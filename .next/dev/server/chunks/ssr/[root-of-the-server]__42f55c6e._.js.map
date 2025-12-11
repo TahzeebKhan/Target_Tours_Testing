@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/webninjaz-developer/Desktop/Targettours/target_tours/src/app/home-page/components/HomePage.jsx"],"sourcesContent":["import React from 'react'\n\nconst HomePage = () => {\n  return (\n    <>\n    <section className=''>\n\n    </section>\n    </>\n  )\n}\n\nexport default HomePage"],"names":[],"mappings":";;;;;AAAA;;;AAEA,MAAM,WAAW;IACf,qBACE;kBACA,cAAA,8OAAC;YAAQ,WAAU;;;;;;;AAKvB;uCAEe"}},
+    {"offset": {"line": 42, "column": 0}, "map": {"version":3,"sources":["file:///Users/webninjaz-developer/Desktop/Targettours/target_tours/src/app/page.js"],"sourcesContent":["import Image from \"next/image\";\nimport HomePage from \"./home-page/components/HomePage\";\n\nexport default function Home() {\n  return (\n    <HomePage/>\n  );\n}\n"],"names":[],"mappings":";;;;;AAAA;AACA;;;;AAEe,SAAS;IACtB,qBACE,8OAAC,gKAAQ;;;;;AAEb"}}]
+}
