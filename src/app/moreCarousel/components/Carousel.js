@@ -50,6 +50,19 @@ export default function Carousel() {
               <img src="/images/img1.jpg" alt="image" />    
             </div>
           </SwiperSlide>
+          
+          <SwiperSlide key={"3"} virtualIndex={3}>
+            <div className={styles.cardContainer3}>
+              {/* <InnerCarousel /> */}
+              <img src="/images/img1.jpg" alt="image" />
+            </div>
+          </SwiperSlide>
+          <SwiperSlide key={"3"} virtualIndex={3}>
+            <div className={styles.cardContainer3}>
+              {/* <InnerCarousel /> */}
+              <img src="/images/img1.jpg" alt="image" />
+            </div>
+          </SwiperSlide>
           <SwiperSlide key={"3"} virtualIndex={3}>
             <div className={styles.cardContainer3}>
               {/* <InnerCarousel /> */}

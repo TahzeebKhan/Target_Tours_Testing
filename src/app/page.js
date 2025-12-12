@@ -13,7 +13,7 @@ export default function Home() {
     <PopularFlights/>
     <TopToFlights/>
     
-    {/* <TargetTours/> */}
+    <TargetTours/>
     </>
     
   );
