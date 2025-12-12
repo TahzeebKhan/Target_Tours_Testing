@@ -103,6 +103,7 @@
 }
 .itemsCard:hover {
     transform: translateY(-10px) scale(1.0);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
 }
 
 /* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
