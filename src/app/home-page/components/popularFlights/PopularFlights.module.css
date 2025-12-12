@@ -79,6 +79,7 @@
 }
 
 .carouselContainer {
+    margin-top: 34px;
     padding: 30px 0;
     display: flex;
     gap: 31px;
@@ -91,11 +92,19 @@
     max-height: 624px;
     height: 100%;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.itemsCard img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 .itemsCard:hover {
-    transform: translateY(-10px) scale(1.03);
-  }
+    transform: translateY(-20px); /* moves card upward */
+    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+}
 
 .overlay {
     position: absolute;
