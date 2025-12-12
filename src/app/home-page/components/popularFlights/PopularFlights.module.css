@@ -102,8 +102,12 @@
     display: block;
 }
 .itemsCard:hover {
-    transform: translateY(-20px); /* moves card upward */
-    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+    transform: translateY(-10px) scale(1.0);
+}
+
+/* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
+:global(.swiper-slide:nth-child(even)) .carouselContainer {
+    margin-top: 50px;
 }
 
 .overlay {

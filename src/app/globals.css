@@ -32,3 +32,8 @@ body {
   box-sizing: border-box;
   /* font-family: var(--font-poppins), "Poppins", sans-serif; */
 }
+
+.popularFlightsCarouselWrapper .swiper-button-prev,
+.popularFlightsCarouselWrapper .swiper-button-next {
+  display: none !important;
+}
