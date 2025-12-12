@@ -28,7 +28,7 @@ export default function InnerCarousel() {
           clickable: true,
         }}
         navigation={true}
-        modules={[Pagination, Navigation]}
+        modules={[Pagination]}
         className="mySwiper"
       >
         <SwiperSlide>

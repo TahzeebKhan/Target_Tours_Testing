@@ -117,11 +117,11 @@
     gap: 8;
     align-items: center;
     display: flex;
-    gap: 3px;
+    gap: 5px;
     align-items: end;
 }
 .price span{
-    font-weight: 500;
+    font-weight: 600;
     font-style: Regular;
     font-size: 14px;
     line-height: 1.5;
