@@ -75,6 +75,8 @@
     border: 1px solid #E4E6E8;
     padding: 8px;
     gap: 16px;
+    transition: background-color 240ms ease, transform 240ms cubic-bezier(.2,.9,.2,1), border-color 240ms ease, box-shadow 240ms ease;
+    will-change: transform, background-color;
     
 }
 
@@ -90,6 +92,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    transition: color 200ms ease, opacity 200ms ease;
 }
 .fromTo span{
     font-weight: 300;
@@ -100,6 +103,7 @@
     vertical-align: middle;
     text-transform: uppercase;
     color: #000000;
+    transition: color 200ms ease, opacity 200ms ease;
 }
 
 .price{
@@ -112,9 +116,12 @@
     display: flex;
     gap: 8;
     align-items: center;
+    display: flex;
+    gap: 3px;
+    align-items: end;
 }
 .price span{
-    font-weight: 400;
+    font-weight: 500;
     font-style: Regular;
     font-size: 14px;
     line-height: 1.5;
@@ -122,4 +129,17 @@
     vertical-align: middle;
     text-transform: uppercase;
 
+}
+
+.flight_items:hover{
+    background-color: #000033;
+    color: white;
+    
+}
+
+.flight_items:hover .fromTo span{
+    color: #FFFFFF;
+}
+.flight_items:hover .fromTo img{
+    filter: brightness(0) invert(1);
 }

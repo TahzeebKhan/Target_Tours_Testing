@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './TargetTours.module.css'
 import Image from 'next/image'
+import Carousel from '@/app/moreCarousel/components/Carousel'
 
 
 const TargetTours = () => {
@@ -28,7 +29,7 @@ const TargetTours = () => {
                 </nav>
 
 
-                <div className={styles.grid}>
+                {/* <div className={styles.grid}>
                     {cards.map((c) => (
                         <article key={c.id} className={styles.card}>
                             <div className={styles.imgWrap}>
@@ -41,7 +42,8 @@ const TargetTours = () => {
                             </div>
                         </article>
                     ))}
-                </div>
+                </div> */}
+                <Carousel></Carousel>
 
 
                 <div className={styles.controls}>
