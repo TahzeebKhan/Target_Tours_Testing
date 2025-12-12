@@ -8403,3 +8403,4 @@ Import trace:
 [22:04:59.438] Browser WARN    Image with src "/images/tour1.jpg" has "fill" and parent element with invalid "position". Provided "static" should be one of absolute,fixed,relative.
 [22:04:59.438] Browser WARN    Image with src "/images/tour2.jpg" has "fill" and parent element with invalid "position". Provided "static" should be one of absolute,fixed,relative.
 [22:04:59.438] Browser WARN    Image with src "/images/tour3.jpg" has "fill" and parent element with invalid "position". Provided "static" should be one of absolute,fixed,relative.
+[15:05:01.528] Server  LOG      ✓ Compiled in 1493ms
