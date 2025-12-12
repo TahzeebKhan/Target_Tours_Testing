@@ -1,0 +1,125 @@
+.topToFlightsSection{
+    padding: 120px 0;
+    margin:  0 auto;
+}
+
+.container{
+    max-width: 1520px;
+    width: 100%;
+    /* border: 1px solid; */
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    gap: 42px;
+}
+.heading{
+    font-family: "Antic Didone", serif;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    text-align: center;
+    color: #000033;
+}
+
+.subContainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar{
+    display: flex;
+    justify-content: center;
+}
+.nav_items{
+    padding: 8px 32px;
+    /* border-bottom: 2px solid #000033; */
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.25;
+    letter-spacing: -2%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #A8A8A8;
+    cursor: pointer;
+
+}
+
+.active {
+    color: #000033;
+    border-bottom: 2px solid #000033 !important;
+}
+.custom_border{
+    position: relative;
+    border: 1px solid #A8A8A8;
+    top: 119.5px;
+    z-index: -9;
+}
+
+.flight_items_cont{
+    margin-top: 54px;
+}
+
+.flight_items_row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+.flight_items{
+    max-width: 356px;
+    width: 100%;
+    display: flex;
+    border: 1px solid #E4E6E8;
+    padding: 8px;
+    gap: 16px;
+    
+}
+
+.flight_items_bottom{
+    display: flex;
+    gap: 13px;
+    flex-direction: column;
+    padding: 10px 0;
+    justify-content: center;
+}
+
+.fromTo{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.fromTo span{
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+}
+
+.price{
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    display: flex;
+    gap: 8;
+    align-items: center;
+}
+.price span{
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
