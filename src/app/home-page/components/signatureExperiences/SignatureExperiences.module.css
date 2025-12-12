@@ -1,0 +1,49 @@
+.section{
+    padding: 100px 0;
+}
+
+
+.heading{
+    font-family: "Antic Didone", serif;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    text-align: center;
+    color: #000033;
+    margin-bottom: 42px;
+    padding: 0 32px ;
+}
+
+.tabsWrap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* max-width: ; */
+    /* width: 100%; */
+    border-bottom: 1px solid #C4C4C4;
+}
+
+.tabs{
+    display: flex;
+    color: #FFFFFF;
+}
+.tab{
+    padding: 8px 24px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.25;
+    letter-spacing: -2%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #A8A8A8;
+    cursor: pointer;
+    border-bottom: 2px solid #000033;
+}
+
+.tab .tabBtn{
+    cursor: pointer;
+}
