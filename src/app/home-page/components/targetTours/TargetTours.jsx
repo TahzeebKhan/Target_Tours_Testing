@@ -32,7 +32,7 @@ const TargetTours = () => {
                     {cards.map((c) => (
                         <article key={c.id} className={styles.card}>
                             <div className={styles.imgWrap}>
-                                <Image src={c.img} alt={c.title} fill className={styles.img} />
+                                <img src={c.img} alt={c.title} />
                                 <div className={styles.gradient} />
 
 

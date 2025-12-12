@@ -104,7 +104,7 @@ const Carousel = () => {
   // Calculate transform and scale for each slide based on its position relative to current slide
   const getSlideStyle = (slideNumber) => {
     let diff = slideNumber - currentSlide;
-    
+
     // Handle wrapping
     if (diff > totalSlides / 2) {
       diff = diff - totalSlides;
@@ -180,6 +180,9 @@ const Carousel = () => {
           const isActive = currentSlide === slideNumber;
           const slideStyle = getSlideStyle(slideNumber);
 
+          
+
+
           return (
             <div
               key={slideNumber}
@@ -195,21 +198,21 @@ const Carousel = () => {
                     alt={slide.title}
                     className={styles.slideImage}
                   />
-                  
+
                   {/* Overlay content for active slide */}
                   {isActive && (
                     <div className={styles.overlayContent}>
                       {slide.hasNewTag && (
                         <div className={styles.newTag}>Newly Added</div>
                       )}
+                      <div className={styles.price}>{slide.price}</div>
                       <div className={styles.textContent}>
                         <div className={styles.title}>{slide.title}</div>
                         <div className={styles.description}>{slide.description}</div>
-                        <div className={styles.price}>{slide.price}</div>
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Newly Added tag for inactive slides */}
                   {!isActive && slide.hasNewTag && (
                     <div className={styles.inactiveNewTag}>Newly Added</div>
@@ -217,13 +220,21 @@ const Carousel = () => {
                 </div>
 
                 {/* Bottom text for all slides */}
-                <div className={styles.bottomText}>
+                {/* <div className={styles.bottomText}>
                   <div className={styles.bottomTitle}>{slide.bottomTitle}</div>
                   <div className={styles.bottomDescription}>{slide.bottomDescription}</div>
                   {isActive && (
                     <div className={styles.bottomPrice}>{slide.price}</div>
                   )}
-                </div>
+                </div> */}
+                {/* Bottom text only for NON-ACTIVE slides */}
+                {!isActive && (
+                  <div className={styles.bottomText}>
+                    <div className={styles.bottomTitle}>{slide.bottomTitle}</div>
+                    <div className={styles.bottomDescription}>{slide.bottomDescription}</div>
+                  </div>
+                )}
+
               </div>
             </div>
           );
@@ -238,7 +249,7 @@ const Carousel = () => {
           aria-label="Previous slide"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         <button
@@ -247,7 +258,7 @@ const Carousel = () => {
           aria-label="Next slide"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>

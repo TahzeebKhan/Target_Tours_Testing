@@ -7,6 +7,55 @@
   overflow-y: visible;
   margin: 0 auto;
 }
+.imageContainer > .bottomText {
+  position: absolute;     /* override previous relative */
+  bottom: -20px;           /* distance from bottom of the image */
+  z-index: 199;
+  max-width: 320px;       /* control width of the white info card on side slides */
+  width: auto;
+  background: white;
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+  opacity: 1;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+/* Left side: card sits at left edge inside the slide */
+.imageContainer > .bottomText.leftAlign {
+  left: 20px;             /* distance from left edge */
+  right: auto;
+  text-align: left;
+  transform: translateX(0);
+  align-items: flex-start;
+}
+
+/* Right side: card sits at right edge inside the slide */
+.imageContainer > .bottomText.rightAlign {
+  right: 20px;            /* distance from right edge */
+  left: auto;
+  text-align: right;
+  transform: translateX(0);
+  align-items: flex-end;
+}
+
+/* For middle / active slide the bottomText is not rendered (JSX),
+   but if it ever appears ensure it stays centered under the image */
+.imageContainer > .bottomText.centerAlign,
+.slide.activeSlide .imageContainer > .bottomText {
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
+  text-align: center;
+}
+
+/* Slightly smaller card for far slides (optional) */
+.imageContainer > .bottomText.far {
+  max-width: 240px;
+  opacity: 1;
+}
+
+
 
 .slider {
   position: relative;
@@ -23,13 +72,14 @@
 
 .slide {
   position: absolute;
-  width: 750px;
+  max-width: 966px;
+  width: 100%;
   height: 550px;
   cursor: pointer;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.6s ease;
+              opacity 1s ease;
   transform-origin: center center;
-  will-change: transform, opacity;
+  will-change: transform,;
 }
 
 .slideContent {
@@ -45,7 +95,7 @@
 
 .imageContainer {
   width: 100%;
-  height: 450px;
+  height: 576px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -84,54 +134,81 @@
 
 .newTag {
   align-self: flex-end;
-  background-color: rgba(255, 255, 255, 0.95);
-  color: #333;
-  padding: 6px 12px;
-  border-radius: 4px;
+  background-color: #FFFFFF;
+  color: #000000;
+  padding: 8px 14px;
   font-size: 11px;
-  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  /* letter-spacing: 0.5px; */
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
 }
 
 .inactiveNewTag {
   position: absolute;
   top: 12px;
   right: 12px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  color: #333;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  align-self: flex-end;
+  background-color: #FFFFFF;
+  color: #000000;
+  padding: 8px 14px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  /* letter-spacing: 0.5px; */
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
   z-index: 3;
 }
 
 .textContent {
+  max-width: 634px;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .title {
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 1.2;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: capitalize;
+  color: #FFFFFF;
+
 }
 
 .description {
-  font-size: 18px;
+  font-family: Antic Didone;
   font-weight: 400;
-  line-height: 1.4;
-  max-width: 90%;
+  font-style: Regular;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+
 }
 
 .price {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translate(-50%);
   font-size: 16px;
   font-weight: 600;
   margin-top: 8px;
@@ -139,13 +216,13 @@
 
 /* Bottom text for all slides */
 .bottomText {
+  max-width: 210px;
+  width: 100%;
   position: relative;
-  margin-top: 20px;
-  padding: 16px 20px;
+  padding: 11px 0;
   background: white;
   border-radius: 8px;
   color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 15;
   min-height: 70px;
   display: flex;
@@ -155,23 +232,44 @@
   opacity: 1;
   visibility: visible;
   flex-shrink: 0;
+  gap: 12px;
 }
 
 .bottomTitle {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
   text-transform: uppercase;
-  color: #1a1a1a;
-  line-height: 1.2;
+  color: #000000;
+
 }
 
 .bottomDescription {
-  font-size: 14px;
+  font-family: Antic Didone;
   font-weight: 400;
-  color: #666;
-  line-height: 1.4;
+  font-style: Regular;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+
 }
+.leftAlign {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.rightAlign {
+  text-align: right;
+  align-items: flex-end;
+}
+
 
 .bottomPrice {
   font-size: 14px;
@@ -185,7 +283,7 @@
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-top: 60px;
+  margin-top: 32px;
   z-index: 20;
   position: relative;
 }
@@ -249,4 +347,32 @@
 
 .radioInput:hover {
   border-color: #333;
+}
+/* Responsive tweaks */
+@media (max-width: 1100px) {
+  .imageContainer > .bottomText {
+    max-width: 260px;
+    bottom: 14px;
+    padding: 12px;
+  }
+  .imageContainer > .bottomText.leftAlign { left: 12px; }
+  .imageContainer > .bottomText.rightAlign { right: 12px; }
+}
+
+@media (max-width: 700px) {
+  .imageContainer > .bottomText {
+    position: relative; /* stack under image on small screens */
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: none;
+    margin-top: 12px;
+    background: white;
+  }
+  .imageContainer > .bottomText.leftAlign,
+  .imageContainer > .bottomText.rightAlign {
+    text-align: left;
+    align-items: flex-start;
+  }
 }
