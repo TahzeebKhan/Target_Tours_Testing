@@ -1,0 +1,141 @@
+.footer {
+    background-color: #000033;
+    padding: 40px 0;
+}
+
+.container {
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    margin: 0 auto;
+}
+
+.footerTop {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+}
+
+.footerTop p {
+    font-family: Poppins;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.8;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+
+}
+
+.footerBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.blockHead {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
+
+.blockItems {
+    display: flex;
+    gap: 99px;
+}
+
+.blockItems ul {
+    display: flex;
+    flex-direction: column;
+    max-width: 317px;
+    width: 100%;
+    /* justify-content: space-between; */
+    gap: 9px;
+}
+
+.blockItems ul li {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.8;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
+
+.footerLinkBlock {
+    display: flex;
+    color: #FFFFFF;
+    gap: 99px;
+}
+
+.footerLinkCont {
+    max-width: 307px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.linkHead {
+    font-weight: 500;
+    font-style: Italic;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+    /* opacity: 9; */
+
+}
+
+.footerLinkCont ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footerLinkCont ul li {
+    font-family: "Onest", sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 184%;
+    letter-spacing: 0%;
+    /* text-align: center; */
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+
+}
+
+.footerLinkCont ul li a {
+    display: flex;
+    gap: 7px;
+}
+
+.footerLinkCont ul li a img{
+    width: 24px;
+    height: 24px;
+}
+.copywrite {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.8;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
