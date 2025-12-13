@@ -304,14 +304,10 @@
 }
 
 .navButton:hover {
-  background: #000;
+  background: #e2e2e2;
   color: white;
-  border-color: #000;
 }
 
-.navButton:hover svg path {
-  fill: #fff;
-}
 .navButton:active {
   transform: scale(0.95);
 }
