@@ -1,0 +1,157 @@
+.section {
+    padding: 24px;
+}
+
+.container {
+    display: flex;
+    gap: 24px;
+}
+
+.items {
+    margin-right: 32px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.items img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.items:hover img {
+    transform: scale(1.12);
+}
+
+/* .imgMainContainer {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+  
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.88) 100%
+    );
+  } */
+
+.imgMainContainer {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.88) 100%);
+}
+
+
+
+/* 🔥 NEW */
+/* transform: translateY(100%);
+    transition: transform 0.5s ease; */
+/* } */
+/* .items:hover .imgMainContainer {
+    transform: translateY(0);
+  } */
+/* .exploreBtn {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+  } */
+/* .items:hover .exploreBtn {
+    opacity: 1;
+    transform: translateY(0);
+  }*/
+
+  .exploreBtn {
+    margin-top: 16px;
+  
+    /* opacity: 0; */
+    transform: translateY(350%); /* 🔥 PURE niche */
+    transition: all 0.78s ease;
+  }
+  
+  .items:hover .exploreBtn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .items:hover .exploreBtn {
+    transition-delay: 0.1s;
+  }
+    
+    
+.imgBottom {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.imgHead {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.2;
+    text-align: center;
+    color: #ffffff;
+}
+
+.imgSubHead {
+    font-weight: 400;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.exploreBtn {
+    position: relative;
+    overflow: hidden;
+
+    /* Text */
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+    cursor: pointer;
+
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    width: 211px;
+    padding: 12px 22px;
+
+    /* 🔹 Figma Color: #FFFFFF @ 14% */
+    background: rgba(255, 255, 255, 0.14);
+
+    /* 🔹 Figma Background Blur: 11.1 */
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+
+    /* 🔹 Figma Border: 1px #FFFFFF */
+    border: 1px solid rgba(255, 255, 255, 1);
+
+
+    /* Optional subtle depth */
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.12),
+        inset 0 0 12px rgba(255, 255, 255, 0.08);
+
+    transition: all 0.25s ease;
+}

@@ -6,6 +6,7 @@ import SignatureExperiences from "./home-page/components/signatureExperiences/Si
 import PopularFlights from "./home-page/components/popularFlights/PopularFlights";
 import ExploreStays from "./home-page/components/exploreStays/ExploreStays";
 import LimitedTimeOffer from "./home-page/components/limitedTimeOffer/LimitedTimeOffer";
+import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPrivateTrips";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
     <TopToFlights/>
     
     <TargetTours/>
+    <GroupPrivateTrips/>
     <LimitedTimeOffer/>
     <ExploreStays/>
     </>
