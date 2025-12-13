@@ -14,6 +14,82 @@ line-height: normal;
 text-transform: uppercase;
 }
 
+.iconsCont{
+    position: absolute;
+    display: flex;
+    /* justify-content: space-between; */
+    top: 50%;
+    /* transform: translate(0,-50%); */
+    width: 100%;
+    z-index: 999;
+    padding: 0 18px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+.leftBtn{
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.leftRightBtn{
+    position: absolute;
+    right: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+
+.heartIcon{
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    /* background-color: red; */
+    z-index: 999;
+    cursor: pointer;
+}
+.swapper{
+    position: relative;
+    overflow: hidden;
+}
+.swapper img{
+    width: 100%;
+    height: 333px;
+    display: block;
+   
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 30%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 5;
+  }
+/* Use :global to target the global class from CSS module */
+:global(.innerCarouselWrapper):hover .iconsCont {
+    opacity: 1;
+}
 .innerCarouselContentSubtitle{
     color: var(--Black, #000);
 font-family: "Antic Didone";

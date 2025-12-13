@@ -37,3 +37,12 @@ body {
 .popularFlightsCarouselWrapper .swiper-button-next {
   display: none !important;
 }
+
+.innerCarouselWrapper .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-horizontal > .swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontale{
+  /* background-color: red; */
+
+}
+
+.innerCarouselWrapper .swiper-pagination-bullet{
+  background-color: #FFFFFF;
+}

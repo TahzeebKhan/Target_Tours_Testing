@@ -1,0 +1,119 @@
+
+.section{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    padding-top: 124px;
+    padding-bottom: 55px;
+    justify-content: center;
+
+}
+
+.container{
+    max-width: 1520px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+
+    
+}
+.leftContainer{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.heading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 69.05px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+}
+
+
+.textContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.offer{
+    
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+.price{
+
+    font-weight: 600;
+    font-style: SemiBold;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+
+}
+.adult{
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+}
+.exploreBtn {
+    position: relative;
+    overflow: hidden;
+  
+    /* Text */
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+  
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  
+    width: 211px;
+    padding: 12px 22px;
+  
+    /* 🔹 Figma Color: #FFFFFF @ 14% */
+    background: rgba(255, 255, 255, 0.14);
+  
+    /* 🔹 Figma Background Blur: 11.1 */
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+  
+    /* 🔹 Figma Border: 1px #FFFFFF */
+    border: 1px solid rgba(255, 255, 255, 1);
+  
+  
+    /* Optional subtle depth */
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.12),
+      inset 0 0 12px rgba(255, 255, 255, 0.08);
+  
+    transition: all 0.25s ease;
+  }
+  
