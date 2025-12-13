@@ -1,67 +1,72 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './Carousel.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./Carousel.module.css";
+// import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // Sample data for slides
-const slideData = [
-  {
-    id: 1,
-    image: '/images/img6.png',
-    title: 'TANZANIA & ZANZIBAR',
-    description: 'SAFARI IN THE LAND OF THE MASAI HAKUNA MATATA ON...',
-    price: 'STARTING FROM ₹20,000',
-    hasNewTag: true,
-    bottomTitle: 'Tanzania & Zanzibar',
-    bottomDescription: 'Safari In The Land Of The Masai Hakuna Matata On...',
-  },
-  {
-    id: 2,
-    image: '/images/img7.png',
-    title: 'SENEGAL',
-    description: 'In The Heart Of East Senegal And The Shine Shaloum',
-    price: 'STARTING FROM ₹15,000',
-    hasNewTag: false,
-    bottomTitle: 'Senegal',
-    bottomDescription: 'In The Heart Of East Senegal And The Shine Shaloum',
-  },
-  {
-    id: 3,
-    image: '/images/img8.png',
-    title: 'UZBEKISTAN',
-    description: 'From Fergana To Khiva',
-    price: 'STARTING FROM ₹18,000',
-    hasNewTag: false,
-    bottomTitle: 'Uzbekistan',
-    bottomDescription: 'From Fergana To Khiva',
-  },
-  {
-    id: 4,
-    image: '/images/img9.png',
-    title: 'MADAGASCAR',
-    description: 'The North: National Parks And Paradise Like Beaches',
-    price: 'STARTING FROM ₹22,000',
-    hasNewTag: true,
-    bottomTitle: 'Madagascar',
-    bottomDescription: 'The North: National Parks And Paradise Like Beaches',
-  },
-  {
-    id: 5,
-    image: '/images/img10.png',
-    title: 'JAPAN',
-    description: 'Japan In The Winter',
-    price: 'STARTING FROM ₹25,000',
-    hasNewTag: false,
-    bottomTitle: 'Japan',
-    bottomDescription: 'Japan In The Winter',
-  },
-];
 
-const Carousel = () => {
+const Carousel = ({
+  slideData = [
+    {
+      id: 1,
+      image: "/images/img1.jpg",
+      title: "TANZANIA & ZANZIBAR",
+      description: "SAFARI IN THE LAND OF THE MASAI HAKUNA MATATA ON...",
+      price: "₹20,000",
+      hasNewTag: true,
+      bottomTitle: "Tanzania & Zanzibar",
+      bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
+    },
+    {
+      id: 2,
+      image: "/images/img2.jpg",
+      title: "SENEGAL",
+      description: "In The Heart Of East Senegal And The Shine Shaloum",
+      price: "₹15,000",
+      hasNewTag: true,
+      bottomTitle: "Senegal",
+      bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
+    },
+    {
+      id: 3,
+      image: "/images/img4.jpg",
+      title: "UZBEKISTAN",
+      description: "From Fergana To Khiva",
+      price: "₹18,000",
+      hasNewTag: false,
+      bottomTitle: "Uzbekistan",
+      bottomDescription: "From Fergana To Khiva",
+    },
+    {
+      id: 4,
+      image: "/images/img3.jpg",
+      title: "MADAGASCAR",
+      description: "The North: National Parks And Paradise Like Beaches",
+      price: "₹22,000",
+      hasNewTag: true,
+      bottomTitle: "Madagascar",
+      bottomDescription: "The North: National Parks And Paradise Like Beaches",
+    },
+    {
+      id: 5,
+      image: "/images/img5.jpg",
+      title: "JAPAN",
+      description: "Japan In The Winter",
+      price: "₹25,000",
+      hasNewTag: false,
+      bottomTitle: "Japan",
+      bottomDescription: "Japan In The Winter",
+    },
+  ],
+}) => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
 
+  useEffect(() => {
+    setCurrentSlide(1);
+  }, [slideData]);
   const totalSlides = slideData.length;
 
   // Auto-advance functionality
@@ -90,6 +95,9 @@ const Carousel = () => {
     setCurrentSlide(slideNumber);
     setIsPaused(true);
   };
+  useEffect(() => {
+    setIsPaused(true);
+  }, []);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev <= 1 ? totalSlides : prev - 1));
@@ -116,37 +124,33 @@ const Carousel = () => {
 
     if (diff === 0) {
       // Active slide - center, full size
-      transform = 'translateX(0%)';
+      transform = "translateX(0%)";
       scale = 1;
       opacity = 1;
       zIndex = 10;
     } else if (diff === 1 || diff === -(totalSlides - 1)) {
       // Next slide - right side, scaled down
-      transform = 'translateX(35%)';
+      transform = "translateX(35%)";
       scale = 0.75;
-      opacity = 0.9;
       zIndex = 5;
     } else if (diff === -1 || diff === totalSlides - 1) {
       // Previous slide - left side, scaled down
-      transform = 'translateX(-35%)';
+      transform = "translateX(-35%)";
       scale = 0.75;
-      opacity = 0.9;
       zIndex = 5;
     } else if (diff === 2 || diff === -(totalSlides - 2)) {
       // Slide after next - far right, very small
-      transform = 'translateX(70%)';
+      transform = "translateX(70%)";
       scale = 0.55;
-      opacity = 0.6;
       zIndex = 1;
     } else if (diff === -2 || diff === totalSlides - 2) {
       // Slide before previous - far left, very small
-      transform = 'translateX(-70%)';
+      transform = "translateX(-70%)";
       scale = 0.55;
-      opacity = 0.6;
       zIndex = 1;
     } else {
       // Default - hidden
-      transform = 'translateX(0%)';
+      transform = "translateX(0%)";
       scale = 0.3;
       opacity = 0;
       zIndex = 0;
@@ -157,6 +161,17 @@ const Carousel = () => {
       opacity,
       zIndex,
     };
+  };
+  const getSideAlignClass = (slideNumber) => {
+    let diff = slideNumber - currentSlide;
+
+    // handle circular wrapping
+    if (diff > totalSlides / 2) diff -= totalSlides;
+    if (diff < -totalSlides / 2) diff += totalSlides;
+
+    if (diff < 0) return styles.leftAlign;
+    if (diff > 0) return styles.rightAlign;
+    return styles.centerAlign;
   };
 
   const handleMouseEnter = () => {
@@ -180,13 +195,12 @@ const Carousel = () => {
           const isActive = currentSlide === slideNumber;
           const slideStyle = getSlideStyle(slideNumber);
 
-          
-
-
           return (
             <div
               key={slideNumber}
-              className={`${styles.slide} ${isActive ? styles.activeSlide : ''}`}
+              className={`${styles.slide} ${
+                isActive ? styles.activeSlide : ""
+              }`}
               style={slideStyle}
               onClick={() => handleSlideChange(slideNumber)}
             >
@@ -205,10 +219,14 @@ const Carousel = () => {
                       {slide.hasNewTag && (
                         <div className={styles.newTag}>Newly Added</div>
                       )}
-                      <div className={styles.price}>{slide.price}</div>
+                      <div className={styles.price}>
+                        <span>STARTING FROM </span> {slide.price}
+                      </div>
                       <div className={styles.textContent}>
                         <div className={styles.title}>{slide.title}</div>
-                        <div className={styles.description}>{slide.description}</div>
+                        <div className={styles.description}>
+                          {slide.description}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -228,13 +246,22 @@ const Carousel = () => {
                   )}
                 </div> */}
                 {/* Bottom text only for NON-ACTIVE slides */}
+
+                {/* ✅ MOVE bottomText HERE */}
                 {!isActive && (
-                  <div className={styles.bottomText}>
-                    <div className={styles.bottomTitle}>{slide.bottomTitle}</div>
-                    <div className={styles.bottomDescription}>{slide.bottomDescription}</div>
+                  <div
+                    className={`${styles.bottomText} ${getSideAlignClass(
+                      slideNumber
+                    )}`}
+                  >
+                    <div className={styles.bottomTitle}>
+                      {slide.bottomTitle}
+                    </div>
+                    <div className={styles.bottomDescription}>
+                      {slide.bottomDescription}
+                    </div>
                   </div>
                 )}
-
               </div>
             </div>
           );
@@ -248,17 +275,41 @@ const Carousel = () => {
           onClick={handlePrev}
           aria-label="Previous slide"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* <ArrowLeft size={14} className="text-[#000000] font-normal " /> */}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M6.43434 2.31564C6.6052 2.48649 6.6052 2.76351 6.43434 2.93436L2.80622 6.5625H12.25C12.4916 6.5625 12.6875 6.75838 12.6875 7C12.6875 7.24161 12.4916 7.4375 12.25 7.4375H2.80622L6.43434 11.0657C6.6052 11.2365 6.6052 11.5135 6.43434 11.6843C6.26348 11.8552 5.98652 11.8552 5.81564 11.6843L1.44064 7.30934C1.26979 7.13848 1.26979 6.86152 1.44064 6.69066L5.81564 2.31564C5.98652 2.14479 6.26348 2.14479 6.43434 2.31564Z"
+              fill="black"
+            />
           </svg>
         </button>
         <button
-          className={styles.navButton}
+          className={`${styles.navButton} ${styles.navButtonLeft}`}
           onClick={handleNext}
           aria-label="Next slide"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* <ArrowRight size={14} className="text-[#000000] font-normal" /> */}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M7.56566 2.31564C7.3948 2.48649 7.3948 2.76351 7.56566 2.93436L11.1938 6.5625H1.75C1.50838 6.5625 1.3125 6.75838 1.3125 7C1.3125 7.24161 1.50838 7.4375 1.75 7.4375H11.1938L7.56566 11.0657C7.3948 11.2365 7.3948 11.5135 7.56566 11.6843C7.73652 11.8552 8.01348 11.8552 8.18436 11.6843L12.5594 7.30934C12.7302 7.13848 12.7302 6.86152 12.5594 6.69066L8.18436 2.31564C8.01348 2.14479 7.73652 2.14479 7.56566 2.31564Z"
+              fill="black"
+            />
           </svg>
         </button>
       </div>

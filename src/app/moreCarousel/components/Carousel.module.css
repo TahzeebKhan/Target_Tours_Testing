@@ -14,14 +14,14 @@
 .cardContainer1,
 .cardContainer2,
 .cardContainer3 {
-  margin: 100px auto;
-  background-color: #F5F5F5;
+  margin-top: 60px;
+  background-color: #f5f5f5;
   max-height: 100%;
   max-width: 100%;
-  width: 400px;
-  height: 400px;
+  width: 597px;
+  height: 611px;
   overflow: hidden;
-  transition: width 0.3s ease, height 0.3s ease;
+  transition: width 0.5s ease, height 0.5s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,30 +35,29 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  filter: grayscale(100%);
+  transition: all 0.3s ease;
 }
 
 /* When hovering over cardContainer1, expand it */
-.cardContainer1:hover {
-  width: 600px;
+.cardContainer1.isHovered {
+  width: 690px;
+  z-index: 5;
 }
-
-/* When hovering over cardContainer2, expand it */
-.cardContainer2:hover {
-  width: 600px;
+.cardContainer1.isShrunk {
+  width: 551px;
+  z-index: 1;
 }
-
-/* When hovering over cardContainer3, expand it */
-.cardContainer3:hover {
-  width: 600px;
+.cardContainer1.isHovered img {
+  filter: grayscale(0%);
 }
 
 /* When hovering over swiper, reduce cards that are not being hovered */
-:global(.swiper:hover) .cardContainer1:not(:hover),
+/* :global(.swiper:hover) .cardContainer1:not(:hover),
 :global(.swiper:hover) .cardContainer2:not(:hover),
 :global(.swiper:hover) .cardContainer3:not(:hover) {
   width: 350px;
-}
+} */
 
 /* Image hover effect - slight scale on card hover */
 .cardContainer1:hover img,
@@ -154,7 +153,12 @@
   left: 0;
   right: 0;
   padding: 30px 25px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.5),
+    transparent
+  );
   color: white;
   z-index: 3;
   display: none;
@@ -284,4 +288,116 @@
   opacity: 0.35;
   cursor: auto;
   pointer-events: none;
+}
+.cardOverlay {
+  position: absolute;
+  bottom: -27.9%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 16px;
+  align-items: center;
+  color: #fff;
+  padding-bottom: 23px;
+  transition: bottom 0.45s ease;
+  /* max-width: 407px; */
+}
+.cardContainer1.isHovered .cardOverlay {
+  bottom: 0;
+}
+
+.duration {
+  align-self: center;
+  border-bottom: 0.5px solid #ffffff;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  height: 31px;
+  letter-spacing: 1px;
+  backdrop-filter: blur(4px);
+  text-transform: uppercase;
+
+  font-family: "Poppins";
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -2%;
+  text-align: center;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.cities {
+  max-width: 407px;
+
+  font-family: "Poppins";
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price {
+  font-family: "Poppins";
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price span {
+  font-family: "Poppins";
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.arrowBtn {
+  margin: 10px auto 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowBtn:hover {
+  cursor: pointer;
+}
+.arrowBtn:hover svg {
+  transition: all 0.3s ease-in-out;
+}
+.arrowBtn:hover svg {
+  transform: rotate(45deg);
 }
