@@ -1,0 +1,226 @@
+.section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    padding-top: 124px;
+    padding-bottom: 55px;
+    justify-content: center;
+
+}
+
+.container {
+    max-width: 1520px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+
+
+}
+
+.leftContainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 25px;
+}
+
+.heading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 69.05px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+}
+
+
+.textContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.offer {
+
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+
+.price {
+
+    font-weight: 600;
+    font-style: SemiBold;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+
+}
+
+.adult {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+}
+
+.exploreBtn {
+    position: relative;
+    overflow: hidden;
+
+    /* Text */
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+    cursor: pointer;
+
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    width: 211px;
+    padding: 12px 22px;
+
+    /* 🔹 Figma Color: #FFFFFF @ 14% */
+    background: rgba(255, 255, 255, 0.14);
+
+    /* 🔹 Figma Background Blur: 11.1 */
+    backdrop-filter: blur(11.1px);
+    -webkit-backdrop-filter: blur(11.1px);
+
+    /* 🔹 Figma Border: 1px #FFFFFF */
+    border: 1px solid rgba(255, 255, 255, 1);
+
+
+    /* Optional subtle depth */
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.12),
+        inset 0 0 12px rgba(255, 255, 255, 0.08);
+
+    transition: all 0.25s ease;
+}
+.btnContainer{
+    display: flex;
+    justify-content: end;
+    margin-right: 10px;
+    gap: 6.4px;
+}
+.btn{
+    height: 32px;
+    width: 32px;
+    border: 0.9px solid #CCCCCC;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.52);
+    cursor: pointer;
+}
+
+.disabledBtn {
+    background-color: transparent !important;
+    border: none !important;
+    pointer-events: none;
+  }
+.rightContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    gap: 28px;
+}
+
+.swapper {
+    display: flex;
+    max-width: 1114px;
+    width: 100%;
+}
+
+.items {
+    width: 350px;
+    height: 371px;
+    margin-right: 32px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.items img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+    
+
+}
+.items:hover img {
+    transform: scale(1.12); /* zoom level */
+}
+.imgMainContainer{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    max-height: 103px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+
+    background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+}
+
+.imgBottom {
+    
+  
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.imgHead {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: #FFFFFF;
+}
+
+.imgSubHead {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-align: center;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
