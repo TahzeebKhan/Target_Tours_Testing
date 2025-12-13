@@ -4,6 +4,7 @@ import TopToFlights from "./home-page/components/topToFlights/TopToFlights";
 import TargetTours from "./home-page/components/targetTours/TargetTours";
 import SignatureExperiences from "./home-page/components/signatureExperiences/SignatureExperiences";
 import PopularFlights from "./home-page/components/popularFlights/PopularFlights";
+import ExploreStays from "./home-page/components/exploreStays/ExploreStays";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
     <TopToFlights/>
     
     <TargetTours/>
+    <ExploreStays/>
     </>
     
   );
