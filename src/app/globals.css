@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
 @import "tailwindcss";
 
-
-
 /* :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -25,9 +23,9 @@
 
 body {
   font-family: var(--font-poppins), "Poppins", sans-serif;
-} 
+}
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -39,11 +37,21 @@ body {
   display: none !important;
 }
 
-.innerCarouselWrapper .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-horizontal > .swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontale{
+.innerCarouselWrapper .swiper-pagination-fraction,
+.swiper-pagination-custom,
+.swiper-horizontal > .swiper-pagination-bullets,
+.swiper-pagination-bullets.swiper-pagination-horizontale {
   /* background-color: red; */
-
 }
 
-.innerCarouselWrapper .swiper-pagination-bullet{
-  background-color: #FFFFFF;
+.innerCarouselWrapper .swiper-pagination-bullet {
+  background-color: #ffffff;
+}
+
+.expCarouselWrapper .swiper-slide {
+  margin-right: 0px !important;
+}
+
+.ExpCarouselWrapper .swiper-pagination {
+  display: none !important;
 }
