@@ -109,8 +109,8 @@ const HomePage = () => {
   }
 
   return (
-    <section className='relative w-full h-[85vh]'>
-      <header className={`${styles.homeSection} w-full h-[85vh]`}>
+    <section className='relative w-full h-[98vh]'>
+      <header className={`${styles.homeSection} w-full h-[98vh]`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src="/videos/hero.mp4"
