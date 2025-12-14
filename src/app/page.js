@@ -8,7 +8,7 @@ import ExploreStays from "./home-page/components/exploreStays/ExploreStays";
 import LimitedTimeOffer from "./home-page/components/limitedTimeOffer/LimitedTimeOffer";
 import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPrivateTrips";
 import FeatureSection from "./home-page/components/featureSection/FeatureSection";
-import Footer from "./home-page/components/footer/footer";
+import Footer from "./home-page/components/footer/Footer";
 
 export default function Home() {
   return (
