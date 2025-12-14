@@ -10,7 +10,7 @@ import "swiper/css/navigation";
 import InnerCarousel from "../../exploreCarousel/component/InnerCarousel";
 import styles from "./Carousel.module.css";
 
-export default function Carousel({ cards }) {
+export default function Carousel({ cards = [] }) {
   const [swiperRef, setSwiperRef] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
