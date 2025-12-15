@@ -73,7 +73,7 @@ const HomePage = () => {
     // optional: scroll the search section into view (smooth)
     const searchEl = document.querySelector(`.${styles.serarchingCont}`);
     if (searchEl) {
-      searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     // optional: focus first input inside the search area
@@ -109,8 +109,8 @@ const HomePage = () => {
   }
 
   return (
-    <section className='relative w-full h-[98vh]'>
-      <header className={`${styles.homeSection} w-full h-[98vh]`}>
+    <section className='relative w-full h-[85vh]'>
+      <header className={`${styles.homeSection} w-full h-[85vh]`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src="/videos/hero.mp4"
