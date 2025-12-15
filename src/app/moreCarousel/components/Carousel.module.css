@@ -36,7 +36,7 @@
   object-fit: cover;
   display: block;
   filter: grayscale(100%);
-  transition: all 0.3s ease;
+  transition: width 0.5s ease, height 0.5s ease, filter 0.3s ease;
 }
 
 .btnContainer{
@@ -72,8 +72,21 @@
   width: 551px;
   z-index: 1;
 }
+
+/* Left card shrinks from right side */
+.leftCard.isShrunk {
+  margin-right: auto;
+}
+
+/* Right card shrinks from left side */
+.rightCard.isShrunk {
+  margin-left: auto;
+}
+
 .cardContainer1.isHovered img {
   filter: grayscale(0%);
+  width: 100%;
+  height: 100%;
 }
 
 /* When hovering over swiper, reduce cards that are not being hovered */
@@ -87,7 +100,7 @@
 .cardContainer1:hover img,
 .cardContainer2:hover img,
 .cardContainer3:hover img {
-  transform: scale(1.05);
+  transform: scale(1.0);
 }
 
 .swiper {
