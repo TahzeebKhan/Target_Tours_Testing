@@ -55,3 +55,13 @@ body {
 .ExpCarouselWrapper .swiper-pagination {
   display: none !important;
 }
+.MoreCarouselWrapper
+{
+ 
+  margin: 0 auto
+}
+
+.MoreCarouselWrapper .swiper-button-prev,
+.MoreCarouselWrapper .swiper-button-next {
+  display: none !important;
+}

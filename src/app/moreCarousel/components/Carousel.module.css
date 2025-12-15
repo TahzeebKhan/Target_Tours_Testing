@@ -39,6 +39,30 @@
   transition: all 0.3s ease;
 }
 
+.btnContainer{
+  display: flex;
+  justify-content: end;
+
+  gap: 6.4px;
+}
+.btnContainerWrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 60px auto 0 auto;
+}
+.btn{
+  height: 32px;
+  width: 32px;
+  border: 0.9px solid #CCCCCC;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  cursor: pointer;
+}
+
 /* When hovering over cardContainer1, expand it */
 .cardContainer1.isHovered {
   width: 690px;

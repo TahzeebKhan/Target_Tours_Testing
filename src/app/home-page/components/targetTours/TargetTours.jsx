@@ -107,7 +107,7 @@ const TargetTours = () => {
                     ))}
                 </div> */}
         <Carousel cards={cardsForTab} />
-
+{/* 
         <div className={styles.controls}>
           <button aria-label="prev" className={styles.controlBtn}>
             ◀
@@ -115,7 +115,7 @@ const TargetTours = () => {
           <button aria-label="next" className={styles.controlBtn}>
             ▶
           </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );
