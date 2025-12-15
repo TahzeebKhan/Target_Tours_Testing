@@ -3,6 +3,7 @@
   max-width: 100%;
   padding: 0;
   position: relative;
+  top: -95px;
   overflow-x: visible;
   overflow-y: visible;
   margin: 0 auto;
@@ -34,7 +35,7 @@
 .imageContainer > .bottomText.rightAlign {
   right: 20px; /* distance from right edge */
   left: auto;
-  text-align: right;
+  /* text-align: right; */
   transform: translateX(0);
   align-items: flex-end;
 }
@@ -84,6 +85,7 @@
   height: auto;
   min-height: 100%;
   position: relative;
+  top:95px;
   border-radius: 12px;
   overflow: visible;
   display: flex;
@@ -267,10 +269,14 @@
 }
 
 .rightAlign {
-  text-align: right;
-  align-items: flex-end;
-  width: 100% !important;
-  max-width: 100% !important;
+  position: absolute;
+  right: 0;
+  bottom: -109px;
+  z-index : 999;
+  /* text-align: right; */
+  /* align-items: flex-end; */
+  /* width: 100% !important; */
+  /* max-width: 100% !important; */
 }
 
 .bottomPrice {
@@ -282,12 +288,14 @@
 
 /* Navigation */
 .navigation {
+
   display: flex;
   justify-content: center;
   gap: 8px;
   margin-top: 10px;
   z-index: 20;
   position: relative;
+  bottom: -95px;
 }
 
 .navButton {

@@ -1,4 +1,3 @@
-
 .heading {
     font-family: "Antic Didone", serif;
     font-style: Regular;
@@ -76,7 +75,7 @@
 
 .carouselContainer {
     margin-top: 34px;
-    padding: 30px 0;
+    padding-top: 30px;
     display: flex;
     gap: 31px;
 }
@@ -88,16 +87,18 @@
     max-height: 624px;
     height: 100%;
     overflow: hidden;
-    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    transition: transform 0.2s ease, box-shadow 0.35s ease;
 }
 
-.itemsCard img{
+.itemsCard img {
     width: 100%;
-    height: 100%;¯ǎ.section {
+    height: 100%;
+
+    ¯ǎ.section {
         padding: 100px 0;
     }
-    
-    
+
+
     .heading {
         font-family: "Antic Didone", serif;
         font-style: Regular;
@@ -113,7 +114,7 @@
         gap: 2px;
         justify-content: center;
     }
-    
+
     .headingMult {
         display: flex;
         align-items: center;
@@ -126,10 +127,10 @@
         line-height: 1;
         letter-spacing: 0%;
         text-transform: capitalize;
-    
-    
+
+
     }
-    
+
     .tabsWrap {
         display: flex;
         justify-content: center;
@@ -138,12 +139,12 @@
         /* width: 100%; */
         border-bottom: 1px solid #C4C4C4;
     }
-    
+
     .tabs {
         display: flex;
         color: #FFFFFF;
     }
-    
+
     .tab {
         padding: 8px 24px;
         font-weight: 400;
@@ -156,30 +157,30 @@
         text-transform: uppercase;
         color: #A8A8A8;
         cursor: pointer;
-    
+
     }
-    
+
     .tab .tabBtn {
         cursor: pointer;
     }
-    
+
     .active {
         border-bottom: 2px solid #000033;
         color: #000033;
     }
-    
+
     .carouselContainerMain {
         margin-top: 34px;
         padding: 0 32px;
     }
-    
+
     .carouselContainer {
         margin-top: 34px;
         padding: 30px 0;
         display: flex;
         gap: 31px;
     }
-    
+
     .itemsCard {
         position: relative;
         max-width: 441px;
@@ -187,25 +188,26 @@
         max-height: 624px;
         height: 100%;
         overflow: hidden;
-        transition: transform 0.35s ease, box-shadow 0.35s ease;
+        transition: transform 0.2s ease, box-shadow 0.35s ease;
     }
-    
-    .itemsCard img{
+
+    .itemsCard img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
+
     .itemsCard:hover {
-        transform: translateY(-10px) scale(1.0);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+        transform: translateY(-20px) scale(1.0);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
     }
-    
+
     /* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
     :global(.swiper-slide:nth-child(even)) .carouselContainer {
         margin-top: 90px;
     }
-    
+
     .overlay {
         position: absolute;
         inset: 0;
@@ -214,27 +216,27 @@
             linear-gradient(360deg, rgba(0, 0, 0, 0) 74.11%, rgba(0, 0, 0, 0.79) 100%);
         pointer-events: none;
     }
-    
-    
-    
+
+
+
     /* Odd items → top margin */
     .itemsCard:nth-child(odd) {
         margin-bottom: 60px;
     }
-    
+
     /* Even items → bottom margin */
     .itemsCard:nth-child(even) {
         margin-top: 60px;
     }
-    
+
     .btnContainer {
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 8px;
-        margin-top: 40px;
+        /* margin-top: 40px; */
     }
-    
+
     .btn {
         display: flex;
         justify-content: center;
@@ -245,7 +247,7 @@
         border-radius: 100%;
         cursor: pointer;
     }
-    
+
     .textContainer {
         width: 100%;
         height: 100%;
@@ -256,16 +258,16 @@
         flex-direction: column;
         justify-content: space-between;
         padding: 24px;
-    
+
     }
-    
+
     .textTop,
     .textBottom {
         display: flex;
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .textTop span {
         font-family: Antic Didone;
         font-weight: 400;
@@ -276,7 +278,7 @@
         vertical-align: middle;
         color: #FFFFFF;
     }
-    
+
     .textTop p {
         font-family: Poppins;
         font-weight: 400;
@@ -288,7 +290,7 @@
         text-transform: uppercase;
         color: #FFFFFF;
     }
-    
+
     .economy {
         font-weight: 400;
         font-style: Regular;
@@ -303,9 +305,9 @@
         align-items: end;
         justify-content: end;
         gap: 3px;
-    
+
     }
-    
+
     .economy span {
         font-weight: 500;
         font-style: Medium;
@@ -315,25 +317,27 @@
         vertical-align: middle;
         text-transform: capitalize;
     }
-    
+
     .discoverText {
         text-align: end;
         font-weight: 400;
         font-style: Regular;
         font-size: 14px;
-    
+
         line-height: 1.2;
         letter-spacing: 0%;
         vertical-align: middle;
         text-transform: capitalize;
         color: #FFFFFF;
     }
+
     object-fit: cover;
     display: block;
 }
+
 .itemsCard:hover {
-    transform: translateY(-10px) scale(1.0);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+    transform: translateY(-20px) scale(1.0);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
 }
 
 /* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
@@ -367,7 +371,7 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-top: 40px;
+    /* margin-top: 40px; */
 }
 
 .btn {

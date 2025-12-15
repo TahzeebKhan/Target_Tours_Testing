@@ -39,9 +39,10 @@ export default function Carousel({ cards = [] }) {
           navigation={true}
         >
           {cards.map((card, index) => (
-            <SwiperSlide key={card.id} virtualIndex={index}>
+            <SwiperSlide key={card.id} virtualIndex={index} className={styles.swaper}>
               <div
                 className={`${styles.cardContainer1}
+                  ${styles.card}
       ${hoveredIndex === index ? styles.isHovered : ""}
       ${hoveredIndex !== null && hoveredIndex !== index ? styles.isShrunk : ""}
       ${index === 0 ? styles.leftCard : ""}

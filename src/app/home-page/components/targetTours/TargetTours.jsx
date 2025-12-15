@@ -34,15 +34,15 @@ const TargetTours = () => {
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
       price: "INR 2,30,000/Adult",
     },
-    {
-      id: 3,
-      img: "/images/tour3.webp",
-      badge: "17 Days & 16 Nights",
-      title: "18 Days - Rajasthan In Deep",
-      cities:
-        "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
-    },
+    // {
+    //   id: 3,
+    //   img: "/images/tour3.webp",
+    //   badge: "17 Days & 16 Nights",
+    //   title: "18 Days - Rajasthan In Deep",
+    //   cities:
+    //     "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
+    //   price: "INR 2,30,000/Adult",
+    // },
   ];
 
   const rotateCards = (cards, shift) => {

@@ -7,13 +7,13 @@ import Link from 'next/link'
 const flightData = {
     "Popular routes": [
         { from: "Nagpur", to: "Bangkok", price: "₹20,000", image: "/images/item1.png" },
-        { from: "Delhi", to: "Dubai", price: "₹15,500", image: "/images/item1.png" },
-        { from: "Mumbai", to: "Singapore", price: "₹18,200", image: "/images/item1.png" },
-        { from: "Chennai", to: "Kuala Lumpur", price: "₹12,900", image: "/images/item1.png" },
-        { from: "Bangalore", to: "London", price: "₹46,000", image: "/images/item1.png" },
-        { from: "Hyderabad", to: "Doha", price: "₹22,300", image: "/images/item1.png" },
-        { from: "Pune", to: "Abu Dhabi", price: "₹17,800", image: "/images/item1.png" },
-        { from: "Kolkata", to: "Hong Kong", price: "₹29,500", image: "/images/item1.png" }
+        { from: "Indore", to: "cairo", price: "₹15,500", image: "/images/indore.png" },
+        { from: "jaipur", to: "Moscow", price: "₹18,200", image: "/images/jaipur.png" },
+        { from: "Bengaluru", to: "Kuala Lumpur", price: "₹12,900", image: "/images/bengaluru.png" },
+        { from: "lucknow", to: "London", price: "₹46,000", image: "/images/lucknow.png" },
+        { from: "surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
+        { from: "kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
+        { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png.png" }
     ],
     "Cities Countries": [
         { from: "Mumbai", to: "New York", price: "₹65,000", image: "/images/item1.png" },
