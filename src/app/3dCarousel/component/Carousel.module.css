@@ -269,6 +269,8 @@
 .rightAlign {
   text-align: right;
   align-items: flex-end;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .bottomPrice {

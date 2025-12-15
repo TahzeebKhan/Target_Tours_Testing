@@ -95,9 +95,6 @@ const Carousel = ({
     setCurrentSlide(slideNumber);
     setIsPaused(true);
   };
-  useEffect(() => {
-    setIsPaused(true);
-  }, []);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev <= 1 ? totalSlides : prev - 1));
@@ -246,13 +243,12 @@ const Carousel = ({
                   )}
                 </div> */}
                 {/* Bottom text only for NON-ACTIVE slides */}
-
-                {/* ✅ MOVE bottomText HERE */}
                 {!isActive && (
                   <div
                     className={`${styles.bottomText} ${getSideAlignClass(
                       slideNumber
                     )}`}
+                    style={{ display: 'flex', visibility: 'visible', opacity: 1 }}
                   >
                     <div className={styles.bottomTitle}>
                       {slide.bottomTitle}
