@@ -29,6 +29,11 @@
     width:100%;
     bottom:0;
 }
+.multiSearch{
+    display:flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
 
 /* dropdown menu container (absolute positioned relative to dateInputWrapper) */
@@ -118,6 +123,9 @@
     padding-top: 42px;
     padding-bottom: 31px;
     justify-content: space-between;
+}
+.contant{
+    transition: all 0.25s ease;
 }
 
 
@@ -337,7 +345,29 @@
     justify-content: center;
     align-items: center;
     background-color: #000033;
+    cursor: pointer;
 }
+
+.multisearchBtn{
+    max-width: 261px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000033;
+    height: 58px;
+    padding: 7px 16px 9px 16px;
+    font-family: Poppins;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 1%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
 
 .featureStrip {
     max-width: 836px;
@@ -472,6 +502,9 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+.multiArrow{
+    left: 23%;
 }
 
 
