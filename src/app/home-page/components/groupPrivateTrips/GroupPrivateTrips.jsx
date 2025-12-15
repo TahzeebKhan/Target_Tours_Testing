@@ -7,6 +7,7 @@ const GroupPrivateTrips = () => {
             <div className={styles.container}>
                 <div className={styles.items}>
                     <img src='/images/GROUPTRIPS.png' alt="" />
+                     {/* <img class={styles.gradient} src="/images/gradient.png"/> */}
 
                     <div className={styles.imgMainContainer}>
                         <div className={styles.imgBottom}>

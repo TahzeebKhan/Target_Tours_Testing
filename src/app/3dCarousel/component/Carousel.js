@@ -265,6 +265,25 @@ const Carousel = ({
       </section>
 
       {/* Navigation Arrows */}
+     
+
+      {/* Radio buttons for slide control */}
+      <div className={styles.radioContainer}>
+        {slideData.map((_, index) => {
+          const slideNumber = index + 1;
+          return (
+            <input
+              key={slideNumber}
+              type="radio"
+              name="slider"
+              id={`s${slideNumber}`}
+              checked={currentSlide === slideNumber}
+              onChange={() => handleSlideChange(slideNumber)}
+              className={styles.radioInput}
+            />
+          );
+        })}
+      </div>
       <div className={styles.navigation}>
         <button
           className={styles.navButton}
@@ -308,24 +327,6 @@ const Carousel = ({
             />
           </svg>
         </button>
-      </div>
-
-      {/* Radio buttons for slide control */}
-      <div className={styles.radioContainer}>
-        {slideData.map((_, index) => {
-          const slideNumber = index + 1;
-          return (
-            <input
-              key={slideNumber}
-              type="radio"
-              name="slider"
-              id={`s${slideNumber}`}
-              checked={currentSlide === slideNumber}
-              onChange={() => handleSlideChange(slideNumber)}
-              className={styles.radioInput}
-            />
-          );
-        })}
       </div>
     </div>
   );

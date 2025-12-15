@@ -120,14 +120,17 @@ const HomePage = () => {
           loop
           playsInline
         />
+        <img class={styles.gradient} src="/images/gradient.png"/>
       </header>
       <div className={`${styles.overlay} absolute inset-0`}></div>
-      <div className={`${styles.navbar} absolute top-0 z-20 w-full flex !py-3 !px-[200px] justify-between items-center`}>
+      <div className={`${styles.navContainer} absolute top-0 z-20`}>
+        <div className={`${styles.navbar}  w-full flex  justify-between items-center`}>
         <img src="./Logo.svg" alt="" />
         <div className="flex gap-3">
           <button className={styles.downloadBtn}>Download the App</button>
           <button className={styles.signInBtn}>Sign In</button>
         </div>
+      </div>
       </div>
 
       <div className={styles.homePageContainer}>
@@ -320,7 +323,7 @@ const HomePage = () => {
 
 
           {bookingType === "hotel" && (
-             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
+            <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
 
 
               <div className={styles.serarchingContBottom}>
@@ -398,7 +401,7 @@ const HomePage = () => {
           )}
 
           {bookingType === "holiday" && (
-             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
+            <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
 
 
               <div className={styles.serarchingContBottom}>
@@ -455,7 +458,7 @@ const HomePage = () => {
           )}
 
           {bookingType === "insurance" && (
-             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
+            <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
 
 
               <div className={styles.serarchingContBottom}>
@@ -537,30 +540,32 @@ const HomePage = () => {
 
 
           {/* ---------- feature strip (replace your previous block) ---------- */}
-          <div className={styles.featureStrip}>
-            <div
-              className={styles.progress}
-              style={{
-                '--active-index': String(activeFeature),
-                '--count': String(features.length)
-              }}
-            >
-              <div className={styles.progressActive}></div>
-            </div>
 
-            <div className={styles.featureRow}>
-              {features.map((f) => (
-                <button
-                  key={f.id}
-                  className={`${styles.feature} ${activeFeature === f.id ? styles.featureActive : ''}`}
-                  onClick={() => handleFeatureClick(f)}
-                  type="button"
-                >
-                  <img src={f.icon} className={styles.icon} alt="" />
-                  <div className={styles.featurelabel}>{f.label}</div>
-                </button>
-              ))}
-            </div>
+        </div>
+
+        <div className={styles.featureStrip}>
+          <div
+            className={styles.progress}
+            style={{
+              '--active-index': String(activeFeature),
+              '--count': String(features.length)
+            }}
+          >
+            <div className={styles.progressActive}></div>
+          </div>
+
+          <div className={styles.featureRow}>
+            {features.map((f) => (
+              <button
+                key={f.id}
+                className={`${styles.feature} ${activeFeature === f.id ? styles.featureActive : ''}`}
+                onClick={() => handleFeatureClick(f)}
+                type="button"
+              >
+                <img src={f.icon} className={styles.icon} alt="" />
+                <div className={styles.featurelabel}>{f.label}</div>
+              </button>
+            ))}
           </div>
         </div>
       </div>

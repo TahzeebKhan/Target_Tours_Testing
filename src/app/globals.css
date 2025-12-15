@@ -65,3 +65,8 @@ body {
 .MoreCarouselWrapper .swiper-button-next {
   display: none !important;
 }
+
+.popularFlightsCarouselWrapper{
+  padding-left:32px;
+  padding-right:32px;
+}

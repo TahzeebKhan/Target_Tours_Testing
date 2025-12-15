@@ -172,7 +172,7 @@ const PopularFlights = () => {
                 </nav>
 
 
-                <div style={{ maxWidth: "1520px", margin: "0 auto" }} className='popularFlightsCarouselWrapper'>
+                <div style={{ margin: "0 auto" }} className='popularFlightsCarouselWrapper'>
                     <Swiper
                         key={activeTab}
                         modules={[Navigation]}

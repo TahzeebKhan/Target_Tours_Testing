@@ -122,13 +122,15 @@
     align-items: end;
 }
 .price span{
-    font-weight: 600;
-    font-style: Regular;
-    font-size: 14px;
-    line-height: 1.5;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    text-transform: uppercase;
+    
+font-weight: 600;
+font-style: SemiBold;
+font-size: 18px;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+text-transform: uppercase;
+
 
 }
 
