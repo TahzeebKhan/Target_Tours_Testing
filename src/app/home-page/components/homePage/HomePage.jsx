@@ -80,17 +80,10 @@ const HomePage = () => {
     setBookingType(feature.type);
 
     // optional: scroll the search section into view (smooth)
-<<<<<<< Updated upstream
-    const searchEl = document.querySelector(`.${styles.serarchingCont}`);
-    if (searchEl) {
-      // searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-=======
     // const searchEl = document.querySelector(`.${styles.serarchingCont}`);
     // if (searchEl) {
     //   searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // }
->>>>>>> Stashed changes
 
     // optional: focus first input inside the search area
     const firstInput = searchEl?.querySelector('input[type="text"], input[type="date"]');
