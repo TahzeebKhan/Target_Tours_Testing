@@ -82,7 +82,7 @@ text-transform: uppercase;
         rgba(0, 0, 0, 0) 30%,
         rgba(0, 0, 0, 0.8) 100%
     );
-    opacity: 0;
+    /* opacity: 0; */
     transition: opacity 0.3s ease-in-out;
     z-index: 5;
   }
@@ -90,6 +90,12 @@ text-transform: uppercase;
 :global(.innerCarouselWrapper):hover .iconsCont {
     opacity: 1;
 }
+:global(.cardItem):hover .iconsCont {
+    opacity: 1;
+}
+/* :global(.cardItem):hover .overlay {
+    opacity: 1;
+} */
 .innerCarouselContentSubtitle{
     color: var(--Black, #000);
 font-family: "Antic Didone";

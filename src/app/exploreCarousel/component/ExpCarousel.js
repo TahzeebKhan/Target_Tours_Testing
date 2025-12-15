@@ -119,7 +119,7 @@ export default function ExpCarousel({ activeTab }) {
         >
           {slides.map((item, index) => (
             <SwiperSlide key={index} virtualIndex={index}>
-              <div className={styles.cardItem}>
+              <div className={`${styles.cardItem} cardItem`}>
                 
                 <InnerCarousel
                   images={item.images}
