@@ -15,7 +15,7 @@ const ExploreStays = () => {
         <section className={styles.section}>
             <div className={styles.container}>
                 <h2 className={styles.heading}>
-                    Popular Flights to Destination From
+                    Explore stays in the usual hotspots.
                 </h2>
 
                 <nav className={styles.tabsWrap}>

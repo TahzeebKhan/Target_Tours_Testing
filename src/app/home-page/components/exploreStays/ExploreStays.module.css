@@ -6,7 +6,7 @@
     font-family: "Antic Didone", serif;
     font-style: Regular;
     font-size: 42px;
-    line-height: 1;
+    line-height: 1.2;
     letter-spacing: 0%;
     text-transform: capitalize;
     text-align: center;
@@ -56,4 +56,36 @@
 .active {
     border-bottom: 2px solid #000033;
     color: #000033;
+}
+
+@media (max-width: 1440px){
+    .heading{
+        font-size: 38px;
+    }
+}
+
+@media (max-width: 1200px){
+    .heading{
+        font-size: 36px;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 768px){
+
+    .heading{
+        font-size: 28px;
+        margin-bottom: 24px;
+    }
+    .tabsWrap{
+        justify-content: start;
+        
+        overflow-x: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .tab{
+        white-space: nowrap;
+    }
+   
 }

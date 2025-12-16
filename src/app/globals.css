@@ -39,9 +39,9 @@ body {
 
 .innerCarouselWrapper .swiper-pagination-fraction,
 .swiper-pagination-custom,
-.swiper-horizontal > .swiper-pagination-bullets,
+.swiper-horizontal>.swiper-pagination-bullets,
 .swiper-pagination-bullets.swiper-pagination-horizontale {
-  /* background-color: red; */
+  background-color: red;
 }
 
 .innerCarouselWrapper .swiper-pagination-bullet {
@@ -55,9 +55,9 @@ body {
 .ExpCarouselWrapper .swiper-pagination {
   display: none !important;
 }
-.MoreCarouselWrapper
-{
- 
+
+.MoreCarouselWrapper {
+
   margin: 0 auto
 }
 
@@ -66,7 +66,43 @@ body {
   display: none !important;
 }
 
-.popularFlightsCarouselWrapper{
-  padding-left:32px;
-  padding-right:32px;
+.popularFlightsCarouselWrapper {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+
+.limitedWrapper .swiper-slide-active {
+  width: unset !important;
+  margin-right: 0 !important;
+  /* width: 100%; */
+}
+
+.limitedWrapper .swiper-slide-next {
+  margin-right: 0 !important;
+  width: unset !important;
+  /* width: 100%; */
+}
+
+.limitedWrapper .swiper-wrapper {
+  gap: 32px;
+}
+
+
+
+
+@media (max-width: 1440px) {
+  .limitedWrapper .swiper-wrapper {
+    gap: 30px;
+  }
+  .ExpCarouselWrapper .swiper-slide{
+    /* margin-right: 20px !important; */
+  }
+}
+
+@media (max-width: 1224px){
+
+  /* .ExpCarouselWrapper .swiper-slide{
+    margin-right: px !important;
+  } */
 }
