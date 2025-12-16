@@ -227,7 +227,13 @@ const HomePage = () => {
                     <div className={styles.lable}>Departure Date</div>
                     <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                       {/* attach ref */}
-                      <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                      <input
+                        ref={departureRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="Add Date"
+                        required
+                      />
                       {/* use button for accessibility; call handler that uses the ref */}
                       <button
                         type="button"
@@ -251,15 +257,21 @@ const HomePage = () => {
                   </div>
                   <div className={styles.fromBtn}>
                     <div className={styles.lable}>Return Date</div>
-                    <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
+                    <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
                       {/* attach ref */}
-                      <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                      <input
+                        ref={returnRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="Add Date"
+                        required
+                      />
                       {/* use button for accessibility; call handler that uses the ref */}
                       <button
                         type="button"
-                        aria-label="Open departure date picker"
+                        aria-label="Open return date picker"
                         className={styles.calendarIcon}
-                        onClick={openDeparturePicker}
+                        onClick={openReturnPicker}
                       >
                         {/* same SVG */}
                         <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -329,7 +341,13 @@ const HomePage = () => {
                     <div className={styles.lable}>Departure Date</div>
                     <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                       {/* attach ref */}
-                      <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                      <input
+                        ref={departureRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="Add Date"
+                        required
+                      />
                       {/* use button for accessibility; call handler that uses the ref */}
                       <button
                         type="button"
@@ -385,7 +403,13 @@ const HomePage = () => {
                     <div className={styles.lable}>Departure Date</div>
                     <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                       {/* attach ref */}
-                      <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                      <input
+                        ref={departureRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="Add Date"
+                        required
+                      />
                       {/* use button for accessibility; call handler that uses the ref */}
                       <button
                         type="button"
@@ -432,7 +456,13 @@ const HomePage = () => {
                     <div className={styles.lable}>Departure Date</div>
                     <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                       {/* attach ref */}
-                      <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                      <input
+                        ref={departureRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="Add Date"
+                        required
+                      />
                       {/* use button for accessibility; call handler that uses the ref */}
                       <button
                         type="button"
@@ -470,9 +500,9 @@ const HomePage = () => {
 
 
               <div className={styles.serarchingContBottom}>
-                <div className={styles.arrowboxOneWay}>
+                {/* <div className={styles.arrowboxOneWay}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
-                </div>
+                </div> */}
                 <div className={styles.fromBtn}>
                   <div className={styles.lable}>WHERE TO</div>
                   <input type="text" className={styles.contant} placeholder='Departure' />
@@ -482,7 +512,13 @@ const HomePage = () => {
                   <div className={styles.lable}>Check In</div>
                   <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                     {/* attach ref */}
-                    <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                    <input
+                      ref={departureRef}
+                      type="date"
+                      className={styles.contant}
+                      data-placeholder="Add Date"
+                      required
+                    />
                     {/* use button for accessibility; call handler that uses the ref */}
                     <button
                       type="button"
@@ -522,14 +558,19 @@ const HomePage = () => {
           {((bookingType === "holiday") || bookingType === "insurance") && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}>
               {/* Holiday form */}
-              <div key="holiday" className={`${styles.searchFormWrapper} ${bookingType === "holiday" ? styles.formVisible : styles.formHidden} ${isForward ? styles.slideLeft : styles.slideRight}`}>
+              <div
+                key="holiday"
+                className={`${styles.searchFormWrapper} ${
+                  bookingType === "holiday" ? styles.formVisible : styles.formHidden
+                }`}
+              >
 
 
               <div className={styles.serarchingContBottom}>
                 {/* <div className={styles.arrowboxOneWay} onClick={swapLocations}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
                 </div> */}
-                <div className={`${styles.fromBtn} ${styles.firstField} ${bookingType === "holiday" ? styles.fieldVisible : styles.fieldSlideOut}`}>
+                <div className={styles.fromBtn}>
                   <div className={styles.lable}>From CITY</div>
                   <input
                     type="text"
@@ -554,7 +595,13 @@ const HomePage = () => {
                   <div className={styles.lable}>Departure Date</div>
                   <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                     {/* attach ref */}
-                    <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                    <input
+                      ref={departureRef}
+                      type="date"
+                      className={styles.contant}
+                      data-placeholder="Add Date"
+                      required
+                    />
                     {/* use button for accessibility; call handler that uses the ref */}
                     <button
                       type="button"
@@ -591,12 +638,17 @@ const HomePage = () => {
               </div>
 
               {/* Insurance form */}
-              <div key="insurance" className={`${styles.searchFormWrapper} ${bookingType === "insurance" ? styles.formVisible : styles.formHidden} ${isForward ? styles.slideRight : styles.slideLeft}`}>
+              <div
+                key="insurance"
+                className={`${styles.searchFormWrapper} ${
+                  bookingType === "insurance" ? styles.formVisible : styles.formHidden
+                }`}
+              >
                 <div className={styles.serarchingContBottom}>
                 {/* <div className={styles.arrowboxOneWay}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
                 </div> */}
-                <div className={`${styles.fromBtn} ${styles.firstField} ${bookingType === "insurance" ? styles.fieldVisible : styles.fieldSlideOut}`}>
+                <div className={styles.fromBtn}>
                   <div className={styles.lable}>TRAVEL DESTINATION</div>
                   <div className={styles.dateInputWrapper}>
                     <div className={styles.contant}>SELECT DESTINATION</div>
@@ -607,7 +659,13 @@ const HomePage = () => {
                   <div className={styles.lable}>TRAVEL DATE</div>
                   <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
           
-                    <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                    <input
+                      ref={departureRef}
+                      type="date"
+                      className={styles.contant}
+                      data-placeholder="Add Date"
+                      required
+                    />
                  
                     <button
                       type="button"
@@ -633,7 +691,13 @@ const HomePage = () => {
                   <div className={styles.lable}>Departure Date</div>
                   <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
             
-                    <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                    <input
+                      ref={departureRef}
+                      type="date"
+                      className={styles.contant}
+                      data-placeholder="Add Date"
+                      required
+                    />
                
                     <button
                       type="button"
