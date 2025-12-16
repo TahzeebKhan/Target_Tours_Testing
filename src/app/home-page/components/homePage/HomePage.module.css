@@ -63,13 +63,15 @@
     font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
-    background-color: #000033;
+  background-color: #000033;
+  color: #ffffff;
   }
   
   /* hover / focus */
   .selectItem:hover,
   .selectItem:focus {
-    background: #f5f7f8;
+  background: #f5f7f8;
+  color: #000066; /* blue-ish text on hover */
     outline: none;
   }
   
@@ -173,7 +175,15 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* Only apply animation when NOT switching between holiday/insurance */
+.searchPanelWrapper:not(.noAnimation) {
   animation: searchFadeIn 350ms ease-out;
+}
+
+.noAnimation {
+  animation: none !important;
 }
 
 @keyframes searchFadeIn {
@@ -198,6 +208,94 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+/* Container for holiday/insurance forms - allows overlapping */
+.searchFormContainer {
+    position: relative;
+    min-height: 106px;
+}
+
+/* Wrapper for each form - positioned absolutely to overlap */
+.searchFormWrapper {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+}
+
+/* Slide directions */
+.slideLeft {
+    transform: translateX(-24px);
+}
+
+.slideRight {
+    transform: translateX(24px);
+}
+
+/* Visible form - slides in from right and fades in */
+.formVisible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    z-index: 2;
+    animation: formSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Hidden form - slides out to left and fades out */
+.formHidden {
+    opacity: 0;
+    transform: translateX(-24px);
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        visibility 0.3s ease;
+}
+
+@keyframes formSlideIn {
+    from {
+        transform: translateX(24px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* First field animation */
+.firstField {
+    will-change: transform, opacity;
+}
+
+/* When form is hidden, first field slides right and fades out */
+.fieldSlideOut {
+    transform: translateX(24px);
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When form is visible, first field slides in from left to right and fades in */
+.fieldVisible {
+    transform: translateX(0);
+    opacity: 1;
+    animation: slideInFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 .glass_panel {
@@ -321,6 +419,32 @@
 .dateInputWrapper {
     display: flex;
     justify-content: space-between;
+}
+
+/* Custom placeholder for native date input: show 'Add Date' instead of DD/MM/YYYY until a value is chosen */
+.dateInputWrapper input[type="date"] {
+    position: relative;
+    color: transparent; /* hide native placeholder text */
+}
+
+.dateInputWrapper input[type="date"]::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    pointer-events: none;
+}
+
+.dateInputWrapper input[type="date"]:focus,
+.dateInputWrapper input[type="date"]:valid {
+    color: #ffffff; /* show selected date */
+}
+
+.dateInputWrapper input[type="date"]:focus::before,
+.dateInputWrapper input[type="date"]:valid::before {
+    content: "";
 }
 
 .calendarIcon {
@@ -495,7 +619,7 @@
 }
 
 .arrowbox{
-    left: 21.5%;
+    left: 17%;
     top: 50%;
     transform: translate(0 ,-50%);
     position: absolute;
