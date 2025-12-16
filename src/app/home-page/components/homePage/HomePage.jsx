@@ -25,15 +25,8 @@ const HomePage = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  // Track previous booking type for direction-based animation
-  const prevBookingTypeRef = useRef(bookingType);
-  
-  // Determine animation direction based on previous and current
-  const isForward = prevBookingTypeRef.current === "holiday" && bookingType === "insurance";
-  
-  useEffect(() => {
-    prevBookingTypeRef.current = bookingType;
-  }, [bookingType]);
+  // Direction for tab-switch animation ("right" when moving to a tab on the right, otherwise "left")
+  const [direction, setDirection] = useState("right");
 
   const swapLocations = () => {
     setFrom(to);
@@ -81,9 +74,20 @@ const HomePage = () => {
     { id: 3, label: "Travel Insurance", icon: "/icons/insurance.svg", type: "insurance" },
   ];
 
+  const tabOrder = ["hotel", "flight", "holiday", "insurance"];
+
   const handleFeatureClick = (feature) => {
     // set the active circular button
     setActiveFeature(feature.id);
+
+    // determine direction based on previous and next tab positions
+    const prevIndex = tabOrder.indexOf(bookingType);
+    const nextIndex = tabOrder.indexOf(feature.type);
+    if (prevIndex < nextIndex) {
+      setDirection("right");
+    } else if (prevIndex > nextIndex) {
+      setDirection("left");
+    }
 
     // switch which search UI is shown
     // `type` is "flight" | "hotel" | "holiday" | "insurance" (you can adapt)
@@ -163,7 +167,7 @@ const HomePage = () => {
         </div>
 
         <div className='flex flex-col gap-[127px] items-center'>
-          <div key={bookingType} className={`${styles.searchPanelWrapper} ${(bookingType === "holiday" || bookingType === "insurance") ? styles.noAnimation : ""}`}>
+          <div className={`${styles.searchPanelWrapper} ${(bookingType === "holiday" || bookingType === "insurance") ? styles.noAnimation : ""}`}>
           {bookingType === "flight" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
               <div className={styles.serarchingContTop}>
@@ -231,7 +235,7 @@ const HomePage = () => {
                         ref={departureRef}
                         type="date"
                         className={styles.contant}
-                        data-placeholder="Add Date"
+                        data-placeholder="ADD DATES"
                         required
                       />
                       {/* use button for accessibility; call handler that uses the ref */}
@@ -263,7 +267,7 @@ const HomePage = () => {
                         ref={returnRef}
                         type="date"
                         className={styles.contant}
-                        data-placeholder="Add Date"
+                        data-placeholder="ADD DATES"
                         required
                       />
                       {/* use button for accessibility; call handler that uses the ref */}
@@ -345,7 +349,7 @@ const HomePage = () => {
                         ref={departureRef}
                         type="date"
                         className={styles.contant}
-                        data-placeholder="Add Date"
+                        data-placeholder="ADD DATES"
                         required
                       />
                       {/* use button for accessibility; call handler that uses the ref */}
@@ -407,7 +411,7 @@ const HomePage = () => {
                         ref={departureRef}
                         type="date"
                         className={styles.contant}
-                        data-placeholder="Add Date"
+                        data-placeholder="ADD DATES"
                         required
                       />
                       {/* use button for accessibility; call handler that uses the ref */}
@@ -460,7 +464,7 @@ const HomePage = () => {
                         ref={departureRef}
                         type="date"
                         className={styles.contant}
-                        data-placeholder="Add Date"
+                        data-placeholder="ADD DATES"
                         required
                       />
                       {/* use button for accessibility; call handler that uses the ref */}
@@ -516,7 +520,7 @@ const HomePage = () => {
                       ref={departureRef}
                       type="date"
                       className={styles.contant}
-                      data-placeholder="Add Date"
+                      data-placeholder="ADD DATES"
                       required
                     />
                     {/* use button for accessibility; call handler that uses the ref */}
@@ -562,7 +566,7 @@ const HomePage = () => {
                 key="holiday"
                 className={`${styles.searchFormWrapper} ${
                   bookingType === "holiday" ? styles.formVisible : styles.formHidden
-                }`}
+                } ${direction === "right" ? styles.slideRight : styles.slideLeft}`}
               >
 
 
@@ -599,7 +603,7 @@ const HomePage = () => {
                       ref={departureRef}
                       type="date"
                       className={styles.contant}
-                      data-placeholder="Add Date"
+                      data-placeholder="ADD DATES"
                       required
                     />
                     {/* use button for accessibility; call handler that uses the ref */}
@@ -642,7 +646,7 @@ const HomePage = () => {
                 key="insurance"
                 className={`${styles.searchFormWrapper} ${
                   bookingType === "insurance" ? styles.formVisible : styles.formHidden
-                }`}
+                } ${direction === "right" ? styles.slideRight : styles.slideLeft}`}
               >
                 <div className={styles.serarchingContBottom}>
                 {/* <div className={styles.arrowboxOneWay}>
@@ -663,7 +667,7 @@ const HomePage = () => {
                       ref={departureRef}
                       type="date"
                       className={styles.contant}
-                      data-placeholder="Add Date"
+                      data-placeholder="ADD DATES"
                       required
                     />
                  
@@ -695,7 +699,7 @@ const HomePage = () => {
                       ref={departureRef}
                       type="date"
                       className={styles.contant}
-                      data-placeholder="Add Date"
+                      data-placeholder="ADD DATES"
                       required
                     />
                

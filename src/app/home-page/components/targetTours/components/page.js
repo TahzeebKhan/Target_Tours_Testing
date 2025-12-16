@@ -12,8 +12,11 @@ import styles from "./newPage.module.css";
 
 // ];
 
-const HoverExpandCarousel = ({ cards }) => {
+const HoverExpandCarousel = ({ cards = [] }) => {
   const [startIndex, setStartIndex] = useState(0);
+
+  // SSR safety: if no cards provided, render nothing
+  if (!cards.length) return null;
 
   const orderedCards = [
     ...cards.slice(startIndex),

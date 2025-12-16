@@ -228,38 +228,69 @@
 
 /* Slide directions */
 .slideLeft {
-    transform: translateX(-24px);
+    /* used as a directional modifier with formVisible/formHidden */
 }
 
 .slideRight {
-    transform: translateX(24px);
+    /* used as a directional modifier with formVisible/formHidden */
 }
 
-/* Visible form - slides in from right and fades in */
+/* Visible form - base state (direction handled via slideLeft/slideRight) */
 .formVisible {
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
     z-index: 2;
-    animation: formSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+    transition:
+        opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hidden form - slides out to left and fades out */
+/* Hidden form - base state (direction handled via slideLeft/slideRight) */
 .formHidden {
     opacity: 0;
-    transform: translateX(-24px);
+    transform: translateX(0);
     visibility: hidden;
     pointer-events: none;
     z-index: 1;
     transition:
-        opacity 0.3s ease,
-        transform 0.3s ease,
-        visibility 0.3s ease;
+        opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 500ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Direction-aware modifiers */
+.formVisible.slideRight {
+    animation: formSlideIn 500ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.formVisible.slideLeft {
+    animation: formSlideInLeft 500ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* when moving to a tab on the right, old form slides left; to the left, slides right */
+.formHidden.slideRight {
+    transform: translateX(-24px);
+}
+
+.formHidden.slideLeft {
+    transform: translateX(24px);
 }
 
 @keyframes formSlideIn {
     from {
         transform: translateX(24px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes formSlideInLeft {
+    from {
+        transform: translateX(-24px);
         opacity: 0;
     }
     to {
@@ -421,7 +452,7 @@
     justify-content: space-between;
 }
 
-/* Custom placeholder for native date input: show 'Add Date' instead of DD/MM/YYYY until a value is chosen */
+/* Custom placeholder for native date input: show 'ADD DATES' instead of DD/MM/YYYY until a value is chosen */
 .dateInputWrapper input[type="date"] {
     position: relative;
     color: transparent; /* hide native placeholder text */
