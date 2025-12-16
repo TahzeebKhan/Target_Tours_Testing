@@ -153,6 +153,7 @@ const HomePage = () => {
         </div>
 
         <div className='flex flex-col gap-[127px] items-center'>
+          <div key={bookingType} className={styles.searchPanelWrapper}>
           {bookingType === "flight" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
               <div className={styles.serarchingContTop}>
@@ -234,31 +235,6 @@ const HomePage = () => {
                           <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
                           <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
                         </svg>
-
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.fromBtn}>
-                    <div className={styles.lable}>Return Date</div>
-                    <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
-                      <input ref={returnRef} type="date" className={styles.contant} placeholder='Add Dates' />
-                      <button
-                        type="button"
-                        aria-label="Open return date picker"
-                        className={styles.calendarIcon}
-                        onClick={openReturnPicker}
-                      >
-                        <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                          <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                          <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                          <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                          <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                          <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                          <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                        </svg>
-
 
                       </button>
                     </div>
@@ -492,37 +468,13 @@ const HomePage = () => {
                   </div>
                 </div>
 
-                <div className={styles.fromBtn}>
-                  <div className={styles.lable}>check out</div>
-                  <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
-                    <input ref={returnRef} type="date" className={styles.contant} placeholder='Add Dates' />
-                    <button
-                      type="button"
-                      aria-label="Open return date picker"
-                      className={styles.calendarIcon}
-                      onClick={openReturnPicker}
-                    >
-                      <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                        <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                        <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                        <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                        <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                        <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                        <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                      </svg>
-
-
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.fromBtn}>
-                  <div className={styles.lable}>GUESTS & ROOMS</div>
-                  <div className={styles.dateInputWrapper}>
-                    <div className={styles.contant}>1 ADULT | 1 ROOM</div>
-                    <img src="/images/Vector.svg" alt="" /></div>
-                </div>
+                <TravellerSelector
+                  travellerClass={travellerClass}
+                  setTravellerClass={setTravellerClass}
+                  travellerOptions={travellerOptions}
+                  styles={styles}
+                  name="Travellers & Class"
+                />
                 <div className={styles.searchBtn}>
                   <img src="/images/searchIcon.svg" alt="" />
                 </div>
@@ -530,21 +482,33 @@ const HomePage = () => {
             </div>
           )}
 
-          {bookingType === "holiday" && (
+          {(bookingType === "holiday"  || bookingType === "insurance") && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
 
 
               <div className={styles.serarchingContBottom}>
-                <div className={styles.arrowboxOneWay}>
+                {/* <div className={styles.arrowboxOneWay} onClick={swapLocations}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
-                </div>
+                </div> */}
                 <div className={styles.fromBtn}>
                   <div className={styles.lable}>From CITY</div>
-                  <input type="text" className={styles.contant} placeholder='Departure' />
+                  <input
+                    type="text"
+                    className={styles.contant}
+                    placeholder="Departure"
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                  />
                 </div>
                 <div className={styles.fromBtn}>
                   <div className={styles.lable}>To CITY/COUNTRY, CATEGORY</div>
-                  <input type="text" className={styles.contant} placeholder='Destination' />
+                  <input
+                    type="text"
+                    className={styles.contant}
+                    placeholder="Destination"
+                    value={to}
+                    onChange={(e) => setTo(e.target.value)}
+                  />
                 </div>
 
                 <div className={styles.fromBtn}>
@@ -574,12 +538,13 @@ const HomePage = () => {
                   </div>
                 </div>
 
-                <div className={styles.fromBtn}>
-                  <div className={styles.lable}>ROOMS & GUESTS</div>
-                  <div className={styles.dateInputWrapper}>
-                    <div className={styles.contant}>SELECT ROOMS</div>
-                    <img src="/images/Vector.svg" alt="" /></div>
-                </div>
+                <TravellerSelector
+                  travellerClass={travellerClass}
+                  setTravellerClass={setTravellerClass}
+                  travellerOptions={travellerOptions}
+                  styles={styles}
+                  name="Travellers & Class"
+                />
                 <div className={styles.searchBtn}>
                   <img src="/images/searchIcon.svg" alt="" />
                 </div>
@@ -587,7 +552,7 @@ const HomePage = () => {
             </div>
           )}
 
-          {bookingType === "insurance" && (
+          {/* {bookingType === "insurance" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
 
 
@@ -605,16 +570,16 @@ const HomePage = () => {
                 <div className={styles.fromBtn}>
                   <div className={styles.lable}>TRAVEL DATE</div>
                   <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                    {/* attach ref */}
+          
                     <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
-                    {/* use button for accessibility; call handler that uses the ref */}
+                 
                     <button
                       type="button"
                       aria-label="Open departure date picker"
                       className={styles.calendarIcon}
                       onClick={openDeparturePicker}
                     >
-                      {/* same SVG */}
+        
                       <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
                         <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
@@ -628,17 +593,19 @@ const HomePage = () => {
                     </button>
                   </div>
                 </div>
-
                 <div className={styles.fromBtn}>
-                  <div className={styles.lable}>Return Date</div>
-                  <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
-                    <input ref={returnRef} type="date" className={styles.contant} placeholder='Add Dates' />
+                  <div className={styles.lable}>Departure Date</div>
+                  <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
+            
+                    <input ref={departureRef} type="date" className={styles.contant} placeholder='Add Dates' />
+               
                     <button
                       type="button"
-                      aria-label="Open return date picker"
+                      aria-label="Open departure date picker"
                       className={styles.calendarIcon}
-                      onClick={openReturnPicker}
+                      onClick={openDeparturePicker}
                     >
+               
                       <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
                         <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
@@ -649,23 +616,24 @@ const HomePage = () => {
                         <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
                       </svg>
 
-
                     </button>
                   </div>
                 </div>
 
-                <div className={styles.fromBtn}>
-                  <div className={styles.lable}>TRAVELLERS</div>
-                  <div className={styles.dateInputWrapper}>
-                    <div className={styles.contant}>1 Traveller</div>
-                    <img src="/images/Vector.svg" alt="" /></div>
-                </div>
+                <TravellerSelector
+                  travellerClass={travellerClass}
+                  setTravellerClass={setTravellerClass}
+                  travellerOptions={travellerOptions}
+                  styles={styles}
+                  name="Travellers & Class"
+                />
                 <div className={styles.searchBtn}>
                   <img src="/images/searchIcon.svg" alt="" />
                 </div>
               </div>
             </div>
-          )}
+          )} */}
+          </div>
 
 
 

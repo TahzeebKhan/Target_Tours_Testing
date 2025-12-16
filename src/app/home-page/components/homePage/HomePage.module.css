@@ -168,6 +168,25 @@
 
 }
 
+/* wrapper to animate search card when bookingType changes */
+.searchPanelWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  animation: searchFadeIn 350ms ease-out;
+}
+
+@keyframes searchFadeIn {
+  from {
+    opacity: 1;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .serarchingCont {
     /* position: absolute; */
     /* bottom: 270px;
@@ -476,7 +495,7 @@
 }
 
 .arrowbox{
-    left: 17%;
+    left: 21.5%;
     top: 50%;
     transform: translate(0 ,-50%);
     position: absolute;
