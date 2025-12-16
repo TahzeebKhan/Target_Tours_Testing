@@ -173,7 +173,15 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* Only apply animation when NOT switching between holiday/insurance */
+.searchPanelWrapper:not(.noAnimation) {
   animation: searchFadeIn 350ms ease-out;
+}
+
+.noAnimation {
+  animation: none !important;
 }
 
 @keyframes searchFadeIn {
@@ -198,6 +206,72 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+/* Container for holiday/insurance forms - allows overlapping */
+.searchFormContainer {
+    position: relative;
+    min-height: 106px;
+}
+
+/* Wrapper for each form - positioned absolutely to overlap */
+.searchFormWrapper {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+}
+
+/* Slide directions */
+.slideLeft {
+    transform: translateX(-24px);
+}
+
+.slideRight {
+    transform: translateX(24px);
+}
+
+/* Visible form - overrides transform */
+.formVisible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    z-index: 2;
+    transition:
+        opacity 300ms ease,
+        transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hidden form */
+.formHidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1;
+    transition:
+        opacity 200ms ease,
+        transform 300ms ease,
+        visibility 200ms ease;
+}
+
+/* First field animation */
+.firstField {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+
+/* When form is hidden, first field slides left to right and fades out */
+.fieldSlideOut {
+    transform: translateX(50px);
+    opacity: 0;
+}
+
+/* When form is visible, first field is at normal position and slides in smoothly */
+.fieldVisible {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
 }
 
 .glass_panel {
@@ -495,7 +569,7 @@
 }
 
 .arrowbox{
-    left: 21.5%;
+    left: 17%;
     top: 50%;
     transform: translate(0 ,-50%);
     position: absolute;
