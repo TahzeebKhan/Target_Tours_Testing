@@ -244,10 +244,17 @@
     }
 }
 
+@media (max-width: 1518px){
+    .heading{
+        font-size: 56px;
+    }
+}
+
+
 @media (max-width: 1440px){
     .heading{
         margin-top: 50px;
-        font-size: 48px;
+        font-size: 47px;
     }
     .offer{
         font-size: 18px;
@@ -258,5 +265,20 @@
     .leftContainer{
         /* justify-content: unset;
         gap: 70px; */
+    }
+    .swapperslider{
+        max-width: 330px !important;
+    }
+}
+
+@media (max-width: 1430px){
+    .price{
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 1300px){
+    .heading{
+        font-size: 37px;
     }
 }

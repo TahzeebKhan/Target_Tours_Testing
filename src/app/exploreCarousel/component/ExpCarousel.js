@@ -40,6 +40,36 @@ export default function ExpCarousel({ activeTab }) {
       price: "₹699/night",
       rating: 4.6,
       users: 720,
+      type: "Beach",
+      favorite: false,
+      images: ["/images/3.webp", "/images/4.webp"]
+    },
+    {
+      title: "Manali, Himachal",
+      subtitle: "Family Hill Resort",
+      price: "₹599/night",
+      rating: 4.4,
+      users: 540,
+      type: "Beach",
+      favorite: false,
+      images: ["/images/4.webp", "/images/1.webp"]
+    },
+    {
+      title: "Darjeeling, Bengal",
+      subtitle: "Mountain View Stay",
+      price: "₹699/night",
+      rating: 4.6,
+      users: 720,
+      type: "Beach",
+      favorite: false,
+      images: ["/images/3.webp", "/images/4.webp"]
+    },
+    {
+      title: "Darjeeling, Bengal",
+      subtitle: "Mountain View Stay",
+      price: "₹699/night",
+      rating: 4.6,
+      users: 720,
       type: "Hiking",
       favorite: false,
       images: ["/images/3.webp", "/images/4.webp"]
@@ -55,6 +85,36 @@ export default function ExpCarousel({ activeTab }) {
       images: ["/images/4.webp", "/images/1.webp"]
     },
     {
+      title: "Manali, Himachal",
+      subtitle: "Family Hill Resort",
+      price: "₹599/night",
+      rating: 4.4,
+      users: 540,
+      type: "Ski",
+      favorite: false,
+      images: ["/images/4.webp", "/images/1.webp"]
+    },
+    {
+      title: "Darjeeling, Bengal",
+      subtitle: "Mountain View Stay",
+      price: "₹699/night",
+      rating: 4.6,
+      users: 720,
+      type: "Ski",
+      favorite: false,
+      images: ["/images/3.webp", "/images/4.webp"]
+    },
+    {
+      title: "Manali, Himachal",
+      subtitle: "Family Hill Resort",
+      price: "₹599/night",
+      rating: 4.4,
+      users: 540,
+      type: "Ski",
+      favorite: false,
+      images: ["/images/4.webp", "/images/1.webp"]
+    },
+    {
       title: "Shimla, India",
       subtitle: "Snow Peak Stay",
       price: "₹799/night",
@@ -63,6 +123,16 @@ export default function ExpCarousel({ activeTab }) {
       type: "Ski",
       favorite: false,
       images: ["/images/exp2.png", "/images/exp1.png"]
+    },
+    {
+      title: "Manali, Himachal",
+      subtitle: "Family Hill Resort",
+      price: "₹599/night",
+      rating: 4.4,
+      users: 540,
+      type: "Ski",
+      favorite: false,
+      images: ["/images/4.webp", "/images/1.webp"]
     },
     {
       title: "Varanasi, India",
@@ -83,7 +153,48 @@ export default function ExpCarousel({ activeTab }) {
       type: "Wellness and Retreat",
       favorite: false,
       images: ["/images/exp1.png", "/images/exp3.png"]
-    }
+    },
+    {
+      title: "Varanasi, India",
+      subtitle: "Cultural Heritage Home",
+      price: "₹349/night",
+      rating: 4.2,
+      users: 410,
+      type: "Wellness and Retreat",
+      favorite: false,
+      images: ["/images/exp3.png", "/images/exp2.png"]
+    },
+
+    {
+      title: "Varanasi, India",
+      subtitle: "Cultural Heritage Home",
+      price: "₹349/night",
+      rating: 4.2,
+      users: 410,
+      type: "Wellness and Retreat",
+      favorite: false,
+      images: ["/images/exp3.png", "/images/exp2.png"]
+    },
+    {
+      title: "Shimla, India",
+      subtitle: "Snow Peak Stay",
+      price: "₹799/night",
+      rating: 4.5,
+      users: 620,
+      type: "Wellness and Retreat",
+      favorite: false,
+      images: ["/images/exp2.png", "/images/exp1.png"]
+    },
+    {
+      title: "Manali, Himachal",
+      subtitle: "Family Hill Resort",
+      price: "₹599/night",
+      rating: 4.4,
+      users: 540,
+      type: "Wellness and Retreat",
+      favorite: false,
+      images: ["/images/4.webp", "/images/1.webp"]
+    },
   ]);
 
   // Filter based on active tab
@@ -130,7 +241,7 @@ export default function ExpCarousel({ activeTab }) {
           }}
         > */}
         <Swiper
-          modules={[Virtual, Pagination]}
+          modules={[Virtual,]}
           onSwiper={setSwiperRef}
           spaceBetween={16}
           centeredSlides={true}            // ✅ center main card

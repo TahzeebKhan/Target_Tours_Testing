@@ -41,7 +41,7 @@ body {
 .swiper-pagination-custom,
 .swiper-horizontal>.swiper-pagination-bullets,
 .swiper-pagination-bullets.swiper-pagination-horizontale {
-  background-color: red;
+  /* background-color: red; */
 }
 
 .innerCarouselWrapper .swiper-pagination-bullet {
@@ -53,7 +53,7 @@ body {
 }
 
 .ExpCarouselWrapper .swiper-pagination {
-  display: none !important;
+  /* display: none !important; */
 }
 
 .MoreCarouselWrapper {
