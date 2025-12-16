@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styles from "./TargetTours.module.css";
 import Image from "next/image";
 import Carousel from "@/app/moreCarousel/components/Carousel";
+import HoverExpandCarousel from "./components/page";
 
 const TargetTours = () => {
   const [activeTab, setActiveTab] = useState("Explore");
@@ -43,6 +44,24 @@ const TargetTours = () => {
     //     "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
     //   price: "INR 2,30,000/Adult",
     // },
+    {
+      id: 4,
+      img: "/images/tour.webp",
+      badge: "17 Days & 16 Nights",
+      title: "17 Days - Best Of India Tour",
+      cities:
+        "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
+      price: "INR 2,30,000/Adult",
+    },
+    {
+      id: 5,
+      img: "/images/tour2.webp",
+      badge: "15 Days & 16 Nights",
+      title: "6 Days - Golden Triangle Tour",
+      cities:
+        "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
+      price: "INR 2,30,000/Adult",
+    },
   ];
 
   const rotateCards = (cards, shift) => {
@@ -106,8 +125,9 @@ const TargetTours = () => {
                         </article>
                     ))}
                 </div> */}
-        <Carousel cards={cardsForTab} />
-{/* 
+        {/* <Carousel cards={cards} /> */}
+        <HoverExpandCarousel cards={cardsForTab} />
+        {/* 
         <div className={styles.controls}>
           <button aria-label="prev" className={styles.controlBtn}>
             ◀
