@@ -22,7 +22,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 508,
       type: "Beach",
       favorite: false,
-      images: ["/images/exp1.png", "/images/exp2.png", "/images/exp3.png"]
+      images: ["/images/1.webp", "/images/2.webp", "/images/3.webp"]
     },
     {
       title: "Goa, India",
@@ -32,7 +32,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 1020,
       type: "Beach",
       favorite: false,
-      images: ["/images/exp2.png", "/images/exp1.png"]
+      images: ["/images/2.webp", "/images/3.webp", "/images/4.webp"]
     },
     {
       title: "Darjeeling, Bengal",
@@ -42,7 +42,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 720,
       type: "Hiking",
       favorite: false,
-      images: ["/images/exp3.png", "/images/exp1.png"]
+      images: ["/images/3.webp", "/images/4.webp"]
     },
     {
       title: "Manali, Himachal",
@@ -52,7 +52,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 540,
       type: "Family",
       favorite: false,
-      images: ["/images/exp1.png", "/images/exp2.png"]
+      images: ["/images/4.webp", "/images/1.webp"]
     },
     {
       title: "Shimla, India",
@@ -91,8 +91,8 @@ export default function ExpCarousel({ activeTab }) {
     activeTab === "All"
       ? allSlidesData.map((item, index) => ({ ...item, originalIndex: index }))
       : allSlidesData
-          .map((item, index) => ({ ...item, originalIndex: index }))
-          .filter((item) => item.type === activeTab);
+        .map((item, index) => ({ ...item, originalIndex: index }))
+        .filter((item) => item.type === activeTab);
 
   // Toggle favorite
   const toggleFavorite = (index) => {
@@ -107,7 +107,7 @@ export default function ExpCarousel({ activeTab }) {
         style={{ maxWidth: "1520px", margin: "0 auto" }}
         className="ExpCarouselWrapper"
       >
-        <Swiper
+        {/* <Swiper
           modules={[Virtual]}
           onSwiper={setSwiperRef}  // ✅ FIXED (important!)
           slidesPerView={4}
@@ -116,11 +116,58 @@ export default function ExpCarousel({ activeTab }) {
           pagination={{ type: "fraction" }}
           navigation={true}
           virtual
+          className={styles.swiperContainer}
+          breakpoints={{
+            0: {
+              slidesPerView: 3, // mobile
+            },
+            576: {
+              slidesPerView: 3, // small tablets
+            },
+            991: {
+              slidesPerView: 4, // ✅ exactly at 991px
+            },
+          }}
+        > */}
+        <Swiper
+          modules={[Virtual, Pagination]}
+          onSwiper={setSwiperRef}
+          spaceBetween={16}
+          centeredSlides={true}            // ✅ center main card
+          slidesPerView={1.1}              // ✅ peek effect
+          pagination={{ clickable: true }} // ✅ bullets
+          navigation={false}               // ❌ hide arrows on mobile
+          virtual
+          className={styles.swiperContainer}
+          breakpoints={{
+            0: {
+              slidesPerView: 1.1,
+              centeredSlides: true,
+              spaceBetween: 16,
+            },
+            576: {
+              slidesPerView: 2,
+              centeredSlides: false,
+              spaceBetween: 20,
+            },
+
+            768: {
+              slidesPerView: 3,
+              centeredSlides: false,
+              spaceBetween: 30,
+            },
+            1200: {
+              slidesPerView: 4,
+              centeredSlides: false,
+              spaceBetween: 30,
+            },
+          }}
         >
+
           {slides.map((item, index) => (
             <SwiperSlide key={index} virtualIndex={index}>
               <div className={`${styles.cardItem} cardItem`}>
-                
+
                 <InnerCarousel
                   images={item.images}
                   favorite={item.favorite}

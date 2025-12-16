@@ -103,7 +103,7 @@ const LimitedTimeOffer = () => {
                             </div>
 
                             {/* SWIPER */}
-                            <div className={styles.swapper}>
+                            <div className={`${styles.swapper} limitedWrapper`}>
                                 <Swiper
                                     slidesPerView={3}
                                     spaceBetween={20}
@@ -119,7 +119,7 @@ const LimitedTimeOffer = () => {
                                     }}
                                 >
                                     {sliderData.map((item, index) => (
-                                        <SwiperSlide key={index}>
+                                        <SwiperSlide key={index} className={styles.swapperslider}>
                                             <div className={styles.items}>
                                                 <img src={item.img} alt="" />
 

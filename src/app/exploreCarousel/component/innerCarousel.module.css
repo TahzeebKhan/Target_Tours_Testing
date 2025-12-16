@@ -66,7 +66,7 @@ text-transform: uppercase;
 }
 .swapper img{
     width: 100%;
-    height: 333px;
+    /* height: 333px; */
     display: block;
    
 }
@@ -131,4 +131,25 @@ font-style: normal;
 font-weight: 600;
 line-height: normal;
 text-transform: uppercase;
+}
+
+
+
+
+@media (max-width: 1366px) {
+    .swapper img{
+        height: 300px;
+    }
+}
+
+@media (max-width: 1224px){
+    .swapper img{
+        height: 275px;
+    }
+}
+
+@media (max-width: 768px){
+    .swapper img{
+        height: 333px;
+    }
 }

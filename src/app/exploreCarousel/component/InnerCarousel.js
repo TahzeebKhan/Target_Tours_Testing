@@ -32,7 +32,7 @@ export default function InnerCarousel({ images = [], favorite, onFavorite }) {
           }}
           onSlideChange={handleSlideChange}
           lazy={true}
-          pagination={{ clickable: true }}
+          pagination={{ clickable: true, type: "bullets" }}
           navigation={false}
           modules={[Pagination]}
           className="mySwiper relative"

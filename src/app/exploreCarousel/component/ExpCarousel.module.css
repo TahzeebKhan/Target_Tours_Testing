@@ -1,72 +1,78 @@
-.innerCarouselContent{
+.innerCarouselContent {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin: 24px 0;
-    padding: 0 24px;
+    /* margin: 24px 0; */
+    padding: 24px 24px;
 }
-.innerCarouselContentTitle{
+
+.innerCarouselContentTitle {
     color: #7F7F7F;
-font-family: Poppins;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: uppercase;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: uppercase;
 }
-.cardItem{
+
+.cardItem {
     background-color: #FFFFFF;
     height: 481px;
     margin-top: 54px;
 }
-.innerCarouselContentSubtitle{
+
+.innerCarouselContentSubtitle {
     color: var(--Black, #000);
-font-family: "Antic Didone";
-font-size: 28px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-letter-spacing: -0.56px;
+    font-family: "Antic Didone";
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.56px;
 }
-.innerCarouselContentPrice{
+
+.innerCarouselContentPrice {
     display: flex;
     justify-content: space-between;
     /* width: 100%; */
     align-items: center;
 }
-.innerCarouselContentPriceValue{
+
+.innerCarouselContentPriceValue {
     color: var(--ROYAL-BLUE, #003);
-font-family: Poppins;
-font-size: 12px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: uppercase;
-display: flex;
-align-items: end;
-gap: 5px;
-/* display: flex;
+    font-family: Poppins;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: uppercase;
+    display: flex;
+    align-items: end;
+    gap: 5px;
+    /* display: flex;
 justify-content: space-between; */
 
 }
-.innerCarouselContentPriceValuePrice{
+
+.innerCarouselContentPriceValuePrice {
     color: var(--ROYAL-BLUE, #003);
-font-family: Poppins;
-font-size: 18px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-text-transform: uppercase;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: uppercase;
 
 }
 
-.innerCarouselContentPriceRating{
+.innerCarouselContentPriceRating {
     display: flex;
     align-items: center;
     gap: 2px;
 }
 
-.ratting{
+.ratting {
     font-family: Poppins;
     font-weight: 400;
     font-style: Regular;
@@ -79,7 +85,7 @@ text-transform: uppercase;
 
 }
 
-.user{
+.user {
     font-family: Poppins;
     font-weight: 400;
     font-style: Regular;
@@ -89,7 +95,7 @@ text-transform: uppercase;
     vertical-align: middle;
     text-transform: capitalize;
     color: #7A7A7A;
-    opacity:0.7;
+    opacity: 0.7;
 
 }
 
@@ -110,4 +116,99 @@ text-transform: uppercase;
     border: 1px solid #212121;
     border-radius: 100%;
     cursor: pointer;
+}
+
+@media (max-width: 1540px) {
+    .swiperContainer {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    
+}
+
+@media (max-width: 1440px){
+    .innerCarouselContentTitle{
+        font-size: 14px;
+    }
+    .innerCarouselContentSubtitle {
+        font-size: 24px;
+    }
+    .innerCarouselContentPriceValuePrice{
+        font-size: 16px;
+    }
+    .cardItem{
+        height: 438px;
+    }
+}
+
+@media (max-width: 1240px) {
+    .innerCarouselContentSubtitle {
+        font-size: 22px;
+    }
+    .innerCarouselContentPriceValuePrice{
+        font-size: 14px;
+    }
+    .ratting{
+        font-size: 12px;
+
+    }
+    .cardItem{
+        height: 438px;
+    }
+}
+
+@media (max-width: 1224px){
+    .cardItem{
+        height: 408px;
+    }
+
+}
+
+@media (max-width: 1156px){
+    .innerCarouselContentSubtitle {
+        font-size: 20px;
+    }
+    .innerCarouselContent{
+        padding: 18px;
+    }
+    .cardItem{
+        height: 394px;
+    }
+}
+@media (max-width: 1024px){
+    .innerCarouselContent{
+        padding: 8px;
+    }
+}
+
+@media (max-width: 768px){
+    .innerCarouselContentTitle{
+        font-size: 16px;
+    }
+    .innerCarouselContentSubtitle{
+        font-size: 24px;
+    }
+    .user{
+        font-size: 12px;
+    }
+    .cardItem{
+        height: 477px;
+        /* width: 356px; */
+    }
+
+     .innerCarouselContent{
+        padding: 24px;
+    }
+    .nnerCarouselContentPriceValuePrice
+    {
+        font-size: 18ox;
+    }
+    .cardItem{
+        margin-top: 32px;
+    }
+    
+    .btnContainer{
+        margin-top: 24px;
+    }
 }

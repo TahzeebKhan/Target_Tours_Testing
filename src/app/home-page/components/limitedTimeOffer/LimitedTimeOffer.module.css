@@ -156,11 +156,12 @@
     display: flex;
     max-width: 1114px;
     width: 100%;
+    gap: 32px;
 }
 
 .items {
-    width: 350px;
-    height: 371px;
+    width: 100%;
+    height: 100%;
     margin-right: 32px;
     position: relative;
     overflow: hidden;
@@ -223,4 +224,39 @@
     text-align: center;
     text-transform: uppercase;
     color: #FFFFFF;
+}
+.swapperslider{
+    max-width: 350px;
+    width: 100%;
+    height: 371px;
+    height: 100%;
+}
+
+
+@media (max-width: 1540px) {
+    .section{
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .heading{
+        /* font-weight: ; */
+        font-size: 62px;
+    }
+}
+
+@media (max-width: 1440px){
+    .heading{
+        margin-top: 50px;
+        font-size: 48px;
+    }
+    .offer{
+        font-size: 18px;
+    }
+    .price{
+        font-size: 28px;
+    }
+    .leftContainer{
+        /* justify-content: unset;
+        gap: 70px; */
+    }
 }
