@@ -23,13 +23,13 @@ const LimitedTimeOffer = () => {
         },
         {
             img: "/images/exp2.png",
-            title: "Manali",
-            subtitle: "Himachal Pradesh",
+            title: "Jaisalmer",
+            subtitle: "Rajasthan",
         },
         {
             img: "/images/exp1.png",
-            title: "Kasol",
-            subtitle: "Himachal Pradesh",
+            title: "Coorg",
+            subtitle: "Karnataka",
         },
         {
             img: "/images/exp1.png",
