@@ -13,7 +13,7 @@ import 'swiper/css/navigation'
 const PopularFlights = () => {
     const [swiperRef, setSwiperRef] = useState(null)
     const [activeTab, setActiveTab] = useState('Domestic')
-    
+
     const domesticData = [
         {
             id: 1,
@@ -45,7 +45,7 @@ const PopularFlights = () => {
         },
         {
             id: 5,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "Mumbai",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹20,000"
@@ -59,14 +59,14 @@ const PopularFlights = () => {
         },
         {
             id: 7,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "Kolkata",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹20,000"
         },
         {
             id: 8,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "Delhi",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹20,000"
@@ -76,14 +76,14 @@ const PopularFlights = () => {
     const internationalData = [
         {
             id: 1,
-            img:"/images/ahamdabad2.png",
+            img: "/images/ahamdabad2.png",
             city: "Dubai",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹45,000"
         },
         {
             id: 2,
-            img:"/images/hyderabad.png",
+            img: "/images/hyderabad.png",
             city: "Singapore",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹35,000"
@@ -97,35 +97,35 @@ const PopularFlights = () => {
         },
         {
             id: 4,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "London",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹85,000"
         },
         {
             id: 5,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "New York",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹95,000"
         },
         {
             id: 6,
-            img: "/images/items1.jpg",
+            img: "/images/pune2.png",
             city: "Paris",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹80,000"
         },
         {
             id: 7,
-            img: "/images/items1.jpg",
+            img: "/images/hyderabad.png",
             city: "Tokyo",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹75,000"
         },
         {
             id: 8,
-            img: "/images/items1.jpg",
+            img: "/images/pune2.png",
             city: "Sydney",
             date: "24 Mar 2026 - 14 Apr 2026",
             price: "₹90,000"
@@ -143,24 +143,24 @@ const PopularFlights = () => {
     };
 
     const tabsRef = useRef(null);
-    
-        useEffect(() => {
-            if (!tabsRef.current) return;   // ✅ prevent crash
-    
-            const tabs = tabsRef.current;
-            const activeTabEl = tabs.querySelector(`.${styles.active}`);
-    
-            if (!activeTabEl) return;
-    
-            tabs.style.setProperty(
-                "--indicator-width",
-                `${activeTabEl.offsetWidth}px`
-            );
-            tabs.style.setProperty(
-                "--indicator-left",
-                `${activeTabEl.offsetLeft}px`
-            );
-        }, [activeTab]);
+
+    useEffect(() => {
+        if (!tabsRef.current) return;   // ✅ prevent crash
+
+        const tabs = tabsRef.current;
+        const activeTabEl = tabs.querySelector(`.${styles.active}`);
+
+        if (!activeTabEl) return;
+
+        tabs.style.setProperty(
+            "--indicator-width",
+            `${activeTabEl.offsetWidth}px`
+        );
+        tabs.style.setProperty(
+            "--indicator-left",
+            `${activeTabEl.offsetLeft}px`
+        );
+    }, [activeTab]);
 
     return (
         <section className={styles.section}>
@@ -176,14 +176,14 @@ const PopularFlights = () => {
                 <nav className={styles.tabsWrap}>
                     <ul className={styles.tabs} ref={tabsRef}>
                         {['Domestic', 'International'].map((t) => (
-                            <li 
-                                key={t} 
+                            <li
+                                key={t}
                                 className={`${styles.tab} ${activeTab === t ? styles.active : ''}`}
                                 onClick={() => handleTabChange(t)}
                             >
-                                <button 
+                                <button
                                     className={styles.tabBtn}
-                                    // onClick={() => handleTabChange(t)}
+                                // onClick={() => handleTabChange(t)}
                                 >
                                     {t}
                                 </button>
@@ -194,7 +194,7 @@ const PopularFlights = () => {
 
 
                 <div style={{ margin: "0 auto" }} className='popularFlightsCarouselWrapper'>
-                    <Swiper
+                    {/* <Swiper
                         key={activeTab}
                         modules={[Navigation]}
                         onSwiper={setSwiperRef}
@@ -204,7 +204,38 @@ const PopularFlights = () => {
                         navigation={true}
                         loop={true}
                         loopAdditionalSlides={2}
-                    >
+                    > */}
+
+                    <Swiper
+  key={activeTab}
+  modules={[Navigation]}
+  onSwiper={setSwiperRef}
+  navigation={true}
+  loop={true}
+  loopAdditionalSlides={2}
+  slidesPerGroup={1}
+  spaceBetween={16}
+
+  breakpoints={{
+    0: {
+      slidesPerView: 1.1,   // 👈 show next slide partially
+      spaceBetween: 16,
+    },
+    576: {
+      slidesPerView: 2,
+      spaceBetween: 20,
+    },
+    767: {
+      slidesPerView: 3,
+      spaceBetween: 24,
+    },
+    991: {
+      slidesPerView: 4,
+      spaceBetween: 30,
+    },
+  }}
+>
+
                         {cardData.map((item, index) => (
                             <SwiperSlide key={item.id}>
                                 <div className={styles.carouselContainer}>
@@ -247,8 +278,8 @@ const PopularFlights = () => {
                     </div>
                 </div> */}
                 <div className={styles.btnContainer}>
-                    <div 
-                        className={styles.btn} 
+                    <div
+                        className={styles.btn}
                         onClick={() => {
                             if (swiperRef) {
                                 swiperRef.slidePrev();
@@ -258,8 +289,8 @@ const PopularFlights = () => {
                         <img src="/icons/left.svg" alt="" />
                     </div>
 
-                    <div 
-                        className={styles.btn} 
+                    <div
+                        className={styles.btn}
                         onClick={() => {
                             if (swiperRef) {
                                 swiperRef.slideNext();
