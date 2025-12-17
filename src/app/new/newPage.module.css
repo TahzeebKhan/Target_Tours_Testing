@@ -8,24 +8,24 @@
 }
 
 .hover-carousel {
-  display: flex;
+    display: flex;
   justify-content: center;
   align-items: stretch;
-  width: 100%;
+    width: 100%;
   max-width: 1200px;
   height: 420px;
   margin: 60px auto;
   padding: 0 40px;
   gap: 40px; /* spacing between cards */
-  overflow: hidden;
-}
-
-/* Default card */
-.hover-card {
+    overflow: hidden;
+  }
+  
+  /* Default card */
+  .hover-card {
   flex: 1 1 0;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
   transition: flex 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
   filter: grayscale(100%);
 }
@@ -54,7 +54,7 @@
   background: #ffffff;
   color: #000033;
   transform: translateY(-2px);
-}
+  }
   
   /* Image */
   .hover-card img {
@@ -68,7 +68,7 @@
 .hover-card:hover {
   flex: 1.5 1 0;
   filter: grayscale(0);
-}
+  }
   
   /* Slight zoom on active */
   .hover-card:hover img {

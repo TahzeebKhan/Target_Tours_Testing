@@ -33,13 +33,13 @@ const HoverExpandCarousel = () => {
       <div className={styles["hover-carousel"]}>
         {orderedCards.slice(0, 3).map((card) => (
           <div className={styles["hover-card"]} key={card.id}>
-            <img src={card.img} alt={card.title} />
+          <img src={card.img} alt={card.title} />
             <div className={styles["card-overlay"]}>
-              <h3>{card.title}</h3>
-            </div>
+            <h3>{card.title}</h3>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
+    </div>
 
       <div className={styles.navButtons}>
         <button

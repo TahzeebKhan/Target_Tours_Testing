@@ -241,6 +241,23 @@
     pointer-events: none;
 }
 
+/* Flight search trip-type container: same animation behavior, but keep original insets */
+.flightSearchFormContainer {
+    position: relative;
+    min-height: 106px;
+    /* margin-top: 24px; */
+    margin-bottom: 24px;
+}
+
+.flightSearchFormWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    pointer-events: none;
+}
+
 /* Slide directions */
 .slideLeft {
     /* used as a directional modifier with formVisible/formHidden */
