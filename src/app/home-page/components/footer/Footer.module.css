@@ -82,6 +82,7 @@
 .linkText {
     position: relative;
     display: inline-block;
+    width: fit-content;
 }
 
 /* underline */

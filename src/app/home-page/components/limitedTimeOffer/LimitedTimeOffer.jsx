@@ -105,7 +105,7 @@ const LimitedTimeOffer = () => {
                             {/* SWIPER */}
                             <div className={`${styles.swapper} limitedWrapper`}>
                                 <Swiper
-                                    slidesPerView={3}
+                                    // slidesPerView={3}
                                     spaceBetween={20}
                                     modules={[Navigation]}
                                     onSwiper={(swiper) => {
@@ -116,6 +116,17 @@ const LimitedTimeOffer = () => {
                                     onSlideChange={(swiper) => {
                                         setIsBeginning(swiper.isBeginning);
                                         setIsEnd(swiper.isEnd);
+                                    }}
+                                    breakpoints={{
+                                        0: {
+                                            slidesPerView: 3, // mobile
+                                        },
+                                        576: {
+                                            slidesPerView: 3, // small tablets
+                                        },
+                                        1300: {
+                                            slidesPerView: 2, // ✅ exactly at 991px
+                                        },
                                     }}
                                 >
                                     {sliderData.map((item, index) => (
