@@ -83,6 +83,13 @@
   transform: translateY(0);
 }
 
+.arrow{
+    transition: transform .3s ease;
+}
+.exploreBtn:hover .arrow{
+    transform: rotate(-45deg);
+}
+
 
 /* 🔥 NEW */
 /* transform: translateY(100%);

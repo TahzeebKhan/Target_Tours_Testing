@@ -28,7 +28,10 @@
 .tabs {
   display: flex;
   color: #ffffff;
+  position: relative;
 }
+
+
 .tab {
   padding: 8px 24px;
   font-weight: 400;
@@ -44,8 +47,19 @@
   /* border-bottom: 2px solid #000033; */
 }
 .activeTab {
-  border-bottom: 2px solid #000033;
+  /* border-bottom: 2px solid #000033; */
   color: #000033;
+}
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
 }
 
 .tab .tabBtn {

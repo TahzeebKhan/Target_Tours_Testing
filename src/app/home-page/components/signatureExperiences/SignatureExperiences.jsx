@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./SignatureExperiences.module.css";
 import Carousel from "@/app/3dCarousel/component/Carousel";
 const baseCarouselData = [
@@ -70,23 +70,43 @@ const SignatureExperiences = () => {
     // { title: "Maldives", carouselData: rotate(baseCarouselData, 0) },
   ];
 
+  const tabsRef = useRef(null);
+    
+        useEffect(() => {
+            if (!tabsRef.current) return;   // ✅ prevent crash
+    
+            const tabs = tabsRef.current;
+            const activeTabEl = tabs.querySelector(`.${styles.activeTab}`);
+    
+            if (!activeTabEl) return;
+    
+            tabs.style.setProperty(
+                "--indicator-width",
+                `${activeTabEl.offsetWidth}px`
+            );
+            tabs.style.setProperty(
+                "--indicator-left",
+                `${activeTabEl.offsetLeft}px`
+            );
+        }, [activeTab]);
   return (
     <section className={styles.section}>
       <div className={styles.container}>
         <h2 className={styles.heading}>Explore More With Target Tours</h2>
 
         <nav className={styles.tabsWrap}>
-          <ul className={styles.tabs}>
+          <ul className={styles.tabs} ref={tabsRef}>
             {tabsData.map((tab, index) => (
               <li
                 key={tab.title}
                 className={`${styles.tab} ${
                   index === activeTab ? styles.activeTab : ""
                 }`}
+                onClick={() => setActiveTab(index)}
               >
                 <button
                   className={styles.tabBtn}
-                  onClick={() => setActiveTab(index)}
+                  
                 >
                   {tab.title}
                 </button>

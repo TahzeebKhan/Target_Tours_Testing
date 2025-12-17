@@ -177,7 +177,7 @@ const HomePage = () => {
         <div className={`${styles.navbar}  w-full flex  justify-between items-center`}>
         <img src="./Logo.svg" alt="" />
           <div className={`${styles.navRight} flex gap-3`}>
-          <button className={styles.downloadBtn}>Download the App</button>
+          <button className={`${styles.glass_button} ${styles.downloadBtn}`} >Download the App</button>
           <button className={styles.signInBtn}>Sign In</button>
             <button className={styles.hamBurger}>
               <img src="/icons/hamBurger.png" alt="" />

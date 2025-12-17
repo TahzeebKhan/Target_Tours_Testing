@@ -29,8 +29,20 @@
 }
 
 .tabs {
+    position: relative;
     display: flex;
     color: #FFFFFF;
+}
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
 }
 
 .tab {
@@ -54,7 +66,7 @@
 }
 
 .active {
-    border-bottom: 2px solid #000033;
+    /* border-bottom: 2px solid #000033; */
     color: #000033;
 }
 

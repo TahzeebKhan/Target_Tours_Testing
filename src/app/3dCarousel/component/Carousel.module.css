@@ -315,8 +315,12 @@
 }
 
 .navButton:hover {
-  background: #e2e2e2;
+  background: #000000;
   color: white;
+}
+
+.navButton:hover svg path {
+  fill: #ffffff;
 }
 
 .navButton:active {

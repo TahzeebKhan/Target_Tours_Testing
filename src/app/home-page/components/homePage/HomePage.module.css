@@ -118,6 +118,11 @@
     text-transform: uppercase;
     background-color: #000033;
     cursor: pointer;
+    transition: all .45s ease;
+}
+
+.signInBtn:hover {
+    background-color: #21347B;
 }
 
 .homePageContainer {
@@ -405,6 +410,52 @@
     mask-composite: exclude;
 }
 
+.glass_button {
+    position: relative;
+
+    background-color: rgba(255, 255, 255, 0.12);
+    /* glass base */
+    backdrop-filter: blur(0.2px);
+    /* blur the background */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+
+
+    box-shadow:
+        0 4px 30px rgba(0, 0, 0, 0.1),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+    color: #fff;
+    transition: all .45s ease;
+
+}
+
+.glass_button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+
+    background:
+        conic-gradient(from -90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 15%,
+            transparent 30%);
+
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+.glass_button:hover {
+    background-color: #ffffff;
+    color: #000033;
+}
+
+
 .selectArrow {}
 
 .serarchingContTop {
@@ -556,6 +607,19 @@
     align-items: center;
     background-color: #000033;
     cursor: pointer;
+    transition: all .45s ease;
+}
+
+.searchBtn img {
+  filter: invert(0);
+  transition: filter 0.2s ease;
+}
+
+.searchBtn:hover img {
+  filter: invert(0) brightness(0.2) sepia(1) hue-rotate(200deg);
+}
+.searchBtn:hover {
+    background-color: #ffffff;
 }
 
 .multisearchBtn {
@@ -576,9 +640,14 @@
     vertical-align: middle;
     text-transform: uppercase;
     cursor: pointer;
+    transition: all .45s ease;
 }
 
 
+.multisearchBtn:hover{
+    background-color: #FFFFFF;
+    color: #000033;
+}
 .featureStrip {
     max-width: 836px;
     width: 100%;
@@ -682,7 +751,7 @@
 
 }
 
-.input::placeholder{
+.input::placeholder {
     color: #000000;
 }
 
@@ -740,6 +809,7 @@
 } */
 
 .hamBurger {
+    display: none !important;
     font-weight: 400;
     font-size: 9px;
     line-height: 1.25;
@@ -943,6 +1013,7 @@
 
     }
 
+
     .fromBtn {
         background: #ffffff;
     }
@@ -954,17 +1025,20 @@
     .signInBtn {
         display: none;
     }
-    .navRight{
+
+    .navRight {
         align-items: center;
     }
+
     .dateInputWrapper input[type="date"]::before {
         color: #000000;
 
     }
+
     .dateInputWrapper input[type="date"]:focus,
-.dateInputWrapper input[type="date"]:valid {
-    color: #000000;
-}
+    .dateInputWrapper input[type="date"]:valid {
+        color: #000000;
+    }
 }
 
 @media (max-width: 556px) {
