@@ -22,6 +22,17 @@
     margin-top: 54px;
 }
 
+.perNight {
+    font-weight: 600;
+    font-style: SemiBold;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
+
 .innerCarouselContentSubtitle {
     color: var(--Black, #000);
     font-family: "Antic Didone";
@@ -95,7 +106,7 @@ justify-content: space-between; */
     vertical-align: middle;
     text-transform: capitalize;
     color: #7A7A7A;
-    opacity: 0.7;
+    opacity: 0.6;
 
 }
 
@@ -104,7 +115,7 @@ justify-content: space-between; */
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-top: 40px;
+    margin-top: 60px;
 }
 
 .btn {
@@ -124,20 +135,23 @@ justify-content: space-between; */
         padding-right: 20px;
     }
 
-    
+
 }
 
-@media (max-width: 1440px){
-    .innerCarouselContentTitle{
+@media (max-width: 1440px) {
+    .innerCarouselContentTitle {
         font-size: 14px;
     }
+
     .innerCarouselContentSubtitle {
         font-size: 24px;
     }
-    .innerCarouselContentPriceValuePrice{
+
+    .innerCarouselContentPriceValuePrice {
         font-size: 16px;
     }
-    .cardItem{
+
+    .cardItem {
         height: 438px;
     }
 }
@@ -146,69 +160,79 @@ justify-content: space-between; */
     .innerCarouselContentSubtitle {
         font-size: 22px;
     }
-    .innerCarouselContentPriceValuePrice{
+
+    .innerCarouselContentPriceValuePrice {
         font-size: 14px;
     }
-    .ratting{
+
+    .ratting {
         font-size: 12px;
 
     }
-    .cardItem{
+
+    .cardItem {
         height: 438px;
     }
 }
 
-@media (max-width: 1224px){
-    .cardItem{
+@media (max-width: 1224px) {
+    .cardItem {
         height: 408px;
     }
 
 }
 
-@media (max-width: 1156px){
+@media (max-width: 1156px) {
     .innerCarouselContentSubtitle {
         font-size: 20px;
     }
-    .innerCarouselContent{
+
+    .innerCarouselContent {
         padding: 18px;
     }
-    .cardItem{
+
+    .cardItem {
         height: 394px;
     }
 }
-@media (max-width: 1024px){
-    .innerCarouselContent{
+
+@media (max-width: 1024px) {
+    .innerCarouselContent {
         padding: 8px;
     }
 }
 
-@media (max-width: 768px){
-    .innerCarouselContentTitle{
+@media (max-width: 768px) {
+    .innerCarouselContentTitle {
         font-size: 16px;
     }
-    .innerCarouselContentSubtitle{
+
+    .innerCarouselContentSubtitle {
         font-size: 24px;
     }
-    .user{
+
+    .user {
         font-size: 12px;
     }
-    .cardItem{
+
+    .cardItem {
         height: 477px;
         /* width: 356px; */
     }
 
-     .innerCarouselContent{
+    .innerCarouselContent {
         padding: 24px;
     }
-    .nnerCarouselContentPriceValuePrice
-    {
+
+    .nnerCarouselContentPriceValuePrice {
         font-size: 18ox;
     }
-    .cardItem{
+
+    .cardItem {
         margin-top: 32px;
     }
-    
-    .btnContainer{
+
+    .btnContainer {
         margin-top: 24px;
     }
 }
