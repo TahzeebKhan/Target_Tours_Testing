@@ -429,7 +429,7 @@ const HomePage = () => {
                   {/* Multi-city form */}
                   {tripType === "multi" && (
                     <div
-                      className={`${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible
+                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible
                         } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
                     >
                   <div className={styles.serarchingContBottom}>

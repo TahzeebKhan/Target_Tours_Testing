@@ -249,9 +249,9 @@
 /* Flight search trip-type container: same animation behavior, but keep original insets */
 .flightSearchFormContainer {
     position: relative;
-    min-height: 106px;
+    /* min-height: 106px; */
     /* margin-top: 24px; */
-    margin-bottom: 24px;
+    /* margin-bottom: 24px; */
 }
 
 .flightSearchFormWrapper {
