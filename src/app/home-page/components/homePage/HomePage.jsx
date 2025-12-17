@@ -62,7 +62,7 @@ const HomePage = () => {
   const travellerOptions = [
     { value: "1_traveller_econ", label: "1 Traveller, Economy" },
     { value: "2_traveller_econ", label: "2 Travellers, Economy" },
-    { value: "1_traveller_business", label: "1 Traveller, Business" },
+    { value: "3_traveller_business", label: "3 Traveller, Business" },
   ];
 
   const TravellerDestination = [
@@ -158,9 +158,13 @@ const HomePage = () => {
       <div className={`${styles.navContainer} absolute top-0 z-20`}>
         <div className={`${styles.navbar}  w-full flex  justify-between items-center`}>
           <img src="./Logo.svg" alt="" />
-          <div className="flex gap-3">
+          <div className={`${styles.navRight} flex gap-3`}>
             <button className={styles.downloadBtn}>Download the App</button>
             <button className={styles.signInBtn}>Sign In</button>
+            <button className={styles.hamBurger}>
+              <img src="/icons/hamBurger.png" alt="" />
+              menu
+            </button>
           </div>
         </div>
       </div>
@@ -828,15 +832,13 @@ const HomePage = () => {
             </div>
 
             {/* TRAVELLERS */}
-            <div className={styles.field}>
-              <label className={styles.label}>TRAVELLERS & CLASS</label>
-              <input
-                type="text"
-                placeholder="1 Traveller, Econ..."
-                readOnly
-                className={styles.input}
-              />
-            </div>
+            <TravellerSelector
+              travellerClass={travellerClass}
+              setTravellerClass={setTravellerClass}
+              travellerOptions={travellerOptions}
+              styles={styles}
+              name="Travellers & Class"
+            />
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -867,7 +869,7 @@ const HomePage = () => {
             {/* SWAP */}
 
 
-  
+
 
             {/* DEPARTURE DATE */}
             <div className={styles.field}>
@@ -875,6 +877,7 @@ const HomePage = () => {
               <input
                 type="date"
                 className={styles.input}
+                placeholder='Add Date'
               />
             </div>
 
@@ -888,15 +891,13 @@ const HomePage = () => {
             </div>
 
             {/* TRAVELLERS */}
-            <div className={styles.field}>
-              <label className={styles.label}>TRAVELLERS & CLASS</label>
-              <input
-                type="text"
-                placeholder="1 Traveller, Econ..."
-                readOnly
-                className={styles.input}
-              />
-            </div>
+            <TravellerSelector
+              travellerClass={travellerClass}
+              setTravellerClass={setTravellerClass}
+              travellerOptions={travellerOptions}
+              styles={styles}
+              name="One adult | one room"
+            />
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -956,15 +957,13 @@ const HomePage = () => {
             </div> */}
 
             {/* TRAVELLERS */}
-            <div className={styles.field}>
-              <label className={styles.label}>TRAVELLERS & CLASS</label>
-              <input
-                type="text"
-                placeholder="1 Traveller, Econ..."
-                readOnly
-                className={styles.input}
-              />
-            </div>
+            <TravellerSelector
+              travellerClass={travellerClass}
+              setTravellerClass={setTravellerClass}
+              travellerOptions={travellerOptions}
+              styles={styles}
+              name="Travellers & Class"
+            />
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -993,12 +992,12 @@ const HomePage = () => {
               />
             </div> */}
             <TravellerSelector
-                      travellerClass={travellerClass}
-                      setTravellerClass={setTravellerClass}
-                      travellerOptions={TravellerDestination}
-                      styles={styles}
-                      name="TRAVEL DESTINATION"
-                    />
+              travellerClass={travellerClass}
+              setTravellerClass={setTravellerClass}
+              travellerOptions={TravellerDestination}
+              styles={styles}
+              name="TRAVEL DESTINATION"
+            />
             {/* SWAP */}
 
 
@@ -1024,12 +1023,12 @@ const HomePage = () => {
 
             {/* TRAVELLERS */}
             <TravellerSelector
-                      travellerClass={travellerClass}
-                      setTravellerClass={setTravellerClass}
-                      travellerOptions={travellerOptions}
-                      styles={styles}
-                      name="Travellers & Class"
-                    />
+              travellerClass={travellerClass}
+              setTravellerClass={setTravellerClass}
+              travellerOptions={travellerOptions}
+              styles={styles}
+              name="Travellers & Class"
+            />
 
 
 

@@ -139,7 +139,8 @@
 .contant {
     transition: all 0.25s ease;
 }
-.contant::placeholder{
+
+.contant::placeholder {
     color: #fff;
 }
 
@@ -664,6 +665,10 @@
 
 }
 
+.input::placeholder{
+    color: #000000;
+}
+
 .feature img {
     width: 55px;
     height: 54px;
@@ -706,9 +711,30 @@
 .flightSectionMain {
     display: none;
 }
-.input{
+
+.input {
     position: relative;
-        z-index: 999;
+    z-index: 999;
+}
+
+/* .hamBurger img {
+    width: 24px;
+    height: 24px;
+} */
+
+.hamBurger {
+    font-weight: 400;
+    font-size: 9px;
+    line-height: 1.25;
+    letter-spacing: 1%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
 }
 
 @media (max-width: 1600px) {
@@ -829,7 +855,8 @@
         gap: 4px;
     }
 
-    .label, .lable{
+    .label,
+    .lable {
         font-weight: 400;
         font-size: 12px;
         line-height: 16px;
@@ -898,25 +925,43 @@
         height: 48px;
 
     }
-    .fromBtn{
+
+    .fromBtn {
         background: #ffffff;
     }
-    .contant{
+
+    .contant {
         color: #000000;
     }
+
+    .signInBtn {
+        display: none;
+    }
+    .navRight{
+        align-items: center;
+    }
+    .dateInputWrapper input[type="date"]::before {
+        color: #000000;
+
+    }
+    .dateInputWrapper input[type="date"]:focus,
+.dateInputWrapper input[type="date"]:valid {
+    color: #000000;
 }
-@media (max-width: 556px){
-    .featureRow{
+}
+
+@media (max-width: 556px) {
+    .featureRow {
         gap: 8px
-
     }
 }
 
-@media (max-width: 400px){
-    .featureRow{
-    gap: 0;
+@media (max-width: 400px) {
+    .featureRow {
+        gap: 0;
     }
-    .featurelabel{
+
+    .featurelabel {
         white-space: wrap;
     }
 }
