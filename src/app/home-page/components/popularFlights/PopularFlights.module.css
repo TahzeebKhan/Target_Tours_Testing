@@ -470,3 +470,19 @@
     text-transform: capitalize;
     color: #FFFFFF;
 }
+
+@media (max-width: 1440px) {
+    .heading {
+        font-size: 38px;
+    }
+}
+
+@media (max-width: 991px) {
+    :global(.swiper-slide:nth-child(even)) .carouselContainer {
+        margin-top: 0;
+    }
+    .carouselContainer{
+        margin-top: 0;
+    }
+
+}

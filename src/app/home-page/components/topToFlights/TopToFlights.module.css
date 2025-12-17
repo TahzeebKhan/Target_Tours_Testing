@@ -1,9 +1,13 @@
-.topToFlightsSection{
+.topToFlightsSection {
     padding: 120px 0;
-    margin:  0 auto;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+
+
 }
 
-.container{
+.container {
     max-width: 1520px;
     width: 100%;
     /* border: 1px solid; */
@@ -12,7 +16,8 @@
     margin: auto;
     gap: 42px;
 }
-.heading{
+
+.heading {
     font-family: "Antic Didone", serif;
     font-style: Regular;
     font-size: 42px;
@@ -21,18 +26,23 @@
     text-transform: capitalize;
     text-align: center;
     color: #000033;
+    margin-bottom: 42px;
 }
 
-.subContainer{
+.subContainer {
     display: flex;
     flex-direction: column;
 }
 
-.navbar{
+.navbar {
     display: flex;
+    border-bottom: 1px solid #A8A8A8;
+    overflow-x: scroll;
+    scrollbar-width: none;
     justify-content: center;
 }
-.nav_items{
+
+.nav_items {
     padding: 8px 32px;
     /* border-bottom: 2px solid #000033; */
     font-weight: 400;
@@ -45,6 +55,7 @@
     text-transform: uppercase;
     color: #A8A8A8;
     cursor: pointer;
+    white-space: nowrap;
 
 }
 
@@ -52,36 +63,59 @@
     color: #000033;
     border-bottom: 2px solid #000033 !important;
 }
-.custom_border{
+
+.custom_border {
     position: relative;
     border: 1px solid #A8A8A8;
     top: 119.5px;
     z-index: -9;
 }
 
-.flight_items_cont{
+.flight_items_cont {
     margin-top: 54px;
 }
 
-.flight_items_row{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 32px;
+.btnContainer {
+    margin-top: 32px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    /* margin-top: 40px; */
 }
-.flight_items{
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.flight_items_row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    justify-items: center;
+}
+
+.flight_items {
     max-width: 356px;
     width: 100%;
     display: flex;
     border: 1px solid #E4E6E8;
     padding: 8px;
     gap: 16px;
-    transition: background-color 240ms ease, transform 240ms cubic-bezier(.2,.9,.2,1), border-color 240ms ease, box-shadow 240ms ease;
+    transition: background-color 240ms ease, transform 240ms cubic-bezier(.2, .9, .2, 1), border-color 240ms ease, box-shadow 240ms ease;
     will-change: transform, background-color;
     cursor: pointer;
-    
+
 }
 
-.flight_items_bottom{
+.flight_items_bottom {
     display: flex;
     gap: 13px;
     flex-direction: column;
@@ -89,13 +123,14 @@
     justify-content: center;
 }
 
-.fromTo{
+.fromTo {
     display: flex;
     gap: 8px;
     align-items: center;
     transition: color 200ms ease, opacity 200ms ease;
 }
-.fromTo span{
+
+.fromTo span {
     font-weight: 300;
     font-style: Light;
     font-size: 16px;
@@ -107,7 +142,7 @@
     transition: color 200ms ease, opacity 200ms ease;
 }
 
-.price{
+.price {
     font-weight: 300;
     font-size: 12px;
     line-height: 1.5;
@@ -121,28 +156,79 @@
     gap: 5px;
     align-items: end;
 }
-.price span{
-    
-font-weight: 600;
-font-style: SemiBold;
-font-size: 18px;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-text-transform: uppercase;
+
+.price span {
+
+    font-weight: 600;
+    font-style: SemiBold;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
 
 
 }
 
-.flight_items:hover{
+.flight_items:hover {
     background-color: #000033;
     color: white;
-    
+
 }
 
-.flight_items:hover .fromTo span{
+.flight_items:hover .fromTo span {
     color: #FFFFFF;
 }
-.flight_items:hover .fromTo img{
+
+.flight_items:hover .fromTo img {
     filter: brightness(0) invert(1);
+}
+
+@media (max-width: 1520px) {
+    .container {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .topToFlightsSection {
+        padding: 32px 0;
+    }
+
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .flight_items_cont {
+        margin-top: 32px;
+    }
+
+    .flight_items {
+        max-width: unset;
+        width: 100%;
+    }
+
+    .flight_items_row {
+        gap: 16px;
+    }
+
+    .navbar {
+        justify-content: start;
+    }
+
+    .heading {
+        margin-bottom: 32px;
+        font-size: 28px;
+    }
+
+    .btnContainer {
+        display: flex;
+    }
+
+    .flight_items_row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }

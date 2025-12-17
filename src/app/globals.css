@@ -67,6 +67,8 @@ body {
 }
 
 .popularFlightsCarouselWrapper {
+  max-width: 1920px;
+  width: 100%;
   padding-left: 32px;
   padding-right: 32px;
 }
@@ -74,18 +76,18 @@ body {
 
 .limitedWrapper .swiper-slide-active {
   width: unset !important;
-  margin-right: 0 !important;
+  margin-right: 32px !important;
   /* width: 100%; */
 }
 
 .limitedWrapper .swiper-slide-next {
-  margin-right: 0 !important;
+  margin-right: 32px !important;
   width: unset !important;
   /* width: 100%; */
 }
 
 .limitedWrapper .swiper-wrapper {
-  gap: 32px;
+  /* gap: 32px; */
 }
 
 
@@ -93,7 +95,7 @@ body {
 
 @media (max-width: 1440px) {
   .limitedWrapper .swiper-wrapper {
-    gap: 30px;
+    /* gap: 30px; */
   }
   .ExpCarouselWrapper .swiper-slide{
     /* margin-right: 20px !important; */

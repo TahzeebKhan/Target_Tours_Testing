@@ -6,7 +6,7 @@
     justify-content: center;
 }
 
-.navbar{
+.navbar {
     max-width: 1520px;
     width: 100%;
 }
@@ -22,15 +22,17 @@
 
 .overlay {
     background-color: rgba(0, 0, 0, 0.3);
-    
+
 }
-.gradient{
+
+.gradient {
     position: absolute;
-    width:100%;
-    bottom:0;
+    width: 100%;
+    bottom: 0;
 }
-.multiSearch{
-    display:flex;
+
+.multiSearch {
+    display: flex;
     flex-direction: column;
     gap: 16px;
 }
@@ -38,54 +40,60 @@
 
 /* dropdown menu container (absolute positioned relative to dateInputWrapper) */
 .dateInputWrapper {
-    position: relative; /* ensure menu positions relative to this wrapper */
-  }
-  
-  /* menu that appears below the field */
-  .selectMenu {
+    position: relative;
+    /* ensure menu positions relative to this wrapper */
+}
+
+/* menu that appears below the field */
+.selectMenu {
     position: absolute;
-    top: calc(100% + 8px); /* a bit of space under the field */
-    right: 0;              /* align to right so it doesn't overflow layout */
-    left: 0;               /* or use width: 100% if you want full width */
+    top: calc(100% + 8px);
+    /* a bit of space under the field */
+    right: 0;
+    /* align to right so it doesn't overflow layout */
+    left: 0;
+    /* or use width: 100% if you want full width */
     z-index: 30;
     background: #fff;
     border: 1px solid #E4E6E8;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     border-radius: 6px;
     overflow: hidden;
     max-height: 220px;
     overflow-y: auto;
-  }
-  
-  /* each option row */
-  .selectItem {
+}
+
+/* each option row */
+.selectItem {
     padding: 10px 12px;
     font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
-  background-color: #000033;
-  color: #ffffff;
-  }
-  
-  /* hover / focus */
-  .selectItem:hover,
-  .selectItem:focus {
-  background: #f5f7f8;
-  color: #000066; /* blue-ish text on hover */
+    background-color: #000033;
+    color: #ffffff;
+}
+
+/* hover / focus */
+.selectItem:hover,
+.selectItem:focus {
+    background: #f5f7f8;
+    color: #000066;
+    /* blue-ish text on hover */
     outline: none;
-  }
-  
-  /* ensure the visible .contant layout is unchanged */
-  .dateInputWrapper > .contant {
-    display: inline-block; /* as before */
-  }
-  
-  /* small tweak so image arrow remains on right and not covered */
-  .dateInputWrapper > img {
+}
+
+/* ensure the visible .contant layout is unchanged */
+.dateInputWrapper>.contant {
+    display: inline-block;
+    /* as before */
+}
+
+/* small tweak so image arrow remains on right and not covered */
+.dateInputWrapper>img {
     position: relative;
     z-index: 31;
-  }
-  
+}
+
 
 .downloadBtn {
     padding: 8px 18px;
@@ -111,7 +119,7 @@
     cursor: pointer;
 }
 
-.homePageContainer{
+.homePageContainer {
     position: absolute;
     /* background-color: red; */
     z-index: 999;
@@ -126,12 +134,13 @@
     padding-bottom: 31px;
     justify-content: space-between;
 }
-.contant{
+
+.contant {
     transition: all 0.25s ease;
 }
 
 
-  
+
 .InspiredSection {
     /* position: absolute; */
     /* top: 114px;
@@ -172,29 +181,30 @@
 
 /* wrapper to animate search card when bookingType changes */
 .searchPanelWrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 /* Only apply animation when NOT switching between holiday/insurance */
 .searchPanelWrapper:not(.noAnimation) {
-  animation: searchFadeIn 350ms ease-out;
+    animation: searchFadeIn 350ms ease-out;
 }
 
 .noAnimation {
-  animation: none !important;
+    animation: none !important;
 }
 
 @keyframes searchFadeIn {
-  from {
-    opacity: 1;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 1;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .serarchingCont {
@@ -282,6 +292,7 @@
         transform: translateX(24px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -293,6 +304,7 @@
         transform: translateX(-24px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -323,6 +335,7 @@
         transform: translateX(-8px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -334,50 +347,49 @@
     /* width: 100%; */
     position: relative;
 
-    background-color: rgba(255, 255, 255, 0.12); /* glass base */
-    backdrop-filter: blur(10px);                 /* blur the background */
+    background-color: rgba(255, 255, 255, 0.12);
+    /* glass base */
+    backdrop-filter: blur(10px);
+    /* blur the background */
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.6);
 
-  
+
     box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      inset 0 0 20px rgba(255, 255, 255, 0.1);
-  
+        0 4px 30px rgba(0, 0, 0, 0.1),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+
     color: #fff;
-  }
-  
-  /* subtle shiny border */
-  .glass_panel::before {
+}
+
+/* subtle shiny border */
+.glass_panel::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
     padding: 1px;
-  
-    background: 
-      conic-gradient(
-        from -90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.4) 15%,
-        transparent 30%
-      );
-  
-    mask: 
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-  }
-.selectArrow{
 
+    background:
+        conic-gradient(from -90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 15%,
+            transparent 30%);
+
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
 }
+
+.selectArrow {}
 
 .serarchingContTop {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
 
 }
 
@@ -455,7 +467,8 @@
 /* Custom placeholder for native date input: show 'ADD DATES' instead of DD/MM/YYYY until a value is chosen */
 .dateInputWrapper input[type="date"] {
     position: relative;
-    color: transparent; /* hide native placeholder text */
+    color: transparent;
+    /* hide native placeholder text */
 }
 
 .dateInputWrapper input[type="date"]::before {
@@ -470,7 +483,8 @@
 
 .dateInputWrapper input[type="date"]:focus,
 .dateInputWrapper input[type="date"]:valid {
-    color: #ffffff; /* show selected date */
+    color: #ffffff;
+    /* show selected date */
 }
 
 .dateInputWrapper input[type="date"]:focus::before,
@@ -522,7 +536,7 @@
     cursor: pointer;
 }
 
-.multisearchBtn{
+.multisearchBtn {
     max-width: 261px;
     width: 100%;
     display: flex;
@@ -627,6 +641,7 @@
     line-height: 1;
     letter-spacing: 0%;
     color: #FFFFFF;
+    white-space: nowrap;
     opacity: 0.6;
     text-transform: uppercase;
 }
@@ -649,10 +664,10 @@
     height: 54px;
 }
 
-.arrowbox{
+.arrowbox {
     left: 17%;
     top: 50%;
-    transform: translate(0 ,-50%);
+    transform: translate(0, -50%);
     position: absolute;
     background-color: #fff;
     border-radius: 100%;
@@ -663,10 +678,11 @@
     align-items: center;
     cursor: pointer;
 }
-.arrowboxOneWay{
+
+.arrowboxOneWay {
     left: 21.5%;
     top: 50%;
-    transform: translate(0 ,-50%);
+    transform: translate(0, -50%);
     position: absolute;
     background-color: #fff;
     border-radius: 100%;
@@ -677,14 +693,199 @@
     align-items: center;
     cursor: pointer;
 }
-.multiArrow{
+
+.multiArrow {
     left: 23%;
 }
 
+.flightSectionMain {
+    display: none;
+}
 
 @media (max-width: 1600px) {
- .navbar{
-    padding-left: 20px;
-    padding-right: 20px
- }
+    .navbar {
+        padding-left: 20px;
+        padding-right: 20px
+    }
+}
+
+
+@media (max-width: 1200px) {
+    .InspiredSection h1 {
+        font-size: 56px;
+    }
+
+    .serarchingCont {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 1156px) {
+    .InspiredSection h1 {
+        font-size: 50px;
+    }
+
+    .glass_panel {
+        width: 1000px;
+        ;
+    }
+
+    .fromBtn {
+        min-width: unset;
+    }
+
+    .arrowbox {
+        left: 16.5%;
+
+    }
+
+    .serarchingContBottom {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 1020px) {
+    .InspiredSection h1 {
+        font-size: 44px;
+    }
+
+    .glass_panel {
+        width: 950px;
+    }
+
+    .arrowbox {
+        left: 17%;
+
+    }
+}
+
+@media (max-width: 768px) {
+    .InspiredSection {
+        gap: 19px;
+        align-items: start;
+    }
+
+    .InspiredSection h1 {
+        font-size: 42px;
+        text-align: start;
+    }
+
+    .InspiredSection p {
+        text-align: start;
+        font-size: 14px;
+    }
+
+    .glass_panel {
+        display: none;
+    }
+
+    .InspiredSection h1 br {
+        display: none;
+    }
+
+    .homePageContainer {
+        align-items: start;
+        padding: 32px 16px 32px 16px;
+    }
+
+    .feature img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .flightSectionMain {
+        padding: 16px;
+        margin-top: -81px;
+        position: relative;
+        display: block
+    }
+
+    .flightSearchCard {
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 12px;
+        background-color: #FFFFFF;
+        box-shadow:
+            -2px -3px 9.2px 0px #00000014,
+            0px 5px 8px 0px #0000001A;
+
+    }
+
+    .field {
+        border: 0.5px solid #E6E8EC;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .label {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0%;
+        text-transform: uppercase;
+        color: #404040;
+    }
+
+    .input {
+        font-weight: 500;
+        font-style: Medium;
+        font-size: 14px;
+        line-height: 1.2;
+        letter-spacing: 0%;
+        text-transform: uppercase;
+        outline: none;
+
+    }
+
+    .swapBtn {
+        background-color: #fff;
+        border-radius: 100%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow:
+            0px 0.67px 1.33px 0px #00000014,
+            0px 2px 8px 0px #0000001A;
+        position: absolute;
+        left: 50%;
+        top: 71px;
+        transform: translate(-50%);
+    }
+
+    .featureStrip {
+        margin-bottom: 83px;
+    }
+
+    .featurelabel {
+        font-size: 10px;
+    }
+
+    .featureRow {
+        gap: 17px;
+    }
+
+    .searchBtna {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        background-color: #000033;
+        font-family: Poppins;
+        font-weight: 500;
+        font-style: Medium;
+        font-size: 12px;
+
+        line-height: 1;
+        letter-spacing: 0%;
+        text-transform: uppercase;
+        color: #FFFFFF;
+        height: 48px;
+
+    }
 }

@@ -17,7 +17,7 @@
     width: 100%;
     height: 100%;
     display: flex;
-    gap:10px;
+    gap: 10px;
 
 }
 
@@ -122,13 +122,15 @@
 
     transition: all 0.25s ease;
 }
-.btnContainer{
+
+.btnContainer {
     display: flex;
     justify-content: end;
     margin-right: 10px;
     gap: 6.4px;
 }
-.btn{
+
+.btn {
     height: 32px;
     width: 32px;
     border: 0.9px solid #CCCCCC;
@@ -144,7 +146,8 @@
     background-color: transparent !important;
     border: none !important;
     pointer-events: none;
-  }
+}
+
 .rightContainer {
     display: flex;
     flex-direction: column;
@@ -173,13 +176,16 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.6s ease;
-    
+
 
 }
+
 .items:hover img {
-    transform: scale(1.12); /* zoom level */
+    transform: scale(1.12);
+    /* zoom level */
 }
-.imgMainContainer{
+
+.imgMainContainer {
     width: 100%;
     position: absolute;
     bottom: 0;
@@ -188,16 +194,14 @@
     display: flex;
     justify-content: center;
 
-    background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.88) 100%
-  );
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.88) 100%);
 }
 
 .imgBottom {
-    
-  
+
+
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -225,7 +229,8 @@
     text-transform: uppercase;
     color: #FFFFFF;
 }
-.swapperslider{
+
+.swapperslider {
     max-width: 350px;
     width: 100%;
     height: 371px;
@@ -233,52 +238,77 @@
 }
 
 
+
+
+
 @media (max-width: 1540px) {
-    .section{
+    .section {
         padding-left: 20px;
         padding-right: 20px;
     }
-    .heading{
+
+    .heading {
         /* font-weight: ; */
         font-size: 62px;
     }
 }
 
-@media (max-width: 1518px){
-    .heading{
+@media (max-width: 1518px) {
+    .heading {
         font-size: 56px;
     }
 }
 
 
-@media (max-width: 1440px){
-    .heading{
+@media (max-width: 1440px) {
+    .heading {
         margin-top: 50px;
         font-size: 47px;
     }
-    .offer{
+
+    .offer {
         font-size: 18px;
     }
-    .price{
+
+    .price {
         font-size: 28px;
     }
-    .leftContainer{
+
+    .leftContainer {
         /* justify-content: unset;
         gap: 70px; */
     }
-    .swapperslider{
+
+    .swapperslider {
         max-width: 330px !important;
     }
 }
 
-@media (max-width: 1430px){
-    .price{
+@media (max-width: 1430px) {
+    .price {
         font-size: 22px;
     }
 }
 
-@media (max-width: 1300px){
-    .heading{
+@media (max-width: 1300px) {
+    .heading {
         font-size: 37px;
+    }
+
+    .swapperslider {
+        width: 300px !important;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .section{
+        padding: 20px;
+    }
+    .container {
+        flex-direction: column;
+    }
+    .heading {
+        margin-top: 0;
     }
 }
