@@ -81,6 +81,12 @@
     vertical-align: middle;
     text-transform: capitalize;
 }
+.arrow{
+    transition: transform .3s ease;
+}
+.exploreBtn:hover .arrow{
+    transform: rotate(-45deg);
+}
 
 .exploreBtn {
     position: relative;

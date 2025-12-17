@@ -1,7 +1,7 @@
 
 
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from './PopularFlights.module.css'
 import { Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -142,6 +142,26 @@ const PopularFlights = () => {
         }
     };
 
+    const tabsRef = useRef(null);
+    
+        useEffect(() => {
+            if (!tabsRef.current) return;   // ✅ prevent crash
+    
+            const tabs = tabsRef.current;
+            const activeTabEl = tabs.querySelector(`.${styles.active}`);
+    
+            if (!activeTabEl) return;
+    
+            tabs.style.setProperty(
+                "--indicator-width",
+                `${activeTabEl.offsetWidth}px`
+            );
+            tabs.style.setProperty(
+                "--indicator-left",
+                `${activeTabEl.offsetLeft}px`
+            );
+        }, [activeTab]);
+
     return (
         <section className={styles.section}>
             <div className={styles.container}>
@@ -154,15 +174,16 @@ const PopularFlights = () => {
                 </div>
 
                 <nav className={styles.tabsWrap}>
-                    <ul className={styles.tabs}>
+                    <ul className={styles.tabs} ref={tabsRef}>
                         {['Domestic', 'International'].map((t) => (
                             <li 
                                 key={t} 
                                 className={`${styles.tab} ${activeTab === t ? styles.active : ''}`}
+                                onClick={() => handleTabChange(t)}
                             >
                                 <button 
                                     className={styles.tabBtn}
-                                    onClick={() => handleTabChange(t)}
+                                    // onClick={() => handleTabChange(t)}
                                 >
                                     {t}
                                 </button>

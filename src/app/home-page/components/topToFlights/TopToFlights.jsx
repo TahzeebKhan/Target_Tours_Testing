@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import style from './TopToFlights.module.css'
 import Link from 'next/link'
 
@@ -65,6 +65,25 @@ const TopToFlights = () => {
         "Region",
         "Airports"
     ]
+    const tabsRef = useRef(null);
+
+    useEffect(() => {
+        if (!tabsRef.current) return;   // ✅ prevent crash
+
+        const tabs = tabsRef.current;
+        const activeTabEl = tabs.querySelector(`.${style.active}`);
+
+        if (!activeTabEl) return;
+
+        tabs.style.setProperty(
+            "--indicator-width",
+            `${activeTabEl.offsetWidth}px`
+        );
+        tabs.style.setProperty(
+            "--indicator-left",
+            `${activeTabEl.offsetLeft}px`
+        );
+    }, [activeTab]);
 
     const flightRows = chunkRows(flightData[activeTab], 4)
 
@@ -75,17 +94,25 @@ const TopToFlights = () => {
 
             {/* <div className={style.subContainer}> */}
 
-            <div className={style.navbar}>
-                {navItems.map((item, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setActiveTab(item)}
-                        className={`${style.nav_items} ${activeTab === item ? style.active : ""}`}
-                    >
-                        {item}
-                    </button>
-                ))}
-            </div>
+            <nav className={style.tabsWrap}>
+                <ul className={style.tabs} ref={tabsRef}>
+                    {navItems.map((t) => (
+                        <li
+                            key={t}
+                            className={`${style.tab} ${activeTab === t ? style.active : ''}`}
+                            onClick={() => setActiveTab(t)}
+                        >
+                            <button
+                                className={style.tabBtn}
+                            // onClick={() => handleTabChange(t)}
+                            >
+                                {t}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
             <div className={style.container}>
 
 

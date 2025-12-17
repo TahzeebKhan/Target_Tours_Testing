@@ -122,7 +122,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 620,
       type: "Ski",
       favorite: false,
-      images: ["/images/exp2.png", "/images/exp1.png"]
+      images: ["/images/2.webp", "/images/1.webp"]
     },
     {
       title: "Manali, Himachal",
@@ -142,7 +142,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 410,
       type: "Culture",
       favorite: false,
-      images: ["/images/exp3.png", "/images/exp2.png"]
+      images: ["/images/3.webp", "/images/2.webp"]
     },
     {
       title: "Rishikesh, India",
@@ -152,7 +152,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 880,
       type: "Wellness and Retreat",
       favorite: false,
-      images: ["/images/exp1.png", "/images/exp3.png"]
+      images: ["/images/1.webp", "/images/3.webp"]
     },
     {
       title: "Varanasi, India",
@@ -162,7 +162,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 410,
       type: "Wellness and Retreat",
       favorite: false,
-      images: ["/images/exp3.png", "/images/exp2.png"]
+      images: ["/images/3.webp", "/images/2.webp"]
     },
 
     {
@@ -173,7 +173,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 410,
       type: "Wellness and Retreat",
       favorite: false,
-      images: ["/images/exp3.png", "/images/exp2.png"]
+      images: ["/images/3.webp", "/images/2.webp"]
     },
     {
       title: "Shimla, India",
@@ -183,7 +183,7 @@ export default function ExpCarousel({ activeTab }) {
       users: 620,
       type: "Wellness and Retreat",
       favorite: false,
-      images: ["/images/exp2.png", "/images/exp1.png"]
+      images: ["/images/2.webp", "/images/1.webp"]
     },
     {
       title: "Manali, Himachal",

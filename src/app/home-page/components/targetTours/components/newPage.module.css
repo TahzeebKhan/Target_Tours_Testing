@@ -53,12 +53,17 @@
   width: 40px;
   border: 1px solid #fff;
   border-radius: 100%;
+  transition: all 0.3s ease;
 }
 
 .navButton:hover {
-  /* background: #ffffff; */
+  background: #ffffff;
   color: #000033;
   /* transform: translateY(-2px); */
+}
+
+.navButton:hover svg path {
+  fill: #000033;
 }
 
 /* Image */
@@ -100,7 +105,7 @@
 /* Text overlay */
 .cardOverlay {
   bottom: -29.9%;
-  transition: bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   position: absolute;
   bottom: -30.6%;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
