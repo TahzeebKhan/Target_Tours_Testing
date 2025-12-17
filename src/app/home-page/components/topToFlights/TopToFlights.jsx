@@ -13,7 +13,7 @@ const flightData = {
         { from: "lucknow", to: "London", price: "₹46,000", image: "/images/lucknow.png" },
         { from: "surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
         { from: "kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
-        { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png.png" }
+        { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png" }
     ],
     "Cities Countries": [
         { from: "Mumbai", to: "New York", price: "₹65,000", image: "/images/item1.png" },
@@ -70,51 +70,64 @@ const TopToFlights = () => {
 
     return (
         <section className={style.topToFlightsSection}>
-            <div className={style.custom_border}></div>
+            {/* <div className={style.custom_border}></div> */}
+            <h2 className={style.heading}>Top Flights From India</h2>
+
+            {/* <div className={style.subContainer}> */}
+
+            <div className={style.navbar}>
+                {navItems.map((item, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setActiveTab(item)}
+                        className={`${style.nav_items} ${activeTab === item ? style.active : ""}`}
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
             <div className={style.container}>
-                <h2 className={style.heading}>Top Flights From India</h2>
 
-                <div className={style.subContainer}>
-                    
-                    <div className={style.navbar}>
-                        {navItems.map((item, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setActiveTab(item)}
-                                className={`${style.nav_items} ${activeTab === item ? style.active : ""}`}
-                            >
-                                {item}
-                            </button>
-                        ))}
-                    </div>
 
-                    <div className={style.flight_items_cont}>
-                        
-                        {flightRows.map((row, rowIndex) => (
-                            <div className={style.flight_items_row} key={rowIndex}>
-                                {row.map((item, i) => (
-                                    <div className={`${style.flight_items}`} key={i}>
-                                        <img src={item.image} alt="" />
-                                        
-                                        <div className={style.flight_items_bottom}>
-                                            <div className={style.fromTo}>
-                                                <span>{item.from}</span>
-                                                <img src="/icons/rightIcon.svg" alt="" />
-                                                <span>{item.to}</span>
-                                            </div>
+                <div className={style.flight_items_cont}>
 
-                                            <div className={style.price}>
-                                                Economy From <span>{item.price}</span>
-                                            </div>
-                                        </div>
+                    <div className={style.flight_items_row}>
+                        {flightData[activeTab].map((item, i) => (
+                            <div className={style.flight_items} key={i}>
+                                <img src={item.image} alt="" />
+
+                                <div className={style.flight_items_bottom}>
+                                    <div className={style.fromTo}>
+                                        <span>{item.from}</span>
+                                        <img src="/icons/rightIcon.svg" alt="" />
+                                        <span>{item.to}</span>
                                     </div>
-                                ))}
+
+                                    <div className={style.price}>
+                                        Economy From <span>{item.price}</span>
+                                    </div>
+                                </div>
                             </div>
                         ))}
-
                     </div>
+
+                    {/* </div> */}
                 </div>
             </div>
+            {/* <div className={style.btnContainer}>
+                <div
+                    className={style.btn}
+
+                >
+                    <img src="/icons/left.svg" alt="" />
+                </div>
+
+                <div
+                    className={style.btn}
+                >
+                    <img src="/icons/right.svg" alt="" />
+                </div>
+            </div> */}
         </section>
     )
 }

@@ -162,6 +162,7 @@ li:hover .linkText::after {
 .footerLinkCont ul li a span {
     display: flex;
     gap: 7px;
+    align-items: center;
 }
 
 .footerLinkCont ul li a img{

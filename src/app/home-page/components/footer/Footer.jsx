@@ -164,7 +164,7 @@ const Footer = () => {
 
                 <div className={styles.footerBoder}></div>
                 <div className={styles.copywrite}>
-                    Zenith Holidays Private Ltd. | Powered by Passion, Driven by Discovery.
+                    © 2025 Target Tours Holidays Private Ltd. | Powered by Passion, Driven by Discovery.
                 </div>
             </div>
         </section>

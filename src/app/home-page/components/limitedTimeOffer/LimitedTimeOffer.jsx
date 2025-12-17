@@ -36,6 +36,16 @@ const LimitedTimeOffer = () => {
             title: "Tirthan",
             subtitle: "Himachal Pradesh",
         },
+        {
+            img: "/images/exp2.png",
+            title: "Manali",
+            subtitle: "Himachal Pradesh",
+        },
+        {
+            img: "/images/exp2.png",
+            title: "Manali",
+            subtitle: "Himachal Pradesh",
+        },
     ];
 
     return (
@@ -105,7 +115,7 @@ const LimitedTimeOffer = () => {
                             {/* SWIPER */}
                             <div className={`${styles.swapper} limitedWrapper`}>
                                 <Swiper
-                                    // slidesPerView={3}
+                                    slidesPerView={3}
                                     spaceBetween={20}
                                     modules={[Navigation]}
                                     onSwiper={(swiper) => {
@@ -117,18 +127,33 @@ const LimitedTimeOffer = () => {
                                         setIsBeginning(swiper.isBeginning);
                                         setIsEnd(swiper.isEnd);
                                     }}
+                                >
+                                {/* <Swiper
+                                    spaceBetween={20}
+                                    modules={[Navigation]}
+                                    observer={true}
+                                    observeParents={true}
+                                    onSwiper={(swiper) => {
+                                        swiperRef.current = swiper;
+                                        setIsBeginning(swiper.isBeginning);
+                                        setIsEnd(swiper.isEnd);
+                                    }}
+                                    onSlideChange={(swiper) => {
+                                        setIsBeginning(swiper.isBeginning);
+                                        setIsEnd(swiper.isEnd);
+                                    }}
                                     breakpoints={{
                                         0: {
-                                            slidesPerView: 3, // mobile
+                                            slidesPerView: 1,
                                         },
-                                        576: {
-                                            slidesPerView: 3, // small tablets
+                                        768: {
+                                            slidesPerView: 2,
                                         },
-                                        1300: {
-                                            slidesPerView: 2, // ✅ exactly at 991px
+                                        1100: {
+                                            slidesPerView: 3,
                                         },
                                     }}
-                                >
+                                > */}
                                     {sliderData.map((item, index) => (
                                         <SwiperSlide key={index} className={styles.swapperslider}>
                                             <div className={styles.items}>
