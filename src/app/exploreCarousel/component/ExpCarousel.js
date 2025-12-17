@@ -17,7 +17,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Munnar, Kerala",
       subtitle: "Tranquil Retreat Lodge",
-      price: "₹449/night",
+      price: "₹449/",
       rating: 3.4,
       users: 508,
       type: "Beach",
@@ -27,7 +27,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Goa, India",
       subtitle: "Blue Lagoon Resort",
-      price: "₹899/night",
+      price: "₹899/",
       rating: 4.5,
       users: 1020,
       type: "Beach",
@@ -37,7 +37,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Darjeeling, Bengal",
       subtitle: "Mountain View Stay",
-      price: "₹699/night",
+      price: "₹699/",
       rating: 4.6,
       users: 720,
       type: "Beach",
@@ -47,7 +47,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Beach",
@@ -57,7 +57,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Darjeeling, Bengal",
       subtitle: "Mountain View Stay",
-      price: "₹699/night",
+      price: "₹699/",
       rating: 4.6,
       users: 720,
       type: "Beach",
@@ -67,7 +67,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Darjeeling, Bengal",
       subtitle: "Mountain View Stay",
-      price: "₹699/night",
+      price: "₹699/",
       rating: 4.6,
       users: 720,
       type: "Hiking",
@@ -77,7 +77,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Family",
@@ -87,7 +87,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Ski",
@@ -97,7 +97,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Darjeeling, Bengal",
       subtitle: "Mountain View Stay",
-      price: "₹699/night",
+      price: "₹699/",
       rating: 4.6,
       users: 720,
       type: "Ski",
@@ -107,7 +107,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Ski",
@@ -117,7 +117,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Shimla, India",
       subtitle: "Snow Peak Stay",
-      price: "₹799/night",
+      price: "₹799/",
       rating: 4.5,
       users: 620,
       type: "Ski",
@@ -127,7 +127,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Ski",
@@ -137,7 +137,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Varanasi, India",
       subtitle: "Cultural Heritage Home",
-      price: "₹349/night",
+      price: "₹349/",
       rating: 4.2,
       users: 410,
       type: "Culture",
@@ -147,7 +147,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Rishikesh, India",
       subtitle: "Yoga & Wellness Retreat",
-      price: "₹991/night",
+      price: "₹991/",
       rating: 4.8,
       users: 880,
       type: "Wellness and Retreat",
@@ -157,7 +157,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Varanasi, India",
       subtitle: "Cultural Heritage Home",
-      price: "₹349/night",
+      price: "₹349/",
       rating: 4.2,
       users: 410,
       type: "Wellness and Retreat",
@@ -168,7 +168,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Varanasi, India",
       subtitle: "Cultural Heritage Home",
-      price: "₹349/night",
+      price: "₹349/",
       rating: 4.2,
       users: 410,
       type: "Wellness and Retreat",
@@ -178,7 +178,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Shimla, India",
       subtitle: "Snow Peak Stay",
-      price: "₹799/night",
+      price: "₹799/",
       rating: 4.5,
       users: 620,
       type: "Wellness and Retreat",
@@ -188,7 +188,7 @@ export default function ExpCarousel({ activeTab }) {
     {
       title: "Manali, Himachal",
       subtitle: "Family Hill Resort",
-      price: "₹599/night",
+      price: "₹599/",
       rating: 4.4,
       users: 540,
       type: "Wellness and Retreat",
@@ -296,7 +296,9 @@ export default function ExpCarousel({ activeTab }) {
                       FROM{" "}
                       <span className={styles.innerCarouselContentPriceValuePrice}>
                         {item.price}
+                        <span className={styles.perNight}>Night</span>
                       </span>
+                      
                     </div>
 
                     <div className={styles.innerCarouselContentPriceRating}>

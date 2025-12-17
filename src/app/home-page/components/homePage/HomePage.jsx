@@ -65,6 +65,15 @@ const HomePage = () => {
     { value: "1_traveller_business", label: "1 Traveller, Business" },
   ];
 
+  const TravellerDestination = [
+    {
+      value: "india", label: "india"
+    },
+    {
+      value: "chennai", label: "Chennai"
+    },
+
+  ]
 
   // inside HomePage component, replace your existing features with this:
   const features = [
@@ -770,72 +779,268 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+      {bookingType === "flight" && (
+        <div className={styles.flightSectionMain}>
+          <button type="button" className={styles.swapBtn}>
+            <img src="/icons/leftRrighArrow.svg" alt="swap" />
+          </button>
+          <div className={styles.flightSearchCard}>
 
-      <div className={styles.flightSectionMain}>
-        <button type="button" className={styles.swapBtn}>
-          <img src="/icons/leftRrighArrow.svg" alt="swap" />
-        </button>
-        <div className={styles.flightSearchCard}>
+            {/* FROM */}
+            <div className={styles.field}>
+              <label className={styles.label}>FROM</label>
+              <input
+                type="text"
+                placeholder="Departure"
+                className={styles.input}
+              />
+            </div>
 
-        {/* FROM */}
-        <div className={styles.field}>
-          <label className={styles.label}>FROM</label>
-          <input
-            type="text"
-            placeholder="Departure"
-            className={styles.input}
-          />
+            {/* SWAP */}
+
+
+            {/* TO */}
+            <div className={styles.field}>
+              <label className={styles.label}>TO</label>
+              <input
+                type="text"
+                placeholder="Destination"
+                className={styles.input}
+              />
+            </div>
+
+            {/* DEPARTURE DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>DEPARTURE DATE</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* RETURN DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>RETURN DATE</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* TRAVELLERS */}
+            <div className={styles.field}>
+              <label className={styles.label}>TRAVELLERS & CLASS</label>
+              <input
+                type="text"
+                placeholder="1 Traveller, Econ..."
+                readOnly
+                className={styles.input}
+              />
+            </div>
+
+            {/* SEARCH */}
+            <button className={styles.searchBtna}>
+              SEARCH
+            </button>
+
+          </div>
         </div>
+      )}
 
-        {/* SWAP */}
-        
+      {bookingType === "hotel" && (
+        <div className={styles.flightSectionMain}>
+          {/* <button type="button" className={styles.swapBtn}>
+            <img src="/icons/leftRrighArrow.svg" alt="swap" />
+          </button> */}
+          <div className={styles.flightSearchCard}>
 
-        {/* TO */}
-        <div className={styles.field}>
-          <label className={styles.label}>TO</label>
-          <input
-            type="text"
-            placeholder="Destination"
-            className={styles.input}
-          />
+            {/* FROM */}
+            <div className={styles.field}>
+              <label className={styles.label}>Where to</label>
+              <input
+                type="text"
+                placeholder="Departure"
+                className={styles.input}
+              />
+            </div>
+
+            {/* SWAP */}
+
+
+  
+
+            {/* DEPARTURE DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>Check in</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* RETURN DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>Check out</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* TRAVELLERS */}
+            <div className={styles.field}>
+              <label className={styles.label}>TRAVELLERS & CLASS</label>
+              <input
+                type="text"
+                placeholder="1 Traveller, Econ..."
+                readOnly
+                className={styles.input}
+              />
+            </div>
+
+            {/* SEARCH */}
+            <button className={styles.searchBtna}>
+              SEARCH
+            </button>
+
+          </div>
         </div>
+      )}
 
-        {/* DEPARTURE DATE */}
-        <div className={styles.field}>
-          <label className={styles.label}>DEPARTURE DATE</label>
-          <input
-            type="date"
-            className={styles.input}
-          />
+      {bookingType === "holiday" && (
+        <div className={styles.flightSectionMain}>
+          <button type="button" className={styles.swapBtn}>
+            <img src="/icons/leftRrighArrow.svg" alt="swap" />
+          </button>
+          <div className={styles.flightSearchCard}>
+
+            {/* FROM */}
+            <div className={styles.field}>
+              <label className={styles.label}>From CITY</label>
+              <input
+                type="text"
+                placeholder="Departure"
+                className={styles.input}
+              />
+            </div>
+
+            {/* SWAP */}
+
+
+            {/* TO */}
+            <div className={styles.field}>
+              <label className={styles.label}>To CITY/COUNTRY,CATEGORY</label>
+              <input
+                type="text"
+                placeholder="Destination"
+                className={styles.input}
+              />
+            </div>
+
+            {/* DEPARTURE DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>Departure Date</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* RETURN DATE */}
+            {/* <div className={styles.field}>
+              <label className={styles.label}>Check out</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div> */}
+
+            {/* TRAVELLERS */}
+            <div className={styles.field}>
+              <label className={styles.label}>TRAVELLERS & CLASS</label>
+              <input
+                type="text"
+                placeholder="1 Traveller, Econ..."
+                readOnly
+                className={styles.input}
+              />
+            </div>
+
+            {/* SEARCH */}
+            <button className={styles.searchBtna}>
+              SEARCH
+            </button>
+
+          </div>
         </div>
+      )}
 
-        {/* RETURN DATE */}
-        <div className={styles.field}>
-          <label className={styles.label}>RETURN DATE</label>
-          <input
-            type="date"
-            className={styles.input}
-          />
+      {bookingType === "insurance" && (
+        <div className={styles.flightSectionMain}>
+          {/* <button type="button" className={styles.swapBtn}>
+            <img src="/icons/leftRrighArrow.svg" alt="swap" />
+          </button> */}
+          <div className={styles.flightSearchCard}>
+
+            {/* FROM */}
+            {/* <div className={styles.field}>
+              <label className={styles.label}>TRAVEL DESTINATION</label>
+              <input
+                type="text"
+                placeholder="SELECT DESTINATION"
+                readOnly
+                className={styles.input}
+              />
+            </div> */}
+            <TravellerSelector
+                      travellerClass={travellerClass}
+                      setTravellerClass={setTravellerClass}
+                      travellerOptions={TravellerDestination}
+                      styles={styles}
+                      name="TRAVEL DESTINATION"
+                    />
+            {/* SWAP */}
+
+
+
+
+            {/* DEPARTURE DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>TRAVEL DATE</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* RETURN DATE */}
+            <div className={styles.field}>
+              <label className={styles.label}>Return Date</label>
+              <input
+                type="date"
+                className={styles.input}
+              />
+            </div>
+
+            {/* TRAVELLERS */}
+            <TravellerSelector
+                      travellerClass={travellerClass}
+                      setTravellerClass={setTravellerClass}
+                      travellerOptions={travellerOptions}
+                      styles={styles}
+                      name="Travellers & Class"
+                    />
+
+
+
+            {/* SEARCH */}
+            <button className={styles.searchBtna}>
+              SEARCH
+            </button>
+
+          </div>
         </div>
-
-        {/* TRAVELLERS */}
-        <div className={styles.field}>
-          <label className={styles.label}>TRAVELLERS & CLASS</label>
-          <input
-            type="text"
-            placeholder="1 Traveller, Econ..."
-            readOnly
-            className={styles.input}
-          />
-        </div>
-
-        {/* SEARCH */}
-        <button className={styles.searchBtna}>
-          SEARCH
-        </button>
-
-      </div>
-      </div>
+      )}
 
 
 
@@ -846,11 +1051,11 @@ const HomePage = () => {
 export default HomePage
 
 
-    // display: flex;
-    // flex-direction: column;
-    // background: white;
-    // width: 100%;
-    // box-shadow: -2px -3px 9.2px 0px #00000014, 0px 5px 8px 0px #0000001A;
-    // padding: 12px;
-    // position: relative;
-    // top: 153px;
+// display: flex;
+// flex-direction: column;
+// background: white;
+// width: 100%;
+// box-shadow: -2px -3px 9.2px 0px #00000014, 0px 5px 8px 0px #0000001A;
+// padding: 12px;
+// position: relative;
+// top: 153px;

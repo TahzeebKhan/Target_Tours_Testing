@@ -59,15 +59,15 @@ const SignatureExperiences = () => {
   const rotate = (arr, n) => [...arr.slice(n), ...arr.slice(0, n)];
   const tabsData = [
     { title: "Explore", carouselData: rotate(baseCarouselData, 0) },
-    { title: "Europe", carouselData: rotate(baseCarouselData, 1) },
-    { title: "Dubai", carouselData: rotate(baseCarouselData, 2) },
-    { title: "Rajasthan", carouselData: rotate(baseCarouselData, 3) },
-    { title: "Japan", carouselData: rotate(baseCarouselData, 4) },
-    { title: "Thailand", carouselData: rotate(baseCarouselData, 1) },
-    { title: "North East India", carouselData: rotate(baseCarouselData, 2) },
-    { title: "Spiti", carouselData: rotate(baseCarouselData, 3) },
-    { title: "Bali", carouselData: rotate(baseCarouselData, 4) },
-    { title: "Maldives", carouselData: rotate(baseCarouselData, 0) },
+    { title: "Asia", carouselData: rotate(baseCarouselData, 1) },
+    { title: "Central America", carouselData: rotate(baseCarouselData, 2) },
+    { title: "Europe", carouselData: rotate(baseCarouselData, 3) },
+    { title: "Indian Ocean", carouselData: rotate(baseCarouselData, 4) },
+    { title: "Middle East", carouselData: rotate(baseCarouselData, 1) },
+    { title: "Oceania", carouselData: rotate(baseCarouselData, 2) },
+    { title: "South America", carouselData: rotate(baseCarouselData, 3) },
+    // { title: "Bali", carouselData: rotate(baseCarouselData, 4) },
+    // { title: "Maldives", carouselData: rotate(baseCarouselData, 0) },
   ];
 
   return (
