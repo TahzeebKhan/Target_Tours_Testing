@@ -241,7 +241,7 @@ export default function ExpCarousel({ activeTab }) {
           }}
         > */}
         <Swiper
-          modules={[Virtual, Pagination]}
+          modules={[Virtual,]}
           onSwiper={setSwiperRef}
           spaceBetween={16}
           centeredSlides={true}            // ✅ center main card
