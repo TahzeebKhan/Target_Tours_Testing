@@ -16,7 +16,7 @@ const TargetTours = () => {
       title: "17 Days - Best Of India Tour",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
+      price: "INR 2,30,000",
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ const TargetTours = () => {
       title: "6 Days - Golden Triangle Tour",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
+      price: "INR 2,30,000",
     },
     {
       id: 3,
@@ -34,7 +34,7 @@ const TargetTours = () => {
       title: "18 Days - Rajasthan In Deep",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
+      price: "INR 2,30,000",
     },
     // {
     //   id: 3,
@@ -43,7 +43,7 @@ const TargetTours = () => {
     //   title: "18 Days - Rajasthan In Deep",
     //   cities:
     //     "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-    //   price: "INR 2,30,000/Adult",
+    //   price: "INR 2,30,000",
     // },
     {
       id: 4,
@@ -52,7 +52,7 @@ const TargetTours = () => {
       title: "17 Days - Best Of India Tour",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
+      price: "INR 2,30,000",
     },
     {
       id: 5,
@@ -61,7 +61,7 @@ const TargetTours = () => {
       title: "6 Days - Golden Triangle Tour",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-      price: "INR 2,30,000/Adult",
+      price: "INR 2,30,000",
     },
   ];
 
@@ -194,7 +194,6 @@ const TargetTours = () => {
         <div className={styles.mobileCarousel}>
           <MobileCarousel cards={cardsForTab} />
         </div>
-        css Copy code
         {/* 
         <div className={styles.controls}>
           <button aria-label="prev" className={styles.controlBtn}>
