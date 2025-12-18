@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap");
 @import "tailwindcss";
 
 /* :root {
@@ -23,6 +23,7 @@
 
 body {
   font-family: var(--font-poppins), "Poppins", sans-serif;
+  /* overflow-x: hidden; */
 }
 
 * {
@@ -30,6 +31,7 @@ body {
   padding: 0;
   box-sizing: border-box;
   /* font-family: var(--font-poppins), "Poppins", sans-serif; */
+  /* border: 1px solid red; */
 }
 
 .popularFlightsCarouselWrapper .swiper-button-prev,
@@ -39,7 +41,7 @@ body {
 
 .innerCarouselWrapper .swiper-pagination-fraction,
 .swiper-pagination-custom,
-.swiper-horizontal>.swiper-pagination-bullets,
+.swiper-horizontal > .swiper-pagination-bullets,
 .swiper-pagination-bullets.swiper-pagination-horizontale {
   /* background-color: red; */
 }
@@ -57,8 +59,7 @@ body {
 }
 
 .MoreCarouselWrapper {
-
-  margin: 0 auto
+  margin: 0 auto;
 }
 
 .MoreCarouselWrapper .swiper-button-prev,
@@ -73,7 +74,6 @@ body {
   padding-right: 32px;
 }
 
-
 .limitedWrapper .swiper-slide-active {
   width: unset !important;
   margin-right: 32px !important;
@@ -86,39 +86,66 @@ body {
   /* width: 100%; */
 }
 
-.limitedWrapper .swiper-wrapper {
-  /* gap: 32px; */
-}
-
-
-
-
 @media (max-width: 1440px) {
   .limitedWrapper .swiper-wrapper {
-    /* gap: 30px; */
-  }
-  .ExpCarouselWrapper .swiper-slide{
-    /* margin-right: 20px !important; */
+    transform: translate3d(50px, 0, 0);
   }
 }
-
-@media (max-width: 1224px){
-
-  /* .ExpCarouselWrapper .swiper-slide{
-    margin-right: px !important;
-  } */
+@media (max-width: 1399px) {
+  .limitedWrapper .swiper-wrapper {
+    transform: translate3d(19.8%, 0, 0);
+  }
 }
-
-@media (max-width: 575px){
-  .popularFlightsCarouselWrapper{
+@media (max-width: 1224px) {
+  .limitedWrapper .swiper-wrapper {
+    transform: translate3d(5.8%, 0, 0);
+  }
+}
+@media (max-width: 768px) {
+  .limitedWrapper .swiper {
+    margin-left: 12px;
+  }
+}
+@media (max-width: 680px) {
+  .limitedWrapper .swapper .swiper-slide {
+    width: 265px; /* so total shift = 285px */
+  }
+}
+@media (max-width: 575px) {
+  .popularFlightsCarouselWrapper {
     padding-left: 16px;
     padding-right: 0;
   }
+  .limitedWrapper .swiper-slide-active {
+    margin-right: 20px !important;
+    /* width: 100%; */
+  }
 }
 
-@media (max-width: 498px){
-  .popularFlightsCarouselWrapper .swiper-slide-active{
+@media (max-width: 498px) {
+  .popularFlightsCarouselWrapper .swiper-slide-active {
     max-width: 300px !important;
     width: 100% !important;
   }
+}
+  .limitedWrapper .swiper {
+    margin-left: 21px;
+  }
+
+@media (max-width: 428px) {
+  .limitedWrapper .swiper-wrapper {
+    transform: translate3d(32.8%, 0, 0);
+  }
+  .limitedWrapper .swiper-slide-active {
+    margin-right: 12px !important;
+  }
+  .limitedWrapper .swiper {
+    margin-left: 0px;
+  }
+}
+
+@media (max-width: 376px) {
+  /* .limitedWrapper .swiper {
+    margin-left: 21px;
+  } */
 }
