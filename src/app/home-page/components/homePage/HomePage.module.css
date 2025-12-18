@@ -376,9 +376,9 @@
 
     background-color: rgba(255, 255, 255, 0.12);
     /* glass base */
-    backdrop-filter: blur(10px);
-    /* blur the background */
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(0px);
+    /* blur starts at 0, animates to 10px */
+    -webkit-backdrop-filter: blur(0px);
     border: 1px solid rgba(255, 255, 255, 0.6);
 
 
@@ -387,6 +387,44 @@
         inset 0 0 20px rgba(255, 255, 255, 0.1);
 
     color: #fff;
+}
+
+/* Smooth blur animation when switching to any tab */
+.searchPanelWrapper .glass_panel {
+    animation: 
+        glassOpacityReduce 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards,
+        smoothBlurFlicker 600ms ease-out forwards;
+}
+
+@keyframes smoothBlurFlicker {
+    0% {
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    50% {
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+    100% {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+}
+
+@keyframes glassOpacityReduce {
+    from {
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    to {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.noAnimation .glass_panel {
+    animation: none !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 /* subtle shiny border */
