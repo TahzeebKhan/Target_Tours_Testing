@@ -6,6 +6,11 @@
 
 
 }
+.btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
 .container {
     max-width: 1520px;
@@ -249,7 +254,14 @@
     }
 }
 
+@media (max-width: 1200px){
+    .heading{
+        font-size: 36px;
+    }
+}
+
 @media (max-width: 768px) {
+    
 
     .tabsWrap{
         justify-content: start;
@@ -285,7 +297,7 @@
 
     .heading {
         margin-bottom: 32px;
-        font-size: 28px;
+        font-size: 30px;
     }
 
     .btnContainer {
