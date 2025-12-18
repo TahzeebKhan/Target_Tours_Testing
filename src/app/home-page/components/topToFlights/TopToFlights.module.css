@@ -44,6 +44,7 @@
     text-transform: uppercase;
     color: #A8A8A8;
     cursor: pointer;
+    white-space: nowrap;
 
 }
 
@@ -68,7 +69,6 @@
     /* border-bottom: 2px solid #000033; */
     color: #000033;
 }
-
 .heading {
     font-family: "Antic Didone", serif;
     font-style: Regular;
@@ -250,6 +250,13 @@
 }
 
 @media (max-width: 768px) {
+
+    .tabsWrap{
+        justify-content: start;
+        overflow-x: scroll;
+         scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
     .topToFlightsSection {
         padding: 32px 0;
     }

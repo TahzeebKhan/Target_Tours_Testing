@@ -115,3 +115,10 @@ body {
     padding-right: 0;
   }
 }
+
+@media (max-width: 498px){
+  .popularFlightsCarouselWrapper .swiper-slide-active{
+    max-width: 300px !important;
+    width: 100% !important;
+  }
+}
