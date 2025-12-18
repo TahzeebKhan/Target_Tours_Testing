@@ -188,7 +188,7 @@ const PopularFlights = () => {
                     Popular Flights to Destination From
                     <span className={styles.headingMult} ref={cityRef}>
                         <button
-                            className={styles.cityBtn}
+                            className={styles.cityBtnn}
                             onClick={() => setIsCityOpen((prev) => !prev)}
                         >
                             <span>{selectedCity}</span>
