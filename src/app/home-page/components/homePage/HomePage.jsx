@@ -817,7 +817,7 @@ const HomePage = () => {
       </div>
       {bookingType === "flight" && (
         <div className={styles.flightSectionMain}>
-          <button type="button" className={styles.swapBtn}>
+          <button type="button" className={styles.swapBtn} onClick={swapLocations}>
             <img src="/icons/leftRrighArrow.svg" alt="swap" />
           </button>
           <div className={styles.flightSearchCard}>
@@ -829,6 +829,7 @@ const HomePage = () => {
                 type="text"
                 placeholder="Departure"
                 className={styles.input}
+                onChange={(e) => setFrom(e.target.value)}
               />
             </div>
 
@@ -842,6 +843,7 @@ const HomePage = () => {
                 type="text"
                 placeholder="Destination"
                 className={styles.input}
+                onChange={(e) => setTo(e.target.value)}
               />
             </div>
 
@@ -954,6 +956,7 @@ const HomePage = () => {
                 type="text"
                 placeholder="Departure"
                 className={styles.input}
+                
               />
             </div>
 

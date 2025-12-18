@@ -162,15 +162,60 @@ const PopularFlights = () => {
         );
     }, [activeTab]);
 
+
+    const [selectedCity, setSelectedCity] = useState("Delhi");
+    const [isCityOpen, setIsCityOpen] = useState(false);
+    const cityRef = useRef(null);
+
+    const metroCities = ["Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata"];
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (cityRef.current && !cityRef.current.contains(e.target)) {
+                setIsCityOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+
     return (
         <section className={styles.section}>
             <div className={styles.container}>
                 <div className={styles.heading}>
                     Popular Flights to Destination From
-                    <div className={styles.headingMult}>
-                        <span> Delhi</span>
-                        <img src="/icons/dropdown.svg" alt="" />
-                    </div>
+                    <span className={styles.headingMult} ref={cityRef}>
+                        <button
+                            className={styles.cityBtn}
+                            onClick={() => setIsCityOpen((prev) => !prev)}
+                        >
+                            <span>{selectedCity}</span>
+                            <img
+                                src="/icons/dropdown.svg"
+                                alt=""
+                                className={isCityOpen ? styles.rotate : ""}
+                            />
+                        </button>
+
+                        {isCityOpen && (
+                            <ul className={styles.cityDropdown}>
+                                {metroCities.map((city) => (
+                                    <li
+                                        key={city}
+                                        onClick={() => {
+                                            setSelectedCity(city);
+                                            setIsCityOpen(false);
+                                        }}
+                                    >
+                                        {city}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </span>
+
                 </div>
 
                 <nav className={styles.tabsWrap}>
@@ -207,34 +252,34 @@ const PopularFlights = () => {
                     > */}
 
                     <Swiper
-  key={activeTab}
-  modules={[Navigation]}
-  onSwiper={setSwiperRef}
-  navigation={true}
-  loop={true}
-  loopAdditionalSlides={2}
-  slidesPerGroup={1}
-  spaceBetween={16}
+                        key={activeTab}
+                        modules={[Navigation]}
+                        onSwiper={setSwiperRef}
+                        navigation={true}
+                        loop={true}
+                        loopAdditionalSlides={2}
+                        slidesPerGroup={1}
+                        spaceBetween={16}
 
-  breakpoints={{
-    0: {
-      slidesPerView: 1.1,   // 👈 show next slide partially
-      spaceBetween: 16,
-    },
-    576: {
-      slidesPerView: 2,
-      spaceBetween: 20,
-    },
-    767: {
-      slidesPerView: 3,
-      spaceBetween: 24,
-    },
-    991: {
-      slidesPerView: 4,
-      spaceBetween: 30,
-    },
-  }}
->
+                        breakpoints={{
+                            0: {
+                                slidesPerView: 1.1,   // 👈 show next slide partially
+                                spaceBetween: 16,
+                            },
+                            576: {
+                                slidesPerView: 2,
+                                spaceBetween: 20,
+                            },
+                            767: {
+                                slidesPerView: 3,
+                                spaceBetween: 24,
+                            },
+                            991: {
+                                slidesPerView: 4,
+                                spaceBetween: 30,
+                            },
+                        }}
+                    >
 
                         {cardData.map((item, index) => (
                             <SwiperSlide key={item.id}>

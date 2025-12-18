@@ -1,7 +1,81 @@
 .footer {
     background-color: #000033;
-    padding: 40px 0;
+    padding: 40px 32px;
 }
+.accordionItem{
+    color: #FFFFFF;
+}
+.accordionItem {
+  /* border-top: 1px solid #f0f0f0; */
+ 
+}
+
+.accordionWrapper {
+    display: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+.accordionItem:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.accordionHeader {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+
+  
+}
+
+.arrow {
+  transition: transform 0.3s ease;
+  font-size: 14px;
+}
+
+.accordionContainer{
+    
+     /* border-bottom: 1px solid #f0f0f0; */
+     padding-bottom: 16px;
+    
+}
+.rotate {
+  transform: rotate(180deg);
+}
+.dot{
+    line-height: 0.5;
+}
+.footerBlockWrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.accordionBody {
+    /* border-bottom: 1px solid #f0f0f0; */
+    /* padding-bottom: 16px; */
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  /* transition: max-height 0.4s ease; */
+  transition:
+    max-height 0.2s ease,
+    opacity 0.4s ease,
+    padding 0.2s ease;
+}
+
+.show {
+  max-height: 2000px; /* enough for content */
+}
+
 
 .container {
     max-width: 1520px;
@@ -179,4 +253,61 @@ li:hover .linkText::after {
     vertical-align: middle;
     text-transform: capitalize;
     color: #FFFFFF;
+}
+.mediaIcons{
+    color: white;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    display: none;
+
+}
+
+@media (max-width:1200px){
+
+    .footer{
+        padding: 20px;
+    }
+    .blockItems, .footerLinkBlock{
+        gap: 50px;
+    }
+
+}
+@media (max-width: 1023px){
+    .accordionWrapper{
+        display: block;
+    }
+    .footerBlockWrapper{
+        display: none;
+    }
+    .mediaIcons{
+        display: flex;
+    }
+}
+
+@media (max-width: 991px){
+    .blockItems, .footerLinkBlock{
+        gap: 20px;
+    }
+    .blockItems ul{
+
+    }
+    .blockItems ul li span{
+        font-size: 10px;
+    }
+    .linkText{
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 767px){
+    .footerTop{
+        flex-direction: column;
+    }
+    .footerTop p{
+        text-align: center;
+    }
+    .blockItems, .footerLinkBlock{
+        flex-wrap: wrap;
+    }
 }

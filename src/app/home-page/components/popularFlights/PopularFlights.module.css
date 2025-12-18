@@ -26,6 +26,7 @@
     line-height: 1;
     letter-spacing: 0%;
     text-transform: capitalize;
+    position: relative;
 
 
 }
@@ -512,6 +513,48 @@
     color: #FFFFFF;
 }
 
+
+.cityBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+}
+
+.rotate {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+.cityDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  padding: 8px 0;
+  width: 160px;
+  z-index: 10;
+}
+
+.cityDropdown li {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cityDropdown li:hover {
+  background: #f5f5f5;
+}
+
+
 @media (max-width: 1440px) {
     .heading, .headingMult {
         font-size: 38px;
@@ -553,11 +596,13 @@
     }
 }
 
-@media (max-width: 1156px) {
-    .heading, .headingMult {
-        font-size: 30px;
+@media (max-width: 1200px){
+    .heading, .headingMult{
+        font-size: 36px;
     }
+}
 
+@media (max-width: 1156px) {
     .textTop span {
         font-size: 30px;
     }
@@ -578,7 +623,7 @@
     }
 
     .heading, .headingMult {
-        font-size: 28px;
+        font-size: 30px;
     }
 
     .textTop span {
@@ -599,6 +644,9 @@
 }
 
 @media (max-width: 767px ){
+     .heading, .headingMult {
+        font-size: 30px;
+    }
     .itemsCard{
         max-height: 416px;
         height: 100%;
@@ -606,6 +654,13 @@
     .btnContainer{
         margin-top: -20px;
     }
+}
+
+@media (max-width: 488px ){
+    .heading, .headingMult{
+        font-size: 28px;
+    }
+
 }
 
 
