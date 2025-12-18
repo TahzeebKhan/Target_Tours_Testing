@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import styles from "./Carousel.module.css";
+import styles from "./CarouselMobile.module.css";
 // import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // Sample data for slides
 
-const Carousel = ({
+const CarouselMobile = ({
   slideData = [
     {
       id: 1,
@@ -117,7 +117,7 @@ const Carousel = ({
       diff = diff + totalSlides;
     }
 
-    let transform, scale, opacity, zIndex;
+    let transform, scale, opacity, zIndex, backgroundColor;
 
     if (diff === 0) {
       // Active slide - center, full size
@@ -127,28 +127,28 @@ const Carousel = ({
       zIndex = 10;
     } else if (diff === 1 || diff === -(totalSlides - 1)) {
       // Next slide - right side, scaled down
-      transform = "translateX(35%)";
-      scale = 0.75;
+      transform = "translateX(88%)";
+      scale = 0.69;
       zIndex = 5;
     } else if (diff === -1 || diff === totalSlides - 1) {
       // Previous slide - left side, scaled down
-      transform = "translateX(-35%)";
-      scale = 0.75;
+      transform = "translateX(-88%)";
+      scale = 0.69;
       zIndex = 5;
     } else if (diff === 2 || diff === -(totalSlides - 2)) {
       // Slide after next - far right, very small
       transform = "translateX(70%)";
-      scale = 0.55;
+      scale = 0;
       zIndex = 1;
     } else if (diff === -2 || diff === totalSlides - 2) {
       // Slide before previous - far left, very small
       transform = "translateX(-70%)";
-      scale = 0.55;
+      scale = 0;
       zIndex = 1;
     } else {
       // Default - hidden
       transform = "translateX(0%)";
-      scale = 0.3;
+      scale = 0;
       opacity = 0;
       zIndex = 0;
     }
@@ -211,8 +211,13 @@ const Carousel = ({
                   />
 
                   {/* Overlay content for active slide */}
-                  {isActive && (
-                    <div className={styles.overlayContent}>
+
+                  <div
+                    className={`${styles.overlayContent} ${
+                      isActive ? styles.overlayActive : ""
+                    }`}
+                  >
+                    <>
                       {slide.hasNewTag && (
                         <div className={styles.newTag}>Newly Added</div>
                       )}
@@ -225,9 +230,8 @@ const Carousel = ({
                           {slide.description}
                         </div>
                       </div>
-                    </div>
-                  )}
-
+                    </>
+                  </div>
                   {/* Newly Added tag for inactive slides */}
                   {!isActive && slide.hasNewTag && (
                     <div className={styles.inactiveNewTag}>Newly Added</div>
@@ -248,7 +252,11 @@ const Carousel = ({
                     className={`${styles.bottomText} ${getSideAlignClass(
                       slideNumber
                     )}`}
-                    style={{ display: 'flex', visibility: 'visible', opacity: 1 }}
+                    style={{
+                      display: "flex",
+                      visibility: "visible",
+                      opacity: 1,
+                    }}
                   >
                     <div className={styles.bottomTitle}>
                       {slide.bottomTitle}
@@ -265,7 +273,6 @@ const Carousel = ({
       </section>
 
       {/* Navigation Arrows */}
-     
 
       {/* Radio buttons for slide control */}
       <div className={styles.radioContainer}>
@@ -332,4 +339,4 @@ const Carousel = ({
   );
 };
 
-export default Carousel;
+export default CarouselMobile;
