@@ -183,10 +183,6 @@ const flightData = {
         { from: "surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
         { from: "kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
         { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png" },
-        { from: "India", to: "Middle East", price: "₹14,500", image: "/images/item1.png" },
-        { from: "India", to: "Southeast Asia", price: "₹16,000", image: "/images/item1.png" },
-        { from: "India", to: "Europe", price: "₹45,000", image: "/images/item1.png" },
-        { from: "India", to: "North America", price: "₹60,000", image: "/images/item1.png" },
     ],
     "Cities Countries": [
         { from: "Mumbai", to: "New York", price: "₹65,000", image: "/images/item1.png" },
@@ -224,6 +220,7 @@ const TopToFlights = () => {
     const [activeTab, setActiveTab] = useState("Popular routes")
     const [currentPage, setCurrentPage] = useState(0)
     const [isMobile, setIsMobile] = useState(false)
+    const [animationKey, setAnimationKey] = useState(0)
 
     const navItems = [
         "Popular routes",
@@ -245,9 +242,10 @@ const TopToFlights = () => {
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
-    // Reset page when tab changes
+    // Reset page and trigger animation when tab changes
     useEffect(() => {
         setCurrentPage(0)
+        setAnimationKey(prev => prev + 1)
     }, [activeTab])
 
     useEffect(() => {
@@ -314,10 +312,13 @@ const TopToFlights = () => {
             </nav>
 
             <div className={style.container}>
-                <div className={style.flight_items_cont}>
+                <div className={`${style.flight_items_cont} ${style.flight_items_animated}`} key={animationKey}>
                     <div className={style.flight_items_row}>
                         {displayedFlights.map((item, i) => (
-                            <div className={style.flight_items} key={i}>
+                            <div 
+                                className={style.flight_items}
+                                key={`${animationKey}-${i}`}
+                            >
                                 <img className={style.flight_items_img} src={item.image}  alt="" />
 
                                 <div className={style.flight_items_bottom}>

@@ -169,10 +169,25 @@
     padding: 8px;
     align-items: center;
     gap: 16px;
-    transition: background-color 240ms ease, transform 240ms cubic-bezier(.2, .9, .2, 1), border-color 240ms ease, box-shadow 240ms ease;
+    background-color: transparent;
+    transition: background-color 400ms ease-in-out, transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease, color 400ms ease-in-out;
     will-change: transform, background-color;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
 
+.flight_items::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000033;
+    opacity: 0;
+    transition: opacity 400ms ease-in-out;
+    z-index: -1;
 }
 
 .flight_items_img {
@@ -180,7 +195,10 @@
     width: 100%;
     max-height: 84px;
     height: 100%;
-    object-fit: cover
+    object-fit: cover;
+    transition: filter 400ms ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .flight_items_bottom {
@@ -195,7 +213,13 @@
     display: flex;
     gap: 8px;
     align-items: center;
-    transition: color 200ms ease, opacity 200ms ease;
+    transition: color 300ms ease, opacity 300ms ease;
+}
+
+.fromTo img {
+    transition: filter 400ms ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .fromTo span {
@@ -207,7 +231,9 @@
     vertical-align: middle;
     text-transform: uppercase;
     color: #000000;
-    transition: color 200ms ease, opacity 200ms ease;
+    transition: color 400ms ease-in-out, opacity 400ms ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .price {
@@ -223,10 +249,12 @@
     display: flex;
     gap: 5px;
     align-items: end;
+    transition: color 400ms ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .price span {
-
     font-weight: 600;
     font-style: SemiBold;
     font-size: 18px;
@@ -234,14 +262,17 @@
     letter-spacing: 0%;
     vertical-align: middle;
     text-transform: uppercase;
-
-
+    transition: color 400ms ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .flight_items:hover {
-    background-color: #000033;
     color: white;
+}
 
+.flight_items:hover::before {
+    opacity: 1;
 }
 
 .flight_items:hover .fromTo span {
@@ -250,6 +281,32 @@
 
 .flight_items:hover .fromTo img {
     filter: brightness(0) invert(1);
+}
+
+.flight_items:hover .price {
+    color: #FFFFFF;
+}
+
+.flight_items:hover .price span {
+    color: #FFFFFF;
+}
+
+/* Animation keyframes */
+@keyframes formSlideIn {
+    from {
+        transform: translateX(24px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation class for entire section */
+.flight_items_cont.flight_items_animated {
+    animation: formSlideIn 0.4s ease-out forwards;
 }
 
 @media (max-width: 1680px) {
