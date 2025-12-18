@@ -166,6 +166,11 @@
     font-size: 12px;
   }
 }
+@media(max-width: 895px){
+  .section{
+     margin-top: 300px
+  }
+}
 @media (max-width: 768px) {
   .heading {
     font-size: 28px;
@@ -182,13 +187,14 @@
   }
   .section {
     padding: 100px 0px 100px 0px;
-    margin-top: 378px;
+   ;
   }
 }
 
 @media (max-width: 540px) {
   .section {
     padding: 50px 0px 50px 0px;
+    margin-top: 330px;
   }
 }
 @media (max-width: 428px) {
@@ -197,6 +203,7 @@
     padding-bottom: 32px;
     align-items: center;
     background-color: #f5f2eb;
+    margin-top: 360px;
   }
   .heading {
     max-width: 330px;

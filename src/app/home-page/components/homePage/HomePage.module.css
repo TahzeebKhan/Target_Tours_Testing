@@ -611,13 +611,14 @@
 }
 
 .searchBtn img {
-  filter: invert(0);
-  transition: filter 0.2s ease;
+    filter: invert(0);
+    transition: filter 0.2s ease;
 }
 
 .searchBtn:hover img {
-  filter: invert(0) brightness(0.2) sepia(1) hue-rotate(200deg);
+    filter: invert(0) brightness(0.2) sepia(1) hue-rotate(200deg);
 }
+
 .searchBtn:hover {
     background-color: #ffffff;
 }
@@ -644,10 +645,11 @@
 }
 
 
-.multisearchBtn:hover{
+.multisearchBtn:hover {
     background-color: #FFFFFF;
     color: #000033;
 }
+
 .featureStrip {
     max-width: 836px;
     width: 100%;
@@ -824,6 +826,92 @@
 
 }
 
+.flightSectionMain {
+    padding: 16px;
+    margin-top: -81px;
+    position: relative;
+    display: none
+}
+
+.flightSearchCard {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+    background-color: #FFFFFF;
+    box-shadow:
+        -2px -3px 9.2px 0px #00000014,
+        0px 5px 8px 0px #0000001A;
+
+}
+
+.field {
+    border: 0.5px solid #E6E8EC;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label,
+.lable {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #404040;
+}
+
+.input {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    outline: none;
+    color: #000000;
+
+}
+
+.swapBtn {
+    background-color: #fff;
+    border-radius: 100%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow:
+        0px 0.67px 1.33px 0px #00000014,
+        0px 2px 8px 0px #0000001A;
+    position: absolute;
+    left: 50%;
+    top: 71px;
+    transform: translate(-50%);
+}
+
+.searchBtna {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    background-color: #000033;
+    font-family: Poppins;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 12px;
+
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    height: 48px;
+
+}
+
 @media (max-width: 1600px) {
     .navbar {
         padding-left: 20px;
@@ -881,6 +969,48 @@
     }
 }
 
+@media (max-width: 991px) {
+    .fromBtn {
+        max-width: 150px;
+    }
+
+    .glass_panel {
+        width: 887px;
+    }
+
+    .arrowbox {
+        left: 16%;
+
+    }
+
+    .InspiredSection {
+        gap: 9px;
+    }
+}
+
+@media (max-width: 895px) {
+    .glass_panel {
+        display: none;
+    }
+    .flightSectionMain{
+        display: block;
+    }
+    .featureStrip {
+        margin-bottom: 83px;
+    }
+    .fromBtn {
+        max-width: unset;
+        width: 100%;
+        background: #ffffff;
+    }
+
+    .contant {
+        color: #000000;
+    }
+
+
+}
+
 @media (max-width: 768px) {
     .InspiredSection {
         gap: 19px;
@@ -915,72 +1045,9 @@
         height: 42px;
     }
 
-    .flightSectionMain {
-        padding: 16px;
-        margin-top: -81px;
-        position: relative;
-        display: block
-    }
 
-    .flightSearchCard {
-        display: flex;
-        flex-direction: column;
-        padding: 12px;
-        gap: 12px;
-        background-color: #FFFFFF;
-        box-shadow:
-            -2px -3px 9.2px 0px #00000014,
-            0px 5px 8px 0px #0000001A;
 
-    }
 
-    .field {
-        border: 0.5px solid #E6E8EC;
-        padding: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .label,
-    .lable {
-        font-weight: 400;
-        font-size: 12px;
-        line-height: 16px;
-        letter-spacing: 0%;
-        text-transform: uppercase;
-        color: #404040;
-    }
-
-    .input {
-        font-weight: 500;
-        font-style: Medium;
-        font-size: 14px;
-        line-height: 1.2;
-        letter-spacing: 0%;
-        text-transform: uppercase;
-        outline: none;
-        color: #000000;
-
-    }
-
-    .swapBtn {
-        background-color: #fff;
-        border-radius: 100%;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        box-shadow:
-            0px 0.67px 1.33px 0px #00000014,
-            0px 2px 8px 0px #0000001A;
-        position: absolute;
-        left: 50%;
-        top: 71px;
-        transform: translate(-50%);
-    }
 
     .featureStrip {
         margin-bottom: 83px;
@@ -994,24 +1061,7 @@
         gap: 17px;
     }
 
-    .searchBtna {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px 16px;
-        background-color: #000033;
-        font-family: Poppins;
-        font-weight: 500;
-        font-style: Medium;
-        font-size: 12px;
 
-        line-height: 1;
-        letter-spacing: 0%;
-        text-transform: uppercase;
-        color: #FFFFFF;
-        height: 48px;
-
-    }
 
 
     .fromBtn {
