@@ -76,3 +76,91 @@
     color: #FFFFFF;
 
 }
+
+@media (max-width: 1520px){
+    .linearContainer, .container{
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+@media (max-width: 1440px){
+    .containerTop h2{
+        font-size: 48px;
+    }
+    .headText{
+        font-size: 32px;
+    }
+    .subHeadText{
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1280px){
+    .containerTop h2{
+        font-size: 44px;
+    }
+    .containerTop p{
+        font-size: 18px
+    }
+    .headText{
+        font-size: 30px;
+    }
+    .containerBottom{
+        gap: 40px;
+    }
+}
+@media (max-width: 1200px){
+    .headText{
+        font-size: 28px
+    }
+    .containerTop h2{
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 1056px){
+    .linearContainer, .container{
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .containerBottom{
+        gap: 17px;
+    }
+}
+
+@media (max-width: 991px){
+    
+    .subHeadText{
+        font-size: 12px;
+        line-height: 20px;
+    }
+    .headText{
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 767px){
+    .featureSection{
+        padding-top: 24px;
+    }
+    .containerBottom{
+        flex-direction: column;
+    }
+    .linearContainer{
+        margin-top: 97px;
+    }
+    .headText{
+        font-size: 24px;
+    }
+    .subHeadText{
+        font-size: 14px;
+    }
+    .containerTop h2{
+        font-size: 32px;
+    }
+    .containerTop p{
+        font-size: 14px;
+        line-height: 24px;
+    }
+}

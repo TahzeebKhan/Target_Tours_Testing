@@ -13,7 +13,10 @@ const flightData = {
         { from: "lucknow", to: "London", price: "₹46,000", image: "/images/lucknow.png" },
         { from: "surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
         { from: "kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
-        { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png" }
+        { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png" },{ from: "India", to: "Middle East", price: "₹14,500", image: "/images/item1.png" },
+        { from: "India", to: "Southeast Asia", price: "₹16,000", image: "/images/item1.png" },
+        { from: "India", to: "Europe", price: "₹45,000", image: "/images/item1.png" },
+        { from: "India", to: "North America", price: "₹60,000", image: "/images/item1.png" },
     ],
     "Cities Countries": [
         { from: "Mumbai", to: "New York", price: "₹65,000", image: "/images/item1.png" },
@@ -141,7 +144,7 @@ const TopToFlights = () => {
                     {/* </div> */}
                 </div>
             </div>
-            {/* <div className={style.btnContainer}>
+            <div className={style.btnContainer}>
                 <div
                     className={style.btn}
 
@@ -154,7 +157,7 @@ const TopToFlights = () => {
                 >
                     <img src="/icons/right.svg" alt="" />
                 </div>
-            </div> */}
+            </div>
         </section>
     )
 }
