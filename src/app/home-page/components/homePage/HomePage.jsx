@@ -121,14 +121,14 @@ const HomePage = () => {
     setBookingType(feature.type);
 
     // optional: scroll the search section into view (smooth)
-    // const searchEl = document.querySelector(`.${styles.serarchingCont}`);
-    // if (searchEl) {
-    //   searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // }
-
-    // optional: focus first input inside the search area
-    const firstInput = searchEl?.querySelector('input[type="text"], input[type="date"]');
-    if (firstInput) firstInput.focus();
+    const searchEl = document.querySelector(`.${styles.serarchingCont}`);
+    if (searchEl) {
+      // searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // optional: focus first input inside the search area
+      const firstInput = searchEl.querySelector('input[type="text"], input[type="date"]');
+      if (firstInput) firstInput.focus();
+    }
   }
 
 
@@ -170,7 +170,7 @@ const HomePage = () => {
           loop
           playsInline
         />
-        <img class={styles.gradient} src="/images/gradient.png" />
+        <img className={styles.gradient} src="/images/gradient.png" />
       </header>
       <div className={`${styles.overlay} absolute inset-0`}></div>
       <div className={`${styles.navContainer} absolute top-0 z-20`}>
