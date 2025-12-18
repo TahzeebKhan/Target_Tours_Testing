@@ -178,7 +178,7 @@ const flightData = {
         { from: "Nagpur", to: "Bangkok", price: "₹20,000", image: "/images/item1.png" },
         { from: "Indore", to: "cairo", price: "₹15,500", image: "/images/indore.png" },
         { from: "jaipur", to: "Moscow", price: "₹18,200", image: "/images/jaipur.png" },
-        { from: "Bengaluru", to: "Kuala Lumpur", price: "₹12,900", image: "/images/bengaluru.png" },
+        { from: "Bengaluru", to: "Tokiyo", price: "₹12,900", image: "/images/bengaluru.png" },
         { from: "lucknow", to: "London", price: "₹46,000", image: "/images/lucknow.png" },
         { from: "surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
         { from: "kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
@@ -318,7 +318,7 @@ const TopToFlights = () => {
                     <div className={style.flight_items_row}>
                         {displayedFlights.map((item, i) => (
                             <div className={style.flight_items} key={i}>
-                                <img src={item.image} alt="" />
+                                <img className={style.flight_items_img} src={item.image}  alt="" />
 
                                 <div className={style.flight_items_bottom}>
                                     <div className={style.fromTo}>

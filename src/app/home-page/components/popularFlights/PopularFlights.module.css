@@ -514,7 +514,7 @@
 }
 
 
-.cityBtn {
+.cityBtnn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -572,6 +572,9 @@
     .textContainer {
         padding: 20px;
     }
+    .cityBtnn img{
+        width: 20px;
+    }
 }
 
 @media (max-width: 1280px) {
@@ -609,6 +612,9 @@
 
     .economy span {
         font-size: 16px;
+    }
+    .cityBtnn img{
+        width: 15px;
     }
 
 }
@@ -661,6 +667,12 @@
         font-size: 28px;
     }
 
+}
+
+@media (max-width: 424px){
+    .section{
+        padding-top: 32px;
+    }
 }
 
 
