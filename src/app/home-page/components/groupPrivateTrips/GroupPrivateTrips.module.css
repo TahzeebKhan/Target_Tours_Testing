@@ -87,9 +87,9 @@
   transition: transform .3s ease;
 }
 
-.exploreBtn:hover .arrow {
+/* .exploreBtn:hover .arrow {
   transform: rotate(-45deg);
-}
+} */
 
 
 /* 🔥 NEW */
