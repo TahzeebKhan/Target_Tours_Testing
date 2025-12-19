@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import styles from './FlightBooking.module.css'
+import ExpandableTabs from '../expendableTabs/ExpandableTabs';
 
 const FlightBooking = () => {
 
@@ -92,8 +93,8 @@ const FlightBooking = () => {
                 city: "Singapore (SIN)",
             },
             duration: {
-                hours: 1,
-                minutes: 50
+                hours: 2,
+                minutes: 51
             },
             stops: {
                 type: "Non Stop",
@@ -160,9 +161,9 @@ const FlightBooking = () => {
                     </div>
                 </div>
             </div>
-
+{flightResults.map((flight) => (
             <div className={styles.expendableContainer}>
-                {flightResults.map((flight) => (
+                
                 <div key={flight.id} className={styles.flightFareDetailsContainer}>
                     <div className={styles.flightFareDetails}>
                         <div className={styles.flightDetail}>
@@ -192,9 +193,9 @@ const FlightBooking = () => {
                                 <div className={styles.departureName}>
                                     <span className={styles.fromName}>{flight.departure.city}</span>
                                     <div className={styles.priceContainer}>
-                                        <span className={styles.duration}>01 <span className={styles.hours}>h</span> 50 <span className={styles.hours}>m</span></span>
+                                        <span className={styles.duration}>{flight.duration.hours} <span className={styles.hours}>h</span> {flight.duration.minutes} <span className={styles.hours}>m</span></span>
                                         <div className={styles.dot}></div>
-                                        <span className={styles.nonStop}>Non Stop</span>
+                                        <span className={styles.nonStop}>{flight.stops.type}</span>
                                     </div>
                                     <span className={styles.fromName}>{flight.arrival.city}</span>
                                 </div>
@@ -212,24 +213,25 @@ const FlightBooking = () => {
                     </div>
                     <div className={styles.fareDetails}>
                         <div className={styles.totalFare}>
-                            <span className={styles.fareText}>₹ 3,22,000</span>
+                            <span className={styles.fareText}>{flight.fare.totalFare}</span>
                             <button className={styles.viewBtn}>VIEW FARES</button>
                         </div>
                         <div className={styles.fareAmount}>
-                            <span className={styles.fare}>₹ 12,000  <span className={styles.adult}> /ADULT</span></span>
+                            <span className={styles.fare}>{flight.fare.pricePerAdult}  <span className={styles.adult}> /ADULT</span></span>
                             <div className={styles.dot}></div>
-                            <span className={styles.economy}>ECONOMY</span>
+                            <span className={styles.economy}>{flight.fare.cabinClass}</span>
                         </div>
                     </div>
 
 
                 </div>
-                ))}
+                
                 {/* ===== EXPANDABLE PANEL ===== */}
                 <div className={`${styles.expandWrap} ${open ? styles.open : ""}`}>
-
+                    <ExpandableTabs/>
                 </div>
             </div>
+            ))}
 
 
         </section>

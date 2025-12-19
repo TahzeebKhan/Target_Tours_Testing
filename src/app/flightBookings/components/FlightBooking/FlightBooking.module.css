@@ -156,7 +156,7 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     gap: 32px;
-    margin-bottom: 24px;
+    /* margin-bottom: 24px; */
 }
 .flightFareDetails{
     padding: 16px 6px 0px 24px;
@@ -386,7 +386,6 @@
 .expandWrap {
   max-height: 0;
   overflow: hidden;
-  background: #f4f6ff;
   transition: max-height 0.45s ease;
   border-top: 1px solid #e5e7f0;
 }
