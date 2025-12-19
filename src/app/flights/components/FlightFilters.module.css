@@ -39,6 +39,13 @@
   border: none;
   cursor: pointer;
 }
+.departureCard {
+  transition: all 0.5s ease;
+}
+.departureCard.activeDepartureCard {
+  background-color: #f0f3ff !important;
+  border: 1px solid #000033;
+}
 
 /* Sections */
 
@@ -114,8 +121,8 @@
 
 /* checked state */
 .checkbox input:checked + .customCheckbox {
-  background-color: #1f2a7c; /* royal blue */
-  border-color: #1f2a7c;
+  background-color: #000033; /* royal blue */
+  border-color: #000033;
 }
 
 .checkbox input:checked + .customCheckbox .checkIcon {
@@ -128,7 +135,7 @@
 
 /* hover (optional polish) */
 .checkbox:hover .customCheckbox {
-  border-color: #1f2a7c;
+  border-color: #000033;
 }
 
 /* Range */

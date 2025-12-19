@@ -61,6 +61,16 @@ export default function FlightFilters() {
       airlines: {},
     });
   };
+  const toggleMapCheckbox = (group, key) => {
+    setFilters((prev) => ({
+      ...prev,
+      [group]: {
+        ...prev[group],
+        [key]: !prev[group]?.[key],
+      },
+    }));
+  };
+
   return (
     <aside className={styles.sidebar}>
       {/* Header */}
@@ -238,7 +248,11 @@ export default function FlightFilters() {
         <div className={styles.departureGrid}>
           <button
             onClick={() => selectDeparture("departureJakarta", "before6")}
-            className={styles.departureCard}
+            className={`${styles.departureCard} ${
+              filters.departureJakarta === "before6"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
           >
             <span className={styles.departureIcon}>
               <svg
@@ -259,8 +273,12 @@ export default function FlightFilters() {
           </button>
 
           <button
-            onClick={() => selectDeparture("departureJakarta", "before6")}
-            className={styles.departureCard}
+            onClick={() => selectDeparture("departureJakarta", "6to12")}
+            className={`${styles.departureCard} ${
+              filters.departureJakarta === "6to12"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
           >
             <span className={styles.departureIcon}>
               <svg
@@ -287,7 +305,14 @@ export default function FlightFilters() {
             <span className={styles.departurePrice}>₹ 712,000</span>
           </button>
 
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureJakarta", "12to6")}
+            className={`${styles.departureCard} ${
+              filters.departureJakarta === "12to6"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -313,7 +338,14 @@ export default function FlightFilters() {
             <span className={styles.departurePrice}>₹ 712,000</span>
           </button>
 
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureJakarta", "after12")}
+            className={`${styles.departureCard} ${
+              filters.departureJakarta === "after12"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -347,7 +379,14 @@ export default function FlightFilters() {
         <h4 className={styles.sectionTitle}>DEPARTURE In Singapore</h4>
 
         <div className={styles.departureGrid}>
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureSingapore", "before6")}
+            className={`${styles.departureCard} ${
+              filters.departureSingapore === "before6"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -366,7 +405,14 @@ export default function FlightFilters() {
             <span className={styles.departurePrice}>₹ 712,000</span>
           </button>
 
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureSingapore", "6to12")}
+            className={`${styles.departureCard} ${
+              filters.departureSingapore === "6to12"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -392,7 +438,14 @@ export default function FlightFilters() {
             <span className={styles.departurePrice}>₹ 712,000</span>
           </button>
 
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureSingapore", "12to6")}
+            className={`${styles.departureCard} ${
+              filters.departureSingapore === "12to6"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -418,7 +471,14 @@ export default function FlightFilters() {
             <span className={styles.departurePrice}>₹ 712,000</span>
           </button>
 
-          <button className={styles.departureCard}>
+          <button
+            onClick={() => selectDeparture("departureSingapore", "after6")}
+            className={`${styles.departureCard} ${
+              filters.departureSingapore === "after6"
+                ? styles.activeDepartureCard
+                : ""
+            }`}
+          >
             <span className={styles.departureIcon}>
               <svg
                 width="16"
@@ -454,49 +514,83 @@ export default function FlightFilters() {
           Aircraft Model
         </h4>
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["A380"]}
+            onChange={() => toggleMapCheckbox("aircraft", "A380")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           Airbus A380
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["B787"]}
+            onChange={() => toggleMapCheckbox("aircraft", "B787")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           Boeing 787
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["E190"]}
+            onChange={() => toggleMapCheckbox("aircraft", "E190")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           Embraer E190
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["CRJ"]}
+            onChange={() => toggleMapCheckbox("aircraft", "CRJ")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           Bombardier CRJ
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["ATR72"]}
+            onChange={() => toggleMapCheckbox("aircraft", "ATR72")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           ATR 72
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["C172"]}
+            onChange={() => toggleMapCheckbox("aircraft", "C172")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           Cessna 172
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.aircraft["LJ60"]}
+            onChange={() => toggleMapCheckbox("aircraft", "LJ60")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
@@ -512,82 +606,101 @@ export default function FlightFilters() {
           Preferred Airline
         </h4>
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.airlines["IndiGo"]}
+            onChange={() => toggleMapCheckbox("airlines", "IndiGo")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           <div className={styles.airlineLogoDiv}>
             <Image
               src="/images/indigo.svg"
-              alt="Airbus"
+              alt="IndiGo"
               width={16}
               height={16}
             />
-
             <span>IndiGo</span>
           </div>
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.airlines["AirIndia"]}
+            onChange={() => toggleMapCheckbox("airlines", "AirIndia")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           <div className={styles.airlineLogoDiv}>
             <Image
               src="/images/airindia.svg"
-              alt="Airbus"
+              alt="Air India"
               width={16}
               height={16}
             />
-
             <span>Air India</span>
           </div>
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.airlines["AirIndiaExpress"]}
+            onChange={() => toggleMapCheckbox("airlines", "AirIndiaExpress")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           <div className={styles.airlineLogoDiv}>
             <Image
               src="/images/airindiaexpress.svg"
-              alt="Airbus"
+              alt="Air India Express"
               width={16}
               height={16}
             />
-
             <span>Air India Express</span>
           </div>
         </label>
+
         <label className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.airlines["AkasaAir"]}
+            onChange={() => toggleMapCheckbox("airlines", "AkasaAir")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           <div className={styles.airlineLogoDiv}>
             <Image
               src="/images/akasaair.svg"
-              alt="Airbus"
+              alt="Akasa Air"
               width={16}
               height={16}
             />
-
             <span>AkasaAir</span>
           </div>
         </label>
+
         <label style={{ marginBottom: 0 }} className={styles.checkbox}>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            checked={!!filters.airlines["SpiceJet"]}
+            onChange={() => toggleMapCheckbox("airlines", "SpiceJet")}
+          />
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
           <div className={styles.airlineLogoDiv}>
             <Image
               src="/images/spicejet.svg"
-              alt="Airbus"
+              alt="SpiceJet"
               width={16}
               height={16}
             />
-
             <span>SpiceJet</span>
           </div>
         </label>

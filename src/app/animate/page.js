@@ -107,7 +107,7 @@ const page = () => {
   
   return (
     <div>
-      <div className={`${styles.searchSec} flex flex-col gap-[127px] items-center`} style={{background: "red"}}>
+      <div className={`${styles.searchSec} flex flex-col gap-[127px] items-center`} >
           <div className={`${styles.searchPanelWrapper} ${(bookingType === "holiday" || bookingType === "insurance") ? styles.noAnimation : ""}`}>
           {bookingType === "flight" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
