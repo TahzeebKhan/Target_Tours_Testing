@@ -1,0 +1,61 @@
+.wrapper {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+/* Main layout container */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0px 24px 0px;
+  display: grid;
+  grid-template-columns: 356px 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+}
+
+/* Sidebar (Filters) */
+.sidebar {
+  max-width: 356px;
+  grid-column: 1 / 2;
+  background-color: red;
+}
+
+.content {
+  grid-column: 2 / 3;
+  min-width: 0; /* critical for grid children */
+}
+
+.sidebarHeading {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.dateSlider {
+  grid-column: 1 / -1;
+}
+
+.imageBackgound {
+  width: 100%;
+  height: 290px;
+  margin-top: -73px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url("/images/flightsPageBgImg.webp");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+}

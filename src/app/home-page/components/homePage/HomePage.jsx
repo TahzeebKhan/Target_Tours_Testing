@@ -3,6 +3,7 @@ import styles from './HomePage.module.css'
 import Switch from '../Switch'
 import { useState, useRef, useEffect } from 'react'
 import TravellerSelector from './TravellerSelector';
+import Navbar from '../../../flights/Navbar';
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
@@ -197,8 +198,8 @@ const HomePage = () => {
 
         </div>
 
-        <div className={`${styles.searchSec}flex flex-col gap-[127px] items-center`}>
-          <div className={styles.searchPanelWrapper}>
+        <div className={`${styles.searchSec} flex flex-col gap-[127px] items-center`}>
+          <div className={`${styles.searchPanelWrapper} ${(bookingType === "holiday" || bookingType === "insurance") ? styles.noAnimation : ""}`}>
           {bookingType === "flight" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
               <div className={styles.serarchingContTop}>
