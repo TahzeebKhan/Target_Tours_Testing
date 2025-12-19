@@ -85,7 +85,8 @@
 
 /* ensure the visible .contant layout is unchanged */
 .dateInputWrapper>.contant {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     /* as before */
 }
 
@@ -560,7 +561,6 @@
 }
 
 .lable {
-    font-family: "Poppins", sans-serif;
     font-weight: 400;
     font-style: Regular;
     font-size: 10px;
@@ -573,6 +573,7 @@
 .dateInputWrapper {
     display: flex;
     justify-content: space-between;
+    height: 21px;
 }
 
 /* Custom placeholder for native date input: show 'ADD DATES' instead of DD/MM/YYYY until a value is chosen */
@@ -891,8 +892,7 @@
     gap: 4px;
 }
 
-.label,
-.lable {
+.label {
     font-weight: 400;
     font-size: 12px;
     line-height: 16px;
