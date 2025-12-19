@@ -1,6 +1,10 @@
+import FlightBooking from "../flightBookings/components/FlightBooking/FlightBooking";
+
 const page = () => {
     return (
-        <></>
+        <>
+        <FlightBooking/>
+        </>
     );
 }
 

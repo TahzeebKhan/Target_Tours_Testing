@@ -13,7 +13,7 @@
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   padding: 24px 0px 24px 0px;
   display: grid;
