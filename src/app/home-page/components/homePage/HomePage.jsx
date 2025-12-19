@@ -25,7 +25,15 @@ const HomePage = () => {
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  
+
+  const [oneWayFrom, setOneWayFrom] = useState("");
+  const [oneWayTo, setOneWayTo] = useState("");
+
+  const [multiCity, setMultiCity] = useState([
+    { from: "", to: "" },
+    { from: "", to: "" },
+  ]);
+
 
   // Direction for main tab (hotel/flight/holiday/insurance) animation
   const [direction, setDirection] = useState("right");
@@ -33,9 +41,31 @@ const HomePage = () => {
   // Direction for flight trip-type animation (round / oneway / multi)
   const [flightDirection, setFlightDirection] = useState("right");
 
-  const swapLocations = () => {
+  const swapLocations = (index) => {
+    // If index is provided and we're in multi-city, swap that leg's from/to
+    if (typeof index === 'number' && tripType === 'multi') {
+      setMultiCity(prev => prev.map((leg, i) => i === index ? { ...leg, from: leg.to || '', to: leg.from || '' } : leg));
+      return;
+    }
+
+    // default behavior for round/oneway
     setFrom(to);
     setTo(from);
+    setOneWayFrom(oneWayTo);
+    setOneWayTo(oneWayFrom);
+  };
+
+  // Multi-city handlers
+  const addMultiLeg = () => {
+    setMultiCity(prev => [...prev, { from: "", to: "", date: "" }]);
+  };
+
+  const updateMultiLeg = (index, field, value) => {
+    setMultiCity(prev => prev.map((leg, i) => i === index ? { ...leg, [field]: value } : leg));
+  };
+
+  const removeMultiLeg = (index) => {
+    setMultiCity(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev);
   };
 
 
@@ -368,8 +398,8 @@ const HomePage = () => {
                           type="text"
                           className={styles.contant}
                           placeholder="Departure"
-                          value={from}
-                          onChange={(e) => setFrom(e.target.value)}
+                          value={oneWayFrom}
+                          onChange={(e) => setOneWayFrom(e.target.value)}
                         />
                       </div>
                       <div className={`${styles.fromBtn} ${tripType === 'oneway' ? styles.growRight : ''}`}>
@@ -378,8 +408,8 @@ const HomePage = () => {
                           type="text"
                           className={styles.contant}
                           placeholder="Destination"
-                          value={to}
-                          onChange={(e) => setTo(e.target.value)}
+                          value={oneWayTo}
+                          onChange={(e) => setOneWayTo(e.target.value)}
                         />
                       </div>
 
@@ -435,18 +465,18 @@ const HomePage = () => {
                         } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
                     >
                       <div className={styles.serarchingContBottom}>
-                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={swapLocations}>
+                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(0)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>From</div>
-                          <input type="text" className={styles.contant} placeholder='Departure ' value={from}
-                            onChange={(e) => setFrom(e.target.value)} />
+                          <input type="text" className={styles.contant} placeholder='Departure ' value={multiCity[0]?.from || ''}
+                            onChange={(e) => updateMultiLeg(0, 'from', e.target.value)} />
                         </div>
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>To</div>
-                          <input type="text" className={styles.contant} placeholder='Destination' value={to}
-                            onChange={(e) => setFrom(e.target.value)} />
+                          <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[0]?.to || ''}
+                            onChange={(e) => updateMultiLeg(0, 'to', e.target.value)} />
                         </div>
 
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
@@ -458,6 +488,8 @@ const HomePage = () => {
                               type="date"
                               className={styles.contant}
                               data-placeholder="ADD DATES"
+                              value={multiCity[0]?.date || ''}
+                              onChange={(e) => updateMultiLeg(0, 'date', e.target.value)}
                               required
                             />
                             {/* use button for accessibility; call handler that uses the ref */}
@@ -490,16 +522,16 @@ const HomePage = () => {
                         />
                       </div>
                       <div className={styles.serarchingContBottom}>
-                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={swapLocations}>
+                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(1)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>From</div>
-                          <input type="text" className={styles.contant} placeholder='Departure' value={from} onChange={(e) => setFrom(e.target.value)} />
+                          <input type="text" className={styles.contant} placeholder='Departure' value={multiCity[1]?.from || ''} onChange={(e) => updateMultiLeg(1, 'from', e.target.value)} />
                         </div>
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>To</div>
-                          <input type="text" className={styles.contant} placeholder='Destination' value={to} onChange={(e) => setFrom(e.target.value)} />
+                          <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[1]?.to || ''} onChange={(e) => updateMultiLeg(1, 'to', e.target.value)} />
                         </div>
 
                         <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
@@ -511,6 +543,8 @@ const HomePage = () => {
                               type="date"
                               className={styles.contant}
                               data-placeholder="ADD DATES"
+                              value={multiCity[1]?.date || ''}
+                              onChange={(e) => updateMultiLeg(1, 'date', e.target.value)}
                               required
                             />
 
