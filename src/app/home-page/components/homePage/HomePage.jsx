@@ -4,11 +4,13 @@ import Switch from '../Switch'
 import { useState, useRef, useEffect } from 'react'
 import TravellerSelector from './TravellerSelector';
 import Navbar from '../../../flights/Navbar';
+import Link from 'next/link';
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
   const [tripType, setTripType] = useState("round"); // NEW
   const [bookingType, setBookingType] = useState("flight")
+  const [menuOpen, setMenuOpen] = useState(false);
 
 
 
@@ -192,6 +194,54 @@ const HomePage = () => {
 
   return (
     <section className='relative w-full h-[100vh]'>
+
+      <div className={`${styles.menuSection} ${
+    menuOpen ? styles.menuOpen : styles.menuClose
+  }`}>
+        <div className={`${styles.navContainer} top-0 z-20`}>
+          <div className={`${styles.navbar}  w-full flex  justify-between items-center`}>
+            <img src="./Logo.svg" alt="" />
+            <div className={`${styles.navRight} flex gap-3`}>
+              <button className={`${styles.glass_button} ${styles.downloadBtn}`} >Download the App</button>
+              <button className={styles.hamBurger} onClick={() => setMenuOpen(false)}>
+                <img src="/icons/XIcon.svg" alt="" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className={styles.menuContainer}>
+          <div className={styles.menuItems}>
+            <ul>
+              <li>
+                <Link href="#">Home</Link>
+              </li>
+              <li>
+                <Link href="#">Destinations</Link>
+              </li>
+              <li>
+                <Link href="#">Tailor-Made Journeys</Link>
+              </li>
+              <li>
+                <Link href="#">About Us</Link>
+              </li>
+              <li>
+                <Link href="#">Flight Booking</Link>
+              </li>
+              <li>
+                <Link href="#">Blogs</Link>
+              </li>
+            </ul>
+          </div>
+          <div className={styles.menuBottom}>
+            <button className={styles.accountBtn}>ACCOUNT LOGIN</button>
+          </div>
+
+
+        </div>
+
+        
+      </div>
+
       <header className={`${styles.homeSection} w-full h-[100vh]`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -211,7 +261,7 @@ const HomePage = () => {
           <div className={`${styles.navRight} flex gap-3`}>
             <button className={`${styles.glass_button} ${styles.downloadBtn}`} >Download the App</button>
             <button className={styles.signInBtn}>Sign In</button>
-            <button className={styles.hamBurger}>
+            <button className={styles.hamBurger} onClick={() => setMenuOpen(true)}>
               <img src="/icons/hamBurger.png" alt="" />
               menu
             </button>
@@ -231,16 +281,16 @@ const HomePage = () => {
 
         <div className={`${styles.searchSec} flex flex-col gap-[127px] items-center`}>
           <div className={`${styles.searchPanelWrapper} ${(bookingType === "holiday" || bookingType === "insurance") ? styles.noAnimation : ""}`}>
-          {bookingType === "flight" && (
-            <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
-              <div className={styles.serarchingContTop}>
-                <div className={styles.serarchingContTop_left}>
-                  <button
-                    className={`${styles.round_tripBtn} ${tripType === "round" ? styles.activeTrip : ""}`}
-                        onClick={() => handleTripTypeChange("round")}
-                  >
-                    Round-trip
-                  </button>
+            {bookingType === "flight" && (
+              <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
+                <div className={styles.serarchingContTop}>
+                  <div className={styles.serarchingContTop_left}>
+                    <button
+                      className={`${styles.round_tripBtn} ${tripType === "round" ? styles.activeTrip : ""}`}
+                      onClick={() => handleTripTypeChange("round")}
+                    >
+                      Round-trip
+                    </button>
 
                     <button
                       className={`${styles.round_tripBtn} ${tripType === "oneway" ? styles.activeTrip : ""}`}
