@@ -1,0 +1,279 @@
+.sidebar {
+  /* width: 356px; */
+  background: #ffffff;
+  padding: 16px;
+  font-family: var(--font-inter);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 300;
+  font-family: var(--font-inter);
+  letter-spacing: 0.04em;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.stops {
+  margin-bottom: 10px !important;
+}
+
+.icon {
+  font-size: 14px;
+}
+
+.reset {
+  font-size: 14px;
+  color: #0604b2;
+  font-weight: 300;
+  font-family: var(--font-inter);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Sections */
+
+.sectionTitle {
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin-bottom: 16px;
+  color: #111827;
+}
+
+.section {
+  padding: 16px 0px;
+  padding-bottom: 0;
+}
+/* Checkbox */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+/* hide native checkbox */
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* custom box */
+.customCheckbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 0px;
+  background-color: #ffffff;
+  border: 1px solid #d5d7da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.departureCard[data-active="true"] {
+  border-color: #0b0f3f;
+  background: #f6f8ff;
+}
+
+.border {
+  width: calc(100% + 32px);
+  transform: translateX(-16px);
+  height: 1px;
+  margin-top: 16px;
+  border-bottom: 1px solid #0000001a;
+}
+
+/* check icon */
+.checkIcon {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s ease;
+  background-color: transparent;
+}
+
+/* checked state */
+.checkbox input:checked + .customCheckbox {
+  background-color: #1f2a7c; /* royal blue */
+  border-color: #1f2a7c;
+}
+
+.checkbox input:checked + .customCheckbox .checkIcon {
+  opacity: 1;
+  transform: scale(1);
+  background-color: white;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+
+/* hover (optional polish) */
+.checkbox:hover .customCheckbox {
+  border-color: #1f2a7c;
+}
+
+/* Range */
+.rangeContainer {
+  position: relative;
+  height: 32px;
+  margin-top: -6px;
+}
+
+/* Base track */
+.sliderTrack {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+/* Active selected range */
+.sliderRange {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background: #0b0f3f;
+  border-radius: 999px;
+}
+
+/* Common range input reset */
+/* Common range input reset */
+.rangeInput {
+  position: absolute;
+  width: 100%;
+  height: 32px;
+  background: none;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+.rangeInput::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  background: #0b0f3f; /* inner dot color */
+  border: 7px solid #ffffff; /* creates white ring */
+
+  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+
+  cursor: pointer;
+}
+
+/* Firefox */
+.rangeInput::-moz-range-thumb {
+  pointer-events: auto;
+
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  background: #0b0f3f;
+  border: 7px solid #ffffff;
+
+  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+
+  cursor: pointer;
+}
+
+/* Layering */
+.rangeLeft {
+  z-index: 2;
+}
+
+.rangeRight {
+  z-index: 3;
+}
+
+/* Price label */
+.rangeValue {
+  margin-top: -5px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+}
+
+/* Departure section grid */
+.departureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 10px;
+  column-gap: 12px;
+  margin-bottom: 4px;
+  margin-top: -6px;
+}
+
+/* Card */
+.departureCard {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 12px 16px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  transition: all 0.2s ease;
+}
+
+.departureCard:hover {
+  border-color: #0b0f3f;
+  background: #f6f8ff;
+}
+
+/* Icon */
+.departureIcon {
+  color: #000000;
+}
+
+/* Time label */
+.departureTime {
+  font-size: 14px;
+  font-weight: 300;
+
+  color: #78788b;
+}
+
+/* Price */
+.departurePrice {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.airlineLogoDiv {
+  display: flex;
+  align-content: center;
+  gap: 8px;
+}

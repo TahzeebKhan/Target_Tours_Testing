@@ -1,6 +1,12 @@
 import { Antic_Didone, Poppins, Jost, Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
+  display: "swap",
+});
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   style: ["normal", "italic"],
@@ -37,7 +43,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${anticDidone.variable} ${inter.variable} ${jost.variable} antialiased`}
+        className={`${poppins.variable} ${anticDidone.variable} ${jost.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-poppins), sans-serif" }}
       >
         {children}
