@@ -19,6 +19,8 @@ const HomePage = () => {
   const returnRef = useRef(null)
 
   const [activeFeature, setActiveFeature] = useState(1); // default: 1 = Flights
+  const featureRowRef = useRef(null);
+  const progressRef = useRef(null);
 
   // state for travellers dropdown
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
@@ -165,6 +167,38 @@ const HomePage = () => {
     }
   }
 
+  // update progress indicator position/width to match active feature button
+  useEffect(() => {
+    const update = () => {
+      const row = featureRowRef.current;
+      const prog = progressRef.current;
+      if (!row || !prog) return;
+
+      const buttons = Array.from(row.querySelectorAll('button'));
+      const idx = features.findIndex(f => f.id === activeFeature);
+      const target = buttons[idx];
+      if (!target) return;
+
+      const rowRect = row.getBoundingClientRect();
+      const progRect = prog.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+
+      const left = targetRect.left - progRect.left;
+      const width = targetRect.width;
+
+      const activeEl = prog.querySelector(`.${styles.progressActive}`) || prog.firstElementChild;
+      // apply inline styles to progressActive for pixel-perfect alignment
+      if (activeEl) {
+        activeEl.style.left = `${left}px`;
+        activeEl.style.width = `${width}px`;
+      }
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [activeFeature, features]);
+
 
 
   // handlers to open the native date picker (if supported)
@@ -195,9 +229,8 @@ const HomePage = () => {
   return (
     <section className='relative w-full h-[100vh]'>
 
-      <div className={`${styles.menuSection} ${
-    menuOpen ? styles.menuOpen : styles.menuClose
-  }`}>
+      <div className={`${styles.menuSection} ${menuOpen ? styles.menuOpen : styles.menuClose
+        }`}>
         <div className={`${styles.navContainer} top-0 z-20`}>
           <div className={`${styles.navbar}  w-full flex  justify-between items-center`}>
             <img src="./Logo.svg" alt="" />
@@ -239,7 +272,7 @@ const HomePage = () => {
 
         </div>
 
-        
+
       </div>
 
       <header className={`${styles.homeSection} w-full h-[100vh]`}>
@@ -325,7 +358,7 @@ const HomePage = () => {
                       <div className={styles.arrowbox} onClick={swapLocations}>
                         <img src="/icons/leftRrighArrow.svg" alt="" />
                       </div>
-                      <div className={styles.fromBtn}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`}>
                         <div className={styles.lable}>From</div>
                         <input
                           type="text"
@@ -335,7 +368,7 @@ const HomePage = () => {
                           onChange={(e) => setFrom(e.target.value)}
                         />
                       </div>
-                      <div className={styles.fromBtn}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`}>
                         <div className={styles.lable}>To</div>
                         <input
                           type="text"
@@ -346,7 +379,7 @@ const HomePage = () => {
                         />
                       </div>
 
-                      <div className={styles.fromBtn}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`} >
                         <div className={styles.lable}>Departure Date</div>
                         <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                           {/* attach ref */}
@@ -378,7 +411,7 @@ const HomePage = () => {
                           </button>
                         </div>
                       </div>
-                      <div className={styles.fromBtn}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`}>
                         <div className={styles.lable}>Return Date</div>
                         <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
                           {/* attach ref */}
@@ -423,6 +456,7 @@ const HomePage = () => {
                         travellerOptions={travellerOptions}
                         styles={styles}
                         name="Travellers & Class"
+                        className={styles.fromInput}
                       />
 
 
@@ -442,7 +476,7 @@ const HomePage = () => {
                       <div className={styles.arrowboxOneWay} onClick={swapLocations}>
                         <img src="/icons/leftRrighArrow.svg" alt="" />
                       </div>
-                      <div className={`${styles.fromBtn} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`}>
                         <div className={styles.lable}>From</div>
                         <input
                           type="text"
@@ -452,7 +486,7 @@ const HomePage = () => {
                           onChange={(e) => setOneWayFrom(e.target.value)}
                         />
                       </div>
-                      <div className={`${styles.fromBtn} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${styles.toInput} ${tripType === 'oneway' ? styles.growRight : ''}`}>
                         <div className={styles.lable}>To</div>
                         <input
                           type="text"
@@ -463,7 +497,7 @@ const HomePage = () => {
                         />
                       </div>
 
-                      <div className={`${styles.fromBtn} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`}>
                         <div className={styles.lable}>Departure Date</div>
                         <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                           {/* attach ref */}
@@ -501,6 +535,7 @@ const HomePage = () => {
                         travellerOptions={travellerOptions}
                         styles={styles}
                         name="Travellers & Class"
+                        className={styles.travellerClassField}
                       />
                       <div className={styles.searchBtn}>
                         <img src="/images/searchIcon.svg" alt="" />
@@ -515,21 +550,21 @@ const HomePage = () => {
                         } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
                     >
                       <div className={styles.serarchingContBottom}>
-                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(0)}>
+                        <div className={`${styles.arrowboxOneWay}  ${styles.multiArrow}`} onClick={() => swapLocations(0)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>From</div>
                           <input type="text" className={styles.contant} placeholder='Departure ' value={multiCity[0]?.from || ''}
                             onChange={(e) => updateMultiLeg(0, 'from', e.target.value)} />
                         </div>
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>To</div>
                           <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[0]?.to || ''}
                             onChange={(e) => updateMultiLeg(0, 'to', e.target.value)} />
                         </div>
 
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>Departure Date</div>
                           <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                             {/* attach ref */}
@@ -569,22 +604,23 @@ const HomePage = () => {
                           travellerOptions={travellerOptions}
                           styles={styles}
                           name="Travellers & Class"
+                          className={styles.travellerClass}
                         />
                       </div>
                       <div className={styles.serarchingContBottom}>
                         <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(1)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>From</div>
                           <input type="text" className={styles.contant} placeholder='Departure' value={multiCity[1]?.from || ''} onChange={(e) => updateMultiLeg(1, 'from', e.target.value)} />
                         </div>
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>To</div>
                           <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[1]?.to || ''} onChange={(e) => updateMultiLeg(1, 'to', e.target.value)} />
                         </div>
 
-                        <div className={`${styles.fromBtn} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
                           <div className={styles.lable}>Departure Date</div>
                           <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
 
@@ -686,6 +722,7 @@ const HomePage = () => {
                       travellerOptions={travellerOptions}
                       styles={styles}
                       name="Travellers & Class"
+
                     />
                     <div className={styles.searchBtn}>
                       <img src="/images/searchIcon.svg" alt="" />
@@ -878,16 +915,17 @@ const HomePage = () => {
 
         <div className={styles.featureStrip}>
           <div
-            className={styles.progress}
-            style={{
-              '--active-index': String(activeFeature),
-              '--count': String(features.length)
-            }}
-          >
-            <div className={styles.progressActive}></div>
-          </div>
+              className={styles.progress}
+              ref={progressRef}
+              style={{
+                '--active-index': String(activeFeature),
+                '--count': String(features.length)
+              }}
+            >
+              <div className={styles.progressActive}></div>
+            </div>
 
-          <div className={styles.featureRow}>
+            <div className={styles.featureRow} ref={featureRowRef}>
             {features.map((f) => (
               <button
                 key={f.id}
