@@ -1,0 +1,62 @@
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* hide native checkbox */
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* custom box */
+.customCheckbox {
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  border: 1px solid #d5d7da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* check icon */
+.checkIcon {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s ease;
+}
+
+/* checked state */
+.checkbox input:checked + .customCheckbox {
+  background-color: #000033;
+  border-color: #000033;
+}
+
+.checkbox input:checked + .customCheckbox .checkIcon {
+  opacity: 1;
+  transform: scale(1);
+  background-color: white;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+
+/* hover */
+.checkbox:hover .customCheckbox {
+  border-color: #000033;
+}
+
+/* label text */
+.label {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}

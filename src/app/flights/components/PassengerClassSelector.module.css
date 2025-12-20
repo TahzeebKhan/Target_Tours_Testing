@@ -1,0 +1,134 @@
+.dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 388px;
+  background: #fff;
+  border: 1px solid #0000001a;
+  box-shadow: 0px 4px 35px 0px #0000000d;
+  font-family: var(--font-inter);
+  padding: 16px;
+  z-index: 999;
+  max-width: 388px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heading {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #000;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 300;
+  color: #000;
+}
+.minusBtn {
+  opacity: 0.5;
+}
+.minusBtn,
+.plusBtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #000033;
+  /* padding: 11px 7px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000033;
+
+  transition: all 0.4s ease;
+}
+.plusBtn {
+  /* padding: 6px !important; */
+  border: 1px solid #000033 !important;
+}
+.minusBtn:hover,
+.plusBtn:hover {
+  background-color: #000033;
+  color: white;
+}
+.minusBtn:hover {
+  border-color: #000033;
+}
+/* .minusBtn svg path,
+.plusBtn svg path {
+  transition: all 0.4s ease;
+} */
+/* .minusBtn:hover svg path,
+.plusBtn:hover svg path {
+  fill: white !important;
+} */
+.sub {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.counter button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #c7c9d9;
+  background: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.counter span {
+  min-width: 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #000000;
+}
+.counterDiv {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.classGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  row-gap: 12px;
+}
+
+.classBtn {
+  border: 1px solid #0000001a;
+  background: white;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 37px;
+  font-size: 13px;
+  color: black;
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 14px;
+  text-transform: capitalize !important;
+  transition: all 0.4s ease;
+}
+.classBtn:hover {
+  border-color: #000033;
+  background: #f0f3ff;
+}
+.classBtn.active {
+  border-color: #000033;
+  background: #f0f3ff;
+}

@@ -2,6 +2,7 @@ import Navbar from "./Navbar";
 import styles from "./FlightsLayout.module.css";
 import DatePriceSlider from "./components/DatePriceSlider";
 import FlightFilters from "./components/FlightsFilters";
+import TopFilterSection from "./components/TopFilterSection";
 
 export default function FlightsLayout({ children }) {
   return (
@@ -9,7 +10,9 @@ export default function FlightsLayout({ children }) {
       {/* Top Navbar */}
       <div className={styles.wrapper}>
         <Navbar />
-        <div className={styles.imageBackgound}></div>
+        <div className={styles.imageBackgound}>
+          <TopFilterSection />
+        </div>
       </div>
       {/* Page Wrapper */}
       <main className={styles.page}>

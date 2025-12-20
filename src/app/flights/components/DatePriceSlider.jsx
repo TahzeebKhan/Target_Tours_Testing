@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./DatePriceSlider.module.css";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const generateDates = (startDate, count = 20) => {
+const generateDates = (startDate, count = 40) => {
   return Array.from({ length: count }, (_, i) => {
     const date = new Date(startDate.getTime() + i * DAY_MS);
     return {
@@ -21,7 +21,22 @@ export default function DatePriceSlider() {
   const [startDate, setStartDate] = useState(new Date());
   const [selected, setSelected] = useState([]);
 
-  const dates = generateDates(startDate);
+  // const dates = generateDates(new Date());
+  const rowRef = useRef(null);
+
+  const today = useRef(new Date(new Date().setHours(0, 0, 0, 0)));
+
+  const dates = generateDates(today.current);
+
+  const scroll = (dir) => {
+    if (!rowRef.current) return;
+
+    const CARD_WIDTH = 116; // card width + gap
+    rowRef.current.scrollBy({
+      left: dir === "left" ? -CARD_WIDTH * 3 : CARD_WIDTH * 3,
+      behavior: "smooth",
+    });
+  };
 
   const toggleSelect = (id) => {
     setSelected((prev) =>
@@ -33,17 +48,22 @@ export default function DatePriceSlider() {
     setStartDate((d) => new Date(d.getTime() - DAY_MS));
   };
 
-  const shiftRight = () => {
-    setStartDate((d) => new Date(d.getTime() + DAY_MS));
-  };
+  // const shiftRight = () => {
+  //   setStartDate((d) => new Date(d.getTime() + DAY_MS));
+  // };
+  useEffect(() => {
+    selected.forEach((s) => {
+      console.log("sel=>", s);
+    });
+  }, [selected]);
 
   return (
     <div className={styles.wrapper}>
-      <button className={styles.arrow} onClick={shiftLeft}>
+      <button className={styles.arrow} onClick={() => scroll("left")}>
         <ArrowLeft size={12} />
       </button>
 
-      <div className={styles.datesRow}>
+      <div className={styles.datesRow} ref={rowRef}>
         {dates.map((d) => {
           const isSelected = selected.includes(d.id);
 
@@ -80,7 +100,7 @@ export default function DatePriceSlider() {
         })}
       </div>
 
-      <button className={styles.arrow} onClick={shiftRight}>
+      <button className={styles.arrow} onClick={() => scroll("right")}>
         <ArrowRight size={12} />
       </button>
     </div>

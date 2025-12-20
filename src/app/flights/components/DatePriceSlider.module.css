@@ -31,6 +31,9 @@
   flex: 1;
   max-width: 1148px;
   overflow-x: auto;
+  scroll-behavior: smooth;
+   scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;  
 }
 
 .dateCard {
@@ -42,18 +45,22 @@
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  transition: all 0.6s ease;
 }
 
 .dateCard:hover {
-  background: #f9fafb;
+  background: #F1F5F9;
 }
 .selected {
   border-color: #000033; /* strong navy */
   background-color: #f0f3ff !important;
+  transition: all 0.4s ease;
 }
 .selected::after {
   content: "";
   position: absolute;
+
+  transition: all 0.4s ease;
   bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
