@@ -1,0 +1,81 @@
+.tabContentFareDetails {
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 0.5px solid #E4E6E8;
+    background-color: #ffffff;
+    width: 100%;
+}
+
+/* Header */
+.header {
+    padding: 11px 16px;
+    background-color: #000033;
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+/* Body */
+.body {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12.5px;
+}
+
+/* Row */
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Left text */
+.label {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 18.57px;
+    letter-spacing: -2%;
+    color: #000000;
+}
+
+/* Normal amount */
+.amount {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #000000;
+}
+
+/* Bold amount */
+.bold {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #000000;
+}
+
+/* Fade animation (optional) */
+.fadeIn {
+    animation: fadeIn 420ms cubic-bezier(.16, .84, .24, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
