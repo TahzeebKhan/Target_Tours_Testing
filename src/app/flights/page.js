@@ -1,5 +1,6 @@
 "use client";
 import FlightBooking from "../flightBookings/components/FlightBooking/FlightBooking";
+import RoundTrip from "./components/roundTrip/RoundTrip";
 import { useTripType } from "./TripTypeContext";
 
 const page = () => {
@@ -11,7 +12,7 @@ const page = () => {
       {tripType === "round" && (
         <>
           {/* yaha roundtrip component aega roundtrip booking component */}
-          roundtrip
+          <RoundTrip/>
         </>
       )}
       {tripType === "multi" && (

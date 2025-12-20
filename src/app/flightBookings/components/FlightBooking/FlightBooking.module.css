@@ -179,6 +179,8 @@
 }
 
 .flightFareDetails {
+    max-width: 672px;
+    width: 100%;
     padding: 16px 6px 0px 24px;
 
     display: flex;
@@ -190,7 +192,7 @@
 .flightDetail {
     max-width: 642px;
     width: 100%;
-    gap: 88px;
+    gap: 44px;
     display: flex;
     justify-content: space-between;
 
@@ -260,6 +262,8 @@
 }
 
 .departureDetail {
+    max-width: 444px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2px;
