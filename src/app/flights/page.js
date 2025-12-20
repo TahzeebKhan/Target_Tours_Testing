@@ -1,5 +1,5 @@
 "use client";
-import FlightBooking from "../flightBookings/components/FlightBooking/FlightBooking";
+import OnewayFlightBooking from "./components/onewayTrip/OnewayFlightBooking";
 import RoundTrip from "./components/roundTrip/RoundTrip";
 import { useTripType } from "./TripTypeContext";
 
@@ -8,11 +8,14 @@ const page = () => {
   if (!tripType) return null;
   return (
     <>
-      {tripType === "oneway" && <FlightBooking />}
+      {tripType === "oneway" && (
+        <>
+          <OnewayFlightBooking />
+        </>
+      )}
       {tripType === "round" && (
         <>
-          {/* yaha roundtrip component aega roundtrip booking component */}
-          <RoundTrip/>
+          <RoundTrip />
         </>
       )}
       {tripType === "multi" && (

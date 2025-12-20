@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import styles from './TripCard.module.css'
 import FlightTimingDetail from '../../flightTimingDetails/FlightTimingDetail'
-import ExpandableTabs from '@/app/flightBookings/components/expendableTabs/ExpandableTabs'
+import ExpandableTabs from '@/app/flights/components/onewayTrip/expendableTabs/ExpandableTabs'
 import RoundTripExpendable from '../roundTripExpendable/RoundTripExpendable'
 const TripCard = () => {
 
