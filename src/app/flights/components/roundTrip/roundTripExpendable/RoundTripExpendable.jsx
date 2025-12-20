@@ -1,6 +1,10 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react'
 import styles from './RoundTripExpendable.module.css'
+import FlightTimeline from './FlightTimeline'
+import FlightFare from '../flightFare/FlightFare'
+import BaggageRules from '../baggageRules/BaggageRules'
+import CancellationRules from '../cancellationRules/CancellationRules'
 
 const RoundTripExpendable = () => {
 
@@ -8,6 +12,104 @@ const RoundTripExpendable = () => {
     const handleTabClick = (next) => setActiveTab(next)
     const tabsRef = useRef(null);
 
+    const flight = {
+        airline: {
+            name: "Indonesia AirAsia",
+            code: "QZ 271",
+            logo: "/images/Flight2.png"
+        },
+        aircraft: "Airbus A320",
+
+        departure: {
+            date: "THU, 25 DEC 2025",
+            time: "06:45",
+            airport: "SIN - SINGAPORE",
+            terminal: "Terminal 2",
+            city: "Jewel Changi Airport"
+        },
+
+        arrival: {
+            date: "THU, 25 DEC 2025",
+            time: "08:00",
+            airport: "CGK - JAKARTA",
+            terminal: "Terminal 3",
+            city: "Soekarno–Hatta International"
+        },
+
+        duration: {
+            hours: "01",
+            minutes: "50"
+        },
+
+        stops: "Non Stop"
+    };
+
+    const flight2 = {
+        airline: {
+            name: "Batik Air, Indones....",
+            code: "ID 715",
+            logo: "/images/Flight1.png"
+        },
+
+        aircraft: "Boeing 737",
+
+        departure: {
+            date: "THU, 18 DEC 2025",
+            time: "06:45",
+            airport: "CGK - JAKARTA",
+            terminal: "Terminal 2F",
+            city: "Soekarno–Hatta Inter......"
+        },
+
+        arrival: {
+            date: "THU, 18 DEC 2025",
+            time: "09:35",
+            airport: "KUL - KUALA LUMPUR",
+            terminal: "Terminal 1",
+            city: "Kuala Lumpur Internati.."
+        },
+
+        duration: {
+            hours: "01",
+            minutes: "50"
+        },
+
+        stops: "Non Stop"
+    };
+
+
+    const flight3 = {
+        airline: {
+            name: "Batik Air Malaysia",
+            code: "OD 804",
+            logo: "/images/Flight3.png"
+        },
+
+        aircraft: "Boeing 737",
+
+        departure: {
+            date: "THU, 18 DEC 2025",
+            time: "10:00",
+            airport: "KUL - KUALA LUMPUR",
+            terminal: "Terminal 2",
+            city: "Kuala Lumpur Internati.."
+        },
+
+        arrival: {
+            date: "THU, 18 DEC 2025",
+            time: "11:10",
+            airport: "SIN - SINGAPORE",
+            terminal: "Terminal T3",
+            city: "Changi Airport"
+        },
+
+        duration: {
+            hours: "01",
+            minutes: "50"
+        },
+
+        stops: "Non Stop"
+    };
 
     useEffect(() => {
         if (!tabsRef.current) return;
@@ -56,65 +158,20 @@ const RoundTripExpendable = () => {
                                 <h3>Jakrata To Singapore, 18 Dec 2025</h3>
                             </div>
                             <div className={styles.mainBody}>
-                                <div className={styles.flightBody}>
-                                    <div className={styles.aboutFlightContainer}>
-                                        <div className={styles.aboutFlightContainerLeft}>
-                                            <img className={styles.flightIcon} src="/images/Flight1.png" alt="" />
-                                            <div className={styles.flightInfoTextContainer}>
-                                                <div className={styles.flightInfoTextTitle}>Batik Air, Indones....(ID 715)</div>
-                                                <div className={styles.flightInfoTextChips}>Boeing 737</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.timelineContainer}>
-                                        {/* LEFT */}
-                                        <div className={styles.side}>
-                                            <div className={styles.date}>THU, 18 DEC 2025</div>
-                                            <div className={styles.time}>06:45</div>
-                                            <div className={styles.airport}>CGK - JAKARTA</div>
-                                            <div className={styles.terminal}>Terminal T2F</div>
-                                            <div className={styles.city}>Soekarno–Hatta Inter.......</div>
-                                        </div>
-
-                                        {/* CENTER */}
-                                        <div className={styles.center}>
-                                            <div className={styles.flightAnimation}>
-                                                <div className={styles.flightDotedcontainer}>
-                                                    <div className={styles.bigDot}></div>
-                                                    <div className={styles.dashBorder}></div>
-                                                </div>
-                                                <img className={styles.flightSvg} src="/icons/flightIcon.svg" alt="" />
-                                                <div className={styles.flightDotedcontainer}>
-                                                    <div className={styles.dashBorder}></div>
-                                                    <div className={styles.bigDot}></div>
-                                                </div>
-                                            </div>
-                                            <div className={styles.priceContainer}>
-                                                <span className={styles.duration}>01<span className={styles.hours}> h </span>50<span className={styles.hours}> m </span></span>
-                                                <div className={styles.dot}></div>
-                                                <span className={styles.nonStop}>Non Stop</span>
-                                            </div>
-                                        </div>
-
-                                        {/* RIGHT */}
-                                        <div className={styles.sideRight}>
-                                            <div className={styles.date}>Thu, 18 Dec 2025</div>
-                                            <div className={styles.time}>08:00</div>
-                                            <div className={styles.airport}>KUL – Kuala Lumpur</div>
-                                            <div className={styles.terminal}>Terminal T1</div>
-                                            <div className={styles.city}>Kuala Lumpur Internati..</div>
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.changeOfPlanes}>
-                                        Change of planes: <span className={styles.changeOfPlanesTiem}>  2  </span>  h  <span className={styles.changeOfPlanesTiem}>  15  </span> m Layover in France
-                                    </div>
+                                <FlightTimeline flight={flight2} />
+                                <div className={styles.changeOfPlanes}>
+                                    Change of planes: <span className={styles.changeOfPlanesTiem}>  2  </span>  h  <span className={styles.changeOfPlanesTiem}>  15  </span> m Layover in France
                                 </div>
+                                <FlightTimeline flight={flight3} />
                             </div>
                         </div>
                         <div className={styles.rightFlightInfoCont}>
-
+                            <div className={styles.flightHeading}>
+                                <h3>Singapore To Jakrata, 25 Dec 2025</h3>
+                            </div>
+                            <div className={styles.mainBody}>
+                                <FlightTimeline flight={flight} />
+                            </div>
                         </div>
 
 
@@ -122,15 +179,24 @@ const RoundTripExpendable = () => {
                 )}
 
                 {activeTab === 'fare' && (
-                    <div>helo</div>
+                    <div className={styles.flightFareContaienr}>
+                        <FlightFare />
+                        <FlightFare />
+
+                    </div>
                 )}
 
                 {activeTab === 'baggage' && (
-                    <div>helo</div>
+                    <div className={styles.baggageRuleContainer}>
+                        <BaggageRules />
+                        <BaggageRules />
+                    </div>
                 )}
 
                 {activeTab === 'cancellation' && (
-                    <div>helo</div>
+                    <div className={styles.baggageRuleContainer}>
+                        <CancellationRules/>
+                    </div>
                 )}
 
 

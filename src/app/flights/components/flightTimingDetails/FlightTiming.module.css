@@ -36,6 +36,9 @@
     flex: 1;
     min-width: 0;
 }
+.withStop{
+    color: #208EF5 !important;
+}
 
 .dashBorder {
     width: clamp(32px, 6vw, 46px);

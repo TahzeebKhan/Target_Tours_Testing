@@ -1,3 +1,8 @@
+.cardPairent{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
 .card{
     display: flex;
     background-color: #ffffff;
@@ -198,7 +203,7 @@
   gap: 5px;
   align-items: center;
   font-family: Inter;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 12px;
   line-height: 1;
   text-transform: uppercase;
@@ -207,6 +212,9 @@
   user-select: none;
 }
 
+.offerBannerWrap{
+    margin-top: 24px;
+}
 /* ARROW ICON */
 .downArrow {
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
@@ -230,11 +238,20 @@
     max-height: 600px;
     /* enough for content */
     border: 1px solid #e5e7f0;
+    transition: all 0.45s ease-in-out;
 }
 
 .open {
     max-height: 600px;
     /* enough for content */
+}
+.card{
+    border: 1px solid transparent;
+}
+.cardOpen{
+    border: 1px solid #e5e7f0;
+     border-bottom: none;
+     transition: all 0.45s ease-in-out;
 }
 
 

@@ -2,6 +2,9 @@
 import React from "react";
 import styles from  './FlightTiming.module.css'
 const FlightTimingDetail = ({ flight }) => {
+
+  const isNonStop = flight.stops.type.toLowerCase() === "non stop";
+
   return (
     <div className={styles.departureDetail}>
       {/* TIME ROW */}
@@ -45,7 +48,7 @@ const FlightTimingDetail = ({ flight }) => {
 
           <div className={styles.dot}></div>
 
-          <span className={styles.nonStop}>
+          <span className={`${styles.nonStop} ${!isNonStop ? styles.withStop : ""}`}>
             {flight.stops.type}
           </span>
         </div>

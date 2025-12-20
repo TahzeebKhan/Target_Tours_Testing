@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './RoundTrip.module.css'
 import TripCard from './tripCard/TripCard'
+import OfferBanner from '../offerComponent/OfferBanner'
 
 const RoundTrip = () => {
     return (
@@ -56,6 +57,7 @@ const RoundTrip = () => {
             </div>
             <div>
                 <TripCard></TripCard>
+                
             </div>
         </section>
 
