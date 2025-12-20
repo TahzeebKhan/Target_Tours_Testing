@@ -128,12 +128,12 @@ const Carousel = ({
     } else if (diff === 1 || diff === -(totalSlides - 1)) {
       // Next slide - right side, scaled down
       transform = "translateX(35%)";
-      scale = 0.75;
+      scale = 0.8;
       zIndex = 5;
     } else if (diff === -1 || diff === totalSlides - 1) {
       // Previous slide - left side, scaled down
       transform = "translateX(-35%)";
-      scale = 0.75;
+      scale = 0.8;
       zIndex = 5;
     } else if (diff === 2 || diff === -(totalSlides - 2)) {
       // Slide after next - far right, very small
@@ -159,6 +159,17 @@ const Carousel = ({
       zIndex,
     };
   };
+  const getFarSide = (slideNumber) => {
+    let diff = slideNumber - currentSlide;
+
+    if (diff > totalSlides / 2) diff -= totalSlides;
+    if (diff < -totalSlides / 2) diff += totalSlides;
+
+    if (diff === -2) return "left";
+    if (diff === 2) return "right";
+    return null;
+  };
+
   const getSideAlignClass = (slideNumber) => {
     let diff = slideNumber - currentSlide;
 
@@ -211,27 +222,30 @@ const Carousel = ({
                   />
 
                   {/* Overlay content for active slide */}
-                  {isActive && (
-                    <div className={styles.overlayContent}>
-                      {slide.hasNewTag && (
-                        <div className={styles.newTag}>Newly Added</div>
-                      )}
-                      <div className={styles.price}>
-                        <span>STARTING FROM </span> {slide.price}
-                      </div>
-                      <div className={styles.textContent}>
-                        <div className={styles.title}>{slide.title}</div>
-                        <div className={styles.description}>
-                          {slide.description}
-                        </div>
+
+                  <div className={`${styles.overlayContent} `}>
+                    {/* {slide.hasNewTag && ( */}
+                    <div className={styles.newTag}>Newly Added</div>
+                    {/* )} */}
+                    <div className={styles.price}>
+                      <span>STARTING FROM </span> {slide.price}
+                    </div>
+                    <div
+                      className={`${styles.textContent} ${
+                        isActive ? styles.overlayShow : styles.overlayHide
+                      }`}
+                    >
+                      <div className={styles.title}>{slide.title}</div>
+                      <div className={styles.description}>
+                        {slide.description}
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   {/* Newly Added tag for inactive slides */}
-                  {!isActive && slide.hasNewTag && (
+                  {/* {!isActive && slide.hasNewTag && (
                     <div className={styles.inactiveNewTag}>Newly Added</div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Bottom text for all slides */}
@@ -243,21 +257,27 @@ const Carousel = ({
                   )}
                 </div> */}
                 {/* Bottom text only for NON-ACTIVE slides */}
-                {!isActive && (
-                  <div
-                    className={`${styles.bottomText} ${getSideAlignClass(
-                      slideNumber
-                    )}`}
-                    style={{ display: 'flex', visibility: 'visible', opacity: 1 }}
-                  >
-                    <div className={styles.bottomTitle}>
-                      {slide.bottomTitle}
-                    </div>
-                    <div className={styles.bottomDescription}>
-                      {slide.bottomDescription}
-                    </div>
+
+                <div
+                  className={`
+    ${styles.bottomText}
+    ${getSideAlignClass(slideNumber)}
+    ${!isActive ? styles.fadeIn : styles.fadeOut}
+    ${getFarSide(slideNumber) === "left" ? styles.farLeftText : ""}
+    ${getFarSide(slideNumber) === "right" ? styles.farRightText : ""}
+    ${slide.smallContent ? styles.smallContent : ""}
+    }
+  `}
+                  style={{
+                    display: "flex",
+                    visibility: "visible",
+                  }}
+                >
+                  <div className={styles.bottomTitle}>{slide.bottomTitle}</div>
+                  <div className={styles.bottomDescription}>
+                    {slide.bottomDescription}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           );
@@ -265,7 +285,6 @@ const Carousel = ({
       </section>
 
       {/* Navigation Arrows */}
-     
 
       {/* Radio buttons for slide control */}
       <div className={styles.radioContainer}>
