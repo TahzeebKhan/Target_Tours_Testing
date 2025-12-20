@@ -1,245 +1,239 @@
-
-
-"use client"
-import React, { useEffect, useRef, useState } from 'react'
-import styles from './PopularFlights.module.css'
-import { Navigation } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./PopularFlights.module.css";
+import { Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import Swiper styles
-import 'swiper/css'
-import 'swiper/css/navigation'
+import "swiper/css";
+import "swiper/css/navigation";
 
 const PopularFlights = () => {
-    const [swiperRef, setSwiperRef] = useState(null)
-    const [activeTab, setActiveTab] = useState('Domestic')
+  const [swiperRef, setSwiperRef] = useState(null);
+  const [activeTab, setActiveTab] = useState("Domestic");
 
-    const domesticData = [
-        {
-            id: 1,
-            img: "/images/hyderabad.png",
-            city: "Hyderabad",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 2,
-            img: "/images/chennai2.png",
-            city: "Chennai",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 3,
-            img: "/images/pune2.png",
-            city: "Pune",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 4,
-            img: "/images/ahamdabad2.png",
-            city: "Ahmedabad",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 5,
-            img: "/images/hyderabad.png",
-            city: "Mumbai",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 6,
-            img: "/images/pune2.png",
-            city: "Bangalore",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 7,
-            img: "/images/hyderabad.png",
-            city: "Kolkata",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        },
-        {
-            id: 8,
-            img: "/images/hyderabad.png",
-            city: "Delhi",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹20,000"
-        }
-    ];
+  const domesticData = [
+    {
+      id: 1,
+      img: "/images/hyderabad.png",
+      city: "Hyderabad",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 2,
+      img: "/images/chennai2.png",
+      city: "Chennai",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 3,
+      img: "/images/pune2.png",
+      city: "Pune",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 4,
+      img: "/images/ahamdabad2.png",
+      city: "Ahmedabad",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 5,
+      img: "/images/hyderabad.png",
+      city: "Mumbai",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 6,
+      img: "/images/pune2.png",
+      city: "Bangalore",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 7,
+      img: "/images/hyderabad.png",
+      city: "Kolkata",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+    {
+      id: 8,
+      img: "/images/hyderabad.png",
+      city: "Delhi",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹20,000",
+    },
+  ];
 
-    const internationalData = [
-        {
-            id: 1,
-            img: "/images/ahamdabad2.png",
-            city: "Dubai",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹45,000"
-        },
-        {
-            id: 2,
-            img: "/images/hyderabad.png",
-            city: "Singapore",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹35,000"
-        },
-        {
-            id: 3,
-            img: "/images/chennai2.png",
-            city: "Bangkok",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹28,000"
-        },
-        {
-            id: 4,
-            img: "/images/hyderabad.png",
-            city: "London",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹85,000"
-        },
-        {
-            id: 5,
-            img: "/images/hyderabad.png",
-            city: "New York",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹95,000"
-        },
-        {
-            id: 6,
-            img: "/images/pune2.png",
-            city: "Paris",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹80,000"
-        },
-        {
-            id: 7,
-            img: "/images/hyderabad.png",
-            city: "Tokyo",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹75,000"
-        },
-        {
-            id: 8,
-            img: "/images/pune2.png",
-            city: "Sydney",
-            date: "24 Mar 2026 - 14 Apr 2026",
-            price: "₹90,000"
-        }
-    ];
+  const internationalData = [
+    {
+      id: 1,
+      img: "/images/ahamdabad2.png",
+      city: "Dubai",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹45,000",
+    },
+    {
+      id: 2,
+      img: "/images/hyderabad.png",
+      city: "Singapore",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹35,000",
+    },
+    {
+      id: 3,
+      img: "/images/chennai2.png",
+      city: "Bangkok",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹28,000",
+    },
+    {
+      id: 4,
+      img: "/images/hyderabad.png",
+      city: "London",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹85,000",
+    },
+    {
+      id: 5,
+      img: "/images/hyderabad.png",
+      city: "New York",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹95,000",
+    },
+    {
+      id: 6,
+      img: "/images/pune2.png",
+      city: "Paris",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹80,000",
+    },
+    {
+      id: 7,
+      img: "/images/hyderabad.png",
+      city: "Tokyo",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹75,000",
+    },
+    {
+      id: 8,
+      img: "/images/pune2.png",
+      city: "Sydney",
+      date: "24 Mar 2026 - 14 Apr 2026",
+      price: "₹90,000",
+    },
+  ];
 
-    const cardData = activeTab === 'Domestic' ? domesticData : internationalData;
+  const cardData = activeTab === "Domestic" ? domesticData : internationalData;
 
-    const handleTabChange = (tab) => {
-        setActiveTab(tab);
-        // Reset swiper to first slide when tab changes
-        if (swiperRef) {
-            swiperRef.slideTo(0, 0);
-        }
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Reset swiper to first slide when tab changes
+    if (swiperRef) {
+      swiperRef.slideTo(0, 0);
+    }
+  };
+
+  const tabsRef = useRef(null);
+
+  useEffect(() => {
+    if (!tabsRef.current) return; // ✅ prevent crash
+
+    const tabs = tabsRef.current;
+    const activeTabEl = tabs.querySelector(`.${styles.active}`);
+
+    if (!activeTabEl) return;
+
+    tabs.style.setProperty("--indicator-width", `${activeTabEl.offsetWidth}px`);
+    tabs.style.setProperty("--indicator-left", `${activeTabEl.offsetLeft}px`);
+  }, [activeTab]);
+
+  const [selectedCity, setSelectedCity] = useState("Delhi");
+  const [isCityOpen, setIsCityOpen] = useState(false);
+  const cityRef = useRef(null);
+
+  const metroCities = ["Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata"];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (cityRef.current && !cityRef.current.contains(e.target)) {
+        setIsCityOpen(false);
+      }
     };
 
-    const tabsRef = useRef(null);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    useEffect(() => {
-        if (!tabsRef.current) return;   // ✅ prevent crash
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <div className={styles.heading}>
+          Popular Flights to Destination From
+          <span className={styles.headingMult} ref={cityRef}>
+            <button
+              className={styles.cityBtnn}
+              onClick={() => setIsCityOpen((prev) => !prev)}
+            >
+              <span>{selectedCity}</span>
+              <img
+                src="/icons/dropdown.svg"
+                alt=""
+                className={isCityOpen ? styles.rotate : ""}
+              />
+            </button>
 
-        const tabs = tabsRef.current;
-        const activeTabEl = tabs.querySelector(`.${styles.active}`);
+            {isCityOpen && (
+              <ul className={styles.cityDropdown}>
+                {metroCities.map((city) => (
+                  <li
+                    key={city}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      setIsCityOpen(false);
+                    }}
+                  >
+                    {city}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </span>
+        </div>
 
-        if (!activeTabEl) return;
+        <nav className={styles.tabsWrap}>
+          <ul className={styles.tabs} ref={tabsRef}>
+            {["Domestic", "International"].map((t) => (
+              <li
+                key={t}
+                className={`${styles.tab} ${
+                  activeTab === t ? styles.active : ""
+                }`}
+                onClick={() => handleTabChange(t)}
+              >
+                <button
+                  className={styles.tabBtn}
+                  // onClick={() => handleTabChange(t)}
+                >
+                  {t}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-        tabs.style.setProperty(
-            "--indicator-width",
-            `${activeTabEl.offsetWidth}px`
-        );
-        tabs.style.setProperty(
-            "--indicator-left",
-            `${activeTabEl.offsetLeft}px`
-        );
-    }, [activeTab]);
-
-
-    const [selectedCity, setSelectedCity] = useState("Delhi");
-    const [isCityOpen, setIsCityOpen] = useState(false);
-    const cityRef = useRef(null);
-
-    const metroCities = ["Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata"];
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (cityRef.current && !cityRef.current.contains(e.target)) {
-                setIsCityOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-
-    return (
-        <section className={styles.section}>
-            <div className={styles.container}>
-                <div className={styles.heading}>
-                    Popular Flights to Destination From
-                    <span className={styles.headingMult} ref={cityRef}>
-                        <button
-                            className={styles.cityBtnn}
-                            onClick={() => setIsCityOpen((prev) => !prev)}
-                        >
-                            <span>{selectedCity}</span>
-                            <img
-                                src="/icons/dropdown.svg"
-                                alt=""
-                                className={isCityOpen ? styles.rotate : ""}
-                            />
-                        </button>
-
-                        {isCityOpen && (
-                            <ul className={styles.cityDropdown}>
-                                {metroCities.map((city) => (
-                                    <li
-                                        key={city}
-                                        onClick={() => {
-                                            setSelectedCity(city);
-                                            setIsCityOpen(false);
-                                        }}
-                                    >
-                                        {city}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </span>
-
-                </div>
-
-                <nav className={styles.tabsWrap}>
-                    <ul className={styles.tabs} ref={tabsRef}>
-                        {['Domestic', 'International'].map((t) => (
-                            <li
-                                key={t}
-                                className={`${styles.tab} ${activeTab === t ? styles.active : ''}`}
-                                onClick={() => handleTabChange(t)}
-                            >
-                                <button
-                                    className={styles.tabBtn}
-                                // onClick={() => handleTabChange(t)}
-                                >
-                                    {t}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-
-
-                <div style={{ margin: "0 auto" }} className='popularFlightsCarouselWrapper'>
-                    {/* <Swiper
+        <div
+          style={{ margin: "0 auto" }}
+          className="popularFlightsCarouselWrapper"
+        >
+          {/* <Swiper
                         key={activeTab}
                         modules={[Navigation]}
                         onSwiper={setSwiperRef}
@@ -251,70 +245,83 @@ const PopularFlights = () => {
                         loopAdditionalSlides={2}
                     > */}
 
-                    <Swiper
-                        key={activeTab}
-                        modules={[Navigation]}
-                        onSwiper={setSwiperRef}
-                        navigation={true}
-                        loop={true}
-                        loopAdditionalSlides={2}
-                        slidesPerGroup={1}
-                        spaceBetween={16}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{
+                duration: 0.25,
+                ease: [0.4, 0, 0.2, 1], 
+              }}
+            >
+              <Swiper
+                key={activeTab}
+                modules={[Navigation]}
+                onSwiper={setSwiperRef}
+                navigation={true}
+                loop={true}
+                loopAdditionalSlides={2}
+                slidesPerGroup={1}
+                spaceBetween={16}
+                breakpoints={{
+                  0: {
+                    slidesPerView: 1.1, // 👈 show next slide partially
+                    spaceBetween: 16,
+                  },
+                  576: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                  },
+                  767: {
+                    slidesPerView: 3,
+                    spaceBetween: 24,
+                  },
+                  991: {
+                    slidesPerView: 4,
+                    spaceBetween: 30,
+                  },
+                }}
+              >
+                {cardData.map((item, index) => (
+                  <SwiperSlide key={item.id}>
+                    <div className={styles.carouselContainer}>
+                      <div className={styles.itemsCard}>
+                        <img src={item.img} alt="" />
 
-                        breakpoints={{
-                            0: {
-                                slidesPerView: 1.1,   // 👈 show next slide partially
-                                spaceBetween: 16,
-                            },
-                            576: {
-                                slidesPerView: 2,
-                                spaceBetween: 20,
-                            },
-                            767: {
-                                slidesPerView: 3,
-                                spaceBetween: 24,
-                            },
-                            991: {
-                                slidesPerView: 4,
-                                spaceBetween: 30,
-                            },
-                        }}
-                    >
+                        {/* Show text overlay on all cards */}
+                        {item.city && (
+                          <>
+                            <div className={styles.overlay}></div>
 
-                        {cardData.map((item, index) => (
-                            <SwiperSlide key={item.id}>
-                                <div className={styles.carouselContainer}>
-                                    <div className={styles.itemsCard}>
-                                        <img src={item.img} alt="" />
+                            <div className={styles.textContainer}>
+                              <div className={styles.textTop}>
+                                <span>{item.city}</span>
+                                <p>{item.date}</p>
+                              </div>
 
-                                        {/* Show text overlay on all cards */}
-                                        {item.city && (
-                                            <>
-                                                <div className={styles.overlay}></div>
-
-                                                <div className={styles.textContainer}>
-                                                    <div className={styles.textTop}>
-                                                        <span>{item.city}</span>
-                                                        <p>{item.date}</p>
-                                                    </div>
-
-                                                    <div className={styles.textBottom}>
-                                                        <p className={styles.economy}>
-                                                            Economy From <span>{item.price}</span>
-                                                        </p>
-                                                        <p className={styles.discoverText}>DISCOVER FLIGHTS</p>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </div>
-                {/* Buttons */}
-                {/* <div className={styles.btnContainer}>
+                              <div className={styles.textBottom}>
+                                <p className={styles.economy}>
+                                  Economy From <span>{item.price}</span>
+                                </p>
+                                <p className={styles.discoverText}>
+                                  DISCOVER FLIGHTS
+                                </p>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        {/* Buttons */}
+        {/* <div className={styles.btnContainer}>
                     <div className={styles.btn}>
                         <img src="/icons/left.svg" alt="" />
                     </div>
@@ -322,33 +329,32 @@ const PopularFlights = () => {
                         <img src="/icons/right.svg" alt="" />
                     </div>
                 </div> */}
-                <div className={styles.btnContainer}>
-                    <div
-                        className={styles.btn}
-                        onClick={() => {
-                            if (swiperRef) {
-                                swiperRef.slidePrev();
-                            }
-                        }}
-                    >
-                        <img src="/icons/left.svg" alt="" />
-                    </div>
+        <div className={styles.btnContainer}>
+          <div
+            className={styles.btn}
+            onClick={() => {
+              if (swiperRef) {
+                swiperRef.slidePrev();
+              }
+            }}
+          >
+            <img src="/icons/left.svg" alt="" />
+          </div>
 
-                    <div
-                        className={styles.btn}
-                        onClick={() => {
-                            if (swiperRef) {
-                                swiperRef.slideNext();
-                            }
-                        }}
-                    >
-                        <img src="/icons/right.svg" alt="" />
-                    </div>
-                </div>
+          <div
+            className={styles.btn}
+            onClick={() => {
+              if (swiperRef) {
+                swiperRef.slideNext();
+              }
+            }}
+          >
+            <img src="/icons/right.svg" alt="" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-            </div>
-        </section>
-    )
-}
-
-export default PopularFlights
+export default PopularFlights;
