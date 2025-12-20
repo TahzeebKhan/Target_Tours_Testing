@@ -1,0 +1,248 @@
+.card{
+    display: flex;
+    background-color: #ffffff;
+    padding: 16px;
+    padding-right: 0;
+    justify-content: space-between;
+}
+.cardLeft{
+    max-width: 835px;
+    width: 100%;
+    display: flex;
+    gap: 16px;
+}
+.cardLeftMainCont{
+    max-width: 835px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.departContainer, .returnContainer{
+    max-width: 409px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.HeadingCont{
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.HeadingCont img{
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+
+}
+
+.ariLineName{
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #000000;
+
+}
+.ariLineNumber{
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 15.71px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #737373;
+
+}
+.departureDetails{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.departTextHeading{
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.departTextHeading h3{
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-style: Bold;
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000000;
+}
+.departTextHeading span{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+.departTimeContainer{
+    max-width: 409px;
+    width: 100%;
+    padding: 16px;
+    border: 0.5px solid #E4E6E8;
+
+}
+
+.cardRight{
+    display: flex;
+    padding-right: 12px;
+    margin-top: -16px;
+    max-height: 171px;
+}
+
+/* FARE DETAILS CONTAINER */
+.fareDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* TOTAL FARE (TOP) */
+.totalFare {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.fareText {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  color: #000000;
+}
+
+/* VIEW FARES BUTTON */
+.viewBtn {
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #ffffff;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+}
+
+/* PRICE PER ADULT ROW */
+.fareAmount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* PRICE TEXT */
+.fare {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1;
+  color: #000000;
+}
+
+.adult {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1;
+  color: #000000;
+}
+
+/* CABIN CLASS */
+.economy {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 1%;
+  text-transform: uppercase;
+  color: #208ef5;
+}
+
+/* DOT (REUSED) */
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #737373;
+}
+
+/* SEE DETAILS BUTTON */
+.seeDetailsBtn {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ARROW ICON */
+.downArrow {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ROTATE WHEN OPEN */
+.rotate {
+  transform: rotate(180deg);
+}
+
+.expandWrap {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease;
+    border: 1px solid transparent;
+    /* border-top: 1px solid #e5e7f0; */
+}
+
+.expandWrap.open {
+    max-height: 600px;
+    /* enough for content */
+    border: 1px solid #e5e7f0;
+}
+
+.open {
+    max-height: 600px;
+    /* enough for content */
+}
+
+
+.downArrow {
+   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
