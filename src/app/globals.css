@@ -72,6 +72,7 @@ body {
   width: 100%;
   padding-left: 32px;
   padding-right: 32px;
+  overflow-x: hidden !important;
 }
 
 .limitedWrapper .swiper-slide-active {
@@ -128,9 +129,9 @@ body {
     width: 100% !important;
   }
 }
-  .limitedWrapper .swiper {
-    margin-left: 21px;
-  }
+.limitedWrapper .swiper {
+  margin-left: 21px;
+}
 
 @media (max-width: 428px) {
   .limitedWrapper .swiper-wrapper {

@@ -26,6 +26,7 @@ const TargetTours = () => {
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
       price: "INR 2,30,000",
+      centerImage: true,
     },
     {
       id: 3,
@@ -36,15 +37,6 @@ const TargetTours = () => {
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
       price: "INR 2,30,000",
     },
-    // {
-    //   id: 3,
-    //   img: "/images/tour3.webp",
-    //   badge: "17 Days & 16 Nights",
-    //   title: "18 Days - Rajasthan In Deep",
-    //   cities:
-    //     "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-    //   price: "INR 2,30,000",
-    // },
     {
       id: 4,
       img: "/images/tour.webp",
@@ -62,14 +54,12 @@ const TargetTours = () => {
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
       price: "INR 2,30,000",
+      centerImage: true,
     },
   ];
 
   const rotateCards = (cards, shift) => {
-    return cards.map((card, index) => ({
-      ...card,
-      img: cards[(index + shift) % cards.length].img,
-    }));
+    return [...cards.slice(shift), ...cards.slice(0, shift)];
   };
   const tabs = [
     "Explore",
@@ -189,10 +179,12 @@ const TargetTours = () => {
                 </div> */}
         {/* <Carousel cards={cards} /> */}
         <div className={styles.desktopCarousel}>
-          <HoverExpandCarousel cards={cardsForTab} />
+          {" "}
+          <HoverExpandCarousel activeTab={activeTab} cards={cardsForTab} />
         </div>
         <div className={styles.mobileCarousel}>
-          <MobileCarousel cards={cardsForTab} />
+          
+          <MobileCarousel activeTab={activeTab} cards={cardsForTab} />
         </div>
         {/* 
         <div className={styles.controls}>

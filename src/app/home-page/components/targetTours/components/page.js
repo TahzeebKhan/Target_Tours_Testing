@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./newPage.module.css";
+import { AnimatePresence, motion } from "framer-motion";
 
 // const cards = [
 //   { id: 1, title: "Holiday", img: "/images/img1.jpg" },
@@ -12,7 +13,7 @@ import styles from "./newPage.module.css";
 
 // ];
 
-const HoverExpandCarousel = ({ cards = [] }) => {
+const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   const [startIndex, setStartIndex] = useState(0);
 
   // SSR safety: if no cards provided, render nothing
@@ -34,61 +35,77 @@ const HoverExpandCarousel = ({ cards = [] }) => {
 
   return (
     <section className={styles.carouselSection}>
-      <div className={styles["hover-carousel"]}>
-        {orderedCards.slice(0, 3).map((card, idx) => (
-          <div
-            className={`${styles["hover-card"]} ${
-              idx == 0 ? styles.leftCard : ""
-            } ${idx == 1 ? styles.midCard : ""} ${
-              idx == 2 ? styles.rightCard : ""
-            }`}
-            key={card.id}
-          >
-            <img
-              className={`${idx == 0 ? styles.leftImg : ""} ${
-                idx == 1 ? styles.midImg : ""
-              } ${idx == 2 ? styles.rightImg : ""}`}
-              src={card.img}
-              alt={card.title}
-            />
-            <div className={styles.cardOverlay}>
-              <span className={styles.duration}>{card.badge}</span>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -40 }}
+          transition={{
+            duration: 0.25,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+        >
+          {" "}
+          <div className={styles["hover-carousel"]}>
+            {orderedCards.slice(0, 3).map((card, idx) => (
+              <div
+                className={`${styles["hover-card"]} ${
+                  idx == 0 ? styles.leftCard : ""
+                } ${idx == 1 ? styles.midCard : ""} ${
+                  idx == 2 ? styles.rightCard : ""
+                }`}
+                key={card.id}
+              >
+                <img
+                  className={`${idx == 0 ? styles.leftImg : ""} ${
+                    idx == 1 ? styles.midImg : ""
+                  } ${idx == 2 ? styles.rightImg : ""} ${
+                    card.centerImage ? styles.centerImg : ""
+                  }`}
+                  src={card.img}
+                  alt={card.title}
+                />
+                <div className={styles.cardOverlay}>
+                  <span className={styles.duration}>{card.badge}</span>
 
-              <h3 className={styles.cardTitle}>{card.title}</h3>
+                  <h3 className={styles.cardTitle}>{card.title}</h3>
 
-              <p className={styles.cities}>{card.cities}</p>
+                  <p className={styles.cities}>{card.cities}</p>
 
-              <div className={styles.price}>
-                {card.price}
-                <span>/Adult</span>
+                  <div className={styles.price}>
+                    {card.price}
+                    <span>/Adult</span>
+                  </div>
+
+                  <button className={styles.arrowBtn}>
+                    <svg
+                      width="30"
+                      height="30"
+                      viewBox="0 0 30 30"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.75 8.75H21.25V21.25"
+                        stroke="white"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M8.75 21.25L21.25 8.75"
+                        stroke="white"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-
-              <button className={styles.arrowBtn}>
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8.75 8.75H21.25V21.25"
-                    stroke="white"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8.75 21.25L21.25 8.75"
-                    stroke="white"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       <div className={styles.navButtons}>
         <button

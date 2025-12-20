@@ -1,7 +1,7 @@
 .carouselSection {
   width: 100%;
   padding: 60px 0;
-
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,6 +103,11 @@
 .hover-card:hover .rightImg {
   transform: scale(1.09);
 }
+
+.centerImg {
+  object-position: center center !important;
+}
+
 /* Text overlay */
 .cardOverlay {
   bottom: -29.9%;
