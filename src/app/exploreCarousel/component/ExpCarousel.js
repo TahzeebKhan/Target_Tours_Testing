@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Virtual, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -12,6 +12,9 @@ import styles from "./ExpCarousel.module.css";
 
 export default function ExpCarousel({ activeTab }) {
   const [swiperRef, setSwiperRef] = useState(null);
+  // track the current slidesPerView according to breakpoints so we can
+  // conditionally show navigation buttons when there are more slides than visible
+  const [slidesPerViewLocal, setSlidesPerViewLocal] = useState(4);
 
   const [allSlidesData, setAllSlidesData] = useState([
     {
@@ -212,6 +215,19 @@ export default function ExpCarousel({ activeTab }) {
     setAllSlidesData(updated);
   };
 
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w >= 1200) setSlidesPerViewLocal(4);
+      else if (w >= 768) setSlidesPerViewLocal(3);
+      else if (w >= 576) setSlidesPerViewLocal(2);
+      else setSlidesPerViewLocal(1.1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
   return (
     <>
       <div
@@ -319,22 +335,24 @@ export default function ExpCarousel({ activeTab }) {
           ))}
         </Swiper>
 
-        {/* Navigation Buttons */}
-        <div className={styles.btnContainer}>
-          <div
-            className={styles.btn}
-            onClick={() => swiperRef?.slidePrev()}
-          >
-            <img src="/icons/left.svg" alt="" />
-          </div>
+        {/* Navigation Buttons - show only when there are more slides than visible */}
+        {slides.length > slidesPerViewLocal && (
+          <div className={styles.btnContainer}>
+            <div
+              className={styles.btn}
+              onClick={() => swiperRef?.slidePrev()}
+            >
+              <img src="/icons/left.svg" alt="" />
+            </div>
 
-          <div
-            className={styles.btn}
-            onClick={() => swiperRef?.slideNext()}
-          >
-            <img src="/icons/right.svg" alt="" />
+            <div
+              className={styles.btn}
+              onClick={() => swiperRef?.slideNext()}
+            >
+              <img src="/icons/right.svg" alt="" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

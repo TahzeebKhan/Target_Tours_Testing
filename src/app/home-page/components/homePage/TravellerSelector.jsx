@@ -10,7 +10,8 @@ export default function TravellerSelector({
   travellerOptions,      // array [{ value, label }]
   wrapperClass = "",     // optional classname for parent .fromBtn sizing
   styles,
-  name                // pass your module styles object
+  name,                // pass your module styles object
+  className
 }) {
   const [open, setOpen] = useState(false)
   const localRef = useRef(null)
@@ -31,7 +32,7 @@ export default function TravellerSelector({
   const selectedLabel = travellerOptions.find(o => o.value === travellerClass)?.label || "1 Traveller, Economy"
 
   return (
-    <div className={`${styles.fromBtn} ${wrapperClass}`}>
+    <div className={`${styles.fromBtn} ${className}  ${wrapperClass}`}>
       <div className={styles.lable}>{name}</div>
 
       <div
