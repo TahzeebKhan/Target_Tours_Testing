@@ -87,6 +87,17 @@ body {
   /* width: 100%; */
 }
 
+
+.wrapper {
+  max-width: 1200px;
+  margin: auto;
+  position: relative;
+}
+.wrapper .swiper-slide.auto-size{
+  width: auto !important;
+}
+
+
 @media (max-width: 1440px) {
   .limitedWrapper .swiper-wrapper {
     transform: translate3d(50px, 0, 0);

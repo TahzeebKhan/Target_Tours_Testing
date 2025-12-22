@@ -206,9 +206,8 @@ const Carousel = ({
           return (
             <div
               key={slideNumber}
-              className={`${styles.slide} ${
-                isActive ? styles.activeSlide : ""
-              }`}
+              className={`${styles.slide} ${isActive ? styles.activeSlide : ""
+                }`}
               style={slideStyle}
               onClick={() => handleSlideChange(slideNumber)}
             >
@@ -231,9 +230,8 @@ const Carousel = ({
                       <span>STARTING FROM </span> {slide.price}
                     </div>
                     <div
-                      className={`${styles.textContent} ${
-                        isActive ? styles.overlayShow : styles.overlayHide
-                      }`}
+                      className={`${styles.textContent} ${isActive ? styles.overlayShow : styles.overlayHide
+                        }`}
                     >
                       <div className={styles.title}>{slide.title}</div>
                       <div className={styles.description}>

@@ -50,23 +50,23 @@ export default function InnerCarousel({ images = [], favorite, onFavorite }) {
           </div>
 
           <div className={styles.iconsCont}>
-            {!isBeginning && (
+            {/* {!isBeginning && (
               <div
                 className={styles.leftBtn}
                 onClick={() => swiperRef.current.slidePrev()}
               >
                 <img src="/icons/left.svg" alt="" />
               </div>
-            )}
+            )} */}
 
-            {!isEnd && (
+            {/* {!isEnd && ( */}
               <div
                 className={styles.leftRightBtn}
                 onClick={() => swiperRef.current.slideNext()}
               >
                 <img src="/icons/right.svg" alt="" />
               </div>
-            )}
+            {/* )} */}
           </div>
 
           {/* Dynamic Images */}
