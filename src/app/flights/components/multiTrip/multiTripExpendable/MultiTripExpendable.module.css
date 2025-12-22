@@ -1,28 +1,26 @@
 /* ROOT */
 .expandableSection {
-  padding: 16px 24px 24px 24px;
+  padding: 24px;
   background-color: #ffffff;
-  border: 1px solid transparent;
 }
 
 .expandableContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
-.leftFlightInfoCont,
-.rightFlightInfoCont {
-  max-width: 494px;
-  width: 100%;
-}
 /* TABS */
 .tabContainer {
   position: relative;
   display: flex;
   background-color: #f0f3ff;
   padding: 6px;
+  height: 49px;
   justify-content: space-between;
+}
+.leftFlightInfoCont {
+  width: 100%;
 }
 
 .tabContainer::before {
@@ -46,6 +44,9 @@
   max-width: 210px;
   width: 100%;
   font-family: var(--font-inter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 300;
   font-size: 14px;
   line-height: 1.2;
@@ -53,7 +54,6 @@
   text-transform: uppercase;
   color: #000033;
   cursor: pointer;
-  text-align: center;
   opacity: 0.6;
   transition: opacity 0.2s ease, color 0.25s ease;
 }
@@ -149,15 +149,16 @@
   background-color: #f7f7f7;
   border: 1px solid #c4c4c4;
   border-radius: 7px;
+  font-weight: 400;
+  color: #737373;
   font-size: 12px;
   width: fit-content;
 }
 
 /* TIMELINE */
 .timelineContainer {
-  display: grid;
+  display: flex;
   justify-content: space-between;
-  grid-template-columns: repeat(3, 1fr);
   align-items: center;
   position: relative;
 }
@@ -198,8 +199,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  top: -10px;
 }
 
 .flightAnimation {
@@ -214,8 +213,8 @@
 }
 
 .bigDot {
-  width: 6px;
-  height: 6px;
+  width: 7px !important;
+  height: 7px !important;
   border-radius: 50%;
   background-color: #000033;
 }
@@ -278,10 +277,6 @@
   gap: 10px;
 }
 
-.baggageRuleContainer {
-  display: flex;
-  gap: 24px;
-}
 .tableCard {
   max-width: 534px;
   width: 100%;
@@ -329,6 +324,7 @@
 
 .flightInfoContainer {
   display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
@@ -366,7 +362,6 @@
   padding: 3px 10px;
   background-color: #f7f7f7;
   border: 1px solid #c4c4c4;
-  color: #737373;
   border-radius: 7px;
   font-family: var(--font-inter);
   font-size: 12px;
@@ -399,8 +394,8 @@
 ========================= */
 
 .timelineContainer {
-  display: flex;
-  justify-content: space-between;
+ display: grid;
+  grid-template-columns: repeat(3, 1fr);
   align-items: center;
   position: relative;
 }
@@ -449,7 +444,6 @@
   font-family: var(--font-inter);
   font-size: 12px;
   color: #a2a2a2;
-  white-space: nowrap;
 }
 
 /* =========================
@@ -534,7 +528,7 @@
 }
 
 .flightHeading {
-  padding: 16px;
+  padding: 14px;
   border: 0.5px solid #e4e6e8;
 }
 
@@ -562,7 +556,14 @@
   flex-direction: column;
   gap: 14px;
 }
+
 .flightFareContaienr {
   display: flex;
+  gap: 24px;
+}
+
+
+.baggageRuleContainer{
+    display: flex;
   gap: 24px;
 }

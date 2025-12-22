@@ -5,38 +5,51 @@ import DatePriceSlider from "./components/DatePriceSlider";
 import FlightFilters from "./components/FlightsFilters";
 import TopFilterSection from "./components/TopFilterSection";
 import { useState } from "react";
-import { TripTypeProvider } from "./TripTypeContext";
+import { TripTypeProvider, useTripType } from "./TripTypeContext";
 
-export default function FlightsLayout({ children }) {
-  // const [tripType, setTripType] = useState("oneway");
+function LayoutContent({ children }) {
+  const { tripType } = useTripType();
+
   return (
     <>
-      <TripTypeProvider>
-        {" "}
-        {/* Top Navbar */}
-        <div className={styles.wrapper}>
-          <Navbar />
-          <div className={styles.imageBackgound}>
-            <TopFilterSection />
-          </div>
+      {" "}
+      {/* Top Navbar */}
+      <div className={styles.wrapper}>
+        <Navbar />
+        <div className={styles.imageBackgound}>
+          <TopFilterSection />
         </div>
-        {/* Page Wrapper */}
-        <main className={styles.page}>
-          <div className={styles.container}>
-            {/* top date slider */}
-            <div className={styles.dateSlider}>
-              <DatePriceSlider />
-            </div>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
-              <FlightFilters />
-            </aside>
-
-            {/* Main content */}
-            <section className={styles.content}>{children}</section>
+      </div>
+      {/* Page Wrapper */}
+      <main className={styles.page}>
+        <div
+          className={`${styles.container} ${
+            tripType === "round" ? styles.wideContainer : styles.normalContainer
+          }`}
+        >
+          {/* top date slider */}
+          <div className={styles.dateSlider}>
+            <DatePriceSlider />
           </div>
-        </main>
-      </TripTypeProvider>
+          {/* Sidebar */}
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarSticky}>
+              <FlightFilters />
+            </div>
+          </aside>
+
+          {/* Main content */}
+          <section className={styles.content}>{children}</section>
+        </div>
+      </main>
     </>
+  );
+}
+
+export default function FlightsLayout({ children }) {
+  return (
+    <TripTypeProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </TripTypeProvider>
   );
 }
