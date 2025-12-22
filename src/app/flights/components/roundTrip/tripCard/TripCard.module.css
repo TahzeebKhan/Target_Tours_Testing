@@ -152,19 +152,11 @@
   text-transform: uppercase;
   cursor: pointer;
   border: none;
-<<<<<<< Updated upstream
   transition: all 0.45s ease;
 }
 .viewBtn:hover {
   background-color: #fcc800;
   color: #000033;
-=======
-    transition: all .35s ease-in-out;
->>>>>>> Stashed changes
-}
-.viewBtn:hover{
-    background-color: #FCC800;
-    color: #000033;
 }
 
 
