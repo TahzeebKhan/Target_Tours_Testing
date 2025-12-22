@@ -7,11 +7,7 @@ const OnewayFlightBooking = () => {
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
-<<<<<<< Updated upstream
   const [selectedSort, setSelectedSort] = useState("");
-=======
-  const [activeSort, setActiveSort] = useState(null);
->>>>>>> Stashed changes
 
   const flightResults = [
     {
@@ -83,11 +79,7 @@ const OnewayFlightBooking = () => {
       airline: {
         name: "Air India",
         code: "AI-541",
-<<<<<<< Updated upstream
-        logo: "/images/flightCompanyLogos/airindia.png",
-=======
         logo: ["/images/Flight.png", "/images/AirIndia.png"],
->>>>>>> Stashed changes
       },
       departure: {
         time: "20:15",

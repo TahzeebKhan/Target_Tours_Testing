@@ -30,13 +30,9 @@
 .tabItem {
     position: relative;
     z-index: 1;
-<<<<<<< Updated upstream
-display: flex;
-align-items: center;
-justify-content: center;
-=======
-    text-align: center;
->>>>>>> Stashed changes
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: color 0.25s ease;
     padding: 8px 24px;
@@ -58,11 +54,13 @@ justify-content: center;
     opacity: 0.6;
     will-change: opacity, transform; */
 }
+
 .expandableContainer {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
+
 .active {
     color: #FFFFFF;
     opacity: 1;
