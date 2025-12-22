@@ -12,8 +12,12 @@
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
     "next": "15.5.7",
+    "owl.carousel": "^2.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-owl-carousel": "^2.3.3",
+    "react-slick": "^0.31.0",
+    "slick-carousel": "^1.8.1",
     "swiper": "^12.0.3"
   },
   "devDependencies": {
