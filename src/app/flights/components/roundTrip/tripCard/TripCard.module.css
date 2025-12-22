@@ -8,6 +8,7 @@
   background-color: #ffffff;
   padding: 16px;
   padding-right: 0;
+  gap: 16px;
   justify-content: space-between;
   transition: all 0.4s ease;
 }
@@ -176,6 +177,7 @@
   font-size: 14px;
   line-height: 1;
   color: #000000;
+  white-space: nowrap;
 }
 
 .adult {
