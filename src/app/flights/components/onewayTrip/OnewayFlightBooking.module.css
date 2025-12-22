@@ -508,7 +508,16 @@
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
+  .fare {
+    white-space: nowrap;
+  }
 
 .rotate {
   transform: rotate(180deg);
+}
+
+@media (max-width: 1264px) {
+  .flightFareDetailsContainer {
+    gap: 24px;
+  }
 }

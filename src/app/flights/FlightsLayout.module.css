@@ -105,5 +105,13 @@
 @media (max-width: 1321px) {
   .container {
     padding: 20px;
+
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+@media (max-width: 1458px) {
+  .wideContainer {
+    padding: 0px 8px;
   }
 }

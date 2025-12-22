@@ -57,6 +57,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    white-space: nowrap;
 }
 
 .fromName {
@@ -102,4 +103,20 @@
     line-height: 100%;
     letter-spacing: 0%;
     color: #000000;
+}
+
+
+@media (max-width:1400px) {
+    .fromName{
+        font-size: 10px;
+    }
+    .duration{
+        font-size: 10px !important;
+    }
+    .nonStop{
+        font-size: 10px !important;
+    }
+    .priceContainer{
+        gap: 4px;
+    }
 }
