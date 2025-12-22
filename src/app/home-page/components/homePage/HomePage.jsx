@@ -5,12 +5,17 @@ import { useState, useRef, useEffect } from 'react'
 import TravellerSelector from './TravellerSelector';
 import Navbar from '../../../flights/Navbar';
 import Link from 'next/link';
+import DateField from './DateField';
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
   const [tripType, setTripType] = useState("round"); // NEW
   const [bookingType, setBookingType] = useState("flight")
   const [menuOpen, setMenuOpen] = useState(false);
+  const [departureDate, setDepartureDate] = useState("");
+  const [returnDate, setReturenDate] = useState("")
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("")
 
 
 
@@ -21,6 +26,8 @@ const HomePage = () => {
   const [activeFeature, setActiveFeature] = useState(1); // default: 1 = Flights
   const featureRowRef = useRef(null);
   const progressRef = useRef(null);
+
+  const [travellerDestination, setTravellerDestination] = useState("SELECT DESTINATION")
 
   // state for travellers dropdown
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
@@ -104,7 +111,7 @@ const HomePage = () => {
     { value: "3_traveller_business", label: "3 Traveller, Business" },
   ];
 
-  const TravellerDestination = [
+  const TravellerDestinationOptions = [
     {
       value: "india", label: "india"
     },
@@ -819,12 +826,19 @@ const HomePage = () => {
                     {/* <div className={styles.arrowboxOneWay}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
                 </div> */}
-                    <div className={styles.fromBtn}>
+                    {/* <div className={styles.fromBtn}>
                       <div className={styles.lable}>TRAVEL DESTINATION</div>
                       <div className={styles.dateInputWrapper}>
                         <div className={styles.contant}>SELECT DESTINATION</div>
                         <img src="/images/Vector.svg" alt="" /></div>
-                    </div>
+                    </div> */}
+                    <TravellerSelector
+                      travellerClass={travellerDestination}
+                      setTravellerClass={setTravellerDestination}
+                      travellerOptions={TravellerDestinationOptions}
+                      styles={styles}
+                      name="TRAVEL DESTINATION"
+                    />
 
                     <div className={styles.fromBtn}>
                       <div className={styles.lable}>TRAVEL DATE</div>
@@ -915,17 +929,17 @@ const HomePage = () => {
 
         <div className={styles.featureStrip}>
           <div
-              className={styles.progress}
-              ref={progressRef}
-              style={{
-                '--active-index': String(activeFeature),
-                '--count': String(features.length)
-              }}
-            >
-              <div className={styles.progressActive}></div>
-            </div>
+            className={styles.progress}
+            ref={progressRef}
+            style={{
+              '--active-index': String(activeFeature),
+              '--count': String(features.length)
+            }}
+          >
+            <div className={styles.progressActive}></div>
+          </div>
 
-            <div className={styles.featureRow} ref={featureRowRef}>
+          <div className={styles.featureRow} ref={featureRowRef}>
             {features.map((f) => (
               <button
                 key={f.id}
@@ -954,6 +968,7 @@ const HomePage = () => {
                 type="text"
                 placeholder="Departure"
                 className={styles.input}
+                value={from}
                 onChange={(e) => setFrom(e.target.value)}
               />
             </div>
@@ -968,27 +983,27 @@ const HomePage = () => {
                 type="text"
                 placeholder="Destination"
                 className={styles.input}
+                value={to}
                 onChange={(e) => setTo(e.target.value)}
               />
             </div>
-
-            {/* DEPARTURE DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>DEPARTURE DATE</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
-
+            <DateField
+              label="DEPARTURE DATE"
+              placeholder="ADD DATES"
+              value={departureDate}
+              name="departureDate"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDepartureDate(e.target.value)}
+            />
             {/* RETURN DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>RETURN DATE</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
+            <DateField
+              label="RETURN DATE"
+              placeholder="ADD DATES"
+              value={returnDate}
+              name="departureDate"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setReturenDate(e.target.value)}
+            />
 
             {/* TRAVELLERS */}
             <TravellerSelector
@@ -1025,29 +1040,23 @@ const HomePage = () => {
               />
             </div>
 
-            {/* SWAP */}
-
-
-
-
-            {/* DEPARTURE DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>Check in</label>
-              <input
-                type="date"
-                className={styles.input}
-                placeholder='Add Date'
-              />
-            </div>
-
+            <DateField
+              label="Check in"
+              placeholder="ADD DATES"
+              value={checkIn}
+              name="departureDate"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setCheckIn(e.target.value)}
+            />
             {/* RETURN DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>Check out</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
+            <DateField
+              label="Check out"
+              placeholder="ADD DATES"
+              value={checkOut}
+              name="returnDate"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setCheckOut(e.target.value)}
+            />
 
             {/* TRAVELLERS */}
             <TravellerSelector
@@ -1099,24 +1108,15 @@ const HomePage = () => {
             </div>
 
             {/* DEPARTURE DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>Departure Date</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
+            <DateField
+              label="DEPARTURE DATE"
+              placeholder="ADD DATES"
+              value={departureDate}
+              name="departureDate"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDepartureDate(e.target.value)}
+            />
 
-            {/* RETURN DATE */}
-            {/* <div className={styles.field}>
-              <label className={styles.label}>Check out</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div> */}
-
-            {/* TRAVELLERS */}
             <TravellerSelector
               travellerClass={travellerClass}
               setTravellerClass={setTravellerClass}
@@ -1136,9 +1136,6 @@ const HomePage = () => {
 
       {bookingType === "insurance" && (
         <div className={styles.flightSectionMain}>
-          {/* <button type="button" className={styles.swapBtn}>
-            <img src="/icons/leftRrighArrow.svg" alt="swap" />
-          </button> */}
           <div className={styles.flightSearchCard}>
 
             {/* FROM */}
@@ -1154,32 +1151,31 @@ const HomePage = () => {
             <TravellerSelector
               travellerClass={travellerClass}
               setTravellerClass={setTravellerClass}
-              travellerOptions={TravellerDestination}
+              travellerOptions={TravellerDestinationOptions}
               styles={styles}
               name="TRAVEL DESTINATION"
             />
             {/* SWAP */}
 
 
-
-
-            {/* DEPARTURE DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>TRAVEL DATE</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
+            <DateField
+              label="TRAVEL DATE"
+              placeholder="ADD DATES"
+              value={departureDate}
+              name="TRAVELDATE"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setDepartureDate(e.target.value)}
+            />
 
             {/* RETURN DATE */}
-            <div className={styles.field}>
-              <label className={styles.label}>Return Date</label>
-              <input
-                type="date"
-                className={styles.input}
-              />
-            </div>
+            <DateField
+              label="TRAVEL DATE"
+              placeholder="ADD DATES"
+              value={returnDate}
+              name="TRAVELDATE"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setReturenDate(e.target.value)}
+            />
 
             {/* TRAVELLERS */}
             <TravellerSelector
@@ -1209,12 +1205,3 @@ const HomePage = () => {
 
 export default HomePage
 
-
-// display: flex;
-// flex-direction: column;
-// background: white;
-// width: 100%;
-// box-shadow: -2px -3px 9.2px 0px #00000014, 0px 5px 8px 0px #0000001A;
-// padding: 12px;
-// position: relative;
-// top: 153px;

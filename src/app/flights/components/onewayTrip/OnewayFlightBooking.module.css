@@ -218,7 +218,27 @@
   flex-direction: column;
   gap: 2px;
 }
+.multiImageCont{
+    position: relative;
+    width: 42px;
+    height: 42px;
+}
+.multiImageCont img{
+    width: 23px;
+    height: 23px;
+}
+.multiImageCont img:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+  
+}
 
+.multiImageCont img:last-child {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
 .seeDetailsBtn {
   display: flex;
   gap: 5px;
@@ -366,6 +386,7 @@
 }
 
 .viewBtn {
+<<<<<<< Updated upstream
   padding: 12px 24px;
   background-color: #000033;
   height: 40px;
@@ -382,6 +403,25 @@
 .viewBtn:hover {
   background-color: #fcc800;
   color: #000033;
+=======
+    padding: 12px 24px;
+    background-color: #000033;
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .35s ease-in-out;
+}
+.viewBtn:hover{
+    background-color: #FCC800;
+    color: #000033;
+>>>>>>> Stashed changes
 }
 
 .fareAmount {
