@@ -58,10 +58,30 @@ const Carousel = ({
       bottomTitle: "Japan",
       bottomDescription: "Japan In The Winter",
     },
+    {
+      id: 6,
+      image: "/images/img5.jpg",
+      title: "JAPAN",
+      description: "Japan In The Winter",
+      price: "₹25,000",
+      hasNewTag: false,
+      bottomTitle: "Japan",
+      bottomDescription: "Japan In The Winter",
+    },
+    {
+      id: 7,
+      image: "/images/img5.jpg",
+      title: "JAPAN",
+      description: "Japan In The Winter",
+      price: "₹25,000",
+      hasNewTag: false,
+      bottomTitle: "Japan",
+      bottomDescription: "Japan In The Winter",
+    },
   ],
 }) => {
   const [currentSlide, setCurrentSlide] = useState(1);
-  const [isPaused, setIsPaused] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
