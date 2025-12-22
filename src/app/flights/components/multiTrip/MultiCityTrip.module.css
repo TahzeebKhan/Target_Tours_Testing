@@ -1,64 +1,60 @@
 .container {
-    max-width: 1060px;
-    width: 100%;
-    /* background-color: red; */
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  max-width: 1060px;
+  width: 100%;
+  /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .FlightBookingTextContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .heading {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: 0%;
-    color: #000000;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #000000;
 }
 
 .heading span {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 28px;
-    line-height: 1;
-    letter-spacing: 0%;
-    color: #070773;
-
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #070773;
 }
 
-
 .subTextContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .priceInfo {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: -2%;
-
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -2%;
 }
 
 .itemsResult {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 12px;
-    line-height: 100%;
-    letter-spacing: -2%;
-    color: #000000;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
 }
-
 
 /* SORT CONTAINER */
 .sortContainer {
@@ -100,8 +96,6 @@
   border: 1px solid #000033;
   background-color: #f0f3ff;
 }
-
-
 /* TEXT */
 .sortedTextContainer {
   display: flex;
@@ -163,4 +157,9 @@
   font-weight: 400;
   text-transform: uppercase;
   color: #000000;
+}
+.tripCardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }

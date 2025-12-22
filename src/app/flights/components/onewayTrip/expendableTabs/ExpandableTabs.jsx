@@ -52,7 +52,7 @@ const ExpandableTabs = () => {
                     <div className={`${styles.tabContentFlightInformation} ${styles.fadeIn}`}>
                         <div className={styles.aboutFlightContainer}>
                             <div className={styles.aboutFlightContainerLeft}>
-                                <img className={styles.flightIcon} src="/images/Flight.png" alt="" />
+                                <img className={styles.flightIcon} src="/images/flightCompanyLogos/indigo.png" alt="" />
                                 <div className={styles.flightInfoTextContainer}>
                                     <div className={styles.flightInfoTextTitle}>IndiGo Airlines (6E- 541)</div>
                                     <div className={styles.flightInfoTextChips}>Boeing 737</div>
@@ -87,7 +87,7 @@ const ExpandableTabs = () => {
                                         <div className={styles.bigDot}></div>
                                         <div className={styles.dashBorder}></div>
                                     </div>
-                                    <img className={styles.flightSvg} src="/icons/flightIcon.svg" alt="" />
+                                    <img className={styles.flightSvg} src="/icons/flightIconBlue.svg" alt="" />
                                     <div className={styles.flightDotedcontainer}>
                                         <div className={styles.dashBorder}></div>
                                         <div className={styles.bigDot}></div>
@@ -132,7 +132,7 @@ const ExpandableTabs = () => {
                                         <div className={styles.bigDot}></div>
                                         <div className={styles.dashBorder}></div>
                                     </div>
-                                    <img className={styles.flightSvg} src="/icons/flightIcon.svg" alt="" />
+                                    <img className={styles.flightSvg} src="/icons/flightIconBlue.svg" alt="" />
                                     <div className={styles.flightDotedcontainer}>
                                         <div className={styles.dashBorder}></div>
                                         <div className={styles.bigDot}></div>

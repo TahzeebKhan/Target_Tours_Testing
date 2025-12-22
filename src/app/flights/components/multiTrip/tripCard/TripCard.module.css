@@ -1,14 +1,10 @@
-.cardPairent {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 .card {
   display: flex;
+  flex-direction: column;
   background-color: #ffffff;
   padding: 16px;
-  padding-right: 0;
   justify-content: space-between;
+  gap: 8px;
   transition: all 0.4s ease;
 }
 .card:hover {
@@ -18,18 +14,23 @@
   max-width: 835px;
   width: 100%;
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 14px;
 }
 .cardLeftMainCont {
   max-width: 835px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+.top {
+  display: flex;
+  gap: 8px;
 }
 .departContainer,
 .returnContainer {
-  max-width: 409px;
+  /* max-width: 409px; */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -38,7 +39,9 @@
 .HeadingCont {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
+
+  min-width: 150px;
 }
 .HeadingCont img {
   width: 30px;
@@ -48,17 +51,33 @@
 
 .ariLineName {
   display: flex;
-  gap: 7px;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  align-items: start;
   font-family: var(--font-inter);
   font-weight: 300;
   font-style: Light;
   font-size: 14px;
   line-height: 18.57px;
   letter-spacing: 0%;
+  max-width: 92px;
+  white-space: wrap;
+  text-overflow: ellipsis;
+  text-align: start;
   vertical-align: middle;
   text-transform: capitalize;
   color: #000000;
+}
+.airlineLogoContainer {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e4e6e8;
+}
+.airlineLogoContainer > .flightLogo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: unset;
 }
 .ariLineNumber {
   font-family: Inter;
@@ -100,17 +119,18 @@
   color: #000000;
 }
 .departTimeContainer {
-  max-width: 409px;
+  display: flex;
   width: 100%;
-  padding: 16px;
+  gap: 38px;
+  justify-content: space-between;
+  /* max-width: 409px; */
+  width: 100%;
+  padding: 14px;
   border: 0.5px solid #e4e6e8;
 }
 
 .cardRight {
   display: flex;
-  padding-right: 12px;
-  margin-top: -16px;
-  max-height: 171px;
 }
 
 /* FARE DETAILS CONTAINER */
@@ -139,7 +159,6 @@
 }
 
 /* VIEW FARES BUTTON */
-
 .viewBtn {
   padding: 12px 24px;
   background-color: #000033;
@@ -158,11 +177,11 @@
   background-color: #fcc800;
   color: #000033;
 }
-
 /* PRICE PER ADULT ROW */
 .fareAmount {
   display: flex;
   align-items: center;
+  white-space: nowrap;
   gap: 8px;
 }
 
@@ -219,9 +238,6 @@
   user-select: none;
 }
 
-.offerBannerWrap {
-  margin-top: 24px;
-}
 /* ARROW ICON */
 .downArrow {
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
@@ -233,13 +249,10 @@
   transform: rotate(180deg);
 }
 
-.cardOpen .expandWrap {
-  box-shadow: 0px 1px 18.6px 0px #00000017;
-}
 .expandWrap {
   max-height: 0;
   overflow: hidden;
-  transition: all 0.45s ease;
+  transition: max-height 0.45s ease;
   border: 1px solid transparent;
   /* border-top: 1px solid #e5e7f0; */
 }
@@ -247,21 +260,12 @@
 .expandWrap.open {
   max-height: 600px;
   /* enough for content */
-  border: 1px solid #e5e7f0;
-  transition: all 0.45s ease-in-out;
+  border-top: 1px solid #e5e7f0;
 }
 
 .open {
   max-height: 600px;
   /* enough for content */
-}
-.card {
-  border: 1px solid transparent;
-}
-.cardOpen {
-  border: 1px solid #e5e7f0;
-  border-bottom: none;
-  transition: all 0.45s ease-in-out;
 }
 
 .downArrow {

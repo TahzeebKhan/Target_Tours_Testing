@@ -1,5 +1,5 @@
-import React from 'react'
-import styles from './OfferBanner.module.css'
+import React from "react";
+import styles from "./OfferBanner.module.css";
 
 const OfferBanner = () => {
   return (
@@ -11,11 +11,9 @@ const OfferBanner = () => {
         </p>
       </div>
 
-      <button className={styles.loginBtn}>
-        LOGIN / SIGNUP
-      </button>
+      <button className={styles.loginBtn}>LOGIN / SIGNUP</button>
     </div>
-  )
-}
+  );
+};
 
-export default OfferBanner
+export default OfferBanner;

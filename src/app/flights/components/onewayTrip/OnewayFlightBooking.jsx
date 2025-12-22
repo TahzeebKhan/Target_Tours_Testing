@@ -7,6 +7,7 @@ const OnewayFlightBooking = () => {
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
+  const [selectedSort, setSelectedSort] = useState("");
 
   const flightResults = [
     {
@@ -78,7 +79,7 @@ const OnewayFlightBooking = () => {
       airline: {
         name: "Air India",
         code: "AI-541",
-        logo: "/images/airindia.png",
+        logo: "/images/flightCompanyLogos/airindia.png",
       },
       departure: {
         time: "20:15",
@@ -126,7 +127,12 @@ const OnewayFlightBooking = () => {
         <div className={styles.sortSubContainer}>
           <div className={styles.sortedItemMainContainer}>
             <div className={styles.sortedItemContainer}>
-              <div className={styles.sortedItem}>
+              <div
+                className={`${styles.sortedItem} ${
+                  selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                }`}
+                onClick={() => setSelectedSort("cheapest")}
+              >
                 <img src="/images/Flight.png" alt="" />
                 <div className={styles.sortedTextContainer}>
                   <span className={styles.budget}>CHEAPEST</span>
@@ -141,10 +147,15 @@ const OnewayFlightBooking = () => {
                 </div>
               </div>
 
-              <div className={styles.sortedItem}>
-                <img src="/images/Flight.png" alt="" />
+              <div
+                className={`${styles.sortedItem} ${
+                  selectedSort === "fastest" ? styles.activeSortedItem : ""
+                }`}
+                onClick={() => setSelectedSort("fastest")}
+              >
+                <img src="/images/flightCompanyLogos/airIndia.png" height={36} width={36} alt="" />
                 <div className={styles.sortedTextContainer}>
-                  <span className={styles.budget}>CHEAPEST</span>
+                  <span className={styles.budget}>fastest</span>
                   <div className={styles.priceContainer}>
                     <span className={styles.price}>₹ 8500</span>
                     <div className={styles.dot}></div>

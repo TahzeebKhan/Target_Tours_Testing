@@ -29,7 +29,6 @@
   display: flex;
   gap: 8px;
   flex: 1;
-  max-width: 1148px;
   overflow-x: auto;
   scroll-behavior: smooth;
    scrollbar-width: none;        /* Firefox */

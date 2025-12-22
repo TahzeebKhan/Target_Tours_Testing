@@ -108,7 +108,9 @@ const FlightTimeline = ({ flight }) => {
 
                         <img
                             className={styles.flightSvg}
-                            src="/icons/flightIcon.svg"
+                            src="/icons/flightIconBlue.svg"
+                            height={20}
+                            width={20}
                             alt="flight"
                         />
 
