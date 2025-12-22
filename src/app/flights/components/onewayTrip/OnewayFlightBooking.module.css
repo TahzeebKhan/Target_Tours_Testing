@@ -178,6 +178,20 @@
 .expendableContainer:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
 }
+.flightOpenHoverNone {
+  box-shadow: none !important;
+}
+.airlineRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.separator {
+  margin: 0 6px;
+  color: #9ca3af;
+}
+
 .flightFareDetailsContainerOpen {
   border: 1px solid #e5e7f0;
   border-bottom: none;
@@ -218,26 +232,25 @@
   flex-direction: column;
   gap: 2px;
 }
-.multiImageCont{
-    position: relative;
-    width: 42px;
-    height: 42px;
+.multiImageCont {
+  position: relative;
+  width: 42px;
+  height: 42px;
 }
-.multiImageCont img{
-    width: 23px;
-    height: 23px;
+.multiImageCont img {
+  width: 23px;
+  height: 23px;
 }
 .multiImageCont img:first-child {
-    position: absolute;
-    left: 0;
-    top: 0;
-  
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 .multiImageCont img:last-child {
-    position: absolute;
-    right: 0;
-    bottom: 0;
+  position: absolute;
+  right: 0;
+  bottom: 0;
 }
 .seeDetailsBtn {
   display: flex;
@@ -287,13 +300,38 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  position: relative;
   justify-content: center;
+}
+.goingVia {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -20px;
+
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: 0%;
+  color: #208ef5;
+}
+.nextDay {
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+  font-family: var(--font-poppins);
+  text-transform: capitalize;
+  position: absolute;
+  top: -6px;
+  right: 0;
 }
 
 .departureTimeContainer {
   display: flex;
   gap: 12px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .departureName {

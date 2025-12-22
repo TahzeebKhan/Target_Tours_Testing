@@ -28,7 +28,7 @@ const passengerTypes = [
 ];
 
 const TopFilterSection = () => {
-    const { tripType, setTripType } = useTripType();
+  const { tripType, setTripType } = useTripType();
   const [directOnly, setDirectOnly] = useState(true);
   // const [tripType, setTripType] = useState("oneway");
   const [bookingType, setBookingType] = useState("flight");
@@ -227,13 +227,7 @@ const TopFilterSection = () => {
                 {/* One-way form */}
                 {tripType === "oneway" && (
                   <div
-                    className={`${styles.serarchingContBottom} ${
-                      styles.flightSearchFormWrapper
-                    } ${styles.formVisible} ${
-                      flightDirection === "right"
-                        ? styles.slideRight
-                        : styles.slideLeft
-                    }`}
+                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
                   >
                     <div
                       className={`${styles.fromBtn} ${
@@ -334,7 +328,18 @@ const TopFilterSection = () => {
                     </div>
 
                     <div className={styles.searchBtn}>
-                      <img src="/icons/searchIconBlue.svg" alt="" />
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
+                          fill="#000033"
+                        />
+                      </svg>
                     </div>
                   </div>
                 )}
@@ -342,13 +347,7 @@ const TopFilterSection = () => {
                 {/* Round-trip form (render only when round-trip is active) */}
                 {tripType === "round" && (
                   <div
-                    className={`${styles.serarchingContBottom} ${
-                      styles.flightSearchFormWrapper
-                    } ${styles.formVisible} ${
-                      flightDirection === "right"
-                        ? styles.slideRight
-                        : styles.slideLeft
-                    }`}
+                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
                   >
                     <div className={`${styles.fromBtn} ${styles.fromBtn2}`}>
                       <div className={styles.lable}>From</div>
@@ -473,7 +472,18 @@ const TopFilterSection = () => {
                     </div>
 
                     <div className={styles.searchBtn}>
-                      <img src="/icons/searchIconBlue.svg" alt="" />
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
+                          fill="#000033"
+                        />
+                      </svg>
                     </div>
                   </div>
                 )}
@@ -481,13 +491,7 @@ const TopFilterSection = () => {
                 {/* Multi-city form */}
                 {tripType === "multi" && (
                   <div
-                    className={`${styles.serarchingContBottom} ${
-                      styles.multiSearch
-                    } ${styles.flightSearchFormWrapper} ${styles.formVisible} ${
-                      flightDirection === "right"
-                        ? styles.slideRight
-                        : styles.slideLeft
-                    }`}
+                    className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
                   >
                     <div className={styles.serarchingContBottom}>
                       <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
@@ -676,7 +680,18 @@ const TopFilterSection = () => {
                         </div>
                       </div>
                       <div className={styles.searchBtn}>
-                        <img src="/icons/searchIconBlue.svg" alt="" />
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
+                            fill="#000033"
+                          />
+                        </svg>
                       </div>
                     </div>
                   </div>

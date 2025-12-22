@@ -54,7 +54,7 @@
   text-transform: uppercase;
   color: #000033;
   cursor: pointer;
-  opacity: 0.6;
+  /* opacity: 0.6; */
   transition: opacity 0.2s ease, color 0.25s ease;
 }
 
@@ -394,7 +394,7 @@
 ========================= */
 
 .timelineContainer {
- display: grid;
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
   position: relative;
@@ -562,8 +562,7 @@
   gap: 24px;
 }
 
-
-.baggageRuleContainer{
-    display: flex;
+.baggageRuleContainer {
+  display: flex;
   gap: 24px;
 }

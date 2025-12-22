@@ -33,7 +33,7 @@ const TripCard = () => {
 
   return (
     <div>
-      <div className={styles.card}>
+      <div className={`${styles.card} ${openId === flight.id ? styles.cardOpen : ""}`}>
         <div className={styles.top}>
           <div className={styles.cardLeftMainCont}>
             <div className={styles.cardLeft}>
