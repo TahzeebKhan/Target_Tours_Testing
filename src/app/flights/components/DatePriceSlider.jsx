@@ -20,6 +20,11 @@ const generateDates = (startDate, count = 40) => {
 export default function DatePriceSlider() {
   const [startDate, setStartDate] = useState(new Date());
   const [selected, setSelected] = useState([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // const dates = generateDates(new Date());
   const rowRef = useRef(null);
@@ -77,11 +82,13 @@ export default function DatePriceSlider() {
               type="button"
             >
               <div className={styles.day}>
-                {d.date.toLocaleDateString("en-GB", {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                })}
+                {mounted
+                  ? d.date.toLocaleDateString("en-GB", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "short",
+                    })
+                  : ""}
               </div>
 
               <div

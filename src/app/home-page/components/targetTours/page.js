@@ -134,7 +134,7 @@ const TargetTours = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clip-path="url(#clip0_1073_7659)">
+              <g clipPath="url(#clip0_1073_7659)">
                 <path
                   d="M2 2.5L7 7.5L12 2.5"
                   stroke="#000033"
