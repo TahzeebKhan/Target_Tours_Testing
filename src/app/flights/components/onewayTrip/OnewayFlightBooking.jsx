@@ -7,7 +7,11 @@ const OnewayFlightBooking = () => {
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
+<<<<<<< Updated upstream
   const [selectedSort, setSelectedSort] = useState("");
+=======
+  const [activeSort, setActiveSort] = useState(null);
+>>>>>>> Stashed changes
 
   const flightResults = [
     {
@@ -15,7 +19,7 @@ const OnewayFlightBooking = () => {
       airline: {
         name: "IndiGo",
         code: "6E-541",
-        logo: "/images/indigo.png",
+        logo: ["/images/Flight.png"],
       },
       departure: {
         time: "06:45",
@@ -47,7 +51,7 @@ const OnewayFlightBooking = () => {
       airline: {
         name: "IndiGo",
         code: " AI 2441",
-        logo: "/images/indigo.png",
+        logo: ["/images/Flight.png"],
       },
       departure: {
         time: "06:45",
@@ -79,7 +83,11 @@ const OnewayFlightBooking = () => {
       airline: {
         name: "Air India",
         code: "AI-541",
+<<<<<<< Updated upstream
         logo: "/images/flightCompanyLogos/airindia.png",
+=======
+        logo: ["/images/Flight.png", "/images/AirIndia.png"],
+>>>>>>> Stashed changes
       },
       departure: {
         time: "20:15",
@@ -178,14 +186,21 @@ const OnewayFlightBooking = () => {
         <div className={styles.expendableContainer}>
           <div
             key={flight.id}
-            className={`${styles.flightFareDetailsContainer} ${
-              openId === flight.id ? styles.flightFareDetailsContainerOpen : ""
-            }`}
+            className={`${styles.flightFareDetailsContainer} ${openId === flight.id ? styles.flightFareDetailsContainerOpen : ""
+              }`}
           >
             <div className={styles.flightFareDetails}>
               <div className={styles.flightDetail}>
                 <div className={styles.flightNameContainer}>
-                  <img src="/images/Flight.png" alt="" />
+                  {flight.airline.logo.length > 1 ? (
+                    <div className={styles.multiImageCont}>
+                      {flight.airline.logo.map((logo, index) => (
+                        <img key={index} src={logo} alt="airline" />
+                      ))}
+                    </div>
+                  ) : (
+                    <img src={flight.airline.logo[0]} alt="airline" />
+                  )}
                   <div className={styles.flightName}>
                     <span className={styles.airlineName}>
                       {flight.airline.name}
@@ -245,9 +260,8 @@ const OnewayFlightBooking = () => {
               >
                 See Details
                 <svg
-                  className={`${styles.downArrow} ${
-                    openId === flight.id ? styles.rotate : ""
-                  }`}
+                  className={`${styles.downArrow} ${openId === flight.id ? styles.rotate : ""
+                    }`}
                   width="8"
                   height="5"
                   viewBox="0 0 8 5"
@@ -279,9 +293,8 @@ const OnewayFlightBooking = () => {
 
           {/* ===== EXPANDABLE PANEL ===== */}
           <div
-            className={`${styles.expandWrap} ${
-              openId === flight.id ? styles.open : ""
-            }`}
+            className={`${styles.expandWrap} ${openId === flight.id ? styles.open : ""
+              }`}
           >
             <ExpandableTabs />
           </div>
