@@ -1,0 +1,79 @@
+.field {
+    border: 0.5px solid #E6E8EC;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #404040;
+}
+
+.dateInputWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 21px;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    outline: none;
+    color: #000000;
+}
+
+/* Hide native placeholder */
+.dateInputWrapper input[type="date"] {
+    position: relative;
+    color: transparent;
+    background: transparent;
+    border: none;
+}
+
+/* Fake placeholder text */
+.dateInputWrapper input[type="date"]::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #000;
+    pointer-events: none;
+}
+
+/* Show real date when selected */
+.dateInputWrapper input[type="date"]:focus,
+.dateInputWrapper input[type="date"]:valid {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    outline: none;
+    color: #000000;
+}
+
+.dateInputWrapper input[type="date"]:focus::before,
+.dateInputWrapper input[type="date"]:valid::before {
+    content: "";
+}
+
+/* Remove native calendar icon */
+.contant::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* Calendar SVG */
+.calendarIcon {
+    cursor: pointer;
+    color: #ffffff;
+}

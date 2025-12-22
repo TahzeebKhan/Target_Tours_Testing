@@ -30,9 +30,13 @@
 .tabItem {
     position: relative;
     z-index: 1;
+<<<<<<< Updated upstream
 display: flex;
 align-items: center;
 justify-content: center;
+=======
+    text-align: center;
+>>>>>>> Stashed changes
     cursor: pointer;
     transition: color 0.25s ease;
     padding: 8px 24px;

@@ -1,7 +1,7 @@
 // Reusable TravellerSelector.jsx (drop into your component file or import)
 import { useState, useRef, useEffect } from 'react'
 
-const truncate = (str = "", max = 10) =>
+const truncate = (str = "", max = 17) =>
   typeof str === 'string' ? (str.length > max ? str.slice(0, max) + "..." : str) : ""
 
 export default function TravellerSelector({
@@ -44,10 +44,10 @@ export default function TravellerSelector({
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpen(prev => !prev) }}
       >
         <div className={styles.contant}>
-          {truncate(selectedLabel, 10)}
+          {truncate(selectedLabel, 17)}
         </div>
 
-        <img src="/images/Vector.svg" alt="open" />
+        <img className={styles.downArrowTravel} src="/images/Vector.svg" alt="open" />
 
         {open && (
           <div className={styles.selectMenu} role="menu" aria-label="Travellers and class options">

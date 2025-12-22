@@ -63,9 +63,9 @@
   /* transform: translateY(-2px); */
 }
 
-.navButton:hover svg path {
+/* .navButton:hover svg path {
   fill: #000033;
-}
+} */
 
 /* Image */
 .hover-card img {
