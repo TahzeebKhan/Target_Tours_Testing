@@ -368,6 +368,7 @@
   /* box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1),
     inset 0 0 20px rgba(255, 255, 255, 0.1); */
   padding: 0;
+  z-index: 99;
   color: #fff;
 }
 
@@ -531,6 +532,7 @@
   position: relative;
   display: flex;
   gap: 12px;
+  /* z-index: -2; */
 }
 
 .serarchingContBottom_left {
@@ -817,6 +819,7 @@
   opacity: 0;
   /* transform: translateY(-8px); */
   will-change: max-height, opacity, transform;
+  z-index: -2;
 }
 .bottomRowAnimate.animateIn {
   animation: bottomRowFadeIn 6s cubic-bezier(0.25, 1, 0.35, 1) forwards;

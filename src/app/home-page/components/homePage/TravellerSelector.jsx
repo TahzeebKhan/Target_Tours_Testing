@@ -29,7 +29,15 @@ export default function TravellerSelector({
     }
   }, [])
 
-  const selectedLabel = travellerOptions.find(o => o.value === travellerClass)?.label || "1 Traveller, Economy"
+  // If `travellerClass` already contains the display text (or an object with .label),
+  // prefer that directly. Otherwise, lookup by value in `travellerOptions`.
+  let selectedLabel = "1 Traveller, Economy";
+  if (typeof travellerClass === 'string') {
+    const found = travellerOptions.find(o => o.value === travellerClass);
+    selectedLabel = found ? found.label : travellerClass || selectedLabel;
+  } else if (travellerClass && typeof travellerClass === 'object' && travellerClass.label) {
+    selectedLabel = travellerClass.label;
+  }
 
   return (
     <div className={`${styles.fromBtn} ${className}  ${wrapperClass}`}>
