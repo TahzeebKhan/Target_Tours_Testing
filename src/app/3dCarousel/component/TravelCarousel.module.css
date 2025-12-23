@@ -1,0 +1,109 @@
+.wrapper {
+    padding: 80px 0;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Swiper container */
+.swiper {
+    width: 100%;
+    padding: 60px 0;
+}
+
+/* All slides - base styling */
+.slide {
+    width: 700px !important;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card styling */
+.card {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 30px;
+    color: white;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Content inside card */
+.content {
+    position: relative;
+    z-index: 2;
+}
+
+.country {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 1;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+}
+
+/* Active (center) slide - fully visible and focused */
+.wrapper :global(.swiper-slide-active) .card {
+    outline-offset: -4px;
+    transform: scale(1.05);
+}
+
+/* Immediate neighbors (prev and next) - 50% behind */
+.wrapper :global(.swiper-slide-prev) .card,
+.wrapper :global(.swiper-slide-next) .card {
+    opacity: 1;
+    transform: scale(0.9);
+}
+
+/* Outer slides (2 positions away) - further behind */
+.wrapper :global(.swiper-slide) .card {
+    opacity: 1;
+}
+
+.wrapper :global(.swiper-slide-active) .card,
+.wrapper :global(.swiper-slide-prev) .card,
+.wrapper :global(.swiper-slide-next) .card {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .slide {
+        width: 600px !important;
+        height: 400px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .slide {
+        width: 400px !important;
+        height: 350px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .country {
+        font-size: 12px;
+    }
+}
