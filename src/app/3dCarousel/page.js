@@ -1,14 +1,15 @@
 import React from 'react'
 import Carousel from './component/Carousel'
 import styles from './page.module.css'
+import TravelCarousel from './component/TravelCarousel'
 // import ShowcaseCarousel from './ShowcaseCarousel'
 
 const Page = () => {
-  return (
-    <div className={styles.container}>
-      <Carousel />
-      {/* <ShowcaseCarousel/> */}
-    </div>
+  return (<TravelCarousel/>
+    // <div className={styles.container}>
+    //   <Carousel />
+    //   {/* <ShowcaseCarousel/> */}
+    // </div>
   )
 }
 
