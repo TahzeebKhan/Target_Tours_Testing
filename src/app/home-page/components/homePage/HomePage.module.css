@@ -82,14 +82,14 @@
 }
 
 /* ensure the visible .contant layout is unchanged */
-.dateInputWrapper > .contant {
+.dateInputWrapper>.contant {
   display: flex;
   align-items: center;
   /* as before */
 }
 
 /* small tweak so image arrow remains on right and not covered */
-.dateInputWrapper > img {
+.dateInputWrapper>img {
   position: relative;
   z-index: 31;
 }
@@ -429,12 +429,10 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(
-    from -90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 15%,
-    transparent 30%
-  );
+  background: conic-gradient(from -90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 15%,
+      transparent 30%);
 
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
@@ -465,12 +463,10 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(
-    from -90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 15%,
-    transparent 30%
-  );
+  background: conic-gradient(from -90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 15%,
+      transparent 30%);
 
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
@@ -481,8 +477,7 @@
   color: #000033;
 }
 
-.selectArrow {
-}
+.selectArrow {}
 
 .serarchingContTop {
   display: flex;
@@ -644,7 +639,7 @@
 }
 
 .multisearchBtn {
-  max-width: 261px;
+  max-width: 258px;
   width: 100%;
   display: flex;
   justify-content: center;

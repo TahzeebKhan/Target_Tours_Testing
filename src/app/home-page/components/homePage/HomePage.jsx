@@ -28,6 +28,9 @@ const HomePage = () => {
   const progressRef = useRef(null);
 
   const [travellerDestination, setTravellerDestination] = useState("SELECT DESTINATION")
+  const [travellerCount, setTravellerCount] = useState("1 TRAVELLER")
+  const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS")
+  const [hotelGuestRoomCount, setHotelGuestRoomCount] = useState("GUESTS & ROOMS")
 
   // state for travellers dropdown
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
@@ -232,6 +235,20 @@ const HomePage = () => {
       input.click()
     }
   }
+  const handleFieldClick = (e) => {
+    const target = e.currentTarget;
+    const input = target.querySelector('input');
+    
+    if (!input) return;
+
+    // Check if it's a date input
+    if (input.type === "date" && typeof input.showPicker === "function") {
+      input.showPicker();
+    } else {
+      // For text inputs, just focus
+      input.focus();
+    }
+  };
 
   return (
     <section className='relative w-full h-[100vh]'>
@@ -365,7 +382,10 @@ const HomePage = () => {
                       <div className={styles.arrowbox} onClick={swapLocations}>
                         <img src="/icons/leftRrighArrow.svg" alt="" />
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.fromInput}`}>
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromInput}`}
+                        onClick={handleFieldClick}
+                      >
                         <div className={styles.lable}>From</div>
                         <input
                           type="text"
@@ -375,7 +395,7 @@ const HomePage = () => {
                           onChange={(e) => setFrom(e.target.value)}
                         />
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>To</div>
                         <input
                           type="text"
@@ -386,7 +406,7 @@ const HomePage = () => {
                         />
                       </div>
 
-                      <div className={`${styles.fromBtn} ${styles.fromInput}`} >
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>Departure Date</div>
                         <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                           {/* attach ref */}
@@ -405,20 +425,12 @@ const HomePage = () => {
                             onClick={openDeparturePicker}
                           >
                             {/* same SVG */}
-                            <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                              <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                              <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                              <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                              <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                              <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                              <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                            </svg>
+                            <img src="/icons/calander.svg" alt="" />
 
                           </button>
                         </div>
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.fromInput}`}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>Return Date</div>
                         <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
                           {/* attach ref */}
@@ -437,26 +449,11 @@ const HomePage = () => {
                             onClick={openReturnPicker}
                           >
                             {/* same SVG */}
-                            <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                              <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                              <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                              <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                              <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                              <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                              <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                            </svg>
+                            <img src="/icons/calander.svg" alt="" />
 
                           </button>
                         </div>
                       </div>
-
-                      {/* <div className={styles.fromBtn}>
-                <div className={styles.lable}>Travellers & Class</div>
-                <div className={styles.dateInputWrapper}>
-                  <div className={styles.contant}>1 Traveller, Econ...</div>
-                  <img src="/images/Vector.svg" alt="" /></div>
-              </div> */}
                       <TravellerSelector
                         travellerClass={travellerClass}
                         setTravellerClass={setTravellerClass}
@@ -483,7 +480,7 @@ const HomePage = () => {
                       <div className={styles.arrowboxOneWay} onClick={swapLocations}>
                         <img src="/icons/leftRrighArrow.svg" alt="" />
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>From</div>
                         <input
                           type="text"
@@ -493,7 +490,7 @@ const HomePage = () => {
                           onChange={(e) => setOneWayFrom(e.target.value)}
                         />
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${styles.toInput} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${styles.toInput} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>To</div>
                         <input
                           type="text"
@@ -504,7 +501,7 @@ const HomePage = () => {
                         />
                       </div>
 
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`}>
+                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>Departure Date</div>
                         <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                           {/* attach ref */}
@@ -523,15 +520,7 @@ const HomePage = () => {
                             onClick={openDeparturePicker}
                           >
                             {/* same SVG */}
-                            <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                              <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                              <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                              <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                              <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                              <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                              <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                            </svg>
+                            <img src="/icons/calander.svg" alt="" />
 
                           </button>
                         </div>
@@ -560,18 +549,18 @@ const HomePage = () => {
                         <div className={`${styles.arrowboxOneWay}  ${styles.multiArrow}`} onClick={() => swapLocations(0)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>From</div>
                           <input type="text" className={styles.contant} placeholder='Departure ' value={multiCity[0]?.from || ''}
                             onChange={(e) => updateMultiLeg(0, 'from', e.target.value)} />
                         </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>To</div>
                           <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[0]?.to || ''}
                             onChange={(e) => updateMultiLeg(0, 'to', e.target.value)} />
                         </div>
 
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>Departure Date</div>
                           <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                             {/* attach ref */}
@@ -592,15 +581,7 @@ const HomePage = () => {
                               onClick={openDeparturePicker}
                             >
                               {/* same SVG */}
-                              <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                                <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                                <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                                <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                                <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                                <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                                <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                              </svg>
+                              <img src="/icons/calander.svg" alt="" />
 
                             </button>
                           </div>
@@ -618,16 +599,16 @@ const HomePage = () => {
                         <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(1)}>
                           <img src="/icons/leftRrighArrow.svg" alt="" />
                         </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>From</div>
                           <input type="text" className={styles.contant} placeholder='Departure' value={multiCity[1]?.from || ''} onChange={(e) => updateMultiLeg(1, 'from', e.target.value)} />
                         </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>To</div>
                           <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[1]?.to || ''} onChange={(e) => updateMultiLeg(1, 'to', e.target.value)} />
                         </div>
 
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`}>
+                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
                           <div className={styles.lable}>Departure Date</div>
                           <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
 
@@ -648,15 +629,7 @@ const HomePage = () => {
                               onClick={openReturnPicker}
                             >
 
-                              <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                                <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                                <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                                <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                                <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                                <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                                <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                              </svg>
+                               <img src="/icons/calander.svg" alt="" />
 
                             </button>
                           </div>
@@ -685,12 +658,12 @@ const HomePage = () => {
                     {/* <div className={styles.arrowboxOneWay}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
                 </div> */}
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>WHERE TO</div>
                       <input type="text" className={styles.contant} placeholder='Departure' />
                     </div>
 
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>Check In</div>
                       <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                         {/* attach ref */}
@@ -709,26 +682,18 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
                           {/* same SVG */}
-                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                            <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                            <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                            <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                            <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                            <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                            <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                          </svg>
+                           <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
                     </div>
 
                     <TravellerSelector
-                      travellerClass={travellerClass}
-                      setTravellerClass={setTravellerClass}
+                      travellerClass={hotelGuestRoomCount}
+                      setTravellerClass={setHotelGuestRoomCount}
                       travellerOptions={travellerOptions}
                       styles={styles}
-                      name="Travellers & Class"
+                      name="GUESTS & ROOMS"
 
                     />
                     <div className={styles.searchBtn}>
@@ -749,7 +714,7 @@ const HomePage = () => {
                     {/* <div className={styles.arrowboxOneWay} onClick={swapLocations}>
                   <img src="/icons/leftRrighArrow.svg" alt="" />
                 </div> */}
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>From CITY</div>
                       <input
                         type="text"
@@ -759,7 +724,7 @@ const HomePage = () => {
                         onChange={(e) => setFrom(e.target.value)}
                       />
                     </div>
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>To CITY/COUNTRY, CATEGORY</div>
                       <input
                         type="text"
@@ -770,7 +735,7 @@ const HomePage = () => {
                       />
                     </div>
 
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>Departure Date</div>
                       <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
                         {/* attach ref */}
@@ -789,26 +754,19 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
                           {/* same SVG */}
-                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                            <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                            <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                            <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                            <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                            <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                            <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                          </svg>
+                           <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
                     </div>
 
                     <TravellerSelector
-                      travellerClass={travellerClass}
-                      setTravellerClass={setTravellerClass}
+                      travellerClass={guestRoomCount}
+                      setTravellerClass={setGuestRoomCount}
                       travellerOptions={travellerOptions}
                       styles={styles}
-                      name="Travellers & Class"
+                      name="ROOMS & GUESTS"
+                      enableEllipsis={false}
                     />
                     <div className={styles.searchBtn}>
                       <img src="/images/searchIcon.svg" alt="" />
@@ -823,24 +781,16 @@ const HomePage = () => {
                     } ${styles.slideRight}`}
                 >
                   <div className={styles.serarchingContBottom}>
-                    {/* <div className={styles.arrowboxOneWay}>
-                  <img src="/icons/leftRrighArrow.svg" alt="" />
-                </div> */}
-                    {/* <div className={styles.fromBtn}>
-                      <div className={styles.lable}>TRAVEL DESTINATION</div>
-                      <div className={styles.dateInputWrapper}>
-                        <div className={styles.contant}>SELECT DESTINATION</div>
-                        <img src="/images/Vector.svg" alt="" /></div>
-                    </div> */}
                     <TravellerSelector
                       travellerClass={travellerDestination}
                       setTravellerClass={setTravellerDestination}
                       travellerOptions={TravellerDestinationOptions}
                       styles={styles}
                       name="TRAVEL DESTINATION"
+                      enableEllipsis={false}
                     />
 
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>TRAVEL DATE</div>
                       <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
 
@@ -859,20 +809,12 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
 
-                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                            <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                            <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                            <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                            <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                            <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                            <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                          </svg>
+                           <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
                     </div>
-                    <div className={styles.fromBtn}>
+                    <div className={styles.fromBtn} onClick={handleFieldClick}>
                       <div className={styles.lable}>Departure Date</div>
                       <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
 
@@ -891,26 +833,18 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
 
-                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.3902 3.343C12.3112 2.02925 11.2142 1 9.89291 1H9.24966V0.5C9.24966 0.224 9.02566 0 8.74966 0C8.47366 0 8.24966 0.224 8.24966 0.5V1H4.24966V0.5C4.24966 0.224 4.02566 0 3.74966 0C3.47366 0 3.24966 0.224 3.24966 0.5V1H2.60641C1.28491 1 0.187913 2.02925 0.109163 3.343C-0.0390874 5.814 -0.0363374 8.3205 0.117413 10.7928C0.195413 12.0483 1.20116 13.054 2.45666 13.132C3.71491 13.2102 4.98216 13.2493 6.24941 13.2493C7.51641 13.2493 8.78391 13.2102 10.0422 13.132C11.2977 13.054 12.3034 12.0483 12.3814 10.7928C12.5354 8.32175 12.5382 5.8155 12.3902 3.343ZM11.3837 10.7308C11.3367 11.484 10.7334 12.0872 9.98041 12.134C7.50491 12.2878 4.99441 12.2878 2.51891 12.134C1.76566 12.087 1.16241 11.4838 1.11566 10.7308C0.997412 8.83 0.973163 6.90925 1.03641 5H11.4632C11.5262 6.91 11.5019 8.83075 11.3837 10.7308ZM3.74966 3C4.02566 3 4.24966 2.776 4.24966 2.5V2H8.24966V2.5C8.24966 2.776 8.47366 3 8.74966 3C9.02566 3 9.24966 2.776 9.24966 2.5V2H9.89291C10.6862 2 11.3447 2.61625 11.3919 3.40275C11.4037 3.60125 11.4087 3.801 11.4184 4H1.08091C1.09091 3.801 1.09566 3.60125 1.10741 3.40275C1.15466 2.61625 1.81291 2 2.60641 2H3.24966V2.5C3.24966 2.776 3.47366 3 3.74966 3Z" fill="white" />
-                            <path d="M3.74951 8C4.16373 8 4.49951 7.66421 4.49951 7.25C4.49951 6.83579 4.16373 6.5 3.74951 6.5C3.3353 6.5 2.99951 6.83579 2.99951 7.25C2.99951 7.66421 3.3353 8 3.74951 8Z" fill="white" />
-                            <path d="M6.24951 8C6.66373 8 6.99951 7.66421 6.99951 7.25C6.99951 6.83579 6.66373 6.5 6.24951 6.5C5.8353 6.5 5.49951 6.83579 5.49951 7.25C5.49951 7.66421 5.8353 8 6.24951 8Z" fill="white" />
-                            <path d="M3.74951 10.5C4.16373 10.5 4.49951 10.1642 4.49951 9.75C4.49951 9.33579 4.16373 9 3.74951 9C3.3353 9 2.99951 9.33579 2.99951 9.75C2.99951 10.1642 3.3353 10.5 3.74951 10.5Z" fill="white" />
-                            <path d="M8.74951 8C9.16373 8 9.49951 7.66421 9.49951 7.25C9.49951 6.83579 9.16373 6.5 8.74951 6.5C8.3353 6.5 7.99951 6.83579 7.99951 7.25C7.99951 7.66421 8.3353 8 8.74951 8Z" fill="white" />
-                            <path d="M8.74951 10.5C9.16373 10.5 9.49951 10.1642 9.49951 9.75C9.49951 9.33579 9.16373 9 8.74951 9C8.3353 9 7.99951 9.33579 7.99951 9.75C7.99951 10.1642 8.3353 10.5 8.74951 10.5Z" fill="white" />
-                            <path d="M6.24951 10.5C6.66373 10.5 6.99951 10.1642 6.99951 9.75C6.99951 9.33579 6.66373 9 6.24951 9C5.8353 9 5.49951 9.33579 5.49951 9.75C5.49951 10.1642 5.8353 10.5 6.24951 10.5Z" fill="white" />
-                          </svg>
+                           <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
                     </div>
 
                     <TravellerSelector
-                      travellerClass={travellerClass}
-                      setTravellerClass={setTravellerClass}
+                      travellerClass={travellerCount}
+                      setTravellerClass={setTravellerCount}
                       travellerOptions={travellerOptions}
                       styles={styles}
-                      name="Travellers & Class"
+                      name="TRAVELLERS"
                     />
                     <div className={styles.searchBtn}>
                       <img src="/images/searchIcon.svg" alt="" />
@@ -1118,11 +1052,12 @@ const HomePage = () => {
             />
 
             <TravellerSelector
-              travellerClass={travellerClass}
-              setTravellerClass={setTravellerClass}
+              travellerClass={guestRoomCount}
+              setTravellerClass={setGuestRoomCount}
               travellerOptions={travellerOptions}
               styles={styles}
-              name="Travellers & Class"
+              name="ROOMS & GUESTS"
+              enableEllipsis={false}
             />
 
             {/* SEARCH */}
@@ -1149,11 +1084,12 @@ const HomePage = () => {
               />
             </div> */}
             <TravellerSelector
-              travellerClass={travellerClass}
-              setTravellerClass={setTravellerClass}
+              travellerClass={travellerDestination}
+              setTravellerClass={setTravellerDestination}
               travellerOptions={TravellerDestinationOptions}
               styles={styles}
               name="TRAVEL DESTINATION"
+              enableEllipsis={false}
             />
             {/* SWAP */}
 
@@ -1179,11 +1115,11 @@ const HomePage = () => {
 
             {/* TRAVELLERS */}
             <TravellerSelector
-              travellerClass={travellerClass}
-              setTravellerClass={setTravellerClass}
+              travellerClass={travellerCount}
+              setTravellerClass={setTravellerCount}
               travellerOptions={travellerOptions}
               styles={styles}
-              name="Travellers & Class"
+              name="TRAVELLERS"
             />
 
 

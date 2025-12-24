@@ -18,6 +18,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 
 .imgeContainer {
@@ -26,6 +27,7 @@
     background-size: cover;
     background-position: center;
     position: relative;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .wrapper :global(.swiper-slide-active) .imgeContainer::after {
@@ -35,8 +37,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background:
-        linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
     pointer-events: none;
     z-index: 1;
 }
@@ -53,7 +54,7 @@
     align-items: flex-end;
     color: white;
     position: relative;
-    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Content inside card */
@@ -68,7 +69,7 @@
     align-items: center;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.5s ease;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .wrapper :global(.swiper-slide-active) .content {
@@ -93,7 +94,6 @@
     text-transform: capitalize;
     color: #000000;
     background-color: #FFFFFF;
-
 }
 
 .content .country {
@@ -149,8 +149,6 @@
 }
 
 .wrapper :global(.swiper-slide-active) .content {
-    /* Counter-scale to keep text size consistent and prevent stretching */
-    /* Slide has scaleX(1.31), card has scale(1.05). Total X = 1.3755, Total Y = 1.05 */
     transform: scaleX(0.727) scaleY(0.952) !important;
 }
 
@@ -166,34 +164,32 @@
 .wrapper :global(.swiper-slide-prev) .bottomTextContainer,
 .wrapper :global(.swiper-slide-next) .bottomTextContainer {
     transform: scaleY(0.8) !important;
-    /* 1 / 1.25 */
     transform-origin: top;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Prev of Prev slide */
 .wrapper :global(.swiper-slide):has(+ :global(.swiper-slide-prev)) .card {
     transform: translateX(21%) translatey(-8%) scaleY(1.2) !important;
-
 }
 
 /* Next of Next slide */
-.wrapper :global(.swiper-slide-next)+ :global(.swiper-slide) .card {
+.wrapper :global(.swiper-slide-next) + :global(.swiper-slide) .card {
     transform: translateX(-21%) translatey(-8%) scaleY(1.2) !important;
 }
 
 /* Counter-scale for bottom text on prev-prev/next-next slides */
 .wrapper :global(.swiper-slide):has(+ :global(.swiper-slide-prev)) .bottomTextContainer,
-.wrapper :global(.swiper-slide-next)+ :global(.swiper-slide) .bottomTextContainer {
+.wrapper :global(.swiper-slide-next) + :global(.swiper-slide) .bottomTextContainer {
     transform: scaleY(0.833) !important;
-    /* 1 / 1.2 */
     transform-origin: top;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Immediate neighbors (prev and next) - 50% behind */
 .wrapper :global(.swiper-slide-prev) .card,
 .wrapper :global(.swiper-slide-next) .card {
     opacity: 1;
-
     transform: scale(1.23);
 }
 
@@ -219,13 +215,13 @@
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
-    /* Default for left side */
     text-align: left;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Right side alignment: next slide and any slide after it in the DOM */
 .wrapper :global(.swiper-slide-next) .bottomTextContainer,
-.wrapper :global(.swiper-slide-next)~ :global(.swiper-slide) .bottomTextContainer {
+.wrapper :global(.swiper-slide-next) ~ :global(.swiper-slide) .bottomTextContainer {
     align-items: flex-end;
     text-align: right;
 }
@@ -240,7 +236,6 @@
     color: black;
     margin: 0;
     text-align: start;
-
 }
 
 .priceContainer {
@@ -249,7 +244,6 @@
     align-items: end;
     bottom: 15px;
     gap: 3px;
-
 }
 
 .priceText {
@@ -261,7 +255,6 @@
     vertical-align: middle;
     text-transform: uppercase;
     color: #FFFFFF;
-
 }
 
 .price {
@@ -273,7 +266,6 @@
     vertical-align: middle;
     text-transform: uppercase;
     color: #FFFFFF;
-
 }
 
 .Bottomcountry {

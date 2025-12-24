@@ -66,6 +66,7 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
                   src={card.img}
                   alt={card.title}
                 />
+                 <img className={styles.bgGradient} src="/icons/Rectanglegrad.svg"/>
                 <div className={styles.cardOverlay}>
                   <span className={styles.duration}>{card.badge}</span>
 
