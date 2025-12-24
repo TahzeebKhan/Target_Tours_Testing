@@ -97,14 +97,25 @@ body {
   width: auto !important;
 }
 
+.innerCarouselWrapper .swiper-horizontal > .swiper-pagination-bullets, .swiper-pagination-horizontal.swiper-pagination-bullets{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  margin-bottom: 10px;
+}
 .innerCarouselWrapper .swiper-pagination-bullet-active{
   width: 8.6px !important;
   height: 8.6px !important;
   background-color: #ffffff !important;
+  margin: 0 !important;
+  opacity: 1 !important;
 }
 .innerCarouselWrapper .swiper-pagination-bullet{
   width: 6px;
   height: 6px;
+  margin: 0 !important;
+  opacity: 0.5;
 }
 
 @media (max-width: 1440px) {

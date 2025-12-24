@@ -34,7 +34,21 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: multiLegEntrance 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+@keyframes multiLegEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* dropdown menu container (absolute positioned relative to dateInputWrapper) */
 .dateInputWrapper {
@@ -244,9 +258,9 @@
 /* Flight search trip-type container: same animation behavior, but keep original insets */
 .flightSearchFormContainer {
   position: relative;
-  /* min-height: 106px; */
-  /* margin-top: 24px; */
-  /* margin-bottom: 24px; */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .flightSearchFormWrapper {
@@ -536,6 +550,34 @@
   padding: 8px 8px 8px 12px;
   border: 0.5px solid #e6e8ec;
   background-color: rgba(0, 0, 0, 0.35);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex: 1;
+  margin-left: 0;
+  cursor: pointer;
+}
+
+.returnDateField {
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hiddenField {
+  min-width: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  flex: 0 0 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-left: -12px !important;
+  opacity: 0 !important;
+  border: none !important;
+  pointer-events: none;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .lable {
@@ -595,7 +637,13 @@
   text-transform: uppercase;
   color: #ffffff;
   outline: none;
-  cursor: pointer;
+  cursor: text;
+  width: 100%;
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 5;
+  /* Above background but below arrow box (10) */
 }
 
 /* Remove default calendar icon */
@@ -787,6 +835,8 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
 }
 
 .arrowboxOneWay {
