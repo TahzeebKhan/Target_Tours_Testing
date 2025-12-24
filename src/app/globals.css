@@ -97,6 +97,15 @@ body {
   width: auto !important;
 }
 
+.innerCarouselWrapper .swiper-pagination-bullet-active{
+  width: 8.6px !important;
+  height: 8.6px !important;
+  background-color: #ffffff !important;
+}
+.innerCarouselWrapper .swiper-pagination-bullet{
+  width: 6px;
+  height: 6px;
+}
 
 @media (max-width: 1440px) {
   .limitedWrapper .swiper-wrapper {

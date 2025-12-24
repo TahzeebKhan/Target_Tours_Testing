@@ -1,0 +1,17 @@
+.layoutWrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.mainContent {
+    flex: 1;
+    padding-top: 80px;
+    /* Offset for fixed navbar */
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+}

@@ -51,7 +51,7 @@ text-transform: uppercase;
     z-index: 999;
     padding: 0 18px;
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.55s ease-in-out;
 }
 .leftBtn{
     width: 32px;
@@ -62,7 +62,7 @@ text-transform: uppercase;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.45s ease, box-shadow 0.2s ease;
 }
 .leftRightBtn{
     position: absolute;
@@ -75,6 +75,7 @@ text-transform: uppercase;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    
 }
 
 
