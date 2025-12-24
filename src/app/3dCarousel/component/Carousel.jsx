@@ -6,80 +6,7 @@ import styles from "./Carousel.module.css";
 
 // Sample data for slides
 
-const Carousel = ({
-  slideData = [
-    {
-      id: 1,
-      image: "/images/img1.jpg",
-      title: "TANZANIA & ZANZIBAR",
-      description: "SAFARI IN THE LAND OF THE MASAI HAKUNA MATATA ON...",
-      price: "₹20,000",
-      hasNewTag: true,
-      bottomTitle: "Tanzania & Zanzibar",
-      bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
-    },
-    {
-      id: 2,
-      image: "/images/img2.jpg",
-      title: "SENEGAL",
-      description: "In The Heart Of East Senegal And The Shine Shaloum",
-      price: "₹15,000",
-      hasNewTag: true,
-      bottomTitle: "Senegal",
-      bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
-    },
-    {
-      id: 3,
-      image: "/images/img4.jpg",
-      title: "UZBEKISTAN",
-      description: "From Fergana To Khiva",
-      price: "₹18,000",
-      hasNewTag: false,
-      bottomTitle: "Uzbekistan",
-      bottomDescription: "From Fergana To Khiva",
-    },
-    {
-      id: 4,
-      image: "/images/img3.jpg",
-      title: "MADAGASCAR",
-      description: "The North: National Parks And Paradise Like Beaches",
-      price: "₹22,000",
-      hasNewTag: true,
-      bottomTitle: "Madagascar",
-      bottomDescription: "The North: National Parks And Paradise Like Beaches",
-    },
-    {
-      id: 5,
-      image: "/images/img5.jpg",
-      title: "JAPAN",
-      description: "Japan In The Winter",
-      price: "₹25,000",
-      hasNewTag: false,
-      bottomTitle: "Japan",
-      bottomDescription: "Japan In The Winter",
-    },
-    {
-      id: 6,
-      image: "/images/img5.jpg",
-      title: "JAPAN",
-      description: "Japan In The Winter",
-      price: "₹25,000",
-      hasNewTag: false,
-      bottomTitle: "Japan",
-      bottomDescription: "Japan In The Winter",
-    },
-    {
-      id: 7,
-      image: "/images/img5.jpg",
-      title: "JAPAN",
-      description: "Japan In The Winter",
-      price: "₹25,000",
-      hasNewTag: false,
-      bottomTitle: "Japan",
-      bottomDescription: "Japan In The Winter",
-    },
-  ],
-}) => {
+const Carousel = ({ slideData = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
@@ -147,23 +74,23 @@ const Carousel = ({
       zIndex = 10;
     } else if (diff === 1 || diff === -(totalSlides - 1)) {
       // Next slide - right side, scaled down
-      transform = "translateX(35%)";
-      scale = 0.8;
+      transform = "translateX(42%) translateY(-30px)";
+      scale = 0.68;
       zIndex = 5;
     } else if (diff === -1 || diff === totalSlides - 1) {
       // Previous slide - left side, scaled down
-      transform = "translateX(-35%)";
-      scale = 0.8;
+      transform = "translateX(-42%) translateY(-30px)";
+      scale = 0.68;
       zIndex = 5;
     } else if (diff === 2 || diff === -(totalSlides - 2)) {
       // Slide after next - far right, very small
-      transform = "translateX(70%)";
-      scale = 0.55;
+      transform = "translateX(70%) translateY(-30px)";
+      scale = 0.538;
       zIndex = 1;
     } else if (diff === -2 || diff === totalSlides - 2) {
       // Slide before previous - far left, very small
-      transform = "translateX(-70%)";
-      scale = 0.55;
+      transform = "translateX(-70%) translateY(-30px)";
+      scale = 0.538;
       zIndex = 1;
     } else {
       // Default - hidden
@@ -226,8 +153,9 @@ const Carousel = ({
           return (
             <div
               key={slideNumber}
-              className={`${styles.slide} ${isActive ? styles.activeSlide : ""
-                }`}
+              className={`${styles.slide} ${
+                isActive ? styles.activeSlide : ""
+              }`}
               style={slideStyle}
               onClick={() => handleSlideChange(slideNumber)}
             >
@@ -250,8 +178,9 @@ const Carousel = ({
                       <span>STARTING FROM </span> {slide.price}
                     </div>
                     <div
-                      className={`${styles.textContent} ${isActive ? styles.overlayShow : styles.overlayHide
-                        }`}
+                      className={`${styles.textContent} ${
+                        isActive ? styles.overlayShow : styles.overlayHide
+                      }`}
                     >
                       <div className={styles.title}>{slide.title}</div>
                       <div className={styles.description}>

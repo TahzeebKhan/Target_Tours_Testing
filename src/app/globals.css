@@ -26,6 +26,15 @@ body {
   /* overflow-x: hidden; */
 }
 
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -87,13 +96,12 @@ body {
   /* width: 100%; */
 }
 
-
 .wrapper {
   max-width: 1200px;
   margin: auto;
   position: relative;
 }
-.wrapper .swiper-slide.auto-size{
+.wrapper .swiper-slide.auto-size {
   width: auto !important;
 }
 
@@ -111,7 +119,7 @@ body {
   margin: 0 !important;
   opacity: 1 !important;
 }
-.innerCarouselWrapper .swiper-pagination-bullet{
+.innerCarouselWrapper .swiper-pagination-bullet {
   width: 6px;
   height: 6px;
   margin: 0 !important;

@@ -97,9 +97,9 @@ const MultiTripExpendable = () => {
                             <path
                               d="M0.871094 0.87207H101.583"
                               stroke="#94A3B8"
-                              stroke-width="1.74407"
-                              stroke-linecap="round"
-                              stroke-dasharray="3.49 3.49"
+                              strokeWidth="1.74407"
+                              strokeLinecap="round"
+                              strokeDasharray="3.49 3.49"
                             />
                           </svg>
                         </div>
@@ -119,9 +119,9 @@ const MultiTripExpendable = () => {
                             <path
                               d="M0.871094 0.87207H101.583"
                               stroke="#94A3B8"
-                              stroke-width="1.74407"
-                              stroke-linecap="round"
-                              stroke-dasharray="3.49 3.49"
+                              strokeWidth="1.74407"
+                              strokeLinecap="round"
+                              strokeDasharray="3.49 3.49"
                             />
                           </svg>
 
@@ -210,9 +210,9 @@ const MultiTripExpendable = () => {
                             <path
                               d="M0.871094 0.87207H101.583"
                               stroke="#94A3B8"
-                              stroke-width="1.74407"
-                              stroke-linecap="round"
-                              stroke-dasharray="3.49 3.49"
+                              strokeWidth="1.74407"
+                              strokeLinecap="round"
+                              strokeDasharray="3.49 3.49"
                             />
                           </svg>
                         </div>
@@ -232,9 +232,9 @@ const MultiTripExpendable = () => {
                             <path
                               d="M0.871094 0.87207H101.583"
                               stroke="#94A3B8"
-                              stroke-width="1.74407"
-                              stroke-linecap="round"
-                              stroke-dasharray="3.49 3.49"
+                              strokeWidth="1.74407"
+                              strokeLinecap="round"
+                              strokeDasharray="3.49 3.49"
                             />
                           </svg>
 

@@ -4,8 +4,8 @@
 }
 .page {
   width: 100%;
-  min-height: 100vh;
   background-color: #f9f9f9;
+  min-height: calc(100vh + 200px);
 }
 
 /* Main layout container */
@@ -34,6 +34,7 @@
 .sidebar {
   max-width: 356px;
   grid-column: 1 / 2;
+  position: relative;
 }
 
 .sidebarSticky {
@@ -42,14 +43,20 @@
   max-height: 94vh;
   overflow-y: auto;
 
+  width: 356px; /* SAME as sidebar */
+  max-height: calc(100vh - 211px);
+  overflow-y: auto;
+
   /* Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: 0px;
+  scrollbar-color: transparent;
+
+  /* overscroll-behavior: contain; */
 }
 
 /* Chrome / Edge / Safari */
 .sidebarSticky::-webkit-scrollbar {
-  width: 6px;
+  width: 0px;
 }
 
 .sidebarSticky::-webkit-scrollbar-track {
@@ -57,12 +64,12 @@
 }
 
 .sidebarSticky::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 8px;
+  background-color: transparent;
+  border-radius: 0px;
 }
 
 .sidebarSticky::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: transparent;
 }
 
 .content {
