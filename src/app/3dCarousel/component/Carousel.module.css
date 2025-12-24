@@ -135,7 +135,7 @@
   transform: translateY(12px);
   pointer-events: none;
 
-  transition: opacity 500ms ease, transform 500ms ease;
+  transition: opacity 1s ease, transform 500ms ease;
 }
 
 .textContent {
@@ -150,7 +150,7 @@
   opacity: 0;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  transition: all 0.5s ease;
+  transition: all 2s ease;
 }
 .overlayShow {
   opacity: 1;
@@ -308,7 +308,8 @@
 }
 .fadeIn {
   opacity: 1;
-  transition: all 0.5s ease;
+  transform: scale(1.6) translate(40px, 20px);
+  transition: opacity 0.5s ease;
   transition-delay: 0.2s;
 }
 .fadeOut {
@@ -326,24 +327,30 @@
 }
 
 .farLeftText {
-  transform: scale(1.25) translateY(13px);
+  transform: scale(1.8) translateY(25px);
+  max-width: 210px !important;
   transform-origin: left center;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .farRightText {
-  transform: scale(1.25) translateY(13px);
+  transform: scale(1.8) translate(30px, 24px) !important;
   transform-origin: right center;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
-.farRightText.smallContent {
-  transform: scale(1.25) translateY(-22px) !important;
-
+.rightAlign.smallContent {
+  transform: scale(1.654) translate(-38px,-10px) !important;
   max-width: fit-content;
 }
-.rightAlign.smallContent{
-  transform: translateY(-34px) !important;
+.rightAlign.fadeIn {
+  transform: scale(1.6) translate(-36px, 21px);
+}
+
+.farRightText.smallContent {
+  transition: all 0.4s ease;
+  transform: scale(1.8) translateY(-5px) !important;
+
   max-width: fit-content;
 }
 /* Navigation */

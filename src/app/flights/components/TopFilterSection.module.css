@@ -485,7 +485,7 @@
   color: #000033;
 }
 
-.selectArrow {}
+
 
 .serarchingContTop {
   display: flex;
@@ -585,6 +585,7 @@
 .arrowbox3 {
   left: calc(25% - 20px) !important;
 }
+
 
 .lable {
   font-family: "Poppins", sans-serif;
@@ -722,6 +723,9 @@
 .searchBtn:hover svg path {
   fill: #ffffff !important;
 }
+.calendarAnchor {
+  position: relative;
+}
 
 .multisearchBtn {
   max-width: 261px;
@@ -854,7 +858,6 @@
     max-height: 60px;
     opacity: 1;
   }
-
 
   60% {
     max-height: 260px;

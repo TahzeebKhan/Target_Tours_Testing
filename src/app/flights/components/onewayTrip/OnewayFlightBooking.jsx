@@ -360,7 +360,7 @@ const OnewayFlightBooking = () => {
           </div>
         </div>
         {flightResults.map((flight, index) => (
-          <>
+          <React.Fragment key={index}>
             {" "}
             <div
               key={flight.id}
@@ -514,7 +514,7 @@ const OnewayFlightBooking = () => {
               </div>
             </div>
             {index === OFFER_INDEX && <OfferBanner />}
-          </>
+          </React.Fragment>
         ))}
 
         {/* Fare Comparison Modal */}
