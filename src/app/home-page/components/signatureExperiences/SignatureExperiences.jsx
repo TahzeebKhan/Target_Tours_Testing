@@ -15,27 +15,6 @@ const baseCarouselData = [
     bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
   },
   {
-    id: 2,
-    image: "/images/img4.jpg",
-    title: "SENEGAL",
-    description: "In The Heart Of East Senegal And The Shine Shaloum",
-    price: "₹15,000",
-    hasNewTag: true,
-    bottomTitle: "Senegal",
-    bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
-  },
-  {
-    id: 3,
-    image: "/images/img5.jpg",
-    title: "UZBEKISTAN",
-    description: "From Fergana To Khiva",
-    price: "₹18,000",
-    smallContent: true,
-    hasNewTag: false,
-    bottomTitle: "Uzbekistan",
-    bottomDescription: "From Fergana To Khiva",
-  },
-  {
     id: 4,
     image: "/images/img2.jpg",
     title: "MADAGASCAR",
@@ -56,6 +35,27 @@ const baseCarouselData = [
     bottomTitle: "Japan",
     bottomDescription: "Japan In The Winter",
   },
+  {
+    id: 3,
+    image: "/images/img5.jpg",
+    title: "UZBEKISTAN",
+    description: "From Fergana To Khiva",
+    price: "₹18,000",
+    smallContent: true,
+    hasNewTag: false,
+    bottomTitle: "Uzbekistan",
+    bottomDescription: "From Fergana To Khiva",
+  },
+  {
+    id: 2,
+    image: "/images/img4.jpg",
+    title: "SENEGAL",
+    description: "In The Heart Of East Senegal And The Shine Shaloum",
+    price: "₹15,000",
+    hasNewTag: true,
+    bottomTitle: "Senegal",
+    bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
+  },
 ];
 const SignatureExperiences = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -63,7 +63,7 @@ const SignatureExperiences = () => {
   const [isOpen, setIsOpen] = useState(false);
   const rotate = (arr, n) => [...arr.slice(n), ...arr.slice(0, n)];
   const tabsData = [
-    { title: "Explore", carouselData: rotate(baseCarouselData, 0) },
+    { title: "Africa", carouselData: rotate(baseCarouselData, 0) },
     { title: "Asia", carouselData: rotate(baseCarouselData, 1) },
     { title: "Central America", carouselData: rotate(baseCarouselData, 2) },
     { title: "Europe", carouselData: rotate(baseCarouselData, 3) },

@@ -4,11 +4,15 @@ import styles from "./FlightsLayout.module.css";
 import DatePriceSlider from "./components/DatePriceSlider";
 import FlightFilters from "./components/FlightsFilters";
 import TopFilterSection from "./components/TopFilterSection";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TripTypeProvider, useTripType } from "./TripTypeContext";
 
 function LayoutContent({ children }) {
   const { tripType } = useTripType();
+  const containerRef = useRef(null);
+
+  const sidebarRef = useRef(null);
+
 
   return (
     <>
@@ -23,6 +27,7 @@ function LayoutContent({ children }) {
       {/* Page Wrapper */}
       <main className={styles.page}>
         <div
+          ref={containerRef}
           className={`${styles.container} ${
             tripType === "round" ? styles.wideContainer : styles.normalContainer
           }`}
@@ -33,7 +38,7 @@ function LayoutContent({ children }) {
           </div>
           {/* Sidebar */}
           <aside className={styles.sidebar}>
-            <div className={styles.sidebarSticky}>
+            <div className={styles.sidebarSticky} ref={sidebarRef}>
               <FlightFilters />
             </div>
           </aside>

@@ -128,8 +128,8 @@ const TargetTours = () => {
                 <path
                   d="M2 2.5L7 7.5L12 2.5"
                   stroke="#000033"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </g>
