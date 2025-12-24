@@ -1,17 +1,31 @@
 .layoutWrapper {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+
 }
 
 .mainContent {
-    flex: 1;
-    padding-top: 80px;
-    /* Offset for fixed navbar */
-    background-color: #f8f9fa;
+  display: grid;
+  grid-template-columns: 1fr 356px;
+  column-gap: 24px;
+  max-width: 1280px;
+  margin: 0px auto;
+  width: 100%;
+  /* Offset for fixed navbar */
 }
 
 .container {
-    max-width: 1280px;
-    margin: 0 auto;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.stepperWrapperInLayout {
+  margin-top: 96px;
+}
+
+.sidebar {
+  width: 100%;
+  min-height: 551px;
 }
