@@ -242,16 +242,14 @@ const TopFilterSection = () => {
   return (
     <>
       <div
-        className={`${styles.searchSec} ${
-          tripType === "multi" ? styles.isMulti : ""
-        } flex flex-col gap-[127px] items-center`}
+        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""
+          } flex flex-col gap-[127px] items-center`}
       >
         <div
-          className={`${styles.searchPanelWrapper} ${
-            bookingType === "holiday" || bookingType === "insurance"
+          className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
               ? styles.noAnimation
               : ""
-          }`}
+            }`}
         >
           {bookingType === "flight" && (
             <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
@@ -310,9 +308,8 @@ const TopFilterSection = () => {
                     className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
                   >
                     <div
-                      className={`${styles.fromBtn} ${
-                        tripType === "oneway" ? styles.growRight : ""
-                      }`}
+                      className={`${styles.fromBtn} ${tripType === "oneway" ? styles.growRight : ""
+                        }`}
                     >
                       <div className={styles.lable}>From</div>
                       <input
@@ -327,9 +324,8 @@ const TopFilterSection = () => {
                       <ArrowLeftRight size={16} color="black" />
                     </div>
                     <div
-                      className={`${styles.fromBtn} ${styles.toBtn} ${
-                        styles.toBtn
-                      } ${tripType === "oneway" ? styles.growRight : ""}`}
+                      className={`${styles.fromBtn} ${styles.toBtn} ${styles.toBtn
+                        } ${tripType === "oneway" ? styles.growRight : ""}`}
                     >
                       <div className={styles.lable}>To</div>
                       <input
@@ -342,6 +338,8 @@ const TopFilterSection = () => {
                     </div>
 
                     <div
+
+
                       onClick={(e) => {
                         e.stopPropagation();
                         // setShowCalendar((prev) => !prev);
@@ -349,6 +347,7 @@ const TopFilterSection = () => {
                       className={`${styles.fromBtn} ${
                         tripType === "oneway" ? styles.growRight : ""
                       } ${styles.calendarAnchor}`}
+
                     >
                       {showCalendar && (
                         <DateCalendarModal
@@ -428,11 +427,10 @@ const TopFilterSection = () => {
                           Traveller(s), {travelClass}
                         </div>
                         <ChevronDown
-                          className={`${styles.chevron} ${
-                            travellerOpen
+                          className={`${styles.chevron} ${travellerOpen
                               ? styles.openChevron
                               : styles.closeChevron
-                          }`}
+                            }`}
                           size={16}
                           color="#FFFFFF"
                         />
@@ -574,11 +572,10 @@ const TopFilterSection = () => {
                         </div>
 
                         <ChevronDown
-                          className={`${styles.chevron} ${
-                            travellerOpen
+                          className={`${styles.chevron} ${travellerOpen
                               ? styles.openChevron
                               : styles.closeChevron
-                          }`}
+                            }`}
                           size={16}
                           color="#FFFFFF"
                         />
@@ -730,6 +727,7 @@ const TopFilterSection = () => {
                             />
                           </div>
 
+
                           <PassengerClassSelector
                             open={travellerOpen}
                             setOpen={setTravellerOpen}
@@ -739,6 +737,7 @@ const TopFilterSection = () => {
                             setTravelClass={setTravelClass}
                           />
                         </div>
+
                       </div>
 
                       <div

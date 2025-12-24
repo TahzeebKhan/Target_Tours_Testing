@@ -547,207 +547,95 @@ const HomePage = () => {
 
             {((bookingType === "hotel") || bookingType === "holiday" || bookingType === "insurance") && (
               <div className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}>
-                {/* Hotel form */}
-                <div
-                  key="hotel"
-                  className={`${styles.searchFormWrapper} ${bookingType === "hotel" ? styles.formVisible : styles.formHidden
-                    } ${styles.slideRight}`}
-                >
-                  <div className={styles.serarchingContBottom}>
-                    {/* <div className={styles.arrowboxOneWay}>
-                  <img src="/icons/leftRrighArrow.svg" alt="" />
-                </div> */}
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>WHERE TO</div>
-                      <input type="text" className={styles.contant} placeholder='Departure' />
+                <div className={`${styles.serarchingContBottom} ${bookingType === 'holiday' ? styles.swapActive : ''}`}>
+
+                  {/* Slot 1: Location 1 (Always at Pos 1) */}
+                  <div className={`${styles.fromBtn} ${styles.pos1}`} onClick={handleFieldClick}>
+                    <div className={`${styles.lable} ${styles.labelFade}`}>
+                      {bookingType === "hotel" ? "WHERE TO" :
+                        bookingType === "holiday" ? "From CITY" :
+                          "TRAVEL DESTINATION"}
                     </div>
+                    {bookingType === "insurance" ? (
+                      <div className={`${styles.contant} ${styles.contentFade}`}>{travellerDestination}</div>
+                    ) : (
+                      <input
+                        type="text"
+                        className={`${styles.contant} ${styles.contentFade}`}
+                        placeholder="Departure"
+                        value={bookingType === "hotel" ? (to || "") : (from || "")}
+                        onChange={(e) => bookingType === "hotel" ? setTo(e.target.value) : setFrom(e.target.value)}
+                      />
+                    )}
+                  </div>
 
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>Check In</div>
-                      <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                        {/* attach ref */}
-                        <input
-                          ref={departureRef}
-                          type="date"
-                          className={styles.contant}
-                          data-placeholder="ADD DATES"
-                          required
-                        />
-                        {/* use button for accessibility; call handler that uses the ref */}
-                        <button
-                          type="button"
-                          aria-label="Open departure date picker"
-                          className={styles.calendarIcon}
-                          onClick={openDeparturePicker}
-                        >
-                          {/* same SVG */}
-                          <img src="/icons/calander.svg" alt="" />
-
-                        </button>
-                      </div>
+                  {/* Slot 2: Hotel: Check In | Holiday: Departure Date | Insurance: Travel Date */}
+                  <div className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`} onClick={handleFieldClick}>
+                    <div className={`${styles.lable} ${styles.labelFade}`}>
+                      {bookingType === "hotel" ? "Check In" : "Departure Date"}
                     </div>
-
-                    <TravellerSelector
-                      travellerClass={hotelGuestRoomCount}
-                      setTravellerClass={setHotelGuestRoomCount}
-                      travellerOptions={travellerOptions}
-                      styles={styles}
-                      name="GUESTS & ROOMS"
-
-                    />
-                    <div className={styles.searchBtn}>
-                      <img src="/images/searchIcon.svg" alt="" />
+                    <div className={`${styles.dateInputWrapper} ${styles.contentFade}`} onClick={openDeparturePicker}>
+                      <input
+                        ref={departureRef}
+                        type="date"
+                        className={styles.contant}
+                        data-placeholder="ADD DATES"
+                        value={bookingType === "hotel" ? checkIn : departureDate}
+                        onChange={(e) => bookingType === "hotel" ? setCheckIn(e.target.value) : setDepartureDate(e.target.value)}
+                        required
+                      />
+                      <button type="button" className={styles.calendarIcon} onClick={openDeparturePicker}>
+                        <img src="/icons/calander.svg" alt="" />
+                      </button>
                     </div>
                   </div>
-                </div>
 
-                {/* Holiday form */}
-                <div
-                  key="holiday"
-                  className={`${styles.searchFormWrapper} ${bookingType === "holiday" ? styles.formVisible : styles.formHidden
-                    } ${styles.slideRight}`}
-                >
-
-
-                  <div className={styles.serarchingContBottom}>
-                    {/* <div className={styles.arrowboxOneWay} onClick={swapLocations}>
-                  <img src="/icons/leftRrighArrow.svg" alt="" />
-                </div> */}
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>From CITY</div>
-                      <input
-                        type="text"
-                        className={styles.contant}
-                        placeholder="Departure"
-                        value={from}
-                        onChange={(e) => setFrom(e.target.value)}
-                      />
+                  {/* Slot 3: Hotel: Check Out | Holiday: To City | Insurance: Departure Date */}
+                  <div className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`} onClick={handleFieldClick}>
+                    <div className={`${styles.lable} ${styles.labelFade}`}>
+                      {bookingType === "hotel" ? "Check Out" :
+                        bookingType === "holiday" ? "To CITY/COUNTRY, CATEGORY" :
+                          "Departure Date"}
                     </div>
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>To CITY/COUNTRY, CATEGORY</div>
+                    {bookingType === "holiday" ? (
                       <input
                         type="text"
-                        className={styles.contant}
+                        className={`${styles.contant} ${styles.contentFade}`}
                         placeholder="Destination"
                         value={to}
                         onChange={(e) => setTo(e.target.value)}
                       />
-                    </div>
-
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>Departure Date</div>
-                      <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                        {/* attach ref */}
+                    ) : (
+                      <div className={`${styles.dateInputWrapper} ${styles.contentFade}`} onClick={openReturnPicker}>
                         <input
-                          ref={departureRef}
+                          ref={returnRef}
                           type="date"
                           className={styles.contant}
                           data-placeholder="ADD DATES"
+                          value={bookingType === "hotel" ? checkOut : returnDate}
+                          onChange={(e) => bookingType === "hotel" ? setCheckOut(e.target.value) : setReturenDate(e.target.value)}
                           required
                         />
-                        {/* use button for accessibility; call handler that uses the ref */}
-                        <button
-                          type="button"
-                          aria-label="Open departure date picker"
-                          className={styles.calendarIcon}
-                          onClick={openDeparturePicker}
-                        >
-                          {/* same SVG */}
+                        <button type="button" className={styles.calendarIcon} onClick={openReturnPicker}>
                           <img src="/icons/calander.svg" alt="" />
-
                         </button>
                       </div>
-                    </div>
-
-                    <TravellerSelector
-                      travellerClass={guestRoomCount}
-                      setTravellerClass={setGuestRoomCount}
-                      travellerOptions={travellerOptions}
-                      styles={styles}
-                      name="ROOMS & GUESTS"
-                      enableEllipsis={false}
-                    />
-                    <div className={styles.searchBtn}>
-                      <img src="/images/searchIcon.svg" alt="" />
-                    </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Insurance form */}
-                <div
-                  key="insurance"
-                  className={`${styles.searchFormWrapper} ${bookingType === "insurance" ? styles.formVisible : styles.formHidden
-                    } ${styles.slideRight}`}
-                >
-                  <div className={styles.serarchingContBottom}>
-                    <TravellerSelector
-                      travellerClass={travellerDestination}
-                      setTravellerClass={setTravellerDestination}
-                      travellerOptions={TravellerDestinationOptions}
-                      styles={styles}
-                      name="TRAVEL DESTINATION"
-                      enableEllipsis={false}
-                    />
+                  {/* Slot 4: Guests & Rooms */}
+                  <TravellerSelector
+                    travellerClass={bookingType === "hotel" ? hotelGuestRoomCount : bookingType === "holiday" ? guestRoomCount : travellerCount}
+                    setTravellerClass={bookingType === "hotel" ? setHotelGuestRoomCount : bookingType === "holiday" ? setGuestRoomCount : setTravellerCount}
+                    travellerOptions={travellerOptions}
+                    styles={styles}
+                    name={bookingType === "hotel" ? "GUESTS & ROOMS" : bookingType === "holiday" ? "ROOMS & GUESTS" : "TRAVELLERS"}
+                    className={`${styles.pos4}`}
+                  />
 
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>TRAVEL DATE</div>
-                      <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-
-                        <input
-                          ref={departureRef}
-                          type="date"
-                          className={styles.contant}
-                          data-placeholder="ADD DATES"
-                          required
-                        />
-
-                        <button
-                          type="button"
-                          aria-label="Open departure date picker"
-                          className={styles.calendarIcon}
-                          onClick={openDeparturePicker}
-                        >
-
-                          <img src="/icons/calander.svg" alt="" />
-
-                        </button>
-                      </div>
-                    </div>
-                    <div className={styles.fromBtn} onClick={handleFieldClick}>
-                      <div className={styles.lable}>Departure Date</div>
-                      <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-
-                        <input
-                          ref={departureRef}
-                          type="date"
-                          className={styles.contant}
-                          data-placeholder="ADD DATES"
-                          required
-                        />
-
-                        <button
-                          type="button"
-                          aria-label="Open departure date picker"
-                          className={styles.calendarIcon}
-                          onClick={openDeparturePicker}
-                        >
-
-                          <img src="/icons/calander.svg" alt="" />
-
-                        </button>
-                      </div>
-                    </div>
-
-                    <TravellerSelector
-                      travellerClass={travellerCount}
-                      setTravellerClass={setTravellerCount}
-                      travellerOptions={travellerOptions}
-                      styles={styles}
-                      name="TRAVELLERS"
-                    />
-                    <div className={styles.searchBtn}>
-                      <img src="/images/searchIcon.svg" alt="" />
-                    </div>
+                  {/* Search Button */}
+                  <div className={`${styles.searchBtn} ${styles.pos5}`}>
+                    <img src="/images/searchIcon.svg" alt="" />
                   </div>
                 </div>
               </div>
