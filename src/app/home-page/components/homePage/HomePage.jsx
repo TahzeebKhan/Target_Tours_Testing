@@ -40,9 +40,6 @@ const HomePage = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  const [oneWayFrom, setOneWayFrom] = useState("");
-  const [oneWayTo, setOneWayTo] = useState("");
-
   const [multiCity, setMultiCity] = useState([
     { from: "", to: "" },
     { from: "", to: "" },
@@ -65,8 +62,6 @@ const HomePage = () => {
     // default behavior for round/oneway
     setFrom(to);
     setTo(from);
-    setOneWayFrom(oneWayTo);
-    setOneWayTo(oneWayFrom);
   };
 
   // Multi-city handlers
@@ -238,7 +233,7 @@ const HomePage = () => {
   const handleFieldClick = (e) => {
     const target = e.currentTarget;
     const input = target.querySelector('input');
-    
+
     if (!input) return;
 
     // Check if it's a date input
@@ -373,13 +368,13 @@ const HomePage = () => {
                 </div>
                 {/* Flight trip-type forms (round / oneway / multi) with smart-animate style transition */}
                 <div className={styles.flightSearchFormContainer}>
-                  {/* Round-trip form (render only when round-trip is active) */}
-                  {tripType === "round" && (
+                  {/* Unified form for all trip types (Row 1) */}
+                  {(tripType === "round" || tripType === "oneway" || tripType === "multi") && (
                     <div
-                      className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible
-                        } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
+                      key="row1"
+                      className={`${styles.serarchingContBottom} ${styles.formVisible}`}
                     >
-                      <div className={styles.arrowbox} onClick={swapLocations}>
+                      <div className={`${styles.arrowbox} ${tripType === "oneway" ? styles.arrowboxOneWay : tripType === "multi" ? styles.multiArrow : ""}`} onClick={() => swapLocations(tripType === 'multi' ? 0 : undefined)}>
                         <img src="/icons/leftRrighArrow.svg" alt="" />
                       </div>
                       <div
@@ -391,8 +386,8 @@ const HomePage = () => {
                           type="text"
                           className={styles.contant}
                           placeholder="Departure"
-                          value={from}
-                          onChange={(e) => setFrom(e.target.value)}
+                          value={tripType === 'multi' ? (multiCity[0]?.from || '') : from}
+                          onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'from', e.target.value) : setFrom(e.target.value)}
                         />
                       </div>
                       <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`} onClick={handleFieldClick}>
@@ -401,59 +396,56 @@ const HomePage = () => {
                           type="text"
                           className={styles.contant}
                           placeholder="Destination"
-                          value={to}
-                          onChange={(e) => setTo(e.target.value)}
+                          value={tripType === 'multi' ? (multiCity[0]?.to || '') : to}
+                          onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'to', e.target.value) : setTo(e.target.value)}
                         />
                       </div>
 
                       <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>Departure Date</div>
                         <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                          {/* attach ref */}
                           <input
                             ref={departureRef}
                             type="date"
                             className={styles.contant}
                             data-placeholder="ADD DATES"
+                            value={tripType === 'multi' ? (multiCity[0]?.date || '') : undefined}
+                            onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'date', e.target.value) : undefined}
                             required
                           />
-                          {/* use button for accessibility; call handler that uses the ref */}
                           <button
                             type="button"
                             aria-label="Open departure date picker"
                             className={styles.calendarIcon}
                             onClick={openDeparturePicker}
                           >
-                            {/* same SVG */}
                             <img src="/icons/calander.svg" alt="" />
-
                           </button>
                         </div>
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick}>
+
+                      {/* Return Date field with smooth transition - hidden in Multi-city and One-way */}
+                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.returnDateField} ${(tripType === "oneway" || tripType === "multi") ? styles.hiddenField : ""}`} onClick={handleFieldClick}>
                         <div className={styles.lable}>Return Date</div>
                         <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
-                          {/* attach ref */}
                           <input
                             ref={returnRef}
                             type="date"
                             className={styles.contant}
                             data-placeholder="ADD DATES"
-                            required
+                            required={tripType === "round"}
                           />
-                          {/* use button for accessibility; call handler that uses the ref */}
                           <button
                             type="button"
                             aria-label="Open return date picker"
                             className={styles.calendarIcon}
                             onClick={openReturnPicker}
                           >
-                            {/* same SVG */}
                             <img src="/icons/calander.svg" alt="" />
-
                           </button>
                         </div>
                       </div>
+
                       <TravellerSelector
                         travellerClass={travellerClass}
                         setTravellerClass={setTravellerClass}
@@ -463,181 +455,88 @@ const HomePage = () => {
                         className={styles.fromInput}
                       />
 
-
-
-                      <div className={styles.searchBtn}>
+                      <div className={`${styles.searchBtn} ${tripType === 'multi' ? styles.hiddenField : ""}`}>
                         <img src="/images/searchIcon.svg" alt="" />
                       </div>
                     </div>
                   )}
 
-                  {/* One-way form */}
-                  {tripType === "oneway" && (
-                    <div
-                      className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible
-                        } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
-                    >
-                      <div className={styles.arrowboxOneWay} onClick={swapLocations}>
-                        <img src="/icons/leftRrighArrow.svg" alt="" />
-                      </div>
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                        <div className={styles.lable}>From</div>
-                        <input
-                          type="text"
-                          className={styles.contant}
-                          placeholder="Departure"
-                          value={oneWayFrom}
-                          onChange={(e) => setOneWayFrom(e.target.value)}
-                        />
-                      </div>
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${styles.toInput} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                        <div className={styles.lable}>To</div>
-                        <input
-                          type="text"
-                          className={styles.contant}
-                          placeholder="Destination"
-                          value={oneWayTo}
-                          onChange={(e) => setOneWayTo(e.target.value)}
-                        />
-                      </div>
-
-                      <div className={`${styles.fromBtn} ${styles.travellerClassField} ${tripType === 'oneway' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                        <div className={styles.lable}>Departure Date</div>
-                        <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                          {/* attach ref */}
-                          <input
-                            ref={departureRef}
-                            type="date"
-                            className={styles.contant}
-                            data-placeholder="ADD DATES"
-                            required
-                          />
-                          {/* use button for accessibility; call handler that uses the ref */}
-                          <button
-                            type="button"
-                            aria-label="Open departure date picker"
-                            className={styles.calendarIcon}
-                            onClick={openDeparturePicker}
-                          >
-                            {/* same SVG */}
-                            <img src="/icons/calander.svg" alt="" />
-
-                          </button>
-                        </div>
-                      </div>
-                      <TravellerSelector
-                        travellerClass={travellerClass}
-                        setTravellerClass={setTravellerClass}
-                        travellerOptions={travellerOptions}
-                        styles={styles}
-                        name="Travellers & Class"
-                        className={styles.travellerClassField}
-                      />
-                      <div className={styles.searchBtn}>
-                        <img src="/images/searchIcon.svg" alt="" />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Multi-city form */}
+                  {/* Multi-city additional legs (Starting from Row 2) */}
                   {tripType === "multi" && (
-                    <div
-                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible
-                        } ${flightDirection === "right" ? styles.slideRight : styles.slideLeft}`}
-                    >
-                      <div className={styles.serarchingContBottom}>
-                        <div className={`${styles.arrowboxOneWay}  ${styles.multiArrow}`} onClick={() => swapLocations(0)}>
-                          <img src="/icons/leftRrighArrow.svg" alt="" />
-                        </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>From</div>
-                          <input type="text" className={styles.contant} placeholder='Departure ' value={multiCity[0]?.from || ''}
-                            onChange={(e) => updateMultiLeg(0, 'from', e.target.value)} />
-                        </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>To</div>
-                          <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[0]?.to || ''}
-                            onChange={(e) => updateMultiLeg(0, 'to', e.target.value)} />
-                        </div>
+                    <div className={styles.multiSearch}>
+                      {multiCity.slice(1).map((leg, idx) => {
+                        const actualIndex = idx + 1;
+                        return (
+                          <div key={actualIndex} className={styles.serarchingContBottom}>
+                            <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(actualIndex)}>
+                              <img src="/icons/leftRrighArrow.svg" alt="" />
+                            </div>
+                            <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
+                              <div className={styles.lable}>From</div>
+                              <input type="text" className={styles.contant} placeholder='Departure' value={leg.from || ''} onChange={(e) => updateMultiLeg(actualIndex, 'from', e.target.value)} />
+                            </div>
+                            <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput}`} onClick={handleFieldClick}>
+                              <div className={styles.lable}>To</div>
+                              <input type="text" className={styles.contant} placeholder='Destination' value={leg.to || ''} onChange={(e) => updateMultiLeg(actualIndex, 'to', e.target.value)} />
+                            </div>
 
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>Departure Date</div>
-                          <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                            {/* attach ref */}
-                            <input
-                              ref={departureRef}
-                              type="date"
-                              className={styles.contant}
-                              data-placeholder="ADD DATES"
-                              value={multiCity[0]?.date || ''}
-                              onChange={(e) => updateMultiLeg(0, 'date', e.target.value)}
-                              required
-                            />
-                            {/* use button for accessibility; call handler that uses the ref */}
-                            <button
-                              type="button"
-                              aria-label="Open departure date picker"
-                              className={styles.calendarIcon}
-                              onClick={openDeparturePicker}
-                            >
-                              {/* same SVG */}
-                              <img src="/icons/calander.svg" alt="" />
+                            <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
+                              <div className={styles.lable}>Departure Date</div>
+                              <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
+                                <input
+                                  ref={actualIndex === 1 ? returnRef : null}
+                                  type="date"
+                                  className={styles.contant}
+                                  data-placeholder="ADD DATES"
+                                  value={leg.date || ''}
+                                  onChange={(e) => updateMultiLeg(actualIndex, 'date', e.target.value)}
+                                  required
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open departure date picker"
+                                  className={styles.calendarIcon}
+                                  onClick={openReturnPicker}
+                                >
+                                  <img src="/icons/calander.svg" alt="" />
+                                </button>
+                              </div>
+                            </div>
 
-                            </button>
+                            {/* Show search button only on the last row of multi-city */}
+                            {actualIndex === multiCity.length - 1 ? (
+                              <div className={styles.multisearchBtn}>
+                                Search
+                              </div>
+                            ) : (
+                              /* Placeholder to keep alignment if search button is missing */
+                              <div className={`${styles.multisearchBtn} opacity-0 pointer-events-none`}>
+                                Search
+                              </div>
+                            )}
+
+                            {/* Add a remove button if needed (optional based on original UI, but good for UX) */}
+                            {multiCity.length > 2 && (
+                              <button
+                                className="absolute -right-8 top-1/2 -translate-y-1/2 text-white hover:text-red-500"
+                                onClick={() => removeMultiLeg(actualIndex)}
+                              >
+                                ✕
+                              </button>
+                            )}
                           </div>
-                        </div>
-                        <TravellerSelector
-                          travellerClass={travellerClass}
-                          setTravellerClass={setTravellerClass}
-                          travellerOptions={travellerOptions}
-                          styles={styles}
-                          name="Travellers & Class"
-                          className={styles.travellerClass}
-                        />
-                      </div>
-                      <div className={styles.serarchingContBottom}>
-                        <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(1)}>
-                          <img src="/icons/leftRrighArrow.svg" alt="" />
-                        </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>From</div>
-                          <input type="text" className={styles.contant} placeholder='Departure' value={multiCity[1]?.from || ''} onChange={(e) => updateMultiLeg(1, 'from', e.target.value)} />
-                        </div>
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>To</div>
-                          <input type="text" className={styles.contant} placeholder='Destination' value={multiCity[1]?.to || ''} onChange={(e) => updateMultiLeg(1, 'to', e.target.value)} />
-                        </div>
+                        );
+                      })}
 
-                        <div className={`${styles.fromBtn} ${styles.travellerClass} ${tripType === 'multi' ? styles.growRight : ''}`} onClick={handleFieldClick}>
-                          <div className={styles.lable}>Departure Date</div>
-                          <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
-
-                            <input
-                              ref={returnRef}
-                              type="date"
-                              className={styles.contant}
-                              data-placeholder="ADD DATES"
-                              value={multiCity[1]?.date || ''}
-                              onChange={(e) => updateMultiLeg(1, 'date', e.target.value)}
-                              required
-                            />
-
-                            <button
-                              type="button"
-                              aria-label="Open departure date picker"
-                              className={styles.calendarIcon}
-                              onClick={openReturnPicker}
-                            >
-
-                               <img src="/icons/calander.svg" alt="" />
-
-                            </button>
-                          </div>
-                        </div>
-                        <div className={styles.multisearchBtn}>
-                          Search
-                        </div>
-                      </div>
+                      {/* Add leg button */}
+                      {/* <div className="flex justify-start">
+                        <button
+                          className="text-[#fcc800] text-xs font-medium uppercase tracking-wider hover:underline"
+                          onClick={addMultiLeg}
+                        >
+                          + Add City
+                        </button>
+                      </div> */}
                     </div>
                   )}
                 </div>
@@ -682,7 +581,7 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
                           {/* same SVG */}
-                           <img src="/icons/calander.svg" alt="" />
+                          <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
@@ -754,7 +653,7 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
                           {/* same SVG */}
-                           <img src="/icons/calander.svg" alt="" />
+                          <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
@@ -809,7 +708,7 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
 
-                           <img src="/icons/calander.svg" alt="" />
+                          <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
@@ -833,7 +732,7 @@ const HomePage = () => {
                           onClick={openDeparturePicker}
                         >
 
-                           <img src="/icons/calander.svg" alt="" />
+                          <img src="/icons/calander.svg" alt="" />
 
                         </button>
                       </div>
