@@ -5,13 +5,7 @@ import PassengerDetails from './components/passengerDetails/PassengerDetails'
 const FlightBookingDetailsPage = () => {
     return (
         <div className="w-full">
-<<<<<<< Updated upstream
-            {/* <BookingStepper currentStep={2} /> */}
-            ho
-=======
-            <BookingStepper currentStep={2} />
-            <PassengerDetails />
->>>>>>> Stashed changes
+            <PassengerDetails /> 
         </div>
     )
 }
