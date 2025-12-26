@@ -305,7 +305,7 @@ const TopFilterSection = () => {
                 {/* One-way form */}
                 {tripType === "oneway" && (
                   <div
-                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
+                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
                   >
                     <div
                       className={`${styles.fromBtn} ${tripType === "oneway" ? styles.growRight : ""
@@ -466,7 +466,7 @@ const TopFilterSection = () => {
                 {/* Round-trip form (render only when round-trip is active) */}
                 {tripType === "round" && (
                   <div
-                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
+                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
                   >
                     <div className={`${styles.fromBtn} ${styles.fromBtn2}`}>
                       <div className={styles.lable}>From</div>
@@ -531,7 +531,11 @@ const TopFilterSection = () => {
                       </div>
                     </div>
 
-                    <div className={`${styles.fromBtn} ${styles.fromBtn2}`}>
+                    <div
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.returnDateField} ${
+                        tripType === "oneway" || tripType === "multi" ? styles.hiddenField : ""
+                      }`}
+                    > 
                       <div className={styles.lable}>Return Date</div>
 
                       <div
@@ -612,7 +616,7 @@ const TopFilterSection = () => {
                 {tripType === "multi" && (
                   <>
                     <div
-                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible} ${styles.slideRight}`}
+                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
                     >
                       <div className={styles.serarchingContBottom}>
                         <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
