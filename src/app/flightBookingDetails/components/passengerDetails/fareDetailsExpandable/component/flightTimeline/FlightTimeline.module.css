@@ -1,0 +1,224 @@
+.flightBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* =========================
+   ABOUT FLIGHT (TOP ROW)
+========================= */
+
+.aboutFlightContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.aboutFlightContainerLeft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.flightIcon {
+  width: 40px;
+  height: 40px;
+}
+
+.flightInfoTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flightInfoTextTitle {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18.57px;
+  color: #000000;
+}
+
+.flightInfoTextChips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 3px 10px;
+  background-color: #f7f7f7;
+  border: 1px solid #c4c4c4;
+  color: #737373;
+  border-radius: 7px;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  width: fit-content;
+}
+
+/* =========================
+   TIMELINE
+========================= */
+
+.timelineContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sideRight {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+}
+
+.date {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #434343;
+}
+
+.time {
+  font-family: Antic Didone;
+  font-size: 22px;
+  line-height: 1.18;
+  color: #000033;
+}
+
+.airport {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.terminal {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: #316cec;
+}
+
+.city {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: #a2a2a2;
+  white-space: nowrap;
+}
+
+/* =========================
+   CENTER ANIMATION
+========================= */
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flightAnimation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flightDotedcontainer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bigDot {
+  width: 11.86px;
+  height: 11.86px;
+  border-radius: 50%;
+  background-color: #7B8799;
+}
+
+.dashBorder {
+  width: clamp(32px, 6vw, 134px);
+  border-top: 1px dashed #94a3b8;
+}
+
+.flightSvg {
+  color: #000033;
+}
+
+/* =========================
+   DURATION / STOP INFO
+========================= */
+
+.priceContainer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.duration {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.hours {
+  color: #a3a3a3;
+}
+
+.nonStop {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #000000;
+}
+
+.aboutFlightContainerRight{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+}
+.flexiPlusFare{
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #0A0A0A;
+}
+.economyChip{
+  height: 22px;
+  padding: 2px 5px;
+  background-color: #FBBF24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+
+}
+.businessChip{
+  background-color: #67AA38;
+}
+.firstClassChip{
+  background-color: #38BDF8;
+}
