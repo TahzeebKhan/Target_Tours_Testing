@@ -116,4 +116,8 @@
   letter-spacing: -2%;
   text-transform: uppercase;
   cursor: pointer;
+  transition: all 0.35s ease;
+}
+.continueButton:hover{
+  background-color: #FCC800;
 }

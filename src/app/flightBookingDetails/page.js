@@ -6,6 +6,7 @@ import { useFlightBooking } from "./FlightBookingContext";
 import styles from "./page.module.css";
 import BaggageDetails from "./components/baggageDetails/BaggageDetails";
 import MealsDetails from "./components/mealsDetails/MealsDetails";
+import SeatingDetails from "./components/seatingDetails/SeatingDetails";
 
 const FlightBookingDetailsPage = () => {
   const { currentStep, setCurrentStep } = useFlightBooking();
@@ -20,15 +21,7 @@ const FlightBookingDetailsPage = () => {
         <MealsDetails/>
       )}{" "}
       {currentStep === 5 && (
-        <>
-          5th step
-          <div
-            onClick={() => setCurrentStep(6)}
-            className={styles.continueButtonContainer}
-          >
-            <button className={styles.continueButton}>CONTINUE</button>
-          </div>
-        </>
+        <SeatingDetails/>
       )}
       {currentStep === 6 && <>6th step</>}
     </div>

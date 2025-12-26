@@ -78,6 +78,28 @@
   justify-content: space-between;
 }
 
+.returnDateField {
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hiddenField {
+  min-width: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  flex: 0 0 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-left: -12px !important;
+  opacity: 0 !important;
+  border: none !important;
+  pointer-events: none;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
 .downloadBtn {
   padding: 8px 18px;
   border: 0.5px solid #e4e6e8;
@@ -723,6 +745,7 @@
 .searchBtn:hover svg path {
   fill: #ffffff !important;
 }
+
 .calendarAnchor {
   position: relative;
 }

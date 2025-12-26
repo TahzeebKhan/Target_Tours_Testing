@@ -140,6 +140,10 @@
   text-transform: uppercase;
   cursor: pointer;
   border: none;
+  transition: all 0.35s ease;
+}
+.continueButton:hover{
+  background-color: #FCC800;
 }
 .flightExpandableBottom{
   width: 100%;
