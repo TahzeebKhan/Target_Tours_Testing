@@ -43,7 +43,7 @@
   color: #0a0a0a;
 }
 .success {
-  color: #4E8729;
+  color: #4e8729;
 }
 
 .divider {
@@ -128,6 +128,73 @@
 .help p {
   margin-bottom: 8px;
 }
-.chat{
+.chat {
   margin-bottom: 0 !important;
+}
+
+.bookNowBtn {
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: -2%;
+  height: 41px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  width: 100%;
+  transition: all 0.5s ease;
+}
+
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+.safeBadge {
+  align-items: center;
+  display: flex;
+  padding: 5px 13px;
+  gap: 12px;
+  /* justify-content: space-between; */
+  width: 100%;
+  border: 1px solid var(--Color-Soft-Green-400, #86c556);
+  background-color: #f2faeb;
+}
+.safeBadge img {
+  width: 48px;
+  height: 100%;
+}
+.safeBadge .title {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-transform: uppercase;
+  color: #345321;
+}
+
+.safeBadge .content {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 11px;
+  leading-trim: NONE;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #4a5565;
+  /* white-space: nowrap; */
+}
+
+.safeBadge .text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
 }

@@ -148,7 +148,7 @@
   align-items: center;
   justify-content: space-between;
 
-  font-family: "Poppins";
+  font-family: "Inter";
   font-weight: 400;
   font-size: 14px;
   line-height: 125%;
@@ -181,7 +181,7 @@
 .mobileOptions li {
   padding: 14px 16px;
 
-  font-family: "Poppins";
+  font-family: "Inter";
   font-weight: 400;
   font-size: 14px;
   line-height: 125%;

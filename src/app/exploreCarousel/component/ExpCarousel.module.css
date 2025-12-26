@@ -8,7 +8,7 @@
 
 .innerCarouselContentTitle {
     color: #7F7F7F;
-    font-family: Poppins;
+    font-family: Inter;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -52,7 +52,7 @@
 
 .innerCarouselContentPriceValue {
     color: var(--ROYAL-BLUE, #003);
-    font-family: Poppins;
+    font-family: Inter;
     font-size: 12px;
     font-style: normal;
     font-weight: 400;
@@ -68,7 +68,7 @@ justify-content: space-between; */
 
 .innerCarouselContentPriceValuePrice {
     color: var(--ROYAL-BLUE, #003);
-    font-family: Poppins;
+    font-family: Inter;
     font-size: 18px;
     font-style: normal;
     font-weight: 600;
@@ -84,7 +84,7 @@ justify-content: space-between; */
 }
 
 .ratting {
-    font-family: Poppins;
+    font-family: Inter;
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;
@@ -97,7 +97,7 @@ justify-content: space-between; */
 }
 
 .user {
-    font-family: Poppins;
+    font-family: Inter;
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;

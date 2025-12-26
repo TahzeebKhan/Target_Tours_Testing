@@ -10,9 +10,7 @@ export default function FlightBookingDetailsLayout({ children }) {
     <FlightBookingProvider>
       <div className={styles.layoutWrapper}>
         <Navbar />
-        <div className={styles.stepperWrapperInLayout}>
-          <BookingStepper />
-        </div>
+        <BookingStepper />
 
         <main className={styles.mainContent}>
           <div className={styles.container}>{children}</div>
