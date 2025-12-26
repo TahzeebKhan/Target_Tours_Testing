@@ -4,6 +4,7 @@
   flex-direction: column;
   gap: 42px;
 
+  background: #f9f9f9;
 }
 
 .mainContent {
@@ -28,4 +29,5 @@
 .sidebar {
   width: 100%;
   min-height: 551px;
+  padding-top: 74px;
 }
