@@ -7,6 +7,7 @@ import styles from "./page.module.css";
 import BaggageDetails from "./components/baggageDetails/BaggageDetails";
 import MealsDetails from "./components/mealsDetails/MealsDetails";
 import SeatingDetails from "./components/seatingDetails/SeatingDetails";
+import PaymentPage from "./components/paymentPage/PaymentPage";
 
 const FlightBookingDetailsPage = () => {
   const { currentStep, setCurrentStep } = useFlightBooking();
@@ -23,7 +24,11 @@ const FlightBookingDetailsPage = () => {
       {currentStep === 5 && (
         <SeatingDetails/>
       )}
-      {currentStep === 6 && <>6th step</>}
+      {currentStep === 6 && (
+        <>
+          <PaymentPage />
+        </>
+      )}
     </div>
   );
 };

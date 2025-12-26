@@ -34,7 +34,7 @@
   cursor: pointer;
   transition: color 0.25s ease;
   padding: 8px 24px;
-  max-width: 210px;
+  max-width: 250px;
   width: 100%;
   font-family: var(--font-inter);
   font-weight: 300;

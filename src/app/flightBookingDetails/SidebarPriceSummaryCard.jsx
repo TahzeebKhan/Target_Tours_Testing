@@ -1,9 +1,10 @@
 "use client"
 import { useFlightBooking } from "./FlightBookingContext";
+import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
 export default function SidebarPriceSummaryCard() {
-  const { prices } = useFlightBooking();
+  const { prices,currentStep  } = useFlightBooking();
 
   return (
     <div className={styles.card}>
@@ -60,6 +61,20 @@ export default function SidebarPriceSummaryCard() {
         </div>
         <p className={styles.note}>Includes taxes and service fees</p>
       </div>
+      {currentStep === 6 && (
+        <>
+          <button className={styles.bookNowBtn}>Continue Payment</button>
+          <div className={styles.safeBadge}>
+            <img src="/images/secure.png" />
+            <div className={styles.text}>
+              <div className={styles.title}>Safe & Secure Payment</div>
+              <div className={styles.content}>
+                Your payment information is encrypted
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className={styles.help}>
         <p className={styles.helpTitle}>Need Help?</p>

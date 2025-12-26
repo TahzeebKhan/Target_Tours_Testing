@@ -1,10 +1,12 @@
 import React from 'react'
 import styles from './SeatingDetails.module.css'
+import { useFlightBooking } from '../../FlightBookingContext';
 const SeatingDetails = () => {
     const [openTab, setOpenTab] = React.useState("flight");
     const toggleTab = (tab) => {
         if (openTab !== tab) setOpenTab(tab);
     };
+    const {setCurrentStep} = useFlightBooking()
     return (
         <div className={styles.container}>
             {/* HEADER */}
@@ -127,7 +129,7 @@ const SeatingDetails = () => {
                 </div>
             </div>
             <div
-                onClick={() => setCurrentStep(5)}
+                onClick={() => setCurrentStep(6)}
                 className={styles.continueButtonContainer}
             >
                 <button className={styles.skipButton}>SKIP MEAL</button>

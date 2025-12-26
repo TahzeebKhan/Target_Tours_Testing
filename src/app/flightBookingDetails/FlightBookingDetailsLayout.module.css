@@ -3,7 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: 42px;
-  background-color: #F9F9F9;
+  padding-top: 73px;
+  background-color: #f9f9f9;
 
   background: #f9f9f9;
 }
@@ -15,6 +16,7 @@
   max-width: 1280px;
   margin: 0px auto;
   width: 100%;
+  padding-bottom: 40px;
   /* Offset for fixed navbar */
 }
 
@@ -22,14 +24,17 @@
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-}
-
-.stepperWrapperInLayout {
-  margin-top: 96px;
+  width: 100%;
 }
 
 .sidebar {
   width: 100%;
   min-height: 551px;
   padding-top: 74px;
+}
+
+.sidebarSticky {
+  position: sticky;
+  top: 202px; /* navbar (96px) + stepper (~90px) */
+  align-self: flex-start;
 }
