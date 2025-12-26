@@ -33,7 +33,7 @@ export default function SidebarPriceSummaryCard() {
 
         <div className={styles.row}>
           <span>Taxes & Fees</span>
-          <span>₹2,819</span>
+          <span className={styles.price}>₹2,819</span>
         </div>
       </div>
 

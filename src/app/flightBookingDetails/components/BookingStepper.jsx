@@ -1,6 +1,8 @@
+"use client";
 import React from "react";
 import styles from "./BookingStepper.module.css";
 import { Check } from "lucide-react";
+import { useFlightBooking } from "../FlightBookingContext";
 
 const steps = [
   { id: 1, label: "Search" },
@@ -11,7 +13,8 @@ const steps = [
   { id: 6, label: "Overview & Payment" },
 ];
 
-export default function BookingStepper({ currentStep = 2 }) {
+export default function BookingStepper() {
+  const { currentStep } = useFlightBooking();
   // Calculate progress line percentage based on currentStep
   // If currentStep is 3, line goes from 1 to 3.
   const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
