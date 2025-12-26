@@ -1,0 +1,157 @@
+.container{
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+}
+.passengerDetailsHeader{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.fromToContainer{
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.from, .to{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    color: #070773;
+}
+.flightExpandableContainer{
+    border: 1px solid transparent;
+}
+
+
+
+
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  /* align-items: start; */
+  height: fit-content;
+}
+
+.subInfoText {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+.flightExpandableHeaderContainer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.aboutFlightContainerRight{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.aboutFlightContainerRight span{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    vertical-align: middle;
+
+}
+
+.flightExpandableCard{
+    padding: 16px 24px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.flightExpandableHeader{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #070773;
+}
+
+.expandWrap {
+  max-height: 0;                 /* start closed */
+  overflow: hidden;              /* hide content */
+  transition: max-height 0.35s ease-in-out;
+}
+.flightActiveBorder{
+  border: 1px solid #E4E6E8;
+  transition: border 0.35s ease;
+}
+.expandOpen {
+  max-height: 1000px;    
+  border-top: 1px solid #E4E6E8;        /* enough to hold content */
+}
+.arrow {
+  transition: transform 0.35s ease;
+}
+
+.arrowRotate {
+  transform: rotate(180deg);
+}
+.continueButtonContainer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 24px;
+}
+.continueButton{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;  
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.skipButton{
+    height: 41px;
+    padding: 12px 16px;
+    border: 0.5px solid #000033;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+}

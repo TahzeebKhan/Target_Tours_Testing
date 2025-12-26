@@ -6,6 +6,7 @@ import TravelInsuranceOption from "./fareDetailsExpandable/component/travelInsur
 import CancellationPenalty from "./fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import TravelerDetails from "./fareDetailsExpandable/component/travelerDetails/TravelerDetails";
 import { useFlightBooking } from "../../FlightBookingContext";
+import { useRouter } from "next/navigation";
 
 const PassengerDetails = () => {
   // 👇 default open = flight
@@ -41,21 +42,20 @@ const PassengerDetails = () => {
         </div>
       </div>
 
-      {/* FLIGHT DETAILS */}
-      <div className={styles.flightExpandableContainer}>
-        <div
-          className={styles.flightExpandableCard}
-          onClick={() => toggleTab("flight")}
-        >
-          <h3 className={styles.flightExpandableHeader}>Flight Details</h3>
-          <img
-            src="/icons/DownArrows.svg"
-            alt=""
-            className={`${styles.arrow} ${
-              openTab === "flight" ? styles.arrowRotate : ""
-            }`}
-          />
-        </div>
+            {/* FLIGHT DETAILS */}
+            <div className={`${styles.flightExpandableContainer} ${openTab === "flight" ? styles.flightActiveBorder : ""}`}>
+                <div
+                    className={styles.flightExpandableCard}
+                    onClick={() => toggleTab("flight")}
+                >
+                    <h3 className={styles.flightExpandableHeader}>Flight Details</h3>
+                    <img
+                        src="/icons/DownArrows.svg"
+                        alt=""
+                        className={`${styles.arrow} ${openTab === "flight" ? styles.arrowRotate : ""
+                            }`}
+                    />
+                </div>
 
         <div
           className={`${styles.expandWrap} ${
@@ -66,23 +66,22 @@ const PassengerDetails = () => {
         </div>
       </div>
 
-      {/* INSURANCE */}
-      <div className={styles.flightExpandableContainer}>
-        <div
-          className={styles.flightExpandableCard}
-          onClick={() => toggleTab("insurance")}
-        >
-          <h3 className={styles.flightExpandableHeader}>
-            Add Travel Insurance (₹399/Person)
-          </h3>
-          <img
-            src="/icons/DownArrows.svg"
-            alt=""
-            className={`${styles.arrow} ${
-              openTab === "insurance" ? styles.arrowRotate : ""
-            }`}
-          />
-        </div>
+            {/* INSURANCE */}
+            <div className={`${styles.flightExpandableContainer} ${openTab === "insurance" ? styles.flightActiveBorder : ""}`}>
+                <div
+                    className={styles.flightExpandableCard}
+                    onClick={() => toggleTab("insurance")}
+                >
+                    <h3 className={styles.flightExpandableHeader}>
+                        Add Travel Insurance (₹399/Person)
+                    </h3>
+                    <img
+                        src="/icons/DownArrows.svg"
+                        alt=""
+                        className={`${styles.arrow} ${openTab === "insurance" ? styles.arrowRotate : ""
+                            }`}
+                    />
+                </div>
 
         <div
           className={`${styles.expandWrap} ${
@@ -93,22 +92,21 @@ const PassengerDetails = () => {
         </div>
       </div>
 
-      <div className={styles.flightExpandableContainer}>
-        <div
-          className={styles.flightExpandableCard}
-          onClick={() => toggleTab("Cancellation")}
-        >
-          <h3 className={styles.flightExpandableHeader}>
-            Cancellation & Date Change Policy
-          </h3>
-          <img
-            src="/icons/DownArrows.svg"
-            alt=""
-            className={`${styles.arrow} ${
-              openTab === "Cancellation" ? styles.arrowRotate : ""
-            }`}
-          />
-        </div>
+            <div className={`${styles.flightExpandableContainer} ${openTab === "Cancellation" ? styles.flightActiveBorder : ""}`}>
+                <div
+                    className={styles.flightExpandableCard}
+                    onClick={() => toggleTab("Cancellation")}
+                >
+                    <h3 className={styles.flightExpandableHeader}>
+                        Cancellation & Date Change Policy
+                    </h3>
+                    <img
+                        src="/icons/DownArrows.svg"
+                        alt=""
+                        className={`${styles.arrow} ${openTab === "Cancellation" ? styles.arrowRotate : ""
+                            }`}
+                    />
+                </div>
 
         <div
           className={`${styles.expandWrap} ${
@@ -119,20 +117,21 @@ const PassengerDetails = () => {
         </div>
       </div>
 
-      <div className={styles.flightExpandableContainer}>
-        <div
-          className={styles.flightExpandableCard}
-          onClick={() => toggleTab("travelerDetails")}
-        >
-          <h3 className={styles.flightExpandableHeader}>TRAVELER Details</h3>
-          <img
-            src="/icons/DownArrows.svg"
-            alt=""
-            className={`${styles.arrow} ${
-              openTab === "travelerDetails" ? styles.arrowRotate : ""
-            }`}
-          />
-        </div>
+            <div className={`${styles.flightExpandableContainer} ${openTab === "travelerDetails" ? styles.flightActiveBorder : ""}`}>
+                <div
+                    className={styles.flightExpandableCard}
+                    onClick={() => toggleTab("travelerDetails")}
+                >
+                    <h3 className={styles.flightExpandableHeader}>
+                        TRAVELER Details
+                    </h3>
+                    <img
+                        src="/icons/DownArrows.svg"
+                        alt=""
+                        className={`${styles.arrow} ${openTab === "travelerDetails" ? styles.arrowRotate : ""
+                            }`}
+                    />
+                </div>
 
         <div
           className={`${styles.expandWrap} ${

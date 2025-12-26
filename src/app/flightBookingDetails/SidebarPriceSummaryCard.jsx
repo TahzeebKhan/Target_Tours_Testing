@@ -1,6 +1,10 @@
+"use client"
+import { useFlightBooking } from "./FlightBookingContext";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
 export default function SidebarPriceSummaryCard() {
+  const { prices } = useFlightBooking();
+
   return (
     <div className={styles.card}>
       <h3 className={styles.title}>PRICE SUMMARY</h3>
@@ -8,7 +12,7 @@ export default function SidebarPriceSummaryCard() {
       <div className={styles.rowWraper}>
         <div className={styles.row}>
           <span>1x Adult</span>
-          <span className={styles.price}>₹ 64,126</span>
+          <span className={styles.price}>₹ {prices.baseFare.toLocaleString()}</span>
         </div>
 
         <div className={styles.row}>
@@ -21,6 +25,13 @@ export default function SidebarPriceSummaryCard() {
           <span className={styles.success}>Included</span>
         </div>
 
+        {prices.baggage > 0 && (
+          <div className={styles.row}>
+            <span>Extra Baggage</span>
+            <span className={styles.price}>₹ {prices.baggage.toLocaleString()}</span>
+          </div>
+        )}
+
         <div className={styles.row}>
           <span>Seat Selection</span>
           <span className={styles.success}>Free</span>
@@ -28,7 +39,11 @@ export default function SidebarPriceSummaryCard() {
 
         <div className={styles.row}>
           <span>Meals</span>
-          <span className={styles.success}>Included</span>
+          {prices.meals > 0 ? (
+            <span className={styles.price}>₹ {prices.meals.toLocaleString()}</span>
+          ) : (
+            <span className={styles.success}>Included</span>
+          )}
         </div>
 
         <div className={styles.row}>
@@ -41,7 +56,7 @@ export default function SidebarPriceSummaryCard() {
       <div>
         <div className={styles.totalRow}>
           <span>Total Amount</span>
-          <span className={styles.totalPrice}>₹ 66,945</span>
+          <span className={styles.totalPrice}>₹ {prices.total.toLocaleString()}</span>
         </div>
         <p className={styles.note}>Includes taxes and service fees</p>
       </div>
