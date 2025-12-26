@@ -1,9 +1,10 @@
 
 "use client";
 import React from "react";
-import styles from "./RoundTripExpendable.module.css";
+import styles from "./FlightTimeline.module.css";
 
 const FlightTimeline = ({ flight }) => {
+    const normalizedClass = flight.travelClass?.toLowerCase().replace(/\s+/g, "");
     return (
         <div className={styles.flightBody}>
             {/* TOP INFO */}
@@ -24,6 +25,15 @@ const FlightTimeline = ({ flight }) => {
                         </div>
                     </div>
                 </div>
+                <div className={styles.aboutFlightContainerRight}>
+                    <p className={styles.flexiPlusFare}>{flight.flexiPlusFare}</p>
+                    <div className={`${styles.economyChip} ${normalizedClass === "business"
+                        ? styles.businessChip
+                        : normalizedClass === "firstclass"
+                            ? styles.firstClassChip
+                            : styles.economyChip
+                        }`}>{flight.travelClass}</div>
+                </div>
             </div>
 
             {/* TIMELINE */}
@@ -33,8 +43,8 @@ const FlightTimeline = ({ flight }) => {
                     <div className={styles.date}>{flight.departure.date}</div>
                     <div className={styles.time}>{flight.departure.time}</div>
                     <div className={styles.airport}>{flight.departure.airport}</div>
-                    <div className={styles.terminal}>{flight.departure.terminal}</div>
-                    <div className={styles.city}>{flight.departure.city}</div>
+                    {/* <div className={styles.terminal}>{flight.departure.terminal}</div>
+                    <div className={styles.city}>{flight.departure.city}</div> */}
                 </div>
 
                 {/* CENTER */}
@@ -47,9 +57,9 @@ const FlightTimeline = ({ flight }) => {
 
                         <img
                             className={styles.flightSvg}
-                            src="/icons/flightIconBlue.svg"
-                            height={20}
-                            width={20}
+                            src="/icons/flightIcon.svg"
+                            height={28}
+                            width={28}
                             alt="flight"
                         />
 
@@ -78,8 +88,8 @@ const FlightTimeline = ({ flight }) => {
                     <div className={styles.date}>{flight.arrival.date}</div>
                     <div className={styles.time}>{flight.arrival.time}</div>
                     <div className={styles.airport}>{flight.arrival.airport}</div>
-                    <div className={styles.terminal}>{flight.arrival.terminal}</div>
-                    <div className={styles.city}>{flight.arrival.city}</div>
+                    {/* <div className={styles.terminal}>{flight.arrival.terminal}</div>
+                    <div className={styles.city}>{flight.arrival.city}</div> */}
                 </div>
             </div>
         </div>
