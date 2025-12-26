@@ -24,7 +24,9 @@
     letter-spacing: 0%;
     color: #070773;
 }
-
+.flightExpandableContainer{
+    border: 1px solid transparent;
+}
 
 
 
@@ -78,7 +80,10 @@
   overflow: hidden;              /* hide content */
   transition: max-height 0.35s ease-in-out;
 }
-
+.flightActiveBorder{
+  border: 1px solid #E4E6E8;
+  transition: border 0.35s ease;
+}
 .expandOpen {
   max-height: 1000px;            /* enough to hold content */
 }

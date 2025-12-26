@@ -4,6 +4,8 @@ import BookingStepper from "./components/BookingStepper";
 import PassengerDetails from "./components/passengerDetails/PassengerDetails";
 import { useFlightBooking } from "./FlightBookingContext";
 import styles from "./page.module.css";
+import BaggageDetails from "./components/baggageDetails/BaggageDetails";
+import MealsDetails from "./components/mealsDetails/MealsDetails";
 
 const FlightBookingDetailsPage = () => {
   const { currentStep, setCurrentStep } = useFlightBooking();
@@ -12,26 +14,10 @@ const FlightBookingDetailsPage = () => {
       {/* <BookingStepper currentStep={2} /> */}
       {currentStep === 2 && <PassengerDetails />}
       {currentStep === 3 && (
-        <>
-          3rd step
-          <div
-            onClick={() => setCurrentStep(4)}
-            className={styles.continueButtonContainer}
-          >
-            <button className={styles.continueButton}>CONTINUE</button>
-          </div>
-        </>
+       <BaggageDetails/>
       )}
       {currentStep === 4 && (
-        <>
-          4th step
-          <div
-            onClick={() => setCurrentStep(5)}
-            className={styles.continueButtonContainer}
-          >
-            <button className={styles.continueButton}>CONTINUE</button>
-          </div>
-        </>
+        <MealsDetails/>
       )}{" "}
       {currentStep === 5 && (
         <>
