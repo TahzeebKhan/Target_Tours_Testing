@@ -550,15 +550,22 @@ const HomePage = () => {
                 <div className={`${styles.serarchingContBottom} ${bookingType === 'holiday' ? styles.swapActive : ''}`}>
 
                   {/* Slot 1: Location 1 (Always at Pos 1) */}
-                  <div className={`${styles.fromBtn} ${styles.pos1}`} onClick={handleFieldClick}>
-                    <div className={`${styles.lable} ${styles.labelFade}`}>
-                      {bookingType === "hotel" ? "WHERE TO" :
-                        bookingType === "holiday" ? "From CITY" :
-                          "TRAVEL DESTINATION"}
-                    </div>
-                    {bookingType === "insurance" ? (
-                      <div className={`${styles.contant} ${styles.contentFade}`}>{travellerDestination}</div>
-                    ) : (
+                  {/* Slot 1: Location 1 (Always at Pos 1) */}
+                  {bookingType === "insurance" ? (
+                    <TravellerSelector
+                      travellerClass={travellerDestination}
+                      setTravellerClass={setTravellerDestination}
+                      travellerOptions={TravellerDestinationOptions}
+                      styles={styles}
+                      name="TRAVEL DESTINATION"
+                      className={`${styles.pos1}`}
+                      enableEllipsis={false}
+                    />
+                  ) : (
+                    <div className={`${styles.fromBtn} ${styles.pos1}`} onClick={handleFieldClick}>
+                      <div className={`${styles.lable} ${styles.labelFade}`}>
+                        {bookingType === "hotel" ? "WHERE TO" : "From CITY"}
+                      </div>
                       <input
                         type="text"
                         className={`${styles.contant} ${styles.contentFade}`}
@@ -566,8 +573,8 @@ const HomePage = () => {
                         value={bookingType === "hotel" ? (to || "") : (from || "")}
                         onChange={(e) => bookingType === "hotel" ? setTo(e.target.value) : setFrom(e.target.value)}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Slot 2: Hotel: Check In | Holiday: Departure Date | Insurance: Travel Date */}
                   <div className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`} onClick={handleFieldClick}>

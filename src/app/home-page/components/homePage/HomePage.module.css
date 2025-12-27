@@ -551,7 +551,7 @@
   border: 0.5px solid #e6e8ec;
   background-color: rgba(0, 0, 0, 0.35);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+
   flex: 1;
   margin-left: 0;
   cursor: pointer;
@@ -916,6 +916,7 @@
 
 .multiArrow {
   left: 23%;
+  z-index: 1;
 }
 
 .flightSectionMain {

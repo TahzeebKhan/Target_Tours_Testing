@@ -69,7 +69,7 @@ export default function TravellerSelector({
       <div
         className={styles.dateInputWrapper}
         ref={localRef}
-        
+
       >
         <div className={styles.contant}>
           {displayLabel}
