@@ -6,25 +6,25 @@ const PREFERENCES = [
   {
     id: "adventure",
     label: "Adventure",
-    imageUrl: "/images/pref-adventure.png",
+    imageUrl: "/images/adventure.png",
   },
-  { id: "beach", label: "Beach", imageUrl: "/images/pref-beach.png" },
-  { id: "culture", label: "Culture", imageUrl: "/images/pref-culture.png" },
+  { id: "beach", label: "Beach", imageUrl: "/images/beach.png" },
+  { id: "culture", label: "Culture", imageUrl: "/images/culture.png" },
   {
     id: "sustainable",
     label: "Sustainable Tour",
-    imageUrl: "/images/pref-sustainable.png",
+    imageUrl: "/images/tour.png",
   },
-  { id: "food", label: "Food & Culinary", imageUrl: "/images/pref-food.png" },
-  { id: "luxury", label: "Luxury", imageUrl: "/images/pref-luxury.png" },
-  { id: "nature", label: "Nature", imageUrl: "/images/pref-nature.png" },
+  { id: "food", label: "Food & Culinary", imageUrl: "/images/food.png" },
+  { id: "luxury", label: "Luxury", imageUrl: "/images/luxury.png" },
+  { id: "nature", label: "Nature", imageUrl: "/images/nature.png" },
   {
     id: "self-drive",
     label: "Self-drive",
-    imageUrl: "/images/pref-selfdrive.png",
+    imageUrl: "/images/selfDrive.png",
   },
-  { id: "slow", label: "Slow Travel", imageUrl: "/images/pref-slow.png" },
-  { id: "wildlife", label: "Wildlife", imageUrl: "/images/pref-wildlife.png" },
+  { id: "slow", label: "Slow Travel", imageUrl: "/images/soloTravel.png" },
+  { id: "wildlife", label: "Wildlife", imageUrl: "/images/wildlife.png" },
 ];
 
 const MAX_SELECTION = 5;

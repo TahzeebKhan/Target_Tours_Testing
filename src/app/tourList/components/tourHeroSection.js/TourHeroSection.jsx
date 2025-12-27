@@ -14,7 +14,7 @@ const TourHeroSection = () => {
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
 
-  const [activeTab, setActiveTab] = useState("traveler");
+  const [activeTab, setActiveTab] = useState("");
   const travellerOptions = [
     { value: "1_room_2_adult", label: "1 Room, 2 Adults" },
     { value: "2_room_4_adult", label: "2 Rooms, 4 Adults" },
@@ -152,7 +152,9 @@ const TourHeroSection = () => {
           className={`${styles.tab} ${
             activeTab === "destination" ? styles.tabActive : ""
           }`}
-          onClick={() => setActiveTab("destination")}
+          onClick={() =>
+            setActiveTab(activeTab === "destination" ? "" : "destination")
+          }
         >
           Destinations
           <img
@@ -178,7 +180,9 @@ const TourHeroSection = () => {
           className={`${styles.tab} ${
             activeTab === "traveler" ? styles.tabActive : ""
           }`}
-          onClick={() => setActiveTab("traveler")}
+          onClick={() =>
+            setActiveTab(activeTab === "traveler" ? "" : "traveler")
+          }
         >
           Traveler profiles
           <img
@@ -204,7 +208,9 @@ const TourHeroSection = () => {
           className={`${styles.tab} ${
             activeTab === "preferences" ? styles.tabActive : ""
           }`}
-          onClick={() => setActiveTab("preferences")}
+          onClick={() =>
+            setActiveTab(activeTab === "preferences" ? "" : "preferences")
+          }
         >
           Your preferences
           <img
