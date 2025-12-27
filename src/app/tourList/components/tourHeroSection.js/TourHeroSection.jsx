@@ -1,8 +1,11 @@
-"use client"
-import React, { useRef, useState } from 'react'
-import styles from './TourHeroSection.module.css'
-import Navbar from '@/app/flights/Navbar'
-import TravellerSelector from '@/app/home-page/components/homePage/TravellerSelector'
+"use client";
+import React, { useRef, useState } from "react";
+import styles from "./TourHeroSection.module.css";
+import Navbar from "@/app/flights/Navbar";
+import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
+import DestinationFilter from "../tabsFilters/DestinationFilter";
+import TravellerFilter from "../tabsFilters/TravellerFilter";
+import PreferencesFilter from "../tabsFilters/PreferencesFilter";
 
 const TourHeroSection = () => {
   const [from, setFrom] = useState("");
@@ -29,10 +32,9 @@ const TourHeroSection = () => {
     }
   };
 
-
   const handleFieldClick = (e) => {
     const target = e.currentTarget;
-    const input = target.querySelector('input');
+    const input = target.querySelector("input");
 
     if (!input) return;
 
@@ -51,11 +53,17 @@ const TourHeroSection = () => {
         <Navbar />
       </div>
       <div className={styles.container}>
-        <div className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}>
-          <div className={`${styles.serarchingContBottom} ${styles.swapActive}`}>
-
+        <div
+          className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}
+        >
+          <div
+            className={`${styles.serarchingContBottom} ${styles.swapActive}`}
+          >
             {/* Slot 1: From City */}
-            <div className={`${styles.fromBtn} ${styles.pos1}`} onClick={handleFieldClick}>
+            <div
+              className={`${styles.fromBtn} ${styles.pos1}`}
+              onClick={handleFieldClick}
+            >
               <div className={`${styles.lable} ${styles.labelFade}`}>
                 From CITY
               </div>
@@ -69,11 +77,17 @@ const TourHeroSection = () => {
             </div>
 
             {/* Slot 2: Departure Date */}
-            <div className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`} onClick={handleFieldClick}>
+            <div
+              className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`}
+              onClick={handleFieldClick}
+            >
               <div className={`${styles.lable} ${styles.labelFade}`}>
                 Departure Date
               </div>
-              <div className={`${styles.dateInputWrapper} ${styles.contentFade}`} onClick={openDeparturePicker}>
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                onClick={openDeparturePicker}
+              >
                 <input
                   ref={departureRef}
                   type="date"
@@ -83,14 +97,21 @@ const TourHeroSection = () => {
                   onChange={(e) => setDepartureDate(e.target.value)}
                   required
                 />
-                <button type="button" className={styles.calendarIcon} onClick={openDeparturePicker}>
+                <button
+                  type="button"
+                  className={styles.calendarIcon}
+                  onClick={openDeparturePicker}
+                >
                   <img src="/icons/calander.svg" alt="" />
                 </button>
               </div>
             </div>
 
             {/* Slot 3: To City / Country / Category */}
-            <div className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`} onClick={handleFieldClick}>
+            <div
+              className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`}
+              onClick={handleFieldClick}
+            >
               <div className={`${styles.lable} ${styles.labelFade}`}>
                 To CITY/COUNTRY, CATEGORY
               </div>
@@ -117,53 +138,95 @@ const TourHeroSection = () => {
             <div className={`${styles.searchBtn} ${styles.pos5}`}>
               <img src="/icons/blueSearchIcon.svg" alt="" />
             </div>
-
           </div>
-
-
-
         </div>
         <div className={styles.textcontainer}>
           <p className={styles.para}>Discover the destination</p>
           <h2 className={styles.heading}>CANADA</h2>
         </div>
-
-
       </div>
-
 
       <div className={styles.tabContainer}>
         <button
           type="button"
-          className={`${styles.tab} ${activeTab === "destination" ? styles.tabActive : ""}`}
+          className={`${styles.tab} ${
+            activeTab === "destination" ? styles.tabActive : ""
+          }`}
           onClick={() => setActiveTab("destination")}
         >
           Destinations
-          <img src="/icons/DownArrows.svg" alt="" />
+          <img
+            className={`${styles.downArrow} ${
+              activeTab === "destination"
+                ? styles.downArrow
+                : styles.reversedDownArrow
+            }`}
+            src="/icons/DownArrows.svg"
+            alt=""
+          />
         </button>
+        <div
+          className={`${styles.filterWrapper} ${
+            activeTab === "destination" ? styles.openFilter : styles.closeFilter
+          }`}
+        >
+          {activeTab === "destination" && <DestinationFilter />}
+        </div>
 
         <button
           type="button"
-          className={`${styles.tab} ${activeTab === "traveler" ? styles.tabActive : ""}`}
+          className={`${styles.tab} ${
+            activeTab === "traveler" ? styles.tabActive : ""
+          }`}
           onClick={() => setActiveTab("traveler")}
         >
           Traveler profiles
-          <img src="/icons/DownArrows.svg" alt="" />
+          <img
+            className={`${styles.downArrow} ${
+              activeTab === "traveler"
+                ? styles.downArrow
+                : styles.reversedDownArrow
+            }`}
+            src="/icons/DownArrows.svg"
+            alt=""
+          />
         </button>
+        <div
+          className={`${styles.filterWrapper} ${
+            activeTab === "traveler" ? styles.openFilter : styles.closeFilter
+          }`}
+        >
+          {activeTab === "traveler" && <TravellerFilter />}
+        </div>
 
         <button
           type="button"
-          className={`${styles.tab} ${activeTab === "preferences" ? styles.tabActive : ""}`}
+          className={`${styles.tab} ${
+            activeTab === "preferences" ? styles.tabActive : ""
+          }`}
           onClick={() => setActiveTab("preferences")}
         >
           Your preferences
-          <img src="/icons/DownArrows.svg" alt="" />
+          <img
+            className={`${styles.downArrow} ${
+              activeTab === "preferences"
+                ? styles.downArrow
+                : styles.reversedDownArrow
+            }`}
+            src="/icons/DownArrows.svg"
+            alt=""
+          />
         </button>
+        <div
+          className={`${styles.filterWrapper} ${
+            activeTab === "preferences" ? styles.openFilter : styles.closeFilter
+          }`}
+        >
+          {activeTab === "preferences" && <PreferencesFilter />}
+        </div>
       </div>
-
-
     </section>
-  )
-}
+  );
+};
 
-export default TourHeroSection
+export default TourHeroSection;
