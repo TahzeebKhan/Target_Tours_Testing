@@ -112,7 +112,7 @@ const TourHeroSection = () => {
               name="ROOMS & GUESTS"
               className={`${styles.pos4}`}
             />
-
+            
             {/* Search Button */}
             <div className={`${styles.searchBtn} ${styles.pos5}`}>
               <img src="/icons/blueSearchIcon.svg" alt="" />
