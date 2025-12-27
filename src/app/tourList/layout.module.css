@@ -1,0 +1,14 @@
+.tourContent{
+    width: 100%;
+    padding-top: 78px;
+    padding-bottom: 98px;
+    background-color: #F9F9F9;
+}
+
+.tourLayout {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 356px 1fr;
+  gap: 24px;
+}

@@ -1,0 +1,223 @@
+.tourListSection{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.cardContainer{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+.card {
+    max-width: 518px;
+    width: 100%;
+    height: 350px;   /* ✅ FIXED HEIGHT */
+    position: relative;
+    overflow: hidden; /* ✅ MOST IMPORTANT */
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(0, 0, 0, 0) 100%);
+    z-index: 0;
+}
+
+.itemImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-position: center
+}
+
+.cardItems {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 14px 20px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cardItemHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.heartIcon {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+}
+
+.new {
+    padding: 6px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FCC800;
+
+
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+
+}
+
+.private {
+    padding: 6px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFFFFF;
+
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+
+
+}
+
+.cardItemCenterText {
+    max-width: 370px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 55px;
+
+}
+
+.cardItemCenterTextPara {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.cardItemCenterTextHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-align: center;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-align: center;
+
+}
+
+.cardFooter {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 31px;
+
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.infoRow span {
+    max-width: 185px;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 0px;
+
+
+
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+    color: #FFFFFF;
+}
+
+.bottomRow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.price {
+    display: flex;
+    align-items: end;
+    color: #FFFFFF;
+    gap: 4px;
+
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
+
+
+.price strong {
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+}
+
+.viewDetails{
+    padding: 5px 0px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    cursor: pointer;
+
+}

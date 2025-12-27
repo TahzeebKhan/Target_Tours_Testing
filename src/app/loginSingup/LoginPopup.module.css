@@ -1,0 +1,315 @@
+.popupOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popupCard {
+    max-width: 984px;
+    width: 100%;
+    /* height: 520px; */
+    padding: 32px;
+    background: #0E0F11;
+    border-radius: 20px;
+    display: flex;
+    gap: 37px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+}
+.asterisk{
+    color: red !important;
+}
+
+/* LEFT */
+.popupLeft {
+    flex: 1;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.popupHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popupHeader h2 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.32;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #FFFFFF;
+
+}
+
+.brand {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.subText {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+
+
+}
+
+
+.popupLeft input {
+    height: 44px;
+    background: #1A1D1F;
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: #fff;
+    outline: none;
+}
+
+.popupLeft input::placeholder{
+    color: #878787;
+}
+
+.popupLeft input::placeholder {
+    color: #777;
+}
+
+.primaryBtn {
+    padding: 12px 32px;
+    height: 48px;
+    border-radius: 48px;
+    background: #644EE5;
+    border: none;
+    cursor: pointer;
+    margin-top: 27px;
+
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+
+}
+
+.primaryBtn:hover {
+    opacity: 0.9;
+}
+
+.terms {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    color: #aaa;
+    padding: 4px 6px;
+    margin-top: 27px;
+    height: 32px;
+}
+.terms input {
+    display: none;
+}
+
+.customCheckbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background-color: #FEE94F; /* ✅ YELLOW */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Tick (hidden by default) */
+.customCheckbox::after {
+  content: "✓";
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.2s ease;
+}
+
+/* Show tick when checked */
+.terms input:checked + .customCheckbox::after {
+  opacity: 1;
+  transform: scale(1);
+}
+.terms span{
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: #FFFFFF;
+
+}
+.termsText{
+    font-family: "Poppins", sans-serif;
+    font-weight: 600 !important;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: #FEE94F !important;
+
+}
+.checkBox{
+    width: 18px;
+    height: 18px;
+    border-radius: 10px !important;
+}
+
+.divider {
+    text-align: center;
+    margin: 27px 0;
+    position: relative;
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    height: 1px;
+    width: 38%;
+    background: #2F2F2F;
+    position: absolute;
+    top: 50%;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+.socialRow {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+}
+
+.social {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: .75px solid #FFFFFF;
+    background: transparent;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.social:hover {
+    background: #222;
+}
+
+/* RIGHT */
+.popupRight {
+    max-width: 350px;
+    width: 100%;
+}
+
+.popupRight img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.popupLeftHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.inputFieldsContainer{
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.inputFields{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.label{
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+}
+.label span{
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+    color: #FEE94F;
+
+}
+
+.resendOtp{
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1.5;        /* 150% */
+  letter-spacing: 0;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: auto; /* 0% not valid in CSS */
+  color: #FEE94F;
+
+}
+.otpSubText{
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0%;
+    color: rgba(255, 255, 255, 0.6);
+
+}
+
+.otpContainer{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+}
+.otpInput{
+    width: 56px !important;
+    height: 56px !important;
+    border: 1px solid #2F2F2F;
+    text-align: center;
+}
