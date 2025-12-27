@@ -1,0 +1,74 @@
+.searchResultsContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.searchResultsLeft {
+    display: flex;
+    align-items: center;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: -2%;
+    color: #000000;
+}
+
+.searchResultsRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.viewTypeContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.viewType {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12.6px;
+    line-height: 14px;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.viewTypeButtons {
+    border: 1.25px solid rgba(228, 230, 232, 1);
+
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activeView {
+
+    border: 1.25px solid rgba(33, 33, 33, 0.39);
+}
+
+.viewTypeButtons img {
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.activeView img {
+    opacity: 1;
+}
+
+
+/* <====================ListView Css====================> */
+
+.ListViewCard{
+    display: flex;
+    align-items: center;
+}
