@@ -69,6 +69,7 @@ import SearchResults from "../searchResult/SearchResults";
 const TourListing = () => {
 
   const [likedTours, setLikedTours] = useState([]);
+  const [viewType, setViewType] = useState("grid");
 
 
   // tourData.js
@@ -151,109 +152,187 @@ const TourListing = () => {
 
   return (
     <section className={styles.tourListSection}>
-      <SearchResults />
+      <SearchResults viewType={viewType} setViewType={setViewType} />
 
-      <div className={styles.cardContainer}>
-        {tourData.map((item) => (
-          <div className={styles.card} key={item.id}>
-            <img
-              className={styles.itemImage}
-              src={item.image}
-              alt={item.title}
-            />
+      {viewType === "grid" && (
+        <div className={styles.cardContainer}>
+          {tourData.map((item) => (
+            <div className={styles.card} key={item.id}>
+              <img
+                className={styles.itemImage}
+                src={item.image}
+                alt={item.title}
+              />
 
-            <div className={styles.cardItems}>
-              {/* Header */}
-              <div className={styles.cardItemHeader}>
-                <div className={styles.headerLeft}>
-                  <div className={styles.new}>New</div>
-                  <div className={styles.private}>Private Tour</div>
-                </div>
-                <img
-                  src={
-                    likedTours.includes(item.id)
-                      ? "/icons/heartIconFilled.svg"
-                      : "/icons/heartIcon.svg"
-                  }
-                  alt="wishlist"
-                  className={styles.heartIcon}
-                  onClick={() => toggleLike(item.id)}
-                />
-              </div>
-
-              {/* Center text */}
-              <div className={styles.cardItemCenterText}>
-                <p className={styles.cardItemCenterTextPara}>
-                  {item.route}
-                </p>
-                <h4 className={styles.cardItemCenterTextHeading}>
-                  {item.title}
-                </h4>
-              </div>
-
-              {/* Footer */}
-              <div className={styles.cardFooter}>
-                <div className={styles.infoRow}>
-                  <span>{item.days}</span>
-                  <span>{item.meals}</span>
+              <div className={styles.cardItems}>
+                {/* Header */}
+                <div className={styles.cardItemHeader}>
+                  <div className={styles.headerLeft}>
+                    <div className={styles.new}>New</div>
+                    <div className={styles.private}>Private Tour</div>
+                  </div>
+                  <img
+                    src={
+                      likedTours.includes(item.id)
+                        ? "/icons/heartIconFilled.svg"
+                        : "/icons/heartIcon.svg"
+                    }
+                    alt="wishlist"
+                    className={styles.heartIcon}
+                    onClick={() => toggleLike(item.id)}
+                  />
                 </div>
 
-                <div className={styles.infoRow}>
-                  <span>{item.hotel}</span>
-                  <span>{item.activities}</span>
-                </div>
-
-                <div className={styles.bottomRow}>
-                  <div className={styles.price}>
-                    FROM <strong>{item.price}</strong> <span>/ PERSON</span>
+                {/* Center text */}
+                <div className={styles.cardItemCenterTextContainer}>
+                  <div className={styles.cardItemCenterText}>
+                    <p className={styles.cardItemCenterTextPara}>
+                      {item.route}
+                    </p>
+                    <h4 className={styles.cardItemCenterTextHeading}>
+                      {item.title}
+                    </h4>
                   </div>
 
-                  <button className={styles.viewDetails}>
-                    VIEW DETAILS
-                    <img src="/icons/smallDropArrow.svg" alt="" />
-                  </button>
+                  {/* Footer */}
+                  <div className={styles.cardFooter}>
+                    <div className={styles.infoRow}>
+                      <span>{item.days}</span>
+                      <span>{item.meals}</span>
+                    </div>
+
+                    <div className={styles.infoRow}>
+                      <span>{item.hotel}</span>
+                      <span>{item.activities}</span>
+                    </div>
+
+                    <div className={styles.bottomRow}>
+                      <div className={styles.price}>
+                        FROM <strong>{item.price}</strong> <span>/ PERSON</span>
+                      </div>
+
+                      <button className={styles.viewDetails}>
+                        VIEW DETAILS
+                        <img src="/icons/smallDropArrow.svg" alt="" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-        <div className={styles.ListViewCard}>
-          <img src="/tourList/cardItem1.jpg" alt="" />
-          <div className={styles.ListViewCardText}>
-            <div className={styles.ListViewCardTextTop}>
-              <div className={styles.topTextHead}>
-                <h2>Splendors of the Canadian West</h2>
-                <div className={styles.topTextHeadAddress}>
-                  <img src="/icons/blackAddress.svg" alt="" />
-                  <span>TORONTO TO OTTAWA</span>
-                </div>
-              </div>
-              <div className={styles.tagsContainer}>
-                <div className={styles.tag}>Round Trip Flights</div>
-                <div className={styles.tag}>4 Star Hotels</div>
-                <div className={styles.tag}>Airport Transfers</div>
-                <div className={styles.tag}>Intercity Car Transfers</div>
-              </div>
-            </div>
-            <div className={styles.ListViewCardTextBottom}>
-              <div className={styles.bottomItem}>
-                <img src="/icons/checkIcon.svg" alt="" />
-                Banff Gondola Ride
-              </div>
+          ))}
 
-              <div className={styles.bottomItem}>
-                <img src="/icons/checkIcon.svg" alt="" />
-                Lake Louise Scenic Walk
-              </div>
-
-              <div className={styles.bottomItem}>
-                <img src="/icons/checkIcon.svg" alt="" />
-                Icefields Parkway Glacier Tour
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
+      )}
+
+  
+
+      {viewType === "list" && (
+        <div className={styles.ListViewWrapper}>
+          {tourData.map((item) => (
+            <div className={styles.ListViewCardContainer} key={item.id}>
+
+              {/* IMAGE SECTION */}
+              <div className={styles.ListViewCardImageContainer}>
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className={styles.ListViewCardImage}
+                />
+
+                <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
+                  <div className={styles.headerLeft}>
+                    <div className={styles.new}>New</div>
+                    <div className={styles.private}>Private Tour</div>
+                  </div>
+
+                  <img
+                    src={
+                      likedTours.includes(item.id)
+                        ? "/icons/heartIconFilled.svg"
+                        : "/icons/heartIcon.svg"
+                    }
+                    alt="wishlist"
+                    className={styles.heartIcon}
+                    onClick={() => toggleLike(item.id)}
+                  />
+                </div>
+              </div>
+
+              {/* TEXT SECTION */}
+              <div className={styles.ListViewCardText}>
+                <div className={styles.cartListTop}>
+
+                  <div className={styles.ListViewCardTextTop}>
+                    <div className={styles.topTextHead}>
+                      <h2>{item.title}</h2>
+
+                      <div className={styles.topTextHeadAddress}>
+                        <img src="/icons/blackAddress.svg" alt="" />
+                        <span>{item.route}</span>
+                      </div>
+                    </div>
+
+                    {/* STATIC TAGS (LIST VIEW EXTRA DATA) */}
+                    <div className={styles.tagsContainer}>
+                      <div className={styles.tag}>Round Trip Flights</div>
+                      <div className={styles.tag}>4 Star Hotels</div>
+                      <div className={styles.tag}>Airport Transfers</div>
+                      <div className={styles.tag}>Intercity Car Transfers</div>
+                    </div>
+
+                    {/* STATIC ACTIVITIES */}
+                    <div className={styles.ListViewCardTextTopBottom}>
+                      <div className={styles.bottomItem}>
+                        <img src="/icons/checkIcon.svg" alt="" />
+                        Banff Gondola Ride
+                      </div>
+                      <div className={styles.bottomItem}>
+                        <img src="/icons/checkIcon.svg" alt="" />
+                        Lake Louise Scenic Walk
+                      </div>
+                      <div className={styles.bottomItem}>
+                        <img src="/icons/checkIcon.svg" alt="" />
+                        Icefields Parkway Glacier Tour
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* INFO GRID */}
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoRowGrid}>
+                      <div className={styles.infoItem}>{item.days}</div>
+                      <div className={styles.infoItem}>{item.meals}</div>
+                    </div>
+
+                    <div className={styles.infoRowGrid}>
+                      <div className={styles.infoItem}>{item.hotel}</div>
+                      <div className={styles.infoItem}>{item.activities}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BOTTOM PRICE SECTION */}
+                <div className={styles.ListViewCardTextBottom}>
+                  <div className={styles.priceContainer}>
+                    <div className={styles.priceSec}>
+                      {item.price}
+                      <span>/PERSON</span>
+                    </div>
+
+                    <div className={styles.totalPrice}>
+                      Total Price
+                      <span>₹ 1,66,945</span>
+                    </div>
+                  </div>
+
+                  <button className={styles.bookNowBtn}>BOOK NOW</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
 
     </section>

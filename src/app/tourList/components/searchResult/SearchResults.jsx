@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import styles from "./SearchResult.module.css";
 import SortDropdown from "../sortDropdown/SortDropdown";
 
-const SearchResults = () => {
+const SearchResults = ({ viewType, setViewType }) => {
   const [sort, setSort] = useState("recent");
-  const [viewType, setViewType] = useState("grid"); // ✅ NEW
 
   return (
     <div className={styles.searchResultsContainer}>
