@@ -65,10 +65,3 @@
     opacity: 1;
 }
 
-
-/* <====================ListView Css====================> */
-
-.ListViewCard{
-    display: flex;
-    align-items: center;
-}
