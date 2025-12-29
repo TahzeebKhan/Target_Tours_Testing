@@ -68,19 +68,20 @@
 /* ===== Fields ===== */
 
 .fromBtn {
-  height: 58px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 193px;
-  width: 100%;
-  padding: 8px 8px 8px 12px;
-  border: 0.5px solid #e6e8ec;
-  background-color: rgba(0, 0, 0, 0.35);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  flex: 1;
-  cursor: pointer;
-  position: relative;
+    height: 58px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 193px;
+    width: 100%;
+    padding: 8px 8px 8px 12px;
+    border: 0.5px solid #e6e8ec;
+    background-color: rgba(0, 0, 0, 0.35);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    cursor: pointer;
+    position: relative;
+    overflow: visible;
 }
 
 /* positions */
@@ -99,7 +100,8 @@
 }
 
 .pos4 {
-  order: 4;
+    order: 4;
+    z-index: 10;
 }
 
 .pos5 {
@@ -173,10 +175,21 @@
 }
 
 .dateInputWrapper {
-  display: flex;
-  justify-content: space-between;
-  height: 21px;
-  position: relative;
+    display: flex;
+    justify-content: space-between;
+    height: 21px;
+    position: relative;
+    z-index: 999;
+}
+
+.dateInputWrapper>.contant {
+    display: flex;
+    align-items: center;
+}
+
+.dateInputWrapper>img {
+    position: relative;
+    z-index: 31;
 }
 
 .dateInputWrapper input[type="date"] {
@@ -297,14 +310,42 @@
 .tabContainer > .tabActive:nth-child(2) {
   border: none;
 }
-.downArrow {
-    
-  transform: rotate(-180deg);
-}
-.downArrow {
-  transition: all 0.5s ease;
+
+/* ===== TravellerSelector Dropdown Menu ===== */
+
+.selectMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #e4e6e8;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    max-height: 220px;
+    overflow-y: auto;
 }
 
-.reversedDownArrow {
-    transform: rotate(0);
+.selectItem {
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: #000033;
+    color: #ffffff;
+}
+
+.selectItem:hover,
+.selectItem:focus {
+    background: #f5f7f8;
+    color: #000066;
+    outline: none;
+}
+
+.downArrowTravel {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+    width: 12px;
 }

@@ -73,6 +73,14 @@
 .imagePlaceholder {
   width: 140px;
   height: auto;
+  border: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.imagePlaceholder img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Countries */
@@ -174,9 +182,9 @@
   border: 1px solid #d0d4e4;
 }
 
-.regionCard:hover {
+/* .regionCard:hover {
   border-color: #0b0f2f;
-}
+} */
 
 .active {
   border-color: #0b0f2f;
@@ -205,13 +213,13 @@
 }
 
 /* Hover */
-.regionCard:hover {
+.imagePlaceholder:hover {
   border-color: #0b0f2f;
 }
 
 /* Active */
-.active {
-  border-color: #0b0f2f;
+.activeImage {
+  border: 2px solid #0b0f2f;
 }
 
 /* Checkbox fade in */

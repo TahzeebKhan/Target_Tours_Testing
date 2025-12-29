@@ -99,6 +99,7 @@
 .dateInputWrapper>.contant {
   display: flex;
   align-items: center;
+  cursor: pointer;
   /* as before */
 }
 
@@ -692,7 +693,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  line-height: 1;
+  /* line-height: 1; */
   letter-spacing: 0%;
   text-transform: uppercase;
   color: #ffffff;
