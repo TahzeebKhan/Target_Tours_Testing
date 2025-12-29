@@ -79,9 +79,8 @@ const DestinationFilter = ({ onApply }) => {
               <button
                 key={region.id}
                 type="button"
-                className={`${styles.regionCard} ${
-                  selectedRegions.includes(region.id) ? styles.active : ""
-                }`}
+                className={`${styles.regionCard} ${selectedRegions.includes(region.id) ? styles.active : ""
+                  }`}
                 onClick={() => toggleRegion(region.id)}
               >
                 <div className={styles.checkboxContainer}>
@@ -91,7 +90,10 @@ const DestinationFilter = ({ onApply }) => {
                   />
                 </div>
 
-                <div className={styles.imagePlaceholder}>
+                <div
+                  className={`${styles.imagePlaceholder} ${selectedRegions.includes(region.id) ? styles.activeImage : ""
+                    }`}
+                >
                   <img src={region.imageUrl} alt="img" />
                 </div>
                 <span>{region.label}</span>
@@ -108,11 +110,10 @@ const DestinationFilter = ({ onApply }) => {
             {COUNTRIES.map((country) => (
               <button
                 key={country}
-                className={`${styles.countryBtn} ${
-                  selectedCountries.includes(country)
+                className={`${styles.countryBtn} ${selectedCountries.includes(country)
                     ? styles.activeCountry
                     : ""
-                }`}
+                  }`}
                 onClick={() => toggleCountry(country)}
               >
                 {country}
