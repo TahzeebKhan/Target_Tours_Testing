@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styles from "./RoundTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
+import DatePriceSlider from "../DatePriceSlider";
 
 const RoundTrip = () => {
   const [selectedSort, setSelectedSort] = useState("");
@@ -21,6 +22,7 @@ const RoundTrip = () => {
           </span>
         </div>
       </div>
+      <DatePriceSlider />
 
       <div className={styles.sortContainer}>
         <div className={styles.sortSubContainer}>

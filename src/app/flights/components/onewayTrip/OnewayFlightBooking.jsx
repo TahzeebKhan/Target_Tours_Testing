@@ -4,6 +4,7 @@ import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
 import FareComparisonModal from "./FareComparisonModal";
+import DatePriceSlider from "../DatePriceSlider";
 
 const OnewayFlightBooking = () => {
   // track which flight's details are open (by id) so only that item expands
@@ -304,6 +305,7 @@ const OnewayFlightBooking = () => {
             </span>
           </div>
         </div>
+        <DatePriceSlider />
 
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>

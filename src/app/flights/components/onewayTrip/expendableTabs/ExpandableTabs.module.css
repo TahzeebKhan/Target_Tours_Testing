@@ -352,11 +352,14 @@
   background-color: #000033;
   font-family: var(--font-inter);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.2;
   letter-spacing: -2%;
   text-transform: uppercase;
   color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 11px;
 }
 
 .body {

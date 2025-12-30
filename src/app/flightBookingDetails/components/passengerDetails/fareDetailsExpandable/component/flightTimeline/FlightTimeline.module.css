@@ -200,25 +200,21 @@
   vertical-align: middle;
   text-transform: uppercase;
   color: #0A0A0A;
+  padding: 2px 8px;
+  background-color: #FBBF24;
 }
 .economyChip{
   height: 22px;
   padding: 2px 5px;
-  background-color: #FBBF24;
+  /* background-color: #FBBF24; */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.18;
   letter-spacing: 0%;
   text-transform: uppercase;
-  color: #FFFFFF;
+  color: #0A0A0A;
 
-}
-.businessChip{
-  background-color: #67AA38;
-}
-.firstClassChip{
-  background-color: #38BDF8;
 }

@@ -14,6 +14,17 @@ function LayoutContent({ children }) {
   const sidebarRef = useRef(null);
 
 
+  // const [scrolled, setScrolled] = useState(false);
+
+  // useEffect(() => {
+  //   const onScroll = () => {
+  //     setScrolled(window.scrollY > 40); // 🔥 threshold
+  //   };
+  //   window.addEventListener("scroll", onScroll);
+  //   return () => window.removeEventListener("scroll", onScroll);
+  // }, []);
+
+
   return (
     <>
       {" "}
@@ -33,9 +44,9 @@ function LayoutContent({ children }) {
           }`}
         >
           {/* top date slider */}
-          <div className={styles.dateSlider}>
-            <DatePriceSlider />
-          </div>
+          {/* <div className={styles.dateSlider}>
+            
+          </div> */}
           {/* Sidebar */}
           <aside className={styles.sidebar}>
             <div className={styles.sidebarSticky} ref={sidebarRef}>

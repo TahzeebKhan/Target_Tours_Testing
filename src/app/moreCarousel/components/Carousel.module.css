@@ -412,7 +412,6 @@
   backdrop-filter: blur(4px);
   text-transform: uppercase;
 
-  font-family: "Poppins";
   font-weight: 400;
   font-size: 14px;
   line-height: 100%;
@@ -435,7 +434,6 @@
 .cities {
   max-width: 407px;
 
-  font-family: "Poppins";
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
@@ -446,7 +444,6 @@
 }
 
 .price {
-  font-family: "Poppins";
   font-weight: 500;
   font-style: Medium;
   font-size: 24px;
@@ -458,7 +455,6 @@
 }
 
 .price span {
-  font-family: "Poppins";
   font-weight: 400;
   font-size: 16px;
   line-height: 100%;

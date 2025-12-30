@@ -1,0 +1,633 @@
+.section {
+    padding-top: 60px;
+    background-color: #F9F9F9;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+
+/* ================= TABS ================= */
+
+.tabsWrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #C4C4C4;
+}
+
+/* TABS CONTAINER */
+.tabs {
+    position: relative;
+    display: flex;
+}
+
+/* MOVING UNDERLINE */
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
+}
+
+/* SINGLE TAB */
+.tab {
+    padding: 8px 30.5px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.25;
+    text-transform: uppercase;
+    color: #A8A8A8;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* BUTTON INSIDE TAB */
+.tabBtn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-transform: uppercase;
+    color: inherit;
+}
+
+/* ACTIVE TAB */
+.active {
+    color: #000033;
+}
+
+/* ================= MOBILE DROPDOWN ================= */
+
+.mobileSelectWrap {
+    display: none;
+    width: 100%;
+    padding: 0 16px;
+    position: relative;
+}
+
+.mobileSelect {
+    width: 100%;
+    height: 48px;
+    background: #ffffff;
+    padding: 15px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-family: "Inter";
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #000033;
+
+    border: none;
+    cursor: pointer;
+}
+
+.mobileOptions {
+    position: absolute;
+    top: 52px;
+    left: 16px;
+    right: 16px;
+
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.mobileOptions li {
+    padding: 14px 16px;
+    font-family: "Inter";
+    font-size: 14px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    color: #000033;
+}
+
+.mobileOptions li:hover {
+    background: #f5f5f5;
+}
+
+.activeOption {
+    background: #000033;
+    color: #ffffff !important;
+}
+
+.container {
+    display: flex;
+}
+
+.leftContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+    align-items: end;
+    width: 50%;
+    background-color: #ffffff;
+    padding: 42px 48px 48px 0;
+}
+
+.leftBottomCont {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+}
+
+.ArrivalContainer {
+    display: flex;
+    justify-content: space-between;
+    height: 41px;
+    border-bottom: 1px solid #E4E6E8;
+}
+
+.ArrivalRight h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000033;
+
+}
+.slide{
+    width: 222px !important;
+}
+
+.ArrivalLeft {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+
+}
+
+/* .expandableMainContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+} */
+.paraCoontainer p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.60;
+    letter-spacing: 0px;
+    color: #434343;
+
+}
+
+.expandableTab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 41px;
+    border-bottom: 1px solid #E4E6E8;
+    cursor: pointer;
+}
+
+.expandableTab h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+}
+
+.expandableTab img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.expandableTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.fromToContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expandableContent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.open {
+  max-height: 800px; /* enough for your content */
+  opacity: 1;
+}
+.arrow {
+  transition: transform 0.3s ease;
+   transform: rotate(180deg);
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+
+.fromToContainer span {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+
+}
+
+.viewDetails {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    text-transform: uppercase;
+    color: #000033;
+
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+
+}
+
+.flightDetailsCont {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px 12px 12px;
+    justify-content: space-between;
+    border: 1px solid #E4E6E8;
+
+}
+
+.flightDetailsSubCont {
+    max-width: 439px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 23px;
+}
+
+.flightDetails {
+    display: flex;
+    gap: 11px;
+    align-items: center;
+}
+
+.flightDetails img {
+    width: 35px;
+    height: 35px;
+}
+
+.flightNameContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.flightTimingContainer {
+    flex: 1;
+    /* 👈 ye sabse important */
+    min-width: 0;
+    max-width: 355px;
+    width: 100%;
+}
+
+.flightNameContainer h2 {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.flightNameContainer span {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 15.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #737373;
+}
+
+.rightContainer {
+    width: 50%;
+
+}
+
+.br {
+    width: 1px;
+    height: 40px;
+    background-color: #E4E6E8;
+    /* margin-left: 38px; */
+}
+
+.cabinCont {
+    display: flex;
+    flex-direction: column;
+    /* margin-left: 33px; */
+    gap: 8px;
+
+}
+
+.cabinRow {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.cabinCont span {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #000000;
+}
+
+.PremiumContainer{
+    display: flex;
+    gap: 22px;
+    padding: 24px 12px 12px 12px;
+    
+}
+
+.PremiumTextContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.PremiumTextContainer h3{
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    color: #000000;
+}
+.PremiumTextContainer p{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.60;
+    letter-spacing: 0px;
+    color: #434343;
+}
+.ApproximatelyTime{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.ApproximatelyTime span{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #000000;
+
+}
+.btnContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+
+.yourActivityContainer{
+    display: flex;
+    flex-direction: column;
+}
+.yourActivityContainerTop{
+    display: flex;
+    
+}
+.yourActivityContainerTopLeft{
+    max-width: 245px;
+    width: 100%;
+    padding-top: 5.5px;
+    padding-bottom: 9.5px;
+}
+.youHeading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
+.yourActivityContainerTopRight{
+    height: 44px;
+    padding-left: 24px;
+    padding-top:5.5px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    border-left: 1px solid #E4E6E8;
+}
+.yourActivityContainerBottom{
+    display: flex;
+    border-top: 1px solid #E4E6E8;
+}
+.yourActivityContainerBottomLeft{
+    padding-top: 12px;
+    padding-right: 10px;
+    border-right: 1px solid #E4E6E8;
+}
+.card{
+    width: 235px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #F9F9F9;
+    border: 1px solid #E4E6E8;
+    padding-bottom: 12px;
+}
+.cardImage{
+    width: 100%;
+    object-fit: cover;
+}
+.cardTextContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0 8px;
+}
+.cardTextAddress{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+.cardTextTitle{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}
+.cardTextButton{
+    padding: 6px 24px;
+    border: 0.5px solid #000033;
+
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+    cursor: pointer;
+}
+.yourActivityContainerBottomRight{
+    max-width: 467px;
+    width: 100%;
+    padding-top: 12px;
+    padding-left: 10px;
+    display: flex;
+    gap: 12px;
+    /* border-right: 1px solid #E4E6E8; */
+
+}
+.btnsCon{
+    display: flex;
+    justify-content: space-between;
+}
+.TextTitle{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #000000;
+}
+.cardCarousell{
+    width: 222px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #F9F9F9;
+    border: 1px solid #E4E6E8;
+    padding-bottom: 12px;
+}
+.cardButton{
+    padding: 8px 31px;
+    border: 0.5px solid #000033;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.cardTextContainer2{
+    gap: 9px !important;
+}
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+    .tabsWrap {
+        justify-content: flex-start;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+}
+
+@media (max-width: 488px) {
+    .tabs {
+        display: none;
+    }
+
+    .tabsWrap {
+        border-bottom: none;
+        justify-content: center;
+    }
+
+    .mobileSelectWrap {
+        display: flex;
+    }
+}

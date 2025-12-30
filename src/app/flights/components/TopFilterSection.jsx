@@ -239,6 +239,7 @@ const TopFilterSection = () => {
     setShowCalendar(true);
   };
 
+  
   return (
     <>
       <div
@@ -338,7 +339,7 @@ const TopFilterSection = () => {
                         }
                       }}
                     >
-                      <ArrowLeftRight size={16} color="black" />
+                      <ArrowLeftRight size={16}  className={styles.arrowIcon} />
                     </div>
                     <div
                       className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.toBtn
@@ -547,7 +548,7 @@ const TopFilterSection = () => {
                             updateSegment(1, "to", from);
                           }}
                         >
-                          <ArrowLeftRight size={16} color="black" />
+                          <ArrowLeftRight size={16} className={styles.arrowIcon} />
                         </div>
 
                         <div
