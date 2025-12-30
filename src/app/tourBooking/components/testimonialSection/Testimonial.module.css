@@ -1,0 +1,148 @@
+.section{
+    padding: 60px 20px 80px 20px;
+}
+
+.container{
+    margin: 0 auto;
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+}
+.heading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    color: #000033;
+
+}
+
+.testimonialContainer{
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+.testimonialCard{
+    max-width: 384px;
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background-color: #F9F9F9;
+}
+
+.profileCont{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.profile{
+    display: flex;
+    gap: 20px;
+}
+
+.profileIcon{
+    width: 51px;
+    height: 51px;
+    border-radius: 50%;
+    background-color: #D9D9D9;
+}
+.profileAddressCont{
+    display: flex;
+    flex-direction: column;
+
+
+}
+
+.profileName{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0px;
+    color: #000033;
+
+}
+.profileAddress{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0px;
+    color: rgba(0, 0, 0, 0.6);
+
+}
+.TestimonialIcon{
+    width: 48px;
+    height: 48px;
+}
+.ratingStart{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.testimonialPara p{
+        font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 1.60;
+    letter-spacing: 0px;
+    color: rgba(0, 0, 0, 0.8);
+
+}
+
+.testimonialDate span{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.btnContainer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+.slide{
+    width: 384px;
+    
+}

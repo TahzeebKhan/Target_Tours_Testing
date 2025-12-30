@@ -235,28 +235,7 @@ export default function ExpCarousel({ activeTab }) {
         style={{ maxWidth: "1520px", margin: "0 auto" }}
         className="ExpCarouselWrapper"
       >
-        {/* <Swiper
-          modules={[Virtual]}
-          onSwiper={setSwiperRef}  // ✅ FIXED (important!)
-          slidesPerView={4}
-          centeredSlides={false}
-          spaceBetween={30}
-          pagination={{ type: "fraction" }}
-          navigation={true}
-          virtual
-          className={styles.swiperContainer}
-          breakpoints={{
-            0: {
-              slidesPerView: 3, // mobile
-            },
-            576: {
-              slidesPerView: 3, // small tablets
-            },
-            991: {
-              slidesPerView: 4, // ✅ exactly at 991px
-            },
-          }}
-        > */}
+        
 
         <AnimatePresence mode="wait">
           <motion.div

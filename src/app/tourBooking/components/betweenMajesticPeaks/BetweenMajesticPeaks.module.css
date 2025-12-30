@@ -1,0 +1,229 @@
+.Section {
+    padding: 100px 20px 20px 20px;
+    background-color: #F9F9F9;
+
+}
+
+.container {
+    max-width: 1520px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+}
+
+.topContainer {
+    max-width: 788px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    margin: 0 auto;
+}
+
+.heading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.19;
+
+}
+
+.paraContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.paraContainer p {
+    font-family: var(--font-inter);
+    font-weight: 200;
+    font-style: Extra Light;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: rgba(33, 33, 33, 0.78);
+
+}
+
+.btnContainer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+
+.bottomContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.carouselWrapper {
+    width: 100%;
+    height: 288px;
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel {
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+.slide {
+    width: 432px !important;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.imageContainer {
+    position: relative;
+    width: 432px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.image {
+    width: 432px;
+    height: 288px;
+    object-fit: cover;
+    display: block;
+}
+
+.progressIndicator {
+    width: 33%;
+    height: 3px;
+    background-color: #1e3a8a;
+    border-radius: 2px;
+    margin-top: 12px;
+    animation: progressAnimation 0.3s ease-out;
+}
+
+@keyframes progressAnimation {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+.controlsContainer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 24px;
+    gap: 22px;
+    position: relative;
+}
+
+.br {
+    width: 100%;
+    height: 1px;
+    background-color: rgba(196, 196, 196, 1);
+    position: relative;
+}
+
+.activeIndicator {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    height: 2px;
+    background-color: #212121;
+    transition: width 0.3s ease;
+}
+
+
+
+
+
+.previewOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 159px;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.27);
+    backdrop-filter: blur(8.8px);
+    -webkit-backdrop-filter: blur(8.8px);
+}
+
+.previewBox {
+    position: relative;
+    max-width: 1080px;
+    width: 100%;
+    height: 632px;
+    overflow: hidden;
+}
+
+.previewImage {
+    width: 100%;
+    object-fit: cover;
+    background-position: center;
+}
+
+.leftArrow,
+.rightArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    color: #000;
+}
+
+.leftArrow {
+    left: -60px;
+}
+
+.rightArrow {
+    right: -60px;
+}
+
+.closeBtn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}

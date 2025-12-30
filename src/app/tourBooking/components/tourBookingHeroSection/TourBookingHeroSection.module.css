@@ -1,0 +1,213 @@
+.tourBookingSection {
+
+    height: 100vh;
+    background-image: url("/tourList/cardItem1.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding-top: 73px;
+    position: relative;
+    padding-bottom: 63px;
+}
+
+.overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    /* top:0 right:0 bottom:0 left:0 */
+    /* background-color: rgba(0, 0, 0, 0.4); */
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+
+    z-index: 0;
+}
+
+.contianerWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    position: relative;
+    z-index: 4;
+}
+
+.container {
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    align-items: end;
+    /* margin-top:248px ; */
+
+}
+
+.leftContainer {
+    max-width: 722px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 161px;
+}
+
+.leftTop {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.fromToCont {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.fromToCont span {
+    font-family: var(--font-inter);
+    font-weight: 200;
+    font-style: Extra Light;
+    font-size: 32px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+
+.header {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 80px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+
+.leftBottom p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #FFFFFF;
+}
+
+.rightContainer {
+    max-width: 489px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.topRight {
+    display: flex;
+    flex-direction: column;
+}
+
+.privateTour {
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.privateText {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 20px;
+    line-height: 1.19;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+
+.tagsCont {
+    padding: 12px 0;
+    display: flex;
+    gap: 7px;
+}
+
+.tags {
+    padding: 12px 17px;
+    border: 0.5px solid rgba(255, 255, 255, 1);
+    border-radius: 50px;
+    color: #FFFFFF;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.19;
+    text-transform: uppercase;
+
+
+}
+
+.tailor_made {
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 20px;
+    line-height: 1.19;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.centerRight {
+    display: flex;
+    align-items: end;
+    gap: 7px;
+}
+
+.price {
+    display: flex;
+    align-items: end;
+    gap: 4px;
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 1.19;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.price span {
+    font-size: 32px;
+}
+
+.person {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 20px;
+    line-height: 1.19;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.bottomRight{
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 255, 255, 1);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+}
