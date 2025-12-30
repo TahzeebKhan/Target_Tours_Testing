@@ -22,7 +22,7 @@
 }
 
 /* Default card */
-.hover-card {
+.hover-card, .slide {
   flex: 1 1 0;
   position: relative;
   max-width: 690px;
@@ -89,6 +89,10 @@
 
 /* Hovered card expands; neighbors automatically shrink because total width is fixed */
 .hover-card:hover {
+  flex: 1.5 1 0;
+  filter: grayscale(0);
+}
+.slide:hover {
   flex: 1.5 1 0;
   filter: grayscale(0);
 }
@@ -260,9 +264,9 @@
   transform: scale(0.92);
   filter: brightness(0.85);
 }
-.hover-card:hover {
+/* .hover-card:hover {
   flex: 1.5 1 0;
-}
+} */
 
 .hover-card:hover .cardInner {
   transform: scale(1);

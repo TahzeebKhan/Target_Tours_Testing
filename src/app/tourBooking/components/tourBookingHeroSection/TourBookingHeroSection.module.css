@@ -30,6 +30,12 @@
     position: relative;
     z-index: 4;
 }
+.heroContainer{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+       padding: 0 20px;
+}
 
 .container {
     max-width: 1520px;

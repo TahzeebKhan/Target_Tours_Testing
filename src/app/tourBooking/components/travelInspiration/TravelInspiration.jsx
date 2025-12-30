@@ -89,9 +89,10 @@ const TravelInspiration = () => {
                         modules={[Navigation]}
                         onSwiper={setSwiperRef}
                         onSlideChange={handleSlideChange}
-                        slidesPerView={3}        // kitni slide dikhegi
-                        slidesPerGroup={1}
-                        spaceBetween={24}
+                        slidesPerView={'auto'}
+                        // slidesPerView={3}        // kitni slide dikhegi
+                        // slidesPerGroup={1}
+                        spaceBetween={25}
                         className={styles.carousel}
                     >
                         {travelTipsData.map((item) => (

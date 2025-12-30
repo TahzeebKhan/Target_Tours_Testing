@@ -48,8 +48,8 @@ const TargetTours = () => {
     {
       id: 4,
       img: "/images/tour.webp",
-      badge: "17 Days & 16 Nights",
-      title: "17 Days - Best Of India Tour",
+      badge: "13 Days & 16 Nights",
+      title: "13 Days - Best Of India Tour",
       cities:
         "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
       price: "INR 2,30,000",
