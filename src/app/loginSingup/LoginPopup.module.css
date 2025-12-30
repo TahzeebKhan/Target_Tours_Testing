@@ -21,7 +21,8 @@
     overflow: hidden;
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
 }
-.asterisk{
+
+.asterisk {
     color: red !important;
 }
 
@@ -40,7 +41,7 @@
 }
 
 .popupHeader h2 {
-    font-family: "Poppins", sans-serif;
+
     font-weight: 600;
     font-size: 20px;
     line-height: 1.32;
@@ -56,7 +57,7 @@
 }
 
 .subText {
-    font-family: "Poppins", sans-serif;
+
     font-weight: 400;
     font-size: 14px;
     line-height: 1.5;
@@ -76,7 +77,7 @@
     outline: none;
 }
 
-.popupLeft input::placeholder{
+.popupLeft input::placeholder {
     color: #878787;
 }
 
@@ -116,39 +117,42 @@
     margin-top: 27px;
     height: 32px;
 }
+
 .terms input {
     display: none;
 }
 
 .customCheckbox {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background-color: #FEE94F; /* ✅ YELLOW */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background-color: #FEE94F;
+    /* ✅ YELLOW */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 /* Tick (hidden by default) */
 .customCheckbox::after {
-  content: "✓";
-  font-size: 18px;
-  font-weight: 800;
-  color: #000000;
-  opacity: 0;
-  transform: scale(0.6);
-  transition: all 0.2s ease;
+    content: "✓";
+    font-size: 18px;
+    font-weight: 800;
+    color: #000000;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: all 0.2s ease;
 }
 
 /* Show tick when checked */
-.terms input:checked + .customCheckbox::after {
-  opacity: 1;
-  transform: scale(1);
+.terms input:checked+.customCheckbox::after {
+    opacity: 1;
+    transform: scale(1);
 }
-.terms span{
-    font-family: "Poppins", sans-serif;
+
+.terms span {
+
     font-weight: 400;
     font-size: 12px;
     line-height: 1;
@@ -157,8 +161,9 @@
     color: #FFFFFF;
 
 }
-.termsText{
-    font-family: "Poppins", sans-serif;
+
+.termsText {
+
     font-weight: 600 !important;
     font-size: 12px;
     line-height: 1;
@@ -167,7 +172,8 @@
     color: #FEE94F !important;
 
 }
-.checkBox{
+
+.checkBox {
     width: 18px;
     height: 18px;
     border-radius: 10px !important;
@@ -177,7 +183,6 @@
     text-align: center;
     margin: 27px 0;
     position: relative;
-    font-family: Poppins;
     font-weight: 400;
     font-size: 12px;
     line-height: 1;
@@ -246,27 +251,30 @@
     gap: 6px;
 }
 
-.inputFieldsContainer{
+.inputFieldsContainer {
     margin-top: 24px;
     display: flex;
     flex-direction: column;
     gap: 24px;
 }
-.inputFields{
+
+.inputFields {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
-.label{
-    font-family: "Poppins", sans-serif;
+
+.label {
+
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;
     line-height: 1.5;
     letter-spacing: 0%;
 }
-.label span{
-    font-family: "Poppins", sans-serif;
+
+.label span {
+
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;
@@ -276,21 +284,24 @@
 
 }
 
-.resendOtp{
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 14px;
-  line-height: 1.5;        /* 150% */
-  letter-spacing: 0;
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-thickness: auto; /* 0% not valid in CSS */
-  color: #FEE94F;
+.resendOtp {
+
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.5;
+    /* 150% */
+    letter-spacing: 0;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-thickness: auto;
+    /* 0% not valid in CSS */
+    color: #FEE94F;
 
 }
-.otpSubText{
-    font-family: "Poppins", sans-serif;
+
+.otpSubText {
+
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;
@@ -300,14 +311,15 @@
 
 }
 
-.otpContainer{
+.otpContainer {
     display: flex;
     align-items: center;
     gap: 12px;
     justify-content: center;
     margin-top: 16px;
 }
-.otpInput{
+
+.otpInput {
     width: 56px !important;
     height: 56px !important;
     border: 1px solid #2F2F2F;

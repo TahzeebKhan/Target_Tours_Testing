@@ -48,7 +48,7 @@ const MultiTripExpendable = () => {
           <div className={styles.flightInfoContainer}>
             <div className={styles.leftFlightInfoCont}>
               <div className={styles.flightHeading}>
-                <h3>Jakrata To Singapore, 18 Dec 2025</h3>
+                <h3>Jakrata <img src="/icons/flightIconBlue.svg" alt="" /> Singapore, 18 Dec 2025</h3>
               </div>
               <div className={styles.mainBody}>
                 <div className={styles.flightBody}>
@@ -161,7 +161,7 @@ const MultiTripExpendable = () => {
             </div>
             <div className={styles.leftFlightInfoCont}>
               <div className={styles.flightHeading}>
-                <h3>Singapore To Krabi, 18 dec</h3>
+                <h3>Singapore <img src="/icons/flightIconBlue.svg" alt="" /> Krabi, 18 Dec 2025</h3>
               </div>
               <div className={styles.mainBody}>
                 <div className={styles.flightBody}>

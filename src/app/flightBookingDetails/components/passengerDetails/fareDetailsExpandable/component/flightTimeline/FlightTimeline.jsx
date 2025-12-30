@@ -26,13 +26,12 @@ const FlightTimeline = ({ flight }) => {
                     </div>
                 </div>
                 <div className={styles.aboutFlightContainerRight}>
-                    <p className={styles.flexiPlusFare}>{flight.flexiPlusFare}</p>
-                    <div className={`${styles.economyChip} ${normalizedClass === "business"
-                        ? styles.businessChip
-                        : normalizedClass === "firstclass"
-                            ? styles.firstClassChip
-                            : styles.economyChip
-                        }`}>{flight.travelClass}</div>
+
+                    <div className={`${styles.economyChip}`}>{flight.travelClass}</div>
+
+                    {flight.flexiPlusFare && (
+                        <p className={styles.flexiPlusFare}>{flight.flexiPlusFare}</p>
+                    )}
                 </div>
             </div>
 

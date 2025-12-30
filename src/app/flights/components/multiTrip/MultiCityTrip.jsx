@@ -3,6 +3,7 @@ import { useState } from "react";
 import styles from "./MultiCityTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
+import DatePriceSlider from "../DatePriceSlider";
 const MultiCityTrip = () => {
   const [selectedSort, setSelectedSort] = useState("cheapest");
   return (
@@ -21,6 +22,7 @@ const MultiCityTrip = () => {
             </span>
           </div>
         </div>
+        <DatePriceSlider />
 
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>

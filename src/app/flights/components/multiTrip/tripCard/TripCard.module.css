@@ -268,13 +268,13 @@
 }
 
 .expandWrap.open {
-  max-height: 600px;
+  max-height: 800px;
   /* enough for content */
   border-top: 1px solid #e5e7f0;
 }
 
 .open {
-  max-height: 600px;
+  max-height: 800px;
   /* enough for content */
 }
 

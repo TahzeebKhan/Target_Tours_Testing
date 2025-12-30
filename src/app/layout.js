@@ -38,8 +38,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${anticDidone.variable} ${jost.variable} ${inter.variable} antialiased`}
-        style={{ fontFamily: "var(--font-poppins), sans-serif" }}
+        className={`${anticDidone.variable} ${jost.variable} ${inter.variable} antialiased`}
+        style={{ fontFamily: "var(--font-inter)" }}
       >
         {children}
       </body>

@@ -18,6 +18,12 @@ const BetweenMajesticPeaks = () => {
         '/images/img1.jpg',
         '/images/img2.jpg',
         '/images/img3.jpg',
+        '/tourBooking/ImagesItem1.png',
+        '/tourBooking/ImagesItem2.png',
+        '/tourBooking/ImagesItem3.png',
+        '/tourBooking/ImagesItem1.png',
+        '/tourBooking/ImagesItem2.png',
+        '/tourBooking/ImagesItem3.png',
     ]
 
     const handleSlideChange = (swiper) => {
@@ -36,7 +42,7 @@ const BetweenMajesticPeaks = () => {
         }
 
         // Otherwise calculate based on total progress
-        return ((activeIndex + 1) / totalSlides) * 100;
+        return ((activeIndex + 3) / totalSlides) * 100;
     }
 
     const handlePrev = () => {

@@ -5,7 +5,7 @@ const FlightFare = () => {
     return (
         <div className={`${styles.tabContentFareDetails} ${styles.fadeIn}`}>
             <div className={styles.header}>
-                Jakrata To Singapore, <span> 18 dec</span>
+                Jakrata <img src="/icons/whitePlane.svg" alt="" /> Singapore, <span> 18 DEC 2025</span>
             </div>
             <div className={styles.body}>
                 <div className={styles.row}>

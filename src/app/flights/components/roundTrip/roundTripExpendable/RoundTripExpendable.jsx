@@ -155,7 +155,7 @@ const RoundTripExpendable = () => {
                         <div className={styles.leftFlightInfoCont}>
 
                             <div className={styles.flightHeading}>
-                                <h3>Jakrata To Singapore, 18 Dec 2025</h3>
+                                <h3>Jakrata <img src="/icons/flightIconBlue.svg" alt="" /> Singapore, 18 Dec 2025</h3>
                             </div>
                             <div className={styles.mainBody}>
                                 <FlightTimeline flight={flight2} />
@@ -167,7 +167,7 @@ const RoundTripExpendable = () => {
                         </div>
                         <div className={styles.rightFlightInfoCont}>
                             <div className={styles.flightHeading}>
-                                <h3>Singapore To Jakrata, 25 Dec 2025</h3>
+                                <h3>Singapore <img src="/icons/flightIconBlue.svg" alt="" /> Jakrata, 25 Dec 2025</h3>
                             </div>
                             <div className={styles.mainBody}>
                                 <FlightTimeline flight={flight} />
