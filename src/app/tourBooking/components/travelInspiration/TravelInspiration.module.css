@@ -127,5 +127,5 @@
     filter: invert(1);
 }
 .slide{
-    width: 482px;
+    width: 482px !important;
 }
