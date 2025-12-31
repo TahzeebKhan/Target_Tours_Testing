@@ -4,14 +4,17 @@ import styles from "./MultiCityTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
 import DatePriceSlider from "../DatePriceSlider";
+import { useTripType } from "../../TripTypeContext";
 const MultiCityTrip = () => {
   const [selectedSort, setSelectedSort] = useState("cheapest");
+  const { committedSearches } = useTripType();
+  const { from, to } = committedSearches.multi;
   return (
     <>
       <section className={styles.container}>
         <div className={styles.FlightBookingTextContainer}>
           <h2 className={styles.heading}>
-            Flight from <span>Jakarta</span> to <span>Singapore</span>
+            Flight from <span>{from || "Jakarta"}</span> to <span>{to || "Singapore"}</span>
           </h2>
           <div className={styles.subTextContainer}>
             <span className={styles.priceInfo}>
@@ -29,9 +32,8 @@ const MultiCityTrip = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -49,9 +51,8 @@ const MultiCityTrip = () => {
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "fastest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("fastest")}
                 >
                   <img

@@ -5,8 +5,11 @@ import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
 import FareComparisonModal from "./FareComparisonModal";
 import DatePriceSlider from "../DatePriceSlider";
+import { useTripType } from "../../TripTypeContext";
 
 const OnewayFlightBooking = () => {
+  const { committedSearches } = useTripType();
+  const { from, to } = committedSearches.oneway;
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
@@ -294,7 +297,7 @@ const OnewayFlightBooking = () => {
       <section className={styles.container}>
         <div className={styles.FlightBookingTextContainer}>
           <h2 className={styles.heading}>
-            Flight from <span>Jakarta</span> to <span>Singapore</span>
+            Flight from <span>{from || "Jakarta"}</span> to <span>{to || "Singapore"}</span>
           </h2>
           <div className={styles.subTextContainer}>
             <span className={styles.priceInfo}>

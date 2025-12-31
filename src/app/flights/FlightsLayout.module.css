@@ -1,6 +1,7 @@
 .wrapper {
   /* overflow-x: hidden; */
   max-width: 100vw;
+  position: relative;
 }
 
 .page {
@@ -101,6 +102,18 @@
 }
 
 .imageBackgound {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.imageBackgound.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.imageBackgound {
   width: 100%;
   min-height: 290px;
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
@@ -110,9 +123,72 @@
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
-
   align-items: end;
   position: relative;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  will-change: opacity, transform;
+}
+
+.imageBackgound.hidden {
+  display: none !important;
+}
+
+.imageBackgoundRes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.imageBackgoundRes.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.imageBackgoundRes {
+  display: none;
+  width: 100%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url("/images/flightsPageBgImg.webp");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.imageBackgoundRes.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  animation: fadeInDown 0.4s ease forwards;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 1321px) {
