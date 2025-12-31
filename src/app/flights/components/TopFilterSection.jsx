@@ -32,9 +32,47 @@ const passengerTypes = [
 const TopFilterSection = () => {
   const calendarRef = useRef(null);
 
-  const { tripType, setTripType } = useTripType();
+  const {
+    tripType,
+    setTripType,
+    from,
+    setFrom,
+    to,
+    setTo,
+    passengers,
+    setPassengers,
+    travelClass,
+    setTravelClass,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    handleSearch,
+  } = useTripType();
   const [directOnly, setDirectOnly] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [activeMultiIndex, setActiveMultiIndex] = useState(null);
+
+  // Direction for flight trip-type animation (round / oneway / multi)
+  const [flightDirection, setFlightDirection] = useState("right");
+
+  const [bookingType, setBookingType] = useState("flight");
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [multiSegments, setMultiSegments] = useState([
+    { from: "", to: "", date: "" },
+    { from: "", to: "", date: "" },
+  ]);
+
+  const departureRef = useRef(null);
+  const returnRef = useRef(null);
+  const multiDateRef1 = useRef(null);
+  const multiDateRef0 = useRef(null);
+
+  const [travellerOpen, setTravellerOpen] = useState(false);
+  const travellerRef = useRef(null);
+
+  const [calendarTripType, setCalendarTripType] = useState("oneway");
 
   // Scroll detection for gap reduction
   useEffect(() => {
@@ -43,53 +81,11 @@ const TopFilterSection = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-    // Check initial scroll position
     handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  // const [tripType, setTripType] = useState("oneway");
-  const [bookingType, setBookingType] = useState("flight");
-  // Passenger type checkbox state
-  const [selectedTypes, setSelectedTypes] = useState([]); // default checked (optional)
-  const [multiSegments, setMultiSegments] = useState([
-    { from: "", to: "", date: "" },
-    { from: "", to: "", date: "" },
-  ]);
 
-  // refs for the date inputs
-  const departureRef = useRef(null);
-  const returnRef = useRef(null);
-  const multiDateRef1 = useRef(null);
-  const multiDateRef0 = useRef(null);
-
-  const [activeFeature, setActiveFeature] = useState(1); // default: 1 = Flights
-
-  // state for travellers dropdown
-  const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
-  const [travellerOpen, setTravellerOpen] = useState(false);
-  const travellerRef = useRef(null);
-
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [passengers, setPassengers] = useState({
-    adult: 1,
-    child: 0,
-    infant: 0,
-  });
-  const [travelClass, setTravelClass] = useState("ECONOMY");
-  // Direction for main tab (hotel/flight/holiday/insurance) animation
-  const [direction, setDirection] = useState("right");
-
-  // date calendar
-  const [calendarTripType, setCalendarTripType] = useState("oneway");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [activeMultiIndex, setActiveMultiIndex] = useState(null);
-
-  // Direction for flight trip-type animation (round / oneway / multi)
-  const [flightDirection, setFlightDirection] = useState("right");
   const handleDateClick = (date) => {
     if (tripType === "multi" && activeMultiIndex !== null) {
       setMultiSegments((prev) =>
@@ -257,7 +253,7 @@ const TopFilterSection = () => {
   return (
     <>
       <div
-        className={`${styles.searchSec} ${isScrolled ? styles.scrolledMargin : ""} ${tripType === "multi" ? styles.isMulti : ""
+        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""
           } sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
@@ -267,10 +263,13 @@ const TopFilterSection = () => {
             }`}
         >
           {bookingType === "flight" && (
-            <div className={`${styles.serarchingCont} ${styles.glass_panel} ${isScrolled ? styles.scrolledGap : ""}`}>
+            <div className={`${styles.serarchingCont} ${styles.glass_panel} `}>
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
-                  <label className={styles.tripOption}>
+                  <label
+                    className={`${styles.tripOption} ${tripType === "oneway" ? styles.active : ""
+                      }`}
+                  >
                     <input
                       type="radio"
                       name="tripType"
@@ -282,7 +281,10 @@ const TopFilterSection = () => {
                     <span className={styles.labelText}>ONE WAY</span>
                   </label>
 
-                  <label className={styles.tripOption}>
+                  <label
+                    className={`${styles.tripOption} ${tripType === "round" ? styles.active : ""
+                      }`}
+                  >
                     <input
                       type="radio"
                       name="tripType"
@@ -294,7 +296,10 @@ const TopFilterSection = () => {
                     <span className={styles.labelText}>ROUND TRIP</span>
                   </label>
 
-                  <label className={styles.tripOption}>
+                  <label
+                    className={`${styles.tripOption} ${tripType === "multi" ? styles.active : ""
+                      }`}
+                  >
                     <input
                       type="radio"
                       name="tripType"
@@ -505,7 +510,7 @@ const TopFilterSection = () => {
                     </div>
 
                     {tripType !== "multi" && (
-                      <div className={styles.searchBtn}>
+                      <div className={styles.searchBtn} onClick={handleSearch}>
                         <svg
                           width="24"
                           height="24"
@@ -527,8 +532,8 @@ const TopFilterSection = () => {
                 {tripType === "multi" && (
                   <>
                     <div
-                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${isScrolled ? styles.scrolledPadding : ""} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
-                      style={{  pointerEvents: 'none' }}
+                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                      style={{ pointerEvents: 'none' }}
                     >
                       {/* First row is now handled by the unified block above. 
                           We use paddingTop to space the second row. */}
@@ -625,7 +630,7 @@ const TopFilterSection = () => {
                             </button>
                           </div>
                         </div>
-                        <div className={styles.searchBtn}>
+                        <div className={styles.searchBtn} onClick={handleSearch}>
                           <svg
                             width="24"
                             height="24"

@@ -6,6 +6,7 @@ import FlightFilters from "./components/FlightsFilters";
 import TopFilterSection from "./components/TopFilterSection";
 import { useEffect, useRef, useState } from "react";
 import { TripTypeProvider, useTripType } from "./TripTypeContext";
+import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
 
 function LayoutContent({ children }) {
   const { tripType } = useTripType();
@@ -13,6 +14,7 @@ function LayoutContent({ children }) {
 
   const sidebarRef = useRef(null);
 
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // const [scrolled, setScrolled] = useState(false);
 
@@ -24,6 +26,38 @@ function LayoutContent({ children }) {
   //   return () => window.removeEventListener("scroll", onScroll);
   // }, []);
 
+  // Scroll detection for gap reduction
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     setIsScrolled(window.scrollY >= 100);
+  //   };
+
+  //   window.addEventListener("scroll", handleScroll);
+  //   handleScroll();
+
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
+
+  useEffect(() => {
+  let ticking = false;
+
+  const handleScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 100);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  handleScroll();
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+
 
   return (
     <>
@@ -31,17 +65,19 @@ function LayoutContent({ children }) {
       {/* Top Navbar */}
       <div className={styles.wrapper}>
         <Navbar />
-        <div className={styles.imageBackgound}>
+        <div className={`${styles.imageBackgound} ${isScrolled ? styles.hidden : ""}`}>
           <TopFilterSection />
+        </div>
+        <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
+          <TopFilterResponsiveSec />
         </div>
       </div>
       {/* Page Wrapper */}
       <main className={styles.page}>
         <div
           ref={containerRef}
-          className={`${styles.container} ${
-            tripType === "round" ? styles.wideContainer : styles.normalContainer
-          }`}
+          className={`${styles.container} ${tripType === "round" ? styles.wideContainer : styles.normalContainer
+            }`}
         >
           {/* top date slider */}
           {/* <div className={styles.dateSlider}>
