@@ -5,6 +5,7 @@ import DaySlider from './DaySlider';
 import FlightTimingDetail from './flightTimingDetails/FlightTimingDetail';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
+import HotelRoom from '../hotelRoom/HotelRoom';
 
 
 const ArrivalToronto = () => {
@@ -180,12 +181,14 @@ const ArrivalToronto = () => {
                         </div>
                         <div className={styles.paraCoontainer}>
                             <p>Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure ahead.</p>
+                            <HotelRoom/>
                         </div>
 
                         <div className={styles.expandableMainContainer}>
                             <div className={styles.expandableTab} onClick={() => toggleExpand("flight")} >
                                 <h2>International Flight</h2>
-                                <img className={styles.arrow} src="/icons/DownArrows.svg" alt="" />
+                                <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
+                                    }`} src="/icons/DownArrows.svg" alt="" />
                             </div>
                             <div
                                 className={`${styles.expandableContent} ${openAccordion === "flight" ? styles.open : ""
@@ -234,9 +237,10 @@ const ArrivalToronto = () => {
 
 
                         <div className={styles.expandableMainContainer}>
-                            <div className={styles.expandableTab}  onClick={() => toggleExpand("transfer")} >
+                            <div className={styles.expandableTab} onClick={() => toggleExpand("transfer")} >
                                 <h2>Private Transfer</h2>
-                                <img className={styles.arrow} src="/icons/DownArrows.svg" alt="" />
+                                <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
+                                    }`} src="/icons/DownArrows.svg" alt="" />
                             </div>
                             <div
                                 className={`${styles.expandableContent} ${openAccordion === "transfer" ? styles.open : ""
