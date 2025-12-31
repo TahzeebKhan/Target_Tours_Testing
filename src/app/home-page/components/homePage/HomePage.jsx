@@ -6,6 +6,7 @@ import TravellerSelector from './TravellerSelector';
 import Navbar from '../../../flights/Navbar';
 import Link from 'next/link';
 import DateField from './DateField';
+import { ArrowLeftRight } from 'lucide-react';
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
@@ -375,7 +376,8 @@ const HomePage = () => {
                       className={`${styles.serarchingContBottom} ${styles.formVisible}`}
                     >
                       <div className={`${styles.arrowbox} ${tripType === "oneway" ? styles.arrowboxOneWay : tripType === "multi" ? styles.multiArrow : ""}`} onClick={() => swapLocations(tripType === 'multi' ? 0 : undefined)}>
-                        <img src="/icons/leftRrighArrow.svg" alt="" />
+                        {/* <img src="/icons/leftRrighArrow.svg" alt="" /> */}
+                        <ArrowLeftRight size={16}  className={styles.arrowIcon} />
                       </div>
                       <div
                         className={`${styles.fromBtn} ${styles.fromInput}`}
@@ -468,8 +470,9 @@ const HomePage = () => {
                         const actualIndex = idx + 1;
                         return (
                           <div key={actualIndex} className={styles.serarchingContBottom}>
-                            <div className={`${styles.arrowboxOneWay} ${styles.multiArrow}`} onClick={() => swapLocations(actualIndex)}>
-                              <img src="/icons/leftRrighArrow.svg" alt="" />
+                            <div className={`${styles.arrowboxOneWay} ${styles.arrowbox}  ${styles.multiArrow}`} onClick={() => swapLocations(actualIndex)}>
+                              {/* <img src="/icons/leftRrighArrow.svg" alt="" /> */}
+                              <ArrowLeftRight size={16}  className={styles.arrowIcon} />
                             </div>
                             <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
                               <div className={styles.lable}>From</div>

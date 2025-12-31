@@ -34,6 +34,20 @@ const TopFilterSection = () => {
 
   const { tripType, setTripType } = useTripType();
   const [directOnly, setDirectOnly] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Scroll detection for gap reduction
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY >= 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    // Check initial scroll position
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   // const [tripType, setTripType] = useState("oneway");
   const [bookingType, setBookingType] = useState("flight");
   // Passenger type checkbox state
@@ -239,12 +253,12 @@ const TopFilterSection = () => {
     setShowCalendar(true);
   };
 
-  
+
   return (
     <>
       <div
-        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""
-          } flex flex-col gap-[127px] items-center`}
+        className={`${styles.searchSec} ${isScrolled ? styles.scrolledMargin : ""} ${tripType === "multi" ? styles.isMulti : ""
+          } sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
           className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
@@ -253,7 +267,7 @@ const TopFilterSection = () => {
             }`}
         >
           {bookingType === "flight" && (
-            <div className={`${styles.serarchingCont} ${styles.glass_panel}`}>
+            <div className={`${styles.serarchingCont} ${styles.glass_panel} ${isScrolled ? styles.scrolledGap : ""}`}>
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
                   <label className={styles.tripOption}>
@@ -306,7 +320,7 @@ const TopFilterSection = () => {
                 {/* Unified One-way, Round-trip, and Multi-city (first row) form */}
                 {(tripType === "oneway" || tripType === "round" || tripType === "multi") && (
                   <div
-                    className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                    className={`${styles.serarchingContBottom}  ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
                   >
                     <div
                       className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
@@ -339,7 +353,7 @@ const TopFilterSection = () => {
                         }
                       }}
                     >
-                      <ArrowLeftRight size={16}  className={styles.arrowIcon} />
+                      <ArrowLeftRight size={16} className={styles.arrowIcon} />
                     </div>
                     <div
                       className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.toBtn
@@ -513,8 +527,8 @@ const TopFilterSection = () => {
                 {tripType === "multi" && (
                   <>
                     <div
-                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
-                      style={{ paddingTop: '24px', pointerEvents: 'none' }}
+                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${isScrolled ? styles.scrolledPadding : ""} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                      style={{  pointerEvents: 'none' }}
                     >
                       {/* First row is now handled by the unified block above. 
                           We use paddingTop to space the second row. */}

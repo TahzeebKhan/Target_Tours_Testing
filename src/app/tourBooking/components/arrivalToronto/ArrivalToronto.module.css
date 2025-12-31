@@ -165,7 +165,8 @@
     color: #000033;
 
 }
-.slide{
+
+.slide {
     width: 222px !important;
 }
 
@@ -240,21 +241,23 @@
     gap: 12px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.45s ease, opacity 0.3s ease;
-    opacity: 0;
+    transition: max-height 0.45s ease;
+    /* opacity: 0; */
 }
 
 .open {
-  max-height: 800px; /* enough for your content */
-  opacity: 1;
+    max-height: 800px;
+    /* enough for your content */
+    opacity: 1;
 }
+
 .arrow {
-  transition: transform 0.3s ease;
-   transform: rotate(180deg);
+    transition: all 0.45s ease-in-out;
+    transform: rotate(180deg);
 }
 
 .rotate {
-  transform: rotate(180deg);
+    transform: rotate(0deg);
 }
 
 
@@ -382,19 +385,20 @@
     color: #000000;
 }
 
-.PremiumContainer{
+.PremiumContainer {
     display: flex;
     gap: 22px;
     padding: 24px 12px 12px 12px;
-    
+
 }
 
-.PremiumTextContainer{
+.PremiumTextContainer {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
-.PremiumTextContainer h3{
+
+.PremiumTextContainer h3 {
     font-family: var(--font-inter);
     font-weight: 500;
     font-size: 14px;
@@ -402,7 +406,8 @@
     letter-spacing: -2%;
     color: #000000;
 }
-.PremiumTextContainer p{
+
+.PremiumTextContainer p {
     font-family: var(--font-inter);
     font-weight: 300;
     font-size: 13px;
@@ -410,12 +415,14 @@
     letter-spacing: 0px;
     color: #434343;
 }
-.ApproximatelyTime{
+
+.ApproximatelyTime {
     display: flex;
     align-items: center;
     gap: 4px;
 }
-.ApproximatelyTime span{
+
+.ApproximatelyTime span {
     font-family: var(--font-inter);
     font-weight: 300;
     font-size: 12px;
@@ -424,6 +431,7 @@
     color: #000000;
 
 }
+
 .btnContainer {
     display: flex;
     justify-content: center;
@@ -456,21 +464,24 @@
     filter: invert(1);
 }
 
-.yourActivityContainer{
+.yourActivityContainer {
     display: flex;
     flex-direction: column;
 }
-.yourActivityContainerTop{
+
+.yourActivityContainerTop {
     display: flex;
-    
+
 }
-.yourActivityContainerTopLeft{
+
+.yourActivityContainerTopLeft {
     max-width: 245px;
     width: 100%;
     padding-top: 5.5px;
     padding-bottom: 9.5px;
 }
-.youHeading{
+
+.youHeading {
     font-family: Antic Didone;
     font-weight: 400;
     font-size: 18px;
@@ -480,26 +491,30 @@
     text-transform: uppercase;
 
 }
-.yourActivityContainerTopRight{
+
+.yourActivityContainerTopRight {
     height: 44px;
     padding-left: 24px;
-    padding-top:5.5px;
+    padding-top: 5.5px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: start;
     border-left: 1px solid #E4E6E8;
 }
-.yourActivityContainerBottom{
+
+.yourActivityContainerBottom {
     display: flex;
     border-top: 1px solid #E4E6E8;
 }
-.yourActivityContainerBottomLeft{
+
+.yourActivityContainerBottomLeft {
     padding-top: 12px;
     padding-right: 10px;
     border-right: 1px solid #E4E6E8;
 }
-.card{
+
+.card {
     width: 235px;
     display: flex;
     flex-direction: column;
@@ -508,17 +523,20 @@
     border: 1px solid #E4E6E8;
     padding-bottom: 12px;
 }
-.cardImage{
+
+.cardImage {
     width: 100%;
     object-fit: cover;
 }
-.cardTextContainer{
+
+.cardTextContainer {
     display: flex;
     flex-direction: column;
     gap: 14px;
     padding: 0 8px;
 }
-.cardTextAddress{
+
+.cardTextAddress {
     font-family: var(--font-inter);
     font-weight: 300;
     font-style: Light;
@@ -530,7 +548,8 @@
     color: #000000;
 
 }
-.cardTextTitle{
+
+.cardTextTitle {
     font-family: Antic Didone;
     font-weight: 400;
     font-size: 20px;
@@ -540,7 +559,8 @@
     color: #000000;
 
 }
-.cardTextButton{
+
+.cardTextButton {
     padding: 6px 24px;
     border: 0.5px solid #000033;
 
@@ -554,7 +574,8 @@
     color: #000033;
     cursor: pointer;
 }
-.yourActivityContainerBottomRight{
+
+.yourActivityContainerBottomRight {
     max-width: 467px;
     width: 100%;
     padding-top: 12px;
@@ -564,11 +585,13 @@
     /* border-right: 1px solid #E4E6E8; */
 
 }
-.btnsCon{
+
+.btnsCon {
     display: flex;
     justify-content: space-between;
 }
-.TextTitle{
+
+.TextTitle {
     font-family: var(--font-inter);
     font-weight: 300;
     font-size: 12px;
@@ -577,7 +600,8 @@
     vertical-align: middle;
     color: #000000;
 }
-.cardCarousell{
+
+.cardCarousell {
     width: 222px;
     display: flex;
     flex-direction: column;
@@ -586,7 +610,8 @@
     border: 1px solid #E4E6E8;
     padding-bottom: 12px;
 }
-.cardButton{
+
+.cardButton {
     padding: 8px 31px;
     border: 0.5px solid #000033;
     font-family: var(--font-inter);
@@ -601,9 +626,11 @@
     justify-content: center;
     cursor: pointer;
 }
-.cardTextContainer2{
+
+.cardTextContainer2 {
     gap: 9px !important;
 }
+
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {

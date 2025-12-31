@@ -2,6 +2,7 @@
   /* overflow-x: hidden; */
   max-width: 100vw;
 }
+
 .page {
   width: 100%;
   background-color: #f9f9f9;
@@ -43,7 +44,8 @@
   max-height: 94vh;
   overflow-y: auto;
 
-  width: 356px; /* SAME as sidebar */
+  width: 356px;
+  /* SAME as sidebar */
   max-height: calc(100vh - 211px);
   overflow-y: auto;
 
@@ -74,7 +76,8 @@
 
 .content {
   grid-column: 2 / 3;
-  min-width: 0; /* critical for grid children */
+  min-width: 0;
+  /* critical for grid children */
   /* min-height: calc(100vh - 350px); */
 }
 
@@ -88,10 +91,12 @@
 
 .dateSlider {
   position: sticky;
-  top: 76px; /* height of navbar */
+  top: 76px;
+  /* height of navbar */
   z-index: 50;
 
-  background: #fff; /* important so content doesn’t bleed */
+  background: #fff;
+  /* important so content doesn’t bleed */
   grid-column: 1 / -1;
 }
 
@@ -107,6 +112,7 @@
   display: flex;
 
   align-items: end;
+  position: relative;
 }
 
 @media (max-width: 1321px) {
