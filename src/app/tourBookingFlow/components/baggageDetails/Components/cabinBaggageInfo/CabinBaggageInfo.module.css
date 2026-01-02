@@ -1,0 +1,86 @@
+.wrapper {
+    max-width: 388px;
+    width: 100%;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+
+/* Icon */
+.iconBox {
+    width: 75px;
+    height: 75px;
+    border: 1px solid #DBE2EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    width: 41px;
+    height: auto;
+}
+
+/* Content */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.header h3 {
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 13px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+}
+
+.included {
+    padding: 2px 7px;
+    border: 1px solid #316CEC;
+    background-color: #EFF6FF;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 12px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}
+
+/* List */
+.list {
+    display: flex;
+    flex-direction: column;
+    list-style: disc;
+    /* ✅ add this */
+    padding-left: 18px;
+}
+
+.list li {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+}
+
+.list strong {
+    font-weight: 700;
+}

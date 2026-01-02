@@ -1,0 +1,130 @@
+.expandWrap {
+
+    padding: 16px 24px 24px 24px;
+    background-color: #FFFFFF;
+}
+
+.mealGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 40px;
+}
+.expandHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.expandHeader h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #070773;
+
+}
+
+
+.Itemwrapper {
+    max-width: 388px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.itemInfo {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.imageBox {
+    width: 75px;
+    height: 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+}
+
+.title {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+}
+
+.priceRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.price {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0px;
+}
+
+.tag {
+    padding: 1px 8px;
+    background-color: #F3F4F6;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #4A5565;
+
+}
+
+.counter {
+    max-width: 86px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 8px 5px;
+    width: 24px;
+    height: 24px;
+    border: .75px solid #000033;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.count {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: -2%;
+    color: #000000;
+
+}

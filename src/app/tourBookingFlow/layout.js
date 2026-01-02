@@ -1,0 +1,26 @@
+import React from "react";
+import styles from "./FlightBookingDetailsLayout.module.css";
+import Navbar from "./Navbar";
+import BookingStepper from "./components/BookingStepper";
+import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
+import { FlightBookingProvider } from "./FlightBookingContext";
+
+export default function FlightBookingDetailsLayout({ children }) {
+  return (
+    <FlightBookingProvider>
+      <div className={styles.layoutWrapper}>
+        <Navbar />
+        <BookingStepper />
+
+        <main className={styles.mainContent}>
+          <div className={styles.container}>{children}</div>
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarSticky}>
+              <SidebarPriceSummaryCard />
+            </div>
+          </aside>
+        </main>
+      </div>
+    </FlightBookingProvider>
+  );
+}

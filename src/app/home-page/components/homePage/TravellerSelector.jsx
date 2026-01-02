@@ -22,6 +22,13 @@ export default function TravellerSelector({
 }) {
   const [open, setOpen] = useState(false)
   const localRef = useRef(null)
+  const [travellerOpen, setTravellerOpen] = useState(false);
+  const [passengers, setPassengers] = useState({
+    adult: 1,
+    child: 0,
+    infant: 0,
+  });
+  const [travelClass, setTravelClass] = useState("Economy");
 
   useEffect(() => {
     const handleClickOutside = (e) => {

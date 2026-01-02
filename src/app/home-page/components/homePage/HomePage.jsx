@@ -6,7 +6,14 @@ import TravellerSelector from './TravellerSelector';
 import Navbar from '../../../flights/Navbar';
 import Link from 'next/link';
 import DateField from './DateField';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, ChevronDown } from 'lucide-react';
+import PassengerClassSelector from './PassengerClassSelector';
+import SuggestionBox from './SuggestionBox';
+// import DateCalendarModal from "@/app/components/calendar/DateCalendarModal";
+// import CalendarMonths from "@/app/components/calendar/CalendarMonths";
+import { CalendarSVG } from "@/app/flights/components/SVGFile";
+import DateCalendarModal from './calendar/DateCalendarModal';
+import CalendarMonths from './calendar/CalendarMonths';
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
@@ -24,6 +31,14 @@ const HomePage = () => {
   const departureRef = useRef(null)
   const returnRef = useRef(null)
 
+  // calendar modal controls
+  const calendarRef = useRef(null)
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [activeMultiIndex, setActiveMultiIndex] = useState(null)
+  const [calendarTripType, setCalendarTripType] = useState("oneway")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+
   const [activeFeature, setActiveFeature] = useState(1); // default: 1 = Flights
   const featureRowRef = useRef(null);
   const progressRef = useRef(null);
@@ -32,6 +47,70 @@ const HomePage = () => {
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER")
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS")
   const [hotelGuestRoomCount, setHotelGuestRoomCount] = useState("GUESTS & ROOMS")
+
+
+  const [passengers, setPassengers] = useState({
+    adult: 1,
+    child: 0,
+    infant: 0,
+  });
+
+  // total passengers derived from state
+  const totalPassengers = passengers.adult + passengers.child + passengers.infant;
+
+  // recent search suggestions (example data)
+  const recentSearches = [
+    { label: 'CHENNAI, INDIA', detail: 'Chennai International Airport, India', code: 'CEN', value: 'Chennai, India' },
+    { label: 'MUMBAI, INDIA', detail: 'Mumbai Chhatrapati Shivaji Maharaj International Airport, India', code: 'BOM', value: 'Mumbai, India' },
+    { label: 'KOLKATA, INDIA', detail: 'Kolkata Netaji Subhas Chandra Bose International Airport, India', code: 'KLG', value: 'Kolkata, India' },
+    { label: 'BENGALURU, INDIA', detail: 'Bengaluru Kempegowda International Airport, India', code: 'BLR', value: 'Bengaluru, India' },
+  ];
+
+  const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
+  const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
+  const fromInputRef = useRef(null);
+  const toInputRef = useRef(null);
+  const fromSuggestionRef = useRef(null);
+  const toSuggestionRef = useRef(null);
+
+  // multi-city suggestion controls
+  const [activeSuggestion, setActiveSuggestion] = useState(null); // { field: 'from'|'to', index: number } or null
+  const multiInputRefs = useRef([]);
+  const multiSuggestionRefs = useRef([]);
+
+  const getFilteredSuggestions = (query) => {
+    if (!query) return recentSearches;
+    const q = query.toLowerCase();
+    return recentSearches.filter(s => s.label.toLowerCase().includes(q) || s.detail.toLowerCase().includes(q) || s.code.toLowerCase().includes(q));
+  };
+
+  const selectSuggestion = (sugg, field = 'from', index = null) => {
+    // multi-city selection
+    if (typeof index === 'number') {
+      updateMultiLeg(index, field, sugg.value);
+      setActiveSuggestion(null);
+      const wrapper = multiInputRefs.current[index];
+      if (wrapper) {
+        const inputEl = wrapper.querySelector('input');
+        if (inputEl) inputEl.focus();
+      }
+      return;
+    }
+
+    // single origin/destination selection
+    if (field === 'from') {
+      setFrom(sugg.value);
+      setFromSuggestionsOpen(false);
+      if (fromInputRef.current) fromInputRef.current.focus();
+    } else {
+      setTo(sugg.value);
+      setToSuggestionsOpen(false);
+      if (toInputRef.current) toInputRef.current.focus();
+    }
+  };
+
+  // Travel class state
+  const [travelClass, setTravelClass] = useState("Economy");
 
   // state for travellers dropdown
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
@@ -81,25 +160,76 @@ const HomePage = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (travellerRef.current && !travellerRef.current.contains(e.target)) {
+      // Traveller dropdown
+      if (
+        travellerRef.current &&
+        !travellerRef.current.contains(e.target)
+      ) {
         setTravellerOpen(false);
+      }
+
+      // FROM suggestions
+      if (
+        fromSuggestionRef.current &&
+        !fromSuggestionRef.current.contains(e.target) &&
+        fromInputRef.current &&
+        !fromInputRef.current.contains(e.target)
+      ) {
+        setFromSuggestionsOpen(false);
+      }
+
+      // TO suggestions
+      if (
+        toSuggestionRef.current &&
+        !toSuggestionRef.current.contains(e.target) &&
+        toInputRef.current &&
+        !toInputRef.current.contains(e.target)
+      ) {
+        setToSuggestionsOpen(false);
+      }
+
+      // ✅ MULTI-CITY FIX
+      if (activeSuggestion?.index !== undefined) {
+        const idx = activeSuggestion.index;
+        const inputWrapper = multiInputRefs.current[idx];
+        const suggestionBox = multiSuggestionRefs.current[idx];
+
+        if (
+          suggestionBox &&
+          inputWrapper &&
+          !suggestionBox.contains(e.target) &&
+          !inputWrapper.contains(e.target)
+        ) {
+          setActiveSuggestion(null);
+        }
       }
     };
 
     const handleEsc = (e) => {
-      if (e.key === 'Escape') setTravellerOpen(false);
+      if (e.key === "Escape") {
+        setTravellerOpen(false);
+        setFromSuggestionsOpen(false);
+        setToSuggestionsOpen(false);
+        setActiveSuggestion(null); // 🔥 important
+      }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
-  }, []);
+  }, [
+    activeSuggestion, // 🔥 VERY IMPORTANT
+    travellerOpen
+  ]);
 
-  const truncate = (str) => {
-    return str.length > 10 ? str.slice(0, 10) + "..." : str;
+
+  const truncate = (str, max = 10) => {
+    if (!str) return "";
+    return str.length > max ? str.slice(0, max) + "..." : str;
   };
 
 
@@ -158,12 +288,10 @@ const HomePage = () => {
       setDirection("left");
     }
 
-    // switch which search UI is shown
-    // `type` is "flight" | "hotel" | "holiday" | "insurance" (you can adapt)
     setBookingType(feature.type);
 
     // optional: scroll the search section into view (smooth)
-    const searchEl = document.querySelector(`.${styles.serarchingCont}`);
+    // const searchEl = document.querySelector(`.${styles.serarchingCont}`);
     if (searchEl) {
       // searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -172,6 +300,12 @@ const HomePage = () => {
       if (firstInput) firstInput.focus();
     }
   }
+
+  useEffect(() => {
+    setFromSuggestionsOpen(false);
+    setToSuggestionsOpen(false);
+    setActiveSuggestion(null);
+  }, [bookingType, tripType]);
 
   // update progress indicator position/width to match active feature button
   useEffect(() => {
@@ -205,17 +339,35 @@ const HomePage = () => {
     return () => window.removeEventListener('resize', update);
   }, [activeFeature, features]);
 
+  useEffect(() => {
+    if (!showCalendar) return;
+
+    const handleClickOutsideCalendar = (e) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(e.target)
+      ) {
+        setShowCalendar(false);
+        setActiveMultiIndex(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideCalendar);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideCalendar);
+    };
+  }, [showCalendar]);
+
 
 
   // handlers to open the native date picker (if supported)
   const openDeparturePicker = () => {
     const input = departureRef.current
     if (!input) return
-    // preferred: showPicker if available
     if (typeof input.showPicker === 'function') {
       input.showPicker()
     } else {
-      // fallback: focus then click (some browsers will open)
       input.focus()
       input.click()
     }
@@ -237,13 +389,59 @@ const HomePage = () => {
 
     if (!input) return;
 
-    // Check if it's a date input
     if (input.type === "date" && typeof input.showPicker === "function") {
       input.showPicker();
     } else {
-      // For text inputs, just focus
       input.focus();
     }
+  };
+
+  const handleDateClick = (date) => {
+    if (tripType === "multi" && activeMultiIndex !== null) {
+      updateMultiLeg(activeMultiIndex, 'date', date);
+      setShowCalendar(false);
+      setActiveMultiIndex(null);
+      return;
+    }
+
+    if (calendarTripType === "oneway") {
+      setStartDate(date);
+      setEndDate(null);
+      setShowCalendar(false);
+      return;
+    }
+
+    if (!startDate || endDate) {
+      setStartDate(date);
+      setEndDate(null);
+    } else if (new Date(date) >= new Date(startDate)) {
+      setEndDate(date);
+      setShowCalendar(false);
+    } else {
+      setStartDate(date);
+      setEndDate(null);
+    }
+  };
+
+  useEffect(() => {
+    if (tripType === "round") {
+      setCalendarTripType("round");
+    } else {
+      setCalendarTripType("oneway");
+    }
+  }, [tripType]);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = date
+      .toLocaleString("en-US", { month: "short" })
+      .toUpperCase();
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
   };
 
   return (
@@ -377,51 +575,123 @@ const HomePage = () => {
                     >
                       <div className={`${styles.arrowbox} ${tripType === "oneway" ? styles.arrowboxOneWay : tripType === "multi" ? styles.multiArrow : ""}`} onClick={() => swapLocations(tripType === 'multi' ? 0 : undefined)}>
                         {/* <img src="/icons/leftRrighArrow.svg" alt="" /> */}
-                        <ArrowLeftRight size={16}  className={styles.arrowIcon} />
+                        <ArrowLeftRight size={16} className={styles.arrowIcon} />
                       </div>
-                      <div
-                        className={`${styles.fromBtn} ${styles.fromInput}`}
-                        onClick={handleFieldClick}
-                      >
+                      <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick} >
                         <div className={styles.lable}>From</div>
                         <input
+                          ref={fromInputRef}
                           type="text"
                           className={styles.contant}
                           placeholder="Departure"
                           value={tripType === 'multi' ? (multiCity[0]?.from || '') : from}
-                          onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'from', e.target.value) : setFrom(e.target.value)}
+                          onFocus={() => setFromSuggestionsOpen(true)}
+                          onClick={() => setFromSuggestionsOpen(true)}
+                          onChange={(e) => {
+                            if (tripType === 'multi') {
+                              updateMultiLeg(0, 'from', e.target.value);
+                            } else {
+                              setFrom(e.target.value);
+                              setFromSuggestionsOpen(true);
+                            }
+                          }}
                         />
+
+                        {fromSuggestionsOpen && (
+                          <SuggestionBox
+                            boxRef={fromSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(from)}
+                            onSelect={(s) => selectSuggestion(s, "from")}
+                          />
+                        )}
                       </div>
-                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`} onClick={handleFieldClick}>
+                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`} onClick={handleFieldClick} >
                         <div className={styles.lable}>To</div>
                         <input
+                          ref={toInputRef}
                           type="text"
                           className={styles.contant}
                           placeholder="Destination"
                           value={tripType === 'multi' ? (multiCity[0]?.to || '') : to}
-                          onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'to', e.target.value) : setTo(e.target.value)}
+                          onFocus={() => setToSuggestionsOpen(true)}
+                          onClick={() => setToSuggestionsOpen(true)}
+                          onChange={(e) => {
+                            if (tripType === 'multi') {
+                              updateMultiLeg(0, 'to', e.target.value);
+                            } else {
+                              setTo(e.target.value);
+                              setToSuggestionsOpen(true);
+                            }
+                          }}
                         />
+
+                        {toSuggestionsOpen && (
+                          <SuggestionBox
+                            boxRef={toSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(to)}
+                            onSelect={(s) => selectSuggestion(s, "to")}
+                          />
+                        )}
                       </div>
 
-                      <div className={`${styles.fromBtn} ${styles.fromInput}`} onClick={handleFieldClick}>
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                          } ${styles.calendarAnchor}`}
+                      >
                         <div className={styles.lable}>Departure Date</div>
-                        <div className={styles.dateInputWrapper} onClick={openDeparturePicker}>
-                          <input
-                            ref={departureRef}
-                            type="date"
-                            className={styles.contant}
-                            data-placeholder="ADD DATES"
-                            value={tripType === 'multi' ? (multiCity[0]?.date || '') : undefined}
-                            onChange={(e) => tripType === 'multi' ? updateMultiLeg(0, 'date', e.target.value) : undefined}
-                            required
-                          />
-                          <button
-                            type="button"
-                            aria-label="Open departure date picker"
-                            className={styles.calendarIcon}
-                            onClick={openDeparturePicker}
+                        {showCalendar && (
+                          <DateCalendarModal
+                            mode={calendarTripType === "round" ? "roundtrip" : "oneway"}
+                            onModeChange={(mode) =>
+                              setCalendarTripType(mode === "roundtrip" ? "round" : "oneway")
+                            }
+                            onClose={() => {
+                              setShowCalendar(false);
+                              setActiveMultiIndex(null);
+                            }}
                           >
-                            <img src="/icons/calander.svg" alt="" />
+                            {/* 👇 IMPORTANT: calendarRef yahin hona chahiye */}
+                            <div ref={calendarRef}>
+                              <CalendarMonths
+                                startDate={startDate}
+                                endDate={endDate}
+                                onDateClick={handleDateClick}
+                              />
+                            </div>
+                          </DateCalendarModal>
+                        )}
+
+                        <div
+                          className={styles.dateInputWrapper}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (tripType === "multi") {
+                              setCalendarTripType("oneway");
+                              setActiveMultiIndex(0);
+                              setShowCalendar(true);
+                            } else {
+                              setCalendarTripType("oneway");
+                              if (tripType === "round") setCalendarTripType("round");
+                              setShowCalendar(true);
+                            }
+                          }}
+                        >
+                          <input
+                            type="text"
+                            readOnly
+                            className={styles.contant}
+                            placeholder="ADD DATE"
+                            value={
+                              tripType === "multi"
+                                ? formatDate(multiCity[0]?.date)
+                                : (formatDate(startDate) || "")
+                            }
+                          />
+
+                          <button type="button" className={styles.calendarIcon}>
+                            <CalendarSVG />
                           </button>
                         </div>
                       </div>
@@ -448,14 +718,47 @@ const HomePage = () => {
                         </div>
                       </div>
 
-                      <TravellerSelector
+                      {/* <TravellerSelector
                         travellerClass={travellerClass}
                         setTravellerClass={setTravellerClass}
                         travellerOptions={travellerOptions}
                         styles={styles}
                         name="Travellers & Class"
                         className={styles.fromInput}
-                      />
+                      /> */}
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                          }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTravellerOpen((o) => !o);
+                        }}
+                      >
+                        <div className={styles.lable}>Travellers & Class</div>
+                        <div className={styles.iconCont}>
+                          <div className={styles.contant}>
+                            {truncate(`${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`, 17)}
+                          </div>
+
+                          <ChevronDown
+                            className={`${styles.chevron} ${travellerOpen
+                              ? styles.openChevron
+                              : styles.closeChevron
+                              }`}
+                            size={16}
+                            color="#FFFFFF"
+                          />
+                        </div>
+
+                        <PassengerClassSelector
+                          open={travellerOpen}
+                          setOpen={setTravellerOpen}
+                          passengers={passengers}
+                          setPassengers={setPassengers}
+                          travelClass={travelClass}
+                          setTravelClass={setTravelClass}
+                        />
+                      </div>
 
                       <div className={`${styles.searchBtn} ${tripType === 'multi' ? styles.hiddenField : ""}`}>
                         <img src="/images/searchIcon.svg" alt="" />
@@ -469,18 +772,52 @@ const HomePage = () => {
                       {multiCity.slice(1).map((leg, idx) => {
                         const actualIndex = idx + 1;
                         return (
-                          <div key={actualIndex} className={styles.serarchingContBottom}>
+                          <div key={actualIndex} ref={(el) => multiInputRefs.current[actualIndex] = el} className={styles.serarchingContBottom} style={{ position: 'relative' }}>
                             <div className={`${styles.arrowboxOneWay} ${styles.arrowbox}  ${styles.multiArrow}`} onClick={() => swapLocations(actualIndex)}>
                               {/* <img src="/icons/leftRrighArrow.svg" alt="" /> */}
-                              <ArrowLeftRight size={16}  className={styles.arrowIcon} />
+                              <ArrowLeftRight size={16} className={styles.arrowIcon} />
                             </div>
                             <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
                               <div className={styles.lable}>From</div>
-                              <input type="text" className={styles.contant} placeholder='Departure' value={leg.from || ''} onChange={(e) => updateMultiLeg(actualIndex, 'from', e.target.value)} />
+                              <input
+                                type="text"
+                                className={styles.contant}
+                                placeholder='Departure'
+                                value={leg.from || ''}
+                                onFocus={() => setActiveSuggestion({ field: 'from', index: actualIndex })}
+                                onClick={() => setActiveSuggestion({ field: 'from', index: actualIndex })}
+                                onChange={(e) => updateMultiLeg(actualIndex, 'from', e.target.value)}
+                              />
+
+                              {activeSuggestion && activeSuggestion.index === actualIndex && activeSuggestion.field === 'from' && (
+                                <SuggestionBox
+                                  boxRef={(el) => multiSuggestionRefs.current[actualIndex] = el}
+                                  heading="RECENT SEARCH"
+                                  suggestions={getFilteredSuggestions(leg.from || '')}
+                                  onSelect={(s) => selectSuggestion(s, 'from', actualIndex)}
+                                />
+                              )}
                             </div>
                             <div className={`${styles.fromBtn} ${styles.travellerClass} ${styles.toInput}`} onClick={handleFieldClick}>
                               <div className={styles.lable}>To</div>
-                              <input type="text" className={styles.contant} placeholder='Destination' value={leg.to || ''} onChange={(e) => updateMultiLeg(actualIndex, 'to', e.target.value)} />
+                              <input
+                                type="text"
+                                className={styles.contant}
+                                placeholder='Destination'
+                                value={leg.to || ''}
+                                onFocus={() => setActiveSuggestion({ field: 'to', index: actualIndex })}
+                                onClick={() => setActiveSuggestion({ field: 'to', index: actualIndex })}
+                                onChange={(e) => updateMultiLeg(actualIndex, 'to', e.target.value)}
+                              />
+
+                              {activeSuggestion && activeSuggestion.index === actualIndex && activeSuggestion.field === 'to' && (
+                                <SuggestionBox
+                                  boxRef={(el) => multiSuggestionRefs.current[actualIndex] = el}
+                                  heading="RECENT SEARCH"
+                                  suggestions={getFilteredSuggestions(leg.to || '')}
+                                  onSelect={(s) => selectSuggestion(s, 'to', actualIndex)}
+                                />
+                              )}
                             </div>
 
                             <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
@@ -569,14 +906,52 @@ const HomePage = () => {
                       <div className={`${styles.lable} ${styles.labelFade}`}>
                         {bookingType === "hotel" ? "WHERE TO" : "From CITY"}
                       </div>
+
                       <input
+                        ref={bookingType === "hotel" ? toInputRef : fromInputRef}
                         type="text"
                         className={`${styles.contant} ${styles.contentFade}`}
-                        placeholder="Departure"
-                        value={bookingType === "hotel" ? (to || "") : (from || "")}
-                        onChange={(e) => bookingType === "hotel" ? setTo(e.target.value) : setFrom(e.target.value)}
+                        placeholder={bookingType === "hotel" ? "Where to" : "From city"}
+                        value={bookingType === "hotel" ? to : from}
+                        onChange={(e) => {
+                          if (bookingType === "hotel") {
+                            setTo(e.target.value);
+                            setToSuggestionsOpen(true);
+                          } else {
+                            setFrom(e.target.value);
+                            setFromSuggestionsOpen(true);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (bookingType === "hotel") {
+                            setToSuggestionsOpen(true);
+                          } else {
+                            setFromSuggestionsOpen(true);
+                          }
+                        }}
                       />
+
+                      {/* ✅ HOTEL → WHERE TO */}
+                      {bookingType === "hotel" && toSuggestionsOpen && (
+                        <SuggestionBox
+                          boxRef={toSuggestionRef}
+                          heading="RECENT SEARCH"
+                          suggestions={getFilteredSuggestions(to)}
+                          onSelect={(s) => selectSuggestion(s, "to")}
+                        />
+                      )}
+
+                      {/* ✅ HOLIDAY → FROM CITY */}
+                      {bookingType === "holiday" && fromSuggestionsOpen && (
+                        <SuggestionBox
+                          boxRef={fromSuggestionRef}
+                          heading="RECENT SEARCH"
+                          suggestions={getFilteredSuggestions(from)}
+                          onSelect={(s) => selectSuggestion(s, "from")}
+                        />
+                      )}
                     </div>
+
                   )}
 
                   {/* Slot 2: Hotel: Check In | Holiday: Departure Date | Insurance: Travel Date */}
@@ -603,18 +978,37 @@ const HomePage = () => {
                   {/* Slot 3: Hotel: Check Out | Holiday: To City | Insurance: Departure Date */}
                   <div className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`} onClick={handleFieldClick}>
                     <div className={`${styles.lable} ${styles.labelFade}`}>
-                      {bookingType === "hotel" ? "Check Out" :
-                        bookingType === "holiday" ? "To CITY/COUNTRY, CATEGORY" :
-                          "Departure Date"}
+                      {bookingType === "hotel"
+                        ? "Check Out"
+                        : bookingType === "holiday"
+                          ? "To CITY/COUNTRY, CATEGORY"
+                          : "Departure Date"}
                     </div>
+
                     {bookingType === "holiday" ? (
-                      <input
-                        type="text"
-                        className={`${styles.contant} ${styles.contentFade}`}
-                        placeholder="Destination"
-                        value={to}
-                        onChange={(e) => setTo(e.target.value)}
-                      />
+                      <>
+                        <input
+                          ref={toInputRef}
+                          type="text"
+                          className={`${styles.contant} ${styles.contentFade}`}
+                          placeholder="Destination"
+                          value={to}
+                          onChange={(e) => {
+                            setTo(e.target.value);
+                            setToSuggestionsOpen(true);
+                          }}
+                          onFocus={() => setToSuggestionsOpen(true)}
+                        />
+
+                        {toSuggestionsOpen && (
+                          <SuggestionBox
+                            boxRef={toSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(to)}
+                            onSelect={(s) => selectSuggestion(s, "to")}
+                          />
+                        )}
+                      </>
                     ) : (
                       <div className={`${styles.dateInputWrapper} ${styles.contentFade}`} onClick={openReturnPicker}>
                         <input
@@ -623,7 +1017,11 @@ const HomePage = () => {
                           className={styles.contant}
                           data-placeholder="ADD DATES"
                           value={bookingType === "hotel" ? checkOut : returnDate}
-                          onChange={(e) => bookingType === "hotel" ? setCheckOut(e.target.value) : setReturenDate(e.target.value)}
+                          onChange={(e) =>
+                            bookingType === "hotel"
+                              ? setCheckOut(e.target.value)
+                              : setReturenDate(e.target.value)
+                          }
                           required
                         />
                         <button type="button" className={styles.calendarIcon} onClick={openReturnPicker}>
@@ -633,15 +1031,49 @@ const HomePage = () => {
                     )}
                   </div>
 
-                  {/* Slot 4: Guests & Rooms */}
-                  <TravellerSelector
-                    travellerClass={bookingType === "hotel" ? hotelGuestRoomCount : bookingType === "holiday" ? guestRoomCount : travellerCount}
-                    setTravellerClass={bookingType === "hotel" ? setHotelGuestRoomCount : bookingType === "holiday" ? setGuestRoomCount : setTravellerCount}
-                    travellerOptions={travellerOptions}
-                    styles={styles}
-                    name={bookingType === "hotel" ? "GUESTS & ROOMS" : bookingType === "holiday" ? "ROOMS & GUESTS" : "TRAVELLERS"}
-                    className={`${styles.pos4}`}
-                  />
+
+                  <div
+                    className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                      }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTravellerOpen((o) => !o);
+                    }}
+                  >
+                    <div className={styles.lable}>
+                      {bookingType === "hotel"
+                        ? "GUESTS & ROOMS"
+                        : bookingType === "holiday"
+                          ? "ROOMS & GUESTS"
+                          : "TRAVELLERS"}
+                    </div>
+                    <div className={styles.iconCont}>
+                      <div className={styles.contant}>
+                        {truncate(
+                          bookingType === "hotel"
+                            ? `${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`
+                            : bookingType === "holiday"
+                              ? `${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}`
+                              : `${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`,
+                          17
+                        )}
+                      </div>
+                      <ChevronDown
+                        className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron
+                          }`}
+                        size={16}
+                        color="#FFFFFF"
+                      />
+                    </div>
+                    <PassengerClassSelector
+                      open={travellerOpen}
+                      setOpen={setTravellerOpen}
+                      passengers={passengers}
+                      setPassengers={setPassengers}
+                      travelClass={travelClass}
+                      setTravelClass={setTravelClass}
+                    />
+                  </div>
 
                   {/* Search Button */}
                   <div className={`${styles.searchBtn} ${styles.pos5}`}>
@@ -737,13 +1169,47 @@ const HomePage = () => {
             />
 
             {/* TRAVELLERS */}
-            <TravellerSelector
+            {/* <TravellerSelector
               travellerClass={travellerClass}
               setTravellerClass={setTravellerClass}
               travellerOptions={travellerOptions}
               styles={styles}
               name="Travellers & Class"
-            />
+            /> */}
+
+            <div
+              className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTravellerOpen((o) => !o);
+              }}
+            >
+              <div className={styles.lable}>Travellers & Class</div>
+              <div className={styles.iconCont}>
+                <div className={styles.contant}>
+                  {truncate(`${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`, 17)}
+                </div>
+
+                <ChevronDown
+                  className={`${styles.chevron} ${travellerOpen
+                    ? styles.openChevron
+                    : styles.closeChevron
+                    }`}
+                  size={20}
+                  color="#000000"
+                />
+              </div>
+
+              <PassengerClassSelector
+                open={travellerOpen}
+                setOpen={setTravellerOpen}
+                passengers={passengers}
+                setPassengers={setPassengers}
+                travelClass={travelClass}
+                setTravelClass={setTravelClass}
+              />
+            </div>
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -790,13 +1256,39 @@ const HomePage = () => {
             />
 
             {/* TRAVELLERS */}
-            <TravellerSelector
-              travellerClass={travellerClass}
-              setTravellerClass={setTravellerClass}
-              travellerOptions={travellerOptions}
-              styles={styles}
-              name="One adult | one room"
-            />
+            <div
+              className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTravellerOpen((o) => !o);
+              }}
+            >
+              <div className={styles.lable}>ROOMS & GUESTS</div>
+              <div className={styles.iconCont}>
+                <div className={styles.contant}>
+                  {truncate(`${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`, 17)}
+                </div>
+
+                <ChevronDown
+                  className={`${styles.chevron} ${travellerOpen
+                    ? styles.openChevron
+                    : styles.closeChevron
+                    }`}
+                  size={20}
+                  color="#000000"
+                />
+              </div>
+
+              <PassengerClassSelector
+                open={travellerOpen}
+                setOpen={setTravellerOpen}
+                passengers={passengers}
+                setPassengers={setPassengers}
+                travelClass={travelClass}
+                setTravelClass={setTravelClass}
+              />
+            </div>
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -848,14 +1340,48 @@ const HomePage = () => {
               onChange={(e) => setDepartureDate(e.target.value)}
             />
 
-            <TravellerSelector
+            {/* <TravellerSelector
               travellerClass={guestRoomCount}
               setTravellerClass={setGuestRoomCount}
               travellerOptions={travellerOptions}
               styles={styles}
               name="ROOMS & GUESTS"
               enableEllipsis={false}
-            />
+            /> */}
+
+            <div
+              className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTravellerOpen((o) => !o);
+              }}
+            >
+              <div className={styles.lable}>ROOMS & GUESTS</div>
+              <div className={styles.iconCont}>
+                <div className={styles.contant}>
+                  {truncate(`${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}`, 17)}
+                </div>
+
+                <ChevronDown
+                  className={`${styles.chevron} ${travellerOpen
+                    ? styles.openChevron
+                    : styles.closeChevron
+                    }`}
+                  size={20}
+                  color="#000000"
+                />
+              </div>
+
+              <PassengerClassSelector
+                open={travellerOpen}
+                setOpen={setTravellerOpen}
+                passengers={passengers}
+                setPassengers={setPassengers}
+                travelClass={travelClass}
+                setTravelClass={setTravelClass}
+              />
+            </div>
 
             {/* SEARCH */}
             <button className={styles.searchBtna}>
@@ -911,13 +1437,39 @@ const HomePage = () => {
             />
 
             {/* TRAVELLERS */}
-            <TravellerSelector
-              travellerClass={travellerCount}
-              setTravellerClass={setTravellerCount}
-              travellerOptions={travellerOptions}
-              styles={styles}
-              name="TRAVELLERS"
-            />
+            <div
+              className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTravellerOpen((o) => !o);
+              }}
+            >
+              <div className={styles.lable}>TRAVELLERS</div>
+              <div className={styles.iconCont}>
+                <div className={styles.contant}>
+                  {truncate(`${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`, 17)}
+                </div>
+
+                <ChevronDown
+                  className={`${styles.chevron} ${travellerOpen
+                    ? styles.openChevron
+                    : styles.closeChevron
+                    }`}
+                  size={20}
+                  color="#000000"
+                />
+              </div>
+
+              <PassengerClassSelector
+                open={travellerOpen}
+                setOpen={setTravellerOpen}
+                passengers={passengers}
+                setPassengers={setPassengers}
+                travelClass={travelClass}
+                setTravelClass={setTravelClass}
+              />
+            </div>
 
 
 
@@ -929,9 +1481,6 @@ const HomePage = () => {
           </div>
         </div>
       )}
-
-
-
     </section>
   )
 }
