@@ -238,13 +238,15 @@
   color: rgba(0, 0, 0, 0.6);
 }
 
-.TravelPreferencesCenter {
+.TravelPreferencesCenter,
+.section {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .TravelPreferencesSubHeading {
+  font-family: var(--font-inter);
   font-weight: 500;
   font-style: Medium;
   font-size: 13px;
@@ -258,6 +260,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  cursor: pointer;
 }
 
 .calenderTab {
@@ -269,7 +272,14 @@
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  transition: all 0.45s ease;
 
+}
+
+.calenderTabActive,
+.activeCategory {
+  border: 1.5px solid #000033;
+  background-color: #F0F3FF;
 }
 
 .calenderTab img {
@@ -336,7 +346,7 @@
 }
 
 .TravelPreferencesNextButton {
-  max-width:210px;
+  max-width: 210px;
   width: 100%;
   padding: 12px 24px;
   background-color: #000033;
@@ -351,7 +361,8 @@
   transition: all 0.45s ease;
 
 }
-.TravelPreferencesNextButton:hover{
+
+.TravelPreferencesNextButton:hover {
   background-color: #FCC800;
   color: #000033;
 }
@@ -372,41 +383,38 @@
 
 .customSub {
   font-size: 14px;
-  color: rgba(0,0,0,0.6);
+  color: rgba(0, 0, 0, 0.6);
   margin-bottom: 8px;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sectionTitle {
-  font-size: 13px;
-  text-transform: uppercase;
-  color: #000; 
-  font-weight: 600;
-}
 
 .hotelCategory {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 23px;
 }
 
 .categoryOption {
-  border: 1px solid rgba(0,0,0,0.08);
-  padding: 18px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 13.2px 16px;
   background: #fff;
   cursor: pointer;
   text-align: center;
-  font-weight: 400;
+
+
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  transition: all 0.45s ease;
+
 }
 
 .activeCategory {
-  border-color: #000033;
-  background: #f6f6f8;
+  border: 1.5px solid #000033;
+  background-color: #F0F3FF;
 }
 
 .addons {
@@ -416,17 +424,23 @@
 }
 
 .addonPill {
-  padding: 10px 16px;
+  padding: 8px 16px;
   background: #f3f4f6;
   border-radius: 24px;
   border: none;
   cursor: pointer;
+
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #000000;
+  transition: all 0.45s ease;
+
 }
 
-.addonActive {
-  background: #000033;
-  color: #fff;
-}
+
 
 .rangeRow {
   display: flex;
@@ -434,50 +448,109 @@
   gap: 8px;
 }
 
-.rangeWrap {
-  position: relative;
-  height: 12px;
-}
-
-.rangeWrap input[type='range'] {
-  -webkit-appearance: none;
-  appearance: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+.rangeContainer {
   width: 100%;
-  background: transparent;
+  --left: 25%;
+  --right: 20%;
+  margin-top: 12px;
+  position: relative;
 }
 
-.rangeWrap input[type='range']::-webkit-slider-runnable-track {
-  height: 6px;
-  background: linear-gradient(90deg,#000033 0%, #000033 50%, #e6e6e6 50%);
-  border-radius: 6px;
+.sliderTrack {
+  position: relative;
+  height: 4px;
+  background: #e6e6e6;
+  border-radius: 10px;
 }
 
-.rangeWrap input[type='range']::-webkit-slider-thumb {
+.sliderRange {
+  position: absolute;
+  left: var(--left);
+  right: var(--right);
+  height: 100%;
+  background: #000033;
+  border-radius: 10px;
+}
+
+.rangeInput {
+  position: absolute;
+  width: 100%;
+  height: 26px;
+  top: -12px;
+  background: none;
+  pointer-events: none;
+  appearance: none;
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  border: 4px solid #000033;
-  margin-top: -7px;
 }
 
-.rangeLabels {
+/* WebKit (Chrome, Safari, Edge) */
+.rangeInput::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  background: #0b0f3f;
+  /* inner dot color */
+  border: 9px solid #ffffff;
+  /* creates white ring */
+
+  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+
+  cursor: pointer;
+}
+
+/* Firefox */
+.rangeInput::-moz-range-thumb {
+  pointer-events: auto;
+
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  background: #0b0f3f;
+  border: 6px solid #ffffff;
+
+  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+
+  cursor: pointer;
+}
+
+.rangeValues {
   display: flex;
   justify-content: space-between;
+  margin-top: 12px;
   font-size: 14px;
+  color: #000;
 }
+
+.rangeValueLeft,
+.rangeValueRight {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  color: #000000;
+  margin-top: 11px;
+}
+
 
 .notes {
   min-height: 84px;
   border: 1px solid #E4E6E8;
   padding: 12px;
   resize: vertical;
+
+
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0px;
+
 }
 
 /* adjust popup buttons area if needed */
@@ -486,4 +559,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.addonActive {
+  background-color: #000033;
+  color: #FFFFFF;
 }

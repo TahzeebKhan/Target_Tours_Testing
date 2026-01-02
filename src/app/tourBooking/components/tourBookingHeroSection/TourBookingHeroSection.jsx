@@ -7,7 +7,9 @@ const TourBookingHeroSection = () => {
     <section className={styles.tourBookingSection}>
       <div className={styles.overlay}></div>
       <div className={styles.contianerWrapper}>
-        <Navbar />
+        <div className={styles.navbarContainer}>
+          <Navbar />
+        </div>
         <div className={styles.heroContainer}>
           <div className={styles.container}>
             <div className={styles.leftContainer}>
