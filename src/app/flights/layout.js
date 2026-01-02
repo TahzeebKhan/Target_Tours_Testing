@@ -1,3 +1,136 @@
+// "use client";
+// import Navbar from "./Navbar";
+// import styles from "./FlightsLayout.module.css";
+// import DatePriceSlider from "./components/DatePriceSlider";
+// import FlightFilters from "./components/FlightsFilters";
+// import TopFilterSection from "./components/TopFilterSection";
+// import { useEffect, useRef, useState } from "react";
+// import { TripTypeProvider, useTripType } from "./TripTypeContext";
+// import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
+
+// function LayoutContent({ children }) {
+//   const { tripType } = useTripType();
+//   const containerRef = useRef(null);
+
+//   const sidebarRef = useRef(null);
+//   const navbarRef = useRef(null);
+
+//   const [isScrolled, setIsScrolled] = useState(false);
+//   const [stickyTop, setStickyTop] = useState(0);
+
+//   // const [scrolled, setScrolled] = useState(false);
+
+//   // useEffect(() => {
+//   //   const onScroll = () => {
+//   //     setScrolled(window.scrollY > 40); // 🔥 threshold
+//   //   };
+//   //   window.addEventListener("scroll", onScroll);
+//   //   return () => window.removeEventListener("scroll", onScroll);
+//   // }, []);
+
+//   // Scroll detection for gap reduction
+//   // useEffect(() => {
+//   //   const handleScroll = () => {
+//   //     setIsScrolled(window.scrollY >= 100);
+//   //   };
+
+//   //   window.addEventListener("scroll", handleScroll);
+//   //   handleScroll();
+
+//   //   return () => window.removeEventListener("scroll", handleScroll);
+//   // }, []);
+
+//   useEffect(() => {
+//   let ticking = false;
+
+//   const updateOffsets = () => {
+//     if (!ticking) {
+//       window.requestAnimationFrame(() => {
+//         const scrolled = window.scrollY > 100;
+//         setIsScrolled(scrolled);
+
+//         const navRect = navbarRef.current?.getBoundingClientRect();
+//         // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
+//         const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
+//         setStickyTop(scrolled ? topOffset : 0);
+
+//         ticking = false;
+//       });
+//       ticking = true;
+//     }
+//   };
+
+//   window.addEventListener("scroll", updateOffsets, { passive: true });
+//   window.addEventListener("resize", updateOffsets);
+//   updateOffsets();
+
+//   return () => {
+//     window.removeEventListener("scroll", updateOffsets);
+//     window.removeEventListener("resize", updateOffsets);
+//   };
+// }, []);
+
+
+
+//   return (
+//     <>
+//       {" "}
+//       {/* Top Navbar */}
+//       <div className={styles.wrapper}>
+//         <div ref={navbarRef}>
+//           <Navbar />
+//         </div>
+//         <div
+//           className={`${styles.imageBackgound} ${isScrolled ? styles.sticky : ""}`}
+//           style={isScrolled ? { top: `${stickyTop}px` } : undefined}
+//         >
+//           <TopFilterSection isScrolled={isScrolled} />
+//         </div>
+//         {isScrolled && (
+//           <div
+//             className={styles.imageSpacer}
+//             aria-hidden="true"
+//             style={{ height: "147px" }}
+//           />
+//         )}
+//         {/* <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
+//           <TopFilterResponsiveSec />
+//         </div> */}
+//       </div>
+//       {/* Page Wrapper */}
+//       <main className={styles.page}>
+//         <div
+//           ref={containerRef}
+//           className={`${styles.container} ${tripType === "round" ? styles.wideContainer : styles.normalContainer
+//             }`}
+//         >
+//           {/* top date slider */}
+//           {/* <div className={styles.dateSlider}>
+            
+//           </div> */}
+//           {/* Sidebar */}
+//           <aside className={styles.sidebar}>
+//             <div className={styles.sidebarSticky} ref={sidebarRef}>
+//               <FlightFilters />
+//             </div>
+//           </aside>
+
+//           {/* Main content */}
+//           <section className={styles.content}>{children}</section>
+//         </div>
+//       </main>
+//     </>
+//   );
+// }
+
+// export default function FlightsLayout({ children }) {
+//   return (
+//     <TripTypeProvider>
+//       <LayoutContent>{children}</LayoutContent>
+//     </TripTypeProvider>
+//   );
+// }
+
 "use client";
 import Navbar from "./Navbar";
 import styles from "./FlightsLayout.module.css";
@@ -13,8 +146,11 @@ function LayoutContent({ children }) {
   const containerRef = useRef(null);
 
   const sidebarRef = useRef(null);
+  const navbarRef = useRef(null);
+  const heroRef = useRef(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [stickyTop, setStickyTop] = useState(0);
 
   // const [scrolled, setScrolled] = useState(false);
 
@@ -41,20 +177,67 @@ function LayoutContent({ children }) {
   useEffect(() => {
   let ticking = false;
 
-  const handleScroll = () => {
+  const updateOffsets = () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 100);
+        const scrolled = window.scrollY > 100;
+        setIsScrolled(scrolled);
+
+        const navRect = navbarRef.current?.getBoundingClientRect();
+        // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
+        const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
+        setStickyTop(scrolled ? topOffset : 0);
+
         ticking = false;
       });
       ticking = true;
     }
   };
 
-  window.addEventListener("scroll", handleScroll, { passive: true });
-  handleScroll();
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
-  return () => window.removeEventListener("scroll", handleScroll);
+  window.addEventListener("scroll", updateOffsets, { passive: true });
+  window.addEventListener("resize", updateOffsets);
+
+  // smooth shrink calculation: 0 -> not shrunk, 1 -> fully shrunk
+  const setShrink = () => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const maxH = 290; // match CSS default
+    const minH = 147; // desired compact height
+    const threshold = 220; // px over which shrink happens
+    const progress = clamp(window.scrollY / threshold, 0, 1);
+    // write as unitless 0..1
+    hero.style.setProperty("--shrink", String(progress));
+
+    // if using spacer keep it in sync (only if spacer present)
+    // const spacer = document.querySelector(`.${styles.imageSpacer}`);
+    // if (spacer) spacer.style.height = `calc(${maxH}px - (${maxH} - ${minH}) * ${progress})`;
+  };
+
+  // attach RAF-wrapped shrink updater
+  let shrinkTicking = false;
+  const rafShrink = () => {
+    if (!shrinkTicking) {
+      window.requestAnimationFrame(() => {
+        setShrink();
+        shrinkTicking = false;
+      });
+      shrinkTicking = true;
+    }
+  };
+
+  window.addEventListener("scroll", rafShrink, { passive: true });
+  window.addEventListener("resize", rafShrink);
+  // initial set
+  setShrink();
+
+  return () => {
+    window.removeEventListener("scroll", updateOffsets);
+    window.removeEventListener("resize", updateOffsets);
+    window.removeEventListener("scroll", rafShrink);
+    window.removeEventListener("resize", rafShrink);
+  };
 }, []);
 
 
@@ -64,13 +247,25 @@ function LayoutContent({ children }) {
       {" "}
       {/* Top Navbar */}
       <div className={styles.wrapper}>
-        <Navbar />
-        <div className={`${styles.imageBackgound} ${isScrolled ? styles.hidden : ""}`}>
-          <TopFilterSection />
+        <div ref={navbarRef}>
+          <Navbar />
         </div>
-        <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
+        <div
+          ref={heroRef}
+          className={`${styles.imageBackgound} ${isScrolled ? styles.sticky : ""}`}
+          style={isScrolled ? { top: `${stickyTop}px` } : undefined}
+        >
+          <TopFilterSection isScrolled={isScrolled} />
+        </div>
+        {isScrolled && (
+          <div
+            className={styles.imageSpacer}
+            aria-hidden="true"
+          />
+        )}
+        {/* <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
           <TopFilterResponsiveSec />
-        </div>
+        </div> */}
       </div>
       {/* Page Wrapper */}
       <main className={styles.page}>

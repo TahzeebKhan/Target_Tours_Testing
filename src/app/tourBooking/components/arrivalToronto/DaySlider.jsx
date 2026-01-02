@@ -9,16 +9,16 @@ export default function DaySlider() {
     const listRef = useRef(null);
 
     // scroll active item into center
-    useEffect(() => {
-        const activeEl = listRef.current?.querySelector(
-            `[data-day="${activeDay}"]`
-        );
-        activeEl?.scrollIntoView({
-            behavior: "smooth",
-            inline: "center",
-            block: "nearest",
-        });
-    }, [activeDay]);
+    // useEffect(() => {
+    //     const activeEl = listRef.current?.querySelector(
+    //         `[data-day="${activeDay}"]`
+    //     );
+    //     activeEl?.scrollIntoView({
+    //         behavior: "smooth",
+    //         inline: "center",
+    //         block: "nearest",
+    //     });
+    // }, [activeDay]);
 
     const handlePrev = () => {
         setActiveDay((d) => Math.max(1, d - 1));

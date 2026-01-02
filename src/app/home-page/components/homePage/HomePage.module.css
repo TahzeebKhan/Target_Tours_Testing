@@ -1357,12 +1357,13 @@
     gap: 8px;
   }
 }
-
-@media (max-width: 400px) {
+@media (max-width: 431px) {
   .featureRow {
     gap: 0;
   }
+}
 
+@media (max-width: 400px) {
   .featurelabel {
     white-space: wrap;
   }

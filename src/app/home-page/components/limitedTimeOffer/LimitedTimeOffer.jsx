@@ -102,9 +102,8 @@ const LimitedTimeOffer = () => {
               {/* BUTTONS */}
               <div className={styles.btnContainer}>
                 <div
-                  className={`${styles.btn} ${
-                    isBeginning ? styles.disabledBtn : ""
-                  }`}
+                  className={`${styles.btn} ${isBeginning ? styles.disabledBtn : ""
+                    }`}
                   onClick={() => swiperRef.current?.slidePrev()}
                 >
                   <svg
@@ -145,11 +144,23 @@ const LimitedTimeOffer = () => {
               </div>
 
               {/* SWIPER */}
-              <div className={`${styles.swapper} limitedWrapper`}>
+              <div className={`${styles.swapper}`}>
                 <Swiper
-                    slidesPerView="auto"
-                  spaceBetween={20}
                   modules={[Navigation]}
+                  slidesPerView={'auto'}
+                  breakpoints={{
+                    0: {
+                      spaceBetween: 12, // mobile
+                    },
+                    640: {
+                      spaceBetween: 16, // optional: small tablets
+                    },
+                    1024: {
+                      spaceBetween: 32, // desktop
+                    },
+                  }}
+                  className={styles.carousel}
+
                   onSwiper={(swiper) => {
                     swiperRef.current = swiper;
                     setIsBeginning(swiper.isBeginning);
@@ -159,7 +170,7 @@ const LimitedTimeOffer = () => {
                     setIsBeginning(swiper.isBeginning);
                     setIsEnd(swiper.isEnd);
                   }}
-                  
+
                 >
                   {/* <Swiper
                                     spaceBetween={20}

@@ -29,7 +29,7 @@ const passengerTypes = [
   "MEDICAL PROFESSIONAL",
 ];
 
-const TopFilterSection = () => {
+const TopFilterSection = ({ isScrolled: parentScrolled = false }) => {
   const calendarRef = useRef(null);
 
   const {
@@ -50,7 +50,7 @@ const TopFilterSection = () => {
     handleSearch,
   } = useTripType();
   const [directOnly, setDirectOnly] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const isScrolled = parentScrolled || false;
   const [showCalendar, setShowCalendar] = useState(false);
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);
 
@@ -73,18 +73,6 @@ const TopFilterSection = () => {
   const travellerRef = useRef(null);
 
   const [calendarTripType, setCalendarTripType] = useState("oneway");
-
-  // Scroll detection for gap reduction
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY >= 100);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleDateClick = (date) => {
     if (tripType === "multi" && activeMultiIndex !== null) {
@@ -253,8 +241,7 @@ const TopFilterSection = () => {
   return (
     <>
       <div
-        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""
-          } sticky top-0 flex flex-col gap-[127px] items-center`}
+        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""} ${isScrolled ? styles.scrolledMargin : ""} sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
           className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
@@ -263,7 +250,7 @@ const TopFilterSection = () => {
             }`}
         >
           {bookingType === "flight" && (
-            <div className={`${styles.serarchingCont} ${styles.glass_panel} `}>
+              <div className={`${styles.serarchingCont} ${styles.glass_panel} ${isScrolled ? styles.scrolledGap : ""}`}>
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
                   <label

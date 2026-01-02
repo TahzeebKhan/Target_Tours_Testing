@@ -1,0 +1,166 @@
+.stepperWrapper {
+  width: 100%;
+  /* max-width: 1280px; */
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 32px 32px;
+  /* padding-top: calc(24px + 23px); */
+  /* position: sticky; */
+  /* top: 73px; */
+  z-index: 20;
+  background-color: #F9FAFB;
+  /* border-bottom: 1px solid #e4e6e8; */
+}
+
+.stepperContainer {
+  display: flex;
+  max-width: calc(1280px + 213px);
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin: 0px auto;
+  width: 100%;
+  position: relative;
+  z-index: 2000;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  position: relative;
+  flex: 1;
+}
+
+/* Connecting Lines using Pseudo-elements */
+.stepItem::before,
+.stepItem::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  /* Half of circle height */
+  height: 2px;
+  background-color: #e5e7eb;
+  /* Default light gray */
+  width: 50%;
+  z-index: -1;
+  transition: background-color 0.3s ease;
+}
+
+.stepItem::before {
+  left: 0;
+}
+
+.stepItem::after {
+  right: 0;
+}
+
+/* Hide first step's before and last step's after lines */
+.stepItem:first-child::before {
+  display: none;
+}
+
+.stepItem:last-child::after {
+  display: none;
+}
+
+/* Active/Completed Line Colors */
+.stepCompleted::before,
+.stepCompleted::after,
+.stepActive::before {
+  background-color: #000033;
+  /* Dark blue */
+}
+
+.circleWrapper {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default !important;
+}
+
+/* Outer yellow ring for completed/active steps */
+.outerRingYellow {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  z-index: 20;
+  background: #fcc800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.outerGrayRing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  z-index: 20;
+  background-color: #e5e7eb;
+}
+.stepCircle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  /* Default gray for pending */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  z-index: 20;
+  font-weight: 400;
+  color: #959595;
+  transition: all 0.3s ease;
+}
+
+.stepCompleted .stepCircle,
+.stepActive .stepCircle {
+  background-color: #000033;
+  /* Dark blue */
+  color: #ffffff;
+  transition: all 1s ease;
+  cursor: default !important;
+}
+
+.stepCompleted .stepCircle:hover,
+.stepActive .stepCircle:hover {
+  transform: scale(1.25);
+}
+
+.stepLabel {
+  font-family: var(--font-inter);
+  font-weight: 300 !important;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  text-align: center;
+  text-transform: uppercase;
+  color: #101828 !important;
+}
+
+.stepActive .stepLabel,
+.stepCompleted .stepLabel {
+  color: #374151;
+  font-weight: 500;
+}
+
+.checkmark {
+  width: 14px;
+  height: 10px;
+  stroke: #ffffff;
+  strokewidth: 2.5;
+  strokelinecap: round;
+  strokelinejoin: round;
+}

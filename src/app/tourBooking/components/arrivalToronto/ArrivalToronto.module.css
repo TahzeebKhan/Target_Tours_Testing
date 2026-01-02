@@ -1,9 +1,115 @@
 .section {
+    max-width: 1920px;
     padding-top: 60px;
     background-color: #F9F9F9;
     display: flex;
     flex-direction: column;
     gap: 32px;
+    margin: 0 auto;
+}
+
+/* RIGHT SIDE */
+.rightContainer {
+    width: 50%;
+    height: 845px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* FULL BACKGROUND IMAGE */
+.dayImageContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.bgImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* FLOATING IMAGE */
+.dayImageCarousel {
+    position: absolute;
+    width: 192px;
+    height: 256px;
+    bottom: 58px;
+    right: 41px;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.carouselImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+/* DARK GRADIENT */
+.dayImageCarousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 1) 100%);
+    z-index: 1;
+}
+
+/* TEXT OVER IMAGE */
+.DayImageTextCont {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.textCont {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.textCont h4 {
+    font-family: Antic Didone;
+    font-size: 18px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+/* NEXT BUTTON */
+.leftRightBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0.8px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.leftRightBtn img {
+    width: 11px;
+    height: 11px;
+    filter: brightness(0) invert(1);
 }
 
 
@@ -126,6 +232,8 @@
 
 .container {
     display: flex;
+    /* height: 845px; */
+
 }
 
 .leftContainer {
@@ -202,7 +310,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 41px;
+    height: 33px;
     border-bottom: 1px solid #E4E6E8;
     cursor: pointer;
 }
@@ -352,7 +460,101 @@
 
 .rightContainer {
     width: 50%;
+    max-height: 845px;
+    position: relative;
+}
 
+.rightContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dayImageCarousel {
+    position: absolute;
+    width: 192px;
+    height: 256px;
+    bottom: 58px;
+    right: 41px;
+    overflow: hidden;
+    /* 🔥 IMPORTANT */
+}
+
+.DayImageTextCont {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px;
+    z-index: 19;
+}
+
+.dayImageContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.textCont {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.textCont h4 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    white-space: wrap;
+
+}
+
+
+.dayImageCarousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 0;
+}
+
+.dayImageCarousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 1) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.leftRightBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border: 0.8px solid #FFFFFF;
+
+}
+
+.leftRightBtn img {
+    width: 11px;
+    height: 11px;
+    filter: brightness(0) invert(1);
 }
 
 .br {
@@ -629,6 +831,145 @@
 
 .cardTextContainer2 {
     gap: 9px !important;
+}
+
+
+
+
+
+.inclusionWrapper {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+.inclusionHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000033;
+
+    padding-bottom: 13px;
+    border-bottom: 1px solid #E4E6E8;
+}
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+}
+
+.inclusionSubHeading {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.inclusionList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* padding: 9.9px 5px; */
+}
+
+.inclusionItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inclusionText {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+}
+
+.tourPolicyWrapper {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 29px;
+}
+
+.tourBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.tourPolicyPara p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
+}
+
+.list {
+    padding-left: 16px;
+    list-style-type: disc;
+}
+
+.list li strong {
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+}
+
+.list li {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
+}
+
+.tourPolicyList p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
 }
 
 /* ================= RESPONSIVE ================= */
