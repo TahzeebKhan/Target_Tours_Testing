@@ -115,7 +115,10 @@
 
 .imageBackgound {
   width: 100%;
-  min-height: 290px;
+  --max-h: 290px;
+  --min-h: 147px;
+  --shrink: 0; /* 0..1 */
+  min-height: calc(var(--max-h) - ( (var(--max-h) - var(--min-h)) * var(--shrink) ));
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
     url("/images/flightsPageBgImg.webp");
 
@@ -125,12 +128,18 @@
   display: flex;
   align-items: end;
   position: relative;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  will-change: opacity, transform;
+  transition: min-height 220ms linear, opacity 0.4s ease, transform 0.4s ease;
+  will-change: min-height, opacity, transform;
 }
 
 .imageBackgound.hidden {
   display: none !important;
+}
+
+.imageBackgound.sticky {
+  min-height: 147px;
+  transition: min-height 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
 }
 
 .imageBackgoundRes {
@@ -177,6 +186,22 @@
   width: 100%;
   z-index: 1000;
   animation: fadeInDown 0.4s ease forwards;
+}
+
+/* Sticky state for hero section when scrolled */
+.sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 900;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Spacer to prevent content jump when hero becomes fixed */
+.imageSpacer {
+  height: 248px; /* match .imageBackgound min-height */
+  width: 100%;
 }
 
 @keyframes fadeInDown {

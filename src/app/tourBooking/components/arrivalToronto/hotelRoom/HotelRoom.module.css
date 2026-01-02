@@ -1,95 +1,96 @@
 .section {
-    display: flex;
-    gap: 24px;
-    border: 1px solid #E4E6E8
+  display: flex;
+  gap: 24px;
+  border: 1px solid #E4E6E8
 }
 
 .leftSection {
-    max-width: 244px;
-    width: 100%;
+  max-width: 244px;
+  width: 100%;
 
 }
-.rating{
-    display: flex;
-    gap: 4px;
-    align-items: center;
+
+.rating {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
 
 .leftSection img {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .rightSection {
-    padding: 16px 24px 16px 0px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  padding: 16px 24px 16px 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .rightTop {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 
 }
 
 .heading {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 20px;
-    line-height: 1.19;
-    vertical-align: middle;
-    text-transform: capitalize;
-    color: #000000;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.19;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
 }
 
 .downtown {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 18px;
-    vertical-align: middle;
-    color: #808080;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  vertical-align: middle;
+  color: #808080;
 
 }
 
 .schaduleTime {
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .schaduleTime span {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0px;
-    color: #000000;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #000000;
 
 }
 
 .rightMiddle p {
-    font-weight: 300;
-    font-size: 13px;
-    line-height: 1.60;
-    letter-spacing: 0px;
-    color: #000000;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.60;
+  letter-spacing: 0px;
+  color: #000000;
 
 }
 
 .viewHotel {
-    width: 100%;
-    padding: 10px 24px;
-    border: 0.5px solid #000033;
-    font-weight: 300;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    text-transform: uppercase;
-    color: #000033;
-    cursor: pointer;
+  width: 100%;
+  padding: 10px 24px;
+  border: 0.5px solid #000033;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
 }
 
 
@@ -111,7 +112,7 @@
 .popupCard {
   background: #ffffff;
   width: 100%;
-  max-width: 1500px;
+  max-width: 1074px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -140,20 +141,70 @@
 
 /* === CONTENT === */
 .popupContent {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: start;
   padding: 32px;
-  gap: 80px;
+  gap: 24px;
   background-color: #F9FAFB;
 }
-.item{
+
+.item {
   padding: 16px 24px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  border: 1px solid transparent;
+  border-bottom: none;
+  /* normal border */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
 }
+
+
+.itemDescription {
+  padding: 0 24px 16px 24px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  border-top: none;
+  /* normal border */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+
+
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.60;
+  letter-spacing: 0px;
+  color: #434343;
+
+}
+
+.activeItem {
+  border-color: #E4E6E8;
+  /* 🔥 active border */
+}
+
+.activeItemDex {
+  border-color: #E4E6E8;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
+
+}
+
 .popupLeft {
   max-width: 476px;
   width: 100%;
@@ -167,10 +218,34 @@
 }
 
 .popupRight {
+
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.confirmBtn {
+  width: 226px;
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+
+  padding: 12px 24px;
+  background-color: #000033;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.21;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  transition: all 0.45s ease;
+  cursor: pointer;
+}
+
+.confirmBtn:hover {
+  background-color: #FCC800;
+  color: #000033;
 }
 
 .popupRight h2 {
@@ -213,4 +288,11 @@
   inset: 2px;
   background: #000033;
   border-radius: 50%;
+}
+
+.itemContent {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

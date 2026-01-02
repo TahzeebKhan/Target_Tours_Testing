@@ -10,21 +10,26 @@ import FeatureSection from '../home-page/components/featureSection/FeatureSectio
 import TourBookingHeroSection from './components/tourBookingHeroSection/TourBookingHeroSection'
 import UpcomingDepartures from './components/upcomingDepartures/UpcomingDepartures'
 import ArrivalToronto from './components/arrivalToronto/ArrivalToronto'
+import PriceBar from './components/priceBar/PriceBar'
+import styles from './page.module.css'
 
 const page = () => {
   return (
     <div>
-      <TourBookingHeroSection/>
-      <BetweenMajesticPeaks/>
-      <UpcomingDepartures/>
-      <TripHighlights/>
-      <ArrivalToronto/>
-      <InfoStrip/>
-      <WhereWillYouStay/>
-      <Testimonial/>
-      <TravelInspiration/>
-      <FeatureSection/>
-      <Footer/>
+      <TourBookingHeroSection />
+      <BetweenMajesticPeaks />
+      <UpcomingDepartures />
+      <TripHighlights />
+      <div className={styles.priceBarContainer}>
+        <PriceBar />
+      </div>
+      <ArrivalToronto />
+      <InfoStrip />
+      <WhereWillYouStay />
+      <Testimonial />
+      <TravelInspiration />
+      <FeatureSection />
+      <Footer />
     </div>
   )
 }

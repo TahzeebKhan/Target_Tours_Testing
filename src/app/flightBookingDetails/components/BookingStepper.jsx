@@ -12,7 +12,7 @@ const steps = [
     { id: 3, label: "Baggage" },
     { id: 4, label: "Meal" },
     { id: 5, label: "Seating" },
-    { id: 6, label: "Overview & Payment" },
+    { id: 6, label: "Overview & Payment" }, 
 ];
 
 export default function BookingStepper() {

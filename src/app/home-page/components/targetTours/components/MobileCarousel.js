@@ -3,9 +3,12 @@ import React, { useState } from "react";
 import styles from "./MobileCarousel.module.css";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 
-const MobileCarousel = ({ cards = [],activeTab }) => {
+const MobileCarousel = ({ cards = [], activeTab }) => {
+  const [swiperRef, setSwiperRef] = useState(null)
   const [startIndex, setStartIndex] = useState(0);
 
   if (!cards.length) return null;
@@ -25,6 +28,18 @@ const MobileCarousel = ({ cards = [],activeTab }) => {
     setStartIndex((prev) => (prev - 1 + cards.length) % cards.length);
   };
 
+  const handleSlideChange = (swiper) => {
+    setActiveIndex(swiper.activeIndex)
+  }
+
+   const handlePrev = () => {
+        swiperRef?.slidePrev()
+    }
+
+    const handleNext = () => {
+        swiperRef?.slideNext()
+    }
+
   return (
     <div className={styles.wrapper}>
       <AnimatePresence mode="wait">
@@ -41,38 +56,68 @@ const MobileCarousel = ({ cards = [],activeTab }) => {
           {" "}
           <div className={styles.viewport}>
             <div className={styles.slider}>
-              {visibleCards.map((card, idx) => (
-                <div
-                  key={card.id}
-                  className={`${styles.card} ${
-                    idx === 1 ? styles.active : styles.side
-                  }`}
-                >
-                  <div className={styles.imageWrap}>
-                    <Image src={card.img} alt={card.title} fill />
-                  </div>
+              <Swiper
+                modules={[Navigation]}
+                onSwiper={setSwiperRef}
+                onSlideChange={handleSlideChange}
+                 slidesPerView={1.1} // ✅ peek effect
+                spaceBetween={12}
+                className={styles.carousel}
+                centeredSlides={true} // ✅ center main card
+                breakpoints={{
+                0: {
+                  slidesPerView: 1.1,
+                  centeredSlides: true,
+                  spaceBetween: 12,
+                },
+                576: {
+                  slidesPerView: 2,
+                  centeredSlides: false,
+                  spaceBetween: 20,
+                },
 
-                  <div className={styles.content}>
-                    <span className={styles.badge}>{card.badge}</span>
-                    <h3 className={styles.title}>{card.title}</h3>
-                    <p className={styles.cities}>{card.cities}</p>
-                    <p className={styles.price}>
-                      {card.price}
-                      <span>/Adult</span>
-                    </p>
-                  </div>
-                </div>
-              ))}
+                768: {
+                  slidesPerView: 3,
+                  centeredSlides: false,
+                  spaceBetween: 30,
+                },
+
+              }}
+              >
+                {visibleCards.map((card, idx) => (
+                  <SwiperSlide key={idx.id} className={styles.sliderSlide}>
+                    <div
+                      key={card.id}
+                      className={`${styles.card} ${idx === 1 ? styles.active : styles.side
+                        }`}
+                    >
+                      <div className={styles.imageWrap}>
+                        <Image src={card.img} alt={card.title} fill />
+                      </div>
+
+                      <div className={styles.content}>
+                        <span className={styles.badge}>{card.badge}</span>
+                        <h3 className={styles.title}>{card.title}</h3>
+                        <p className={styles.cities}>{card.cities}</p>
+                        <p className={styles.price}>
+                          {card.price}
+                          <span>/Adult</span>
+                        </p>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
       <div className={styles.controls}>
-        <button onClick={prev}>
+        <button onClick={handlePrev}>
           <ArrowLeft size={14} />
         </button>
-        <button onClick={next}>
+        <button onClick={handleNext}>
           <ArrowRight size={14} />
         </button>
       </div>
