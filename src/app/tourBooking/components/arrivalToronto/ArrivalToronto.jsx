@@ -8,6 +8,7 @@ import { Navigation } from 'swiper/modules';
 import HotelRoom from './hotelRoom/HotelRoom';
 import { motion, AnimatePresence } from "framer-motion";
 import HotelPopup from './hotelRoom/HotelPopup';
+import YourActivityPop from './YourActivityPop';
 
 
 
@@ -18,10 +19,11 @@ const ArrivalToronto = () => {
     const [activeIndex, setActiveIndex] = useState(0)
     const [openAccordion, setOpenAccordion] = useState(null);
     const [isHotelPopupOpen, setIsHotelPopupOpen] = useState(false);
+    const [isYourActivityPopupOpen, setIsYourActivityPopupOpen] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-   
+
 
 
 
@@ -34,6 +36,16 @@ const ArrivalToronto = () => {
         setIsHotelPopupOpen(false);
         setSelectedHotel(null);
     };
+    const closeYourActivityPopup = () => {
+        setIsYourActivityPopupOpen(false);
+        setSelectedHotel(null);
+    };
+
+    // Open YourActivityPop with the selected activity object
+    const openYourActivityPopup = (activity) => {
+        setSelectedHotel(activity);
+        setIsYourActivityPopupOpen(true);
+    }; 
 
 
 
@@ -175,6 +187,14 @@ const ArrivalToronto = () => {
         images: ["/images/hotel1.png"]
     };
 
+    // A different hotel used by the small cards (so popup shows the right data)
+    const sereneHotel = {
+        title: "Serene Haven Inn",
+        location: "Toronto, Canada",
+        desc: "Cozy boutique hotel with comfortable rooms and easy access to local attractions.",
+        images: ["/images/yourAtivityImage1.png"]
+    }; 
+
 
     const dayImgeFilter = [
         {
@@ -195,7 +215,7 @@ const ArrivalToronto = () => {
 
     ]
 
-     const nextDayIndex = (activeDayIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length;
+    const nextDayIndex = (activeDayIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length;
 
 
 
@@ -284,7 +304,7 @@ const ArrivalToronto = () => {
 
 
                                     <div className={styles.expandableMainContainer}>
-                                        <div className={styles.expandableTab} onClick={() => toggleExpand("flight")} >
+                                        <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
                                             <h2>International Flight</h2>
                                             <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
                                                 }`} src="/icons/DownArrows.svg" alt="" />
@@ -336,7 +356,7 @@ const ArrivalToronto = () => {
 
 
                                     <div className={styles.expandableMainContainer}>
-                                        <div className={styles.expandableTab} onClick={() => toggleExpand("transfer")} >
+                                        <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
                                             <h2>Private Transfer</h2>
                                             <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
                                                 }`} src="/icons/DownArrows.svg" alt="" />
@@ -392,7 +412,7 @@ const ArrivalToronto = () => {
                                                     <div className={styles.cardTextContainer}>
                                                         <span className={styles.cardTextAddress}>Toronto, canada</span>
                                                         <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
-                                                        <button className={styles.cardTextButton}>view hotel options</button>
+                                                    <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -416,7 +436,16 @@ const ArrivalToronto = () => {
 
                                                                     <div className={styles.btnsCon}>
                                                                         {item.actions.map((btn, i) => (
-                                                                            <button key={i} className={styles.cardButton}>
+                                                                            <button
+                                                                                key={i}
+                                                                                className={styles.cardButton}
+                                                                                onClick={() => {
+                                                                                    if (btn.type === 'view') openYourActivityPopup(item);
+                                                                                    else if (btn.type === 'add') {
+                                                                                        console.log('add action for', item);
+                                                                                    }
+                                                                                }}
+                                                                            >
                                                                                 {btn.label}
                                                                             </button>
                                                                         ))}
@@ -457,13 +486,7 @@ const ArrivalToronto = () => {
                                     className={styles.leftBottomCont}
                                 >
                                     <div className={styles.paraCoontainer}>
-                                        <HotelRoom onViewHotel={() => openHotelPopup(hotelData)} />
-
-                                        <HotelPopup
-                                            isOpen={isHotelPopupOpen}
-                                            hotel={selectedHotel}
-                                            onClose={closeHotelPopup}
-                                        />
+                                        <HotelRoom hotel={hotelData} onViewHotel={openHotelPopup} />
                                     </div>
                                 </motion.div>
                             </div>
@@ -495,7 +518,7 @@ const ArrivalToronto = () => {
 
 
                                     <div className={styles.expandableMainContainer}>
-                                        <div className={styles.expandableTab} onClick={() => toggleExpand("flight")} >
+                                        <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
                                             <h2>International Flight</h2>
                                             <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
                                                 }`} src="/icons/DownArrows.svg" alt="" />
@@ -547,7 +570,7 @@ const ArrivalToronto = () => {
 
 
                                     <div className={styles.expandableMainContainer}>
-                                        <div className={styles.expandableTab} onClick={() => toggleExpand("transfer")} >
+                                        <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
                                             <h2>Private Transfer</h2>
                                             <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
                                                 }`} src="/icons/DownArrows.svg" alt="" />
@@ -625,7 +648,7 @@ const ArrivalToronto = () => {
                                                     <div className={styles.cardTextContainer}>
                                                         <span className={styles.cardTextAddress}>Toronto, canada</span>
                                                         <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
-                                                        <button className={styles.cardTextButton}>view hotel options</button>
+                                                        <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -649,7 +672,16 @@ const ArrivalToronto = () => {
 
                                                                     <div className={styles.btnsCon}>
                                                                         {item.actions.map((btn, i) => (
-                                                                            <button key={i} className={styles.cardButton}>
+                                                                            <button
+                                                                                key={i}
+                                                                                className={styles.cardButton}
+                                                                                onClick={() => {
+                                                                                    if (btn.type === 'view') openYourActivityPopup(item);
+                                                                                    else if (btn.type === 'add') {
+                                                                                        console.log('add action for', item);
+                                                                                    }
+                                                                                }}
+                                                                            >
                                                                                 {btn.label}
                                                                             </button>
                                                                         ))}
@@ -726,6 +758,16 @@ const ArrivalToronto = () => {
 
 
             </div>
+            <HotelPopup
+                isOpen={isHotelPopupOpen}
+                hotel={selectedHotel}
+                onClose={closeHotelPopup}
+            />
+            <YourActivityPop
+                isOpen={isYourActivityPopupOpen}
+                hotel={selectedHotel}
+                onClose={closeYourActivityPopup}
+            />
         </section >
     )
 }

@@ -40,7 +40,9 @@ const HotelPopup = ({ isOpen, hotel, onClose }) => {
                     >
                         {/* HEADER */}
                         <div className={styles.popupHeader}>
-                            <h4>Your Hotel Options Toronto, Canada</h4>
+                            {/* <h4>Your Hotel Options{hotel?.title ? ` — ${hotel.title}` : ' Toronto, Canada'}</h4> */}
+                            <h4>Your Hotel Options
+Toronto, Canada</h4>
                             <button onClick={onClose} className={styles.closeBtn}>✕</button>
                         </div>
 
