@@ -5,9 +5,16 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    padding-top: 73px;
+    padding-bottom: 73px;
     position: relative;
     padding-bottom: 63px;
+}
+.navbarContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 5;
 }
 
 .overlay {
