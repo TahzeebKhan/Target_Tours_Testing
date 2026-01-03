@@ -5,10 +5,16 @@ import { Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import styles from './BetweenMajesticPeaks.module.css'
+import { useRouter } from 'next/navigation';
 
 const BetweenMajesticPeaks = () => {
     const [swiperRef, setSwiperRef] = useState(null)
     const [activeIndex, setActiveIndex] = useState(0)
+    const router = useRouter();
+
+    const goToGallery = () => {
+        router.push('/view-gallery');
+    }
 
     // Sample images - replace with your actual images
     const carouselImages = [
@@ -87,7 +93,7 @@ const BetweenMajesticPeaks = () => {
                         <p>This itinerary is crafted as a true immersion—where every day invites discovery, awe, and a sense of freedom found only in wide-open spaces.</p>
                     </div>
                 </div>
-                <div className={styles.bottomContainer}>
+                {/* <div className={styles.bottomContainer}>
                     <div className={styles.carouselWrapper}>
                         <Swiper
                             modules={[Navigation]}
@@ -164,6 +170,32 @@ const BetweenMajesticPeaks = () => {
                                 <img src="/icons/right.svg" alt="Next" />
                             </div>
                         </div>
+                    </div>
+                </div> */}
+
+            </div>
+            <div className={styles.bottomContainerRef}>
+                <div className={styles.rightImage}>
+                    <img src={"/tourBooking/ToursImage1.png"} alt="" />
+                </div>
+                <div className={styles.rightGrid}>
+                    <div className={styles.imageBox}>
+                        <img src="/tourBooking/ImagesItem1.png" alt="" />
+                    </div>
+
+                    <div className={styles.imageBox}>
+                        <img src="/tourBooking/ImagesItem2.png" alt="" />
+                    </div>
+
+                    <div className={styles.imageBox}>
+                        <img src="/tourBooking/ImagesItem3.png  " alt="" />
+                    </div>
+
+                    <div className={styles.imageBox}>
+                        <img src="/tourBooking/ImagesItem1.png" alt="" />
+                        <button className={styles.viewGalleryBtn} onClick={goToGallery}>
+                            ⠿ VIEW GALLERY
+                        </button>
                     </div>
                 </div>
             </div>
