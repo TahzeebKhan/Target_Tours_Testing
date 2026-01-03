@@ -148,6 +148,16 @@ function LayoutContent({ children }) {
   const sidebarRef = useRef(null);
   const navbarRef = useRef(null);
   const heroRef = useRef(null);
+const PAGE_PADDING_CONFIG = {
+  default: {
+    start: 291,
+    end: 239,
+  },
+  multi: {
+    start: 369,
+    end: 318,
+  },
+};
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [stickyTop, setStickyTop] = useState(0);
@@ -174,72 +184,102 @@ function LayoutContent({ children }) {
   //   return () => window.removeEventListener("scroll", handleScroll);
   // }, []);
 
-  useEffect(() => {
-  let ticking = false;
+//   useEffect(() => {
+//   let ticking = false;
 
-  const updateOffsets = () => {
+//   const updateOffsets = () => {
+//     if (!ticking) {
+//       window.requestAnimationFrame(() => {
+//         const scrolled = window.scrollY > 100;
+//         setIsScrolled(scrolled);
+
+//         const navRect = navbarRef.current?.getBoundingClientRect();
+//         // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
+//         const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
+//         setStickyTop(scrolled ? topOffset : 0);
+
+//         ticking = false;
+//       });
+//       ticking = true;
+//     }
+//   };
+
+//   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+
+//   window.addEventListener("scroll", updateOffsets, { passive: true });
+//   window.addEventListener("resize", updateOffsets);
+
+//   // smooth shrink calculation: 0 -> not shrunk, 1 -> fully shrunk
+//   const setShrink = () => {
+//     const hero = heroRef.current;
+//     if (!hero) return;
+//     const maxH = 290; // match CSS default
+//     const minH = 147; // desired compact height
+//     const threshold = 220; // px over which shrink happens
+//     const progress = clamp(window.scrollY / threshold, 0, 1);
+//     // write as unitless 0..1
+//     hero.style.setProperty("--shrink", String(progress));
+
+//     // if using spacer keep it in sync (only if spacer present)
+//     // const spacer = document.querySelector(`.${styles.imageSpacer}`);
+//     // if (spacer) spacer.style.height = `calc(${maxH}px - (${maxH} - ${minH}) * ${progress})`;
+//   };
+
+//   // attach RAF-wrapped shrink updater
+//   let shrinkTicking = false;
+//   const rafShrink = () => {
+//     if (!shrinkTicking) {
+//       window.requestAnimationFrame(() => {
+//         setShrink();
+//         shrinkTicking = false;
+//       });
+//       shrinkTicking = true;
+//     }
+//   };
+
+//   window.addEventListener("scroll", rafShrink, { passive: true });
+//   window.addEventListener("resize", rafShrink);
+//   // initial set
+//   setShrink();
+
+//   return () => {
+//     window.removeEventListener("scroll", updateOffsets);
+//     window.removeEventListener("resize", updateOffsets);
+//     window.removeEventListener("scroll", rafShrink);
+//     window.removeEventListener("resize", rafShrink);
+//   };
+// }, []);
+const [scrollProgress, setScrollProgress] = useState(0);
+
+useEffect(() => {
+  let ticking = false;
+  const NAV_HEIGHT = 72;
+
+  const onScroll = () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
-        const scrolled = window.scrollY > 100;
-        setIsScrolled(scrolled);
-
-        const navRect = navbarRef.current?.getBoundingClientRect();
-        // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
-        const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
-        setStickyTop(scrolled ? topOffset : 0);
-
+        const y = window.scrollY;
+        const progress = Math.min(y / NAV_HEIGHT, 1); // 0 → 1
+        setScrollProgress(progress);
         ticking = false;
       });
       ticking = true;
     }
   };
 
-  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll(); // initial run
 
-  window.addEventListener("scroll", updateOffsets, { passive: true });
-  window.addEventListener("resize", updateOffsets);
-
-  // smooth shrink calculation: 0 -> not shrunk, 1 -> fully shrunk
-  const setShrink = () => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const maxH = 290; // match CSS default
-    const minH = 147; // desired compact height
-    const threshold = 220; // px over which shrink happens
-    const progress = clamp(window.scrollY / threshold, 0, 1);
-    // write as unitless 0..1
-    hero.style.setProperty("--shrink", String(progress));
-
-    // if using spacer keep it in sync (only if spacer present)
-    // const spacer = document.querySelector(`.${styles.imageSpacer}`);
-    // if (spacer) spacer.style.height = `calc(${maxH}px - (${maxH} - ${minH}) * ${progress})`;
-  };
-
-  // attach RAF-wrapped shrink updater
-  let shrinkTicking = false;
-  const rafShrink = () => {
-    if (!shrinkTicking) {
-      window.requestAnimationFrame(() => {
-        setShrink();
-        shrinkTicking = false;
-      });
-      shrinkTicking = true;
-    }
-  };
-
-  window.addEventListener("scroll", rafShrink, { passive: true });
-  window.addEventListener("resize", rafShrink);
-  // initial set
-  setShrink();
-
-  return () => {
-    window.removeEventListener("scroll", updateOffsets);
-    window.removeEventListener("resize", updateOffsets);
-    window.removeEventListener("scroll", rafShrink);
-    window.removeEventListener("resize", rafShrink);
-  };
+  return () => window.removeEventListener("scroll", onScroll);
 }, []);
 
+const isMulti = tripType === "multi";
+
+const { start, end } = isMulti
+  ? PAGE_PADDING_CONFIG.multi
+  : PAGE_PADDING_CONFIG.default;
+
+const pagePaddingTop = start - (start - end) * scrollProgress;
 
 
   return (
@@ -247,28 +287,32 @@ function LayoutContent({ children }) {
       {" "}
       {/* Top Navbar */}
       <div className={styles.wrapper}>
-        <div ref={navbarRef}>
-          <Navbar />
+        <div className={`${scrollProgress===1 ?styles.hiddenNavbar : ""}`} ref={navbarRef}>
+          <Navbar scrollProgress={scrollProgress}/>
         </div>
         <div
           ref={heroRef}
-          className={`${styles.imageBackgound} ${isScrolled ? styles.sticky : ""}`}
-          style={isScrolled ? { top: `${stickyTop}px` } : undefined}
+          className={`${styles.imageBackgound} 
+          `}
         >
-          <TopFilterSection isScrolled={isScrolled} />
+          <TopFilterSection scrollProgress={scrollProgress} />
         </div>
-        {isScrolled && (
+        {/* {isScrolled && (
           <div
             className={styles.imageSpacer}
             aria-hidden="true"
           />
-        )}
+        )} */}
         {/* <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
           <TopFilterResponsiveSec />
         </div> */}
       </div>
       {/* Page Wrapper */}
-      <main className={styles.page}>
+      <main
+      style={{
+    paddingTop: `${pagePaddingTop}px`,
+  }}
+       className={styles.page}>
         <div
           ref={containerRef}
           className={`${styles.container} ${tripType === "round" ? styles.wideContainer : styles.normalContainer

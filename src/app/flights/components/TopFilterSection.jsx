@@ -29,7 +29,7 @@ const passengerTypes = [
   "MEDICAL PROFESSIONAL",
 ];
 
-const TopFilterSection = ({ isScrolled: parentScrolled = false }) => {
+const TopFilterSection = ({ isScrolled: parentScrolled = false,scrollProgress }) => {
   const calendarRef = useRef(null);
 
   const {
@@ -236,12 +236,50 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false }) => {
     setCalendarTripType("round");
     setShowCalendar(true);
   };
+const [scrollY, setScrollY] = useState(0);
+
+useEffect(() => {
+  let ticking = false;
+
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        setScrollY(window.scrollY || 0);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  return () => window.removeEventListener("scroll", onScroll);
+}, []);
+const MAX_MARGIN = 76;
+const MIN_PADDING = 16;
+const MAX_PADDING = 20;
+const MAX_MARGIN_BOTTOM = 28;
+const clampedScroll = Math.min(scrollY, MAX_MARGIN);
+const progress = clampedScroll / MAX_MARGIN;
+
+const marginTop = MAX_MARGIN * (1 - progress);
+const marginBottom = MAX_MARGIN_BOTTOM * (1 - progress);
+const padding = MAX_PADDING - (MAX_PADDING - MIN_PADDING) * progress;
+
 
 
   return (
     <>
-      <div
-        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""} ${isScrolled ? styles.scrolledMargin : ""} sticky top-0 flex flex-col gap-[127px] items-center`}
+      <div  style={{
+    marginTop: `${marginTop}px`,
+    padding: `${padding}px`,
+     marginBottom: `${marginBottom}px`,
+    transition: "none", // 👈 IMPORTANT
+  }}
+        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""}
+        ${scrollProgress===1 ? styles.scrolledSearchSec : ""}
+         sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
           className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
@@ -250,7 +288,11 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false }) => {
             }`}
         >
           {bookingType === "flight" && (
-              <div className={`${styles.serarchingCont} ${styles.glass_panel} ${isScrolled ? styles.scrolledGap : ""}`}>
+              <div className={`${styles.serarchingCont} ${styles.glass_panel}
+              ${scrollProgress===1 ? styles.scrolledSerarchingCont : ""}
+              //  ${isScrolled ? styles.scrolledGap : ""}
+               
+               `}>
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
                   <label

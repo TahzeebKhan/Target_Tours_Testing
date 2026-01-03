@@ -18,7 +18,7 @@
   box-sizing: border-box;
   /* interpolate bottom margin from 28px -> 0 */
   margin-bottom: calc(28px - (28px * var(--shrink, 0)));
-  transition: padding 220ms linear, margin 220ms linear;
+  transition: all 1s ease;
 }
 .scrolledMargin{
   margin-bottom: 0;
@@ -26,7 +26,6 @@
   margin-top: 8px;
   transition: padding 0.3s ease, margin 0.3s ease;
 }
-
 .searchSec.isMulti {
   /* padding-top: 95px; */
 }
@@ -252,7 +251,9 @@
   box-sizing: border-box;
   transition: gap 220ms linear, padding 220ms linear, top 220ms linear;
 }
-
+.scrolledSerarchingCont{
+  gap:16px;
+}
 .scrolledGap {
   gap: 10px;
   padding: 12px;

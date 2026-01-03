@@ -1,10 +1,14 @@
 "use client";
 import styles from "./Navbar.module.css";
-const Navbar = () => {
+const Navbar = ({scrollProgress={scrollProgress}}) => {
   return (
     <>
       {" "}
-      <div className={`${styles.navContainer} absolute top-0 z-100`}>
+      <div style={{
+        // transform: `translateY(${-72 * scrollProgress}px)`,
+        opacity: 1 - scrollProgress,
+      }}
+       className={`${styles.navContainer} absolute top-0 z-100`}>
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
