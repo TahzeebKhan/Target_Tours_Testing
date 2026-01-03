@@ -1,0 +1,247 @@
+.container{
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+}
+
+.headerBannerContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background-color: #FFFFFF;
+    padding-bottom: 24px;
+}
+
+.BannerContainer{
+  height: 245px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.78) 100%);
+
+}
+
+.priceContainer{
+  position: absolute;
+  bottom: 15px;
+  right: 26px;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+.price{
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -2%;
+  color: #FFFFFF;
+}
+.price strong{
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -2%;
+
+}
+.person{
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #E5E5E5;
+
+}
+.bannerTextContainer{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 24px;
+}
+
+
+.bannerHeading{
+  font-family: var(--font-antic-didone);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+
+  color: #070773;
+}
+.subTextContainer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.dateLocationContainer{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dateLocation{
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #000000;
+}
+.dayNightContainer{
+  display: flex;
+  align-items: center;
+}
+.dayNightChip{
+  padding: 2px 6px;
+  border: 0.5px solid #000033;
+  background-color: #DFF9FF;
+
+
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.dash{
+  width: 19px;
+  height: 1px;
+  background-color: #000033;
+}
+.itineraryContainer{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.boldSpan{
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+
+}
+.ubudText{
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  /* align-items: start; */
+  height: fit-content;
+}
+
+.subInfoText {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.flightExpandableCard{
+    padding: 16px 24px;
+    background: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.flightExpandableHeader{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #070773;
+}
+
+.expandWrap {
+  max-height: 0;                 /* start closed */
+  overflow: hidden;              /* hide content */
+  transition: max-height 0.6s ease-in-out;
+}
+.flightExpandableContainer{
+  border: 1px solid transparent;
+}
+.flightActiveBorder{
+  border: 1px solid #E4E6E8;
+  transition: border 0.6s ease-in-out;
+}
+.expandOpen {
+  max-height: 1000px;            /* enough to hold content */
+}
+.arrow {
+  transition: transform 0.6s ease;
+}
+
+.arrowRotate {
+  transform: rotate(180deg);
+}
+.continueButtonContainer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+.continueButton{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;  
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+.continueButton:hover{
+  background-color: #FCC800;
+}
