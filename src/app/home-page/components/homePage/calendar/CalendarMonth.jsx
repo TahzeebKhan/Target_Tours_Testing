@@ -110,9 +110,8 @@ export default function CalendarMonth({
             return (
               <div key={`prev-${index}`}>
                 <div
-                  className={`${styles.cell} ${styles.muted} ${
-                    isSunday(prevYear, prevMonth, day) ? styles.sundayDate : ""
-                  }`}
+                  className={`${styles.cell} ${styles.muted} ${isSunday(prevYear, prevMonth, day) ? styles.sundayDate : ""
+                    }`}
                 >
                   <span className={styles.day}>{day}</span>
                 </div>
@@ -168,11 +167,10 @@ export default function CalendarMonth({
           return (
             <div key={`next-${index}`}>
               <div
-                className={`${styles.cell} ${styles.muted} ${
-                  isSunday(nextYear, nextMonth, nextDay)
+                className={`${styles.cell} ${styles.muted} ${isSunday(nextYear, nextMonth, nextDay)
                     ? styles.sundayDate
                     : ""
-                }`}
+                  }`}
               >
                 <span className={styles.day}>{nextDay}</span>
               </div>

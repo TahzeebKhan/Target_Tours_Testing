@@ -51,7 +51,7 @@ const DateField = ({
                     type="text"
                     readOnly
                     className={styles.contant}
-                    data-placeholder={placeholder}
+                    placeholder={placeholder}
                     value={formatDate(value) || ''}
                     name={name}
                     required

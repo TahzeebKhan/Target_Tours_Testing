@@ -404,24 +404,27 @@ const HomePage = () => {
       return;
     }
 
+    // ROUND / ONEWAY
     if (calendarTripType === "oneway") {
       setStartDate(date);
-      setEndDate(null);
+      setEndDate("");
       setShowCalendar(false);
       return;
     }
 
+    // ROUND TRIP
     if (!startDate || endDate) {
       setStartDate(date);
-      setEndDate(null);
+      setEndDate("");
     } else if (new Date(date) >= new Date(startDate)) {
       setEndDate(date);
       setShowCalendar(false);
     } else {
       setStartDate(date);
-      setEndDate(null);
+      setEndDate("");
     }
   };
+
 
   useEffect(() => {
     if (tripType === "round") {
@@ -697,15 +700,26 @@ const HomePage = () => {
                       </div>
 
                       {/* Return Date field with smooth transition - hidden in Multi-city and One-way */}
-                      <div className={`${styles.fromBtn} ${styles.fromInput} ${styles.returnDateField} ${(tripType === "oneway" || tripType === "multi") ? styles.hiddenField : ""}`} onClick={handleFieldClick}>
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromInput} ${styles.returnDateField} ${(tripType === "oneway" || tripType === "multi") ? styles.hiddenField : ""
+                          }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+
+                          if (tripType === "round") {
+                            setCalendarTripType("round");   // 🔥 round-trip mode
+                            setShowCalendar(true);          // 🔥 open calendar
+                          }
+                        }}
+                      >
                         <div className={styles.lable}>Return Date</div>
                         <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
                           <input
-                            ref={returnRef}
-                            type="date"
+                            type="text"
+                            readOnly
                             className={styles.contant}
-                            data-placeholder="ADD DATES"
-                            required={tripType === "round"}
+                            placeholder="ADD DATE"
+                            value={formatDate(endDate)}
                           />
                           <button
                             type="button"
@@ -822,21 +836,51 @@ const HomePage = () => {
 
                             <div className={`${styles.fromBtn} ${styles.travellerClass}`} onClick={handleFieldClick}>
                               <div className={styles.lable}>Departure Date</div>
-                              <div className={styles.dateInputWrapper} onClick={openReturnPicker}>
+
+                              {/* Calendar modal for this multi leg */}
+                              {showCalendar && activeMultiIndex === actualIndex && (
+                                <DateCalendarModal
+                                  mode="oneway"
+                                  onModeChange={() => {}}
+                                  onClose={() => { setShowCalendar(false); setActiveMultiIndex(null); }}
+                                  anchorEl={multiInputRefs.current[actualIndex]}
+                                >
+                                  <div>
+                                    <CalendarMonths
+                                      startDate={leg.date}
+                                      endDate={null}
+                                      onDateClick={(date) => {
+                                        updateMultiLeg(actualIndex, 'date', date);
+                                        setShowCalendar(false);
+                                        setActiveMultiIndex(null);
+                                      }}
+                                    />
+                                  </div>
+                                </DateCalendarModal>
+                              )}
+
+                              <div
+                                className={styles.dateInputWrapper}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCalendarTripType("oneway");
+                                  setActiveMultiIndex(actualIndex);
+                                  setShowCalendar(true);
+                                }}
+                              >
                                 <input
-                                  ref={actualIndex === 1 ? returnRef : null}
-                                  type="date"
+                                  type="text"
+                                  readOnly
                                   className={styles.contant}
                                   data-placeholder="ADD DATES"
-                                  value={leg.date || ''}
-                                  onChange={(e) => updateMultiLeg(actualIndex, 'date', e.target.value)}
+                                  value={formatDate(leg.date) || ''}
                                   required
                                 />
                                 <button
                                   type="button"
                                   aria-label="Open departure date picker"
                                   className={styles.calendarIcon}
-                                  onClick={openReturnPicker}
+                                  onClick={(e) => { e.stopPropagation(); setActiveMultiIndex(actualIndex); setShowCalendar(true); }}
                                 >
                                   <img src="/icons/calander.svg" alt="" />
                                 </button>
