@@ -53,7 +53,7 @@
 /* dropdown menu container (absolute positioned relative to dateInputWrapper) */
 .dateInputWrapper {
   position: relative;
-  z-index: 999;
+  z-index: 1;
   /* ensure menu positions relative to this wrapper */
 }
 

@@ -98,7 +98,7 @@
 }
 
 .RangeStartCell {
-  background-color: #fac702 !important;
+  background-color: #E2E8F0 !important;
 }
 .RangeStartCell .day {
   color: white !important;
@@ -108,7 +108,7 @@
   display: none !important;
 }
 .RangeEndCell {
-  background-color: #fac900 !important;
+  background-color: #E2E8F0 !important;
 }
 .RangeStartCell::before {
   content: "";
@@ -117,7 +117,7 @@
   left: 0;
   width: 6px;
   height: 100%;
-  background-color: white;
+  background-color: #171717;
 }
 .RangeEndCell::after {
   content: "";
@@ -126,7 +126,7 @@
   right: 0;
   width: 6px;
   height: 100%;
-  background-color: white;
+  background-color: #171717;
 }
 .cell {
   /* padding: 6px; */
@@ -136,20 +136,21 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  width: 30px;
+  width: 32px;
   height: 30px;
+  transition: all 0.6s ease;
 }
 
 .cell:hover {
-  background: #fbc800;
+  background: #E2E8F0;
 }
 
 .selected {
-  background: #facc15;
+  background: #E2E8F0;
 }
 
 .range {
-  background: #eff6ff;
+  background: #424242;
 }
 
 .day {
@@ -186,7 +187,7 @@
   right: 0;
   width: 7px;
   height: 100%;
-  /* background-color: white; */
+  background-color: #171717;
 }
 
 .sunday{
