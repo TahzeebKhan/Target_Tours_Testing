@@ -379,7 +379,7 @@
 }
 
 .glass_panel {
-  width: 1130px;
+  width: 1200px;
   /* width: 100%; */
   position: relative;
 
@@ -394,6 +394,7 @@
     inset 0 0 20px rgba(255, 255, 255, 0.1);
 
   color: #fff;
+  z-index: 2;
 }
 
 /* Smooth blur animation when switching to any tab */
@@ -704,7 +705,14 @@
   border: none;
   position: relative;
   z-index: 5;
+   text-overflow: ellipsis;
+   white-space: nowrap;
   /* Above background but below arrow box (10) */
+}
+.iconCont{
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Remove default calendar icon */
@@ -748,7 +756,7 @@
 }
 
 .multisearchBtn {
-  max-width: 258px;
+  max-width: 278px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -766,6 +774,7 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.45s ease;
+  position: relative;
 }
 
 .multisearchBtn:hover {
@@ -812,7 +821,7 @@
   width: 99%;
   margin-bottom: 12px;
   border: 1px solid gray;
-  z-index: 0;
+  z-index: -1;
 }
 
 .progressActive {
@@ -834,6 +843,7 @@
   width: 100%;
   position: relative;
   align-items: center;
+  z-index: 0;
 }
 
 .feature {
@@ -974,7 +984,7 @@
 }
 
 .toInput {
-  padding-left: 24px;
+  padding-left: 13px;
 }
 
 .menuSection {
@@ -1133,6 +1143,79 @@
   width: 12px;
 }
 
+.suggestionBox{
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background-color: #171717;
+  border: .5px solid #E6E8EC;
+ backdrop-filter: blur(39.29999923706055px);
+  width: 324px;
+  overflow-y: auto;
+  z-index: 50;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.recentSearchHeading{
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #C4C4C4;
+
+}
+.suggestionItem{
+  display: flex;
+  /* align-items: center; */
+  gap: 5px;
+  justify-content: space-between;
+
+  cursor: pointer;
+}
+
+.suggestionText{
+  display: flex;
+  flex-direction: column;
+  
+  gap: 2px;
+}
+.suggestionLabel{
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.19;
+  text-align: start;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+.suggestionDetail{
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-align: start;
+  text-transform: capitalize;
+  color: rgba(255, 255, 255, 0.82);
+
+
+}
+.suggestionCode{
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  color: #FFFFFF;
+
+}
 @media (max-width: 1600px) {
   .navbar {
     padding-left: 20px;

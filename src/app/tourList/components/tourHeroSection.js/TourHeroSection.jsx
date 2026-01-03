@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import styles from "./TourHeroSection.module.css";
 import Navbar from "@/app/flights/Navbar";
 import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
+import DateField from "@/app/home-page/components/homePage/DateField";
 import DestinationFilter from "../tabsFilters/DestinationFilter";
 import TravellerFilter from "../tabsFilters/TravellerFilter";
 import PreferencesFilter from "../tabsFilters/PreferencesFilter";
@@ -79,31 +80,17 @@ const TourHeroSection = () => {
             {/* Slot 2: Departure Date */}
             <div
               className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`}
-              onClick={handleFieldClick}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
                 Departure Date
               </div>
-              <div
-                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
-                onClick={openDeparturePicker}
-              >
-                <input
-                  ref={departureRef}
-                  type="date"
-                  className={styles.contant}
-                  data-placeholder="ADD DATES"
+              <div className={`${styles.dateInputWrapper} ${styles.contentFade}`}>
+                <DateField
+                  label={""}
+                  placeholder={"ADD DATES"}
                   value={departureDate}
                   onChange={(e) => setDepartureDate(e.target.value)}
-                  required
                 />
-                <button
-                  type="button"
-                  className={styles.calendarIcon}
-                  onClick={openDeparturePicker}
-                >
-                  <img src="/icons/calander.svg" alt="" />
-                </button>
               </div>
             </div>
 
