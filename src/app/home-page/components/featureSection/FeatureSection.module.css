@@ -94,6 +94,9 @@
     .subHeadText{
         font-size: 14px;
     }
+    .linearContainer{
+        margin-top: 184px;
+    }
 }
 
 @media (max-width: 1280px){
@@ -137,6 +140,9 @@
     }
     .headText{
         font-size: 28px;
+    }
+    .linearContainer{
+        margin-top: 133px;
     }
 }
 

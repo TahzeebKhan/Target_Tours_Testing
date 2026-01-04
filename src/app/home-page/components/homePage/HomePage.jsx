@@ -56,6 +56,20 @@ const HomePage = () => {
   const featureRowRef = useRef(null);
   const progressRef = useRef(null);
 
+  const [flightDates, setFlightDates] = useState({
+    round: {
+      start: "",
+      end: "",
+    },
+    oneway: {
+      start: "",
+    },
+    multi: [
+      { date: "" },
+      { date: "" },
+    ],
+  });
+
   const [travellerDestination, setTravellerDestination] = useState("SELECT DESTINATION")
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER")
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS")
@@ -160,12 +174,12 @@ const HomePage = () => {
       }
 
       if (fromSuggestionRef.current && !fromSuggestionRef.current.contains(e.target) &&
-          fromInputRef.current && !fromInputRef.current.contains(e.target)) {
+        fromInputRef.current && !fromInputRef.current.contains(e.target)) {
         setFromSuggestionsOpen(false);
       }
 
       if (toSuggestionRef.current && !toSuggestionRef.current.contains(e.target) &&
-          toInputRef.current && !toInputRef.current.contains(e.target)) {
+        toInputRef.current && !toInputRef.current.contains(e.target)) {
         setToSuggestionsOpen(false);
       }
 
@@ -175,7 +189,7 @@ const HomePage = () => {
         const suggestionBox = multiSuggestionRefs.current[idx];
 
         if (suggestionBox && inputWrapper &&
-            !suggestionBox.contains(e.target) && !inputWrapper.contains(e.target)) {
+          !suggestionBox.contains(e.target) && !inputWrapper.contains(e.target)) {
           setActiveSuggestion(null);
         }
       }
@@ -204,11 +218,6 @@ const HomePage = () => {
     return str.length > max ? str.slice(0, max) + "..." : str;
   };
 
-  const travellerOptions = [
-    { value: "1_traveller_econ", label: "1 Traveller, Economy" },
-    { value: "2_traveller_econ", label: "2 Travellers, Economy" },
-    { value: "3_traveller_business", label: "3 Traveller, Business" },
-  ];
 
   const TravellerDestinationOptions = [
     { value: "india", label: "india" },
@@ -381,32 +390,89 @@ const HomePage = () => {
   };
 
   // Flight date handler
+  // const handleDateClick = (date) => {
+  //   if (tripType === "multi" && activeMultiIndex !== null) {
+  //     updateMultiLeg(activeMultiIndex, 'date', date);
+  //     setShowCalendar(false);
+  //     setActiveMultiIndex(null);
+  //     return;
+  //   }
+
+  //   if (calendarTripType === "oneway") {
+  //     setStartDate(date);
+  //     setEndDate("");
+  //     setShowCalendar(false);
+  //     return;
+  //   }
+
+  //   if (!startDate || endDate) {
+  //     setStartDate(date);
+  //     setEndDate("");
+  //   } else if (new Date(date) >= new Date(startDate)) {
+  //     setEndDate(date);
+  //     setShowCalendar(false);
+  //   } else {
+  //     setStartDate(date);
+  //     setEndDate("");
+  //   }
+  // };
+
+  const handleRoundDateClick = (date) => {
+    setFlightDates((prev) => {
+      const { start, end } = prev.round;
+
+      if (!start || end) {
+        return {
+          ...prev,
+          round: { start: date, end: "" },
+        };
+      }
+
+      if (new Date(date) >= new Date(start)) {
+        return {
+          ...prev,
+          round: { start, end: date },
+        };
+      }
+
+      return {
+        ...prev,
+        round: { start: date, end: "" },
+      };
+    });
+  };
+
+  const handleOneWayDateClick = (date) => {
+    setFlightDates((prev) => ({
+      ...prev,
+      oneway: { start: date },
+    }));
+  };
+  const handleMultiDateClick = (index, date) => {
+    setFlightDates((prev) => {
+      const updated = [...prev.multi];
+      updated[index] = { date };
+      return { ...prev, multi: updated };
+    });
+  };
+
   const handleDateClick = (date) => {
+    if (tripType === "round") {
+      handleRoundDateClick(date);
+    }
+
+    if (tripType === "oneway") {
+      handleOneWayDateClick(date);
+      setShowCalendar(false);
+    }
+
     if (tripType === "multi" && activeMultiIndex !== null) {
-      updateMultiLeg(activeMultiIndex, 'date', date);
+      handleMultiDateClick(activeMultiIndex, date);
       setShowCalendar(false);
       setActiveMultiIndex(null);
-      return;
-    }
-
-    if (calendarTripType === "oneway") {
-      setStartDate(date);
-      setEndDate("");
-      setShowCalendar(false);
-      return;
-    }
-
-    if (!startDate || endDate) {
-      setStartDate(date);
-      setEndDate("");
-    } else if (new Date(date) >= new Date(startDate)) {
-      setEndDate(date);
-      setShowCalendar(false);
-    } else {
-      setStartDate(date);
-      setEndDate("");
     }
   };
+
 
   // Hotel date handler
   const handleHotelDateClick = (date) => {
@@ -633,14 +699,24 @@ const HomePage = () => {
                       <div
                         className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
                           } ${styles.calendarAnchor}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (tripType === "multi") {
+                            setCalendarTripType("oneway");
+                            setActiveMultiIndex(0);
+                            setShowCalendar(true);
+                          } else {
+                            setCalendarTripType("oneway");
+                            if (tripType === "round") setCalendarTripType("round");
+                            setShowCalendar(true);
+                          }
+                        }}
                       >
                         <div className={styles.lable}>Departure Date</div>
                         {showCalendar && (
                           <DateCalendarModal
-                            mode={calendarTripType === "round" ? "roundtrip" : "oneway"}
-                            onModeChange={(mode) =>
-                              setCalendarTripType(mode === "roundtrip" ? "round" : "oneway")
-                            }
+                            mode={tripType === "round" ? "roundtrip" : "oneway"}
+                            onModeChange={() => { }}
                             onClose={() => {
                               setShowCalendar(false);
                               setActiveMultiIndex(null);
@@ -648,13 +724,24 @@ const HomePage = () => {
                           >
                             <div ref={calendarRef}>
                               <CalendarMonths
-                                startDate={startDate}
-                                endDate={endDate}
+                                startDate={
+                                  tripType === "round"
+                                    ? flightDates.round.start
+                                    : tripType === "oneway"
+                                      ? flightDates.oneway.start
+                                      : flightDates.multi[activeMultiIndex ?? 0]?.date
+                                }
+                                endDate={
+                                  tripType === "round"
+                                    ? flightDates.round.end
+                                    : null
+                                }
                                 onDateClick={handleDateClick}
                               />
                             </div>
                           </DateCalendarModal>
                         )}
+
 
                         <div
                           className={styles.dateInputWrapper}
@@ -677,9 +764,11 @@ const HomePage = () => {
                             className={styles.contant}
                             placeholder="ADD DATE"
                             value={
-                              tripType === "multi"
-                                ? formatDate(multiCity[0]?.date)
-                                : (formatDate(startDate) || "")
+                              tripType === "round"
+                                ? formatDate(flightDates.round.start)
+                                : tripType === "oneway"
+                                  ? formatDate(flightDates.oneway.start)
+                                  : formatDate(flightDates.multi[0]?.date)
                             }
                           />
 
@@ -708,7 +797,7 @@ const HomePage = () => {
                             readOnly
                             className={styles.contant}
                             placeholder="ADD DATE"
-                            value={formatDate(endDate)}
+                            value={formatDate(flightDates.round.end)}
                           />
                           <button
                             type="button"
@@ -824,11 +913,20 @@ const HomePage = () => {
                                   anchorEl={multiInputRefs.current[actualIndex]}
                                 >
                                   <div>
-                                    <CalendarMonths
+                                    {/* <CalendarMonths
                                       startDate={leg.date}
                                       endDate={null}
                                       onDateClick={(date) => {
                                         updateMultiLeg(actualIndex, 'date', date);
+                                        setShowCalendar(false);
+                                        setActiveMultiIndex(null);
+                                      }}
+                                    /> */}
+                                    <CalendarMonths
+                                      startDate={flightDates.multi[actualIndex]?.date}
+                                      endDate={null}
+                                      onDateClick={(date) => {
+                                        handleMultiDateClick(actualIndex, date);
                                         setShowCalendar(false);
                                         setActiveMultiIndex(null);
                                       }}
@@ -851,7 +949,7 @@ const HomePage = () => {
                                   readOnly
                                   className={styles.contant}
                                   placeholder="ADD DATES"
-                                  value={formatDate(leg.date) || ''}
+                                  value={formatDate(flightDates.multi[actualIndex]?.date)}
                                   required
                                 />
                                 <button
@@ -916,7 +1014,7 @@ const HomePage = () => {
                         ref={bookingType === "hotel" ? toInputRef : fromInputRef}
                         type="text"
                         className={`${styles.contant} ${styles.contentFade}`}
-                        placeholder={bookingType === "hotel" ? "Where to" : "From city"}
+                        placeholder={bookingType === "hotel" ? "Where to" : "Departure"}
                         value={bookingType === "hotel" ? to : from}
                         onChange={(e) => {
                           if (bookingType === "hotel") {
@@ -966,7 +1064,7 @@ const HomePage = () => {
                     {bookingType === "hotel" && showHotelCalendar && (
                       <DateCalendarModal
                         mode="roundtrip"
-                        onModeChange={() => {}}
+                        onModeChange={() => { }}
                         onClose={() => setShowHotelCalendar(false)}
                       >
                         <div ref={hotelCalendarRef}>
@@ -983,7 +1081,7 @@ const HomePage = () => {
                     {bookingType === "holiday" && showHolidayCalendar && (
                       <DateCalendarModal
                         mode="oneway"
-                        onModeChange={() => {}}
+                        onModeChange={() => { }}
                         onClose={() => setShowHolidayCalendar(false)}
                       >
                         <div ref={holidayCalendarRef}>
@@ -1000,7 +1098,7 @@ const HomePage = () => {
                     {bookingType === "insurance" && showInsuranceCalendar && (
                       <DateCalendarModal
                         mode="roundtrip"
-                        onModeChange={() => {}}
+                        onModeChange={() => { }}
                         onClose={() => setShowInsuranceCalendar(false)}
                       >
                         <div ref={insuranceCalendarRef}>
@@ -1013,7 +1111,7 @@ const HomePage = () => {
                       </DateCalendarModal>
                     )}
 
-                    <div 
+                    <div
                       className={`${styles.dateInputWrapper} ${styles.contentFade}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1032,11 +1130,11 @@ const HomePage = () => {
                         className={styles.contant}
                         placeholder="ADD DATES"
                         value={
-                          bookingType === "hotel" 
+                          bookingType === "hotel"
                             ? formatDate(hotelStartDate)
                             : bookingType === "holiday"
-                            ? formatDate(holidayStartDate)
-                            : formatDate(insuranceStartDate)
+                              ? formatDate(holidayStartDate)
+                              : formatDate(insuranceStartDate)
                         }
                       />
                       <button type="button" className={styles.calendarIcon}>
@@ -1080,7 +1178,7 @@ const HomePage = () => {
                         )}
                       </>
                     ) : (
-                      <div 
+                      <div
                         className={`${styles.dateInputWrapper} ${styles.contentFade}`}
                         onClick={(e) => {
                           e.stopPropagation();
