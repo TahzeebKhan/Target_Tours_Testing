@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import styles from './HomePage.module.css'
+import styles from './SuggestionBox.module.css'
 
 const SuggestionBox = ({
   boxRef,
