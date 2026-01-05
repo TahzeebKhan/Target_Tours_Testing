@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './hotelDetailLayout.module.css'
+import styles from './HotelDetailLayout.module.css'
 import Navbar from '../flightBookingDetails/Navbar'
 import Footer from '../home-page/components/footer/Footer'
 const layout = ({children}) => {

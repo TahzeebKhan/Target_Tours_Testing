@@ -344,6 +344,11 @@
 
     }
 }
+@media (max-width: 1277px) {
+    .flight_items{
+        max-width: unset;
+    }
+}
 
 @media (max-width: 1200px) {
     .heading {

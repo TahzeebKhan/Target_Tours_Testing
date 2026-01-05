@@ -707,6 +707,7 @@
   z-index: 5;
    text-overflow: ellipsis;
    white-space: nowrap;
+   cursor: pointer;
   /* Above background but below arrow box (10) */
 }
 .iconCont{

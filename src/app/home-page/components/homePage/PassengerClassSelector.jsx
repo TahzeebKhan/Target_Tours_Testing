@@ -92,9 +92,8 @@ const PassengerClassSelector = ({
         {CLASSES.map((cls) => (
           <button
             key={cls}
-            className={`${styles.classBtn} ${
-              travelClass === cls ? styles.active : ""
-            }`}
+            className={`${styles.classBtn} ${travelClass === cls ? styles.active : ""
+              }`}
             onClick={() => setTravelClass(cls)}
           >
             {cls}
