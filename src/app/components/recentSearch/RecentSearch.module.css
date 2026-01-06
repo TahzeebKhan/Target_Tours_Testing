@@ -1,0 +1,83 @@
+.wrapper {
+  max-height: 258px;
+  max-width: 262px;
+  width: 100%;
+  overflow-y: auto;
+  background-color: #171717;
+  backdrop-filter: blur(39px);
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -1px;
+  border: 0.5px solid #E6E8EC
+}
+
+.wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wrapper::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+
+.inner {
+  padding: 12px 24px 15px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sectionTitle {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 10px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: #C4C4C4;
+
+}
+
+.recentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* RECENT SEARCH ITEM */
+.recentItem h3,
+.list li {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+
+}
+
+.recentItem p {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  color: #A8A8A8;
+}
+
+/* POPULAR LIST */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.list li:not(:last-child) {
+  /* border-bottom: 1px solid rgba(255, 255, 255, 0.05); */
+}
+
+.list li:hover {
+  opacity: 0.8;
+}

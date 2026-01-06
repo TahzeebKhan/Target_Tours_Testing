@@ -12,6 +12,11 @@ import SuggestionBox from './SuggestionBox';
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
 import DateCalendarModal from './calendar/DateCalendarModal';
 import CalendarMonths from './calendar/CalendarMonths';
+import HotelDropDown from '@/app/components/hotelDropDown/HotelDropDown';
+import HotelDateCalendarModal from '@/app/components/hotelCalendar/HotelDateCalendarModal';
+import HotelCalendarMonths from '@/app/components/hotelCalendar/HotelCalendarMonths';
+import RecentSearch from '@/app/components/recentSearch/RecentSearch';
+
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true)
@@ -77,12 +82,20 @@ const HomePage = () => {
   const [travellerOpen, setTravellerOpen] = useState(false);
 
   const [travellerOpend, setTravellerOpend] = useState(false);
+  const [hotelGuestOpen, setHotelGuestOpen] = useState({
+    room: 1,
+    adults: 0,
+    children: 0,
+    pets: 0,
+  });
   const [passengers, setPassengers] = useState({
     adult: 1,
     child: 0,
     infant: 0,
   });
 
+
+  const totalHotelPassengers = hotelGuestOpen.adults + hotelGuestOpen.children + hotelGuestOpen.pets + hotelGuestOpen.room;
   const totalPassengers = passengers.adult + passengers.child + passengers.infant;
 
   const recentSearches = [
@@ -134,7 +147,7 @@ const HomePage = () => {
 
   const [travelClass, setTravelClass] = useState("Economy");
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
-  
+
   const travellerRef = useRef(null);
 
   const [from, setFrom] = useState("");
@@ -1038,14 +1051,15 @@ const HomePage = () => {
                       />
 
                       {bookingType === "hotel" && toSuggestionsOpen && (
-                        <SuggestionBox
-                          boxRef={toSuggestionRef}
-                          heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(to)}
-                          onSelect={(s) => selectSuggestion(s, "to")}
-                        />
+                        <div ref={toSuggestionRef}>
+                          <RecentSearch
+                            onSelect={(city) => {
+                              setTo(city);                 // ✅ input value set
+                              setToSuggestionsOpen(false); // ✅ dropdown close
+                            }}
+                          />
+                        </div>
                       )}
-
                       {bookingType === "holiday" && fromSuggestionsOpen && (
                         <SuggestionBox
                           boxRef={fromSuggestionRef}
@@ -1065,19 +1079,19 @@ const HomePage = () => {
 
                     {/* Hotel Calendar */}
                     {bookingType === "hotel" && showHotelCalendar && (
-                      <DateCalendarModal
+                      <HotelDateCalendarModal
                         mode="roundtrip"
                         onModeChange={() => { }}
                         onClose={() => setShowHotelCalendar(false)}
                       >
                         <div ref={hotelCalendarRef}>
-                          <CalendarMonths
+                          <HotelCalendarMonths
                             startDate={hotelStartDate}
                             endDate={hotelEndDate}
                             onDateClick={handleHotelDateClick}
                           />
                         </div>
-                      </DateCalendarModal>
+                      </HotelDateCalendarModal>
                     )}
 
                     {/* Holiday Calendar */}
@@ -1215,7 +1229,7 @@ const HomePage = () => {
                     className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setTravellerOpend((o) => !o);
+                      setTravellerOpend((prev) => !prev);
                     }}
                   >
                     <div className={styles.lable}>
@@ -1225,32 +1239,49 @@ const HomePage = () => {
                           ? "ROOMS & GUESTS"
                           : "TRAVELLERS"}
                     </div>
+
                     <div className={styles.iconCont}>
                       <div className={styles.contant}>
                         {truncate(
                           bookingType === "hotel"
-                            ? `${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`
+                            ? `${totalHotelPassengers} Guest${totalHotelPassengers > 1 ? "s" : ""}, ${totalHotelPassengers} Room${totalHotelPassengers > 1 ? "s" : ""}`
                             : bookingType === "holiday"
-                              ? `${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}`
-                              : `${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`,
+                              ? `${totalPassengers} Room${totalPassengers > 1 ? "s" : ""}, ${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""}`
+                              : `${totalPassengers} Traveller${totalPassengers > 1 ? "s" : ""}, ${travelClass}`,
                           17
                         )}
                       </div>
+
                       <ChevronDown
-                        className={`${styles.chevron} ${travellerOpend ? styles.openChevron : styles.closeChevron}`}
+                        className={`${styles.chevron} ${travellerOpend ? styles.openChevron : styles.closeChevron
+                          }`}
                         size={16}
                         color="#FFFFFF"
                       />
                     </div>
-                    <PassengerClassSelector
-                      open={travellerOpend}
-                      setOpen={setTravellerOpend}
-                      passengers={passengers}
-                      setPassengers={setPassengers}
-                      travelClass={travelClass}
-                      setTravelClass={setTravelClass}
-                    />
+
+                    {bookingType === "hotel" && (
+                      <HotelDropDown
+                        open={travellerOpend}
+                        setOpen={setTravellerOpend}
+                        passengers={hotelGuestOpen}
+                        setPassengers={setHotelGuestOpen}
+                        travelClass={travelClass}
+                        setTravelClass={setTravelClass}
+                      />
+                    )}
+                    {bookingType === "holiday" && (
+                      <PassengerClassSelector
+                        open={travellerOpend}
+                        setOpen={setTravellerOpend}
+                        passengers={passengers}
+                        setPassengers={setPassengers}
+                        travelClass={travelClass}
+                        setTravelClass={setTravelClass}
+                      />
+                    )}
                   </div>
+
 
                   <div className={`${styles.searchBtn} ${styles.pos5}`}>
                     <img src="/images/searchIcon.svg" alt="" />
@@ -1335,7 +1366,7 @@ const HomePage = () => {
             />
 
             <div
-            ref={travellerRef}  // ← Ye ref parent div pe lagao
+              ref={travellerRef}  // ← Ye ref parent div pe lagao
               className={`${styles.fromBtn} ${styles.fromBtn2}`}
               onClick={(e) => {
                 e.stopPropagation();

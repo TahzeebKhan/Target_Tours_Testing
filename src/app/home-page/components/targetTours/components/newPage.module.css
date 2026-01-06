@@ -345,6 +345,11 @@
     bottom: -27.99%;
   }
 }
+@media (max-width: 1200px) {
+  .cardOverlay {
+    bottom: -31.99%;
+  }
+}
 
 @media (max-width: 1160px) {
   .hover-carousel {
@@ -353,14 +358,20 @@
     height: auto; /* allow height to grow */
   }
   .hover-card {
-    flex: 0 0 calc(50% - 12px); /* 2 cards per row */
+    /* flex: 0 0 calc(50% - 12px); 2 cards per row */
     /* max-width: calc(50% - 12px); */
     /* height: 420px; */
   }
   .hover-card {
-    flex: 0 0 calc(52% - 12px); /* 2 cards per row */
+    /* flex: 0 0 calc(52% - 12px); 2 cards per row */
     /* max-width: calc(50% - 12px); */
-    /* height: 420px; */
+    height: 420px;
+  }
+  .cardOverlay {
+    bottom: -47%;
+  }
+  .cardTitle{
+    font-size: 20px;
   }
 }
 

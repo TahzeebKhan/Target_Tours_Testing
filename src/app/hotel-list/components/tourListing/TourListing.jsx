@@ -8,7 +8,7 @@ import SearchResults from "../searchResult/SearchResults";
 const TourListing = () => {
 
   const [likedTours, setLikedTours] = useState([]);
-  const [viewType, setViewType] = useState("list");
+  const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
   const router = useRouter();
   const handleBookNow = () => {
@@ -103,34 +103,24 @@ const TourListing = () => {
       <AnimatePresence mode="popLayout">
         {viewType === "grid" && (
           <motion.div
-            className={styles.cardContainer}
+            className={styles.gridWrapper}
             key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            layout
+            initial={{ opacity: 0, y:0 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 0 }}
+            transition={{ duration: 0.55, ease: "easeInOut" }}
           >
             {tourData.map((item, index) => (
-              <motion.div
-                className={styles.card}
-                // onClick={handleBookNow}
-                key={item.id}
-                layoutId={index < 2 ? `card-${item.id}` : undefined}
-              >
-                <motion.img
-                  layoutId={index < 2 ? `image-${item.id}` : undefined}
-                  className={styles.itemImage}
-                  src={item.image}
-                  alt={item.title}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-
-                <div className={styles.cardItems}>
-                  <div className={styles.cardItemHeader}>
+              <div className={styles.gridCard}>
+                <div className={styles.gridCardImage}>
+                  <img className={styles.ListViewCardImage} src="/hotelList/hotelCardImg.png" alt="" />
+                  <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
                     <div className={styles.headerLeft}>
                       <div className={styles.new}>New</div>
-                      <div className={styles.private}>Private Tour</div>
+                      <div className={styles.private}>Flagship</div>
                     </div>
+
                     <img
                       src={
                         likedTours.includes(item.id)
@@ -138,117 +128,112 @@ const TourListing = () => {
                           : "/icons/heartIcon.svg"
                       }
                       alt="wishlist"
-                      className={styles.heartIcon}
+                      className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+
                       onClick={() => toggleLike(item.id)}
                     />
                   </div>
-
-                  <div className={styles.cardItemCenterTextContainer}>
-                    <div className={styles.cardItemCenterText}>
-                      <p className={styles.cardItemCenterTextPara}>
-                        {item.route}
-                      </p>
-                      <h4 className={styles.cardItemCenterTextHeading}>
-                        {item.title}
-                      </h4>
-                    </div>
-
-                    <div className={styles.cardFooter}>
-                      <div className={styles.infoRow}>
-                        <span>{item.days}</span>
-                        <span>{item.meals}</span>
-                      </div>
-
-                      <div className={styles.infoRow}>
-                        <span>{item.hotel}</span>
-                        <span>{item.activities}</span>
-                      </div>
-
-                      <div className={styles.bottomRow}>
-                        <div className={styles.price}>
-                          FROM <strong>{item.price}</strong> <span>/ PERSON</span>
+                </div>
+                <div className={styles.gridCardText}>
+                  <div className={styles.cartListTop}>
+                    <div className={styles.ListViewCardTextTop}>
+                      <div className={styles.topTextHead}>
+                        <div className={styles.rating}>
+                          {[...Array(5)].map((_, index) => (
+                            <img
+                              key={index}
+                              src={
+                                index < rating
+                                  ? "/icons/conicstar.svg"
+                                  : "/icons/star-gray.svg"
+                              }
+                              alt="star"
+                            />
+                          ))}
                         </div>
+                        <h2>{item.title}</h2>
 
-                        <button
-                          className={styles.viewDetails}
-                          onClick={() => toggleExpand(item.id)}
-                        >
-                          VIEW DETAILS
-                          <img
-                            src="/icons/smallDropArrow.svg"
-                            alt=""
-                            style={{
-                              transform: expandedId === item.id ? "rotate(180deg)" : "rotate(0deg)",
-                              transition: "0.3s",
-                            }}
-                          />
-                        </button>
+                        <div className={styles.topTextHeadAddress}>
+                          <img src="/icons/blackAddress.svg" alt="" />
+                          <span>{item.route}</span>
+                        </div>
                       </div>
+                      <div className={styles.featuresCont}>
+                        <div className={styles.featureItem}>
+                          <img src="/icons/AirConditioning.svg" alt="" />
+                          <p>Air conditioning</p>
+                          <span>•</span>
+                        </div>
+                        <div className={styles.featureItem}>
+                          <img src="/icons/Wifi.svg" alt="" />
+                          <p>Wifi</p>
+                          <span>•</span>
+                        </div>
+                        <div className={styles.featureItem}>
+                          <img src="/icons/Kitchen.svg" alt="" />
+                          <p>Kitchen</p>
+                          <span>•</span>
+                        </div>
+                        <div className={styles.featureItem}>
+                          <img src="/icons/Pool.svg" alt="" />
+                          <p>Pool</p>
+                          <span>•</span>
+                        </div>
+                        <div className={styles.featureItem}>
+                          <img src="" alt="" />
+                          <p>Mixer</p>
+                        </div>
+                      </div>
+                      <ul className={styles.freeList}>
+                        <li>
+                          <div className={styles.tickCont}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                          </div>
+                          Free Cancellation till 7 Jan 2022
+                        </li>
+                        <li>
+                          <div className={styles.tickCont}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                          </div>
+                          Free Breakfast
+                        </li>
+                      </ul>
+
+
                     </div>
                   </div>
-                </div>
 
-                <AnimatePresence>
-                  {expandedId === item.id && (
-                    <motion.div
-                      className={styles.expandableContainer}
-                      initial={{ height: 0, opacity: 0, y: 0 }}
-                      animate={{ height: "auto", opacity: 1, y: 0 }}
-                      exit={{ height: 0, opacity: 0, y: 0 }}
-                      transition={{ duration: 0.35, ease: "easeInOut" }}
-                    >
-                      <div className={styles.expandableContent}>
-                        <div className={styles.expandableTopContainer}>
-                          <div className={styles.expandableTop}>
-                            <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
-                            <ul className={styles.list}>
-                              <li>Round Trip Flights</li>
-                              <li>4 Star Hotels</li>
-                              <li>Airport Transfers</li>
-                              <li>Intercity Car Transfers</li>
-                            </ul>
-                          </div>
-                          <div className={styles.expandableCenter}>
-                            <div className={styles.expandableRow}>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Banff Gondola Ride</span>
-                              </div>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Lake Louise Scenic Walk</span>
-                              </div>
-                            </div>
-                            <div className={styles.expandableRow}>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Lake Louise Scenic Walk</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className={styles.hr}></div>
-                        <div className={styles.expandableFooter}>
-                          <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
-                          <button className={styles.bookNow}>BOOK NOW</button>
-                        </div>
+                  <div className={styles.ListViewCardTextBottom}>
+                    <div className={styles.priceContainer}>
+                      <div className={styles.priceSec}>
+                        {item.price}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+
+                      <div className={styles.totalPrice}>
+
+                        <span>1 night, 2 adults</span>
+                      </div>
+                    </div>
+
+                    <button className={styles.bookNowBtn}>SEE AVAILABILITY</button>
+                  </div>
+                </div>
+              </div>
             ))}
           </motion.div>
+          // </div>
         )}
 
         {viewType === "list" && (
-          <motion.div
-            className={styles.ListViewWrapper}
+          
+            <motion.div
+           className={styles.ListViewWrapper}
             key="list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            layout
+            initial={{ opacity: 0, y:0 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 0 }}
+            transition={{ duration: 0.55, ease: "easeInOut" }}
           >
             {tourData.map((item, index) => (
               <motion.div
@@ -268,7 +253,7 @@ const TourListing = () => {
                   <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
                     <div className={styles.headerLeft}>
                       <div className={styles.new}>New</div>
-                      <div className={styles.private}>Private Tour</div>
+                      <div className={styles.private}>Flagship</div>
                     </div>
 
                     <img
@@ -284,12 +269,8 @@ const TourListing = () => {
                   </div>
                 </div>
 
-                <motion.div
+                <div
                   className={styles.ListViewCardText}
-                  initial={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
-                  animate={index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined}
-                  exit={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
-                  transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                   <div className={styles.cartListTop}>
                     <div className={styles.ListViewCardTextTop}>
@@ -343,13 +324,13 @@ const TourListing = () => {
                       <ul className={styles.freeList}>
                         <li>
                           <div className={styles.tickCont}>
-                            <img src="/icons/bluetick.svg" alt="" />
+                            <img src="/icons/checkIcon.svg" alt="" />
                           </div>
                           Free Cancellation till 7 Jan 2022
                         </li>
                         <li>
                           <div className={styles.tickCont}>
-                            <img src="/icons/bluetick.svg" alt="" />
+                            <img src="/icons/checkIcon.svg" alt="" />
                           </div>
                           Free Breakfast
                         </li>
@@ -373,9 +354,10 @@ const TourListing = () => {
 
                     <button className={styles.bookNowBtn}>SEE AVAILABILITY</button>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             ))}
+
           </motion.div>
         )}
       </AnimatePresence>
