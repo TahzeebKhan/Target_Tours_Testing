@@ -1,0 +1,16 @@
+.tourContent{
+    width: 100%;
+    background-color: #F9F9F9;
+    position: relative;
+    z-index: -1;
+}
+
+.tourLayout {
+  max-width: 1920px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 50% 1fr;
+  gap: 24px;
+  padding: 42px 0px 24px 64px;
+}

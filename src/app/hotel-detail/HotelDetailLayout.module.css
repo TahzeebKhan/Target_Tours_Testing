@@ -1,3 +1,26 @@
-.navBar{
+.layoutWrapper{
+    background-color: #F9F9F9;
+
+}
+.navBar {
     margin-bottom: 73px;
+}
+
+.pageSection {
+    /* background-color: #F9F9F9; */
+}
+
+.contentWrapper {
+    max-width: 1520px;
+    width: 100%;
+    /* background-color: #F9F9F9; */
+    display: grid;
+    grid-template-columns: 1056px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 64px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+.rightSidebar{
+    margin-top: 79px;
 }

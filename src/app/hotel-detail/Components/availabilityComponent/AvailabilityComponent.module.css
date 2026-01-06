@@ -1,0 +1,377 @@
+.CardSection {
+    display: flex;
+    gap: 24px;
+    background-color: #FFFFFF;
+    margin-top: 16px;
+}
+
+.imagesNestedCarousel {
+    max-width: 313px;
+    width: 100%;
+    display: flex;
+    position: relative;
+    /* height: 327px; */
+}
+.slide{
+    width: 313px;
+}
+
+.imagesNestedCarousel img {
+    width: 100%;
+    object-fit: cover;
+    background-position: center;
+    height: 100%;
+}
+
+.heading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+}
+
+.cardDetails {
+    display: flex;
+    gap: 16px;
+    padding: 24px;
+    padding-left: 0 !important;
+}
+
+.cardDetailLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+}
+
+.hotelHeadCont {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+}
+
+.hotelTitle {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -2%;
+    color: #000000;
+
+}
+
+.bedMainCont {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bedCount {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+}
+
+.bedCount span,
+.persons {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    color: #121316;
+}
+
+.featureSec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.featureList {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.iconCont {
+    width: 20px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featureList li {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #0A0A0A;
+    white-space: nowrap;
+
+}
+
+.benefitsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 16px;
+    list-style-type: disc;
+}
+
+.benefitsList li {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #343434;
+
+}
+
+.btnContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.CalcellCont {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.CalcellCont span {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #0604B2;
+}
+
+.moreDetailsBtn {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    cursor: pointer;
+    color: #000033;
+
+}
+
+.br {
+    border: 1px solid #DDDFE3
+}
+
+.cardRightTop {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ExcellentCont {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+
+}
+
+.ExcellentText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+}
+
+.Excellent {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #000000;
+
+}
+
+.reviews {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #4A5565;
+}
+
+.ratting {
+    padding: 5px 4.8px;
+    background-color: #F1F2F3;
+
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: #000033;
+
+}
+
+.priceContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+
+.price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.actualPrice {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    text-align: center;
+    text-decoration: line-through;
+    color: #DC2626;
+
+}
+
+.offerPrice {
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    text-align: center;
+    color: black;
+    white-space: nowrap;
+}
+
+.perNight {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #4A5565;
+}
+
+.taxesPrice {
+
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #4A5565;
+
+}
+
+.cardDetailRight {
+    display: flex;
+    justify-content: space-between;
+    gap: 26px;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.BookAmoutn {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #0604B2;
+}
+
+.bookroomContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.BookAmoutn span {
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 13px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #0604B2;
+
+}
+
+.addRoomBtn {
+    padding: 12px 24px;
+    background-color: #000033;
+    color: #FFFFFF;
+
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    transition: all .45s ease;
+    cursor: pointer;
+}
+
+.addRoomBtn:hover {
+    background-color: #FCC800;
+    color: #000033;
+}
+.leftBtn, .rightBtn{
+    background-color: #FFFFFF;
+    width: 24px;
+    height: 24px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btns{
+    padding: 0 9px;
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    top: 50%
+
+}
+
+.rightBtn img{
+    width: 10px;
+    height: 10px;
+}
+.leftBtn img {
+    width: 10px;
+    height: 10px;
+    transform: rotate(0);
+}

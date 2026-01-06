@@ -1,0 +1,36 @@
+.DescriptionSection{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.heading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+
+}
+.paraCont p{
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 1.50;
+    letter-spacing: 0%;
+    color: #1F2226;
+}
+.seeMoreBtn{
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-decoration: underline;
+    color: #000033;
+    text-align: start;
+    cursor: pointer;
+    width: fit-content;
+}
