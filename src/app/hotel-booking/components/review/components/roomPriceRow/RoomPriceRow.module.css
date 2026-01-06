@@ -1,0 +1,110 @@
+.card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border: 1px solid #E4E6E8;
+    background: #fff;
+    padding-right: 24px;
+}
+
+.contentContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.priceContainer {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+
+}
+
+/* Image */
+.image {
+    width: 104px;
+    height: 90px;
+    object-fit: cover;
+}
+
+.content {
+    max-width: 198px;
+}
+
+
+.title {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.60;
+    letter-spacing: 0%;
+
+}
+
+/* Price */
+.priceSection {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: end;
+}
+
+.price {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-style: Semi Bold;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -0.31px;
+    text-align: right;
+    color: #101828;
+
+}
+
+.perNight {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0px;
+    text-align: right;
+    color: #6A7282;
+}
+
+/* Counter */
+.counter {
+    display: flex;
+    align-items: center;
+    gap: 26.5px;
+}
+
+.btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #000033;
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    /* cursor: not-allowed; */
+}
+
+.count {
+
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-style: Semi Bold;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    color: #000000;
+
+}

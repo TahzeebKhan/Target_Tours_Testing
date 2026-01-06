@@ -3,7 +3,7 @@
 import styles from "./RoomSelectionCard.module.css";
 import { CalendarDays } from "lucide-react";
 
-export default function RoomSelectionCard() {
+export default function RoomSelectionCard({onBookNow}) {
     return (
         <div className={styles.card}>
             <div className={styles.innerBox}>
@@ -48,7 +48,7 @@ export default function RoomSelectionCard() {
             </div>
 
             {/* Button */}
-            <button className={styles.selectBtn}>SELECT ROOM</button>
+            <button className={styles.selectBtn} onClick={onBookNow}>SELECT ROOM</button>
         </div>
     );
 }

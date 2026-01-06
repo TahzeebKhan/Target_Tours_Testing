@@ -1,7 +1,8 @@
-.layoutWrapper{
+.layoutWrapper {
     background-color: #F9F9F9;
 
 }
+
 .navBar {
     margin-bottom: 73px;
 }
@@ -21,6 +22,43 @@
     margin: 0 auto;
     margin-top: 50px;
 }
-.rightSidebar{
+
+.rightSidebar {
     margin-top: 79px;
+}
+
+/* ROOM CARD */
+.roomWrapper {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.roomWrapper.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+}
+
+/* BOOKING SUMMARY */
+.summaryWrapper {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    overflow: hidden;
+    transition:
+        max-height 0.6s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+.summaryWrapper.show {
+    max-height: 1200px;
+    /* safe height */
+    opacity: 1;
+    transform: translateY(0);
 }
