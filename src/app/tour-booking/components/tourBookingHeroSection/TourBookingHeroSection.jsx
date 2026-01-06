@@ -1,14 +1,16 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import styles from './TourBookingHeroSection.module.css'
 import Navbar from '@/app/flights/Navbar'
 
 const TourBookingHeroSection = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
   return (
     <section className={styles.tourBookingSection}>
       <div className={styles.overlay}></div>
       <div className={styles.contianerWrapper}>
         <div className={styles.navbarContainer}>
-          <Navbar />
+          <Navbar scrollProgress={scrollProgress} />
         </div>
         <div className={styles.heroContainer}>
           <div className={styles.container}>

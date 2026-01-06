@@ -14,6 +14,7 @@ const TourHeroSection = () => {
   const [departureDate, setDepartureDate] = useState("");
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const [activeTab, setActiveTab] = useState("");
   const travellerOptions = [
@@ -51,7 +52,7 @@ const TourHeroSection = () => {
     <section className={styles.tourHeroSection}>
       <div className={styles.overlay}></div>
       <div>
-        <Navbar />
+        <Navbar scrollProgress={scrollProgress}/>
       </div>
       <div className={styles.container}>
         <div
