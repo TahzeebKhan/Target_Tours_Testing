@@ -1,0 +1,112 @@
+"use client";
+import React, { useEffect, useRef } from "react";
+import styles from './HotelDropDown.module.css'
+import { Minus, Plus } from "lucide-react";
+
+// const CLASSES = ["Economy", "Premium Economy", "Business", "First Class"];
+
+const HotelDropDown = ({
+  open,
+  setOpen,
+  passengers,
+  setPassengers,
+  travelClass,
+  setTravelClass,
+}) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    const handleEsc = (e) => e.key === "Escape" && setOpen(false);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [setOpen]);
+
+  const updateCount = (key, delta) => {
+    setPassengers((prev) => {
+      const next = { ...prev };
+      next[key] = Math.max(0, prev[key] + delta);
+
+      // infants <= adults
+      if (key === "adult" && next.infant > next.adult) {
+        next.infant = next.adult;
+      }
+
+      return next;
+    });
+  };
+
+  if (!open) return null;
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className={styles.dropdown}
+      ref={ref}
+    >
+      {/* <h4 className={styles.heading}>Set Passenger</h4> */}
+      <div className={styles.counterDiv}>
+        {[
+          { key: "room", label: "Room" },
+          { key: "adults", label: "Adults" },
+          { key: "children", label: "Children (1-16 Years Old)" },
+          { key: "pets", label: "Pets"}
+        ].map((row) => (
+          <div key={row.key} className={styles.row}>
+            <div>
+              <div className={styles.label}>{row.label}</div>
+              {/* <div className={styles.sub}>{row.sub}</div> */}
+            </div>
+
+            <div className={styles.counter}>
+              <button
+                onClick={() => updateCount(row.key, -1)}
+                className={styles.minusBtn}
+                disabled={passengers[row.key] === 0}
+              >
+                <Minus size={13} />
+              </button>
+              <span>{passengers[row.key]}</span>
+              <button
+                className={styles.plusBtn}
+                onClick={() => updateCount(row.key, 1)}
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* <h4 className={styles.heading}>Preferred Class</h4>
+
+      <div className={styles.classGrid}>
+        {CLASSES.map((cls) => (
+          <button
+            key={cls}
+            className={`${styles.classBtn} ${travelClass === cls ? styles.active : ""
+              }`}
+            onClick={() => setTravelClass(cls)}
+          >
+            {cls}
+          </button>
+        ))}
+      </div> */}
+
+      <div className={styles.applyBtnContainer}>
+        <button className={styles.applyBtn} onClick={() => setOpen(false)} >apply</button>
+      </div>
+    </div>
+  );
+};
+
+export default HotelDropDown;
