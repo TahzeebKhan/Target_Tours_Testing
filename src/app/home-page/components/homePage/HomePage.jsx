@@ -74,7 +74,9 @@ const HomePage = () => {
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER")
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS")
   const [hotelGuestRoomCount, setHotelGuestRoomCount] = useState("GUESTS & ROOMS")
+  const [travellerOpen, setTravellerOpen] = useState(false);
 
+  const [travellerOpend, setTravellerOpend] = useState(false);
   const [passengers, setPassengers] = useState({
     adult: 1,
     child: 0,
@@ -132,7 +134,7 @@ const HomePage = () => {
 
   const [travelClass, setTravelClass] = useState("Economy");
   const [travellerClass, setTravellerClass] = useState("1_traveller_econ");
-  const [travellerOpen, setTravellerOpen] = useState(false);
+  
   const travellerRef = useRef(null);
 
   const [from, setFrom] = useState("");
@@ -811,11 +813,12 @@ const HomePage = () => {
                       </div>
 
                       <div
+                        ref={travellerRef}
                         className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
                           }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setTravellerOpen((o) => !o);
+                          setTravellerOpend((o) => !o);
                         }}
                       >
                         <div className={styles.lable}>Travellers & Class</div>
@@ -825,7 +828,7 @@ const HomePage = () => {
                           </div>
 
                           <ChevronDown
-                            className={`${styles.chevron} ${travellerOpen
+                            className={`${styles.chevron} ${travellerOpend
                               ? styles.openChevron
                               : styles.closeChevron
                               }`}
@@ -835,8 +838,8 @@ const HomePage = () => {
                         </div>
 
                         <PassengerClassSelector
-                          open={travellerOpen}
-                          setOpen={setTravellerOpen}
+                          open={travellerOpend}
+                          setOpen={setTravellerOpend}
                           passengers={passengers}
                           setPassengers={setPassengers}
                           travelClass={travelClass}
@@ -1208,10 +1211,11 @@ const HomePage = () => {
                   </div>
 
                   <div
+                    ref={travellerRef}
                     className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setTravellerOpen((o) => !o);
+                      setTravellerOpend((o) => !o);
                     }}
                   >
                     <div className={styles.lable}>
@@ -1233,14 +1237,14 @@ const HomePage = () => {
                         )}
                       </div>
                       <ChevronDown
-                        className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
+                        className={`${styles.chevron} ${travellerOpend ? styles.openChevron : styles.closeChevron}`}
                         size={16}
                         color="#FFFFFF"
                       />
                     </div>
                     <PassengerClassSelector
-                      open={travellerOpen}
-                      setOpen={setTravellerOpen}
+                      open={travellerOpend}
+                      setOpen={setTravellerOpend}
                       passengers={passengers}
                       setPassengers={setPassengers}
                       travelClass={travelClass}
@@ -1331,6 +1335,7 @@ const HomePage = () => {
             />
 
             <div
+            ref={travellerRef}  // ← Ye ref parent div pe lagao
               className={`${styles.fromBtn} ${styles.fromBtn2}`}
               onClick={(e) => {
                 e.stopPropagation();
