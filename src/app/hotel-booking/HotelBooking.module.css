@@ -1,0 +1,17 @@
+.contentWrapper{
+    padding-top: 64px;
+    background-color: #F9F9F9;
+}
+.navbarWrapper{
+    margin-bottom: 73px;
+}
+.childrenWrapper{
+  
+    max-width: 1280px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 856px 1fr;
+    gap: 24px;
+    margin: 0 auto;
+    
+}
