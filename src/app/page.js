@@ -9,6 +9,7 @@ import LimitedTimeOffer from "./home-page/components/limitedTimeOffer/LimitedTim
 import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPrivateTrips";
 import FeatureSection from "./home-page/components/featureSection/FeatureSection";
 import Footer from "./home-page/components/footer/Footer";
+import PrivateGroup from "./home-page/components/privateGroup/PrivateGroup";
 
 export default function Home() {
   return (
@@ -19,7 +20,7 @@ export default function Home() {
     <TopToFlights/>
     
     <TargetTours/>
-    <GroupPrivateTrips/>
+    <PrivateGroup/>
     <LimitedTimeOffer/>
     <ExploreStays/>
     <FeatureSection/>

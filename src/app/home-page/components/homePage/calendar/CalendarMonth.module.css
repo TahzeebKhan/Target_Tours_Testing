@@ -2,6 +2,7 @@
   color: #000000;
   font-family: Inter;
 }
+
 .header {
   display: flex;
   align-items: center;
@@ -9,6 +10,7 @@
   margin-bottom: 8px;
   padding: 8px 0px;
 }
+
 .header h4 {
   font-family: var(--font-inter);
   font-size: 14px;
@@ -22,6 +24,7 @@
   margin-right: auto;
   color: #FFFFFF;
 }
+
 .arrow {
   width: 24px;
   height: 24px;
@@ -41,20 +44,25 @@
   transition: all 0.3s ease;
   fill: #FFFFFF;
 }
+
 .arrow:hover {
   background: #000;
 }
+
 .arrow:hover svg path {
   fill: #fff;
 }
+
 .arrowRight {
   margin-left: auto;
   margin-right: unset;
 }
+
 .rightHeading {
   margin-left: auto;
   margin-right: unset !important;
 }
+
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -73,7 +81,7 @@
   padding: 0px 7px;
 }
 
-.weekdays > span {
+.weekdays>span {
   font-size: var(--font-inter);
   display: flex;
   align-items: center;
@@ -89,7 +97,8 @@
   row-gap: 8px;
   column-gap: px;
 }
-.grid > div {
+
+.grid>div {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -98,18 +107,32 @@
 }
 
 .RangeStartCell {
-  background-color: #E2E8F0 !important;
+  background-color: #FCC800 !important;
 }
+
 .RangeStartCell .day {
-  color: white !important;
+  color: #000033 !important;
   font-weight: 400 !important;
 }
+
+.RangeEndCell .day {
+  color: #000033 !important;
+}
+
 .RangeStartCell .price {
-  display: none !important;
+  /* display: none !important; */
+  color: #14532D !important;
 }
+
+.RangeEndCell .price {
+  /* display: none !important; */
+  color: #14532D !important;
+}
+
 .RangeEndCell {
-  background-color: #E2E8F0 !important;
+  background-color: #FCC800 !important;
 }
+
 .RangeStartCell::before {
   content: "";
   position: absolute;
@@ -119,6 +142,7 @@
   height: 100%;
   background-color: #171717;
 }
+
 .RangeEndCell::after {
   content: "";
   position: absolute;
@@ -128,6 +152,7 @@
   height: 100%;
   background-color: #171717;
 }
+
 .cell {
   /* padding: 6px; */
   cursor: pointer;
@@ -142,15 +167,27 @@
 }
 
 .cell:hover {
-  background: #E2E8F0;
+  background: #FCC800;
+}
+
+.cell:hover .day {
+  color: #000000;
+}
+
+.cell:hover .price {
+  color: #14532D;
 }
 
 .selected {
-  background: #E2E8F0;
+  background: #FCC800;
+}
+
+.selected .day {
+  color: #000033 !important;
 }
 
 .range {
-  background: #424242;
+  background: rgba(252, 200, 0, 0.22);
 }
 
 .day {
@@ -158,24 +195,29 @@
   font-weight: 500;
   font-family: Inter;
   color: #FFFFFF;
+  transition: all 0.6s ease;
 }
 
 .price {
   font-size: 8px;
   font-weight: 500;
   color: #3d6823;
+  transition: all 0.6s ease;
 }
 
 .muted {
   opacity: 0.5;
   pointer-events: none;
 }
+
 .muted .day {
   font-weight: 400 !important;
 }
+
 .sundayDate .day {
   color: #ef4444 !important;
 }
+
 .muted .price {
   display: none;
 }
@@ -190,10 +232,11 @@
   background-color: #171717;
 }
 
-.sunday{
+.sunday {
   font-size: var(--font-inter);
   color: #EF4444 !important;
 }
+
 .sunday::before {
   content: "";
   position: absolute;
@@ -210,9 +253,11 @@
 }
 
 .priceGreen {
-  color: #4ADE80; /* your existing green */
+  color: #4ADE80;
+  /* your existing green */
 }
 
 .priceRed {
-  color: #EF4444; /* red-600 (matches airline UI) */
+  color: #EF4444;
+  /* red-600 (matches airline UI) */
 }
