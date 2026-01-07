@@ -9,7 +9,7 @@
 .searchSec {
   width: 100%;
   max-width: 100%;
-  margin-top: 76px;
+  margin-top: 73px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,7 +18,9 @@
   box-sizing: border-box;
   /* interpolate bottom margin from 28px -> 0 */
   margin-bottom: calc(28px - (28px * var(--shrink, 0)));
-  transition: all 1s ease;
+  margin-bottom: 0;
+  padding: 16px;
+  /* transition: all 1s ease; */
 }
 .scrolledMargin{
   margin-bottom: 0;
@@ -247,6 +249,7 @@
   flex-direction: column;
   /* reduce gap from 24px -> 10px using --shrink */
   gap: calc(24px - (14px * var(--shrink, 0)));
+  gap:16px;
   width: 100%;
   box-sizing: border-box;
   transition: gap 220ms linear, padding 220ms linear, top 220ms linear;

@@ -5,6 +5,7 @@
   padding: 12px 0;
   display: flex;
   justify-content: center;
+  position: absolute;
 
   /* 🔹 Glass blur effect */
   /* background: rgba(10, 22, 40, 0.55); */
