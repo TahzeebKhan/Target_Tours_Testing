@@ -4,6 +4,7 @@ import ProfileSection from "./components/profileSection/ProfileSection";
 import PaymentMethod from "./components/paymentMethod/PaymentMethod";
 import EmptyTrip from "./components/emptyTrip/EmptyTrip";
 import Reservations from "./components/reservations/Reservations";
+import PersonalData from "./components/personalData/PersonalData";
 import { useProfile } from "./context/ProfileContext";
 
 const ProflePage = () => {
@@ -26,7 +27,7 @@ const ProflePage = () => {
       {activeMenu === "wishList" && <div>WishLists</div>}
       {activeMenu === "support" && <div>Support</div>}
       {activeMenu === "myReviews" && <div>My Reviews</div>}
-      {activeMenu === "settings" && <div>Settings</div>}
+      {activeMenu === "settings" && <PersonalData />}
     </>
   );
 };
