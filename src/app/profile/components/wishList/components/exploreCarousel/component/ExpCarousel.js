@@ -230,7 +230,7 @@ export default function ExpCarousel({ activeTab }) {
   return (
     <>
       <div
-        style={{ maxWidth: "1520px", margin: "0 auto" }}
+        style={{ maxWidth: "908px", margin: "0 auto" }}
         className="ExpCarouselWrapper"
       >
         
@@ -250,7 +250,7 @@ export default function ExpCarousel({ activeTab }) {
             <Swiper
               modules={[Virtual]}
               onSwiper={setSwiperRef}
-              spaceBetween={16}
+              spaceBetween={12}
               centeredSlides={true} // ✅ center main card
               slidesPerView={1.1} // ✅ peek effect
               pagination={{ clickable: true }} // ✅ bullets
@@ -261,28 +261,28 @@ export default function ExpCarousel({ activeTab }) {
                 0: {
                   slidesPerView: 1.1,
                   centeredSlides: true,
-                  spaceBetween: 16,
+                  spaceBetween: 12,
                 },
                 576: {
                   slidesPerView: 2,
                   centeredSlides: false,
-                  spaceBetween: 20,
+                  spaceBetween: 12,
                 },
 
                 768: {
                   slidesPerView: 3,
                   centeredSlides: false,
-                  spaceBetween: 30,
+                  spaceBetween: 12,
                 },
                 1200: {
-                  slidesPerView: 4,
+                  slidesPerView: 3,
                   centeredSlides: false,
-                  spaceBetween: 30,
+                  spaceBetween: 12,
                 },
               }}
             >
               {slides.map((item, index) => (
-                <SwiperSlide key={index} virtualIndex={index}>
+                <SwiperSlide key={index} virtualIndex={index} className={styles.swiperSlide}>
                   <div className={`${styles.cardItem} cardItem`}>
                     <InnerCarousel
                       images={item.images}

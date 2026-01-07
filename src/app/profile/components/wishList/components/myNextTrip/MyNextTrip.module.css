@@ -1,0 +1,40 @@
+.container {
+    height: 100%;
+    padding: 24px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.br {
+    width: 100%;
+    border: .5px solid #E4E6E8;
+}
+
+.backToWishLists {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.backToWishLists p {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #000000;
+}
+
+.myNextTripHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: 0%;
+    color: #000033;
+}
