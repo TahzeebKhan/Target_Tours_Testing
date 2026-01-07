@@ -1,6 +1,11 @@
+"use client";
+import { useState } from "react";
+
 import styles from './PaymentMethod.module.css';
+import ChoosePaymentMethod from "./ChoosePaymentMethod";
 
 export default function PaymentMethod() {
+  const [showChoosePayment, setShowChoosePayment] = useState(false);
   return (
     <main className={styles.container}>
       <header className={styles.header}>
@@ -12,15 +17,26 @@ export default function PaymentMethod() {
 
       <section className={styles.sectionGroup}>
         {/* Payment Methods Section */}
-        <div className={styles.row}>
-          <div className={styles.textContent}>
-            <h2 className={styles.sectionTitle}>PAYMENT METHODS</h2>
-            <p className={styles.description}>
-              Add a payment method using our secure payment system, then start planning your next trip.
-            </p>
-          </div>
-          <button className={styles.button}>ADD PAYMENT METHOD</button>
-        </div>
+{!showChoosePayment ? (
+  <div className={styles.row}>
+    <div className={styles.textContent}>
+      <h2 className={styles.sectionTitle}>PAYMENT METHODS</h2>
+      <p className={styles.description}>
+        Add a payment method using our secure payment system, then start
+        planning your next trip.
+      </p>
+    </div>
+    <button
+      className={styles.button}
+      onClick={() => setShowChoosePayment(true)}
+    >
+      ADD PAYMENT METHOD
+    </button>
+  </div>
+) : (
+  <ChoosePaymentMethod />
+)}
+
 
         {/* Gift Credit Section */}
         <div className={styles.row}>
