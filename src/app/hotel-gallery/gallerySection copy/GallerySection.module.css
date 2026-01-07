@@ -1,0 +1,41 @@
+.container{
+    display: flex;
+}
+.headerContainer{
+    width: 34%;
+
+}
+.head{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+}
+.galleryBottom{
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.galleryContainer{
+    width: 66%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.galleryTop{
+    /* display: flex; */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    /* height: 373px; */
+    overflow: hidden;
+}
+.galleryTop img{
+    width: 100%;
+    height: auto;
+}

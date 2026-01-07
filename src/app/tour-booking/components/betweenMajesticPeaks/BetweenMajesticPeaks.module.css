@@ -21,6 +21,10 @@
 
     margin: 0 auto;
 }
+.viewGalleryBtnIcon{
+    width: 12px !important;
+    height: 12px !important;
+}
 
 .bottomContainerRef {
     display: flex;
@@ -77,6 +81,9 @@
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* RESPONSIVE */

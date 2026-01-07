@@ -1,7 +1,14 @@
 import React from 'react'
 import styles from './HotelGallery.module.css'
+import { useRouter } from 'next/navigation';
 
 const HotelGallery = () => {
+
+     const router = useRouter();
+    
+        const goToGallery = () => {
+            router.push('/hotel-gallery');
+        }
     return (
         <div className={styles.bottomContainerRef}>
             <div className={styles.rightImage}>
@@ -22,8 +29,8 @@ const HotelGallery = () => {
 
                 <div className={styles.imageBox}>
                     <img src="/images/hotelArt4.png" alt="" />
-                    <button className={styles.viewGalleryBtn} >
-                        ⠿ VIEW GALLERY
+                    <button className={styles.viewGalleryBtn} onClick={goToGallery} >
+                        <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                     </button>
                 </div>
             </div>
