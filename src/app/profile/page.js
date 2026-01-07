@@ -5,11 +5,14 @@ import PaymentMethod from "./components/paymentMethod/PaymentMethod";
 import EmptyTrip from "./components/emptyTrip/EmptyTrip";
 import Reservations from "./components/reservations/Reservations";
 import PersonalData from "./components/personalData/PersonalData";
+import IndividualProperty from "./components/individualProperty/IndividualProperty";
+
 import { useProfile } from "./context/ProfileContext";
 
 const ProflePage = () => {
   const { activeMenu } = useProfile();
   const [showReservations, setShowReservations] = useState(false);
+  const [showIndividualProperty, setShowIndividualProperty] = useState(false);
 
   return (
     <>
@@ -20,8 +23,12 @@ const ProflePage = () => {
       {activeMenu === "trip" &&
         (!showReservations ? (
           <EmptyTrip onStartSearching={() => setShowReservations(true)} />
+        ) : !showIndividualProperty ? (
+          <Reservations
+            onCheckDetails={() => setShowIndividualProperty(true)}
+          />
         ) : (
-          <Reservations />
+          <IndividualProperty />
         ))}
 
       {activeMenu === "wishList" && <div>WishLists</div>}

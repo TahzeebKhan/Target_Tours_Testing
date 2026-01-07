@@ -27,7 +27,7 @@ const reservationData = [
 
 const tabs = ["ALL", "HOTEL BOOKING", "PACKAGES", "TRAVEL INSURANCE"];
 
-export default function Reservations() {
+export default function Reservations({ onCheckDetails }) {
   const [activeTab, setActiveTab] = useState("HOTEL BOOKING");
 
   return (
@@ -99,7 +99,9 @@ export default function Reservations() {
                 <span className={styles.idLabel}>ID {item.id}</span>
               </div>
 
-              <button className={styles.checkDetails}>Check Details</button>
+              <button className={styles.checkDetails} onClick={onCheckDetails}>
+                Check Details
+              </button>
             </div>
           </article>
         ))}
