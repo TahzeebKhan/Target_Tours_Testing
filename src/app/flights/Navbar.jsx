@@ -6,9 +6,9 @@ const Navbar = ({scrollProgress={scrollProgress}}) => {
       {" "}
       <div style={{
         // transform: `translateY(${-72 * scrollProgress}px)`,
-        opacity: 1 - scrollProgress,
+        // opacity: 1 - scrollProgress,
       }}
-       className={`${styles.navContainer} absolute top-0 z-100`}>
+       className={`${styles.navContainer} top-0 z-100`}>
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >

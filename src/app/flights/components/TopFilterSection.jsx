@@ -267,8 +267,6 @@
 // const marginBottom = MAX_MARGIN_BOTTOM * (1 - progress);
 // const padding = MAX_PADDING - (MAX_PADDING - MIN_PADDING) * progress;
 
-
-
 //   return (
 //     <>
 //       <div  style={{
@@ -564,7 +562,7 @@
 //                       className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
 //                       style={{ pointerEvents: 'none' }}
 //                     >
-//                       {/* First row is now handled by the unified block above. 
+//                       {/* First row is now handled by the unified block above.
 //                           We use paddingTop to space the second row. */}
 
 //                       <div
@@ -699,7 +697,6 @@
 
 // export default TopFilterSection;
 
-
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./TopFilterSection.module.css";
@@ -733,9 +730,10 @@ const passengerTypes = [
   "MEDICAL PROFESSIONAL",
 ];
 
-
-
-const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }) => {
+const TopFilterSection = ({
+  isScrolled: parentScrolled = false,
+  scrollProgress,
+}) => {
   const calendarRef = useRef(null);
   const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
   const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
@@ -778,10 +776,30 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
 
   // Sample suggestions data
   const recentSearches = [
-    { label: 'CHENNAI, INDIA', detail: 'Chennai International Airport, India', code: 'CEN', value: 'Chennai, India' },
-    { label: 'MUMBAI, INDIA', detail: 'Mumbai Chhatrapati Shivaji Maharaj International Airport, India', code: 'BOM', value: 'Mumbai, India' },
-    { label: 'KOLKATA, INDIA', detail: 'Kolkata Netaji Subhas Chandra Bose International Airport, India', code: 'KLG', value: 'Kolkata, India' },
-    { label: 'BENGALURU, INDIA', detail: 'Bengaluru Kempegowda International Airport, India', code: 'BLR', value: 'Bengaluru, India' },
+    {
+      label: "CHENNAI, INDIA",
+      detail: "Chennai International Airport, India",
+      code: "CEN",
+      value: "Chennai, India",
+    },
+    {
+      label: "MUMBAI, INDIA",
+      detail: "Mumbai Chhatrapati Shivaji Maharaj International Airport, India",
+      code: "BOM",
+      value: "Mumbai, India",
+    },
+    {
+      label: "KOLKATA, INDIA",
+      detail: "Kolkata Netaji Subhas Chandra Bose International Airport, India",
+      code: "KLG",
+      value: "Kolkata, India",
+    },
+    {
+      label: "BENGALURU, INDIA",
+      detail: "Bengaluru Kempegowda International Airport, India",
+      code: "BLR",
+      value: "Bengaluru, India",
+    },
   ];
 
   const departureRef = useRef(null);
@@ -796,10 +814,7 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
 
   // Filter suggestions based on input
   const getFilteredSuggestions = (input) => {
-    const query =
-      typeof input === "string"
-        ? input
-        : input?.label || "";   // 🔥 object case handle
+    const query = typeof input === "string" ? input : input?.label || ""; // 🔥 object case handle
 
     if (!query) return recentSearches;
 
@@ -812,7 +827,6 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
         s.code.toLowerCase().includes(q)
     );
   };
-
 
   // Handle suggestion selection
   const selectSuggestion = (suggestion, field) => {
@@ -827,7 +841,6 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
     setFromSuggestionsOpen(false);
     setToSuggestionsOpen(false);
   };
-
 
   const handleDateClick = (date) => {
     if (tripType === "multi" && activeMultiIndex !== null) {
@@ -903,11 +916,18 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
       if (travellerRef.current && !travellerRef.current.contains(e.target)) {
         setTravellerOpen(false);
       }
-      if (fromSuggestionRef.current && !fromSuggestionRef.current.contains(e.target) &&
-        fromInputRef.current && !fromInputRef.current.contains(e.target)) {
+      if (
+        fromSuggestionRef.current &&
+        !fromSuggestionRef.current.contains(e.target) &&
+        fromInputRef.current &&
+        !fromInputRef.current.contains(e.target)
+      ) {
         setFromSuggestionsOpen(false);
       }
-      if (toSuggestionRef.current && !toSuggestionRef.current.contains(e.target)) {
+      if (
+        toSuggestionRef.current &&
+        !toSuggestionRef.current.contains(e.target)
+      ) {
         setToSuggestionsOpen(false);
       }
     };
@@ -1044,33 +1064,40 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
 
   return (
     <>
-      <div style={{
-        marginTop: `${marginTop}px`,
-        padding: `${padding}px`,
-        marginBottom: `${marginBottom}px`,
-        transition: "none", // 👈 IMPORTANT
-      }}
-        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""}
+      <div
+        style={{
+          // marginTop: scrollProgress === 1 ? `0px` : "",
+          // padding: `${padding}px`,
+          // marginBottom: `${marginBottom}px`,
+          // transition: "none", // 👈 IMPORTANT
+        }}
+        className={`${styles.searchSec} ${
+          tripType === "multi" ? styles.isMulti : ""
+        }
         ${scrollProgress === 1 ? styles.scrolledSearchSec : ""}
          sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
-          className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
-            ? styles.noAnimation
-            : ""
-            }`}
+          className={`${styles.searchPanelWrapper} ${
+            bookingType === "holiday" || bookingType === "insurance"
+              ? styles.noAnimation
+              : ""
+          }`}
         >
           {bookingType === "flight" && (
-            <div className={`${styles.serarchingCont} ${styles.glass_panel}
+            <div
+              className={`${styles.serarchingCont} ${styles.glass_panel}
               ${scrollProgress === 1 ? styles.scrolledSerarchingCont : ""}
               //  ${isScrolled ? styles.scrolledGap : ""}
                
-               `}>
+               `}
+            >
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
                   <label
-                    className={`${styles.tripOption} ${tripType === "oneway" ? styles.active : ""
-                      }`}
+                    className={`${styles.tripOption} ${
+                      tripType === "oneway" ? styles.active : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -1084,8 +1111,9 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                   </label>
 
                   <label
-                    className={`${styles.tripOption} ${tripType === "round" ? styles.active : ""
-                      }`}
+                    className={`${styles.tripOption} ${
+                      tripType === "round" ? styles.active : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -1099,8 +1127,9 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                   </label>
 
                   <label
-                    className={`${styles.tripOption} ${tripType === "multi" ? styles.active : ""
-                      }`}
+                    className={`${styles.tripOption} ${
+                      tripType === "multi" ? styles.active : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -1125,13 +1154,18 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
               {/* Flight trip-type forms (round / oneway / multi) with smart-animate style transition */}
               <div className={styles.flightSearchFormContainer}>
                 {/* Unified One-way, Round-trip, and Multi-city (first row) form */}
-                {(tripType === "oneway" || tripType === "round" || tripType === "multi") && (
+                {(tripType === "oneway" ||
+                  tripType === "round" ||
+                  tripType === "multi") && (
                   <div
                     className={`${styles.serarchingContBottom}  ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
                   >
                     <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
-                        }`}
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                        tripType === "oneway" || tripType === "multi"
+                          ? styles.growRight
+                          : ""
+                      }`}
                     >
                       <div className={styles.lable}>From</div>
                       <input
@@ -1139,12 +1173,14 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                         type="text"
                         className={styles.contant}
                         placeholder="Departure"
-                        value={tripType === 'multi' ? multiSegments[0].from : from}
+                        value={
+                          tripType === "multi" ? multiSegments[0].from : from
+                        }
                         onFocus={() => setFromSuggestionsOpen(true)}
                         onClick={() => setFromSuggestionsOpen(true)}
                         onChange={(e) => {
-                          if (tripType === 'multi') {
-                            updateSegment(0, 'from', e.target.value);
+                          if (tripType === "multi") {
+                            updateSegment(0, "from", e.target.value);
                           } else {
                             setFrom(e.target.value);
                             setFromSuggestionsOpen(true);
@@ -1156,13 +1192,17 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                         <SuggestionBox
                           boxRef={fromSuggestionRef}
                           heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(tripType === 'multi' ? multiSegments[0].from : from)}
+                          suggestions={getFilteredSuggestions(
+                            tripType === "multi" ? multiSegments[0].from : from
+                          )}
                           onSelect={(s) => selectSuggestion(s, "from")}
                         />
                       )}
                     </div>
                     <div
-                      className={`${styles.arrowbox} ${tripType === "round" ? styles.arrowbox2 : ""} ${tripType === "multi" ? styles.arrowbox3 : ""}`}
+                      className={`${styles.arrowbox} ${
+                        tripType === "round" ? styles.arrowbox2 : ""
+                      } ${tripType === "multi" ? styles.arrowbox3 : ""}`}
                       onClick={() => {
                         if (tripType === "multi") {
                           const { from, to } = multiSegments[0];
@@ -1176,8 +1216,13 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                       <ArrowLeftRight size={16} className={styles.arrowIcon} />
                     </div>
                     <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.toBtn
-                        } ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""}`}
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                        styles.toBtn
+                      } ${
+                        tripType === "oneway" || tripType === "multi"
+                          ? styles.growRight
+                          : ""
+                      }`}
                     >
                       <div className={styles.lable}>To</div>
                       <input
@@ -1201,15 +1246,20 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                         <SuggestionBox
                           boxRef={toSuggestionRef}
                           heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(tripType === 'multi' ? multiSegments[0].to : to)}
+                          suggestions={getFilteredSuggestions(
+                            tripType === "multi" ? multiSegments[0].to : to
+                          )}
                           onSelect={(s) => selectSuggestion(s, "to")}
                         />
                       )}
                     </div>
 
                     <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
-                        } ${styles.calendarAnchor}`}
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                        tripType === "oneway" || tripType === "multi"
+                          ? styles.growRight
+                          : ""
+                      } ${styles.calendarAnchor}`}
                     >
                       <div className={styles.lable}>Departure Date</div>
                       {showCalendar && (
@@ -1248,7 +1298,8 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                             setShowCalendar(true);
                           } else {
                             setCalendarTripType("oneway");
-                            if (tripType === "round") setCalendarTripType("round");
+                            if (tripType === "round")
+                              setCalendarTripType("round");
                             setShowCalendar(true);
                           }
                         }}
@@ -1261,7 +1312,7 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                           value={
                             tripType === "multi"
                               ? formatDate(multiSegments[0].date)
-                              : (formatDate(startDate) || "")
+                              : formatDate(startDate) || ""
                           }
                         />
 
@@ -1273,8 +1324,13 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
 
                     {/* Return Date - conditionally hidden with CSS */}
                     <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.returnDateField} ${tripType === "oneway" || tripType === "multi" ? styles.hiddenField : ""
-                        }`}
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                        styles.returnDateField
+                      } ${
+                        tripType === "oneway" || tripType === "multi"
+                          ? styles.hiddenField
+                          : ""
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         openRoundTripCalendar();
@@ -1282,9 +1338,7 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                     >
                       <div className={styles.lable}>Return Date</div>
 
-                      <div
-                        className={styles.dateInputWrapper}
-                      >
+                      <div className={styles.dateInputWrapper}>
                         <input
                           type="text"
                           readOnly
@@ -1300,8 +1354,11 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                     </div>
 
                     <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
-                        }`}
+                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                        tripType === "oneway" || tripType === "multi"
+                          ? styles.growRight
+                          : ""
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setTravellerOpen((o) => !o);
@@ -1317,10 +1374,11 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                         </div>
 
                         <ChevronDown
-                          className={`${styles.chevron} ${travellerOpen
-                            ? styles.openChevron
-                            : styles.closeChevron
-                            }`}
+                          className={`${styles.chevron} ${
+                            travellerOpen
+                              ? styles.openChevron
+                              : styles.closeChevron
+                          }`}
                           size={16}
                           color="#FFFFFF"
                         />
@@ -1360,18 +1418,20 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                   <>
                     <div
                       className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
-                      style={{ pointerEvents: 'none' }}
+                      style={{ pointerEvents: "none" }}
                     >
                       {/* First row is now handled by the unified block above. 
                           We use paddingTop to space the second row. */}
 
                       <div
-                        className={`${styles.serarchingContBottom} ${styles.bottomRowAnimate
-                          } ${tripType === "multi"
+                        className={`${styles.serarchingContBottom} ${
+                          styles.bottomRowAnimate
+                        } ${
+                          tripType === "multi"
                             ? styles.animateIn
                             : styles.animateOut
-                          }`}
-                        style={{ pointerEvents: 'auto' }}
+                        }`}
+                        style={{ pointerEvents: "auto" }}
                       >
                         <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
                           <div className={styles.lable}>From</div>
@@ -1394,7 +1454,10 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                             updateSegment(1, "to", from);
                           }}
                         >
-                          <ArrowLeftRight size={16} className={styles.arrowIcon} />
+                          <ArrowLeftRight
+                            size={16}
+                            className={styles.arrowIcon}
+                          />
                         </div>
 
                         <div
@@ -1457,7 +1520,10 @@ const TopFilterSection = ({ isScrolled: parentScrolled = false, scrollProgress }
                             </button>
                           </div>
                         </div>
-                        <div className={styles.searchBtn} onClick={handleSearch}>
+                        <div
+                          className={styles.searchBtn}
+                          onClick={handleSearch}
+                        >
                           <svg
                             width="24"
                             height="24"
