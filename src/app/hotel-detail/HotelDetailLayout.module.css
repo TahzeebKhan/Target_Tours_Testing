@@ -4,11 +4,11 @@
 }
 
 .navBar {
-    margin-bottom: 73px;
+    /* margin-bottom: 73px; */
 }
 
 .pageSection {
-    /* background-color: #F9F9F9; */
+padding-top: 73px;
 }
 
 .contentWrapper {

@@ -1,19 +1,19 @@
 "use client";
 import styles from "./Navbar.module.css";
-const Navbar = ({scrollProgress={scrollProgress}}) => {
+const Navbar = () => {
   return (
     <>
       {" "}
-      <div style={{
-        // transform: `translateY(${-72 * scrollProgress}px)`,
-        // opacity: 1 - scrollProgress,
-      }}
-       className={`${styles.navContainer} top-0 z-100`}>
+      <div className={`${styles.navContainer} fixed top-0 z-100`}>
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
           <img src="./Logo.svg" alt="" />
           <div className={`${styles.navRight} flex gap-3`}>
+            {/* <div className={styles.sessionExpires}>
+              <img src="/icons/watchIcon.svg" alt="" />
+              <p className={styles.sessionExpiresText}>Session expires in <span>14:32</span></p>
+            </div> */}
             <button className={`${styles.glass_button} ${styles.downloadBtn}`}>
               Download the App
             </button>

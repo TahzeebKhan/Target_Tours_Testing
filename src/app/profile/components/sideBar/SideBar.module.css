@@ -1,0 +1,148 @@
+.sideBarContianer {
+    padding: 24px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sideBarTop {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+}
+
+.sideBarProfileDetails {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.sideBarProfileDetailsText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 100%;
+}
+
+.sideBarProfileDetailsText h3 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    color: #1F2226;
+
+}
+
+.sideBarProfileDetailsText p {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+
+    color: #1F2226;
+
+}
+
+.br {
+    width: 100%;
+    border: 0.5px solid #DDDFE3
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+}
+
+.item {
+    padding: 14px 25px 12px 21px;
+    display: flex;
+    align-items: center;
+
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    color: #000033;
+    transition: all .35s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.trip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.active {
+    background-color: #E8EFFC;
+    border-bottom: 1px solid #000033
+}
+
+/* Sub menu */
+.subMenu {
+    margin-left: 16px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 3px solid #DDDFE3;
+    padding-left: 12px;
+}
+
+/* Sub items */
+.subItem {
+    
+    font-size: 15px;
+    color: #6b7280;
+    cursor: pointer;
+    position: relative;
+
+
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    color: #000033;
+    border-radius: 6px;
+
+}
+
+.subActive {
+    color: #111827;
+    font-weight: 500;
+    transition: all 0.45s ease;
+}
+
+.activeIndicator {
+    height: 29px !important;
+    position: absolute;
+    left: -16px;
+    top: calc(50% - 12px);
+    width: 6px;
+    height: 24px;
+    background: #0b0b45;
+    border-radius: 6px;
+}
+
+.logout{
+    color: #B91C1C;
+}
