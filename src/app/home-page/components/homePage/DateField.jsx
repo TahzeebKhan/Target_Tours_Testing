@@ -83,7 +83,7 @@ const DateField = ({
 
                 {/* Calendar icon */}
                 <button type="button" className={styles.calendarIcon} onClick={(e) => { e.stopPropagation(); setShowCalendar(true) }}>
-                    <CalendarSVG />
+                    <CalendarSVG className={styles.calendarIcon} />
                 </button>
 
                 {showCalendar && (

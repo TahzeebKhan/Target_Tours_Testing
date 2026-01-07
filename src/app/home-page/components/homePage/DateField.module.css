@@ -66,19 +66,22 @@
 .dateInputWrapper input[type="date"]:valid::before {
     content: "";
 }
-.contant{
+
+.contant {
     width: 100%;
     outline: none;
     color: #ffffff;
     cursor: pointer;
 }
-.contant::placeholder{
+
+.contant::placeholder {
     color: #ffffff;
 }
+
 /* Remove native calendar icon */
 .contant::-webkit-calendar-picker-indicator {
     display: none;
-    
+
 }
 
 /* Calendar SVG */
@@ -87,16 +90,21 @@
     color: #ffffff;
 }
 
-@media (max-width: 895px){
-    .field{
+@media (max-width: 895px) {
+    .field {
         border: 0.5px solid #E6E8EC;
-    padding: 8px;
+        padding: 8px;
     }
-    .contant{
-    color: #000000;
-}
-.contant::placeholder{
-    color: #000000;
-}
 
+    .contant {
+        color: #000000;
+    }
+
+    .contant::placeholder {
+        color: #000000;
+    }
+
+    .calendarIcon path {
+        fill: #000000 !important;
+    }
 }
