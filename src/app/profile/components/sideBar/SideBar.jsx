@@ -1,0 +1,95 @@
+
+"use client"
+import React, { useState } from 'react'
+import styles from './SideBar.module.css'
+import { ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+import { useProfile } from '../../context/ProfileContext'
+
+const SideBar = () => {
+    const { activeMenu, setActiveMenu } = useProfile();
+
+    const [openTrips, setOpenTrips] = useState(false);
+    const [activeTrip, setActiveTrip] = useState("All");
+    return (
+        <div className={styles.sideBarContianer}>
+            <div className={styles.sideBarTop}>
+                <div className={styles.sideBarProfileDetails}>
+                    <img className={styles.avatar} src="/images/Avatar.png" alt="" />
+                    <div className={styles.sideBarProfileDetailsText}>
+                        <h3>Emmily Morgan</h3>
+                        <p>Customer Operations</p>
+                    </div>
+                </div>
+                <div className={styles.br}></div>
+                <ul className={styles.menu}>
+                    <li className={`${styles.item} ${activeMenu === "Personal Information" ? styles.active : ""}`}
+                        onClick={() => setActiveMenu("Personal Information")}>
+                        Personal Information
+                    </li>
+
+                    <li className={`${styles.item} ${activeMenu === "paymentAccount" ? styles.active : ""}`} onClick={() => setActiveMenu("paymentAccount")}>Payment Account</li>
+
+                    <li className={`${styles.item} ${activeMenu === "trip" ? styles.active : ""} ${styles.trip}`} onClick={() => {
+                        setOpenTrips(!openTrips)
+                        setActiveMenu("trip")
+
+                    }
+                    }>
+                        <span>Trips</span>
+                        <ChevronDown size={16} />
+                    </li>
+                    <AnimatePresence>
+                        {openTrips && (
+                            <motion.ul
+                                initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+                                animate={{ height: 'auto', opacity: 1, transitionEnd: { overflow: 'visible' } }}
+                                exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className={styles.subMenu}
+                            >
+                                {["All", "Active", "Completed", "Canceled"].map((item) => (
+                                    <li
+                                        key={item}
+                                        className={`${styles.subItem} ${activeTrip === item ? styles.subActive : ""
+                                            }`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveTrip(item);
+                                            setActiveMenu("trip");
+                                        }}
+                                    >
+                                        {activeTrip === item && (
+                                            <motion.div
+                                                layoutId="activeTripIndicator"
+                                                className={styles.activeIndicator}
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                        {item}
+                                    </li>
+                                ))}
+                            </motion.ul>
+                        )}
+                    </AnimatePresence>
+
+                    <li className={`${styles.item} ${activeMenu === "wishList" ? styles.active : ""}`} onClick={() => setActiveMenu("wishList")}>WishLists</li>
+                    <li className={`${styles.item} ${activeMenu === "support" ? styles.active : ""}`} onClick={() => setActiveMenu("support")}>Support</li>
+                    <li className={`${styles.item} ${activeMenu === "myReviews" ? styles.active : ""}`} onClick={() => setActiveMenu("myReviews")}>My Reviews</li>
+                </ul>
+                <div className={styles.br}></div>
+                <div className={`${styles.item} ${activeMenu === "settings" ? styles.active : ""}`} onClick={() => setActiveMenu("settings")}>
+                    Settings
+                </div>
+            </div>
+            <div className={styles.sideBarBottom}>
+                <div className={`${styles.logout} ${styles.item}`}>
+                    Logout
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default SideBar
