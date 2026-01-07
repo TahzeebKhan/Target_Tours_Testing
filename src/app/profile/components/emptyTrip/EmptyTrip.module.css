@@ -1,0 +1,102 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 956px;
+  padding: 24px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  font-family: 'Inter';
+  color: rgba(0, 0, 0, 1);
+  min-height: 100%;
+  flex: 1; 
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  gap: 23px;
+  text-align: center;
+  height: 100%;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.illustration {
+  object-fit: contain;
+}
+
+.searchButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 51, 1); 
+  color: #ffffff;
+  padding: 12px 24px;
+  min-width: 268px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  height: 41px;
+      transition: 
+    background-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+.searchButton:hover {
+  background: rgba(252, 200, 0, 1);
+    color: rgba(0, 0, 51, 1);
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading {
+  font-family: Antic Didone; 
+  font-size: 32px;
+  font-weight: 400;
+  color: rgba(0, 0, 51, 1);
+}
+
+.subtext {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Responsive Breakpoints */
+
+@media (max-width: 768px) {
+  .heading {
+    font-size: 32px;
+  }
+  
+  .subtext {
+    font-size: 16px;
+  }
+  
+  .contentWrapper {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heading {
+    font-size: 28px;
+  }
+
+  .searchButton {
+    width: 100%;
+    padding: 12px 24px;
+  }
+}

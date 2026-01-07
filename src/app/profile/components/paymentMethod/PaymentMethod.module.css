@@ -1,0 +1,109 @@
+.container {
+  max-width: 956px;
+  padding: 24px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+  gap: 24px;
+  font-family: 'Inter';
+  color: rgba(0, 0, 0, 1);
+  background-color: white;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex-grow: 1;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.title {
+  font-family: Antic Didone; 
+  font-size: 28px;
+  font-weight: 400;
+  color: rgba(0, 0, 51, 1);
+}
+
+.subtitle {
+  font-size: 14px;
+}
+
+.sectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap; 
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.sectionTitle {
+  font-size: 18px;
+}
+
+.description {
+  font-size: 14px;
+  color: rgba(67, 67, 67, 1);
+}
+
+.button {
+  background-color: rgba(0, 0, 51, 1); 
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 256px;
+  text-align: center;
+    transition: 
+    background-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.button:hover {
+  background: rgba(252, 200, 0, 1);
+    color: rgba(0, 0, 51, 1);
+}
+
+.footerSection {
+  padding-top: 24px;
+  border-top: 1px solid rgba(228, 230, 232, 1);
+}
+
+/* Tablet and Mobile Adjustments */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .button {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+}
