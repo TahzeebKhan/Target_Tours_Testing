@@ -13,7 +13,7 @@ const BetweenMajesticPeaks = () => {
     const router = useRouter();
 
     const goToGallery = () => {
-        router.push('/view-gallery');
+        router.push('/view-gallery'); 
     }
 
     // Sample images - replace with your actual images
@@ -194,7 +194,7 @@ const BetweenMajesticPeaks = () => {
                     <div className={styles.imageBox}>
                         <img src="/tourBooking/ImagesItem1.png" alt="" />
                         <button className={styles.viewGalleryBtn} onClick={goToGallery}>
-                            ⠿ VIEW GALLERY
+                            <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                         </button>
                     </div>
                 </div>
