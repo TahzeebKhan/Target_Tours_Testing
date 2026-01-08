@@ -583,3 +583,17 @@
   color: #cccccc;
   margin-top: -10px;
 }
+
+@media (max-width: 830px) {
+  .flightIcon {
+    width: 27px;
+    height: 27px;
+  }
+}
+
+@media (max-width: 780px) {
+  .tabItem {
+    font-size: 12px;
+    padding: 8px ;
+  }
+}

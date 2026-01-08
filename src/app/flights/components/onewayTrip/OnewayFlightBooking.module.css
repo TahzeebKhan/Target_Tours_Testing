@@ -174,15 +174,19 @@
 
   transition: border-bottom 0.45s ease;
 }
+
 .expendableContainer {
   transition: all 0.4s ease;
 }
+
 .expendableContainer:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
 }
+
 .flightOpenHoverNone {
   box-shadow: none !important;
 }
+
 .airlineRow {
   display: flex;
   gap: 6px;
@@ -234,15 +238,18 @@
   flex-direction: column;
   gap: 2px;
 }
+
 .multiImageCont {
   position: relative;
   width: 42px;
   height: 42px;
 }
+
 .multiImageCont img {
   width: 23px;
   height: 23px;
 }
+
 .multiImageCont img:first-child {
   position: absolute;
   left: 0;
@@ -254,6 +261,7 @@
   right: 0;
   bottom: 0;
 }
+
 .seeDetailsBtn {
   display: flex;
   gap: 5px;
@@ -305,6 +313,7 @@
   position: relative;
   justify-content: center;
 }
+
 .goingVia {
   position: absolute;
   left: 50%;
@@ -318,6 +327,7 @@
   letter-spacing: 0%;
   color: #208ef5;
 }
+
 .nextDay {
   font-size: 12px;
   font-weight: 500;
@@ -439,6 +449,7 @@
   border: none;
   transition: all 0.45s ease;
 }
+
 .viewBtn:hover {
   background-color: #fcc800;
   color: #000033;
@@ -448,6 +459,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.flightFareDetailsResponsive {
+  display: none;
 }
 
 .fare {
@@ -486,6 +501,10 @@
   color: #208ef5;
 }
 
+.fareDetailsResponsive {
+  display: none;
+}
+
 /* EXPAND CONTAINER */
 .expandWrap {
   max-height: 0;
@@ -510,6 +529,7 @@
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
+
 .fare {
   white-space: nowrap;
 }
@@ -519,19 +539,21 @@
 }
 
 
-.isMobileView{
+.isMobileView {
+  display: none;
   padding: 12px 16px;
-  display: flex;
   flex-direction: column;
   gap: 12px;
 
 }
-.mobileFlightContainer{
+
+.mobileFlightContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.mobileSubTextContainer{
+
+.mobileSubTextContainer {
   font-family: var(--font-inter);
   font-weight: 300;
   font-style: Light;
@@ -540,7 +562,8 @@
   letter-spacing: -2%;
   color: #000000;
 }
-.filterBtn{
+
+.filterBtn {
   font-family: var(--font-inter);
   font-weight: 600;
   font-style: Semi Bold;
@@ -551,6 +574,42 @@
   color: #0604B2;
 
 }
+
+.flightChipContainer {
+  width: 100%;
+  
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+}
+
+.chips {
+  padding: 4px;
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #E4E6E8;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+}
+
+.mobileCloseBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  background-color: #F2F3F7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileCloseBtn img {
+  width: 16px;
+  height: 16px;
+}
+
 @media (max-width: 1264px) {
   .flightFareDetailsContainer {
     gap: 4px;
@@ -561,52 +620,167 @@
   .flightDetail {
     gap: 15px;
   }
+
   .container {
     max-width: unset;
   }
-  .FlightBookingTextContainer{
+
+  .FlightBookingTextContainer {
     gap: 20px;
   }
 }
 
-@media (max-width: 430px){
-  .container{
+@media (max-width: 830px) {
+  .departureTime {
+    font-size: 26px;
+  }
+
+  .dashBorder {
+    width: 77px;
+  }
+
+  .bigDot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .flightFareDetails {
+    padding-left: 16px;
+  }
+
+  .airlineName {
+    font-size: 13px;
+  }
+
+  .flightNumber {
+    font-size: 12px;
+  }
+
+  .flightNameContainer {
+    gap: 5px;
+  }
+
+  .flightNameContainer img {
+    width: 27px;
+    height: 27px;
+  }
+
+  .sortedItem img {
+    height: 27px;
+    width: 27px;
+  }
+
+  .fareDetails {
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 780px) {
+  .departureDetail {
+    margin-left: 15px;
+  }
+
+  .viewBtn {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .flightAnimation {
+    width: 100%;
+  }
+
+  .flightDotedcontainer {
+    width: 100%;
+  }
+
+  .dashBorder {
+    width: 100%;
+    /* max-width: 77px; */
+  }
+}
+
+@media (max-width: 690px) {
+  .flightFareDetailsContainer {
+    flex-direction: column;
+  }
+
+  .fareDetailsResponsive {
+    display: flex;
+    padding-left: 16px;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .fareDetails {
     display: none;
   }
-  .imMobileView{
+
+  .seeDetailsBtn {
+    display: none;
+  }
+
+  .fareDetailsResponsive>.fareDetails {
+    display: flex;
+    padding-top: 0;
+  }
+
+  .fareDetailsResponsive>.seeDetailsBtn {
     display: flex;
   }
 
-  .sortSubContainer{
+  .fareDetailsResponsive .totalFare {
+    flex-direction: row;
+  }
+
+}
+
+@media (max-width: 430px) {
+  .container {
+    display: none;
+  }
+
+  .isMobileView {
+    display: flex;
+  }
+
+  .sortSubContainer {
     align-items: center;
   }
-  .sortContainer{
+
+  .sortContainer {
     background-color: transparent;
     padding: 0;
-    
+
   }
-  .sortedItem{
+
+  .sortedItem {
     padding: 6px;
     background-color: #FFFFFF;
     border: 0.69px solid #0000001A
   }
-  .sortedItem img{
+
+  .sortedItem img {
     width: 24px;
     height: 24px;
   }
-  .budget{
+
+  .budget {
     font-size: 10px;
   }
-  .priceContainer{
+
+  .priceContainer {
     gap: 4px;
   }
-  .price{
+
+  .price {
     font-size: 10px;
   }
-  .duration{
+
+  .duration {
     font-size: 10px;
   }
-  .sortByText{
+
+  .sortByText {
     font-size: 12px;
   }
 }
