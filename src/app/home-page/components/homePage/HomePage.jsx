@@ -16,6 +16,8 @@ import HotelDropDown from '@/app/components/hotelDropDown/HotelDropDown';
 import HotelDateCalendarModal from '@/app/components/hotelCalendar/HotelDateCalendarModal';
 import HotelCalendarMonths from '@/app/components/hotelCalendar/HotelCalendarMonths';
 import RecentSearch from '@/app/components/recentSearch/RecentSearch';
+import LoginPopup from '@/app/profile/components/loginPopUp/LoginPopup';
+import SignupPopup from '@/app/profile/components/signUpPopUp/SignupPopup';
 
 
 const HomePage = () => {
@@ -27,6 +29,8 @@ const HomePage = () => {
   const [returnDate, setReturenDate] = useState("")
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("")
+  const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState("login");
 
   // refs for the date inputs
   const departureRef = useRef(null)
@@ -592,7 +596,12 @@ const HomePage = () => {
           <img src="./Logo.svg" alt="" />
           <div className={`${styles.navRight} flex gap-3`}>
             <button className={`${styles.glass_button} ${styles.downloadBtn}`} >Download the App</button>
-            <button className={styles.signInBtn}>Sign In</button>
+            <button
+                className={styles.signInBtn}
+                onClick={() => setShowLogin(true)}
+              >
+                Sign In
+            </button>
             <button className={styles.hamBurger} onClick={() => setMenuOpen(true)}>
               <img src="/icons/hamBurger.png" alt="" />
               menu
@@ -1585,6 +1594,20 @@ const HomePage = () => {
           </div>
         </div>
       )}
+{showLogin && authView === "login" && (
+  <LoginPopup
+    onClose={() => setShowLogin(false)}
+    onNavigate={setAuthView}
+  />
+)}
+
+{showLogin && authView === "signup" && (
+  <SignupPopup
+    onClose={() => setShowLogin(false)}
+    onNavigate={setAuthView}
+  />
+)}
+
     </section>
   )
 }

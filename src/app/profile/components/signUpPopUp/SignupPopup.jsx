@@ -1,0 +1,131 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import styles from "./SignupPopup.module.css";
+
+export default function SignupPopup({ onNavigate, onClose }) {
+    useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        className={styles.mainContainer}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Left Section: Image Area */}
+        <section className={styles.imageSection}>
+          <Image
+            src="/images/signup-hero.jpg"
+            alt="Scenic mountain view"
+            fill
+            className={styles.heroImage}
+            priority
+          />
+        </section>
+
+        {/* Right Section: Form Area */}
+        <section className={styles.formSection}>
+          <div className={styles.formContent}>
+            <header className={styles.header}>
+              <div className={styles.logoContainer}>
+                <Image
+                  src="/images/tour-logo.svg"
+                  alt="Target Tours Logo"
+                  width={87}
+                  height={73}
+                  className={styles.logo}
+                />
+              </div>
+
+              <div className={styles.titleWrapper}>
+                <h1 className={styles.title}>Create new account</h1>
+                <p className={styles.subtitle}>
+                  Already a member?{" "}
+                  <span
+                    className={styles.linkText}
+                    onClick={() => onNavigate("login")}
+                  >
+                    Log in
+                  </span>
+                </p>
+              </div>
+            </header>
+
+            <form className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>
+                  Enter Email Id/ Phone Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="olivia@untitledui.com"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Enter password</label>
+                <input type="password" className={styles.input} />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Confirm password</label>
+                <input type="password" className={styles.input} />
+              </div>
+
+              <div className={styles.formOptions}>
+                <label className={styles.checkboxContainer}>
+                  <input type="checkbox" className={styles.checkboxInput} />
+                  <span className={styles.customCheckbox}></span>
+                  <span className={styles.checkboxLabel}>
+                    Keep me signed in
+                  </span>
+                </label>
+              </div>
+
+              <button type="submit" className={styles.signupButton}>
+                SIGN UP
+              </button>
+            </form>
+
+            <div className={styles.divider}>
+              <span className={styles.dividerText}>Or sign in with</span>
+            </div>
+
+            <div className={styles.socialButtons}>
+              <button className={styles.socialButton}>
+                <Image
+                  src="/icons/google-icon.svg"
+                  alt="Google"
+                  width={24}
+                  height={24}
+                />
+                Sign in with Google
+              </button>
+              <button className={styles.socialButtonFacebook}>
+                <Image
+                  src="/icons/facebook-icon.svg"
+                  alt="Facebook"
+                  width={24}
+                  height={24}
+                />
+                Sign in with Facebook
+              </button>
+            </div>
+
+            <footer className={styles.footer}>
+              <p className={styles.copyright}>
+                Copyrights ©2023 Target tours. Build by Webninjaz.
+              </p>
+            </footer>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

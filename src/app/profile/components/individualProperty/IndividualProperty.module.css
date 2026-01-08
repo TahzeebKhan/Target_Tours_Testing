@@ -4,6 +4,13 @@
     flex-direction: column;
     gap: 24px;
     max-width: 956px;
+    height: 100%;
+}
+
+.innerContainer {
+    max-height: 800px;
+    height: 100%;
+    overflow: auto;
 }
 
 /* Header & Meta */
@@ -429,6 +436,14 @@
 
 
 /* Responsive */
+
+@media (max-width: 1024px) {
+    .aboutSection {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
 @media (max-width: 768px) {
 
     .header,
@@ -444,6 +459,6 @@
 
     .mapWrapper {
         height: 200px;
-        order: -1;
+        /* order: -1; */
     }
 }

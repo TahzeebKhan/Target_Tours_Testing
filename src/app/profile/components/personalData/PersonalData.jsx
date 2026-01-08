@@ -81,7 +81,7 @@ export default function PersonalData() {
             <div className={styles.control}>
               <div className={styles.dropdownWrapper} ref={dropdownRef}>
                 <div
-                  className={styles.dropdown}
+                  className={`${styles.dropdown} ${styles.currencyDropdown}`}
                   onClick={() => setIsCurrencyOpen((prev) => !prev)}
                 >
                   <span>{selectedCurrency}</span>
@@ -143,7 +143,7 @@ export default function PersonalData() {
             <div className={styles.control}>
               <div className={styles.dropdownWrapper} ref={languageRef}>
                 <div
-                  className={styles.dropdown}
+                  className={`${styles.dropdown} ${styles.languageDropdown}`}
                   onClick={() => setIsLanguageOpen((prev) => !prev)}
                 >
                   <div className={styles.flagWrapper}>

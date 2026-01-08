@@ -25,6 +25,7 @@ const IndividualProperty = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.innerContainer}>
       {/* Header Section */}
       <header className={styles.header}>
         <div className={styles.hotelInfo}>
@@ -173,42 +174,41 @@ const IndividualProperty = () => {
         </section>
 
         {/* Guest & Meal Info */}
-<div className={styles.infoAmenitiesWrapper}>
-  {/* Guest & Meal Info */}
-  <div className={styles.guestInfo}>
-    <p className={styles.textPrimary}>
-      <span className={styles.infoTitle}>Guest name:</span>{" "}
-      <span className={styles.infoText}>
-        Anna George / for max. 2 people
-      </span>
-    </p>
+        <div className={styles.infoAmenitiesWrapper}>
+          {/* Guest & Meal Info */}
+          <div className={styles.guestInfo}>
+            <p className={styles.textPrimary}>
+              <span className={styles.infoTitle}>Guest name:</span>{" "}
+              <span className={styles.infoText}>
+                Anna George / for max. 2 people
+              </span>
+            </p>
 
-    <p className={styles.textPrimary}>
-      <span className={styles.infoTitle}>Meal Plan:</span>{" "}
-      <span className={styles.infoText}>
-        There is no meal included in the rate for this apartment.
-      </span>
-    </p>
-  </div>
+            <p className={styles.textPrimary}>
+              <span className={styles.infoTitle}>Meal Plan:</span>{" "}
+              <span className={styles.infoText}>
+                There is no meal included in the rate for this apartment.
+              </span>
+            </p>
+          </div>
 
-  {/* Amenities Grid */}
-  <div className={styles.amenitiesGrid}>
-    {amenities.map((item, idx) => (
-      <div key={idx} className={styles.amenityCard}>
-        <div className={styles.iconWrapper}>
-          <Image
-            src={item.icon}
-            alt={item.label}
-            width={22}
-            height={22}
-          />
+          {/* Amenities Grid */}
+          <div className={styles.amenitiesGrid}>
+            {amenities.map((item, idx) => (
+              <div key={idx} className={styles.amenityCard}>
+                <div className={styles.iconWrapper}>
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    width={22}
+                    height={22}
+                  />
+                </div>
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <span>{item.label}</span>
-      </div>
-    ))}
-  </div>
-</div>
-
 
         {/* Footer Actions */}
         <footer className={styles.footerActions}>
@@ -216,6 +216,7 @@ const IndividualProperty = () => {
           <button className={styles.btnPrimary}>DOWNLOAD INVOICE</button>
         </footer>
       </div>
+    </div>
     </div>
   );
 };
