@@ -298,7 +298,8 @@ const OnewayFlightBooking = () => {
       <section className={styles.container}>
         <div className={styles.FlightBookingTextContainer}>
           <h2 className={styles.heading}>
-            Flight from <span>{from || "Jakarta"}</span> to <span>{to || "Singapore"}</span>
+            Flight from <span>{from || "Jakarta"}</span> to{" "}
+            <span>{to || "Singapore"}</span>
           </h2>
           <div className={styles.subTextContainer}>
             <span className={styles.priceInfo}>
@@ -316,8 +317,9 @@ const OnewayFlightBooking = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
-                    }`}
+                  className={`${styles.sortedItem} ${
+                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                  }`}
                   onClick={() => setSelectedSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -335,8 +337,9 @@ const OnewayFlightBooking = () => {
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
-                    }`}
+                  className={`${styles.sortedItem} ${
+                    selectedSort === "fastest" ? styles.activeSortedItem : ""
+                  }`}
                   onClick={() => setSelectedSort("fastest")}
                 >
                   <img
@@ -370,15 +373,17 @@ const OnewayFlightBooking = () => {
             {" "}
             <div
               key={flight.id}
-              className={`${styles.expendableContainer} ${openId === flight.id ? styles.flightOpenHoverNone : ""
-                }`}
+              className={`${styles.expendableContainer} ${
+                openId === flight.id ? styles.flightOpenHoverNone : ""
+              }`}
             >
               <div
                 key={flight.id}
-                className={`${styles.flightFareDetailsContainer} ${openId === flight.id
-                  ? styles.flightFareDetailsContainerOpen
-                  : ""
-                  }`}
+                className={`${styles.flightFareDetailsContainer} ${
+                  openId === flight.id
+                    ? styles.flightFareDetailsContainerOpen
+                    : ""
+                }`}
               >
                 <div className={styles.flightFareDetails}>
                   <div className={styles.flightDetail}>
@@ -471,8 +476,9 @@ const OnewayFlightBooking = () => {
                   >
                     See Details
                     <svg
-                      className={`${styles.downArrow} ${openId === flight.id ? styles.rotate : ""
-                        }`}
+                      className={`${styles.downArrow} ${
+                        openId === flight.id ? styles.rotate : ""
+                      }`}
                       width="8"
                       height="5"
                       viewBox="0 0 8 5"
@@ -484,6 +490,52 @@ const OnewayFlightBooking = () => {
                         fill="#000033"
                       />
                     </svg>
+                  </div>
+                </div>
+                <div className={styles.fareDetailsResponsive}>
+                  <div
+                    className={styles.seeDetailsBtn}
+                    onClick={() =>
+                      setOpenId((prev) =>
+                        prev === flight.id ? null : flight.id
+                      )
+                    }
+                  >
+                    See Details
+                    <svg
+                      className={`${styles.downArrow} ${
+                        openId === flight.id ? styles.rotate : ""
+                      }`}
+                      width="8"
+                      height="5"
+                      viewBox="0 0 8 5"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M3.55967 4.01408C3.47933 4.01408 3.40454 4.00126 3.33532 3.97562C3.26609 3.94997 3.20028 3.90596 3.13789 3.84357L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0.0482881 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357C3.91906 3.90596 3.85325 3.94997 3.78402 3.97562C3.7148 4.00126 3.64001 4.01408 3.55967 4.01408Z"
+                        fill="#000033"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className={styles.fareDetails}>
+                    <div className={styles.totalFare}>
+                      <span className={styles.fareText}>
+                        {flight.fare.totalFare}
+                      </span>
+                      
+                    </div>
+                    <div className={styles.fareAmount}>
+                      <span className={styles.fare}>
+                        {flight.fare.pricePerAdult}{" "}
+                        <span className={styles.adult}> /ADULT</span>
+                      </span>
+                      <div className={styles.dot}></div>
+                      <span className={styles.economy}>
+                        {flight.fare.cabinClass}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className={styles.fareDetails}>
@@ -513,8 +565,9 @@ const OnewayFlightBooking = () => {
 
               {/* ===== EXPANDABLE PANEL ===== */}
               <div
-                className={`${styles.expandWrap} ${openId === flight.id ? styles.open : ""
-                  }`}
+                className={`${styles.expandWrap} ${
+                  openId === flight.id ? styles.open : ""
+                }`}
               >
                 <ExpandableTabs />
               </div>
@@ -527,7 +580,7 @@ const OnewayFlightBooking = () => {
         <FareComparisonModal
           isOpen={fareModalOpen !== null}
           onClose={() => setFareModalOpen(null)}
-          flightData={flightResults.find(f => f.id === fareModalOpen)}
+          flightData={flightResults.find((f) => f.id === fareModalOpen)}
         />
       </section>
       <section className={styles.isMobileView}>

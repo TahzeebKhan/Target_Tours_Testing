@@ -208,18 +208,18 @@
   width: 100%;
 }
 .sidebarToggle {
-      padding: 12px 24px;
-    background-color: #000033;
-    height: 40px;
-    color: #ffffff;
-    font-family: Inter;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 100%;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: none;
-    transition: all 0.45s ease;
+  padding: 12px 24px;
+  background-color: #000033;
+  height: 40px;
+  color: #ffffff;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.45s ease;
 }
 .sidebarOverlay {
   position: fixed;
@@ -315,7 +315,7 @@
     background-image: none;
     background-color: #000033;
   }
-  .container{
+  .container {
     padding: 0;
   }
 }

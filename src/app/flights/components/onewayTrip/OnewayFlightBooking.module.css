@@ -449,7 +449,9 @@
   align-items: center;
   gap: 8px;
 }
-
+.flightFareDetailsResponsive {
+  display: none;
+}
 .fare {
   display: flex;
   gap: 2px;
@@ -484,6 +486,9 @@
   vertical-align: middle;
   text-transform: uppercase;
   color: #208ef5;
+}
+.fareDetailsResponsive {
+  display: none;
 }
 
 /* EXPAND CONTAINER */
@@ -564,9 +569,93 @@
   .container {
     max-width: unset;
   }
-  .FlightBookingTextContainer{
+  .FlightBookingTextContainer {
     gap: 20px;
   }
+}
+@media (max-width: 830px) {
+  .departureTime {
+    font-size: 26px;
+  }
+  .dashBorder {
+    width: 77px;
+  }
+  .bigDot {
+    width: 4px;
+    height: 4px;
+  }
+  .flightFareDetails {
+    padding-left: 16px;
+  }
+  .airlineName {
+    font-size: 13px;
+  }
+  .flightNumber {
+    font-size: 12px;
+  }
+  .flightNameContainer {
+    gap: 5px;
+  }
+  .flightNameContainer img {
+    width: 27px;
+    height: 27px;
+  }
+  .sortedItem img {
+    height: 27px;
+    width: 27px;
+  }
+  .fareDetails {
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 780px) {
+  .departureDetail {
+    margin-left: 15px;
+  }
+  .viewBtn {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .flightAnimation {
+    width: 100%;
+  }
+  .flightDotedcontainer {
+    width: 100%;
+  }
+  .dashBorder {
+    width: 100%;
+    /* max-width: 77px; */
+  }
+}
+
+@media (max-width: 690px) {
+  .flightFareDetailsContainer {
+    flex-direction: column;
+  }
+  .fareDetailsResponsive {
+    display: flex;
+    padding-left: 16px;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .fareDetails {
+    display: none;
+  }
+  .seeDetailsBtn {
+    display: none;
+  }
+  .fareDetailsResponsive > .fareDetails {
+    display: flex;
+    padding-top: 0;
+  }
+  .fareDetailsResponsive > .seeDetailsBtn {
+    display: flex;
+  }
+  .fareDetailsResponsive .totalFare {
+    flex-direction: row;
+  }
+  
 }
 
 @media (max-width: 430px){
