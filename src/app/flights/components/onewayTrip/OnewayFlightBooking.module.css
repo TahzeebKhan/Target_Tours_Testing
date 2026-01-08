@@ -520,6 +520,18 @@
 
 @media (max-width: 1264px) {
   .flightFareDetailsContainer {
-    gap: 24px;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .flightDetail {
+    gap: 15px;
+  }
+  .container {
+    max-width: unset;
+  }
+  .FlightBookingTextContainer{
+    gap: 20px;
   }
 }

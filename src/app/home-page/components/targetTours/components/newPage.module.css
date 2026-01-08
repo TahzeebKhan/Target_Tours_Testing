@@ -12,6 +12,7 @@
   justify-content: center;
   align-items: stretch;
   width: 100%;
+
   max-width: 1920px;
   height: 611px;
   /* margin: 60px auto; */
@@ -22,7 +23,8 @@
 }
 
 /* Default card */
-.hover-card, .slide {
+.hover-card,
+.slide {
   flex: 1 1 0;
   position: relative;
   max-width: 690px;
@@ -370,7 +372,7 @@
   .cardOverlay {
     bottom: -47%;
   }
-  .cardTitle{
+  .cardTitle {
     font-size: 20px;
   }
 }
@@ -382,15 +384,20 @@
     height: auto;
   }
   .hover-card {
-    max-width: none;
-  }
-  .hover-card {
     flex: 0 0 calc(84% - 12px); /* 2 cards per row */
-    /* max-width: calc(50% - 12px); */
+    max-width: calc(50% - 12px);
     /* height: 420px; */
   }
   .hover-card:hover {
     flex: 0 0 calc(88% - 12px); /* 2 cards per row */
+  }
+}
+@media (max-width: 539px) {
+  .hover-card{
+     max-width: calc(75% - 12px);
+  }
+  .cardOverlay {
+    bottom: -46%;
   }
 }
 
