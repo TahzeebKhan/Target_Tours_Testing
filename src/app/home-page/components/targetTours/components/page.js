@@ -15,6 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   const [startIndex, setStartIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   // SSR safety: if no cards provided, render nothing
   if (!cards.length) return null;
@@ -66,7 +67,10 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
                   src={card.img}
                   alt={card.title}
                 />
-                 <img className={styles.bgGradient} src="/icons/Rectanglegrad.svg"/>
+                <img
+                  className={styles.bgGradient}
+                  src="/icons/Rectanglegrad.svg"
+                />
                 <div className={styles.cardOverlay}>
                   <span className={styles.duration}>{card.badge}</span>
 
@@ -158,8 +162,6 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
 
 export default HoverExpandCarousel;
 
-
-
 // "use client";
 // import React, { useState } from "react";
 // import styles from "./newPage.module.css";
@@ -216,7 +218,7 @@ export default HoverExpandCarousel;
 //       <AnimatePresence mode="wait">
 //         <motion.div
 //           key={activeTab}
-          
+
 //         >
 //           {" "}
 //           <Swiper

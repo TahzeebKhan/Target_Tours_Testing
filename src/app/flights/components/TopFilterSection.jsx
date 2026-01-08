@@ -702,7 +702,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./TopFilterSection.module.css";
 // import Switch from "@/app/home-page/components/Switch";
 // import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
-import { ArrowLeftRight, ChevronDown } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, ChevronDown, Pencil } from "lucide-react";
 import CustomCheckbox from "@/app/components/CustomCheckbox";
 import PassengerClassSelector from "./PassengerClassSelector";
 import { CalendarSVG } from "./SVGFile";
@@ -729,6 +729,40 @@ const passengerTypes = [
   "ARMED FORCES",
   "MEDICAL PROFESSIONAL",
 ];
+
+const PencilIcon = () => {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clip-path="url(#clip0_4473_64088)">
+        <path
+          d="M14.1161 4.54126C14.4686 4.18888 14.6666 3.71091 14.6667 3.2125C14.6668 2.71409 14.4688 2.23607 14.1165 1.8836C13.7641 1.53112 13.2861 1.33307 12.7877 1.33301C12.2893 1.33295 11.8113 1.53088 11.4588 1.88326L2.56145 10.7826C2.40667 10.9369 2.29219 11.1269 2.22812 11.3359L1.34745 14.2373C1.33022 14.2949 1.32892 14.3562 1.34369 14.4145C1.35845 14.4728 1.38873 14.5261 1.43132 14.5686C1.4739 14.6111 1.5272 14.6413 1.58556 14.656C1.64392 14.6706 1.70516 14.6693 1.76279 14.6519L4.66479 13.7719C4.87357 13.7084 5.06357 13.5947 5.21812 13.4406L14.1161 4.54126Z"
+          stroke="white"
+          stroke-width="1.33333"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M10 3.33337L12.6667 6.00004"
+          stroke="white"
+          stroke-width="1.33333"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_4473_64088">
+          <rect width="16" height="16" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
 
 const TopFilterSection = ({
   isScrolled: parentScrolled = false,
@@ -763,6 +797,7 @@ const TopFilterSection = ({
   const isScrolled = parentScrolled || false;
   const [showCalendar, setShowCalendar] = useState(false);
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);
+  const [activeTile, setActiveTile] = useState([]);
 
   // Direction for flight trip-type animation (round / oneway / multi)
   const [flightDirection, setFlightDirection] = useState("right");
@@ -1013,6 +1048,14 @@ const TopFilterSection = ({
       input.click();
     }
   };
+  const toggleTile = (index) => {
+    setActiveTile(
+      (prev) =>
+        prev.includes(index)
+          ? prev.filter((i) => i !== index) // deselect
+          : [...prev, index] // select
+    );
+  };
 
   const openReturnPicker = () => {
     const input = returnRef.current;
@@ -1061,16 +1104,65 @@ const TopFilterSection = ({
   const marginTop = MAX_MARGIN * (1 - progress);
   const marginBottom = MAX_MARGIN_BOTTOM * (1 - progress);
   const padding = MAX_PADDING - (MAX_PADDING - MIN_PADDING) * progress;
+  // ---------- DATE TILE DATA GENERATOR ----------
+
+  // helpers
+  const formatTileDate = (date) =>
+    date.toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+    });
+
+  const getCurrentMonth = () =>
+    new Date().toLocaleString("en-US", { month: "short" }).toUpperCase();
+
+  // generate today → next 40 days
+  const generateDateTiles = () => {
+    const today = new Date();
+    const tiles = [];
+
+    for (let i = 0; i < 40; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+
+      // random price between 4k – 9k
+      const price = Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;
+
+      tiles.push({
+        label: formatTileDate(d),
+        price,
+      });
+    }
+
+    // determine min / max price
+    const prices = tiles.map((t) => t.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+
+    // assign trend
+    return tiles.map((t) => ({
+      ...t,
+      trend: t.price === min ? "down" : t.price === max ? "up" : "neutral",
+    }));
+  };
+  const [dateTiles, setDateTiles] = useState([]);
+  const currentMonth = getCurrentMonth();
+  useEffect(() => {
+    setDateTiles(generateDateTiles());
+  }, []);
 
   return (
     <>
       <div
-        style={{
-          // marginTop: scrollProgress === 1 ? `0px` : "",
-          // padding: `${padding}px`,
-          // marginBottom: `${marginBottom}px`,
-          // transition: "none", // 👈 IMPORTANT
-        }}
+        style={
+          {
+            // marginTop: scrollProgress === 1 ? `0px` : "",
+            // padding: `${padding}px`,
+            // marginBottom: `${marginBottom}px`,
+            // transition: "none", // 👈 IMPORTANT
+          }
+        }
         className={`${styles.searchSec} ${
           tripType === "multi" ? styles.isMulti : ""
         }
@@ -1554,6 +1646,76 @@ const TopFilterSection = ({
               </div>
             </div>
           )}
+
+          <div className={styles.MobileTopFilterSection}>
+            <div className={styles.topDetails}>
+              {/* Left: Back Arrow */}
+
+              <div className={styles.leftIcon}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M14.9203 7.30135H2.48481L6.48039 3.30577C6.72862 3.05754 6.72862 2.65632 6.48039 2.4081C6.23201 2.15987 5.83079 2.15987 5.58256 2.4081L0.50325 7.4868C0.444736 7.54577 0.398412 7.61632 0.366107 7.69373C0.301955 7.8487 0.301955 8.02394 0.366107 8.17891C0.398412 8.25632 0.444736 8.32672 0.50325 8.38585L5.58256 13.4646C5.7063 13.5884 5.86889 13.6506 6.03148 13.6506C6.19392 13.6506 6.35651 13.5884 6.48039 13.4646C6.72862 13.2163 6.72862 12.8151 6.48039 12.5667L2.48481 8.57129H14.9203C15.2708 8.57129 15.5553 8.2868 15.5553 7.93632C15.5553 7.58585 15.2708 7.30135 14.9203 7.30135Z"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+
+              {/* Middle: Content */}
+              <div className={styles.middleContent}>
+                <div className={styles.routeText}>
+                  <span>JAKARTA (CGK)</span>
+                  <span>-</span>
+                  <span>SINGAPORE (SIN)</span>
+                </div>
+                <div className={styles.subText}>
+                  Wed, 03 Dec • 1 Traveller • Economy
+                </div>
+              </div>
+
+              {/* Right: Edit Icon */}
+              <div className={styles.rightIcon}>
+                <PencilIcon />
+              </div>
+            </div>
+            <div className={styles.datesContainer}>
+              <div className={styles.datesScrollerWrapper}>
+                {/* Month badge */}
+                <div className={styles.monthBadge}>{currentMonth}</div>
+                {/* Scrollable dates */}
+                <div className={styles.datesScroller}>
+                  {dateTiles.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.dateTile} ${
+                        activeTile.includes(i) ? styles.activeTile : ""
+                      }`}
+                      onClick={() => toggleTile(i)}
+                    >
+                      <div className={styles.dateLabel}>{item.label}</div>
+
+                      <div
+                        className={`${styles.price} ${
+                          item.trend === "up"
+                            ? styles.priceUp
+                            : item.trend === "down"
+                            ? styles.priceDown
+                            : ""
+                        }`}
+                      >
+                        ₹ {item.price.toLocaleString("en-IN")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
