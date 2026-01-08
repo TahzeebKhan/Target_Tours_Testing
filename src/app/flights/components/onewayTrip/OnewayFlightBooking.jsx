@@ -588,6 +588,33 @@ const OnewayFlightBooking = () => {
           <p className={styles.mobileSubTextContainer}>Showing 1-10 of 100 results</p>
           <button className={styles.filterBtn}>Filter</button>
         </div>
+        {/* <div className={styles.flightChipContainer}>
+          <div className={styles.chips}>
+          
+            <p>No. of stops: Direct</p>
+            <div className={styles.mobileCloseBtn}>
+              <img src="/icons/CLose.svg" alt="" />
+            </div>
+          </div>
+          <div className={styles.chips}>
+            <p>Departure time: Morning, 06:00 - 12:00</p>
+            <div className={styles.mobileCloseBtn}>
+              <img src="/icons/CLose.svg" alt="" />
+            </div>
+          </div>
+          <div className={styles.chips}>
+            <p>Departure time: Morning, 06:00 - 12:00</p>
+            <div className={styles.mobileCloseBtn}>
+              <img src="/icons/CLose.svg" alt="" />
+            </div>
+          </div>
+          <div className={styles.chips}>
+            <p>Departure time: Morning, 06:00 - 12:00</p>
+            <div className={styles.mobileCloseBtn}>
+              <img src="/icons/CLose.svg" alt="" />
+            </div>
+          </div>
+        </div> */}
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
             <div className={styles.sortedItemMainContainer}>
