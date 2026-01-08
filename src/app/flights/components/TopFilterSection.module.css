@@ -1012,7 +1012,22 @@
   }
 }
 
+@media (max-width: 751px) {
+  .arrowbox {
+    left: calc(50% - 16px);
+  }
+}
 
+@media (max-width: 575px) {
+  .arrowbox {
+    top: 15%;
+  }
+}
+@media (max-width: 507px) {
+  .arrowbox {
+    display: none;
+  }
+}
 
 @media (max-width: 430px) {
   .searchSec {
