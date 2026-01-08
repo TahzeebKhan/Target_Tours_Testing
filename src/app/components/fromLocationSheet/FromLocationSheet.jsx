@@ -1,9 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./FromLocationSheet.module.css";
+import LocationPermissionModal from "../locationPermissionModal/LocationPermissionModal";
 
 export default function FromLocationSheet({ onClose, inputType, onSelectCity }) {
     const [search, setSearch] = useState("");
+    const [currentLocation, setCurrentLocation] = useState(false);
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, []);
 
     // ✅ SINGLE JSON WITH TYPE
     const cities = [
@@ -32,6 +41,21 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
             airport: "Visakhapatnam Intl",
             type: "nearby",
         },
+        {
+            city: "VISAKHAPATNAM, INDIA (VTZ)",
+            airport: "Visakhapatnam Intl",
+            type: "nearby",
+        },
+        {
+            city: "VISAKHAPATNAM, INDIA (VTZ)",
+            airport: "Visakhapatnam Intl",
+            type: "nearby",
+        },
+        {
+            city: "VISAKHAPATNAM, INDIA (VTZ)",
+            airport: "Visakhapatnam Intl",
+            type: "nearby",
+        },
     ];
 
     // 🔍 SEARCH FILTER (COMMON)
@@ -52,7 +76,10 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
 
     return (
         <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.sheet}>
+            <div
+                className={styles.sheet}
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* HEADER */}
                 <div className={styles.header}>
                     <span className={styles.label}>{inputType}</span>
@@ -70,6 +97,26 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
                 </div>
 
                 <div className={styles.section}>
+                    <div className={styles.section2} onClick={() => setCurrentLocation(true)}>
+                        <div className={styles.row}>
+                            <div className={styles.iconBox}>
+                                <img src="/icons/locationIcon.svg" alt="" />
+                            </div>
+
+                            <div className={styles.rowContent}>
+                                <p className={styles.title}>Use Current Location</p>
+                                <p className={styles.sub}>Turn on Location Access</p>
+                            </div>
+                        </div>
+                    </div>
+                    {currentLocation && (
+                        <LocationPermissionModal
+                            open={currentLocation}
+                            onAllow={() => setCurrentLocation(false)}
+                            onClose={() => setCurrentLocation(false)}
+                        />
+                    )}
+
                     {/* POPULAR */}
                     {popularCities.length > 0 && (
                         <>
@@ -118,7 +165,7 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
 }
 
 /* 🔁 REUSABLE CITY ROW */
-function CityRow({ item , onSelect }) {
+function CityRow({ item, onSelect }) {
     return (
         <div className={styles.section2} onClick={() => onSelect(item.city)}>
             <div className={styles.row}>

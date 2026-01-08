@@ -1358,6 +1358,15 @@
     border: 0.67px solid #E4E6E8;
     left: 50%;
   }
+  .HolidaySwapBtn{
+    top: 40px;
+  }
+  .field3{
+    width: 100%;
+  }
+  .fromtoConSub{
+    width: 50%;
+  }
 
   .downArrowTravel {
     filter: invert(1);

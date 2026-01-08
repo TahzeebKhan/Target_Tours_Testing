@@ -22,6 +22,19 @@ const DateField = ({
     const [showCalendar, setShowCalendar] = useState(false)
     const wrapperRef = useRef(null)
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -68,7 +81,11 @@ const DateField = ({
 
             <div
                 className={styles.dateInputWrapper}
-                onClick={() => setShowCalendar(true)}
+                onClick={() => {
+                    if (!isMobile) {
+                        setShowCalendar(true);
+                    }
+                }}
             >
                 {/* Display date as readonly text */}
                 <input

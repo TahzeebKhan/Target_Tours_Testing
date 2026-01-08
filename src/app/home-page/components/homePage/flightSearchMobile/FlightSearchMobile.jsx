@@ -4,6 +4,9 @@ import { ChevronDown } from 'lucide-react';
 import DateField from '../DateField';
 import PassengerClassSelector from '../PassengerClassSelector';
 import FromLocationSheet from '@/app/components/fromLocationSheet/FromLocationSheet';
+import MobileViewCalender from '@/app/components/mobileViewCalendar/MobileViewCalender';
+import PassengersPopup from '@/app/components/passengersPopUp/PassengersPopup';
+import SeatClassPopup from '@/app/components/seatClassPopup/SeatClassPopup';
 
 const FlightSearchMobile = ({
     styles,
@@ -18,13 +21,19 @@ const FlightSearchMobile = ({
     setReturenDate,
     travellerOpen,
     setTravellerOpen,
-    totalPassengers,
-    travelClass,
-    setTravelClass,
-    passengers,
-    setPassengers,
     truncate
 }) => {
+    const [openCalendar, setOpenCalendar] = useState(false);
+    const [calendarType, setCalendarType] = useState("departure"); // "departure" | "return"
+    const [travelClass, setTravelClass] = useState("Premium Economy");
+
+    const [openPassengers, setOpenPassengers] = useState(false);
+    const [passengers, setPassengers] = useState({
+        adult: 1,
+        children: 0,
+        infant: 0,
+    });
+    const [openSeatClass, setOpenSeatClass] = useState(false);
     const [openTo, setOpenTo] = useState(false);
     const [openFrom, setOpenFrom] = useState(false);
     const travellerRef = useRef(null);
@@ -32,6 +41,24 @@ const FlightSearchMobile = ({
     const handleTripTypeChange = (type) => {
         setTripType(type);
     }
+
+    const formatDate = (date) =>
+        date
+            ? date.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+            })
+            : "";
+
+
+    const totalPassengers =
+        passengers.adult + passengers.children + passengers.infant;
+
+    const passengerText = `${passengers.adult} Adult${passengers.adult > 1 ? "s" : ""
+        }, ${passengers.children} Child${passengers.children > 1 ? "ren" : ""
+        }`;
+
     return (
         <div className={styles.flightSectionMain}>
 
@@ -76,7 +103,7 @@ const FlightSearchMobile = ({
 
                             </div>
                             {openFrom && (
-                                <FromLocationSheet onClose={() => setOpenFrom(false)} inputType="from" onSelectCity={(value) => setFrom(value)}  />
+                                <FromLocationSheet onClose={() => setOpenFrom(false)} inputType="from" onSelectCity={(value) => setFrom(value)} />
                             )}
 
                             <div className={`${styles.field} ${styles.field2}`} onClick={() => setOpenTo(true)}>
@@ -96,53 +123,64 @@ const FlightSearchMobile = ({
 
                         </div>
                         <div className={styles.fromToCont}>
-                            <DateField
-                                label="DEPARTURE DATE"
-                                placeholder="ADD DATES"
-                                value={departureDate}
-                                name="departureDate"
-                                min={new Date().toISOString().split("T")[0]}
-                                onChange={(e) => setDepartureDate(e.target.value)}
-                            />
-                            <DateField
-                                label="RETURN DATE"
-                                placeholder="ADD DATES"
-                                value={returnDate}
-                                name="departureDate"
-                                min={new Date().toISOString().split("T")[0]}
-                                onChange={(e) => setReturenDate(e.target.value)}
-                            />
+                            <div className={styles.fromtoConSub}
+                                onClick={() => {
+                                    setCalendarType("departure");
+                                    setOpenCalendar(true);
+                                }}
+                            >
+                                <DateField
+                                    label="DEPARTURE DATE"
+                                    placeholder="ADD DATES"
+                                    value={formatDate(departureDate)}
+                                />
+                            </div>
+
+                             <div className={styles.fromtoConSub}
+                                onClick={() => {
+                                    setCalendarType("return");
+                                    setOpenCalendar(true);
+                                }}
+                            >
+                                <DateField
+                                    label="RETURN DATE"
+                                    placeholder="ADD DATES"
+                                    value={formatDate(returnDate)}
+                                />
+                            </div>
                         </div>
+
+
 
                         <div
                             ref={travellerRef}
                             className={`${styles.fromBtn} ${styles.fromBtn2}`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setTravellerOpen((o) => !o);
+                                setOpenPassengers(true);
                             }}
                         >
                             <div className={styles.lable}>Passengers</div>
+
                             <div className={styles.iconCont}>
                                 <div className={styles.contant}>
-                                    {truncate(`${totalPassengers} adult${totalPassengers > 1 ? 's' : ''} ${totalPassengers} child${totalPassengers > 1 ? 's' : ''}`, 17)}
+                                    {truncate(passengerText, 22)}
                                 </div>
 
                                 <ChevronDown
-                                    className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
+                                    className={`${styles.chevron} ${openPassengers ? styles.openChevron : styles.closeChevron
+                                        }`}
                                     size={20}
-                                    color="#000000"
                                 />
                             </div>
 
-                            <PassengerClassSelector
-                                open={travellerOpen}
-                                setOpen={setTravellerOpen}
-                                passengers={passengers}
-                                setPassengers={setPassengers}
-                                travelClass={travelClass}
-                                setTravelClass={setTravelClass}
-                            />
+                            {openPassengers && (
+                                <PassengersPopup
+                                    passengers={passengers}
+                                    setPassengers={setPassengers}
+                                    onClose={() => setOpenPassengers(false)}
+                                />
+                            )}
                         </div>
 
                         <div
@@ -150,31 +188,36 @@ const FlightSearchMobile = ({
                             className={`${styles.fromBtn} ${styles.fromBtn2}`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setTravellerOpen((o) => !o);
+                                setOpenSeatClass(true);
                             }}
                         >
                             <div className={styles.lable}>Seat Class</div>
+
                             <div className={styles.iconCont}>
                                 <div className={styles.contant}>
-                                    {truncate(`${travelClass}`, 17)}
+                                    {truncate(travelClass, 17)}
                                 </div>
 
                                 <ChevronDown
-                                    className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
+                                    className={`${styles.chevron} ${openSeatClass ? styles.openChevron : styles.closeChevron
+                                        }`}
                                     size={20}
-                                    color="#000000"
                                 />
                             </div>
 
-                            <PassengerClassSelector
-                                open={travellerOpen}
-                                setOpen={setTravellerOpen}
-                                passengers={passengers}
-                                setPassengers={setPassengers}
-                                travelClass={travelClass}
-                                setTravelClass={setTravelClass}
-                            />
+                            {openSeatClass && (
+                                <SeatClassPopup
+                                    value={travelClass}
+                                    onChange={(val) => {
+                                        setTravelClass(val);
+                                        setOpenSeatClass(false); // 🔥 auto close
+                                    }}
+                                    onClose={() => setOpenSeatClass(false)}
+                                    inputType="Seat Class"
+                                />
+                            )}
                         </div>
+
 
                         <button className={styles.searchBtna}>SEARCH</button>
                     </>
@@ -182,7 +225,7 @@ const FlightSearchMobile = ({
                 {tripType === "oneway" && (
                     <>
                         <div className={styles.fromToCont}>
-                            <div className={styles.field}>
+                            <div className={styles.field} onClick={() => setOpenFrom(true)}>
                                 <label className={styles.label}>FROM</label>
                                 <input
                                     type="text"
@@ -192,8 +235,11 @@ const FlightSearchMobile = ({
                                     onChange={(e) => setFrom(e.target.value)}
                                 />
                             </div>
+                            {openFrom && (
+                                <FromLocationSheet onClose={() => setOpenFrom(false)} inputType="from" onSelectCity={(value) => setFrom(value)} />
+                            )}
 
-                            <div className={`${styles.field} ${styles.field2}`}>
+                            <div className={`${styles.field} ${styles.field2}`} onClick={() => setOpenTo(true)}>
                                 <label className={styles.label}>TO</label>
                                 <input
                                     type="text"
@@ -203,15 +249,19 @@ const FlightSearchMobile = ({
                                     onChange={(e) => setTo(e.target.value)}
                                 />
                             </div>
+                            {openTo && (
+                                <FromLocationSheet onClose={() => setOpenTo(false)} inputType="to" onSelectCity={(value) => setTo(value)} />
+                            )}
                         </div>
-                        <div className={styles.fromToCont}>
+                        <div className={styles.fromToCont} onClick={() => {
+                            setCalendarType("departure");
+                            setOpenCalendar(true);
+                        }}>
                             <DateField
                                 label="DEPARTURE DATE"
                                 placeholder="ADD DATES"
-                                value={departureDate}
+                                value={formatDate(departureDate)}
                                 name="departureDate"
-                                min={new Date().toISOString().split("T")[0]}
-                                onChange={(e) => setDepartureDate(e.target.value)}
                             />
                         </div>
 
@@ -220,68 +270,86 @@ const FlightSearchMobile = ({
                             className={`${styles.fromBtn} ${styles.fromBtn2}`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setTravellerOpen((o) => !o);
+                                setOpenPassengers(true);
                             }}
                         >
                             <div className={styles.lable}>Passengers</div>
+
                             <div className={styles.iconCont}>
                                 <div className={styles.contant}>
-                                    {truncate(`${totalPassengers} adult${totalPassengers > 1 ? 's' : ''} ${totalPassengers} child${totalPassengers > 1 ? 's' : ''}`, 17)}
+                                    {truncate(passengerText, 22)}
                                 </div>
 
                                 <ChevronDown
-                                    className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
+                                    className={`${styles.chevron} ${openPassengers ? styles.openChevron : styles.closeChevron
+                                        }`}
                                     size={20}
-                                    color="#000000"
                                 />
                             </div>
 
-                            <PassengerClassSelector
-                                open={travellerOpen}
-                                setOpen={setTravellerOpen}
-                                passengers={passengers}
-                                setPassengers={setPassengers}
-                                travelClass={travelClass}
-                                setTravelClass={setTravelClass}
-                            />
+                            {openPassengers && (
+                                <PassengersPopup
+                                    passengers={passengers}
+                                    setPassengers={setPassengers}
+                                    onClose={() => setOpenPassengers(false)}
+                                />
+                            )}
                         </div>
+
 
                         <div
                             ref={travellerRef}
                             className={`${styles.fromBtn} ${styles.fromBtn2}`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setTravellerOpen((o) => !o);
+                                setOpenSeatClass(true);
                             }}
                         >
                             <div className={styles.lable}>Seat Class</div>
+
                             <div className={styles.iconCont}>
                                 <div className={styles.contant}>
-                                    {truncate(`${travelClass}`, 17)}
+                                    {truncate(travelClass, 17)}
                                 </div>
 
                                 <ChevronDown
-                                    className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
+                                    className={`${styles.chevron} ${openSeatClass ? styles.openChevron : styles.closeChevron
+                                        }`}
                                     size={20}
-                                    color="#000000"
                                 />
                             </div>
 
-                            <PassengerClassSelector
-                                open={travellerOpen}
-                                setOpen={setTravellerOpen}
-                                passengers={passengers}
-                                setPassengers={setPassengers}
-                                travelClass={travelClass}
-                                setTravelClass={setTravelClass}
-                            />
+                            {openSeatClass && (
+                                <SeatClassPopup
+                                    value={travelClass}
+                                    onChange={(val) => {
+                                        setTravelClass(val);
+                                        setOpenSeatClass(false); // 🔥 auto close
+                                    }}
+                                    onClose={() => setOpenSeatClass(false)}
+                                    inputType="Seat Class"
+                                />
+                            )}
                         </div>
 
                         <button className={styles.searchBtna}>SEARCH</button>
                     </>
                 )}
+                {openCalendar && (
+                    <MobileViewCalender
+                        onClose={() => setOpenCalendar(false)}
+                        inputType={tripType === "oneway" ? "oneway" : "roundtrip"}
+                        selectedDeparture={departureDate}
+                        selectedReturn={returnDate}
+                        onSelectDate={({ departure, returnDate }) => {
+                            if (departure) setDepartureDate(departure);
+                            if (returnDate !== undefined) setReturenDate(returnDate);
+                            setOpenCalendar(false);
+                        }}
+                    />
+                )}
             </div>
-        </div>
+        </div >
     );
 };
 

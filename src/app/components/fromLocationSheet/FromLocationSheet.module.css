@@ -12,10 +12,13 @@
 .sheet {
     background: #fff;
     width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: 20px 20px 8px 0px;
     padding-top: 24px;
     padding-bottom: 8px;
-    min-height: 430px;
+
+    height: 556px;          /* fixed height */
+    display: flex;
+    flex-direction: column;
 }
 
 /* HEADER */
@@ -72,6 +75,9 @@
 /* SECTIONS */
 .section {
     padding: 8px 0;
+    overflow: scroll;
+    min-height: 464px;
+    max-height: 4646px;
     /* border-bottom: 1px solid #DBE2EB */
 }
 

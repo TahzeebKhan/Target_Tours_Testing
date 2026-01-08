@@ -1,0 +1,282 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #0A0A0A33;
+    backdrop-filter: blur(8px);
+
+    display: flex;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+.sheet {
+    background: #fff;
+    width: 100%;
+    border-radius: 16px 16px 0px 0px;
+    padding-top: 24px;
+    padding-bottom: 8px;
+
+    /* height: 574px; */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 16px 16px 16px;
+    border-bottom: 1px solid #DBE2EB;
+}
+
+.label {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: -3%;
+    text-transform: uppercase;
+    color: #7B8799;
+}
+
+/* INPUT */
+.inputRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.inputRow .selectedDate {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -3%;
+    color: #1A2029;
+    width: 100%;
+}
+
+/* OPTIONAL: scroll section if you add calendar body later */
+.section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* hide scrollbar (optional) */
+.section::-webkit-scrollbar {
+    display: none;
+}
+
+.calendarSection {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* MONTH HEADER */
+.monthHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.monthHeader button {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* WEEK DAYS */
+.weekDays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    color: #6B7280;
+    font-size: 13px;
+}
+
+/* CALENDAR GRID */
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* gap: 5px; */
+}
+
+.dateCell {
+    height: 52px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    color: #0F172A;
+    padding: 0 6px;
+
+}
+
+.monthHeaderText {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -3%;
+    text-align: center;
+    text-transform: uppercase;
+    color: #1A2029;
+}
+
+.leftBtn img {
+    transform: rotate(180deg);
+}
+
+.daysName {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    color: #6B7280;
+
+}
+
+.muted {
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-style: Semi Bold;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    color: #0F172A;
+    opacity: 0.5;
+    cursor: default;
+}
+
+.selected {
+    background-color: #000;
+    color: #fff;
+}
+
+
+
+.selected {
+    background: #000033;
+    color: #fff;
+}
+
+.priceText {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 11px;
+    line-height: 1.40;
+    letter-spacing: 0%;
+    color: #4E8729;
+
+}
+
+.selected .priceText {
+    color: #E5E7EB;
+}
+
+.increase {
+    color: #EF4444 !important;
+}
+
+
+
+.rangeStart,
+.rangeEnd {
+    background-color: #000033;
+    color: #fff;
+}
+
+.rangeStart .priceText,
+.rangeEnd .priceText {
+    color: #E5E7EB;
+}
+
+.inRange {
+    background-color: #EFF6FF;
+    border-radius: 0;
+}
+
+.inRange,
+.rangeStart,
+.rangeEnd {
+    position: relative;
+}
+
+
+
+.inRange .priceText {
+    color: #1a7f37;
+}
+
+.rangeStart {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.rangeEnd {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.totalDayContainer {
+    display: flex;
+    padding: 24px 16px;
+    padding-top: 0 !important;
+    align-items: center;
+    gap: 16px;
+}
+
+.total {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -3%;
+    text-align: center;
+    color: #7B8799;
+
+}
+
+.numberOfDay {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -3%;
+    text-align: center;
+    color: #1A2029;
+}
+
+.doneBtn {
+    margin-left: auto;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
