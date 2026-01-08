@@ -8,6 +8,9 @@ import PersonalData from "./components/personalData/PersonalData";
 import IndividualProperty from "./components/individualProperty/IndividualProperty";
 
 import { useProfile } from "./context/ProfileContext";
+import WishList from "./components/wishList/WishList";
+import MyNextTrip from "./components/wishList/components/myNextTrip/MyNextTrip";
+import MyReview from "./components/myReview/MyReview";
 
 const ProflePage = () => {
   const { activeMenu } = useProfile();
@@ -34,7 +37,7 @@ const ProflePage = () => {
       {activeMenu === "wishList" && <div>WishLists</div>}
       {activeMenu === "support" && <div>Support</div>}
       {activeMenu === "myReviews" && <div>My Reviews</div>}
-      {activeMenu === "settings" && <PersonalData />}
+      {activeMenu === "settings" && <div>Settings</div>}
     </>
   );
 };

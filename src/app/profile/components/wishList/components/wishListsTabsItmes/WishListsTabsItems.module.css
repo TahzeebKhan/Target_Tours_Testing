@@ -1,0 +1,72 @@
+.container {
+    background-color: #FFFFFF;
+    padding: 24px;
+    height: 100%;
+
+}
+
+.contentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.wishlistHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.wishlistHeadLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wishlistHeadLeft h3 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 34px;
+    letter-spacing: 0%;
+    text-align: left;
+    color: #000033;
+}
+
+.wishlistHeadLeft p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}
+
+.wishlistHeadRight {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 18px;
+    leading-trim: NONE;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #070773;
+    cursor: pointer;
+    transition: all 0.45s ease;
+
+}
+.br{
+    width: 100%;
+    border: .5px solid #E4E6E8;
+}
+
+.wishlistHeadRight:hover {
+    transition: all 0.45s ease;
+    text-decoration: underline;
+    text-underline-offset: 6px;
+}
