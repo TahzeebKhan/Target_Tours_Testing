@@ -1,0 +1,273 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.mainContainer {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  max-width: 1200px;
+  width: 100%;
+  background: white;
+  padding: 18px;
+}
+
+@media (max-width: 768px) {
+  .mainContainer {
+    grid-template-columns: 1fr;
+  }
+  .imageSection {
+    display: none;
+  }
+  .logo {
+    width: 129px;
+    height: 108px;
+  }
+  .mainContainer, .pageWrapper {
+    padding: 0;
+  }
+}
+
+.imageSection {
+  max-width: 593px;
+  width: 100%;
+  position: relative;
+  max-height: 765px; 
+  height: 100%;
+}
+
+.heroImage {
+  object-fit: cover;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 53px 55px;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .formSection {
+    padding-left: 24px;
+    padding-right: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .formSection {
+    padding: 24px 15px;
+  }
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logoContainer {
+  display: flex;
+}
+
+.titleWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: rgba(26, 26, 26, 1);
+  line-height: 100%;
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(26, 26, 26, 1);
+  line-height: 100%;
+  letter-spacing: -0.02em;
+}
+
+.linkText {
+  color: rgba(32, 142, 245, 1);
+  cursor: pointer;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(26, 26, 26, 1);
+  line-height: 100%;
+  letter-spacing: -0.02em;
+}
+
+.input {
+  padding: 10px 14px;
+  border: 1px solid rgba(213, 215, 218, 1);
+  box-shadow: 0px 1px 2px 0px rgba(10, 13, 18, 0.05);
+  font-size: 16px;
+  color: rgba(113, 118, 128, 1);
+  outline: none;
+  background: rgba(250, 250, 250, 1);
+  line-height: 24px;
+  letter-spacing: -0.02em;
+}
+
+.formOptions {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.customCheckbox {
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid rgba(230, 232, 236, 1);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkboxInput:checked + .customCheckbox {
+  background: rgba(0, 0, 51, 1);
+  border-color: rgba(0, 0, 51, 1);
+}
+
+.checkboxInput:checked + .customCheckbox::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(-45deg);
+}
+
+.checkboxLabel {
+  color: rgba(0, 0, 0, 1);
+}
+
+.signupButton {
+  background: rgba(0, 0, 51, 1);
+  box-shadow: 0px 1px 2px 0px rgba(10, 13, 18, 0.05);
+  color: white;
+  padding: 10px 14px;
+  border: none;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 11px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(231, 231, 231, 1);
+}
+
+.dividerText {
+  font-size: 12px;
+  color: rgba(196, 196, 196, 1);
+  line-height: 16px;
+  letter-spacing: -0.02em;
+}
+
+.socialButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.socialButton,
+.socialButtonFacebook {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid rgba(213, 215, 218, 1);
+  box-shadow: 0px 1px 2px 0px rgba(10, 13, 18, 0.05);
+}
+
+.socialButton {
+  color: rgba(65, 70, 81, 1);
+}
+
+.socialButtonFacebook {
+  background-color: rgba(24, 119, 242, 1);
+  color: rgba(255, 255, 255, 1);
+  border: none;
+}
+
+.footer {
+  text-align: center;
+}
+
+.copyright {
+  font-size: 14px;
+  color: rgba(196, 196, 196, 1);
+  line-height: 100%;
+  letter-spacing: -0.02em;
+}

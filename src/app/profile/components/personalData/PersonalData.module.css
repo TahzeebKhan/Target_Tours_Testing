@@ -6,6 +6,7 @@
   max-width: 956px;
   background-color: #ffffff;
   color: rgba(0, 0, 0, 1);
+  height: 100%;
 }
 
 .section {
@@ -62,14 +63,25 @@
   display: flex;
   align-items: center;
   padding: 8px 16px;
-  padding: 10px 16px;
   border: 1px solid rgba(221, 223, 227, 1);
   gap: 8px;
   width: 100%;
   cursor: pointer;
   font-size: 16px;
   color: rgba(118, 118, 118, 1);
+  justify-content: space-between;
 }
+
+.currencyDropdown {
+  width: 100%;
+  width: 161px;
+}
+
+.languageDropdown {
+  /* width: 100%; */
+  width: 186px;
+}
+
 
 .flagWrapper {
   display: flex;
@@ -96,7 +108,7 @@
 }
 
 .toggleActive {
-  background-color: rgba(0, 0, 51, 1); 
+  background-color: rgba(0, 0, 51, 1);
 }
 
 .toggleCircle {
@@ -140,7 +152,7 @@
   font-weight: 500;
   cursor: pointer;
   width: 100%;
-    transition:
+  transition:
     background-color 0.25s ease,
     color 0.25s ease;
 }
@@ -159,7 +171,7 @@
 .dropdownMenu {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;    
+  right: 0;
   left: auto;
   width: 220px;
   background: #ffffff;
@@ -213,8 +225,13 @@
     justify-content: flex-start;
   }
 
-  .dropdown, .outlineButton, .deleteButton {
+  .dropdown,
+  .outlineButton,
+  .deleteButton {
     width: 100%;
-    max-width: 300px;
+  }
+
+  .dropdownMenu{
+    width: 100%;
   }
 }
