@@ -3,8 +3,22 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./ProfileSection.module.css";
+import { useEffect, useRef } from "react";
 
 const ProfileSection = () => {
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileFields((prev) => prev.map((f) => ({ ...f, isOpen: false })));
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const [profileFields, setProfileFields] = useState([
     { label: "Full Name", value: "Demian Satria", isEditing: false },
     {
@@ -158,23 +172,54 @@ const ProfileSection = () => {
                 />
               )}
 
-              <input
-                type="text"
-                className={styles.input}
-                value={field.value}
-                placeholder={field.placeholder}
-                readOnly={!field.isEditing}
-                onChange={(e) => handleChange(index, e.target.value)}
-              />
-
-              {field.isDropdown && (
-                <Image
-                  src="/images/chevron-down.svg"
-                  alt="Dropdown"
-                  width={12}
-                  height={12}
-                  className={styles.arrowIcon}
+              {field.isDropdown ? (
+                <div
+                  className={styles.dropdownInput}
+                  onClick={() => toggleDropdown(index)}
+                >
+                  <span>{field.value}</span>
+                  <Image
+                    src="/images/chevron-down.svg"
+                    alt="Dropdown"
+                    width={12}
+                    height={12}
+                    className={styles.arrowIcon}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={field.value}
+                  placeholder={field.placeholder}
+                  readOnly={!field.isEditing}
+                  onChange={(e) => handleChange(index, e.target.value)}
                 />
+              )}
+
+              {field.isDropdown && field.isOpen && (
+                <div className={styles.dropdownMenu} ref={dropdownRef}>
+                  {field.options.map((option) => (
+                    <div
+                      key={option}
+                      className={`${styles.dropdownItem} ${
+                        option === field.value ? styles.selectedItem : ""
+                      }`}
+                      onClick={() => selectOption(index, option)}
+                    >
+                      <span>{option}</span>
+
+                      {option === field.value && (
+                        <Image
+                          src="/icons/check.svg"
+                          alt="Selected"
+                          width={16}
+                          height={16}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

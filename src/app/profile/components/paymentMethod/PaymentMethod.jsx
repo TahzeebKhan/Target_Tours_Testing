@@ -56,10 +56,11 @@ export default function PaymentMethod() {
       {/* Coupons Section */}
       <footer className={styles.footerSection}>
         <div className={styles.row}>
-          <div className={styles.textContent}>
+          <div className={`${styles.textContent} ${styles.fullWidth}`}>
             <h2 className={styles.sectionTitle}>COUPONS</h2>
             <p className={styles.description}>Your copons</p>
           </div>
+
           <button className={styles.button}>ADD COPONS</button>
         </div>
       </footer>

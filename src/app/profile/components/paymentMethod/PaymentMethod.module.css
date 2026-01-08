@@ -74,7 +74,8 @@
   padding: 12px 24px;
   font-size: 14px;
   cursor: pointer;
-  min-width: 256px;
+  max-width: 256px;
+  width: 100%;
   text-align: center;
     transition: 
     background-color 0.25s ease,
@@ -100,10 +101,15 @@
   }
   
   .button {
-    width: 100%;
+    max-width: 100%;
   }
 
   .title {
     font-size: 1.8rem;
   }
+
+  .fullWidth {
+  width: 100%;
+}
+
 }
