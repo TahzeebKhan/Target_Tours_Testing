@@ -21,7 +21,6 @@ const page = () => {
       )}
       {tripType === "multi" && (
         <>
-          {/* yaha multi component aega multi booking component */}
           <MultiCityTrip />
         </>
       )}

@@ -1,0 +1,153 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #0A0A0A33;
+    backdrop-filter: blur(8px);
+
+    display: flex;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+.sheet {
+    background: #fff;
+    width: 100%;
+    border-radius: 20px 20px 8px 0px;
+    padding-top: 24px;
+    padding-bottom: 8px;
+
+    height: 556px;          /* fixed height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 16px 24px 16px;
+    border-bottom: 1px solid #DBE2EB
+}
+
+.label {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 13px;
+
+    line-height: 1.50;
+    letter-spacing: -3%;
+    text-transform: uppercase;
+    color: #7B8799;
+
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* INPUT */
+.inputRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inputRow input {
+    border: none;
+    outline: none;
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    color: #000033;
+    width: 100%;
+}
+
+.icon {
+    color: #6b7280;
+}
+
+/* SECTIONS */
+.section {
+    padding: 8px 0;
+    overflow: scroll;
+    min-height: 464px;
+    max-height: 4646px;
+    /* border-bottom: 1px solid #DBE2EB */
+}
+
+.section2:last-child .row{
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section:last-child {
+    border-bottom: none;
+}
+
+.sectionTitle {
+    padding: 16px 16px 12px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 13px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    text-transform: uppercase;
+    color: #141814;
+
+}
+
+/* ROW */
+.row {
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 16px 16px 16px;
+    border-bottom: 1px solid #DBE2EB;
+
+}
+.rowContent{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.row:hover {
+    background: #f9fafb;
+}
+
+.iconBox {
+    width: 44px;
+    height: 44px;
+    border: 0.92px solid #DBE2EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.20;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #141814;
+}
+
+.sub {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.50;
+    letter-spacing: -3%;
+    color: #7B8799;
+}

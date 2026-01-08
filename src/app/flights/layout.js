@@ -138,8 +138,14 @@ import TopFilterSection from "./components/TopFilterSection";
 import { useEffect, useRef, useState } from "react";
 import { TripTypeProvider, useTripType } from "./TripTypeContext";
 import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 function LayoutContent({ children }) {
+  const isMobile = useMediaQuery("(max-width: 430px)");
+  const isTablet = useMediaQuery("(max-width: 1200px)");
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const { tripType } = useTripType();
   const containerRef = useRef(null);
 
@@ -295,7 +301,11 @@ function LayoutContent({ children }) {
           `}
         >
           <Navbar scrollProgress={scrollProgress} />
-          <TopFilterSection scrollProgress={scrollProgress} />
+
+          <TopFilterSection
+            isMobile={isMobile}
+            scrollProgress={scrollProgress}
+          />
         </div>
         {/* {isScrolled && (
           <div
@@ -322,12 +332,26 @@ function LayoutContent({ children }) {
             tripType === "round" ? styles.wideContainer : styles.normalContainer
           }`}
         >
-          {/* top date slider */}
-          {/* <div className={styles.dateSlider}>
-            
-          </div> */}
+          {isTablet && (
+            <button
+              className={styles.sidebarToggle}
+              onClick={() => setIsSidebarOpen((prev) => !prev)}
+            >
+              {isSidebarOpen ? "Hide Filters" : "Show Filters"}
+            </button>
+          )}
+          {isTablet && isSidebarOpen && (
+            <div
+              className={styles.sidebarOverlay}
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
           {/* Sidebar */}
-          <aside className={styles.sidebar}>
+          <aside
+            className={`${styles.sidebar} ${
+              isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
+            }`}
+          >
             <div
               className={`${styles.sidebarSticky} ${
                 tripType === "multi" ? styles.sidebarStickyMultiCity : ""

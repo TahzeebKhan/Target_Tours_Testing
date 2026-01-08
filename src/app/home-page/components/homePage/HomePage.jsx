@@ -16,8 +16,15 @@ import HotelDropDown from '@/app/components/hotelDropDown/HotelDropDown';
 import HotelDateCalendarModal from '@/app/components/hotelCalendar/HotelDateCalendarModal';
 import HotelCalendarMonths from '@/app/components/hotelCalendar/HotelCalendarMonths';
 import RecentSearch from '@/app/components/recentSearch/RecentSearch';
+
 import LoginPopup from '@/app/profile/components/loginPopUp/LoginPopup';
 import SignupPopup from '@/app/profile/components/signUpPopUp/SignupPopup';
+
+import FlightSearchMobile from './flightSearchMobile/FlightSearchMobile';
+import HotelSearchMobile from './hotelSearchMobile/HotelSearchMobile';
+import HolidaySearchMobile from './holidaySearchMobile/HolidaySearchMobile';
+import InsuranceSearchMobile from './insuranceSearchMobile/InsuranceSearchMobile';
+
 
 
 const HomePage = () => {
@@ -1330,269 +1337,89 @@ const HomePage = () => {
       </div>
 
       {/* Mobile sections remain same as original with DateField */}
+      {/* Mobile sections remain same as original with DateField */}
       {bookingType === "flight" && (
-        <div className={styles.flightSectionMain}>
-          <button type="button" className={styles.swapBtn} onClick={swapLocations}>
-            <img src="/icons/leftRrighArrow.svg" alt="swap" />
-          </button>
-          <div className={styles.flightSearchCard}>
-            <div className={styles.field}>
-              <label className={styles.label}>FROM</label>
-              <input
-                type="text"
-                placeholder="Departure"
-                className={styles.input}
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>TO</label>
-              <input
-                type="text"
-                placeholder="Destination"
-                className={styles.input}
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-              />
-            </div>
-            <DateField
-              label="DEPARTURE DATE"
-              placeholder="ADD DATES"
-              value={departureDate}
-              name="departureDate"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDepartureDate(e.target.value)}
-            />
-            <DateField
-              label="RETURN DATE"
-              placeholder="ADD DATES"
-              value={returnDate}
-              name="departureDate"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setReturenDate(e.target.value)}
-            />
-
-            <div
-              ref={travellerRef}  // ← Ye ref parent div pe lagao
-              className={`${styles.fromBtn} ${styles.fromBtn2}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setTravellerOpen((o) => !o);
-              }}
-            >
-              <div className={styles.lable}>Travellers & Class</div>
-              <div className={styles.iconCont}>
-                <div className={styles.contant}>
-                  {truncate(`${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`, 17)}
-                </div>
-
-                <ChevronDown
-                  className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
-                  size={20}
-                  color="#000000"
-                />
-              </div>
-
-              <PassengerClassSelector
-                open={travellerOpen}
-                setOpen={setTravellerOpen}
-                passengers={passengers}
-                setPassengers={setPassengers}
-                travelClass={travelClass}
-                setTravelClass={setTravelClass}
-              />
-            </div>
-
-            <button className={styles.searchBtna}>SEARCH</button>
-          </div>
-        </div>
+        <FlightSearchMobile
+          styles={styles}
+          swapLocations={swapLocations}
+          from={from}
+          setFrom={setFrom}
+          to={to}
+          setTo={setTo}
+          departureDate={departureDate}
+          setDepartureDate={setDepartureDate}
+          returnDate={returnDate}
+          setReturenDate={setReturenDate}
+          travellerOpen={travellerOpen}
+          setTravellerOpen={setTravellerOpen}
+          totalPassengers={totalPassengers}
+          travelClass={travelClass}
+          setTravelClass={setTravelClass}
+          passengers={passengers}
+          setPassengers={setPassengers}
+          truncate={truncate}
+        />
       )}
 
       {bookingType === "hotel" && (
-        <div className={styles.flightSectionMain}>
-          <div className={styles.flightSearchCard}>
-            <div className={styles.field}>
-              <label className={styles.label}>Where to</label>
-              <input type="text" placeholder="Departure" className={styles.input} value={to} onChange={(e) => setTo(e.target.value)} />
-            </div>
-
-            <DateField
-              label="Check in"
-              placeholder="ADD DATES"
-              value={checkIn}
-              name="departureDate"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setCheckIn(e.target.value)}
-            />
-            <DateField
-              label="Check out"
-              placeholder="ADD DATES"
-              value={checkOut}
-              name="returnDate"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setCheckOut(e.target.value)}
-            />
-
-            <div
-              className={`${styles.fromBtn} ${styles.fromBtn2}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setTravellerOpen((o) => !o);
-              }}
-            >
-              <div className={styles.lable}>ROOMS & GUESTS</div>
-              <div className={styles.iconCont}>
-                <div className={styles.contant}>
-                  {truncate(`${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`, 17)}
-                </div>
-
-                <ChevronDown
-                  className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
-                  size={20}
-                  color="#000000"
-                />
-              </div>
-
-              <PassengerClassSelector
-                open={travellerOpen}
-                setOpen={setTravellerOpen}
-                passengers={passengers}
-                setPassengers={setPassengers}
-                travelClass={travelClass}
-                setTravelClass={setTravelClass}
-              />
-            </div>
-
-            <button className={styles.searchBtna}>SEARCH</button>
-          </div>
-        </div>
+        <HotelSearchMobile
+          styles={styles}
+          to={to}
+          setTo={setTo}
+          checkIn={checkIn}
+          setCheckIn={setCheckIn}
+          checkOut={checkOut}
+          setCheckOut={setCheckOut}
+          travellerOpen={travellerOpen}
+          setTravellerOpen={setTravellerOpen}
+          totalPassengers={totalPassengers}
+          passengers={passengers}
+          setPassengers={setPassengers}
+          travelClass={travelClass}
+          setTravelClass={setTravelClass}
+          truncate={truncate}
+        />
       )}
 
       {bookingType === "holiday" && (
-        <div className={styles.flightSectionMain}>
-          <button type="button" className={styles.swapBtn}>
-            <img src="/icons/leftRrighArrow.svg" alt="swap" />
-          </button>
-          <div className={styles.flightSearchCard}>
-            <div className={styles.field}>
-              <label className={styles.label}>From CITY</label>
-              <input type="text" placeholder="Departure" className={styles.input} value={from} onChange={(e) => setFrom(e.target.value)} />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>To CITY/COUNTRY,CATEGORY</label>
-              <input type="text" placeholder="Destination" className={styles.input} value={to} onChange={(e) => setTo(e.target.value)} />
-            </div>
-
-            <DateField
-              label="DEPARTURE DATE"
-              placeholder="ADD DATES"
-              value={departureDate}
-              name="departureDate"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDepartureDate(e.target.value)}
-            />
-
-            <div
-              className={`${styles.fromBtn} ${styles.fromBtn2}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setTravellerOpen((o) => !o);
-              }}
-            >
-              <div className={styles.lable}>ROOMS & GUESTS</div>
-              <div className={styles.iconCont}>
-                <div className={styles.contant}>
-                  {truncate(`${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Guest${totalPassengers > 1 ? 's' : ''}`, 17)}
-                </div>
-
-                <ChevronDown
-                  className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
-                  size={20}
-                  color="#000000"
-                />
-              </div>
-
-              <PassengerClassSelector
-                open={travellerOpen}
-                setOpen={setTravellerOpen}
-                passengers={passengers}
-                setPassengers={setPassengers}
-                travelClass={travelClass}
-                setTravelClass={setTravelClass}
-              />
-            </div>
-
-            <button className={styles.searchBtna}>SEARCH</button>
-          </div>
-        </div>
+        <HolidaySearchMobile
+          styles={styles}
+          from={from}
+          setFrom={setFrom}
+          to={to}
+          setTo={setTo}
+          departureDate={departureDate}
+          setDepartureDate={setDepartureDate}
+          travellerOpen={travellerOpen}
+          setTravellerOpen={setTravellerOpen}
+          totalPassengers={totalPassengers}
+          passengers={passengers}
+          setPassengers={setPassengers}
+          travelClass={travelClass}
+          setTravelClass={setTravelClass}
+          truncate={truncate}
+        />
       )}
 
       {bookingType === "insurance" && (
-        <div className={styles.flightSectionMain}>
-          <div className={styles.flightSearchCard}>
-            <TravellerSelector
-              travellerClass={travellerDestination}
-              setTravellerClass={setTravellerDestination}
-              travellerOptions={TravellerDestinationOptions}
-              styles={styles}
-              name="TRAVEL DESTINATION"
-              enableEllipsis={false}
-            />
-
-            <DateField
-              label="TRAVEL DATE"
-              placeholder="ADD DATES"
-              value={departureDate}
-              name="TRAVELDATE"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDepartureDate(e.target.value)}
-            />
-
-            <DateField
-              label="TRAVEL DATE"
-              placeholder="ADD DATES"
-              value={returnDate}
-              name="TRAVELDATE"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setReturenDate(e.target.value)}
-            />
-
-            <div
-              className={`${styles.fromBtn} ${styles.fromBtn2}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setTravellerOpen((o) => !o);
-              }}
-            >
-              <div className={styles.lable}>TRAVELLERS</div>
-              <div className={styles.iconCont}>
-                <div className={styles.contant}>
-                  {truncate(`${totalPassengers} Traveller${totalPassengers > 1 ? 's' : ''}, ${travelClass}`, 17)}
-                </div>
-
-                <ChevronDown
-                  className={`${styles.chevron} ${travellerOpen ? styles.openChevron : styles.closeChevron}`}
-                  size={20}
-                  color="#000000"
-                />
-              </div>
-
-              <PassengerClassSelector
-                open={travellerOpen}
-                setOpen={setTravellerOpen}
-                passengers={passengers}
-                setPassengers={setPassengers}
-                travelClass={travelClass}
-                setTravelClass={setTravelClass}
-              />
-            </div>
-
-            <button className={styles.searchBtna}>SEARCH</button>
-          </div>
-        </div>
+        <InsuranceSearchMobile
+          styles={styles}
+          travellerDestination={travellerDestination}
+          setTravellerDestination={setTravellerDestination}
+          TravellerDestinationOptions={TravellerDestinationOptions}
+          departureDate={departureDate}
+          setDepartureDate={setDepartureDate}
+          returnDate={returnDate}
+          setReturnDate={setReturenDate}
+          travellerOpen={travellerOpen}
+          setTravellerOpen={setTravellerOpen}
+          totalPassengers={totalPassengers}
+          travelClass={travelClass}
+          setTravelClass={setTravelClass}
+          passengers={passengers}
+          setPassengers={setPassengers}
+          truncate={truncate}
+        />
       )}
 {showLogin && authView === "login" && (
   <LoginPopup
