@@ -698,7 +698,7 @@
 // export default TopFilterSection;
 
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import styles from "./TopFilterSection.module.css";
 // import Switch from "@/app/home-page/components/Switch";
 // import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
@@ -710,6 +710,7 @@ import { useTripType } from "../TripTypeContext";
 import DateCalendarModal from "@/app/components/calendar/DateCalendarModal";
 import CalendarMonths from "@/app/components/calendar/CalendarMonths";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
+import { useRouter } from "next/navigation";
 // import calendarSVG from "/icons/calendar.svg";
 
 const travellerOptions = [
@@ -774,6 +775,7 @@ const TopFilterSection = ({
   const fromInputRef = useRef(null);
   const fromSuggestionRef = useRef(null);
   const toSuggestionRef = useRef(null);
+  const router = useRouter();
 
   const {
     tripType,
@@ -1146,12 +1148,36 @@ const TopFilterSection = ({
       trend: t.price === min ? "down" : t.price === max ? "up" : "neutral",
     }));
   };
-  const [dateTiles, setDateTiles] = useState([]);
   const currentMonth = getCurrentMonth();
-  useEffect(() => {
-    setDateTiles(generateDateTiles());
-  }, []);
+  const dateTiles = useMemo(() => {
+    const today = new Date();
+    const tiles = [];
 
+    for (let i = 0; i < 40; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+
+      const price = Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;
+
+      tiles.push({
+        label: d.toLocaleDateString("en-US", {
+          weekday: "short",
+          day: "2-digit",
+          month: "short",
+        }),
+        price,
+      });
+    }
+
+    const prices = tiles.map((t) => t.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+
+    return tiles.map((t) => ({
+      ...t,
+      trend: t.price === min ? "down" : t.price === max ? "up" : "neutral",
+    }));
+  }, []);
   return (
     <>
       <div
@@ -1651,7 +1677,12 @@ const TopFilterSection = ({
             <div className={styles.topDetails}>
               {/* Left: Back Arrow */}
 
-              <div className={styles.leftIcon}>
+              <div
+                onClick={() => {
+                  router.push("/");
+                }}
+                className={styles.leftIcon}
+              >
                 <svg
                   width="16"
                   height="16"

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
@@ -7,6 +7,7 @@ import FareComparisonModal from "./FareComparisonModal";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
+import { SidebarContext } from "../../SidebarContext";
 
 const OnewayFlightBooking = () => {
   const { committedSearches } = useTripType();
@@ -17,6 +18,8 @@ const OnewayFlightBooking = () => {
   const [selectedSort, setSelectedSort] = useState("");
   const [fareModalOpen, setFareModalOpen] = useState(null); // Track which flight's fare modal is open
   const OFFER_INDEX = 3;
+  const { setIsSidebarOpen } = useContext(SidebarContext);
+
   const flightResults = [
     {
       id: 1,
@@ -159,7 +162,7 @@ const OnewayFlightBooking = () => {
       },
     },
     {
-      id: 4,
+      id: 5,
       airlines: [
         {
           name: "AkasaAir",
@@ -192,7 +195,7 @@ const OnewayFlightBooking = () => {
       },
     },
     {
-      id: 4,
+      id: 6,
       airlines: [
         {
           name: "Air India Express",
@@ -225,7 +228,7 @@ const OnewayFlightBooking = () => {
       },
     },
     {
-      id: 2,
+      id: 7,
       airlines: [
         {
           name: "IndiGo",
@@ -258,7 +261,7 @@ const OnewayFlightBooking = () => {
       },
     },
     {
-      id: 4,
+      id: 8,
       airlines: [
         {
           name: "Air India Express",
@@ -524,7 +527,6 @@ const OnewayFlightBooking = () => {
                       <span className={styles.fareText}>
                         {flight.fare.totalFare}
                       </span>
-                      
                     </div>
                     <div className={styles.fareAmount}>
                       <span className={styles.fare}>
@@ -585,8 +587,15 @@ const OnewayFlightBooking = () => {
       </section>
       <section className={styles.isMobileView}>
         <div className={styles.mobileFlightContainer}>
-          <p className={styles.mobileSubTextContainer}>Showing 1-10 of 100 results</p>
-          <button className={styles.filterBtn}>Filter</button>
+          <p className={styles.mobileSubTextContainer}>
+            Showing 1-10 of 100 results
+          </p>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className={styles.filterBtn}
+          >
+            Filter
+          </button>
         </div>
         {/* <div className={styles.flightChipContainer}>
           <div className={styles.chips}>
@@ -620,8 +629,9 @@ const OnewayFlightBooking = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
-                    }`}
+                  className={`${styles.sortedItem} ${
+                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                  }`}
                   onClick={() => setSelectedSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -639,8 +649,9 @@ const OnewayFlightBooking = () => {
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
-                    }`}
+                  className={`${styles.sortedItem} ${
+                    selectedSort === "fastest" ? styles.activeSortedItem : ""
+                  }`}
                   onClick={() => setSelectedSort("fastest")}
                 >
                   <img
@@ -664,7 +675,6 @@ const OnewayFlightBooking = () => {
               </div>
             </div>
             <div className={styles.sortByContainer}>
-
               <span className={styles.sortByText}>Sort by</span>
               <img src="/icons/DownArrows.svg" alt="" />
             </div>

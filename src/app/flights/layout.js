@@ -139,6 +139,7 @@ import { useEffect, useRef, useState } from "react";
 import { TripTypeProvider, useTripType } from "./TripTypeContext";
 import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { SidebarContext } from "./SidebarContext";
 
 function LayoutContent({ children }) {
   const isMobile = useMediaQuery("(max-width: 430px)");
@@ -326,45 +327,49 @@ function LayoutContent({ children }) {
         }
         className={styles.page}
       >
-        <div
-          ref={containerRef}
-          className={`${styles.container} ${
-            tripType === "round" ? styles.wideContainer : styles.normalContainer
-          }`}
-        >
-          {isTablet && (
-            <button
-              className={styles.sidebarToggle}
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-            >
-              {isSidebarOpen ? "Hide Filters" : "Show Filters"}
-            </button>
-          )}
-          {isTablet && isSidebarOpen && (
-            <div
-              className={styles.sidebarOverlay}
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
-          {/* Sidebar */}
-          <aside
-            className={`${styles.sidebar} ${
-              isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
+        <SidebarContext.Provider value={{ isSidebarOpen, setIsSidebarOpen }}>
+          <div
+            ref={containerRef}
+            className={`${styles.container} ${
+              tripType === "round"
+                ? styles.wideContainer
+                : styles.normalContainer
             }`}
           >
-            <div
-              className={`${styles.sidebarSticky} ${
-                tripType === "multi" ? styles.sidebarStickyMultiCity : ""
+            {isTablet && (
+              <button
+                className={styles.sidebarToggle}
+                onClick={() => setIsSidebarOpen((prev) => !prev)}
+              >
+                {isSidebarOpen ? "Hide Filters" : "Show Filters"}
+              </button>
+            )}
+            {isTablet && isSidebarOpen && (
+              <div
+                className={styles.sidebarOverlay}
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
+            {/* Sidebar */}
+            <aside
+              className={`${styles.sidebar} ${
+                isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
               }`}
-              ref={sidebarRef}
             >
-              <FlightFilters />
-            </div>
-          </aside>
+              <div
+                className={`${styles.sidebarSticky} ${
+                  tripType === "multi" ? styles.sidebarStickyMultiCity : ""
+                }`}
+                ref={sidebarRef}
+              >
+                <FlightFilters />
+              </div>
+            </aside>
 
-          {/* Main content */}
-          <section className={styles.content}>{children}</section>
-        </div>
+            {/* Main content */}
+            <section className={styles.content}>{children}</section>
+          </div>
+        </SidebarContext.Provider>
       </main>
     </>
   );
