@@ -6,6 +6,7 @@ import OfferBanner from "../offerComponent/OfferBanner";
 import FareComparisonModal from "./FareComparisonModal";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
+import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
 
 const OnewayFlightBooking = () => {
   const { committedSearches } = useTripType();
@@ -528,6 +529,70 @@ const OnewayFlightBooking = () => {
           onClose={() => setFareModalOpen(null)}
           flightData={flightResults.find(f => f.id === fareModalOpen)}
         />
+      </section>
+      <section className={styles.isMobileView}>
+        <div className={styles.mobileFlightContainer}>
+          <p className={styles.mobileSubTextContainer}>Showing 1-10 of 100 results</p>
+          <button className={styles.filterBtn}>Filter</button>
+        </div>
+        <div className={styles.sortContainer}>
+          <div className={styles.sortSubContainer}>
+            <div className={styles.sortedItemMainContainer}>
+              <div className={styles.sortedItemContainer}>
+                <div
+                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    }`}
+                  onClick={() => setSelectedSort("cheapest")}
+                >
+                  <img src="/images/Flight.png" alt="" />
+                  <div className={styles.sortedTextContainer}>
+                    <span className={styles.budget}>CHEAPEST</span>
+                    <div className={styles.priceContainer}>
+                      <span className={styles.price}>₹ 8500</span>
+                      <div className={styles.dot}></div>
+                      <span className={styles.duration}>
+                        01 <span className={styles.hours}>h</span> 50{" "}
+                        <span className={styles.hours}>m</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    }`}
+                  onClick={() => setSelectedSort("fastest")}
+                >
+                  <img
+                    src="/images/flightCompanyLogos/airIndia.png"
+                    height={36}
+                    width={36}
+                    alt=""
+                  />
+                  <div className={styles.sortedTextContainer}>
+                    <span className={styles.budget}>fastest</span>
+                    <div className={styles.priceContainer}>
+                      <span className={styles.price}>₹ 8500</span>
+                      <div className={styles.dot}></div>
+                      <span className={styles.duration}>
+                        01 <span className={styles.hours}>h</span> 50{" "}
+                        <span className={styles.hours}>m</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.sortByContainer}>
+
+              <span className={styles.sortByText}>Sort by</span>
+              <img src="/icons/DownArrows.svg" alt="" />
+            </div>
+          </div>
+        </div>
+        {flightResults.map((flight, index) => (
+          <FlightDetailsCard key={flight.id + index} flight={flight} />
+        ))}
       </section>
     </>
   );
