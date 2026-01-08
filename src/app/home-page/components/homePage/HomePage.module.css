@@ -167,6 +167,8 @@
   /* top: 114px;
     left: 50%;
     transform: translate(-50%); */
+    max-width: 870px;
+    width: 100%;
   display: flex;
   align-items: center;
   flex-direction: column;

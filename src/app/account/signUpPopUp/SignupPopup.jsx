@@ -5,19 +5,70 @@ import Image from "next/image";
 import styles from "./SignupPopup.module.css";
 
 export default function SignupPopup({ onNavigate, onClose }) {
-    useEffect(() => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
   }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        "http://139.84.175.121:1337/api/frontend-user/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            domain: "localhost:1337", // ❗ as required
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || "Signup failed");
+      }
+
+      // ✅ SUCCESS
+      console.log("Signup success:", data);
+      onNavigate("login"); // move to login screen
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.mainContainer}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Section: Image Area */}
+        {/* Left Section */}
         <section className={styles.imageSection}>
           <Image
             src="/images/signup-hero.jpg"
@@ -28,7 +79,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
           />
         </section>
 
-        {/* Right Section: Form Area */}
+        {/* Right Section */}
         <section className={styles.formSection}>
           <div className={styles.formContent}>
             <header className={styles.header}>
@@ -56,27 +107,42 @@ export default function SignupPopup({ onNavigate, onClose }) {
               </div>
             </header>
 
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
                 <label className={styles.label}>
                   Enter Email Id/ Phone Number
                 </label>
                 <input
                   type="text"
-                  placeholder="olivia@untitledui.com"
                   className={styles.input}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Enter password</label>
-                <input type="password" className={styles.input} />
+                <input
+                  type="password"
+                  className={styles.input}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Confirm password</label>
-                <input type="password" className={styles.input} />
+                <input
+                  type="password"
+                  className={styles.input}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
+
+              {error && (
+                <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
+              )}
 
               <div className={styles.formOptions}>
                 <label className={styles.checkboxContainer}>
@@ -88,8 +154,12 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 </label>
               </div>
 
-              <button type="submit" className={styles.signupButton}>
-                SIGN UP
+              <button
+                type="submit"
+                className={styles.signupButton}
+                disabled={loading}
+              >
+                {loading ? "SIGNING UP..." : "SIGN UP"}
               </button>
             </form>
 
@@ -107,6 +177,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 />
                 Sign in with Google
               </button>
+
               <button className={styles.socialButtonFacebook}>
                 <Image
                   src="/icons/facebook-icon.svg"

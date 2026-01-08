@@ -8,8 +8,8 @@ import ChoosePaymentMethod from "./ChoosePaymentMethod";
 import EmptyTrip from "./EmptyTrip";
 import Reservations from "./Reservations";
 import Wishlist from "./Wishlist";
-import LoginPopup from "../profile/components/loginPopUp/LoginPopup";
-import SignupPopup from "../profile/components/signUpPopUp/SignupPopup";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 
 export default function ProfilePage() {
   const [activePage, setActivePage] = useState("login");
