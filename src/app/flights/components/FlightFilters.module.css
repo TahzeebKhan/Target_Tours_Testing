@@ -2,6 +2,7 @@
   /* width: 356px; */
   background: #ffffff;
   padding: 16px;
+  padding-top: 24px;
   font-family: var(--font-inter);
 }
 
@@ -11,6 +12,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.titleAndCrossContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .title {
@@ -283,4 +291,175 @@
   display: flex;
   align-content: center;
   gap: 8px;
+}
+.actionBar {
+  display: none;
+}
+.filterClose {
+  display: none;
+}
+.filterChips {
+  display: none;
+}
+
+@media (max-width: 630px) {
+  .reset {
+    display: none;
+  }
+  .filterClose {
+    display: block;
+  }
+  .title .icon {
+    display: none;
+  }
+  .title {
+    color: #7b8799;
+    font-size: 13px;
+    font-weight: 400;
+  }
+  .titleAndCrossContainer {
+    margin-bottom: 6px;
+  }
+  .filterChips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    width: 100%;
+    align-items: flex-start;
+
+    white-space: nowrap;
+
+    /* smooth scroll */
+    scroll-behavior: smooth;
+
+    /* hide scrollbar (optional) */
+    scrollbar-width: none; /* Firefox */
+  }
+  .filterChips .name {
+    padding: 3px 8px;
+  }
+  .filterChips::-webkit-scrollbar {
+    display: none; /* Chrome / Safari */
+  }
+
+  .chip {
+    flex-shrink: 0; /* IMPORTANT */
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid #e4e6e8;
+    background: #fff;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    leading-trim: NONE;
+    line-height: 150%;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+
+    cursor: pointer;
+  }
+  .chip > span {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: #f2f3f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e4e6e8;
+  }
+  .sectionPopularFilter {
+    padding-top: 16px;
+  }
+  .sectionTitle {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .checkbox {
+    padding-left: 0;
+  }
+  .rangeValue {
+    margin-top: 8px;
+  }
+  .titlePriceRange {
+    margin-bottom: 13px;
+  }
+  .stops {
+    margin-bottom: 6px !important;
+  }
+  .departureGrid {
+    row-gap: 6px;
+  }
+
+  .actionBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 24px 0px 16px 0px;
+    border-top: 1px solid #E4E6E8
+  }
+
+  /* COMMON TYPOGRAPHY */
+  .resetBtn,
+  .applyBtn {
+    font-family: Inter, sans-serif;
+    font-weight: 500; /* Medium */
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: -0.03em; /* -3% */
+    text-transform: uppercase;
+    text-align: center;
+
+    height: 44px;
+    border-radius: 2px;
+    cursor: pointer;
+
+    transition: background-color 0.35s ease, color 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  /* RESET (default white) */
+  .resetBtn {
+    background-color: #ffffff;
+    color: #000033;
+    height: 48px;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* RESET → turns royal blue on hover */
+  .resetBtn:hover {
+    background-color: #000033;
+    color: #ffffff;
+    border-color: #000033;
+  }
+
+  /* APPLY (always royal blue) */
+  .applyBtn {
+    background-color: #000033;
+    color: #ffffff;
+    border: none;
+    height: 48px;
+  }
+
+  /* Optional subtle press */
+  .resetBtn:active,
+  .applyBtn:active {
+    transform: scale(0.98);
+  }
+  .sectionPrefferedAirline{
+    padding-bottom: 16px;
+  }
 }

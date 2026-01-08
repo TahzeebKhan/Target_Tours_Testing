@@ -1,13 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styles from "./FlightFilters.module.css";
-import { ListFilter } from "lucide-react";
+import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "./SVGFile";
+import { SidebarContext } from "../SidebarContext";
 
 export default function FlightFilters() {
   const DEFAULT_PRICE = [11307, 57295];
-
+  const { setIsSidebarOpen } = useContext(SidebarContext);
   const [filters, setFilters] = useState({
     price: DEFAULT_PRICE,
     popular: {
@@ -76,19 +77,42 @@ export default function FlightFilters() {
     <aside className={styles.sidebar}>
       {/* Header */}
       <div className={styles.header}>
-        <div className={styles.title}>
-          <span className={styles.icon}>
-            <ListFilter size={20} />
-          </span>
-          FILTER
+        <div className={styles.titleAndCrossContainer}>
+          <div className={styles.title}>
+            <span className={styles.icon}>
+              <ListFilter size={20} />
+            </span>
+            FILTER
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className={styles.filterClose}
+          >
+            <X size={20} color="#1A2029" />
+          </button>
+          <button onClick={handleReset} className={styles.reset}>
+            RESET
+          </button>
         </div>
-        <button onClick={handleReset} className={styles.reset}>
-          RESET
-        </button>
+        <div className={styles.filterChips}>
+          <div className={styles.chip}>
+            <div className={styles.name}>No. of stops: Direct </div>
+
+            <span>
+              <X size={16} color="#4A5565" />
+            </span>
+          </div>
+          <div className={styles.chip}>
+            <div className={styles.name}>Morning </div>
+            <span>
+              <X size={16} color="#4A5565" />
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Popular Filters */}
-      <section>
+      <section className={styles.sectionPopularFilter}>
         <h4 className={styles.sectionTitle}>POPULAR FILTERS</h4>
 
         <label className={styles.checkbox}>
@@ -143,7 +167,9 @@ export default function FlightFilters() {
 
       {/* Price Range */}
       <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>PRICE RANGE</h4>
+        <h4 className={`${styles.sectionTitle} ${styles.titlePriceRange}`}>
+          PRICE RANGE
+        </h4>
 
         <div className={styles.rangeContainer}>
           {/* Track */}
@@ -472,7 +498,9 @@ export default function FlightFilters() {
 
       {/* preferred airline */}
 
-      <section className={styles.section}>
+      <section
+        className={`${styles.section} ${styles.sectionPrefferedAirline}`}
+      >
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Preferred Airline
         </h4>
@@ -576,6 +604,12 @@ export default function FlightFilters() {
           </div>
         </label>
       </section>
+      <div className={styles.actionBar}>
+        <button onClick={handleReset} className={styles.resetBtn}>
+          RESET
+        </button>
+        <button className={styles.applyBtn}>APPLY</button>
+      </div>
     </aside>
   );
 }
