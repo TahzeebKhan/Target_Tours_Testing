@@ -109,12 +109,29 @@
         font-size: 10px;
     }
     .duration{
-        font-size: 10px !important;
+        font-size: 10px ;
     }
     .nonStop{
-        font-size: 10px !important;
+        font-size: 10px ;
     }
     .priceContainer{
         gap: 4px;
+    }
+}
+@media (max-width: 430px){
+    .departureTime{
+        font-size: 22px;
+    }
+    .fromName{
+        font-size: 11px;
+    }
+    .duration{
+        font-size: 11px;
+    }
+    .nonStop{
+        font-size: 11px;
+    }
+    .dashBorder{
+        width: 70px;
     }
 }

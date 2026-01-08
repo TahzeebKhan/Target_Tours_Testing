@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './FlightDetailsCard.module.css'
-import FlightTimingDetail from './flightTimingDetails/FlightTimingDetail';
+import FlightTimingDetail from '@/app/tour-booking/components/arrivalToronto/flightTimingDetails/FlightTimingDetail';
+
 
 const FlightDetailsCard = ({ flight }) => {
   // Get the first airline (or handle multiple airlines)
