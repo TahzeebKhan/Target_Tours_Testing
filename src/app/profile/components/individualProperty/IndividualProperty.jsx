@@ -5,23 +5,22 @@ import Image from "next/image";
 import styles from "./IndividualProperty.module.css";
 
 const IndividualProperty = () => {
-  // State for the "Confirmed" status or any interactive element
   const [isActive, setIsActive] = useState(true);
 
   const amenities = [
-    { icon: "hot-tub", label: "Hot tub" },
-    { icon: "city-view", label: "City view" },
-    { icon: "ac", label: "Air conditioning" },
-    { icon: "tv", label: "Tv" },
-    { icon: "fridge", label: "Refrigerator" },
-    { icon: "hair-dryer", label: "Hair dryer" },
-    { icon: "microwave", label: "Microwave" },
-    { icon: "wifi", label: "Wifi" },
-    { icon: "plates", label: "Plates" },
-    { icon: "security", label: "Security Cameras" },
-    { icon: "coffee", label: "Coffee machine" },
-    { icon: "towels", label: "Towels" },
-    { icon: "sofa", label: "Sofa" },
+    { icon: "/icons/hot-tub.svg", label: "Hot tub" },
+    { icon: "/icons/city-view.svg", label: "City view" },
+    { icon: "/icons/ac.svg", label: "Air conditioning" },
+    { icon: "/icons/tv-retro.svg", label: "TV" },
+    { icon: "/icons/fridge.svg", label: "Refrigerator" },
+    { icon: "/icons/hair-dryer.svg", label: "Hair dryer" },
+    { icon: "/icons/microwave.svg", label: "Microwave" },
+    { icon: "/icons/wifi.svg", label: "Wifi" },
+    { icon: "/icons/Plate.svg", label: "Plates" },
+    { icon: "/icons/camera-circle.svg", label: "Security Cameras" },
+    { icon: "/icons/coffee.svg", label: "Coffee machine" },
+    { icon: "/icons/towels.svg", label: "Towels" },
+    { icon: "/icons/sofa.svg", label: "Sofa" },
   ];
 
   return (
@@ -65,14 +64,32 @@ const IndividualProperty = () => {
             <span className={styles.label}>Check-In</span>
             <span className={styles.dateNumber}>14</span>
             <span className={styles.month}>August</span>
-            <span className={styles.time}>14:00 - 21:00</span>
+            <div className={styles.timeWrapper}>
+              <Image
+                src="/icons/alarm-clock.svg"
+                alt="Time"
+                width={18}
+                height={18}
+                className={styles.timeIcon}
+              />
+              <span className={styles.time}>14:00 - 21:00</span>
+            </div>
           </div>
           <div className={styles.divider} />
           <div className={styles.metaBox}>
             <span className={styles.label}>Check-Out</span>
             <span className={styles.dateNumber}>19</span>
             <span className={styles.month}>August</span>
-            <span className={styles.time}>08:00 - 10:00</span>
+            <div className={styles.timeWrapper}>
+              <Image
+                src="/icons/alarm-clock.svg"
+                alt="Time"
+                width={18}
+                height={18}
+                className={styles.timeIcon}
+              />
+              <span className={styles.time}>08:00 - 10:00</span>
+            </div>
           </div>
           <div className={styles.divider} />
           <div className={styles.statusSection}>
@@ -120,6 +137,15 @@ const IndividualProperty = () => {
               fill
               className={styles.objectFit}
             />
+
+            {/* Map Pin Icon */}
+            <Image
+              src="/icons/map-pin.svg"
+              alt="Location Pin"
+              width={24}
+              height={28}
+              className={styles.mapPin}
+            />
           </div>
         </section>
 
@@ -128,14 +154,14 @@ const IndividualProperty = () => {
           <h2 className={styles.sectionTitle}>BOOKING SUMMARY</h2>
           <div className={styles.priceTable}>
             {[
-              { label: "₹2245.5 × 1 Room × 8 Nights", value: "₹ 64,126" },
+              { label: "₹2245.5 x 1 Room x 8 Nights", value: "₹ 64,126" },
               { label: "Base Price", value: "₹ 64,126" },
               { label: "Discount", value: "₹ 64,126" },
               { label: "Coupon Discount", value: "₹ 64,126" },
               { label: "Taxes & Fees", value: "₹ 64,126" },
             ].map((item, idx) => (
               <div key={idx} className={styles.priceRow}>
-                <span className={styles.textSecondary}>{item.label}</span>
+                <span className={styles.priceLabel}>{item.label}</span>
                 <span className={styles.textPrimary}>{item.value}</span>
               </div>
             ))}
@@ -147,25 +173,42 @@ const IndividualProperty = () => {
         </section>
 
         {/* Guest & Meal Info */}
-        <div className={styles.guestInfo}>
-          <p className={styles.textPrimary}>
-            <strong>Guest name:</strong> Anna George / for max. 2 people
-          </p>
-          <p className={styles.textPrimary}>
-            <strong>Meal Plan:</strong> There is no meal included in the rate
-            for this apartment.
-          </p>
-        </div>
+<div className={styles.infoAmenitiesWrapper}>
+  {/* Guest & Meal Info */}
+  <div className={styles.guestInfo}>
+    <p className={styles.textPrimary}>
+      <span className={styles.infoTitle}>Guest name:</span>{" "}
+      <span className={styles.infoText}>
+        Anna George / for max. 2 people
+      </span>
+    </p>
 
-        {/* Amenities Grid */}
-        <div className={styles.amenitiesGrid}>
-          {amenities.map((item, idx) => (
-            <div key={idx} className={styles.amenityCard}>
-              <div className={styles.iconPlaceholder} />
-              <span>{item.label}</span>
-            </div>
-          ))}
+    <p className={styles.textPrimary}>
+      <span className={styles.infoTitle}>Meal Plan:</span>{" "}
+      <span className={styles.infoText}>
+        There is no meal included in the rate for this apartment.
+      </span>
+    </p>
+  </div>
+
+  {/* Amenities Grid */}
+  <div className={styles.amenitiesGrid}>
+    {amenities.map((item, idx) => (
+      <div key={idx} className={styles.amenityCard}>
+        <div className={styles.iconWrapper}>
+          <Image
+            src={item.icon}
+            alt={item.label}
+            width={22}
+            height={22}
+          />
         </div>
+        <span>{item.label}</span>
+      </div>
+    ))}
+  </div>
+</div>
+
 
         {/* Footer Actions */}
         <footer className={styles.footerActions}>

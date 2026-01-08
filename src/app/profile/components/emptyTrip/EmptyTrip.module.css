@@ -40,7 +40,8 @@
   background-color: rgba(0, 0, 51, 1); 
   color: #ffffff;
   padding: 12px 24px;
-  min-width: 268px;
+  max-width: 268px;
+  width: 100%;
   border: none;
   cursor: pointer;
   font-size: 14px;
