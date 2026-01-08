@@ -525,8 +525,8 @@
 
 
 .isMobileView{
+  display: none ;
   padding: 12px 16px;
-  display: flex;
   flex-direction: column;
   gap: 12px;
 
@@ -662,8 +662,8 @@
   .container{
     display: none;
   }
-  .imMobileView{
-    display: flex;
+  .isMobileView{
+    display: flex ;
   }
 
   .sortSubContainer{
