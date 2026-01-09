@@ -1335,6 +1335,16 @@ const HomePage = () => {
                         setTravelClass={setTravelClass}
                       />
                     )}
+                    {bookingType === "insurance" && (
+                      <PassengerClassSelector
+                        open={travellerOpend}
+                        setOpen={setTravellerOpend}
+                        passengers={passengers}
+                        setPassengers={setPassengers}
+                        travelClass={travelClass}
+                        setTravelClass={setTravelClass}
+                      />
+                    )}
                   </div>
 
 

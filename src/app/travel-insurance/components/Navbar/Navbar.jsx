@@ -1,4 +1,5 @@
 "use client";
+import TravelInsuranceSearch from "../travelInsuranceSearch/TravelInsuranceSearch";
 import styles from "./Navbar.module.css";
 
 const Navbar = () => {
@@ -56,6 +57,10 @@ const Navbar = () => {
             Plans starting at just ₹65/day with tax
           </div>
         </div>
+
+        <TravelInsuranceSearch />
+
+        
       </div>
     </header>
   );
