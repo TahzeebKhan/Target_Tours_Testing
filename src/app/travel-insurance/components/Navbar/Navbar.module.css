@@ -113,7 +113,7 @@
   color: #ffffff;
 }
 
-.plans{
+.plans {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,12 +159,10 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(
-    from -90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 15%,
-    transparent 30%
-  );
+  background: conic-gradient(from -90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 15%,
+      transparent 30%);
 
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
@@ -203,16 +201,18 @@
 
 /* ================= HAMBURGER ================= */
 
+
 .hamBurger {
-  display: none !important;
+  display: none;
+  font-weight: 400;
   font-size: 9px;
   text-transform: uppercase;
   color: #ffffff;
 
-  display: flex;
   flex-direction: column;
   gap: 2px;
 }
+
 
 /* ================= RESPONSIVE ================= */
 
@@ -227,10 +227,24 @@
   .signInBtn {
     display: none;
   }
+
+  .hamBurger {
+    display: flex !important;
+  }
+
+  .plans {
+    padding: 10px 48px;
+    font-size: 18px;
+  }
 }
 
-@media (max-width: 430px) {
-  .navContainer {
-    display: none;
+@media (max-width: 480px) {
+  .plans {
+    width: 100%;
+    max-width: 360px;
+
+    padding: 10px 24px;
+    font-size: 16px;
+    line-height: 150%;
   }
 }
