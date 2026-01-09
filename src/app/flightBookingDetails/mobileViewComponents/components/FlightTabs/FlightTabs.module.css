@@ -1,0 +1,67 @@
+.wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Tabs row */
+.tabs {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+    padding-bottom: 8px;
+    position: relative;
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tab text */
+.tab {
+    padding: 8px 12px;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    background: none;
+    outline: none;
+
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+}
+
+/* Active tab styling */
+.active {
+    color: #0b1440;
+    font-weight: 500;
+}
+
+/* Sliding indicator */
+.indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background-color: #000033;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px 2px 0 0;
+}
+
+/* Hover effect for inactive tabs */
+.tab:not(.active):hover {
+    color: #0b1440;
+}

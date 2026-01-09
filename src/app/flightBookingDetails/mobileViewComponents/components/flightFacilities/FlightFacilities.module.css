@@ -7,8 +7,8 @@
 .flightDepartureFacilitiesHeader {
     font-family: var(--font-inter);
     font-weight: 600;
-    font-size: 14px;
-    line-height: 1.18;
+    font-size: 12px;
+    line-height: 1.5;
     letter-spacing: 0%;
     color: #000000;
 }
@@ -16,8 +16,8 @@
 .flightDepartureFacilitiesList {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 48px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .flightDepartureFacilitiesItem {
@@ -36,22 +36,3 @@
     color: #000000;
 }
 
-@media (max-width: 1280px) {
-    .flightDepartureFacilitiesList {
-        gap: 0;
-        justify-content: space-between;
-    }
-    
-}
-
-@media (max-width: 1200px) {
-    .flightDepartureFacilitiesList{
-        gap: 10px ;
-    }
-    .flightDepartureFacilitiesHeader{
-        font-size: 13px;
-    }
-    .facilitiesText{
-        font-size: 11px;
-    }
-}

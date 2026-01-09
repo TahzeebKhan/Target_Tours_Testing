@@ -171,3 +171,10 @@
     vertical-align: middle;
     color: #767676;
 }
+
+@media (max-width: 1200px) {
+    .marks {
+        gap: 66px;
+    }
+}
+
