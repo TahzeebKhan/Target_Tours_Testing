@@ -73,12 +73,22 @@ const Navbar = () => {
             </div>
 
             <button className={styles.searchBtn} aria-label="Search">
-              <Image
-                src="/icons/search-icon.svg"
-                alt="Search"
-                width={24}
-                height={24}
-              />
+              <span className={styles.iconWrapper}>
+                <Image
+                  src="/icons/search-icon.svg"
+                  alt="Search"
+                  width={24}
+                  height={24}
+                  className={styles.iconDefault}
+                />
+                <Image
+                  src="/icons/search-icon-dark.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                  className={styles.iconHover}
+                />
+              </span>
             </button>
           </div>
         </div>

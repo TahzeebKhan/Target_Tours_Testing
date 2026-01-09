@@ -156,6 +156,13 @@
   color: rgba(255, 255, 255, 1);
 }
 
+.iconWrapper {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+
 .searchBtn {
   flex: 0 0 56px;
   height: 54px;
@@ -167,6 +174,36 @@
   background-color: rgba(0, 0, 51, 1);
   border: none;
   cursor: pointer;
+}
+
+.searchBtn:hover{
+    transition: 
+    background-color 300ms ease-in,
+    transform 300ms ease-in;
+  background-color: rgba(255, 255, 255, 1);
+}
+.iconDefault,
+.iconHover {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.25s ease;
+}
+
+.iconDefault {
+  opacity: 1;
+}
+
+.iconHover {
+  opacity: 0;
+}
+
+/* Hover effect */
+.searchBtn:hover .iconDefault {
+  opacity: 0;
+}
+
+.searchBtn:hover .iconHover {
+  opacity: 1;
 }
 
 

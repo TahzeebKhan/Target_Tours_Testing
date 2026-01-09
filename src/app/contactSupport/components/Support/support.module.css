@@ -25,7 +25,15 @@
     flex-direction: column;
     gap: 16px;
     cursor: pointer;
+    transition:
+        background-color 300ms ease-in,
+        transform 300ms ease-in;
 }
+
+.card:hover {
+    box-shadow: 0px 1px 18.6px 0px rgba(0, 0, 0, 0.09);
+}
+
 
 
 .iconWrapper {
@@ -174,7 +182,8 @@
 }
 
 .footerButton:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(252, 200, 0, 1);
+    color: rgba(0, 0, 51, 1);
 }
 
 /* Responsiveness */
