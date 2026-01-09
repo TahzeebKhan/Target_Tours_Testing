@@ -1,77 +1,29 @@
 "use client";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "./SVGFile";
 import { SidebarContext } from "../SidebarContext";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+import { useFlightFilters } from "@/app/context/FlightFilterContext";
 
 export default function FlightFilters() {
-  const DEFAULT_PRICE = [11307, 57295];
-  const { setIsSidebarOpen } = useContext(SidebarContext);
-  const [filters, setFilters] = useState({
-    price: DEFAULT_PRICE,
-    popular: {
-      refundable: false,
-      oneStop: false,
-      lateDeparture: false,
-      nonStop: false,
-    },
-    stops: {
-      nonStop: false,
-      oneStop: false,
-      twoPlus: false,
-    },
-    departureJakarta: null, // 'before6', '6to12', '12to6', 'after6'
-    departureSingapore: null,
-    aircraft: {},
-    airlines: {},
-  });
+  const { setIsSidebarOpen, isSidebarOpen } = useContext(SidebarContext);
+
+  useLockBodyScroll(isSidebarOpen);
+
+  const {
+    filters,
+    filterChips,
+    toggleCheckbox,
+    toggleMapCheckbox,
+    selectDeparture,
+    resetFilters,
+    setFilters, // needed only for price slider
+  } = useFlightFilters();
+
   const price = filters.price;
-  const toggleCheckbox = (group, key) => {
-    setFilters((prev) => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [key]: !prev[group][key],
-      },
-    }));
-  };
-  const selectDeparture = (type, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [type]: prev[type] === value ? null : value,
-    }));
-  };
-  const handleReset = () => {
-    setFilters({
-      price: DEFAULT_PRICE,
-      popular: {
-        refundable: false,
-        oneStop: false,
-        lateDeparture: false,
-        nonStop: false,
-      },
-      stops: {
-        nonStop: false,
-        oneStop: false,
-        twoPlus: false,
-      },
-      departureJakarta: null,
-      departureSingapore: null,
-      aircraft: {},
-      airlines: {},
-    });
-  };
-  const toggleMapCheckbox = (group, key) => {
-    setFilters((prev) => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [key]: !prev[group]?.[key],
-      },
-    }));
-  };
 
   return (
     <aside className={styles.sidebar}>
@@ -90,25 +42,22 @@ export default function FlightFilters() {
           >
             <X size={20} color="#1A2029" />
           </button>
-          <button onClick={handleReset} className={styles.reset}>
+          <button onClick={resetFilters} className={styles.reset}>
             RESET
           </button>
         </div>
-        <div className={styles.filterChips}>
-          <div className={styles.chip}>
-            <div className={styles.name}>No. of stops: Direct </div>
-
-            <span>
-              <X size={16} color="#4A5565" />
-            </span>
+        {filterChips.length > 0 && (
+          <div className={styles.filterChips}>
+            {filterChips.map((chip, index) => (
+              <div key={index} className={styles.chip}>
+                <div className={styles.name}>{chip.label}</div>
+                <span onClick={chip.onRemove}>
+                  <X size={16} color="#4A5565" />
+                </span>
+              </div>
+            ))}
           </div>
-          <div className={styles.chip}>
-            <div className={styles.name}>Morning </div>
-            <span>
-              <X size={16} color="#4A5565" />
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Popular Filters */}
@@ -605,7 +554,7 @@ export default function FlightFilters() {
         </label>
       </section>
       <div className={styles.actionBar}>
-        <button onClick={handleReset} className={styles.resetBtn}>
+        <button onClick={resetFilters} className={styles.resetBtn}>
           RESET
         </button>
         <button className={styles.applyBtn}>APPLY</button>

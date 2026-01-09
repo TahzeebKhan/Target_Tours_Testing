@@ -140,6 +140,7 @@ import { TripTypeProvider, useTripType } from "./TripTypeContext";
 import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { SidebarContext } from "./SidebarContext";
+import { FlightFilterProvider } from "../context/FlightFilterContext";
 
 function LayoutContent({ children }) {
   const isMobile = useMediaQuery("(max-width: 430px)");
@@ -377,8 +378,10 @@ function LayoutContent({ children }) {
 
 export default function FlightsLayout({ children }) {
   return (
-    <TripTypeProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </TripTypeProvider>
+    <FlightFilterProvider>
+      <TripTypeProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </TripTypeProvider>
+    </FlightFilterProvider>
   );
 }

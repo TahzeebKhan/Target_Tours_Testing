@@ -8,6 +8,10 @@ import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
+import SortBySheet from "../SortBySheet";
+import OnewaySkeleton from "./OnewaySkeleton";
+import { useFlightFilters } from "@/app/context/FlightFilterContext";
+import { X } from "lucide-react";
 
 const OnewayFlightBooking = () => {
   const { committedSearches } = useTripType();
@@ -18,6 +22,8 @@ const OnewayFlightBooking = () => {
   const [selectedSort, setSelectedSort] = useState("");
   const [fareModalOpen, setFareModalOpen] = useState(null); // Track which flight's fare modal is open
   const OFFER_INDEX = 3;
+  const [openSort, setOpenSort] = useState(false);
+  const [isLoading, seIsloading] = useState(false);
   const { setIsSidebarOpen } = useContext(SidebarContext);
 
   const flightResults = [
@@ -294,7 +300,14 @@ const OnewayFlightBooking = () => {
       },
     },
   ];
-
+  const {
+    filters,
+    filterChips,
+    toggleCheckbox,
+    toggleMapCheckbox,
+    selectDeparture,
+    resetFilters,
+  } = useFlightFilters();
   return (
     <>
       {" "}
@@ -365,7 +378,10 @@ const OnewayFlightBooking = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.sortByContainer}>
+            <div
+              onClick={() => setOpenSort(true)}
+              className={styles.sortByContainer}
+            >
               <img src="/icons/sort.svg" alt="" />
               <span className={styles.sortByText}>Sort by</span>
             </div>
@@ -597,33 +613,20 @@ const OnewayFlightBooking = () => {
             Filter
           </button>
         </div>
-        {/* <div className={styles.flightChipContainer}>
-          <div className={styles.chips}>
-          
-            <p>No. of stops: Direct</p>
-            <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
-            </div>
+
+        {filterChips.length > 0 && (
+          <div className={styles.filterChips}>
+            {filterChips.map((chip, index) => (
+              <div key={index} className={styles.chip}>
+                <div className={styles.name}>{chip.label}</div>
+                <span onClick={chip.onRemove}>
+                  <X size={16} color="#4A5565" />
+                </span>
+              </div>
+            ))}
           </div>
-          <div className={styles.chips}>
-            <p>Departure time: Morning, 06:00 - 12:00</p>
-            <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
-            </div>
-          </div>
-          <div className={styles.chips}>
-            <p>Departure time: Morning, 06:00 - 12:00</p>
-            <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
-            </div>
-          </div>
-          <div className={styles.chips}>
-            <p>Departure time: Morning, 06:00 - 12:00</p>
-            <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
-            </div>
-          </div>
-        </div> */}
+        )}
+
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
             <div className={styles.sortedItemMainContainer}>
@@ -674,16 +677,30 @@ const OnewayFlightBooking = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.sortByContainer}>
+            <div
+              onClick={() => setOpenSort(true)}
+              className={styles.sortByContainer}
+            >
               <span className={styles.sortByText}>Sort by</span>
-              <img src="/icons/DownArrows.svg" alt="" />
+              <img
+                className={`${styles.chevronSort} ${
+                  openSort === true ? styles.open : ""
+                }`}
+                src="/icons/DownArrows.svg"
+                alt=""
+              />
             </div>
           </div>
         </div>
-        {flightResults.map((flight, index) => (
-          <FlightDetailsCard key={flight.id + index} flight={flight} />
-        ))}
+        {isLoading ? (
+          <OnewaySkeleton />
+        ) : (
+          flightResults.map((flight, index) => (
+            <FlightDetailsCard key={flight.id + index} flight={flight} />
+          ))
+        )}
       </section>
+      <SortBySheet open={openSort} onClose={() => setOpenSort(false)} />
     </>
   );
 };

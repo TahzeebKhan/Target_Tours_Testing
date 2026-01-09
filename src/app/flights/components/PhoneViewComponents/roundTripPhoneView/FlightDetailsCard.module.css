@@ -52,10 +52,29 @@
   letter-spacing: 0%;
   color: #000033;
 }
+.border {
+  border-top: 1px solid #e4e6e8;
+}
+.depart {
+  color: black;
+  font-family: Inter;
+  font-weight: 400;
+  margin-bottom: 6px;
+  font-style: Regular;
+  font-size: 11px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+}
+.bold {
+  font-weight: 600;
+}
 
-@media (max-width: 356px) {
-  .flightDetailsLeftText {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+
+@media (max-width:356px) {
+    .flightDetailsLeftText{
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }

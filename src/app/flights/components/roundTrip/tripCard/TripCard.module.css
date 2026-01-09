@@ -278,3 +278,50 @@
 .rotate {
   transform: rotate(180deg);
 }
+.cardRight .seeDetailsBtn {
+  display: none;
+}
+@media (max-width: 1440px) {
+  .expandWrap.open {
+    max-height: 886px;
+  }
+}
+@media (max-width: 1383px) {
+  .card {
+    flex-direction: column;
+    padding-right: 16px;
+  }
+  .cardLeft {
+    max-width: 100%;
+  }
+  .cardLeftMainCont {
+    max-width: 100%;
+  }
+  .departContainer {
+    max-width: 100%;
+  }
+  .cardRight {
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0px;
+    padding-right: 0;
+  }
+
+  .cardRight .seeDetailsBtn {
+    display: flex;
+  }
+  .cardLeftMainCont .seeDetailsBtn {
+    display: none;
+  }
+}
+@media (max-width: 1200px) {
+  .departTimeContainer,
+  .returnContainer {
+    max-width: unset;
+  }
+}
+@media (max-width: 800px) {
+  .cardLeft {
+    flex-direction: column;
+  }
+}

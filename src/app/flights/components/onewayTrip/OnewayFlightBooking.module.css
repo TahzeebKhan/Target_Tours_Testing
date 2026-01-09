@@ -538,13 +538,11 @@
   transform: rotate(180deg);
 }
 
-
 .isMobileView {
   display: none;
   padding: 12px 16px;
   flex-direction: column;
   gap: 12px;
-
 }
 
 .mobileFlightContainer {
@@ -568,20 +566,18 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 12px;
-  line-height: 1.20;
+  line-height: 1.2;
   letter-spacing: -3%;
   text-transform: uppercase;
-  color: #0604B2;
-
+  color: #0604b2;
 }
 
 .flightChipContainer {
   width: 100%;
-  
+
   display: flex;
   align-items: center;
   gap: 8px;
-
 }
 
 .chips {
@@ -590,8 +586,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #E4E6E8;
-  background-color: #FFFFFF;
+  border: 1px solid #e4e6e8;
+  background-color: #ffffff;
   border-radius: 16px;
 }
 
@@ -599,7 +595,7 @@
   width: 24px;
   height: 24px;
   border-radius: 100%;
-  background-color: #F2F3F7;
+  background-color: #f2f3f7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -609,7 +605,67 @@
   width: 16px;
   height: 16px;
 }
+.chevronSort {
+  transition: all 0.5s ease;
+}
+.chevronSort.open {
+  transform: rotate(-180deg);
+}
 
+.filterChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  width: 100%;
+  align-items: flex-start;
+
+  white-space: nowrap;
+
+  /* smooth scroll */
+  scroll-behavior: smooth;
+
+  /* hide scrollbar (optional) */
+  scrollbar-width: none; /* Firefox */
+}
+.filterChips .name {
+  padding: 3px 8px;
+}
+.filterChips::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
+
+.chip {
+  flex-shrink: 0; /* IMPORTANT */
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid #e4e6e8;
+  background: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 150%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+
+  cursor: pointer;
+}
+.chip > span {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: #f2f3f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 @media (max-width: 1264px) {
   .flightFareDetailsContainer {
     gap: 4px;
@@ -719,19 +775,18 @@
     display: none;
   }
 
-  .fareDetailsResponsive>.fareDetails {
+  .fareDetailsResponsive > .fareDetails {
     display: flex;
     padding-top: 0;
   }
 
-  .fareDetailsResponsive>.seeDetailsBtn {
+  .fareDetailsResponsive > .seeDetailsBtn {
     display: flex;
   }
 
   .fareDetailsResponsive .totalFare {
     flex-direction: row;
   }
-
 }
 
 @media (max-width: 630px) {
@@ -750,15 +805,19 @@
   .sortContainer {
     background-color: transparent;
     padding: 0;
-
   }
 
   .sortedItem {
-    padding: 6px;
-    background-color: #FFFFFF;
-    border: 0.69px solid #0000001A
+    padding: 6px 4px;
+    gap: 4px;
+    height: 40px;
+    border: 0.69px solid transparent;
+    transition: all 0.5s ease;
   }
-
+  .sortedItem.activeSortedItem {
+    background-color: #ffffff;
+    border: 0.69px solid #0000001a;
+  }
   .sortedItem img {
     width: 24px;
     height: 24px;
@@ -782,5 +841,23 @@
 
   .sortByText {
     font-size: 12px;
+    font-weight: 300;
+  }
+}
+@media (max-width: 380px) {
+  .sortedItemContainer {
+    gap: unset;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .sortedItemMainContainer {
+    width: 100%;
+    max-width: 264px;
+  }
+  .sortByContainer {
+    gap: 4px;
+  }
+  .chevronSort {
+    display: none;
   }
 }
