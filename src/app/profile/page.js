@@ -6,6 +6,7 @@ import Trip from "./components/trip/Trip";
 import PersonalData from "./components/personalData/PersonalData";
 import WishList from "./components/wishList/WishList";
 import MyReview from "./components/myReview/MyReview";
+import Support from "./components/Support/support";
 import { useProfile } from "./context/ProfileContext";
 
 const ProflePage = () => {
@@ -17,7 +18,7 @@ const ProflePage = () => {
       {activeMenu === "paymentAccount" && <PaymentMethod />}
       {activeMenu === "trip" && <Trip />}
       {activeMenu === "wishList" && <WishList />}
-      {activeMenu === "support" && <div>Support</div>}
+      {activeMenu === "support" && <Support />}
       {activeMenu === "myReviews" && <MyReview />}
       {activeMenu === "settings" && <PersonalData />}
     </>
