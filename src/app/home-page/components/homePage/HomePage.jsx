@@ -82,55 +82,61 @@ const HomePage = () => {
 
 
   useEffect(() => {
-  const fetchHeroSection = async () => {
-    try {
-      // Get token from cookie
-      const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-      };
+    const fetchHeroSection = async () => {
+      try {
+        // Get token from cookie
+        const getCookie = (name) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+        };
 
-      const token = getCookie('auth_token');
-      
-      const headers = {
-        'Content-Type': 'application/json',
-      };
+        const token = getCookie('auth_token');
 
-      // Add Authorization header if token exists
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+        const headers = {
+          'Content-Type': 'application/json',
+        };
 
-      const res = await fetch(
-        "http://139.84.175.121:1337/api/hero-section/company",
-        {
-          method: 'GET',
-          headers,
-          credentials: "include", // Still include for cookie-based auth
+        // Add Authorization header if token exists
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
-      );
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const res = await fetch(
+          "http://139.84.175.121:1337/api/hero-section/company",
+          {
+            method: 'GET',
+            headers,
+            credentials: "include", // Still include for cookie-based auth
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        setHeroData({
+          heading: data.heading || "",
+          description: data.description || "",
+          videoUrl: data.media?.url
+            ? `http://139.84.175.121:1337${data.media.url}`
+            : "",
+        });
+      } catch (error) {
+        console.error("Hero section fetch failed:", error);
+        // Optionally set default/fallback data
+        setHeroData({
+          heading: "Welcome to Our Platform",
+          description: "Discover amazing travel experiences",
+          videoUrl: "/videos/hero.mp4",
+        });
       }
+    };
 
-      const data = await res.json();
-
-      setHeroData({
-        heading: data.heading || "",
-        description: data.description || "",
-        videoUrl: data.media?.url
-          ? `http://139.84.175.121:1337${data.media.url}`
-          : "",
-      });
-    } catch (error) {
-      console.error("Hero section fetch failed:", error);
-    }
-  };
-
-  fetchHeroSection();
-}, []);
+    fetchHeroSection();
+  }, []);
 
 
   const [flightDates, setFlightDates] = useState({
@@ -475,34 +481,6 @@ const HomePage = () => {
       input.focus();
     }
   };
-
-  // Flight date handler
-  // const handleDateClick = (date) => {
-  //   if (tripType === "multi" && activeMultiIndex !== null) {
-  //     updateMultiLeg(activeMultiIndex, 'date', date);
-  //     setShowCalendar(false);
-  //     setActiveMultiIndex(null);
-  //     return;
-  //   }
-
-  //   if (calendarTripType === "oneway") {
-  //     setStartDate(date);
-  //     setEndDate("");
-  //     setShowCalendar(false);
-  //     return;
-  //   }
-
-  //   if (!startDate || endDate) {
-  //     setStartDate(date);
-  //     setEndDate("");
-  //   } else if (new Date(date) >= new Date(startDate)) {
-  //     setEndDate(date);
-  //     setShowCalendar(false);
-  //   } else {
-  //     setStartDate(date);
-  //     setEndDate("");
-  //   }
-  // };
 
   const handleRoundDateClick = (date) => {
     setFlightDates((prev) => {
