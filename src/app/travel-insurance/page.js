@@ -9,7 +9,7 @@ import Navbar from './components/Navbar/Navbar'
 const page = () => {
   return (
     <div>
-      {/* <Navbar /> */}
+      <Navbar />
       <Comprehensive />
           <Claim />
           <Questions />
