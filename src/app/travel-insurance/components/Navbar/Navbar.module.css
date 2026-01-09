@@ -1,14 +1,53 @@
+/* ================= HERO SECTION ================= */
+
+.homeSection {
+  position: relative;
+  width: 100%;
+  min-height: 646px;
+  overflow: hidden;
+}
+
+/* Background video */
+.heroVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Dark overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+/* Gradient image */
+.gradient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ================= NAVBAR ================= */
+
 .navContainer {
   width: 100%;
-  /* border-bottom: 1px solid rgba(227, 227, 227, 0.5); */
   border-bottom: 1px solid #e3e3e380;
   padding: 12px 0;
   display: flex;
   justify-content: center;
   position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
 
-  /* 🔹 Glass blur effect */
-  /* background: rgba(10, 22, 40, 0.55); */
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
@@ -16,22 +55,99 @@
 .navbar {
   max-width: 1520px;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
+
+.navRight {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+/* ================= HERO CONTENT ================= */
+
+.homePageContainer {
+  position: absolute;
+  z-index: 5;
+  top: 42px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 42px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.InspiredSection {
+  max-width: 870px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 44px;
+}
+
+.InspiredSection h1 {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 100%;
+  text-align: center;
+  text-transform: capitalize;
+  color: #ffffff;
+  max-width: 700px;
+}
+
+.InspiredSection p {
+  max-width: 636px;
+  width: 100%;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 160%;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.plans{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 11px 73px;
+
+  background-color: rgba(255, 255, 255, 1);
+  opacity: 1;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 160%;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-transform: uppercase;
+
+  color: rgba(0, 0, 51, 1);
+}
+
+/* ================= BUTTONS ================= */
 
 .glass_button {
   position: relative;
-
   background-color: rgba(255, 255, 255, 0.12);
-  /* glass base */
   backdrop-filter: blur(0.2px);
-  /* blur the background */
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.6);
 
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1),
     inset 0 0 20px rgba(255, 255, 255, 0.1);
 
-  color: #fff;
+  color: #ffffff;
   transition: all 0.45s ease;
 }
 
@@ -54,6 +170,22 @@
   mask-composite: exclude;
 }
 
+.glass_button:hover {
+  background-color: #ffffff;
+  color: #000033;
+}
+
+.downloadBtn {
+  padding: 8px 18px;
+  border: 0.5px solid #e4e6e8;
+  height: 37px;
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  background: #15151512;
+  cursor: pointer;
+}
+
 .signInBtn {
   padding: 7px 16px;
   background-color: #000033;
@@ -61,7 +193,6 @@
   font-size: 14px;
   font-weight: 400;
   text-transform: uppercase;
-  background-color: #000033;
   cursor: pointer;
   transition: all 0.45s ease;
 }
@@ -70,39 +201,20 @@
   background-color: #21347b;
 }
 
-.downloadBtn {
-  padding: 8px 18px;
-  border: 0.5px solid #e4e6e8;
-  color: #ffffff;
-  height: 37px;
-
-  font-size: 14px;
-  font-weight: 400;
-  text-transform: uppercase;
-  background: #15151512;
-
-  cursor: pointer;
-}
-
-.glass_button:hover {
-  background-color: #ffffff;
-  color: #000033;
-}
+/* ================= HAMBURGER ================= */
 
 .hamBurger {
   display: none !important;
-  font-weight: 400;
   font-size: 9px;
-  line-height: 1.25;
-  letter-spacing: 1%;
-  text-align: center;
-  vertical-align: middle;
   text-transform: uppercase;
   color: #ffffff;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
+
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 1600px) {
   .navbar {
@@ -112,10 +224,6 @@
 }
 
 @media (max-width: 768px) {
-  .navRight {
-    align-items: center;
-  }
-
   .signInBtn {
     display: none;
   }
