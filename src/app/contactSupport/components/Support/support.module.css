@@ -1,0 +1,199 @@
+.mainContainer {
+    padding: 60px 30px;
+    background-color: #ffffff;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    margin: 0 auto;
+}
+
+/* Grid Layout */
+.gridContainer {
+    max-width: 1402px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+/* Card Styling */
+.card {
+    padding: 24px;
+    border: 1px solid rgba(228, 230, 232, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    cursor: pointer;
+}
+
+
+.iconWrapper {
+    width: 64px;
+    height: 64px;
+    background-color: rgba(0, 0, 51, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cardTitle {
+    font-family: 'Antic Didone', serif;
+    font-size: 20px;
+    color: rgba(10, 10, 10, 1);
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: -0.44px;
+}
+
+.cardDescription {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 1);
+    line-height: 160%;
+    letter-spacing: -0.15px;
+}
+
+.linkList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+}
+
+.linkItem {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 1);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: -0.15px;
+}
+
+.linkItem::before {
+    content: "•";
+    color: rgba(6, 4, 178, 1);
+    font-weight: bold;
+}
+
+.viewArticles {
+    font-family: Antic Didone;
+    font-size: 14px;
+    color: rgba(0, 0, 51, 1);
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 0;
+    margin-top: auto;
+    cursor: pointer;
+    text-transform: uppercase;
+    line-height: 160%;
+    letter-spacing: -0.15px;
+}
+
+/* Footer Action Boxes */
+.footerActions {
+    max-width: 1440px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.footerBox {
+    background-color: rgba(0, 0, 51, 1);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    border-top: 1px solid rgba(243, 244, 246, 1)
+}
+
+.footerHeader {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+}
+
+.footerIcon {
+    background-color: #ffffff;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footerTextGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 161px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.footerTitle {
+    font-family: 'Antic Didone', serif;
+    font-size: 42px;
+    color: rgba(255, 255, 255, 1);
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: 0px;
+}
+
+.footerDescription {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 1);
+    font-weight: 300;
+    line-height: 24px;
+    letter-spacing: -0.31px;
+}
+
+.footerButton {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+
+    color: rgba(255, 255, 255, 1);
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 1);
+    padding: 12px 24px;
+    cursor: pointer;
+    line-height: 100%;
+    letter-spacing: -2%;
+    transition: background 0.3s;
+}
+
+.footerButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsiveness */
+@media (max-width: 1024px) {
+    .gridContainer {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .gridContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .footerActions {
+        grid-template-columns: 1fr;
+    }
+
+    .mainContainer {
+        padding: 40px 20px;
+    }
+}
