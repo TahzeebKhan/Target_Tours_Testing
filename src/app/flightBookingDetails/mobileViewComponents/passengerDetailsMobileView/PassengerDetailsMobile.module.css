@@ -1,0 +1,172 @@
+.container{
+    width: 100%;
+    background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+
+}
+.tripDetailsContainer{
+    width: 100%;
+    padding: 10px 16px;
+    background-color: #000033;
+}
+.tripDetailsHeader{
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.tripDetails{
+    font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 20px;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+text-transform: capitalize;
+color: #FFFFFF;
+}
+
+.TripCardContainer{
+    padding: 16px;
+    background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+}
+
+
+
+.TripCardHeader{
+    padding: 12px 16px;
+    background-color: #000033;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.TripCardHeaderDetails{
+    display: flex;
+    gap: 2px;
+    align-items: center;
+
+}
+.TripCardHeaderDetailsItemText, .TripCardHeaderDetailsItemCode{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+.TripCardHeaderDate{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 20px;
+    vertical-align: middle;
+    color: #FFFFFF;
+
+}
+
+.TripFlightDetailsCard{
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #FFFFFF;
+}
+.TripFlightDetailsCardCont{
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.TripFlightDetailsCardImage{
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+.AirLineDetails{
+    display: flex;
+    flex-direction: column;
+}
+.AirLineDetailsItem{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.AirLineDetailsItemText, .AirLineCode{
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 12px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #000000;
+
+}
+.dot{
+    width: 4px;
+    height: 4px;
+    background-color: #767676;
+    border-radius: 50%;
+
+}
+.AirLineBoeing, .AirLineDetailsItemCode{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #7B8799;
+}
+.br{
+    max-width: 374px;
+    width: 100%;
+    height: 1px;
+    /* border: .5px dashed #94A3B8; */
+    background-image: repeating-linear-gradient(
+    to right,
+    #94A3B8 0,
+    #94A3B8 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.74;
+  margin: 0 auto;
+}
+
+
+.FareDetailsTag{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+}
+.blueDot{
+    width: 4px;
+    height: 4px;
+    background-color: #208EF5;
+    border-radius: 50%;
+}
+.FareDetailsTag span{
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.18;
+    text-transform: capitalize;
+    color: #208EF5;
+}
+.flightDepartureReturenDetailsContianer{
+    padding: 12px;
+    border: 1px solid #E4E6E8;
+    background-color: #FFFFFF;
+}

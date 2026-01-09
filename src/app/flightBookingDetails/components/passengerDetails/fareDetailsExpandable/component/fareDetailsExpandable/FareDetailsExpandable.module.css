@@ -112,3 +112,9 @@
 .facilities{
     justify-content: unset !important;
 }
+
+@media (max-width: 1280px) {
+    .facilities{
+        gap: 30px !important;
+    }
+}

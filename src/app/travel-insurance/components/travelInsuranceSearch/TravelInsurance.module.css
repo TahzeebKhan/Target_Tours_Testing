@@ -1,0 +1,91 @@
+.glass_panel {
+    margin-top: 44px;
+    max-width: 1200px;
+    width: 100%;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  color: #fff;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+}
+
+.fromBtn {
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 0.5px solid #e6e8ec;
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  flex: 1;
+}
+
+.contant::placeholder{
+    color: #FFFFFF;
+}
+.fromBtn2 {
+  min-width: 220px;
+}
+
+.lable {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #c4c4c4;
+}
+
+.contant {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+}
+
+.dateInputWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendarIcon {
+  cursor: pointer;
+}
+
+.iconCont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chevron {
+  transition: transform 0.3s ease;
+}
+
+.openChevron {
+  transform: rotate(180deg);
+}
+
+.searchBtn {
+  min-width: 120px;
+  height: 58px;
+  background: #000033;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.searchBtn:hover {
+  background: #ffffff;
+  color: #000033;
+}

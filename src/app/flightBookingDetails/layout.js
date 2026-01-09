@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
 import { FlightBookingProvider } from "./FlightBookingContext";
+import PassengerDetailsMobile from "./mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
 
 export default function FlightBookingDetailsLayout({ children }) {
   return (
@@ -20,6 +21,9 @@ export default function FlightBookingDetailsLayout({ children }) {
             </div>
           </aside>
         </main>
+      </div>
+      <div className={styles.mobileView}>
+        <PassengerDetailsMobile />
       </div>
     </FlightBookingProvider>
   );
