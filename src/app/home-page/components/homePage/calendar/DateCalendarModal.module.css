@@ -112,3 +112,17 @@ cursor: pointer;
   font-size: 18px;
   cursor: pointer;
 }
+
+@media (max-width: 1056px){
+  .modal{
+    left: -50px;
+  }
+}
+
+
+
+@media (max-width: 991px){
+  .modal{
+    left: -80px;
+  }
+}

@@ -17,8 +17,8 @@ import HotelDateCalendarModal from '@/app/components/hotelCalendar/HotelDateCale
 import HotelCalendarMonths from '@/app/components/hotelCalendar/HotelCalendarMonths';
 import RecentSearch from '@/app/components/recentSearch/RecentSearch';
 
-import LoginPopup from '@/app/profile/components/loginPopUp/LoginPopup';
-import SignupPopup from '@/app/profile/components/signUpPopUp/SignupPopup';
+import LoginPopup from '@/app/account/loginPopUp/LoginPopup';
+import SignupPopup from '@/app/account/signUpPopUp/SignupPopup';
 
 import FlightSearchMobile from './flightSearchMobile/FlightSearchMobile';
 import HotelSearchMobile from './hotelSearchMobile/HotelSearchMobile';
@@ -38,6 +38,13 @@ const HomePage = () => {
   const [checkOut, setCheckOut] = useState("")
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
+
+
+  const [heroData, setHeroData] = useState({
+    heading: "",
+    description: "",
+    videoUrl: "",
+  });
 
   // refs for the date inputs
   const departureRef = useRef(null)
@@ -71,6 +78,60 @@ const HomePage = () => {
   const [activeFeature, setActiveFeature] = useState(1);
   const featureRowRef = useRef(null);
   const progressRef = useRef(null);
+
+
+
+  useEffect(() => {
+  const fetchHeroSection = async () => {
+    try {
+      // Get token from cookie
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      };
+
+      const token = getCookie('auth_token');
+      
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add Authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(
+        "http://139.84.175.121:1337/api/hero-section/company",
+        {
+          method: 'GET',
+          headers,
+          credentials: "include", // Still include for cookie-based auth
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      setHeroData({
+        heading: data.heading || "",
+        description: data.description || "",
+        videoUrl: data.media?.url
+          ? `http://139.84.175.121:1337${data.media.url}`
+          : "",
+      });
+    } catch (error) {
+      console.error("Hero section fetch failed:", error);
+    }
+  };
+
+  fetchHeroSection();
+}, []);
+
 
   const [flightDates, setFlightDates] = useState({
     round: {
@@ -588,7 +649,8 @@ const HomePage = () => {
       <header className={`${styles.homeSection} w-full h-[100vh]`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
-          src="/videos/hero.mp4"
+          // src="/videos/hero.mp4"
+          src={heroData.videoUrl}
           poster="/images/hero-poster.jpg"
           autoPlay
           muted
@@ -604,10 +666,10 @@ const HomePage = () => {
           <div className={`${styles.navRight} flex gap-3`}>
             <button className={`${styles.glass_button} ${styles.downloadBtn}`} >Download the App</button>
             <button
-                className={styles.signInBtn}
-                onClick={() => setShowLogin(true)}
-              >
-                Sign In
+              className={styles.signInBtn}
+              onClick={() => setShowLogin(true)}
+            >
+              Sign In
             </button>
             <button className={styles.hamBurger} onClick={() => setMenuOpen(true)}>
               <img src="/icons/hamBurger.png" alt="" />
@@ -619,9 +681,8 @@ const HomePage = () => {
 
       <div className={styles.homePageContainer}>
         <div className={styles.InspiredSection}>
-          <h1>Inspired travel for the <br />
-            curious & cultured</h1>
-          <p>Thoughtfully designed journeys for those who find beauty in the details.</p>
+          <h1>{heroData.heading}</h1>
+          <p>{heroData.description}</p>
         </div>
 
         <div className={`${styles.searchSec} flex flex-col gap-[127px] items-center`}>
@@ -1421,19 +1482,19 @@ const HomePage = () => {
           truncate={truncate}
         />
       )}
-{showLogin && authView === "login" && (
-  <LoginPopup
-    onClose={() => setShowLogin(false)}
-    onNavigate={setAuthView}
-  />
-)}
+      {showLogin && authView === "login" && (
+        <LoginPopup
+          onClose={() => setShowLogin(false)}
+          onNavigate={setAuthView}
+        />
+      )}
 
-{showLogin && authView === "signup" && (
-  <SignupPopup
-    onClose={() => setShowLogin(false)}
-    onNavigate={setAuthView}
-  />
-)}
+      {showLogin && authView === "signup" && (
+        <SignupPopup
+          onClose={() => setShowLogin(false)}
+          onNavigate={setAuthView}
+        />
+      )}
 
     </section>
   )

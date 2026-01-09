@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import LoginPopup from "../profile/components/loginPopUp/LoginPopup";
-import SignupPopup from "../profile/components/signUpPopUp/SignupPopup";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 
 export default function AuthPopupManager() {
   const [activePopup, setActivePopup] = useState("login"); // 'login' | 'signup'
