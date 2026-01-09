@@ -45,6 +45,9 @@
   padding: 8px 24px;
   max-width: 210px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-inter);
   font-weight: 300;
   font-size: 14px;
@@ -193,7 +196,7 @@
   font-size: 12px;
   color: #a2a2a2;
 }
- 
+
 .center {
   display: flex;
   flex-direction: column;
@@ -329,7 +332,8 @@
 
 .flightInfoContainer {
   display: flex;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 /* =========================
@@ -550,7 +554,7 @@
   align-items: center;
   gap: 11px;
 }
-.flightHeading h3 img{
+.flightHeading h3 img {
   width: 20px;
   height: 20px;
 }
@@ -572,4 +576,39 @@
 .flightFareContaienr {
   display: flex;
   gap: 24px;
+}
+
+@media (max-width: 1440px) {
+  .flightInfoContainer {
+    flex-direction: column;
+  }
+  .leftFlightInfoCont {
+    max-width: 100%;
+  }
+  .rightFlightInfoCont {
+    max-width: 100%;
+  }
+  .dashBorder {
+    width: 100%;
+  }
+  .flightAnimation {
+    width: 100%;
+  }
+  .center {
+    width: 40%;
+  }
+}
+
+@media (max-width: 830px) {
+  .flightIcon {
+    width: 27px;
+    height: 27px;
+  }
+}
+
+@media (max-width: 780px) {
+  .tabItem {
+    font-size: 12px;
+    padding: 8px;
+  }
 }
