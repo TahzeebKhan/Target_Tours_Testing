@@ -167,6 +167,8 @@
   /* top: 114px;
     left: 50%;
     transform: translate(-50%); */
+    max-width: 870px;
+    width: 100%;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -1259,6 +1261,9 @@
   .serarchingCont {
     padding: 16px;
   }
+  .glass_panel{
+    width:1160px;
+  }
 }
 
 @media (max-width: 1156px) {
@@ -1289,6 +1294,10 @@
   .serarchingContBottom {
     gap: 10px;
   }
+  .multisearchBtn{
+    max-width: 234px;
+    width: 100%;
+  }
 }
 
 @media (max-width: 1020px) {
@@ -1301,21 +1310,40 @@
   }
 
   .arrowbox {
-    left: 17%;
+    left: 15.5%;
+  }
+  .arrowboxOneWay{
+    left: 21%;
+  }
+  .multiArrow{
+    left: 23%;
+  }
+  .multisearchBtn{
+    max-width: 222px;
+    width: 100%;
   }
 }
 
 @media (max-width: 991px) {
-  .fromInput {
+  /* .fromInput {
     max-width: 150px;
-  }
+  } */
+
+    /* .arrowboxOneWay{
+    left: 20.5% !important;
+  } */
+
 
   .glass_panel {
     width: 887px;
   }
+  .multisearchBtn{
+    max-width: 204px;
+    width: 100%;
+  }
 
   .arrowbox {
-    left: 16%;
+    left: 23%;
   }
 
   .InspiredSection {
@@ -1411,12 +1439,15 @@
   .serarchingContTop_left{
     gap: 16px;
   }
+  
 }
 
 @media (max-width: 768px) {
   .InspiredSection {
     gap: 19px;
     align-items: start;
+    max-width: 500px;
+    width: 100%;
   }
 
   .InspiredSection h1 {
@@ -1441,6 +1472,7 @@
     align-items: start;
     padding: 32px 16px 32px 16px;
   }
+
 
   .feature img {
     width: 42px;
@@ -1489,6 +1521,10 @@
 @media (max-width: 431px) {
   .featureRow {
     gap: 0;
+  }
+  .InspiredSection{
+    max-width: 338px;
+    width: 100%;
   }
 }
 
