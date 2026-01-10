@@ -1,56 +1,97 @@
-.container{
+.container {
     width: 100%;
     background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
 
 }
-.tripDetailsContainer{
+
+/* sticky behavior */
+.stickyHidden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+.flightDepartureReturenDetailsContianerWrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stickyVisible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+
+
+.tripDetailsContainer {
     width: 100%;
     padding: 10px 16px;
     background-color: #000033;
 }
-.tripDetailsHeader{
+
+.tripDetailsHeader {
     padding: 10px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.tripDetails{
-    font-family: Antic Didone;
-font-weight: 400;
-font-style: Regular;
-font-size: 20px;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-text-transform: capitalize;
-color: #FFFFFF;
+.TripCard{
+    margin-bottom: 16px;
 }
 
-.TripCardContainer{
+.tripDetails {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
+
+.TripCardContainer {
     padding: 16px;
     background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    /* gap: 16px; */
+    padding-bottom: 107px;
 
 }
 
 
 
-.TripCardHeader{
+.TripCardHeader {
     padding: 12px 16px;
     background-color: #000033;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
-.TripCardHeaderDetails{
+
+.TripCardHeaderDetails {
     display: flex;
     gap: 2px;
     align-items: center;
 
 }
-.TripCardHeaderDetailsItemText, .TripCardHeaderDetailsItemCode{
+
+.TripCardHeaderDetailsItemText,
+.TripCardHeaderDetailsItemCode {
     font-family: var(--font-inter);
     font-weight: 300;
     font-style: Light;
@@ -61,7 +102,8 @@ color: #FFFFFF;
     color: #FFFFFF;
 
 }
-.TripCardHeaderDate{
+
+.TripCardHeaderDate {
     font-family: var(--font-inter);
     font-weight: 300;
     font-style: Light;
@@ -72,33 +114,39 @@ color: #FFFFFF;
 
 }
 
-.TripFlightDetailsCard{
+.TripFlightDetailsCard {
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     background-color: #FFFFFF;
 }
-.TripFlightDetailsCardCont{
+
+.TripFlightDetailsCardCont {
     display: flex;
     gap: 6px;
     align-items: center;
 }
-.TripFlightDetailsCardImage{
+
+.TripFlightDetailsCardImage {
     width: 30px;
     height: 30px;
     object-fit: contain;
 }
-.AirLineDetails{
+
+.AirLineDetails {
     display: flex;
     flex-direction: column;
 }
-.AirLineDetailsItem{
+
+.AirLineDetailsItem {
     display: flex;
     align-items: center;
     gap: 5px;
 }
-.AirLineDetailsItemText, .AirLineCode{
+
+.AirLineDetailsItemText,
+.AirLineCode {
     font-family: var(--font-inter);
     font-weight: 700;
     font-style: Bold;
@@ -110,14 +158,17 @@ color: #FFFFFF;
     color: #000000;
 
 }
-.dot{
+
+.dot {
     width: 4px;
     height: 4px;
     background-color: #767676;
     border-radius: 50%;
 
 }
-.AirLineBoeing, .AirLineDetailsItemCode{
+
+.AirLineBoeing,
+.AirLineDetailsItemCode {
     font-family: var(--font-inter);
     font-weight: 400;
     font-style: Regular;
@@ -128,36 +179,37 @@ color: #FFFFFF;
     text-transform: capitalize;
     color: #7B8799;
 }
-.br{
+
+.br {
     max-width: 374px;
     width: 100%;
     height: 1px;
     /* border: .5px dashed #94A3B8; */
-    background-image: repeating-linear-gradient(
-    to right,
-    #94A3B8 0,
-    #94A3B8 6px,
-    transparent 6px,
-    transparent 12px
-  );
-  opacity: 0.74;
-  margin: 0 auto;
+    background-image: repeating-linear-gradient(to right,
+            #94A3B8 0,
+            #94A3B8 6px,
+            transparent 6px,
+            transparent 12px);
+    opacity: 0.74;
+    margin: 0 auto;
 }
 
 
-.FareDetailsTag{
+.FareDetailsTag {
     display: flex;
     align-items: center;
     gap: 5px;
 
 }
-.blueDot{
+
+.blueDot {
     width: 4px;
     height: 4px;
     background-color: #208EF5;
     border-radius: 50%;
 }
-.FareDetailsTag span{
+
+.FareDetailsTag span {
     font-family: var(--font-inter);
     font-weight: 500;
     font-size: 12px;
@@ -165,8 +217,139 @@ color: #FFFFFF;
     text-transform: capitalize;
     color: #208EF5;
 }
-.flightDepartureReturenDetailsContianer{
+
+.flightDepartureReturenDetailsContianer {
     padding: 12px;
     border: 1px solid #E4E6E8;
     background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.travelInsuranceContainer {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #FFFFFF;
+    border: 1px solid #E4E6E8;
+}
+
+.travelInsuranceHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #070773;
+}
+
+.footer {
+    padding: 24px 16px;
+    background: #000033;
+    box-shadow: 0px -6px 10.2px 0px #0000001A;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9;
+}
+
+.footerContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.amountSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    color: #FFFFFF;
+
+}
+
+.infoIcon {
+    border: 1.5px solid #7B8799;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #7B8799;
+}
+
+.amount {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 1.19;
+    color: #FFFFFF;
+}
+
+.continueBtn {
+    max-width: 240px;
+    width: 100%;
+    height: 48px;
+    padding: 10px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+.TripCardHeaderNav {
+    padding: 0;
+}
+
+.TripCardHeaderBookingDate {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.TripCardHeaderBookingDate p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #FFFFFF;
+    opacity: 0.9;
+}
+.navDot{
+    width: 4px;
+    height: 4px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    opacity: 0.9;
 }

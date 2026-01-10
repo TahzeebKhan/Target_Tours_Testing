@@ -184,3 +184,16 @@
     vertical-align: middle;
 
 }
+
+/* @media (max-width: 430px){
+    .wrapper{
+        padding: 0px;
+        border-top: none;
+    }
+    .notes{
+        display: none;
+    }
+    .topInfo{
+        display: none;
+    }
+} */

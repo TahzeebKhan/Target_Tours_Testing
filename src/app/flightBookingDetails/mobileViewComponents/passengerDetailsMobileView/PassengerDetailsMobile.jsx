@@ -1,9 +1,63 @@
-import React from 'react'
+"use client"
+import React, { useEffect, useState } from 'react'
 import styles from './PassengerDetailsMobile.module.css'
 import FlightTimeline from '../components/flightTimeline/FlightTimeline';
 import FlightTabs from '../components/FlightTabs/FlightTabs';
 import FlightSection from '../components/FlightSection/FlightSection';
+import TravelInsuranceOption from '../../components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption';
+import CancellationPenalty from '../../components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty';
 const PassengerDetailsMobile = () => {
+    const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 40) {
+                setShowStickyHeader(true);
+            } else {
+                setShowStickyHeader(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const returnFlightData = {
+        "type": "RETURN",
+        "airline": {
+            "name": "Garuda Indonesia",
+            "code": "6E-541",
+            "logo": "/images/GarudaIndonesia.png"
+        },
+        "aircraft": "Boeing 737",
+        "cabinClass": "Economy",
+        "fareType": "Flexi Plus Fare",
+        "date": "Thu, 06 Jul 2025",
+
+        "departure": {
+            "time": "06:00",
+            "city": "Jakarta (JKTC)"
+        },
+
+        "arrival": {
+            "time": "07:40",
+            "city": "Surabaya (SUB)"
+        },
+
+        "duration": {
+            "hours": "01",
+            "minutes": "50"
+        },
+
+        "stops": "Direct",
+
+        "facilities": [
+            "Baggage 20 kg, Cabin Baggage 7kg",
+            "In-flight entertainment",
+            "In-flight meal",
+            "Power & USB Port"
+        ]
+    }
 
     const flight = {
         departure: {
@@ -39,6 +93,35 @@ const PassengerDetailsMobile = () => {
                     <p className={styles.tripDetails}>Trip Details</p>
                 </div>
             </div>
+            <div
+                className={`${styles.tripDetailsContainer} ${showStickyHeader ? styles.stickyVisible : styles.stickyHidden
+                    }`}
+            >
+                <div className={styles.tripDetailsHeader}>
+                    <img src="/icons/leftArrowTrip.svg" alt="" />
+                    <div className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}>
+                        <div className={styles.TripCardHeaderDetails}>
+                            <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+                            <span className={styles.TripCardHeaderDetailsItemCode}>(DEL)</span>
+
+                            <img src="/icons/right-arrow.svg" alt="" />
+                            <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+                            <span className={styles.TripCardHeaderDetailsItemCode}>(DEL)</span>
+                        </div>
+
+                        <div className={styles.TripCardHeaderBookingDate}>
+                            <p>Wed, 03 Dec</p>
+                            <p>
+                                <div className={styles.navDot}></div>1 Traveller
+                            </p>
+                            <p>
+                                <div className={styles.navDot}></div>Economy
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <div className={styles.TripCardContainer}>
                 <div className={styles.TripCard}>
@@ -86,11 +169,48 @@ const PassengerDetailsMobile = () => {
                 <FlightTabs />
                 {/* </div> */}
 
-                <div className={styles.flightDepartureReturenDetailsContianer}>
+                <div className={styles.flightDepartureReturenDetailsContianerWrapper}>
+                    <div className={styles.flightDepartureReturenDetailsContianer}>
                     <FlightSection />
+                    <div className={styles.br}></div>
 
+                    <FlightSection flight={returnFlightData} />
                 </div>
 
+                <div className={styles.travelInsuranceContainer}>
+                    <h2 className={styles.travelInsuranceHeading}>Add Travel Insurance (₹399/Person)</h2>
+                    <div>
+                        <TravelInsuranceOption />
+                    </div>
+                </div>
+
+                <div className={styles.travelInsuranceContainer}>
+                    <h2 className={styles.travelInsuranceHeading}>Cancellation & Date Change Policy</h2>
+                    <div>
+                        <CancellationPenalty />
+                    </div>
+                </div>
+                </div>
+
+
+            </div>
+
+            <div className={styles.footer}>
+                {/* LEFT */}
+                <div className={styles.footerContainer}>
+                    <div className={styles.amountSection}>
+                        <div className={styles.label}>
+                            Total Amount
+                            <span className={styles.infoIcon}>!</span>
+                        </div>
+                        <div className={styles.amount}>₹ 66,945</div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <button className={styles.continueBtn}>
+                        CONTINUE BOOKING
+                    </button>
+                </div>
             </div>
 
         </div>

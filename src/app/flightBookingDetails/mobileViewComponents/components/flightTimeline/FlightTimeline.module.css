@@ -101,6 +101,8 @@
 }
 
 .flightSvg {
+  width: 18px;
+  height: 18px;
   color: #000033;
 }
 
