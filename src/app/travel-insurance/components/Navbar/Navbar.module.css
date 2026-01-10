@@ -3,7 +3,7 @@
 .homeSection {
   position: relative;
   width: 100%;
-  min-height: 646px;
+  height: 100vh;
   overflow: hidden;
 }
 
