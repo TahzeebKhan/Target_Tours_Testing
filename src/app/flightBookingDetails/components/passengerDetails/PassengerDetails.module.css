@@ -1,35 +1,35 @@
-.container{
-    max-width: 900px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-
+.container {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-.passengerDetailsHeader{
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.passengerDetailsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.fromToContainer{
-    display: flex;
-    gap: 6px;
-    align-items: center;
+.fromToContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
-.from, .to{
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 28px;
-    line-height: 1.18;
-    letter-spacing: 0%;
-    color: #070773;
+.from,
+.to {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  color: #070773;
 }
-.flightExpandableContainer{
-    border: 1px solid transparent;
+.flightExpandableContainer {
+  border: 1px solid transparent;
 }
-
-
-
+.mobileView {
+  display: none;
+}
 
 .aboutFlightContainerRight {
   display: flex;
@@ -57,35 +57,35 @@
   align-self: center;
 }
 
-.flightExpandableCard{
-    padding: 16px 24px;
-    background: #FFFFFF;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.flightExpandableCard {
+  padding: 16px 24px;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.flightExpandableHeader{
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    line-height: 1.18;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #070773;
+.flightExpandableHeader {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
 }
 
 .expandWrap {
-  max-height: 0;                 /* start closed */
-  overflow: hidden;              /* hide content */
+  max-height: 0; /* start closed */
+  overflow: hidden; /* hide content */
   transition: max-height 0.35s ease-in-out;
 }
-.flightActiveBorder{
-  border: 1px solid #E4E6E8;
+.flightActiveBorder {
+  border: 1px solid #e4e6e8;
   transition: border 0.35s ease;
 }
 .expandOpen {
-  max-height: 1000px;            /* enough to hold content */
+  max-height: 1000px; /* enough to hold content */
 }
 .arrow {
   transition: transform 0.35s ease;
@@ -94,21 +94,21 @@
 .arrowRotate {
   transform: rotate(180deg);
 }
-.continueButtonContainer{
+.continueButtonContainer {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: end;
 }
-.continueButton{
+.continueButton {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px 24px;
   height: 40px;
   width: 236px;
-  background-color: #000033;  
-  color: #FFFFFF;
+  background-color: #000033;
+  color: #ffffff;
   font-family: var(--font-inter);
   font-weight: 400;
   font-size: 14px;
@@ -118,13 +118,21 @@
   cursor: pointer;
   transition: all 0.35s ease;
 }
-.continueButton:hover{
-  background-color: #FCC800;
+.continueButton:hover {
+  background-color: #fcc800;
 }
 
-
 @media (max-width: 1280px) {
-    .from{
-      font-size: 24px;
-    }
+  .from {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .mobileView {
+    display: block;
+  }
+  .container {
+    display: none;
+  }
 }
