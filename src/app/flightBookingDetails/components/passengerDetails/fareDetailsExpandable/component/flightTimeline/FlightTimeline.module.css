@@ -218,3 +218,14 @@
   color: #0A0A0A;
 
 }
+
+@media(max-width: 1025px){
+    .bigDot{
+      width: 8px;
+      height: 8px;
+    }
+    .flightSvg{
+      width: 24px;
+      height: 24px;
+    }
+}

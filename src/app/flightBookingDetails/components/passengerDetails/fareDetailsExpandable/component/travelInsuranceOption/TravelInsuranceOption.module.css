@@ -59,3 +59,9 @@
     }
 
 }
+
+@media(max-width: 1080px){
+    .wrapper{
+        padding: 16px 20px;
+    }
+}
