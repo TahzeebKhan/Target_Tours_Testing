@@ -32,7 +32,8 @@ const CancellationPenalty = () => {
                         <span>₹ 2,849</span>
                         <span>₹ 2,849</span>
                         <span>₹ 2,849</span>
-                        <span>Non-Refundable</span>
+                        <span className={styles.nonRefundable}>Non-Refundable</span>
+                        <span className={styles.mobileView}>Nor-r</span>
                     </div>
                 </div>
 
@@ -44,7 +45,8 @@ const CancellationPenalty = () => {
                         <div className={styles.bar} />
 
                         <div className={styles.marks}>
-                            <span>Now</span>
+                            <span className={styles.now}>Now</span>
+                            <span className={styles.mobileView}>6 Jan <small>04:45</small></span>
                             <span>6 Jan <small>04:45</small></span>
                             <span>9 Jan <small>04:45</small></span>
                             <span>12 Jan <small>04:45</small></span>

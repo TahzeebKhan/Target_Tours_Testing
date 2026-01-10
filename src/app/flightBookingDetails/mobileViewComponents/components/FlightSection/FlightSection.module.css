@@ -1,8 +1,25 @@
-.FlightSection{
+.FlightSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.FlightSectionDetails {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
+.heading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #070773;
+}
+
 .FlightSectionDetailsTop {
     display: flex;
     flex-direction: column;
@@ -29,7 +46,6 @@
 .flightInfoTextContainer {
     display: flex;
     flex-direction: column;
-    gap: 2px;
 }
 
 .flightInfoTextTitle {
@@ -121,6 +137,11 @@
 
 }
 
+.flightDateTimeLineContainer {
+    max-width: 278px;
+    width: 100%;
+}
+
 .dot {
     width: 5px;
     height: 5px;
@@ -130,8 +151,9 @@
 
 .flightDateTimeLine {
     display: flex;
-    padding-left: 48px;
     gap: 8px;
+    margin: 0 auto;
+    width: fit-content;
 }
 
 .flightDateTimeLineLeft {
@@ -222,4 +244,10 @@
     letter-spacing: -3%;
     text-align: center;
     color: #7B8799;
+}
+
+.flightIconSvg {
+    width: 14px;
+    height: 14px;
+    transform: rotate(90deg);
 }

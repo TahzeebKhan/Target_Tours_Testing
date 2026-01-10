@@ -1,6 +1,12 @@
 .wrapper {
     width: 100%;
     overflow: hidden;
+    position: sticky;
+    top: 82px;
+    z-index: 9;
+    background-color: #EEF5FF;
+    padding-bottom: 16px;
+
 }
 
 /* Tabs row */

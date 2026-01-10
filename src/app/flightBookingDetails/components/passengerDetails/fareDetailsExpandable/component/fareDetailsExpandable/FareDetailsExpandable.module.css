@@ -118,3 +118,8 @@
         gap: 30px !important;
     }
 }
+@media(max-width: 1080px){
+    .expandWrap{
+        padding: 16px 20px;
+    }
+}

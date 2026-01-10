@@ -71,6 +71,9 @@
     z-index: 0;
     /* Ensure grid lines are on top of other elements including the bar */
 }
+.mobileView{
+    display: none !important;
+}
 
 .gridOverlay div:not(:first-child) {
     border-left: 1px dashed #b0b3b8;
@@ -175,6 +178,90 @@
 @media (max-width: 1200px) {
     .marks {
         gap: 66px;
+    }
+}
+@media (max-width: 1156px) {
+    .marks {
+        gap: 58px;
+    }
+}
+
+@media (max-width: 1080px) {
+    .wrapper{
+        padding: 16px 20px;
+    }
+    .marks {
+        gap: 42px;
+    }
+    .penaltyValues span{
+        font-size: 13px;
+    }
+    /* .marks small{
+        font-size: 11px;
+    } */
+     .timelineRow, .penaltyRow{
+        grid-template-columns: 159px 1fr;
+    }
+    .gridOverlay{
+        left: 145px;
+    }
+}
+
+
+
+@media (max-width: 430px){
+    .wrapper{
+        padding: 0px;
+        border-top: none;
+    }
+    .marks{
+        gap: 0;
+        justify-content: space-around;
+        /* position: relative; */
+        margin-top: 6px;
+    }
+    .marks span{
+        flex-direction: column;
+        gap: 0;
+        font-size: 10px;
+        /* position: absolute; */
+        
+    }
+    .marks small{
+        font-size: 10px;
+    }
+    .nonRefundable{
+        display: none !important;
+    }
+    .mobileView{
+        display: block !important;
+    }
+    .penaltyValues span{
+        font-size: 12px;
+        line-height: 19px;
+    }
+    .timelineRow, .penaltyRow{
+        grid-template-columns: 82px 1fr;
+    }
+    .gridOverlay{
+        left: 82px;
+        top: 19px;
+        height: 51px;
+    }
+    .penaltyRow{
+        margin-bottom: 0;
+    }
+    .now{
+        display: none !important;
+    }
+    .label{
+        font-size: 12px;
+    }
+    .header span{
+        font-size: 14px;
+    }
+    .viewPolicy{
+        display: none;
     }
 }
 

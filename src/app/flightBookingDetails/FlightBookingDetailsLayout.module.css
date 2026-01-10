@@ -37,6 +37,9 @@
   top: 202px; /* navbar (96px) + stepper (~90px) */
   align-self: flex-start;
 }
+.mobileView{
+  display: none;
+}
 
 
 @media (max-width: 1280px) {
@@ -46,6 +49,21 @@
   }
 }
 
+
+@media(max-width: 1025px){
+    .mainContent{
+      column-gap: 12px;
+      grid-template-columns: 1fr 330px;
+    }
+}
+
+@media(max-width: 991px){
+    .mainContent{
+      grid-template-columns: 1fr 317px;
+      padding-left: 16px;
+    padding-right: 16px;
+    }
+}
 @media (max-width: 430px) {
     .layoutWrapper{
       display: none;

@@ -145,3 +145,16 @@
 }
 
 
+
+@media(max-width: 1080px){
+    .wrapper{
+        padding: 16px 20px;
+    }
+    .grid{
+        gap: 9px;
+    }
+    .field input,
+.field select {
+    padding: 8px 7px;
+}
+}
