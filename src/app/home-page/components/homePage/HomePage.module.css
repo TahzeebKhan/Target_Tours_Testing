@@ -726,7 +726,7 @@
   background: transparent;
   border: none;
   position: relative;
-  z-index: 5;
+  /* z-index: 5; */
    text-overflow: ellipsis;
    white-space: nowrap;
    cursor: pointer;
