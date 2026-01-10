@@ -286,3 +286,28 @@
 .rotate {
   transform: rotate(180deg);
 }
+.cardRight .seeDetailsBtn {
+  display: none;
+}
+@media (max-width: 1200px) {
+  .top {
+    justify-content: space-between;
+  }
+}
+@media (max-width: 751px) {
+  .top {
+    flex-direction: column;
+  }
+  .seeDetailsBtn {
+    display: none;
+  }
+  .cardRight .seeDetailsBtn {
+    display: flex;
+  }
+  .cardRight{
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+

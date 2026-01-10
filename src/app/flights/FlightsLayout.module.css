@@ -213,6 +213,7 @@
   height: 40px;
   color: #ffffff;
   font-family: Inter;
+  align-items: center;
   font-weight: 400;
   font-size: 14px;
   line-height: 100%;
@@ -220,6 +221,10 @@
   cursor: pointer;
   border: none;
   transition: all 0.45s ease;
+}
+.sidebarToggle:hover {
+  background-color: #fcc800;
+  color: #000033;
 }
 .sidebarOverlay {
   position: fixed;
@@ -332,7 +337,9 @@
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
   }
-
+  .wrapper {
+    top: 0;
+  }
   .sidebarOpen {
     transform: translateY(0);
   }

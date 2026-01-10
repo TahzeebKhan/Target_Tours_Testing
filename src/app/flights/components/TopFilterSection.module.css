@@ -580,7 +580,7 @@
 
 .serarchingContBottom {
   /* height: 54px; */
-
+  isolation: isolate;
   position: relative;
   display: flex;
   gap: 12px;
@@ -905,93 +905,99 @@
   transition: transform 160ms ease;
 }
 
+.arrowboxBottomRow {
+  position: absolute;
+  left: unset !important;
+  right: -20px;
+  z-index: 999999 !important;
+}
 .bottomRowAnimate {
-  overflow: hidden;
+  overflow: visible;
   max-height: 0;
   opacity: 0;
-  /* transform: translateY(-8px); */
-  will-change: max-height, opacity, transform;
-  z-index: -2;
+  will-change: max-height, opacity;
 }
+
 .bottomRowAnimate.animateIn {
-  animation: bottomRowFadeIn 6s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  animation: bottomRowExpand 470ms cubic-bezier(0.25, 1, 0.35, 1) forwards;
 }
 
 .bottomRowAnimate.animateOut {
-  animation: bottomRowFadeOut 700ms cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-.roundTripSerarchingContBottom {
+  animation: bottomRowCollapse 320ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .roundTripBtn {
   flex: 1.35;
   max-width: unset;
 }
-
-@keyframes bottomRowFadeIn {
+.bottomRowFirstBtn {
+  position: relative;
+}
+@keyframes bottomRowExpand {
   0% {
     max-height: 0;
     opacity: 0;
-    /* transform: translateY(-6px); */
   }
 
-  15% {
-    max-height: 60px;
-    opacity: 1;
+  10% {
+    max-height: 6px;
+    opacity: 0.15;
+  }
+
+  20% {
+    max-height: 12px;
+    opacity: 0.3;
+  }
+
+  30% {
+    max-height: 18px;
+    opacity: 0.45;
+  }
+
+  40% {
+    max-height: 24px;
+    opacity: 0.6;
+  }
+
+  50% {
+    max-height: 30px;
+    opacity: 0.75;
   }
 
   60% {
-    max-height: 260px;
-
-    /* transform: translateY(0); */
-    /* opacity: 0.65; */
+    max-height: 36px;
+    opacity: 0.85;
   }
 
-  75% {
-    max-height: 300px;
-    /* opacity: 0.85; */
+  70% {
+    max-height: 42px;
+    opacity: 0.92;
+  }
+
+  80% {
+    max-height: 48px;
+    opacity: 0.97;
+  }
+
+  90% {
+    max-height: 52px;
+    opacity: 0.99;
   }
 
   100% {
-    max-height: 340px;
+    max-height: 55px;
     opacity: 1;
   }
 }
 
-@keyframes bottomRowFadeOut {
+@keyframes bottomRowCollapse {
   0% {
-    max-height: 320px;
+    max-height: 55px;
     opacity: 1;
-    transform: translateY(0);
   }
-
-  15% {
-    max-height: 300px;
-  }
-
-  30% {
-    max-height: 260px;
-    /* opacity: 0.15; */
-  }
-
-  45% {
-    max-height: 190px;
-    /* opacity: 0.35; */
-  }
-
-  60% {
-    max-height: 120px;
-  }
-
-  75% {
-    max-height: 60px;
-    opacity: 0;
-  }
-
   100% {
     max-height: 0;
     opacity: 0;
-    transform: translateY(-6px);
   }
 }
 
@@ -1000,9 +1006,15 @@
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+  .multiCitySerarchingContBottom {
+    justify-content: flex-start;
+  }
   .arrowbox2 {
     left: calc(21% - 35px) !important;
     top: 22% !important;
+  }
+  .arrowbox3 {
+    top: 27px;
   }
 }
 @media (max-width: 1239px) {
@@ -1015,6 +1027,38 @@
   .arrowbox {
     left: calc(25% - 20px);
     top: 24%;
+  }
+  .arrowbox3 {
+    top: 27px;
+  }
+}
+@media (max-width: 1056px) {
+  @keyframes bottomRowExpand {
+    0% {
+      max-height: 0;
+      opacity: 0;
+    }
+    60% {
+      opacity: 1; /* fade completes early */
+    }
+    100% {
+      max-height: 120px;
+      opacity: 1;
+    }
+  }
+
+  @keyframes bottomRowCollapse {
+    0% {
+      max-height: 120px;
+      opacity: 1;
+    }
+    100% {
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+  .bottomRowAnimate > .fromBtn {
+    flex: 1.35;
   }
 }
 @media (max-width: 995px) {
@@ -1031,8 +1075,25 @@
     /* justify-content: space-between; */
     flex-wrap: wrap;
   }
+  .multiCityArrowBoxTop {
+    left: calc(40% - 84px) !important;
+  }
 }
-
+@media (max-width: 917px) {
+  .multiCityArrowBoxTop {
+    left: calc(40% - 79px) !important;
+  }
+}
+@media (max-width: 869px) {
+  .multiCityArrowBoxTop {
+    left: calc(40% - 75px) !important;
+  }
+}
+@media (max-width: 780px) {
+  .multiCityArrowBoxTop {
+    left: calc(40% - 68px) !important;
+  }
+}
 @media (max-width: 751px) {
   .arrowbox {
     left: calc(50% - 16px);
@@ -1040,6 +1101,9 @@
   .arrowbox2 {
     left: calc(50% - 16px) !important;
     top: 15% !important;
+  }
+  .multiCityArrowBoxTop {
+    left: calc(50% - 17px) !important;
   }
 }
 

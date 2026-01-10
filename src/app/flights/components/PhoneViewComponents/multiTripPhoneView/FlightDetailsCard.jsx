@@ -32,8 +32,9 @@ const FlightDetailsCard = ({ flight }) => {
       {/* ===== DEPART LABEL ===== */}
       <div>
         <div className={styles.depart}>
-          <span className={styles.bold}>DEPART</span>&nbsp;&nbsp;
-          {outbound.dateLabel}
+          {/* <span className={styles.bold}>DEPART</span>&nbsp;&nbsp; */}
+          <span>{outbound.dateLabel}</span>
+          <span>{outbound.dateLabel}</span>
         </div>
 
         <FlightTimingDetail flight={outbound} />
@@ -63,8 +64,8 @@ const FlightDetailsCard = ({ flight }) => {
       {/* ===== RETURN LABEL ===== */}
       <div>
         <div className={styles.depart}>
-          <span className={styles.bold}>RETURN</span>&nbsp;&nbsp;
-          {inbound.dateLabel}
+          <span>{outbound.dateLabel}</span>
+          <span>{outbound.dateLabel}</span>
         </div>
 
         <FlightTimingDetail flight={inbound} />
