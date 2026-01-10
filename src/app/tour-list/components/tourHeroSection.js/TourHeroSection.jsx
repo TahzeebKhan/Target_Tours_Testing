@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./TourHeroSection.module.css";
 import Navbar from "@/app/flights/Navbar";
 import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
@@ -7,6 +7,10 @@ import DateField from "@/app/home-page/components/homePage/DateField";
 import DestinationFilter from "../tabsFilters/DestinationFilter";
 import TravellerFilter from "../tabsFilters/TravellerFilter";
 import PreferencesFilter from "../tabsFilters/PreferencesFilter";
+import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
+import { TripTypeProvider } from "@/app/flights/TripTypeContext";
+import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
+import { ChevronDown } from "lucide-react";
 
 const TourHeroSection = () => {
   const [from, setFrom] = useState("");
@@ -15,6 +19,138 @@ const TourHeroSection = () => {
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  const [travellerOpend, setTravellerOpend] = useState(false);
+
+  const travellerRef = useRef(null);
+
+  const [passengers, setPassengers] = useState({
+    adult: 1,
+    child: 0,
+    infant: 0,
+  });
+
+  const [travelClass, setTravelClass] = useState("Economy");
+
+  const totalPassengers =
+    passengers.adult + passengers.child + passengers.infant;
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (travellerRef.current && !travellerRef.current.contains(e.target)) {
+        setTravellerOpend(false);
+      }
+    };
+
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setTravellerOpend(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
+
+  const recentSearches = [
+    {
+      label: "CHENNAI, INDIA",
+      detail: "Chennai International Airport, India",
+      code: "CEN",
+      value: "Chennai, India",
+    },
+    {
+      label: "MUMBAI, INDIA",
+      detail: "Mumbai Chhatrapati Shivaji Maharaj International Airport, India",
+      code: "BOM",
+      value: "Mumbai, India",
+    },
+    {
+      label: "KOLKATA, INDIA",
+      detail: "Kolkata Netaji Subhas Chandra Bose International Airport, India",
+      code: "KLG",
+      value: "Kolkata, India",
+    },
+    {
+      label: "BENGALURU, INDIA",
+      detail: "Bengaluru Kempegowda International Airport, India",
+      code: "BLR",
+      value: "Bengaluru, India",
+    },
+  ];
+
+  const getFilteredSuggestions = (query) => {
+    if (!query) return recentSearches;
+    const q = query.toLowerCase();
+    return recentSearches.filter(
+      (s) =>
+        s.label.toLowerCase().includes(q) ||
+        s.detail.toLowerCase().includes(q) ||
+        s.code.toLowerCase().includes(q)
+    );
+  };
+
+  const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
+  const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
+
+  const fromInputRef = useRef(null);
+  const toInputRef = useRef(null);
+  const fromSuggestionRef = useRef(null);
+  const toSuggestionRef = useRef(null);
+
+  const selectSuggestion = (sugg, field) => {
+    if (field === "from") {
+      setFrom(sugg.value);
+      setFromSuggestionsOpen(false);
+      fromInputRef.current?.focus();
+    } else {
+      setTo(sugg.value);
+      setToSuggestionsOpen(false);
+      toInputRef.current?.focus();
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        fromSuggestionRef.current &&
+        !fromSuggestionRef.current.contains(e.target) &&
+        fromInputRef.current &&
+        !fromInputRef.current.contains(e.target)
+      ) {
+        setFromSuggestionsOpen(false);
+      }
+
+      if (
+        toSuggestionRef.current &&
+        !toSuggestionRef.current.contains(e.target) &&
+        toInputRef.current &&
+        !toInputRef.current.contains(e.target)
+      ) {
+        setToSuggestionsOpen(false);
+      }
+    };
+
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setFromSuggestionsOpen(false);
+        setToSuggestionsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
 
   const [activeTab, setActiveTab] = useState("");
   const travellerOptions = [
@@ -52,7 +188,7 @@ const TourHeroSection = () => {
     <section className={styles.tourHeroSection}>
       <div className={styles.overlay}></div>
       <div>
-        <Navbar scrollProgress={scrollProgress}/>
+        <Navbar scrollProgress={scrollProgress} />
       </div>
       <div className={styles.container}>
         <div
@@ -70,12 +206,27 @@ const TourHeroSection = () => {
                 From CITY
               </div>
               <input
+                ref={fromInputRef}
                 type="text"
                 className={`${styles.contant} ${styles.contentFade}`}
                 placeholder="Departure"
-                value={from || ""}
-                onChange={(e) => setFrom(e.target.value)}
+                value={from}
+                onFocus={() => setFromSuggestionsOpen(true)}
+                onClick={() => setFromSuggestionsOpen(true)}
+                onChange={(e) => {
+                  setFrom(e.target.value);
+                  setFromSuggestionsOpen(true);
+                }}
               />
+
+              {fromSuggestionsOpen && (
+                <SuggestionBox
+                  boxRef={fromSuggestionRef}
+                  heading="RECENT SEARCH"
+                  suggestions={getFilteredSuggestions(from)}
+                  onSelect={(s) => selectSuggestion(s, "from")}
+                />
+              )}
             </div>
 
             {/* Slot 2: Departure Date */}
@@ -85,7 +236,9 @@ const TourHeroSection = () => {
               <div className={`${styles.lable} ${styles.labelFade}`}>
                 Departure Date
               </div>
-              <div className={`${styles.dateInputWrapper} ${styles.contentFade}`}>
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+              >
                 <DateField
                   label={""}
                   placeholder={"ADD DATES"}
@@ -104,24 +257,72 @@ const TourHeroSection = () => {
                 To CITY/COUNTRY, CATEGORY
               </div>
               <input
+                ref={toInputRef}
                 type="text"
                 className={`${styles.contant} ${styles.contentFade}`}
                 placeholder="Destination"
                 value={to}
-                onChange={(e) => setTo(e.target.value)}
+                onFocus={() => setToSuggestionsOpen(true)}
+                onClick={() => setToSuggestionsOpen(true)}
+                onChange={(e) => {
+                  setTo(e.target.value);
+                  setToSuggestionsOpen(true);
+                }}
               />
+
+              {toSuggestionsOpen && (
+                <SuggestionBox
+                  boxRef={toSuggestionRef}
+                  heading="RECENT SEARCH"
+                  suggestions={getFilteredSuggestions(to)}
+                  onSelect={(s) => selectSuggestion(s, "to")}
+                />
+              )}
             </div>
 
             {/* Slot 4: Rooms & Guests */}
-            <TravellerSelector
-              travellerClass={guestRoomCount}
-              setTravellerClass={setGuestRoomCount}
-              travellerOptions={travellerOptions}
-              styles={styles}
-              name="ROOMS & GUESTS"
-              className={`${styles.pos4}`}
-            />
-            
+            <div
+              ref={travellerRef}
+              className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTravellerOpend((prev) => !prev);
+              }}
+            >
+              <div className={styles.lable}>ROOMS & GUESTS</div>
+
+              <div className={styles.guestSummary}>
+                <span className={styles.guestCount}>
+                  {`${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""}`}
+                </span>
+
+                <ChevronDown
+                  className={`${styles.guestChevron} ${
+                    travellerOpend ? styles.openChevron : styles.closeChevron
+                  }`}
+                  size={16}
+                  color="#FFFFFF"
+                />
+              </div>
+
+              <div
+                style={{
+                  display: travellerOpend ? "block" : "none",
+                }}
+              >
+                <TripTypeProvider>
+                  <PassengerClassSelector
+                    open={true}
+                    setOpen={setTravellerOpend}
+                    passengers={passengers}
+                    setPassengers={setPassengers}
+                    travelClass={travelClass}
+                    setTravelClass={setTravelClass}
+                  />
+                </TripTypeProvider>
+              </div>
+            </div>
+
             {/* Search Button */}
             <div className={`${styles.searchBtn} ${styles.pos5}`}>
               <img src="/icons/blueSearchIcon.svg" alt="" />

@@ -1,0 +1,138 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding-top: 22px;
+  background-color: rgba(255, 255, 255, 1);
+  font-family: 'Inter', sans-serif;
+}
+
+.planeBody {
+  background-color: #ffffff;
+  box-shadow: 0px 3.91px 21.3px 0px rgba(0, 0, 0, 0.11);
+  padding: 0 40px 1px 26px;
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  max-width: 768px;
+  width: 100%;
+}
+
+.nose {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.seatingArea {
+  display: flex;
+  flex-direction: column;
+  gap: 15.5px; /* Vertical gap between rows */
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.seatGroup {
+  display: flex;
+  gap: 10px; /* Horizontal gap between seats */
+
+}
+
+.rowNumberColumn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 40px;
+}
+
+.label {
+  width: 40px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13.68px;
+  color: rgba(0, 0, 0, 1);
+    padding-bottom: 10px;
+}
+
+.rowNumber {
+  font-size: 13.68px;
+  color: rgba(0, 0, 0, 1);
+  font-weight: 500;
+}
+
+/* Seat Base Styles */
+.seat {
+  width: 39.09px;
+  height: 39.09px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Seat Types */
+.grey { background-color: rgba(226, 228, 233, 1); }
+.blue { background-color: rgba(147, 197, 253, 1); }
+.purple { background-color: rgba(194, 122, 255, 1); }
+.red { background-color: rgba(248, 113, 113, 1); }
+.orange { background-color: rgba(251, 146, 60, 1); }
+.black { background-color: rgba(16, 24, 40, 1); }
+.xl { background-color: rgba(226, 228, 233, 1); border: 0.98px solid rgba(153, 161, 175, 1); }
+.taken { 
+  background-color: rgba(216, 216, 216, 1); 
+  cursor: not-allowed;
+}
+
+/* Active State */
+.active {
+  background-color: rgba(103, 170, 56, 1); /* Match green check color from image */
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Exit Rows */
+.exitRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.exitSide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exitText {
+    font-family: Antic Didone;
+  font-size: 15.64px;
+  color: rgba(7, 7, 115, 1);
+  font-weight: 400;
+  letter-spacing: 0%;
+  line-height: 100%;
+}
+
+.exitLine {
+  height: 39.09px;
+  width: 8.8px;
+  background-color: rgba(0, 0, 51, 1);
+}
+
+/* Responsiveness */
+@media (max-width: 400px) {
+  .planeBody { padding: 0 15px 40px 15px; }
+  .seat { width: 34px; height: 34px; }
+  .label { width: 34px; }
+  .seatGroup { gap: 6px; }
+  .seatingArea { gap: 12px; }
+}

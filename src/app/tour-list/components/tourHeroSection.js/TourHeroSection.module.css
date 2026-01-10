@@ -24,7 +24,7 @@
   align-items: center;
   flex-direction: column;
   position: relative;
-  z-index: 2;
+  z-index: 50;
   gap: 98px;
 }
 
@@ -348,4 +348,26 @@
     filter: invert(0);
     transition: filter 0.2s ease;
     width: 12px;
+}
+
+.guestSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 21px;
+  cursor: pointer;
+}
+
+.guestCount {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.guestChevron {
+  margin-left: 6px;
+  transition: transform 0.3s ease;
 }
