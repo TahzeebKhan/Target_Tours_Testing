@@ -1,9 +1,13 @@
+"use client";
 import React from "react";
 import styles from "./FlightBookingDetailsLayout.module.css";
 import Navbar from "./Navbar";
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
-import { FlightBookingProvider } from "./FlightBookingContext";
+import {
+  FlightBookingProvider,
+  useFlightBooking,
+} from "./FlightBookingContext";
 import PassengerDetailsMobile from "./mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
 
 export default function FlightBookingDetailsLayout({ children }) {
@@ -23,7 +27,7 @@ export default function FlightBookingDetailsLayout({ children }) {
         </main>
       </div>
       <div className={styles.mobileView}>
-        <PassengerDetailsMobile />
+        <div className={styles.container}>{children}</div>
       </div>
     </FlightBookingProvider>
   );
