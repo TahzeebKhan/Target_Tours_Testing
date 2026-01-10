@@ -8,6 +8,7 @@ import TravelInsuranceOption from "../../components/passengerDetails/fareDetails
 import CancellationPenalty from "../../components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import { useFlightBooking } from "../../FlightBookingContext";
 import FareDetailsPop from "../components/fareDetailsPop/FareDetailsPop";
+import BaggageRules from "../components/baggageRules/BaggageRules";
 const PassengerDetailsMobile = () => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
@@ -186,8 +187,11 @@ const PassengerDetailsMobile = () => {
         </div>
         {/* <div> */}
         <FlightTabs onFlightDetailsClick={() => setShowFareDetailsPopup(true)} />
+          {/* {showFareDetailsPopup && (
+            <FareDetailsPop onClose={() => setShowFareDetailsPopup(false)} />
+          )} */}
           {showFareDetailsPopup && (
-            <FareDetailsPop onFlightDetailsClick={() => setShowFareDetailsPopup(false)} />
+            <BaggageRules onClose={() => setShowFareDetailsPopup(false)} />
           )}
         {/* </div> */}
 
