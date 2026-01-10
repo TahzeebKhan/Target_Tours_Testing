@@ -90,6 +90,7 @@
     content: "•";
     color: rgba(6, 4, 178, 1);
     font-weight: bold;
+    padding: 0 8px;
 }
 
 .viewArticles {
