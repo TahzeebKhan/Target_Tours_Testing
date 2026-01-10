@@ -8,7 +8,7 @@ const tabs = [
     "CANCELLATION & DATE CHANGE",
 ];
 
-export default function FlightTabs() {
+export default function FlightTabs({ onFlightDetailsClick }) {
     const [activeTab, setActiveTab] = useState(0);
     const tabsRef = useRef([]);
     const containerRef = useRef(null);
@@ -47,7 +47,14 @@ export default function FlightTabs() {
                         ref={(el) => (tabsRef.current[index] = el)}
                         className={`${styles.tab} ${activeTab === index ? styles.active : ""
                             }`}
-                        onClick={() => setActiveTab(index)}
+                        onClick={() => {
+                            setActiveTab(index);
+
+                            // 👇 FLIGHT DETAILS tab click
+                            if (index === 0 && onFlightDetailsClick) {
+                                onFlightDetailsClick();
+                            }
+                        }}
                     >
                         {tab}
                     </button>

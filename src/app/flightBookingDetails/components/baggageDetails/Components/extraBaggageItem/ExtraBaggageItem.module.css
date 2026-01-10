@@ -69,3 +69,20 @@
     color: #000000;
 
 }
+
+@media (max-width: 1156px) {
+    .imageBox{
+        width: 56px;
+        height: 56px;
+    }
+    .imageInfoContainer{
+        gap: 12px;
+    }
+}
+@media (max-width: 640px) {
+    .wrapper{
+        max-width: unset;
+        
+    }
+}
+    

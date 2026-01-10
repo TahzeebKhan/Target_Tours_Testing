@@ -84,3 +84,20 @@
 .list strong {
     font-weight: 700;
 }
+
+@media (max-width: 1156px) {
+      .iconBox{
+        max-width: 56px;
+        height: 56px;
+      }
+      .wrapper{
+        gap: 12px;
+      }
+}
+@media (max-width: 640px) {
+    .header h3 {
+        font-weight: 500;
+    }
+
+}
+    
