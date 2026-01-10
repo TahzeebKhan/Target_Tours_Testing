@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import styles from "./PassengerClassSelector.module.css";
 import { Minus, Plus } from "lucide-react";
+import { useTripType } from "../TripTypeContext";
 
 const CLASSES = ["Economy", "Premium Economy", "Business", "First Class"];
 
@@ -46,11 +47,15 @@ const PassengerClassSelector = ({
   };
 
   if (!open) return null;
+  const { tripType } = useTripType();
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className={styles.dropdown}
+      className={`${styles.dropdown}
+      ${tripType==='oneway'? styles.oneWayDropdown :""}
+      ${tripType==='round'? styles.roundTripDropDown :""}
+      `}
       ref={ref}
     >
       <h4 className={styles.heading}>Set Passenger</h4>

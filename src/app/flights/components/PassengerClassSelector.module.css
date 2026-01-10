@@ -132,3 +132,28 @@
   border-color: #000033;
   background: #f0f3ff;
 }
+
+@media (max-width: 1466px) {
+  .dropdown {
+    right: 0;
+    left: unset;
+  }
+}
+@media (max-width: 1239px) {
+  .roundTripDropDown {
+    max-width: unset;
+    width: 100%;
+  }
+}
+@media (max-width: 995px) {
+  .dropdown {
+    max-width: unset;
+    width: 100%;
+  }
+}
+
+@media (max-width: 749px) {
+  .oneWayDropdown {
+    min-width: 338px;
+  }
+}

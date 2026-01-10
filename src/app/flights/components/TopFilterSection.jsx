@@ -559,7 +559,9 @@ const TopFilterSection = ({
                       tripType === "round"
                         ? styles.roundTripSerarchingContBottom
                         : ""
-                    }  `}
+                    }
+                     
+                      `}
                   >
                     <div
                       className={`${styles.fromBtn} ${styles.fromBtn2} ${
@@ -603,7 +605,10 @@ const TopFilterSection = ({
                     <div
                       className={`${styles.arrowbox} ${
                         tripType === "round" ? styles.arrowbox2 : ""
-                      } ${tripType === "multi" ? styles.arrowbox3 : ""}`}
+                      } ${tripType === "multi" ? styles.arrowbox3 : ""}
+                      ${
+                        tripType === "multi" ? styles.multiCityArrowBoxTop : ""
+                      }`}
                       onClick={() => {
                         if (tripType === "multi") {
                           const { from, to } = multiSegments[0];
@@ -833,10 +838,18 @@ const TopFilterSection = ({
                           tripType === "multi"
                             ? styles.animateIn
                             : styles.animateOut
-                        }`}
+                        }
+                        
+                         ${
+                           tripType === "multi"
+                             ? styles.multiCitySerarchingContBottom
+                             : ""
+                         }`}
                         style={{ pointerEvents: "auto" }}
                       >
-                        <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.bottomRowFirstBtn}`}
+                        >
                           <div className={styles.lable}>From</div>
                           <input
                             type="text"
@@ -847,20 +860,19 @@ const TopFilterSection = ({
                               updateSegment(1, "from", e.target.value)
                             }
                           />
-                        </div>
-
-                        <div
-                          className={`${styles.arrowbox} ${styles.arrowbox3} `}
-                          onClick={() => {
-                            const { from, to } = multiSegments[1];
-                            updateSegment(1, "from", to);
-                            updateSegment(1, "to", from);
-                          }}
-                        >
-                          <ArrowLeftRight
-                            size={16}
-                            className={styles.arrowIcon}
-                          />
+                          <div
+                            className={`${styles.arrowbox} ${styles.arrowbox3} ${styles.arrowboxBottomRow} `}
+                            onClick={() => {
+                              const { from, to } = multiSegments[1];
+                              updateSegment(1, "from", to);
+                              updateSegment(1, "to", from);
+                            }}
+                          >
+                            <ArrowLeftRight
+                              size={16}
+                              className={styles.arrowIcon}
+                            />
+                          </div>
                         </div>
 
                         <div

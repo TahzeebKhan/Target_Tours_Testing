@@ -149,9 +149,15 @@
     width: 100%;
   }
 }
+@media (max-width:430px) {
+  .priceContainer{
+    gap: 8px;
+  }
+}
 
 @media (max-width: 350px) {
   .priceContainer {
+    gap: 4px;
     flex-direction: column;
   }
   .dot {
