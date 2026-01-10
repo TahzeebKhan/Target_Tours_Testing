@@ -128,3 +128,138 @@
     color: #000000;
 
 }
+
+
+.aboutFlightContainerRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.aboutFlightContainerRight span {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.mobileFlightDestinationName {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.baggageMobileCard {
+  border: 1px solid #E4E6E8;
+  background: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+}
+
+.mobileViewContainer{
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+  padding-top: 76px;
+}
+.baggageMobileCard{
+  border: 1px solid #E4E6E8;
+  background: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+}
+.br {
+    width: 100%;
+    height: 1px;
+    /* border: .5px dashed #94A3B8; */
+    background-image: repeating-linear-gradient(to right,
+            #94A3B8 0,
+            #94A3B8 6px,
+            transparent 6px,
+            transparent 12px);
+    opacity: 0.74;
+    margin: 0 auto;
+}
+@media (max-width: 1200px){
+    .mealGrid{
+        gap: 12px 12px;
+    }
+    .imageBox{
+        width: 56px;
+        height: 56px;
+    }
+    .Itemwrapper{
+        gap: 5px;
+    }
+}
+
+@media (max-width: 1156px){
+    .tag{
+        font-size: 10px;
+        height: auto;
+    }
+    .price{
+        font-size: 16px;
+    }
+    .itemInfo{
+        gap: 10px;
+    }
+    .counter{
+        max-width: 80px;
+
+    }
+}
+
+@media (max-width: 1080px){
+    .mealGrid{
+        /* grid-template-columns: 1fr; */
+    }
+    .priceRow{
+        gap: 2px;
+    }
+    .info{
+        gap: 2px;
+    }
+    .price{
+        font-size: 14px;
+    }
+    .expandWrap{
+        padding: 16px;
+    }
+}
+@media (max-width: 1024px){
+   .title{
+    font-size: 11px;
+   }
+}
+@media (max-width: 640px){
+    .mealGrid{
+        grid-template-columns: 1fr;
+        gap: 16px;
+
+    }
+    .Itemwrapper{
+        max-width: unset;
+    }
+}

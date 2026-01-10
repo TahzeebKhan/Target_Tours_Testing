@@ -7,8 +7,11 @@ import FlightSection from "../components/FlightSection/FlightSection";
 import TravelInsuranceOption from "../../components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
 import CancellationPenalty from "../../components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import { useFlightBooking } from "../../FlightBookingContext";
+import FareDetailsPop from "../components/fareDetailsPop/FareDetailsPop";
 const PassengerDetailsMobile = () => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
+
 
   const { setCurrentStep } = useFlightBooking();
   useEffect(() => {
@@ -95,9 +98,8 @@ const PassengerDetailsMobile = () => {
         </div>
       </div>
       <div
-        className={`${styles.tripDetailsContainer} ${
-          showStickyHeader ? styles.stickyVisible : styles.stickyHidden
-        }`}
+        className={`${styles.tripDetailsContainer} ${showStickyHeader ? styles.stickyVisible : styles.stickyHidden
+          }`}
       >
         <div className={styles.tripDetailsHeader}>
           <img src="/icons/leftArrowTrip.svg" alt="" />
@@ -183,7 +185,10 @@ const PassengerDetailsMobile = () => {
           </div>
         </div>
         {/* <div> */}
-        <FlightTabs />
+        <FlightTabs onFlightDetailsClick={() => setShowFareDetailsPopup(true)} />
+          {showFareDetailsPopup && (
+            <FareDetailsPop onFlightDetailsClick={() => setShowFareDetailsPopup(false)} />
+          )}
         {/* </div> */}
 
         <div className={styles.flightDepartureReturenDetailsContianerWrapper}>

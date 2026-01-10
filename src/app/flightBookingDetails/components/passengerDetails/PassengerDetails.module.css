@@ -136,3 +136,11 @@
     display: none;
   }
 }
+
+
+
+@media (max-width: 991px) {
+   .container{
+    max-width: unset;
+   }
+}
