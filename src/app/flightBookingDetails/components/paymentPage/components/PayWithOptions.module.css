@@ -28,9 +28,8 @@
   height: 18px;
   cursor: pointer;
 }
-.card input:focus-visible{
-    outline: none;
-
+.card input:focus-visible {
+  outline: none;
 }
 /* ICON */
 .card img {
@@ -54,3 +53,27 @@
 }
 
 /* ACTIVE / SELECTED */
+
+@media (max-width: 640px) {
+  .wrapper {
+    padding: 12px;
+    padding-top: 16px;
+    border: 1px solid #e4e6e8;
+    border-top: none;
+  }
+  .card {
+    padding: 12px;
+  }
+  .card input {
+    width: 24px;
+    height: 24px;
+  }
+  .card img {
+    width: 54px;
+    height: 32px;
+  }
+  .card span{
+    font-weight: 400;
+    font-size: 12px;
+  }
+}

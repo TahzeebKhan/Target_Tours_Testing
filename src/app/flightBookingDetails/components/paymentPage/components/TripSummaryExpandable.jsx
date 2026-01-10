@@ -1,5 +1,8 @@
 import { Plane } from "lucide-react";
 import styles from "./TripSummaryExpandable.module.css";
+import TravelInsuranceOption from "../../passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
+import FlightSection from "@/app/flightBookingDetails/mobileViewComponents/components/FlightSection/FlightSection";
+import CancellationPenalty from "../../passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 
 const FlightIcon = () => (
   <svg
@@ -226,7 +229,42 @@ const PowerIcon = () => {
     </svg>
   );
 };
+const returnFlightData = {
+  type: "RETURN",
+  airline: {
+    name: "Garuda Indonesia",
+    code: "6E-541",
+    logo: "/images/GarudaIndonesia.png",
+  },
+  aircraft: "Boeing 737",
+  cabinClass: "Economy",
+  fareType: "Flexi Plus Fare",
+  date: "Thu, 06 Jul 2025",
 
+  departure: {
+    time: "06:00",
+    city: "Jakarta (JKTC)",
+  },
+
+  arrival: {
+    time: "07:40",
+    city: "Surabaya (SUB)",
+  },
+
+  duration: {
+    hours: "01",
+    minutes: "50",
+  },
+
+  stops: "Direct",
+
+  facilities: [
+    "Baggage 20 kg, Cabin Baggage 7kg",
+    "In-flight entertainment",
+    "In-flight meal",
+    "Power & USB Port",
+  ],
+};
 const FlightBlock = ({ data, showReturnLabel = false }) => {
   const {
     airline,
@@ -359,21 +397,34 @@ const FlightBlock = ({ data, showReturnLabel = false }) => {
 
 const TripSummaryExpandable = ({ data }) => {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.cardsContainer}>
-        <FlightBlock data={data.onward} />
-        <FlightBlock data={data.onwardBusinessClass} />
-      </div>
-      <div className={styles.returnLabel}>RETURN</div>
-      <div className={styles.cardsContainer}>
-        <FlightBlock data={data.return} showReturnLabel />
-      </div>
-      <div className={styles.bottomRulesContainer}>
-        <span>Fare Rules</span>
+    <>
+      <div className={styles.wrapper}>
+        <div className={styles.cardsContainer}>
+          <FlightBlock data={data.onward} />
+          <FlightBlock data={data.onwardBusinessClass} />
+        </div>
+        <div className={styles.returnLabel}>RETURN</div>
+        <div className={styles.cardsContainer}>
+          <FlightBlock data={data.return} showReturnLabel />
+        </div>
+        <div className={styles.bottomRulesContainer}>
+          <span>Fare Rules</span>
 
-        <span>Baggage</span>
+          <span>Baggage</span>
+        </div>
       </div>
-    </div>
+
+      <div className={styles.wrapperMobile}>
+        <div className={styles.flightDepartureReturenDetailsContianerWrapper}>
+          <div className={styles.flightDepartureReturenDetailsContianer}>
+            <FlightSection />
+            <div className={styles.dashedBorder}></div>
+
+            <FlightSection flight={returnFlightData} />
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

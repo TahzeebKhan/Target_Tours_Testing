@@ -282,3 +282,46 @@
   color: #155dfc;
   cursor: pointer;
 }
+.wrapperMobile {
+  display: none;
+}
+
+.flightDepartureReturenDetailsContianerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+  padding-top: 16px;
+  border: 1px solid #e4e6e8;
+  border-top: none;
+  background-color: white;
+}
+.flightDepartureReturenDetailsContianer {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid #e4e6e8;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .wrapper {
+    display: none;
+  }
+  .wrapperMobile {
+    display: block;
+  }
+  .dashedBorder {
+    display: block;
+    width: calc(100%);
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      to right,
+      rgba(123, 135, 153, 0.74) 0 8px,
+      transparent 4px 15px
+    );
+  }
+}
