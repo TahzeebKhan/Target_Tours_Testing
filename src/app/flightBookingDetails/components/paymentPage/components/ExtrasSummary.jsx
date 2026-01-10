@@ -133,7 +133,7 @@ const ExtrasSummary = () => {
   return (
     <div className={styles.wrapper}>
       {/* BAGGAGE */}
-      <div className={styles.section}>
+      <div className={`${styles.section} ${styles.sectionTop}`}> 
         <h4 className={styles.heading}>BAGGAGE</h4>
 
         <div className={styles.item}>
@@ -153,6 +153,8 @@ const ExtrasSummary = () => {
         </div>
       </div>
 
+      <div className={styles.dashedBorder}/>
+
       {/* MEALS */}
       <div className={`${styles.section} ${styles.sectionMid}`}>
         <h4 className={styles.heading}>MEALS & BEVERAGES</h4>
@@ -166,6 +168,7 @@ const ExtrasSummary = () => {
         </div>
       </div>
 
+      <div className={styles.dashedBorder}/>
       {/* SEATING */}
       <div className={styles.section}>
         <h4 className={styles.heading}>SEATING</h4>

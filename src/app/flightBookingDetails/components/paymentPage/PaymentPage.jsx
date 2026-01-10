@@ -17,8 +17,15 @@ const PaymentPage = () => {
 
   return (
     <>
+      <div className={styles.tripDetailsContainer}>
+        <div className={styles.tripDetailsHeader}>
+          <img src="/icons/leftArrowTrip.svg" alt="" />
+          <p className={styles.tripDetails}>Review and Payment</p>
+        </div>
+      </div>
       <div className={styles.container}>
         {/* HEADER */}
+
         <div className={styles.passengerDetailsHeader}>
           <div className={styles.fromToContainer}>
             <h2 className={styles.from}>Review and Payment</h2>
@@ -38,7 +45,9 @@ const PaymentPage = () => {
         {/* Trip Summary */}
         <div className={styles.flightExpandableContainer}>
           <div
-            className={styles.flightExpandableCard}
+            className={`${styles.flightExpandableCard} ${
+              openTab === "tripSummary" ? styles.open : ""
+            }`}
             onClick={() => toggleTab("tripSummary")}
           >
             <div className={styles.firstCard}>
@@ -120,7 +129,9 @@ const PaymentPage = () => {
         {/* Passenger info */}
         <div className={styles.flightExpandableContainer}>
           <div
-            className={styles.flightExpandableCard}
+            className={`${styles.flightExpandableCard} ${
+              openTab === "passengerInfo" ? styles.open : ""
+            }`}
             onClick={() => toggleTab("passengerInfo")}
           >
             <h3 className={styles.flightExpandableHeader}>
@@ -146,7 +157,9 @@ const PaymentPage = () => {
 
         <div className={styles.flightExpandableContainer}>
           <div
-            className={styles.flightExpandableCard}
+            className={`${styles.flightExpandableCard} ${
+              openTab === "extras" ? styles.open : ""
+            }`}
             onClick={() => toggleTab("extras")}
           >
             <h3 className={styles.flightExpandableHeader}>extras</h3>
@@ -168,8 +181,10 @@ const PaymentPage = () => {
           </div>
         </div>
 
-        <div className={styles.flightExpandableContainer}>
-          <div className={styles.flightExpandableCard}>
+        <div className={`${styles.flightExpandableContainer} `}>
+          <div
+            className={`${`${styles.flightExpandableCard}`} ${styles.payWithContainer}`}
+          >
             <h3 className={styles.flightExpandableHeader}>Pay with</h3>
           </div>
           <PayWithOptions />
@@ -181,6 +196,27 @@ const PaymentPage = () => {
         >
           <button className={styles.continueButton}>CONTINUE</button>
         </div> */}
+      </div>
+      <div className={styles.mobileView}>
+        <div className={styles.footer}>
+          {/* LEFT */}
+          <div className={styles.footerContainer}>
+            <div className={styles.amountSection}>
+              <div className={styles.label}>
+                Total Amount
+                <span className={styles.infoIcon}>!</span>
+              </div>
+              <div className={styles.amount}>₹ 66,945</div>
+            </div>
+
+            {/* RIGHT */}
+            <button
+              className={styles.continueBtn}
+            >
+              CONTINUE PAYMENT
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );

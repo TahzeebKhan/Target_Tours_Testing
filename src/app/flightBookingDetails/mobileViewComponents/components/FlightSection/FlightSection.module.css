@@ -1,253 +1,267 @@
 .FlightSection {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .FlightSectionDetails {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .heading {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    color: #070773;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  color: #070773;
 }
 
 .FlightSectionDetailsTop {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .aboutFlightContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .aboutFlightContainerLeft {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .flightIcon {
-    width: 40px;
-    height: 40px;
+  width: 40px;
+  height: 40px;
 }
 
 .flightInfoTextContainer {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .flightInfoTextTitle {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 18.57px;
-    color: #000000;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18.57px;
+  color: #000000;
 }
 
 .flightInfoTextChips {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 22px;
-    padding: 3px 10px;
-    background-color: #f7f7f7;
-    border: 1px solid #c4c4c4;
-    color: #737373;
-    border-radius: 7px;
-    font-family: var(--font-inter);
-    font-size: 10px;
-    width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 3px 10px;
+  background-color: #f7f7f7;
+  border: 1px solid #c4c4c4;
+  color: #737373;
+  border-radius: 7px;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  width: fit-content;
 }
 
 .aboutFlightContainerRight {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: flex-end;
-    padding-right: 11px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-right: 11px;
+  margin-right: auto;
+  margin-left: 48px;
 }
 
 .flightInfomClass {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .economyChip {
-    font-family: var(--font-inter);
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 18.57px;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    text-transform: uppercase;
-
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
 }
 
 .flexiPlusFare {
-    height: 22px;
-    max-width: 108px;
-    width: 100%;
-    padding: 2px 8px;
-    background: #FBBF24;
-    font-family: var(--font-inter);
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 12px;
-    line-height: 1.18;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #000033;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-
+  height: 22px;
+  max-width: 108px;
+  width: 100%;
+  padding: 2px 8px;
+  background: #fbbf24;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dashedLine {
-    max-width: 24px;
-    width: 100%;
-    background: #C6D0DE;
-    height: 1px;
+  width: 8px;
+  background: #c6d0de;
+  height: 1px;
 }
 
 .flightDate {
-    font-family: var(--font-inter);
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 12px;
-    line-height: 1.20;
-    letter-spacing: -3%;
-    color: #000000;
-
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  white-space: nowrap;
+  color: #000000;
 }
 
 .flightDateTimeLineContainer {
-    max-width: 278px;
-    width: 100%;
+  max-width: 278px;
+  width: 100%;
 }
 
 .dot {
-    width: 5px;
-    height: 5px;
-    background-color: #7B8799;
-    border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  background-color: #7b8799;
+  border-radius: 50%;
 }
 
 .flightDateTimeLine {
-    display: flex;
-    gap: 8px;
-    margin: 0 auto;
-    width: fit-content;
+  display: flex;
+  gap: 8px;
+  margin: 0 auto;
+  width: fit-content;
 }
 
 .flightDateTimeLineLeft {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
 }
 
 .time {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    line-height: 1.2;
-    letter-spacing: -3%;
-    color: #000000;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  color: #000000;
 }
 
 .flightAnimation {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
 .dotDashed {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
 .flightDateTimeLineRight {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .airPortName {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 13px;
-    line-height: 24px;
-    letter-spacing: -3%;
-    text-transform: uppercase;
-    color: #000000;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  line-height: 24px;
+  letter-spacing: -3%;
+  text-transform: uppercase;
+  color: #000000;
 }
 
 .flightDateTimeLineRightDetails {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .smallDot {
-    width: 4px;
-    height: 4px;
-    background-color: #7B8799;
-    border-radius: 50%;
+  width: 4px;
+  height: 4px;
+  background-color: #7b8799;
+  border-radius: 50%;
 }
 
 .flightDateTimeLineRightDetails p {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
 
-    line-height: 1.50;
-    letter-spacing: -3%;
-    text-align: center;
-
+  line-height: 1.5;
+  letter-spacing: -3%;
+  text-align: center;
 }
 
 .flightDateTimeLineRightDetails p span {
-    color: #7B8799;
+  color: #7b8799;
 }
 
 .direct {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
 
-    line-height: 1.50;
-    letter-spacing: -3%;
-    text-align: center;
-    color: #7B8799;
+  line-height: 1.5;
+  letter-spacing: -3%;
+  text-align: center;
+  color: #7b8799;
 }
 
 .flightIconSvg {
-    width: 14px;
-    height: 14px;
-    transform: rotate(90deg);
+  width: 14px;
+  height: 14px;
+  transform: rotate(90deg);
+}
+@media (max-width:441px) {
+    .aboutFlightContainerRight{
+        
+        padding-right: 0px;
+    }
+}
+@media (max-width:441px) {
+    .flightDate{
+        white-space: unset;
+    }
+    .aboutFlightContainerRight{
+        gap: 5px;
+    }
+}
+@media (max-width:370px) {
+     .aboutFlightContainerRight{
+        margin: 0px auto;
+     }
 }
