@@ -33,7 +33,7 @@
   background: linear-gradient(180deg, #00003f 0%, #00001f 100%);
   color: #ffffff;
   font-weight: 400;
-height: 38px;
+  height: 38px;
   padding: 7px 13px;
   font-size: 13px;
 
@@ -76,4 +76,110 @@ height: 38px;
   font-size: 13px;
   font-weight: 400;
   color: #767676;
+}
+.wrapperMobile {
+  display: flex;
+  flex-direction: column;
+  padding: 0px 12px;
+  border: 1px solid #e4e6e8;
+  border-top: none;
+  background: #ffffff;
+}
+
+.dashedBorder {
+  display: none;
+}
+/* Each row */
+.passengerItemMobile {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+
+/* dashed divider except last */
+.withBorderMobile {
+  /* border-bottom: 1px dashed rgba(123, 135, 153, 0.74); */
+}
+
+/* LEFT */
+.leftMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameMobile {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+  text-transform: uppercase;
+}
+
+.metaMobile {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  color: #7b8799;
+  display: flex;
+  align-items: center;
+}
+
+.dotMobile {
+  margin: 0 6px;
+  width: 4px;
+  height: 4px;
+  background-color: #7b8799;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+/* RIGHT */
+.rightMobile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.emailMobile {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 400;
+  color: #000000;
+  text-transform: uppercase;
+}
+
+.phoneMobile {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  color: #000000;
+}
+
+.wrapperMobile {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .wrapper {
+    display: none;
+  }
+  .wrapperMobile {
+    display: flex;
+  }
+  .dashedBorder {
+    display: block;
+    width: calc(100%);
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      to right,
+      rgba(123, 135, 153, 0.74) 0 8px,
+      transparent 4px 15px
+    );
+  }
 }

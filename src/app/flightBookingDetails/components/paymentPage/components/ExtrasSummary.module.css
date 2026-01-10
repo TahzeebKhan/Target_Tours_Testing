@@ -64,3 +64,51 @@
 .itemEnd {
   margin-bottom: 0;
 }
+.dashedBorder {
+  display: none;
+}
+@media (max-width: 640px) {
+  .dashedBorder {
+    display: block;
+    width: calc(100% - 24px);
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      to right,
+      rgba(123, 135, 153, 0.74) 0 8px,
+      transparent 4px 15px
+    );
+  }
+  .section {
+    padding: 16px 12px;
+    border: none;
+  }
+  .sectionTop {
+    border-top: none;
+  }
+  .heading {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .item svg path {
+    stroke: #7b8799;
+  }
+  .wrapper {
+    border: 1px solid #e4e6e8;
+    border-top: none;
+  }
+  .title {
+    font-size: 13px;
+  }
+  .item {
+    margin-bottom: 12px;
+  }
+  .subText {
+    color: #7b8799;
+  }
+  .itemEnd {
+    margin-bottom: 0;
+  }
+}
