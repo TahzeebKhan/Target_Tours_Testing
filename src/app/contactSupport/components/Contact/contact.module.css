@@ -1,0 +1,169 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 32px;
+  background: rgba(249, 249, 249, 1);
+  gap: 32px;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 32px;
+}
+
+.title {
+  font-family: "Antic Didone", serif;
+  font-size: 54px;
+  color: rgba(0, 0, 51, 1);
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(0, 0, 51, 1);
+  letter-spacing: -2%;
+  line-height: 160%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  width: 100%;
+  max-width: 1120px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 19px;
+
+  border: 1px solid rgba(228, 230, 232, 1);
+  background-color: #ffffff;
+  cursor: pointer;
+
+  transition: box-shadow 300ms ease-in-out,
+              background-color 300ms ease-in-out,
+              border-color 300ms ease-in-out;
+}
+
+/* ✅ HOVER: ONLY SHADOW */
+.card:hover {
+  box-shadow: 0px 1px 18.6px 0px rgba(0, 0, 0, 0.09);
+}
+
+/* ✅ ACTIVE STATE */
+.active {
+  border-color: rgba(0, 0, 51, 1);
+  background-color: rgba(0, 0, 51, 1);
+}
+
+/* ICON */
+.iconWrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(243, 244, 246, 1);
+}
+
+/* CONTENT */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* TEXT */
+.cardTitle {
+  font-family: "Inter", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(10, 10, 10, 1);
+  line-height: 100%;
+  letter-spacing: -0.44px;
+  transition: color 300ms ease-in-out;
+}
+
+.cardDescription {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: rgba(74, 85, 101, 1);
+    line-height: 160%;
+  letter-spacing: -0.15px;
+  transition: color 300ms ease-in-out;
+}
+
+/* ✅ TEXT COLOR CHANGE ONLY WHEN ACTIVE */
+.active .cardTitle,
+.active .cardDescription {
+  color: rgba(255, 255, 255, 1);
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.continueButton {
+    max-width: 210px;
+    width: 100%;
+  background-color: rgba(0, 0, 51, 1);
+  color: #ffffff;
+  padding: 12px 24px;
+  border: none;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+    transition: 
+    background-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.continueButton:hover {
+  background: rgba(252, 200, 0, 1);
+    color: rgba(0, 0, 51, 1);
+}
+
+/* Responsive Breakpoints */
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 40px 16px;
+    gap: 40px;
+  }
+  
+  .title {
+    font-size: 32px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .continueButton {
+    width: 100%;
+    padding: 16px 0;
+  }
+}
