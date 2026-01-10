@@ -1,0 +1,119 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #0A0A0A33;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+.fareDetialsContainre{
+    width: 100%;
+    background-color: #FFFFFF;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+}
+.fareDetailsTop{
+    padding: 24px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.headerTop{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+.fareDetailsText {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 13px;
+    line-height: 1.50;
+    letter-spacing: -3%;
+    text-transform: uppercase;
+    color: #7B8799;
+}
+
+
+.tableContainer {
+    padding: 24px 16px;
+    border-top: 0.5px solid #E4E6E8;
+}
+.tableCard {
+  max-width: 534px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.tableHeader {
+  padding: 11px 13px;
+  display: flex;
+  justify-content: space-between;
+  background-color: #000033;
+}
+
+.tableHeader span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* ROW */
+.tableRow {
+  padding: 9px 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e4e6e8;
+}
+
+/* AIRLINE CELL */
+.airlineCell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.airlineIcon {
+  width: 32px;
+  height: 32px;
+}
+
+.airlineText {
+  display: flex;
+  flex-direction: column;
+}
+
+.airlineName {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.flightNo {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  color: #737373;
+}
+
+/* BAGGAGE VALUES */
+.baggage {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  color: #000000;
+}

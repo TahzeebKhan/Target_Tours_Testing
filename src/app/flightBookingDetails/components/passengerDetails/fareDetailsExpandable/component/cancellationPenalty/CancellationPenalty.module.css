@@ -209,7 +209,7 @@
 
 
 
-@media (max-width: 430px){
+@media (max-width: 640px){
     .wrapper{
         padding: 0px;
         border-top: none;
@@ -219,6 +219,9 @@
         justify-content: space-around;
         /* position: relative; */
         margin-top: 6px;
+    }
+    .mobileView{
+        flex-direction: column;
     }
     .marks span{
         flex-direction: column;
@@ -234,7 +237,8 @@
         display: none !important;
     }
     .mobileView{
-        display: block !important;
+        display: flex !important;
+        flex-direction: column;
     }
     .penaltyValues span{
         font-size: 12px;
