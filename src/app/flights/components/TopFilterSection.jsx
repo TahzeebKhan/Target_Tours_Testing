@@ -168,18 +168,28 @@ const TopFilterSection = ({
     );
   };
 
+  const [activeMultiFromIndex, setActiveMultiFromIndex] = useState(null);
+  const [activeMultiToIndex, setActiveMultiToIndex] = useState(null);
+
   // Handle suggestion selection
   const selectSuggestion = (suggestion, field) => {
-    const value = suggestion.label; // ya suggestion.value
+    const value = suggestion.label;
 
     if (tripType === "multi") {
-      updateSegment(0, field, value);
+      if (field === "from" && activeMultiFromIndex !== null) {
+        updateSegment(activeMultiFromIndex, "from", value);
+      }
+      if (field === "to" && activeMultiToIndex !== null) {
+        updateSegment(activeMultiToIndex, "to", value);
+      }
     } else {
       field === "from" ? setFrom(value) : setTo(value);
     }
 
     setFromSuggestionsOpen(false);
     setToSuggestionsOpen(false);
+    setActiveMultiFromIndex(null);
+    setActiveMultiToIndex(null);
   };
 
   const handleDateClick = (date) => {
@@ -263,12 +273,15 @@ const TopFilterSection = ({
         !fromInputRef.current.contains(e.target)
       ) {
         setFromSuggestionsOpen(false);
+        setActiveMultiFromIndex(null);
       }
+
       if (
         toSuggestionRef.current &&
         !toSuggestionRef.current.contains(e.target)
       ) {
         setToSuggestionsOpen(false);
+        setActiveMultiToIndex(null);
       }
     };
 
@@ -579,15 +592,22 @@ const TopFilterSection = ({
                         value={
                           tripType === "multi" ? multiSegments[0].from : from
                         }
-                        onFocus={() => setFromSuggestionsOpen(true)}
-                        onClick={() => setFromSuggestionsOpen(true)}
+                        onFocus={() => {
+                          setFromSuggestionsOpen(true);
+                          if (tripType === "multi") setActiveMultiFromIndex(0);
+                        }}
+                        onClick={() => {
+                          setFromSuggestionsOpen(true);
+                          if (tripType === "multi") setActiveMultiFromIndex(0);
+                        }}
                         onChange={(e) => {
                           if (tripType === "multi") {
                             updateSegment(0, "from", e.target.value);
+                            setActiveMultiFromIndex(0);
                           } else {
                             setFrom(e.target.value);
-                            setFromSuggestionsOpen(true);
                           }
+                          setFromSuggestionsOpen(true);
                         }}
                       />
 
@@ -852,14 +872,38 @@ const TopFilterSection = ({
                         >
                           <div className={styles.lable}>From</div>
                           <input
+                            ref={fromInputRef}
                             type="text"
                             className={styles.contant}
                             placeholder="Departure"
                             value={multiSegments[1].from}
-                            onChange={(e) =>
-                              updateSegment(1, "from", e.target.value)
-                            }
+                            onFocus={() => {
+                              setFromSuggestionsOpen(true);
+                              setActiveMultiFromIndex(1);
+                            }}
+                            onClick={() => {
+                              setFromSuggestionsOpen(true);
+                              setActiveMultiFromIndex(1);
+                            }}
+                            onChange={(e) => {
+                              updateSegment(1, "from", e.target.value);
+                              setFromSuggestionsOpen(true);
+                              setActiveMultiFromIndex(1);
+                            }}
                           />
+
+                          {fromSuggestionsOpen &&
+                            activeMultiFromIndex === 1 && (
+                              <SuggestionBox
+                                boxRef={fromSuggestionRef}
+                                heading="RECENT SEARCH"
+                                suggestions={getFilteredSuggestions(
+                                  multiSegments[1].from
+                                )}
+                                onSelect={(s) => selectSuggestion(s, "from")}
+                              />
+                            )}
+
                           <div
                             className={`${styles.arrowbox} ${styles.arrowbox3} ${styles.arrowboxBottomRow} `}
                             onClick={() => {
@@ -884,10 +928,31 @@ const TopFilterSection = ({
                             className={styles.contant}
                             placeholder="Destination"
                             value={multiSegments[1].to}
-                            onChange={(e) =>
-                              updateSegment(1, "to", e.target.value)
-                            }
+                            onFocus={() => {
+                              setToSuggestionsOpen(true);
+                              setActiveMultiToIndex(1);
+                            }}
+                            onClick={() => {
+                              setToSuggestionsOpen(true);
+                              setActiveMultiToIndex(1);
+                            }}
+                            onChange={(e) => {
+                              updateSegment(1, "to", e.target.value);
+                              setToSuggestionsOpen(true);
+                              setActiveMultiToIndex(1);
+                            }}
                           />
+
+                          {toSuggestionsOpen && activeMultiToIndex === 1 && (
+                            <SuggestionBox
+                              boxRef={toSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(
+                                multiSegments[1].to
+                              )}
+                              onSelect={(s) => selectSuggestion(s, "to")}
+                            />
+                          )}
                         </div>
 
                         <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>

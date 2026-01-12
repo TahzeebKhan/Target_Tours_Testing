@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
@@ -12,6 +12,7 @@ import SortBySheet from "../SortBySheet";
 import OnewaySkeleton from "./OnewaySkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
+import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
 
 const OnewayFlightBooking = () => {
   const { committedSearches } = useTripType();
@@ -25,6 +26,22 @@ const OnewayFlightBooking = () => {
   const [openSort, setOpenSort] = useState(false);
   const [isLoading, seIsloading] = useState(false);
   const { setIsSidebarOpen } = useContext(SidebarContext);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+
+    checkScreen();
+    setMounted(true);
+
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const flightResults = [
     {
@@ -595,11 +612,24 @@ const OnewayFlightBooking = () => {
         ))}
 
         {/* Fare Comparison Modal */}
-        <FareComparisonModal
-          isOpen={fareModalOpen !== null}
-          onClose={() => setFareModalOpen(null)}
-          flightData={flightResults.find((f) => f.id === fareModalOpen)}
-        />
+        {/* Fare Comparison Modal */}
+        {mounted && fareModalOpen !== null && (
+          <>
+            {isMobile ? (
+              <MobileFareComparisonModal
+                isOpen
+                onClose={() => setFareModalOpen(null)}
+                flightData={flightResults.find((f) => f.id === fareModalOpen)}
+              />
+            ) : (
+              <FareComparisonModal
+                isOpen
+                onClose={() => setFareModalOpen(null)}
+                flightData={flightResults.find((f) => f.id === fareModalOpen)}
+              />
+            )}
+          </>
+        )}
       </section>
       <section className={styles.isMobileView}>
         <div className={styles.mobileFlightContainer}>
