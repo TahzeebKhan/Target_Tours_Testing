@@ -10,12 +10,15 @@ import { TripTypeProvider } from "@/app/flights/TripTypeContext";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import DateField from "../dateField/DateField";
+import { useSearchParams } from "next/navigation";
 
 const TourHeroSection = () => {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
+  const searchParams = useSearchParams();
+  const [from, setFrom] = useState(searchParams.get("from") || "");
+  const [to, setTo] = useState(searchParams.get("to") || "");
+  const [departureDate, setDepartureDate] = useState(searchParams.get("date") || "");
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
+
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -296,9 +299,8 @@ const TourHeroSection = () => {
                 </span>
 
                 <ChevronDown
-                  className={`${styles.guestChevron} ${
-                    travellerOpend ? styles.openChevron : styles.closeChevron
-                  }`}
+                  className={`${styles.guestChevron} ${travellerOpend ? styles.openChevron : styles.closeChevron
+                    }`}
                   size={16}
                   color="#FFFFFF"
                 />
@@ -337,84 +339,75 @@ const TourHeroSection = () => {
       <div className={styles.tabContainer}>
         <button
           type="button"
-          className={`${styles.tab} ${
-            activeTab === "destination" ? styles.tabActive : ""
-          }`}
+          className={`${styles.tab} ${activeTab === "destination" ? styles.tabActive : ""
+            }`}
           onClick={() =>
             setActiveTab(activeTab === "destination" ? "" : "destination")
           }
         >
           Destinations
           <img
-            className={`${styles.downArrow} ${
-              activeTab === "destination"
+            className={`${styles.downArrow} ${activeTab === "destination"
                 ? styles.downArrow
                 : styles.reversedDownArrow
-            }`}
+              }`}
             src="/icons/DownArrows.svg"
             alt=""
           />
         </button>
         <div
-          className={`${styles.filterWrapper} ${
-            activeTab === "destination" ? styles.openFilter : styles.closeFilter
-          }`}
+          className={`${styles.filterWrapper} ${activeTab === "destination" ? styles.openFilter : styles.closeFilter
+            }`}
         >
           {activeTab === "destination" && <DestinationFilter />}
         </div>
 
         <button
           type="button"
-          className={`${styles.tab} ${
-            activeTab === "traveler" ? styles.tabActive : ""
-          }`}
+          className={`${styles.tab} ${activeTab === "traveler" ? styles.tabActive : ""
+            }`}
           onClick={() =>
             setActiveTab(activeTab === "traveler" ? "" : "traveler")
           }
         >
           Traveler profiles
           <img
-            className={`${styles.downArrow} ${
-              activeTab === "traveler"
+            className={`${styles.downArrow} ${activeTab === "traveler"
                 ? styles.downArrow
                 : styles.reversedDownArrow
-            }`}
+              }`}
             src="/icons/DownArrows.svg"
             alt=""
           />
         </button>
         <div
-          className={`${styles.filterWrapper} ${
-            activeTab === "traveler" ? styles.openFilter : styles.closeFilter
-          }`}
+          className={`${styles.filterWrapper} ${activeTab === "traveler" ? styles.openFilter : styles.closeFilter
+            }`}
         >
           {activeTab === "traveler" && <TravellerFilter />}
         </div>
 
         <button
           type="button"
-          className={`${styles.tab} ${
-            activeTab === "preferences" ? styles.tabActive : ""
-          }`}
+          className={`${styles.tab} ${activeTab === "preferences" ? styles.tabActive : ""
+            }`}
           onClick={() =>
             setActiveTab(activeTab === "preferences" ? "" : "preferences")
           }
         >
           Your preferences
           <img
-            className={`${styles.downArrow} ${
-              activeTab === "preferences"
+            className={`${styles.downArrow} ${activeTab === "preferences"
                 ? styles.downArrow
                 : styles.reversedDownArrow
-            }`}
+              }`}
             src="/icons/DownArrows.svg"
             alt=""
           />
         </button>
         <div
-          className={`${styles.filterWrapper} ${
-            activeTab === "preferences" ? styles.openFilter : styles.closeFilter
-          }`}
+          className={`${styles.filterWrapper} ${activeTab === "preferences" ? styles.openFilter : styles.closeFilter
+            }`}
         >
           {activeTab === "preferences" && <PreferencesFilter />}
         </div>

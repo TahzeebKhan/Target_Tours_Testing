@@ -88,7 +88,7 @@ const baseCarouselData = [
   },
   {
     id: 9,
-    image: "/images/img3.jpg",
+    image: "/images/img4.jpg",
     title: "NEW ZEALAND",
     description: "Adventure awaits in Middle Earth",
     price: "₹35,000",

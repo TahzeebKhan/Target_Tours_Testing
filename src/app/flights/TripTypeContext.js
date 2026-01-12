@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const TripTypeContext = createContext(null);
 
@@ -8,11 +9,16 @@ const TripTypeContext = createContext(null);
  * Provider
  */
 export function TripTypeProvider({ children }) {
-  const [tripType, setTripType] = useState("oneway");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const searchParams = useSearchParams();
+
+  // Helper to safely get params
+  const getParam = (key) => searchParams?.get(key) || "";
+
+  const [tripType, setTripType] = useState(getParam("tripType") || "oneway");
+  const [from, setFrom] = useState(getParam("from") || "");
+  const [to, setTo] = useState(getParam("to") || "");
+  const [startDate, setStartDate] = useState(getParam("start") || null);
+  const [endDate, setEndDate] = useState(getParam("end") || null);
   const [passengers, setPassengers] = useState({
     adult: 1,
     child: 0,
@@ -20,10 +26,34 @@ export function TripTypeProvider({ children }) {
   });
   const [travelClass, setTravelClass] = useState("ECONOMY");
   const [committedSearches, setCommittedSearches] = useState({
-    oneway: { from: "Jakarta", to: "Singapore" },
-    round: { from: "Jakarta", to: "Singapore" },
-    multi: { from: "Jakarta", to: "Singapore" },
+    oneway: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
+    round: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
+    multi: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
   });
+
+  // Effect to update state when URL params change (e.g. on navigation)
+  useEffect(() => {
+    const pTripType = getParam("tripType");
+    const pFrom = getParam("from");
+    const pTo = getParam("to");
+    const pStart = getParam("start");
+    const pEnd = getParam("end");
+
+    if (pTripType) setTripType(pTripType);
+    if (pFrom) setFrom(pFrom);
+    if (pTo) setTo(pTo);
+    if (pStart) setStartDate(pStart);
+    if (pEnd) setEndDate(pEnd);
+
+    if (pFrom || pTo) {
+      setCommittedSearches(prev => ({
+        ...prev,
+        [pTripType || "oneway"]: { from: pFrom || prev[pTripType || "oneway"].from, to: pTo || prev[pTripType || "oneway"].to }
+      }));
+    }
+
+  }, [searchParams]);
+
 
   const handleSearch = () => {
     setCommittedSearches((prev) => ({
