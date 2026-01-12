@@ -123,6 +123,6 @@
 
 @media (max-width: 630px) {
   .navContainer {
-    display: none;
+    /* display: none; */
   }
 }

@@ -1,30 +1,90 @@
-import React from "react";
+// "use client"
+// import React, { useState } from "react";
 
+// import styles from "./layout.module.css";
+// import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
+// import FlightFilters from "./components/flightFilter/FlightsFilters";
+// import TourListing from "./components/tourListing/TourListing";
 
+// const ToursPage = () => {
+//   return (
+//     <>
+//       {/* HERO SECTION (Image + Search) */}
+//       <TourHeroSection />
+
+//       {/* MAIN CONTENT */}
+//       <section className={styles.tourContent}>
+//         <div className={styles.tourLayout}>
+//           {/* LEFT: FILTERS */}
+//           <aside className={styles.tourFilters}>
+//             <FlightFilters/>
+//           </aside>
+
+//           {/* RIGHT: RESULTS GRID */}
+//           <div className={styles.tourResults}>
+//             <TourListing/>
+//           </div>
+//         </div>
+//       </section>
+//     </>
+//   );
+// };
+
+// export default ToursPage;
+
+"use client";
+import React, { useState } from "react";
 import styles from "./layout.module.css";
 import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
 import FlightFilters from "./components/flightFilter/FlightsFilters";
 import TourListing from "./components/tourListing/TourListing";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { SidebarContext } from "./SidebarContext";
 
 const ToursPage = () => {
+  const isTablet = useMediaQuery("(max-width: 1156px)");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <>
-      {/* HERO SECTION (Image + Search) */}
+      {/* HERO SECTION */}
       <TourHeroSection />
 
       {/* MAIN CONTENT */}
       <section className={styles.tourContent}>
-        <div className={styles.tourLayout}>
-          {/* LEFT: FILTERS */}
-          <aside className={styles.tourFilters}>
-            <FlightFilters/>
-          </aside>
+        <SidebarContext.Provider
+          value={{ isSidebarOpen, setIsSidebarOpen, isTablet }}
+        >
+          <div className={styles.tourLayout}>
+            {/* TOGGLE BUTTON (Tablet & below) */}
 
-          {/* RIGHT: RESULTS GRID */}
-          <div className={styles.tourResults}>
-            <TourListing/>
+
+
+            {/* OVERLAY */}
+            {isTablet && isSidebarOpen && (
+              <div
+                className={styles.sidebarOverlay}
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
+
+            {/* FILTERS */}
+            <aside
+              className={`${styles.tourFilters} ${isSidebarOpen
+                ? styles.sidebarOpen
+                : styles.sidebarCollapsed
+                }`}
+            >
+              <FlightFilters />
+            </aside>
+
+            {/* RESULTS */}
+            <div className={styles.tourResults}>
+              <TourListing />
+            </div>
+
           </div>
-        </div>
+        </SidebarContext.Provider>
       </section>
     </>
   );

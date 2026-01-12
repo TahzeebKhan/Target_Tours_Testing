@@ -8,7 +8,7 @@ const Navbar = ({scrollProgress={scrollProgress}}) => {
         // transform: `translateY(${-72 * scrollProgress}px)`,
         // opacity: 1 - scrollProgress,
       }}
-       className={`${styles.navContainer} top-0 z-100`}>
+       className={`${styles.navContainer} top-0 z-1`}>
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >

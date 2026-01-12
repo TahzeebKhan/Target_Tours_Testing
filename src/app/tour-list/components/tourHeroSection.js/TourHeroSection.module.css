@@ -7,6 +7,7 @@
   background-repeat: no-repeat;
   padding-top: 73px;
   position: relative;
+  margin: 0 auto;
 }
 
 .overlay {
@@ -69,20 +70,20 @@
 /* ===== Fields ===== */
 
 .fromBtn {
-    height: 58px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    /* min-width: 193px; */
-    width: 100%;
-    padding: 8px 8px 8px 12px;
-    border: 0.5px solid #e6e8ec;
-    background-color: rgba(0, 0, 0, 0.35);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    flex: 1;
-    cursor: pointer;
-    position: relative;
-    overflow: visible;
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  /* min-width: 193px; */
+  width: 100%;
+  padding: 8px 8px 8px 12px;
+  border: 0.5px solid #e6e8ec;
+  background-color: rgba(0, 0, 0, 0.35);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
 }
 
 /* positions */
@@ -101,8 +102,8 @@
 }
 
 .pos4 {
-    order: 4;
-    z-index: 10;
+  order: 4;
+  z-index: 10;
 }
 
 .pos5 {
@@ -176,21 +177,21 @@
 }
 
 .dateInputWrapper {
-    display: flex;
-    justify-content: space-between;
-    height: 21px;
-    position: relative;
-    z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  height: 21px;
+  position: relative;
+  z-index: 999;
 }
 
 .dateInputWrapper>.contant {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .dateInputWrapper>img {
-    position: relative;
-    z-index: 31;
+  position: relative;
+  z-index: 31;
 }
 
 .dateInputWrapper input[type="date"] {
@@ -272,13 +273,16 @@
   margin: 0 auto;
   position: relative;
 }
+
 .filterWrapper {
+  width: 100%;
   position: absolute;
   top: 64px;
   left: 0;
-  box-shadow: 0px 4px 9.3px 0px #0000001a;
-  border: 1px solid #e4e6e8;
+  /* box-shadow: 0px 4px 9.3px 0px #0000001a;
+  border: 1px solid #e4e6e8; */
 }
+
 .tab {
   width: 100%;
   padding: 24px 50px;
@@ -297,58 +301,62 @@
   letter-spacing: 0%;
   text-transform: uppercase;
 }
-.tabContainer > .tab:nth-child(2) {
+
+.tabContainer>.tab:nth-child(2) {
   border-right: 1px solid #e0e0e0;
   border-left: 1px solid #e0e0e0;
 }
+
 .tab img {
   width: 14px;
   height: 14px;
 }
+
 .tabActive {
   background-color: #ffffff;
 }
-.tabContainer > .tabActive:nth-child(2) {
+
+.tabContainer>.tabActive:nth-child(2) {
   border: none;
 }
 
 /* ===== TravellerSelector Dropdown Menu ===== */
 
 .selectMenu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: 0;
-    z-index: 1000;
-    background: #fff;
-    border: 1px solid #e4e6e8;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    border-radius: 6px;
-    overflow: hidden;
-    max-height: 220px;
-    overflow-y: auto;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #e4e6e8;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .selectItem {
-    padding: 10px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    white-space: nowrap;
-    background-color: #000033;
-    color: #ffffff;
+  padding: 10px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  background-color: #000033;
+  color: #ffffff;
 }
 
 .selectItem:hover,
 .selectItem:focus {
-    background: #f5f7f8;
-    color: #000066;
-    outline: none;
+  background: #f5f7f8;
+  color: #000066;
+  outline: none;
 }
 
 .downArrowTravel {
-    filter: invert(0);
-    transition: filter 0.2s ease;
-    width: 12px;
+  filter: invert(0);
+  transition: filter 0.2s ease;
+  width: 12px;
 }
 
 .guestSummary {
@@ -373,19 +381,58 @@
   transition: transform 0.3s ease;
 }
 
-@media (max-width: 900px){
-  .para{
+@media (max-width: 1200px) {
+  .tabContainer {
+    padding: 0 20px;
+  }
+
+  .filterWrapper {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 991px) {
+  .tab {
+    padding-left: 30px;
+    padding-right: 30px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .para {
     font-size: 32px;
     text-align: center;
   }
-  .heading{
+
+  .heading {
     font-size: 64px;
     text-align: center;
   }
 }
 
-@media (max-width: 900px){
-  .lable{
+@media (max-width: 900px) {
+  .lable {
     font-size: 9px;
+  }
+}
+
+@media (max-width: 768px) {
+  .serarchingCont {
+    display: none;
+  }
+
+  .container {
+    margin-top: 60px;
+  }
+
+  .searchResultsContainer {
+    flex-direction: column;
+    align-items: end;
+    gap: 20px;
+  }
+
+  .tabContainer {
+    display: none;
   }
 }
