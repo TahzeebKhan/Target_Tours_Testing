@@ -4,53 +4,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./plane.module.css";
 
-const Plane = () => {
+const Plane = ({
+  callFromDesktop,
+  rowData,
+  selectedSeats,
+  setSelectedSeats,
+  toggleSeat,
+}) => {
   // Mapping of seats to colors/states based on the provided image
-  const rowData = [
-    { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
-    { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
-    { id: 3, seats: ["blue", "blue", "blue", "blue", "taken", "blue"] },
-    { id: 4, seats: ["blue", "taken", "taken", "blue", "taken", "blue"] },
-    {
-      id: 5,
-      seats: ["purple", "purple", "purple", "purple", "purple", "purple"],
-    },
-    { id: 6, seats: ["purple", "xl", "xl", "xl", "xl", "purple"] },
-    {
-      id: 7,
-      seats: ["purple", "taken", "taken", "purple", "purple", "purple"],
-    },
-    { id: 8, seats: ["red", "taken", "taken", "red", "red", "red"] },
-    { id: "exit1", type: "exit" },
-    { id: 9, seats: ["red", "red", "red", "red", "red", "red"] },
-    { id: 10, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
-    {
-      id: 11,
-      seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
-    },
-    {
-      id: 12,
-      seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
-    },
-    { id: 13, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
-    { id: 14, seats: ["red", "red", "red", "red", "red", "red"] },
-    { id: "exit2", type: "exit" },
-    { id: 15, seats: ["red", "red", "red", "red", "red", "red"] },
-    { id: 16, seats: ["xl", "xl", "xl", "xl", "xl", "xl"] },
-    { id: 17, seats: ["black", "black", "xl", "xl", "black", "black"] },
-  ];
-
-  const [selectedSeats, setSelectedSeats] = useState(["3-A", "3-B"]);
-
-  const toggleSeat = (rowId, colLabel, type) => {
-    if (type === "taken") return;
-    const seatId = `${rowId}-${colLabel}`;
-    setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
-        : [...prev, seatId]
-    );
-  };
 
   const renderSeat = (type, rowId, index, side) => {
     const labels = side === "left" ? ["A", "B", "C"] : ["D", "E", "F"];
@@ -61,7 +22,7 @@ const Plane = () => {
     return (
       <div
         key={seatId}
-        className={`${styles.seat} ${styles[type]} ${
+        className={`${styles.seat} ${styles[type]} ${styles.seatDesktop}  ${
           isActive ? styles.active : ""
         }`}
         onClick={() => toggleSeat(rowId, label, type)}
@@ -98,14 +59,26 @@ const Plane = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.planeBody}>
-        <div className={styles.nose}>
+    <div
+      className={`${styles.container} ${
+        callFromDesktop ? styles.desktopContainer : ""
+      }`}
+    >
+      <div
+        className={`${styles.planeBody} ${
+          callFromDesktop ? styles.planeBodyDesktop : ""
+        }`}
+      >
+        <div
+          className={`${styles.nose} ${
+            callFromDesktop ? styles.noseDesktop : ""
+          }`}
+        >
           <Image
             src="/images/nose.svg"
             alt="Plane nose"
-            width={335}
-            height={148}
+            width={callFromDesktop ? 343 : 335}
+            height={callFromDesktop ? 152 : 148}
             priority
           />
         </div>
@@ -113,20 +86,56 @@ const Plane = () => {
         {/* Labels Header */}
         <div className={styles.row}>
           <div className={styles.seatGroup}>
-            <span className={styles.label}>A</span>
-            <span className={styles.label}>B</span>
-            <span className={styles.label}>C</span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              A
+            </span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              B
+            </span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              C
+            </span>
           </div>
           <div className={styles.rowNumberColumn}></div>
           <div className={styles.seatGroup}>
-            <span className={styles.label}>D</span>
-            <span className={styles.label}>E</span>
-            <span className={styles.label}>F</span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              D
+            </span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              E
+            </span>
+            <span
+              className={`${styles.label} ${
+                callFromDesktop ? styles.labelDesktop : ""
+              }`}
+            >
+              F
+            </span>
           </div>
         </div>
 
         {/* Rows */}
-        <div className={styles.seatingArea}>
+        <div className={`${styles.seatingArea} ${styles.seatingAreaDesktop}`}>
           {rowData.map((row) => {
             if (row.type === "exit") {
               return (

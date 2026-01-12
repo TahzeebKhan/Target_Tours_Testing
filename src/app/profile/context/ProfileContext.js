@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 const ProfileContext = createContext();
 
 export const ProfileProvider = ({ children }) => {
-    const [activeMenu, setActiveMenu] = useState("myReviews");
+    const [activeMenu, setActiveMenu] = useState("Personal Information");
 
     return (
         <ProfileContext.Provider value={{ activeMenu, setActiveMenu }}>

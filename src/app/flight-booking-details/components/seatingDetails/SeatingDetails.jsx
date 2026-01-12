@@ -1,15 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/plane";
 import BelowPlane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/below_plane";
 import Mobile_footer from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
+const rowData = [
+  { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
+  { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
+  { id: 3, seats: ["blue", "blue", "blue", "blue", "taken", "blue"] },
+  { id: 4, seats: ["blue", "taken", "taken", "blue", "taken", "blue"] },
+  {
+    id: 5,
+    seats: ["purple", "purple", "purple", "purple", "purple", "purple"],
+  },
+  { id: 6, seats: ["purple", "xl", "xl", "xl", "xl", "purple"] },
+  {
+    id: 7,
+    seats: ["purple", "taken", "taken", "purple", "purple", "purple"],
+  },
+  { id: 8, seats: ["red", "taken", "taken", "red", "red", "red"] },
+  { id: "exit1", type: "exit" },
+  { id: 9, seats: ["red", "red", "red", "red", "red", "red"] },
+  { id: 10, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
+  {
+    id: 11,
+    seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
+  },
+  {
+    id: 12,
+    seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
+  },
+  { id: 13, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
+  { id: 14, seats: ["red", "red", "red", "red", "red", "red"] },
+  { id: "exit2", type: "exit" },
+  { id: 15, seats: ["red", "red", "red", "red", "red", "red"] },
+  { id: 16, seats: ["xl", "xl", "xl", "xl", "xl", "xl"] },
+  { id: 17, seats: ["black", "black", "xl", "xl", "black", "black"] },
+];
 const SeatingDetails = () => {
-  const [openTab, setOpenTab] = React.useState("flight");
+  const [openTab, setOpenTab] = useState("");
+  const [selectedPassenger, setSelectedPassenger] = useState(1);
+  const [selectedSeats, setSelectedSeats] = useState(["3-A", "3-B"]);
   const toggleTab = (tab) => {
     if (openTab !== tab) setOpenTab(tab);
   };
   const { setCurrentStep, currentStep } = useFlightBooking();
+
+  const toggleSeat = (rowId, colLabel, type) => {
+    if (type === "taken") return;
+    const seatId = `${rowId}-${colLabel}`;
+    setSelectedSeats((prev) =>
+      prev.includes(seatId)
+        ? prev.filter((id) => id !== seatId)
+        : [...prev, seatId]
+    );
+  };
+
   return (
     <>
       <div className={styles.container}>
@@ -74,11 +120,25 @@ const SeatingDetails = () => {
             }`}
           >
             <div className={styles.expandableContent}>
-              <div className={styles.flightSeatingWrapper}></div>
+              <div className={styles.flightSeatingWrapper}>
+                <div className={styles.selectSeatsTitle}>
+                  Select Seat On Map
+                </div>
+                <Plane
+                  callFromDesktop={true}
+                  toggleSeat={toggleSeat}
+                  selectedSeats={selectedSeats}
+                  setSelectedSeats={setSelectedSeats}
+                  rowData={rowData}
+                />
+              </div>
               <div className={styles.flightSeatingRight}>
                 <div className={styles.flightSeatingSubRight}>
                   <div className={styles.flightSeatingRightHeader}>
-                    <img src="/images/airIndia.png" alt="" />
+                    <img
+                      src="/images/flightCompanyLogos/batikAirlines2.png"
+                      alt=""
+                    />
                     <div className={styles.flightSeatingRightHeaderInfo}>
                       <h3 className={styles.flightName}>
                         Batik Air Malaysia (OD 804)
@@ -87,34 +147,44 @@ const SeatingDetails = () => {
                     </div>
                   </div>
 
-                  <div className={styles.flightSeatingPriceWrapper}>
-                    {/* Rows */}
-                    <div className={styles.flightSeatingPriceContainer}>
-                      <div className={styles.row}>
-                        <div className={styles.left}>
-                          <span className={styles.name}>Adult 1</span>
-                          <span className={styles.seat}>3C</span>
-                        </div>
-                        <span className={styles.priceSeat}>₹ 1,000</span>
-                      </div>
-
-                      <div className={styles.row}>
-                        <div className={styles.left}>
-                          <span className={styles.name}>Adult 2</span>
-                          <span className={styles.seat}>3D</span>
-                        </div>
-                        <span className={styles.priceSeat}>₹ 2,000</span>
-                      </div>
+                  {/* Passenger Seat Selector */}
+                  <div className={styles.passengerSeatWrapper}>
+                    <div className={styles.passengerSeatTitle}>
+                      Select your seat
                     </div>
 
-                    {/* Divider */}
-                    {/* <div className={styles.divider} /> */}
+                    {[
+                      { id: 1, name: "Demian" },
+                      { id: 2, name: "Satria" },
+                    ].map((passenger, index) => {
+                      const seat = selectedSeats[index] || null;
 
-                    {/* Total */}
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalText}>Total</span>
-                      <span className={styles.totalPrice}>₹ 3000</span>
-                    </div>
+                      return (
+                        <div
+                          onClick={() => setSelectedPassenger(passenger.id)}
+                          key={passenger.id}
+                          className={`${styles.passengerSeatCard} ${
+                            selectedPassenger === passenger.id
+                              ? styles.passengerSeatCardActive
+                              : ""
+                          }`}
+                        >
+                          <div className={styles.passengerSeatIcon}>
+                            <img src="/icons/User_copy.svg" alt="passenger" />
+                          </div>
+
+                          <div className={styles.passengerSeatInfo}>
+                            <p className={styles.passengerSeatHeading}>
+                              Seat Passenger {passenger.id}
+                            </p>
+                            <p className={styles.passengerSeatSub}>
+                              {passenger.name} •{" "}
+                              {seat ? `Seat ${seat}` : "No seat selected"}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className={styles.legend}>
@@ -169,7 +239,12 @@ const SeatingDetails = () => {
             <span>23:10 - 10:40</span>
           </div>
         </div>
-        <Plane />
+        <Plane
+          toggleSeat={toggleSeat}
+          selectedSeats={selectedSeats}
+          setSelectedSeats={setSelectedSeats}
+          rowData={rowData}
+        />
         <BelowPlane />
         <Mobile_footer
           setCurrentStep={setCurrentStep}

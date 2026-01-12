@@ -208,10 +208,31 @@
 }
 
 .flightSeatingWrapper {
+  border: 1px solid #e4e6e8;
+  max-height: 620px;
+  overflow-y: auto;
+  background: #f2f3f7;
+  padding: 19px 22px;
   max-width: 566px;
   width: 100%;
+  display: flex;
+  padding-bottom: 0;
+  flex-direction: column;
+  align-items: center;
 }
-
+.selectSeatsTitle {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  color: black;
+  font-size: 13px;
+  text-align: left;
+  align-self: flex-start;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
 .flightSeatingRight {
   height: 620px;
   max-width: 262px;
@@ -414,9 +435,18 @@
   border: 1px solid #9aa1b2;
   border-radius: 4px;
   display: flex;
+
   align-items: center;
   justify-content: center;
+  padding: 3px 3.5px;
   font-weight: 600;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 16px;
+  letter-spacing: 0px;
 }
 
 /* Text */
@@ -462,6 +492,78 @@
   text-transform: capitalize;
   color: #ffffff;
 }
+/* Passenger seat block */
+.passengerSeatWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.passengerSeatTitle {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  color: #1a2029;
+}
+
+/* Card */
+.passengerSeatCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.passengerSeatCard:hover {
+  background: #f8fafc;
+}
+
+/* Active */
+.passengerSeatCardActive {
+  border: 1px solid #000033;
+}
+
+/* Icon */
+.passengerSeatIcon {
+  width: 40px;
+  height: 40px;
+  border: 0.83px solid #dbe2eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passengerSeatIcon img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Text */
+.passengerSeatInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passengerSeatHeading {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a2029;
+}
+
+.passengerSeatSub {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 400;
+  color: #5b6574;
+}
+
 @media (max-width: 640px) {
   .mobileView {
     display: block;
@@ -486,7 +588,7 @@
     text-transform: uppercase;
     color: #070773;
   }
-  
+
   .dateTime {
     padding: 2.5px 0px;
     display: flex;
