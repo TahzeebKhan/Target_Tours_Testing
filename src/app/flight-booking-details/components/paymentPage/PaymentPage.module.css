@@ -256,6 +256,7 @@
 .footerContainer {
   display: flex;
   gap: 20px;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -316,12 +317,16 @@
   background-color: #ffffff;
   cursor: pointer;
 }
-
+.backArrow{
+  cursor: pointer;
+}
 @media (max-width: 640px) {
   .mobileView {
     display: block;
   }
   .tripDetailsContainer {
+    position: sticky;
+    top: 0;
     display: block;
   }
   .passengerDetailsHeader {

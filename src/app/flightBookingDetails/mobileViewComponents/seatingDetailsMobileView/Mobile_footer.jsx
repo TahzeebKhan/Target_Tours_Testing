@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./Mobile_footer.module.css";
+import { useFlightBooking } from "@/app/travel-insurance-booking/FlightBookingContext";
 
-export default function Mobile_footer() {
+export default function Mobile_footer({ setCurrentStep, currentStep }) {
   const [isActive, setIsActive] = useState(false);
 
   const toggleActive = () => {
-    setIsActive(prev => !prev);
+    setIsActive((prev) => !prev);
   };
 
   return (
@@ -20,22 +21,16 @@ export default function Mobile_footer() {
         <footer className={styles.footer}>
           <div className={styles.footerInfo}>
             <div className={styles.footerLabelGroup}>
-              <span className={styles.footerTotalLabel}>
-                Total Amount
-              </span>
+              <span className={styles.footerTotalLabel}>Total Amount</span>
 
-              <Image
-                src="/icons/info-circle.svg"
-                alt="Info"
-                width={16}
-                height={16}
-              />
+              <span className={styles.infoIcon}>!</span>
             </div>
 
             <div className={styles.footerPrice}>₹ 66,945</div>
           </div>
 
           <button
+            onClick={() => setCurrentStep(currentStep + 1)}
             className={styles.continueButton}
             type="button"
           >

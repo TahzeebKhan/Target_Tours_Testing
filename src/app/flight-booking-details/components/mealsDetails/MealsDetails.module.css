@@ -192,10 +192,10 @@
   padding: 16px;
   background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
   padding-top: 76px;
-  padding-bottom: 100px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-bottom: 143px;
 }
 
 .baggageMobileCard {
@@ -260,7 +260,7 @@
 }
 
 .footer {
-    padding: 24px 16px;
+    padding: 24px 16px 55px;
     background: #000033;
     box-shadow: 0px -6px 10.2px 0px #0000001A;
     position: fixed;
@@ -271,6 +271,7 @@
 
 .footerContainer {
     display: flex;
+    align-items: center;
     justify-content: space-between;
 }
 

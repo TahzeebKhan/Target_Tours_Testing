@@ -53,6 +53,13 @@
 }
 
 /* ACTIVE / SELECTED */
+/* ACTIVE / SELECTED */
+.card.active {
+  border-color: #000033;
+  background-color: #f5f7ff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 51, 0.2);
+}
+
 
 @media (max-width: 640px) {
   .wrapper {

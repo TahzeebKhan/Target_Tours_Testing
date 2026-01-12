@@ -9,11 +9,11 @@ import CancellationPenalty from "../../components/passengerDetails/fareDetailsEx
 import { useFlightBooking } from "../../FlightBookingContext";
 import FareDetailsPop from "../components/fareDetailsPop/FareDetailsPop";
 import BaggageRules from "../components/baggageRules/BaggageRules";
+import { useRouter } from "next/navigation";
 const PassengerDetailsMobile = () => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
-
-
+  const router = useRouter();
   const { setCurrentStep } = useFlightBooking();
   useEffect(() => {
     const handleScroll = () => {
@@ -94,13 +94,24 @@ const PassengerDetailsMobile = () => {
     <div className={styles.container}>
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
-          <img src="/icons/leftArrowTrip.svg" alt="" />
+          <img
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              if (!router) return;
+              else {
+                router.push("/flights");
+              }
+            }}
+            src="/icons/leftArrowTrip.svg"
+            alt=""
+          />
           <p className={styles.tripDetails}>Trip Details</p>
         </div>
       </div>
       <div
-        className={`${styles.tripDetailsContainer} ${showStickyHeader ? styles.stickyVisible : styles.stickyHidden
-          }`}
+        className={`${styles.tripDetailsContainer} ${
+          showStickyHeader ? styles.stickyVisible : styles.stickyHidden
+        }`}
       >
         <div className={styles.tripDetailsHeader}>
           <img src="/icons/leftArrowTrip.svg" alt="" />

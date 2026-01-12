@@ -1,7 +1,7 @@
-import Plane from "./plane";
-import Mobile_footer from "./Mobile_footer";
+import Plane from "../flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/plane";
+import Mobile_footer from "../flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
 import PriceSummary from "./PriceSummary";
-import BelowPlane from "./below_plane";
+import BelowPlane from "../flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/below_plane";
 
 export default function ProfilePage() {
 
@@ -9,13 +9,12 @@ export default function ProfilePage() {
     <main>
 
       <PriceSummary />
-      <Mobile_footer />
+      {/* <Mobile_footer /> */}
 
 
       
-      <Plane />
       <BelowPlane />
-      <Mobile_footer />
+      {/* <Mobile_footer /> */}
 
 
     </main>
