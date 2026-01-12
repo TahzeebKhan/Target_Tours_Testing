@@ -5,7 +5,7 @@ import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "@/app/flights/components/SVGFile";
 
-export default function FlightFilters( {onClose}) {
+export default function FlightFilters( {onClose, onReset}) {
   const DEFAULT_NIGHTS = [1, 10];
   const DEFAULT_PRICE = [11307, 57295];
 
@@ -78,6 +78,7 @@ export default function FlightFilters( {onClose}) {
       aircraft: {},
       airlines: {},
     });
+    onReset?.(); // 🔥 notify parent if needed
   };
   const toggleMapCheckbox = (group, key) => {
     setFilters((prev) => ({

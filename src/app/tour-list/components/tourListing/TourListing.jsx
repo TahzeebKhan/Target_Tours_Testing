@@ -6,10 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Pencil, SlidersHorizontal } from "lucide-react";
 import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
+import SortBySheet from "../sortBySheet/SortBySheet";
+import PreferencesSection from "../preferencesSection/PreferencesSection";
 
 const TourListing = () => {
 
   const [openFilter, setOpenFilter] = useState(false);
+  const [openSortByFilter, setOpenSortByFilter] = useState(false);
+  const [openPreferencesFilter, setOpenPreferencesFilter] = useState(false);
 
   const [showStickyHeader, setShowStickyHeader] = useState(false);
 
@@ -424,9 +428,15 @@ const TourListing = () => {
 
         <div className={styles.tourListMobileWrapper}>
           <div className={styles.filterContainer}>
-            <button className={styles.filterCard}>
+            <button className={styles.filterCard} onClick={() => setOpenSortByFilter(true)}>
               Sort by
             </button>
+            {openSortByFilter && (
+              <SortBySheet
+                open={openSortByFilter}
+                setOpen={setOpenSortByFilter}
+              />
+            )}
             <button className={styles.filterCard} onClick={() => setOpenFilter(true)}>
               FILTERS
               <img src="/icons/filterIcon.svg" alt="" />
@@ -437,11 +447,19 @@ const TourListing = () => {
                 setOpen={setOpenFilter}
               />
             )}
-            <button className={styles.filterCard}>
+            <button className={styles.filterCard} onClick={() => setOpenPreferencesFilter(true)}>
 
               PREFERENCES
             </button>
+            {openPreferencesFilter && (
+              <PreferencesSection
+                onClose={() => setOpenPreferencesFilter(false)}
+                open={openPreferencesFilter}
+                setOpen={setOpenPreferencesFilter}
+              />
+            )}
           </div>
+
           <div
             className={`${styles.ListViewWrapper} ${styles.ListViewWrapperMobile}`}
 
