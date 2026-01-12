@@ -4,7 +4,7 @@ import styles from "./PayWithOptions.module.css";
 
 const paymentMethods = [
   {
-    id: "card",
+    id: "credit",
     label: "CREDIT OR DEBIT CARD",
     icon: "/images/card.png",
   },
@@ -20,9 +20,7 @@ const paymentMethods = [
   },
 ];
 
-const PayWithOptions = () => {
-  const [selected, setSelected] = useState("card");
-
+const PayWithOptions = ({ setPaymentMethod, selected }) => {
   return (
     <div className={styles.wrapper}>
       {paymentMethods.map((method) => (
@@ -31,12 +29,14 @@ const PayWithOptions = () => {
           className={`${styles.card} ${
             selected === method.id ? styles.active : ""
           }`}
+          onClick={() => setPaymentMethod(method.id)}
         >
           <input
             type="radio"
             name="payment"
             checked={selected === method.id}
-            onChange={() => setSelected(method.id)}
+            readOnly
+            
           />
 
           <img src={method.icon} alt={method.id} />

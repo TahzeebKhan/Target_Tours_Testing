@@ -34,13 +34,13 @@
 
 .sidebarSticky {
   position: sticky;
+  max-height: 594px;
   top: 202px; /* navbar (96px) + stepper (~90px) */
   align-self: flex-start;
 }
 .mobileView {
   display: none;
 }
-
 
 @media (max-width: 1280px) {
   .mainContent {

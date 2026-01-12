@@ -10,7 +10,7 @@ import PayWithOptions from "./components/PayWithOptions";
 const PaymentPage = () => {
   const { setCurrentStep } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
-
+  const [paymentMethod, setPaymentMethod] = useState("credit");
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
@@ -19,7 +19,12 @@ const PaymentPage = () => {
     <>
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
-          <img src="/icons/leftArrowTrip.svg" alt="" />
+          <img
+            onClick={() => setCurrentStep(5)}
+            className={styles.backArrow}
+            src="/icons/leftArrowTrip.svg"
+            alt=""
+          />
           <p className={styles.tripDetails}>Review and Payment</p>
         </div>
       </div>
@@ -183,17 +188,22 @@ const PaymentPage = () => {
 
         <div className={`${styles.flightExpandableContainer} `}>
           <div
-            className={`${`${styles.flightExpandableCard}`} ${styles.payWithContainer}`}
+            className={`${`${styles.flightExpandableCard}`} ${
+              styles.payWithContainer
+            }`}
           >
             <h3 className={styles.flightExpandableHeader}>Pay with</h3>
           </div>
-          <PayWithOptions />
+          <PayWithOptions
+            selected={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
+          />
         </div>
 
         {/* <div
           onClick={() => setCurrentStep(3)}
           className={styles.continueButtonContainer}
-        >
+        >a
           <button className={styles.continueButton}>CONTINUE</button>
         </div> */}
       </div>
@@ -210,11 +220,7 @@ const PaymentPage = () => {
             </div>
 
             {/* RIGHT */}
-            <button
-              className={styles.continueBtn}
-            >
-              CONTINUE PAYMENT
-            </button>
+            <button className={styles.continueBtn}>CONTINUE PAYMENT</button>
           </div>
         </div>
       </div>

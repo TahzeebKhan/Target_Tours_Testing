@@ -144,6 +144,7 @@
   font-style: Light;
   font-size: 12px;
   line-height: 16px;
+  white-space: nowrap;
   letter-spacing: 0px;
   text-align: center;
   text-transform: uppercase;
@@ -163,4 +164,7 @@
   strokewidth: 2.5;
   strokelinecap: round;
   strokelinejoin: round;
+}
+.lastStepItem {
+  margin-right: 26px;
 }

@@ -302,8 +302,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-bottom: 100px;
   padding-top: 76px;
+
+  padding-bottom: 143px;
 }
 
 .mobileFlightDestinationName {
@@ -350,7 +351,7 @@
 }
 
 .footer {
-    padding: 24px 16px;
+    padding: 24px 16px 55px;
     background: #000033;
     box-shadow: 0px -6px 10.2px 0px #0000001A;
     position: fixed;
@@ -361,6 +362,7 @@
 
 .footerContainer {
     display: flex;
+    align-items: center;
     justify-content: space-between;
 }
 

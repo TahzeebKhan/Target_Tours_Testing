@@ -7,12 +7,12 @@ import { useFlightBooking } from "../FlightBookingContext";
 import { useSearchParams } from "next/navigation";
 
 const steps = [
-    { id: 1, label: "Search" },
-    { id: 2, label: "Passenger Details" },
-    { id: 3, label: "Baggage" },
-    { id: 4, label: "Meal" },
-    { id: 5, label: "Seating" },
-    { id: 6, label: "Overview & Payment" }, 
+  { id: 1, label: "Search" },
+  { id: 2, label: "Passenger Details" },
+  { id: 3, label: "Baggage" },
+  { id: 4, label: "Meal" },
+  { id: 5, label: "Seating" },
+  { id: 6, label: "Overview & Payment" },
 ];
 
 export default function BookingStepper() {
@@ -21,43 +21,47 @@ export default function BookingStepper() {
   // If currentStep is 3, line goes from 1 to 3.
   const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
 
-    return (
-        <div className={styles.stepperWrapper}>
-            <div className={styles.stepperContainer}>
-                {/* Steps */}
-                {steps.map((step, index) => {
-                    const isActive = step.id === currentStep;
-                    const isCompleted = step.id < currentStep;
+  return (
+    <div className={styles.stepperWrapper}>
+      <div className={styles.stepperContainer}>
+        {/* Steps */}
+        {steps.map((step, index) => {
+          const isActive = step.id === currentStep;
+          const isCompleted = step.id < currentStep;
 
-                    return (
-                        <div
-                            key={step.id}
-                            className={`${styles.stepItem} ${isActive ? styles.stepActive : ""
-                                } ${isCompleted ? styles.stepCompleted : ""}`}
-                        >
-                            <div className={styles.circleWrapper}>
-                                <div
-                                    className={` ${isActive || isCompleted
-                                            ? styles.outerRingYellow
-                                            : styles.outerGrayRing
-                                        }`}
-                                ></div>
+          return (
+            <div
+              key={step.id}
+              className={`${styles.stepItem} ${
+                isActive ? styles.stepActive : ""
+              } ${isCompleted ? styles.stepCompleted : ""}
+                                ${step.id === 6 ? styles.lastStepItem : ""}
+                                `}
+            >
+              <div className={styles.circleWrapper}>
+                <div
+                  className={` ${
+                    isActive || isCompleted
+                      ? styles.outerRingYellow
+                      : styles.outerGrayRing
+                  }`}
+                ></div>
 
-                                <div className={styles.stepCircle}>
-                                    {isCompleted ? (
-                                        <span>
-                                            <Check size={16} color="white" />{" "}
-                                        </span>
-                                    ) : (
-                                        <span>{step.id}</span>
-                                    )}
-                                </div>
-                            </div>
-                            <span className={styles.stepLabel}>{step.label}</span>
-                        </div>
-                    );
-                })}
+                <div className={styles.stepCircle}>
+                  {isCompleted ? (
+                    <span>
+                      <Check size={16} color="white" />{" "}
+                    </span>
+                  ) : (
+                    <span>{step.id}</span>
+                  )}
+                </div>
+              </div>
+              <span className={styles.stepLabel}>{step.label}</span>
             </div>
-        </div>
-    );
+          );
+        })}
+      </div>
+    </div>
+  );
 }
