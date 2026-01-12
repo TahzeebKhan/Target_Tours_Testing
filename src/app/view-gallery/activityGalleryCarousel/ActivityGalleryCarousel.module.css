@@ -12,9 +12,17 @@
     align-items: center;
     border: 1px solid #212121;
     cursor: pointer;
+    transition: all 0.45s ease;
 }
 .leftBtn img{
     transform: rotate(180deg);
+}
+
+.leftBtn:hover, .rightBtn:hover{
+    background: #000033;
+}
+.leftBtn:hover img, .rightBtn:hover img{
+    filter: invert(1);
 }
 
 .container{

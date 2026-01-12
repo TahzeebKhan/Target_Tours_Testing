@@ -1,5 +1,5 @@
 import React from 'react'
-import Navbar from '../flightBookingDetails/Navbar'
+import Navbar from '../flight-booking-details/Navbar'
 import styles from './HotelBooking.module.css'
 import BookingSummary from '../hotel-detail/Components/bookingSummary/BookingSummary'
 

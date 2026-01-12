@@ -5,9 +5,9 @@ import styles from "./ReviewPage.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import { useRouter } from "next/navigation";
 import DayByDayItinerary from "./components/dayByDayItinerary/DayByDayItinerary";
-import TravelInsuranceOption from "@/app/flightBookingDetails/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
-import TravelerDetails from "@/app/flightBookingDetails/components/passengerDetails/fareDetailsExpandable/component/travelerDetails/TravelerDetails";
-import CancellationPenalty from "@/app/flightBookingDetails/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
+import TravelInsuranceOption from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
+import TravelerDetails from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelerDetails/TravelerDetails";
+import CancellationPenalty from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 
 const ReviewPage = () => {
     // 👇 default open = flight
@@ -107,7 +107,7 @@ const ReviewPage = () => {
                 </div>
             </div>
 
-            
+
 
             <div className={`${styles.flightExpandableContainer} ${openTab === "travelerDetails" ? styles.flightActiveBorder : ""}`}>
                 <div

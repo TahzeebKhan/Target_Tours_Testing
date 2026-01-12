@@ -2,8 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./TourHeroSection.module.css";
 import Navbar from "@/app/flights/Navbar";
-import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
-import DateField from "@/app/home-page/components/homePage/DateField";
 import DestinationFilter from "../tabsFilters/DestinationFilter";
 import TravellerFilter from "../tabsFilters/TravellerFilter";
 import PreferencesFilter from "../tabsFilters/PreferencesFilter";
@@ -11,6 +9,7 @@ import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import { TripTypeProvider } from "@/app/flights/TripTypeContext";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
+import DateField from "../dateField/DateField";
 
 const TourHeroSection = () => {
   const [from, setFrom] = useState("");

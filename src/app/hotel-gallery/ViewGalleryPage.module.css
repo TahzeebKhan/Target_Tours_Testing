@@ -30,7 +30,14 @@
     align-items: center;
     border: 1px solid #212121;
     cursor: pointer;
+    transition: all 0.45s ease;
 }
 .navItem img{
     transform: rotate(180deg);
+}
+.navItem:hover{
+    background: #000033;
+}
+.navItem:hover img{
+    filter: invert(1);
 }

@@ -12,7 +12,7 @@ const TourListing = () => {
   const [expandedId, setExpandedId] = useState(null);
   const router = useRouter();
   const handleBookNow = () => {
-    router.push("/tour-booking"); // 👈 your page route
+    router.push("/hotel-detail"); // 👈 your page route
   };
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -215,7 +215,7 @@ const TourListing = () => {
                       </div>
                     </div>
 
-                    <button className={styles.bookNowBtn}>SEE AVAILABILITY</button>
+                    <button className={styles.bookNowBtn} onClick={handleBookNow}>SEE AVAILABILITY</button>
                   </div>
                 </div>
               </div>
@@ -352,7 +352,7 @@ const TourListing = () => {
                       </div>
                     </div>
 
-                    <button className={styles.bookNowBtn}>SEE AVAILABILITY</button>
+                    <button className={styles.bookNowBtn} onClick={handleBookNow}>SEE AVAILABILITY</button>
                   </div>
                 </div>
               </motion.div>

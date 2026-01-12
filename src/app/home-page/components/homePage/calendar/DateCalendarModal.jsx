@@ -21,8 +21,8 @@ export default function DateCalendarModal({
     : {};
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal} style={style}>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} style={style} >
         {/* Header */}
         <div className={styles.header}>
           <h3>SET THE DATE</h3>
@@ -30,7 +30,7 @@ export default function DateCalendarModal({
           {/* <button className={styles.close} onClick={onClose}>
             <X size={24} color="#1C1B1F" />
           </button> */}
-          <div className={styles.toggle}>
+          <div className={styles.toggle} onClick={(e) => e.stopPropagation()}>
             <button
               className={mode === "oneway" ? styles.active : ""}
             // onClick={() => onModeChange("oneway")}

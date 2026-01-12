@@ -1171,7 +1171,7 @@ const HomePage = () => {
                       <DateCalendarModal
                         mode="roundtrip"
                         onModeChange={() => { }}
-                        onClose={() => setShowInsuranceCalendar(false)}
+                        // onClose={() => setShowInsuranceCalendar(false)}
                       >
                         <div ref={insuranceCalendarRef}>
                           <CalendarMonths

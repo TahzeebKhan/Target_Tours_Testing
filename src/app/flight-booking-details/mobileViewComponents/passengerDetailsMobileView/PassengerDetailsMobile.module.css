@@ -353,3 +353,9 @@
     border-radius: 50%;
     opacity: 0.9;
 }
+
+@media (max-width: 400px) {
+  .amountSection{
+    min-width: 148px;
+  }
+}

@@ -1,7 +1,7 @@
 import { Plane } from "lucide-react";
 import styles from "./TripSummaryExpandable.module.css";
 import TravelInsuranceOption from "../../passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
-import FlightSection from "@/app/flightBookingDetails/mobileViewComponents/components/FlightSection/FlightSection";
+import FlightSection from "@/app/flight-booking-details/mobileViewComponents/components/FlightSection/FlightSection";
 import CancellationPenalty from "../../passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 
 const FlightIcon = () => (
@@ -280,9 +280,8 @@ const FlightBlock = ({ data, showReturnLabel = false }) => {
   return (
     <>
       <div
-        className={`${styles.section} ${
-          showReturnLabel ? styles.lastSection : ""
-        } ${secondTrip ? styles.secondTrip : ""}`}
+        className={`${styles.section} ${showReturnLabel ? styles.lastSection : ""
+          } ${secondTrip ? styles.secondTrip : ""}`}
       >
         {/* Header */}
         <div className={styles.flightHeader}>
@@ -303,13 +302,11 @@ const FlightBlock = ({ data, showReturnLabel = false }) => {
           <div className={styles.fareInfo}>
             <span className={styles.fareText}>{fareType}</span>
             <span
-              className={`${styles.fareBadge} ${
-                cabin.toLowerCase() === "first class" ? styles.firstClass : ""
-              } ${
-                cabin.toLowerCase() === "business"
+              className={`${styles.fareBadge} ${cabin.toLowerCase() === "first class" ? styles.firstClass : ""
+                } ${cabin.toLowerCase() === "business"
                   ? styles.businessClassBadge
                   : ""
-              }`}
+                }`}
             >
               {cabin}
             </span>
