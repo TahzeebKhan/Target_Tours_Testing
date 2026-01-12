@@ -26,6 +26,7 @@ import HolidaySearchMobile from "./holidaySearchMobile/HolidaySearchMobile";
 import InsuranceSearchMobile from "./insuranceSearchMobile/InsuranceSearchMobile";
 import Cookies from "js-cookie";
 import ProfileModal from "./modals/ProfileModal";
+import { useRouter } from "next/navigation";
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true);
@@ -54,8 +55,11 @@ const HomePage = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);
   const [calendarTripType, setCalendarTripType] = useState("oneway");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // const [startDate, setStartDate] = useState("");
+  // const [endDate, setEndDate] = useState("");
+
+  const router = useRouter();
+
 
   // Hotel calendar states
   const hotelCalendarRef = useRef(null);
@@ -684,6 +688,36 @@ const HomePage = () => {
     return `${day}-${month}-${year}`;
   };
 
+
+
+
+  const handleSearch = () => {
+  if (bookingType === "flight") {
+    router.push(
+      `/flights?from=${from}&to=${to}&tripType=${tripType}&start=${flightDates.round.start}&end=${flightDates.round.end}`
+    );
+  }
+
+  if (bookingType === "hotel") {
+    router.push(
+      `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`
+    );
+  }
+
+  if (bookingType === "holiday") {
+    router.push(
+      `/tour-list?from=${from}&to=${to}&date=${holidayStartDate}`
+    );
+  }
+
+  if (bookingType === "insurance") {
+    router.push(
+      `/travel-insurance?destination=${travellerDestination}&start=${insuranceStartDate}&end=${insuranceEndDate}`
+    );
+  }
+};
+
+
   return (
     <>
       <section className="relative w-full h-[100vh]">
@@ -1134,6 +1168,7 @@ const HomePage = () => {
                           className={`${styles.searchBtn} ${
                             tripType === "multi" ? styles.hiddenField : ""
                           }`}
+                          onClick={handleSearch}
                         >
                           <img src="/images/searchIcon.svg" alt="" />
                         </div>
@@ -1347,12 +1382,12 @@ const HomePage = () => {
                               </div>
 
                               {actualIndex === multiCity.length - 1 ? (
-                                <div className={styles.multisearchBtn}>
+                                <div className={styles.multisearchBtn} onClick={handleSearch}>
                                   Search
                                 </div>
                               ) : (
                                 <div
-                                  className={`${styles.multisearchBtn} opacity-0 pointer-events-none`}
+                                  className={`${styles.multisearchBtn} opacity-0 pointer-events-none`} onClick={handleSearch}
                                 >
                                   Search
                                 </div>
@@ -1700,7 +1735,7 @@ const HomePage = () => {
                       )}
                     </div>
 
-                    <div className={`${styles.searchBtn} ${styles.pos5}`}>
+                    <div className={`${styles.searchBtn} ${styles.pos5}`} onClick={handleSearch}>
                       <img src="/images/searchIcon.svg" alt="" />
                     </div>
                   </div>

@@ -7,11 +7,13 @@ import TravellerSelector from "@/app/home-page/components/homePage/TravellerSele
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 const TourHeroSection = () => {
+  const searchParams = useSearchParams();
   const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
+  const [to, setTo] = useState(searchParams.get("city") || "");
+  const [departureDate, setDepartureDate] = useState(searchParams.get("checkIn") || "");
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
