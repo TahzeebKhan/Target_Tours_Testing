@@ -1,0 +1,60 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+}
+.modal {
+  width: 360px;
+  background: #fff;
+  /* border-radius: 12px; */
+  padding: 16px;
+  position: absolute;
+  top: 74px;
+  z-index: 999999999;
+  right: 47px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.header {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 4px;
+}
+
+.subText {
+  font-size: 12px;
+  color: #1d4ed8;
+}
+
+.email {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.option {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.option:hover {
+  background: #f5f7fa;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #020000;
+}
+
+.desc {
+  font-size: 12px;
+  color: #555;
+}

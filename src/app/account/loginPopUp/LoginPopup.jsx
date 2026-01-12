@@ -187,13 +187,13 @@
 //   );
 // }
 
-
 "use client";
 import Image from "next/image";
 import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
-export default function LoginPopup({ onNavigate, onClose }) {
+export default function LoginPopup({ setIsLoggedIn, onNavigate, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -244,12 +244,12 @@ export default function LoginPopup({ onNavigate, onClose }) {
 
       // ✅ STORE TOKEN IN COOKIE
       setCookie("auth_token", data.token, 7);
-
+      setIsLoggedIn(true);
+      Cookies.set("user", JSON.stringify(data.user), { expires: 7 });
       // Optional: user info bhi cookie ya localStorage me
       setCookie("user_id", data.user.id, 7);
 
       onClose();
-
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -386,4 +386,3 @@ export default function LoginPopup({ onNavigate, onClose }) {
     </div>
   );
 }
-

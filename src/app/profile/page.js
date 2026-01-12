@@ -8,9 +8,24 @@ import WishList from "./components/wishList/WishList";
 import MyReview from "./components/myReview/MyReview";
 import Support from "./components/Support/support";
 import { useProfile } from "./context/ProfileContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const ProflePage = () => {
-  const { activeMenu } = useProfile();
+  const { activeMenu, setActiveMenu } = useProfile();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  useEffect(() => {
+    const isMyTrips = searchParams.get("my-trips");
+
+    if (isMyTrips === "true") {
+      setActiveMenu("trip");
+      if (router) {
+        router.replace("/profile", { scroll: false });
+      }
+    }
+  }, [searchParams, setActiveMenu]);
 
   return (
     <>
