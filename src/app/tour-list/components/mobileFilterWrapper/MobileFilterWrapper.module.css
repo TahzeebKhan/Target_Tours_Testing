@@ -69,6 +69,7 @@
 }
 
 .reset {
+    height: 48px;
     border: 1px solid #E4E6E8;
     background: white;
     padding: 0 24px;
@@ -87,8 +88,18 @@
 }
 
 .apply {
+    height: 48px;
     background: #000033;
     color: white;
     padding: 12px;
     font-weight: 500;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
 }

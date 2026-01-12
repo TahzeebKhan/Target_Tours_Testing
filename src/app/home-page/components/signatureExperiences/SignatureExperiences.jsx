@@ -56,6 +56,56 @@ const baseCarouselData = [
     bottomTitle: "Senegal",
     bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
   },
+  {
+    id: 6,
+    image: "/images/img1.jpg",
+    title: "ICELAND",
+    description: "Land of Fire and Ice",
+    price: "₹30,000",
+    hasNewTag: false,
+    bottomTitle: "Iceland",
+    bottomDescription: "Land of Fire and Ice",
+  },
+  {
+    id: 7,
+    image: "/images/img3.jpg",
+    title: "NEW ZEALAND",
+    description: "Adventure awaits in Middle Earth",
+    price: "₹35,000",
+    hasNewTag: true,
+    bottomTitle: "New Zealand",
+    bottomDescription: "Adventure awaits in Middle Earth",
+  },
+  {
+    id: 8,
+    image: "/images/img4.jpg",
+    title: "THAILAND",
+    description: "Tropical Paradise",
+    price: "₹12,000",
+    hasNewTag: false,
+    bottomTitle: "Thailand",
+    bottomDescription: "Tropical Paradise",
+  },
+  {
+    id: 9,
+    image: "/images/img3.jpg",
+    title: "NEW ZEALAND",
+    description: "Adventure awaits in Middle Earth",
+    price: "₹35,000",
+    hasNewTag: true,
+    bottomTitle: "New Zealand",
+    bottomDescription: "Adventure awaits in Middle Earth",
+  },
+  {
+    id: 10,
+    image: "/images/img4.jpg",
+    title: "THAILAND",
+    description: "Tropical Paradise",
+    price: "₹12,000",
+    hasNewTag: false,
+    bottomTitle: "Thailand",
+    bottomDescription: "Tropical Paradise",
+  },
 ];
 const SignatureExperiences = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -68,9 +118,9 @@ const SignatureExperiences = () => {
     { title: "Central America", carouselData: rotate(baseCarouselData, 2) },
     { title: "Europe", carouselData: rotate(baseCarouselData, 3) },
     { title: "Indian Ocean", carouselData: rotate(baseCarouselData, 4) },
-    { title: "Middle East", carouselData: rotate(baseCarouselData, 1) },
-    { title: "Oceania", carouselData: rotate(baseCarouselData, 2) },
-    { title: "South America", carouselData: rotate(baseCarouselData, 3) },
+    { title: "Middle East", carouselData: rotate(baseCarouselData, 5) },
+    { title: "Oceania", carouselData: rotate(baseCarouselData, 6) },
+    { title: "South America", carouselData: rotate(baseCarouselData, 7) },
     // { title: "Bali", carouselData: rotate(baseCarouselData, 4) },
     // { title: "Maldives", carouselData: rotate(baseCarouselData, 0) },
   ];
@@ -100,9 +150,8 @@ const SignatureExperiences = () => {
             {tabsData.map((tab, index) => (
               <li
                 key={tab.title}
-                className={`${styles.tab} ${
-                  index === activeTab ? styles.activeTab : ""
-                }`}
+                className={`${styles.tab} ${index === activeTab ? styles.activeTab : ""
+                  }`}
                 onClick={() => setActiveTab(index)}
               >
                 <button className={styles.tabBtn}>{tab.title}</button>
