@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import styles from "./FlightFilters.module.css";
-import { ListFilter } from "lucide-react";
+import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "@/app/flights/components/SVGFile";
 
-export default function FlightFilters() {
+export default function FlightFilters( {onClose}) {
   const DEFAULT_NIGHTS = [1, 10];
   const DEFAULT_PRICE = [11307, 57295];
 
@@ -111,19 +111,93 @@ export default function FlightFilters() {
     }));
   };
 
+  // Generate filter chips from selected filters
+  const filterChips = useMemo(() => {
+    const chips = [];
+
+    // Flight type chips
+    if (filters.flightType === "with") {
+      chips.push({ label: "With Flights", onRemove: () => selectFlightType("with") });
+    }
+    if (filters.flightType === "without") {
+      chips.push({ label: "Without Flights", onRemove: () => selectFlightType("without") });
+    }
+
+    // Package type chips
+    if (filters.packageType === "customizable") {
+      chips.push({ label: "Customizable", onRemove: () => selectPackageType("customizable") });
+    }
+    if (filters.packageType === "group") {
+      chips.push({ label: "Group Packages", onRemove: () => selectPackageType("group") });
+    }
+
+    // Hotel category chips
+    if (filters.hotelCategory) {
+      const categoryLabels = { "<3": "<3 Star", "3": "3 Star", "4": "4 Star", "5": "5 Star" };
+      chips.push({
+        label: categoryLabels[filters.hotelCategory] || filters.hotelCategory + " Star",
+        onRemove: () => selectHotelCategory(filters.hotelCategory)
+      });
+    }
+
+    // City chips
+    Object.entries(filters.cities).forEach(([city, isSelected]) => {
+      if (isSelected) {
+        chips.push({ label: city, onRemove: () => toggleMapCheckbox("cities", city) });
+      }
+    });
+
+    // Theme chips
+    Object.entries(filters.themes).forEach(([theme, isSelected]) => {
+      if (isSelected) {
+        chips.push({ label: theme, onRemove: () => toggleMapCheckbox("themes", theme) });
+      }
+    });
+
+    // Premium packages chips
+    Object.entries(filters.premiumPackages).forEach(([pkg, isSelected]) => {
+      if (isSelected) {
+        chips.push({ label: "Premium Packages", onRemove: () => toggleMapCheckbox("premiumPackages", pkg) });
+      }
+    });
+
+    return chips;
+  }, [filters]);
+
   return (
     <aside className={styles.sidebar}>
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.title}>
-          <span className={styles.icon}>
-            <ListFilter size={20} />
-          </span>
-          FILTER
+      <div className={styles.headerMobile}>
+        <div className={styles.headerMobileFilter}>
+          <p>FILTER</p>
+        <X onClick={onClose} />
         </div>
-        <button onClick={handleReset} className={styles.reset}>
-          RESET
-        </button>
+        {filterChips.length > 0 && (
+          <div className={styles.filterChips}>
+            {filterChips.map((chip, index) => (
+              <div key={index} className={styles.chip}>
+                <div className={styles.chipName}>{chip.label}</div>
+                <span onClick={chip.onRemove}>
+                  <X size={16} color="#4A5565" />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className={styles.header}>
+        <div className={styles.titleAndCrossContainer}>
+          <div className={styles.title}>
+            <span className={styles.icon}>
+              <ListFilter size={20} />
+            </span>
+            FILTER
+          </div>
+          <button onClick={handleReset} className={styles.reset}>
+            RESET
+          </button>
+        </div>
+
       </div>
 
       <div className={styles.border} />
@@ -500,6 +574,6 @@ export default function FlightFilters() {
         </label>
       </section>
 
-    </aside>
+    </aside >
   );
 }

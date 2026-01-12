@@ -1,19 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./TourListing.module.css";
 import SearchResults from "../searchResult/SearchResults";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Pencil, SlidersHorizontal } from "lucide-react";
+import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
 
 const TourListing = () => {
+
+  const [openFilter, setOpenFilter] = useState(false);
+
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 184) {
+        setShowStickyHeader(true);   // 👈 scroll ke baad show
+      } else {
+        setShowStickyHeader(false);  // 👈 top par hide
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
   const router = useRouter();
-   const handleBookNow = () => {
-        router.push("/tour-booking"); // 👈 your page route
-    };
+  const handleBookNow = () => {
+    router.push("/tour-booking"); // 👈 your page route
+  };
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
@@ -96,177 +115,347 @@ const TourListing = () => {
   };
 
   return (
-    <section className={styles.tourListSection}>
-      <SearchResults viewType={viewType} setViewType={setViewType} />
+    <>
+      <section className={styles.tourListSection}>
+        <SearchResults viewType={viewType} setViewType={setViewType} />
 
-      <AnimatePresence mode="popLayout">
-        {viewType === "grid" && (
-          <motion.div
-            className={styles.cardContainer}
-            key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {tourData.map((item, index) => (
-              <motion.div
-                className={styles.card}
-                onClick={handleBookNow}
-                key={item.id}
-                layoutId={index < 2 ? `card-${item.id}` : undefined}
-              >
-                <motion.img
-                  layoutId={index < 2 ? `image-${item.id}` : undefined}
-                  className={styles.itemImage}
-                  src={item.image}
-                  alt={item.title}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-
-                <div className={styles.cardItems}>
-                  <div className={styles.cardItemHeader}>
-                    <div className={styles.headerLeft}>
-                      <div className={styles.new}>New</div>
-                      <div className={styles.private}>Private Tour</div>
-                    </div>
-                    <img
-                      src={
-                        likedTours.includes(item.id)
-                          ? "/icons/heartIconFilled.svg"
-                          : "/icons/heartIcon.svg"
-                      }
-                      alt="wishlist"
-                      className={styles.heartIcon}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleLike(item.id)}
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.cardItemCenterTextContainer}>
-                    <div className={styles.cardItemCenterText}>
-                      <p className={styles.cardItemCenterTextPara}>
-                        {item.route}
-                      </p>
-                      <h4 className={styles.cardItemCenterTextHeading}>
-                        {item.title}
-                      </h4>
-                    </div>
-
-                    <div className={styles.cardFooter}>
-                      <div className={styles.infoRow}>
-                        <span>{item.days}</span>
-                        <span>{item.meals}</span>
-                      </div>
-
-                      <div className={styles.infoRow}>
-                        <span>{item.hotel}</span>
-                        <span>{item.activities}</span>
-                      </div>
-
-                      <div className={styles.bottomRow}>
-                        <div className={styles.price}>
-                          FROM <strong>{item.price}</strong> <span>/ PERSON</span>
-                        </div>
-
-                        <button
-                          className={styles.viewDetails}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpand(item.id)}}
-                        >
-                          VIEW DETAILS
-                          <img
-                            src="/icons/smallDropArrow.svg"
-                            alt=""
-                            style={{
-                              transform: expandedId === item.id ? "rotate(180deg)" : "rotate(0deg)",
-                              transition: "0.3s",
-                            }}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedId === item.id && (
-                    <motion.div
-                      className={styles.expandableContainer}
-                      initial={{ height: 0, opacity: 0, y: 0 }}
-                      animate={{ height: "auto", opacity: 1, y: 0 }}
-                      exit={{ height: 0, opacity: 0, y: 0 }}
-                      transition={{ duration: 0.35, ease: "easeInOut" }}
-                    >
-                      <div className={styles.expandableContent}>
-                        <div className={styles.expandableTopContainer}>
-                          <div className={styles.expandableTop}>
-                            <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
-                            <ul className={styles.list}>
-                              <li>Round Trip Flights</li>
-                              <li>4 Star Hotels</li>
-                              <li>Airport Transfers</li>
-                              <li>Intercity Car Transfers</li>
-                            </ul>
-                          </div>
-                          <div className={styles.expandableCenter}>
-                            <div className={styles.expandableRow}>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Banff Gondola Ride</span>
-                              </div>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Lake Louise Scenic Walk</span>
-                              </div>
-                            </div>
-                            <div className={styles.expandableRow}>
-                              <div className={styles.expandableItem}>
-                                <img src="/icons/checkIcon.svg" alt="" />
-                                <span>Lake Louise Scenic Walk</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className={styles.hr}></div>
-                        <div className={styles.expandableFooter}>
-                          <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
-                          <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {viewType === "list" && (
-          <motion.div
-            className={styles.ListViewWrapper}
-            key="list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {tourData.map((item, index) => (
-              <motion.div
-                className={styles.ListViewCardContainer}
-                key={item.id}
-                layoutId={index < 2 ? `card-${item.id}` : undefined}
-              >
-                <div className={styles.ListViewCardImageContainer}>
+        <AnimatePresence mode="popLayout">
+          {viewType === "grid" && (
+            <motion.div
+              className={styles.cardContainer}
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {tourData.map((item, index) => (
+                <motion.div
+                  className={styles.card}
+                  onClick={handleBookNow}
+                  key={item.id}
+                  layoutId={index < 2 ? `card-${item.id}` : undefined}
+                >
                   <motion.img
                     layoutId={index < 2 ? `image-${item.id}` : undefined}
+                    className={styles.itemImage}
+                    src={item.image}
+                    alt={item.title}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+
+                  <div className={styles.cardItems}>
+                    <div className={styles.cardItemHeader}>
+                      <div className={styles.headerLeft}>
+                        <div className={styles.new}>New</div>
+                        <div className={styles.private}>Private Tour</div>
+                      </div>
+                      <img
+                        src={
+                          likedTours.includes(item.id)
+                            ? "/icons/heartIconFilled.svg"
+                            : "/icons/heartIcon.svg"
+                        }
+                        alt="wishlist"
+                        className={styles.heartIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(item.id)
+                        }
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.cardItemCenterTextContainer}>
+                      <div className={styles.cardItemCenterText}>
+                        <p className={styles.cardItemCenterTextPara}>
+                          {item.route}
+                        </p>
+                        <h4 className={styles.cardItemCenterTextHeading}>
+                          {item.title}
+                        </h4>
+                      </div>
+
+                      <div className={styles.cardFooter}>
+                        <div className={styles.infoRow}>
+                          <span>{item.days}</span>
+                          <span>{item.meals}</span>
+                        </div>
+
+                        <div className={styles.infoRow}>
+                          <span>{item.hotel}</span>
+                          <span>{item.activities}</span>
+                        </div>
+
+                        <div className={styles.bottomRow}>
+                          <div className={styles.price}>
+                            FROM <strong>{item.price}</strong> <span>/ PERSON</span>
+                          </div>
+
+                          <button
+                            className={styles.viewDetails}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExpand(item.id)
+                            }}
+                          >
+                            VIEW DETAILS
+                            <img
+                              src="/icons/smallDropArrow.svg"
+                              alt=""
+                              style={{
+                                transform: expandedId === item.id ? "rotate(180deg)" : "rotate(0deg)",
+                                transition: "0.3s",
+                              }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {expandedId === item.id && (
+                      <motion.div
+                        className={styles.expandableContainer}
+                        initial={{ height: 0, opacity: 0, y: 0 }}
+                        animate={{ height: "auto", opacity: 1, y: 0 }}
+                        exit={{ height: 0, opacity: 0, y: 0 }}
+                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                      >
+                        <div className={styles.expandableContent}>
+                          <div className={styles.expandableTopContainer}>
+                            <div className={styles.expandableTop}>
+                              <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
+                              <ul className={styles.list}>
+                                <li>Round Trip Flights</li>
+                                <li>4 Star Hotels</li>
+                                <li>Airport Transfers</li>
+                                <li>Intercity Car Transfers</li>
+                              </ul>
+                            </div>
+                            <div className={styles.expandableCenter}>
+                              <div className={styles.expandableRow}>
+                                <div className={styles.expandableItem}>
+                                  <img src="/icons/checkIcon.svg" alt="" />
+                                  <span>Banff Gondola Ride</span>
+                                </div>
+                                <div className={styles.expandableItem}>
+                                  <img src="/icons/checkIcon.svg" alt="" />
+                                  <span>Lake Louise Scenic Walk</span>
+                                </div>
+                              </div>
+                              <div className={styles.expandableRow}>
+                                <div className={styles.expandableItem}>
+                                  <img src="/icons/checkIcon.svg" alt="" />
+                                  <span>Lake Louise Scenic Walk</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={styles.hr}></div>
+                          <div className={styles.expandableFooter}>
+                            <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
+                            <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {viewType === "list" && (
+            <motion.div
+              className={styles.ListViewWrapper}
+              key="list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {tourData.map((item, index) => (
+                <motion.div
+                  className={styles.ListViewCardContainer}
+                  key={item.id}
+                  layoutId={index < 2 ? `card-${item.id}` : undefined}
+                >
+                  <div className={styles.ListViewCardImageContainer}>
+                    <motion.img
+                      layoutId={index < 2 ? `image-${item.id}` : undefined}
+                      src={item.image}
+                      alt={item.title}
+                      className={styles.ListViewCardImage}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    />
+
+                    <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
+                      <div className={styles.headerLeft}>
+                        <div className={styles.new}>New</div>
+                        <div className={styles.private}>Private Tour</div>
+                      </div>
+
+                      <img
+                        src={
+                          likedTours.includes(item.id)
+                            ? "/icons/heartIconFilled.svg"
+                            : "/icons/heartIcon.svg"
+                        }
+                        alt="wishlist"
+                        className={styles.heartIcon}
+                        onClick={() => toggleLike(item.id)}
+                      />
+                    </div>
+                  </div>
+
+                  <motion.div
+                    className={styles.ListViewCardText}
+                    initial={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
+                    animate={index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined}
+                    exit={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
+                    transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  >
+                    <div className={styles.cartListTop}>
+                      <div className={styles.ListViewCardTextTop}>
+                        <div className={styles.topTextHead}>
+                          <h2>{item.title}</h2>
+
+                          <div className={styles.topTextHeadAddress}>
+                            <img src="/icons/blackAddress.svg" alt="" />
+                            <span>{item.route}</span>
+                          </div>
+                        </div>
+
+                        <div className={styles.tagsContainer}>
+                          <div className={styles.tag}>Round Trip Flights</div>
+                          <div className={styles.tag}>4 Star Hotels</div>
+                          <div className={styles.tag}>Airport Transfers</div>
+                          <div className={styles.tag}>Intercity Car Transfers</div>
+                        </div>
+
+                        <div className={styles.ListViewCardTextTopBottom}>
+                          <div className={styles.bottomItem}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                            Banff Gondola Ride
+                          </div>
+                          <div className={styles.bottomItem}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                            Lake Louise Scenic Walk
+                          </div>
+                          <div className={styles.bottomItem}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                            Icefields Parkway Glacier Tour
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.infoGrid}>
+                        <div className={styles.infoRowGrid}>
+                          <div className={styles.infoItem}>{item.days}</div>
+                          <div className={styles.infoItem}>{item.meals}</div>
+                        </div>
+
+                        <div className={styles.infoRowGrid}>
+                          <div className={styles.infoItem}>{item.hotel}</div>
+                          <div className={styles.infoItem}>{item.activities}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.ListViewCardTextBottom}>
+                      <div className={styles.priceContainer}>
+                        <div className={styles.priceSec}>
+                          {item.price}
+                          <span>/PERSON</span>
+                        </div>
+
+                        <div className={styles.totalPrice}>
+                          Total Price
+                          <span>₹ 1,66,945</span>
+                        </div>
+                      </div>
+
+                      <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
+      <section className={styles.tourListMobileSection}>
+
+        <div
+          className={`${styles.tripDetailsHeader} 
+              ${showStickyHeader ? styles.stickyVisible : styles.stickyHidden}`}
+        >
+          <div className={styles.mainCotainer}>
+            <img src="/icons/leftArrowTrip.svg" alt="" />
+            <div
+              className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
+            >
+              <div className={styles.TripCardHeaderDetails}>
+                <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+                {/* <span className={styles.TripCardHeaderDetailsItemCode}>
+                (DEL)
+              </span> */}
+
+                {/* <img src="/icons/right-arrow.svg" alt="" /> */}
+                <div className={styles.minDash}>-</div>
+                <p className={styles.TripCardHeaderDetailsItemText}>Goa</p>
+              </div>
+
+              <div className={styles.TripCardHeaderBookingDate}>
+                <p>Wed, 03 Dec</p>
+                <p>
+                  <div className={styles.navDot}></div>1 Traveller
+                </p>
+                <p>
+                  <div className={styles.navDot}></div>Economy
+                </p>
+              </div>
+            </div>
+          </div>
+          <Pencil className={styles.editIcon} color="#FFFFFF" size={16} />
+        </div>
+
+        <div className={styles.tourListMobileWrapper}>
+          <div className={styles.filterContainer}>
+            <button className={styles.filterCard}>
+              Sort by
+            </button>
+            <button className={styles.filterCard} onClick={() => setOpenFilter(true)}>
+              FILTERS
+              <img src="/icons/filterIcon.svg" alt="" />
+            </button>
+            {openFilter && (
+              <MobileFilterWrapper
+                open={openFilter}
+                setOpen={setOpenFilter}
+              />
+            )}
+            <button className={styles.filterCard}>
+
+              PREFERENCES
+            </button>
+          </div>
+          <div
+            className={`${styles.ListViewWrapper} ${styles.ListViewWrapperMobile}`}
+
+          >
+            {tourData.map((item, index) => (
+              <div
+                className={`${styles.ListViewCardContainer} ${styles.ListViewCardContainerMobile}`}
+                key={item.id}
+              >
+                <div className={`${styles.ListViewCardImageContainer}  ${styles.ListViewCardImageContainerMobile}`}>
+                  <img
                     src={item.image}
                     alt={item.title}
                     className={styles.ListViewCardImage}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
                   />
 
                   <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
@@ -289,14 +478,14 @@ const TourListing = () => {
                 </div>
 
                 <motion.div
-                  className={styles.ListViewCardText}
+                  className={`${styles.ListViewCardTextMobile}`}
                   initial={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
                   animate={index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined}
                   exit={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
                   transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                   <div className={styles.cartListTop}>
-                    <div className={styles.ListViewCardTextTop}>
+                    <div className={`${styles.ListViewCardTextTopMobile} `}>
                       <div className={styles.topTextHead}>
                         <h2>{item.title}</h2>
 
@@ -306,14 +495,14 @@ const TourListing = () => {
                         </div>
                       </div>
 
-                      <div className={styles.tagsContainer}>
+                      <div className={styles.tagsContainerMobile}>
                         <div className={styles.tag}>Round Trip Flights</div>
                         <div className={styles.tag}>4 Star Hotels</div>
                         <div className={styles.tag}>Airport Transfers</div>
                         <div className={styles.tag}>Intercity Car Transfers</div>
                       </div>
 
-                      <div className={styles.ListViewCardTextTopBottom}>
+                      <div className={styles.ListViewCardTextTopBottomMobile}>
                         <div className={styles.bottomItem}>
                           <img src="/icons/checkIcon.svg" alt="" />
                           Banff Gondola Ride
@@ -342,28 +531,28 @@ const TourListing = () => {
                     </div>
                   </div>
 
-                  <div className={styles.ListViewCardTextBottom}>
+                  <div className={`${styles.ListViewCardTextBottom} ${styles.ListViewCardTextBottomMobile}`}>
                     <div className={styles.priceContainer}>
-                      <div className={styles.priceSec}>
+                      <div className={`${styles.priceSec} ${styles.mobilePrice}`}>
                         {item.price}
                         <span>/PERSON</span>
                       </div>
 
                       <div className={styles.totalPrice}>
                         Total Price
-                        <span>₹ 1,66,945</span>
+                        <span>₹1,66,945</span>
                       </div>
                     </div>
 
                     <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
                   </div>
                 </motion.div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
