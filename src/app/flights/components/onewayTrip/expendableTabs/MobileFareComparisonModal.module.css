@@ -55,6 +55,7 @@
 /* Header */
 .header {
     padding: 16px 16px;
+    padding-top: 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -163,7 +164,7 @@
 .price{
     font-family: Antic Didone;
     font-weight: 400;
-    font-size: 34px;
+    font-size: 24px;
     line-height: 100%;
     letter-spacing: -2%;
     vertical-align: middle;
