@@ -113,6 +113,18 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                         <span>Phuket City</span>
                     </div>
                     <div className={styles.flightDuration}>
+                        <div className={styles.flightInfoStatus}>
+                            <img className={styles.flightIconStatus} src="/images/Flight.png" alt="" />
+                            <div className={styles.flightInfoNameDatesContainer}>
+                                <span className={styles.flightInfoNameDates}>Air India</span>
+                                <div className={styles.smallestDot}></div>
+                                <span className={styles.flightInfoNameDates}>AI2380</span>
+                                <div className={styles.smallestDot}></div>
+                                <span className={styles.flightInfoNameDates}>Boeing 787-9 Dreamliner</span>
+                                <div className={styles.smallestDot}></div>
+                                <span className={styles.flightInfoNameDates}>Economy Class</span>
+                            </div>
+                        </div>
                         <div className={styles.timelineContainer}>
                             {/* LEFT */}
                             <div className={styles.side}>
@@ -128,7 +140,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                                 <div className={styles.flightAnimation}>
                                     <div className={styles.flightDotedcontainer}>
                                         <div className={styles.bigDot}></div>
-                                       <img src="/icons/dashline.svg" alt="" />
+                                       <img src="/images/popupDash.svg" alt="" />
                                     </div>
 
                                     <img
@@ -141,7 +153,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
                                     <div className={styles.flightDotedcontainer}>
                                         {/* <div className={styles.dashBorder}></div> */}
-                                        <img src="/icons/dashline.svg" alt="" />
+                                        <img src="/images/popupDash.svg" alt="" />
                                         <div className={styles.bigDot}></div>
                                     </div>
                                 </div>

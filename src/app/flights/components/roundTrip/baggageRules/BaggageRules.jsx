@@ -8,7 +8,7 @@ const BaggageRules = () => {
                 <table className={styles.baggageTable}>
                     <thead>
                         <tr>
-                            <th>AIRLINE</th>
+                            <th className={styles.airlineCellHead}>AIRLINE</th>
                             <th>CHECK-IN BAGGAGE</th>
                             <th>CABIN BAGGAGE</th>
                         </tr>

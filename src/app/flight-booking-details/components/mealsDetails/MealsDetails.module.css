@@ -120,7 +120,7 @@
 
 .expandOpen {
   max-height: 1000px;
-  border-top: 1px solid #E4E6E8;
+  /* border-top: 1px solid #E4E6E8; */
   /* enough to hold content */
 }
 

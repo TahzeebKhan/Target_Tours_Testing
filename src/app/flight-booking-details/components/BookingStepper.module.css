@@ -8,8 +8,8 @@
   position: sticky;
   top: 73px;
   z-index: 20;
-  background-color: white;
-  border-bottom: 1px solid #e4e6e8;
+  background-color: #F9F9F9;
+  /* border-bottom: 1px solid #e4e6e8; */
 }
 
 .stepperContainer {

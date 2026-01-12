@@ -191,7 +191,7 @@ const ExpandableTabs = () => {
                         <div className={styles.tableCard}>
                             {/* Header */}
                             <div className={styles.tableHeader}>
-                                <span>AIRLINE</span>
+                                <span className={styles.airlineCellHead}>AIRLINE</span>
                                 <span>CHECK-IN BAGGAGE</span>
                                 <span>CABIN BAGGAGE</span>
                             </div>

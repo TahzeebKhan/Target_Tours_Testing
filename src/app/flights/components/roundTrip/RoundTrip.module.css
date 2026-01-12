@@ -86,11 +86,12 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  padding: 8px;
+  padding: 7px 8px;
   border: 1px solid transparent;
   transition: all 0.3s ease;
   height: 52px;
   cursor: pointer;
+  border: 1px solid #0000001A
 }
 .sortedItem.activeSortedItem {
   border: 1px solid #000033;
@@ -219,18 +220,18 @@
 .chevronSort.open {
   transform: rotate(-180deg);
 }
-
+/* 
 .sortedItem {
   padding: 6px 4px;
   gap: 4px;
   height: 40px;
   border: 0.69px solid transparent;
   transition: all 0.5s ease;
-}
-.sortedItem.activeSortedItem {
+} */
+/* .sortedItem.activeSortedItem {
   background-color: #ffffff;
   border: 0.69px solid #0000001a;
-}
+} */
 
 .sortedTextContainer {
   display: flex;
