@@ -3,22 +3,19 @@ import Mobile_footer from "../flightBookingDetails/mobileViewComponents/seatingD
 import PriceSummary from "./PriceSummary";
 import BelowPlane from "../flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/below_plane";
 import MobileFareComparisonModal from "../flights/components/onewayTrip/expendableTabs/MobileFareComparisonModal";
+import SelectDestination from "./selectDestination";
+import SelectTravellerProfile from "./selectTravellerProfile";
+import SelectPreferences from "./selectPreferences";
 
 export default function ProfilePage() {
 
   return (
     <main>
 
-      {/* <PriceSummary /> */}
-      {/* <Mobile_footer /> */}
-
-<MobileFareComparisonModal/>
+<SelectDestination />
+<SelectTravellerProfile />
+<SelectPreferences />
       
-      {/* <BelowPlane /> */}
-      {/* <Mobile_footer /> */}
-
-
-
     </main>
   );
 }
