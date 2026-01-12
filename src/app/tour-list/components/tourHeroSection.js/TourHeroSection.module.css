@@ -44,7 +44,8 @@
 }
 
 .glass_panel {
-  width: 1280px;
+  max-width: 1280px;
+  width: 100%;
   position: relative;
 }
 
@@ -72,7 +73,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    min-width: 193px;
+    /* min-width: 193px; */
     width: 100%;
     padding: 8px 8px 8px 12px;
     border: 0.5px solid #e6e8ec;
@@ -370,4 +371,21 @@
 .guestChevron {
   margin-left: 6px;
   transition: transform 0.3s ease;
+}
+
+@media (max-width: 900px){
+  .para{
+    font-size: 32px;
+    text-align: center;
+  }
+  .heading{
+    font-size: 64px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 900px){
+  .lable{
+    font-size: 9px;
+  }
 }

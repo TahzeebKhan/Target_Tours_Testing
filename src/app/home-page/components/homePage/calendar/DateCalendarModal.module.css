@@ -57,7 +57,7 @@
   padding: 4px;
   gap: 8px;
   overflow: hidden;
-
+border: 1px solid #FFFFFF66;
   align-self: flex-end;
 }
 .oneway{
@@ -115,7 +115,7 @@ cursor: pointer;
 
 @media (max-width: 1056px){
   .modal{
-    left: -50px;
+    left: auto;
   }
 }
 
@@ -123,6 +123,7 @@ cursor: pointer;
 
 @media (max-width: 991px){
   .modal{
-    left: -80px;
+    left: auto;
+    /* right: 0; */
   }
 }

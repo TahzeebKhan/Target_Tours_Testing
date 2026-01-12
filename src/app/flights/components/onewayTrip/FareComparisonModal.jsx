@@ -1,9 +1,15 @@
 "use client";
 import React from "react";
 import styles from "./FareComparisonModal.module.css";
+import { useRouter } from "next/navigation";
 
 const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
     if (!isOpen) return null;
+    const router = useRouter();
+    
+    const handleBookNow = () => {
+        router.push("/flight-booking-details");
+    };
 
     const fareOptions = [
         {
@@ -242,7 +248,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                             {/* Action Buttons */}
                             <div className={styles.fareActions}>
                                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                                <button className={styles.bookNowBtn}>BOOK NOW</button>
+                                <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
                             </div>
                         </div>
                     ))}

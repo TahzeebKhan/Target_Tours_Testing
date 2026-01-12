@@ -296,3 +296,10 @@
   align-content: center;
   gap: 8px;
 }
+
+
+@media (max-width: 1156px){
+    .departureCard{
+      padding: 12px 12px;
+    }
+}

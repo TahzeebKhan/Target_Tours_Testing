@@ -112,7 +112,7 @@ const TourListing = () => {
             {tourData.map((item, index) => (
               <motion.div
                 className={styles.card}
-                // onClick={handleBookNow}
+                onClick={handleBookNow}
                 key={item.id}
                 layoutId={index < 2 ? `card-${item.id}` : undefined}
               >
@@ -138,7 +138,10 @@ const TourListing = () => {
                       }
                       alt="wishlist"
                       className={styles.heartIcon}
-                      onClick={() => toggleLike(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(item.id)}
+                      }
                     />
                   </div>
 
@@ -170,7 +173,9 @@ const TourListing = () => {
 
                         <button
                           className={styles.viewDetails}
-                          onClick={() => toggleExpand(item.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpand(item.id)}}
                         >
                           VIEW DETAILS
                           <img
@@ -229,7 +234,7 @@ const TourListing = () => {
                         <div className={styles.hr}></div>
                         <div className={styles.expandableFooter}>
                           <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
-                          <button className={styles.bookNow}>BOOK NOW</button>
+                          <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
                         </div>
                       </div>
                     </motion.div>
@@ -350,7 +355,7 @@ const TourListing = () => {
                       </div>
                     </div>
 
-                    <button className={styles.bookNowBtn}>BOOK NOW</button>
+                    <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
                   </div>
                 </motion.div>
               </motion.div>

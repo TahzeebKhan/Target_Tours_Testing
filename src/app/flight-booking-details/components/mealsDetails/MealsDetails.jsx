@@ -245,7 +245,7 @@ const MealsDetails = () => {
 
                         {/* RIGHT */}
                         <button
-                            onClick={() => setCurrentStep(4)}
+                            onClick={() => setCurrentStep(5)}
                             className={styles.continueBtn}
                         >
                             CONTINUE BOOKING

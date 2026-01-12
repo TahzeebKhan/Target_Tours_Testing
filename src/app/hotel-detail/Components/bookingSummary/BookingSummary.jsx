@@ -1,8 +1,15 @@
+"use client";
 import React from "react";
 import styles from "./BookingSummary.module.css";
 import { Delete, Trash, Trash2, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const BookingSummary = () => {
+    const router = useRouter();
+
+    const handleDelete = () => {
+        router.push("/hotel-booking");
+    }
     return (
         <aside className={styles.wrapper}>
             {/* Header */}
@@ -68,7 +75,7 @@ const BookingSummary = () => {
             </div>
 
             {/* CTA */}
-            <button className={styles.bookBtn}>BOOK NOW</button>
+            <button className={styles.bookBtn} onClick={handleDelete}>BOOK NOW</button>
 
 
             <div className={styles.help}>

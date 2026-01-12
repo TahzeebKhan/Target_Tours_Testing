@@ -5,8 +5,8 @@
 }
 
 .cardContainer {
-    display: flex;
-    flex-wrap: wrap;
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
 
@@ -651,4 +651,16 @@
 .bookNow:hover{
     background-color: #FCC800;
     color: #000033;
+}
+
+@media (max-width: 1156px){
+    .cardContainer{
+        gap: 16px;
+    }
+    .cardItemCenterTextContainer{
+        gap: 18px;
+    }
+    .cardItemCenterTextHeading{
+        font-size: 28px;
+    }
 }

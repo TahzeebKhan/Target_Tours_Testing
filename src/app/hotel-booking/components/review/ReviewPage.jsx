@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import styles from "./ReviewPage.module.css";
 
 import { useRouter } from "next/navigation";
-import TravelInsuranceOption from "@/app/flightBookingDetails/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
-import CancellationPenalty from "@/app/flightBookingDetails/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
+import TravelInsuranceOption from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
+import CancellationPenalty from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import RoomPriceRow from "./components/roomPriceRow/RoomPriceRow";
 import TravelerDetails from "./components/travelerDetails/TravelerDetails";
 import CancellationPolicy from "./components/cancellationPolicy/CancellationPolicy";

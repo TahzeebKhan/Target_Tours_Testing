@@ -3,10 +3,13 @@ import React from 'react'
 import styles from './ViewGalleryPage.module.css'
 import ActivityGalleryCarousel from './activityGalleryCarousel/ActivityGalleryCarousel'
 import GallerySection from './gallerySection/GallerySection'
+import { useRouter } from 'next/navigation'
 
 const ViewGalleryPage = () => {
-
-
+  const router = useRouter();
+ const handleBack = () => {
+    router.back();
+  } 
   const galleryData = [
     {
       title: "ALPINE HIKING TRAIL",
@@ -43,7 +46,7 @@ const ViewGalleryPage = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.nav}>
-        <div className={styles.navItem}>
+        <div className={styles.navItem} onClick={handleBack}>
           <img src="/icons/right.svg" alt="" />
         </div>
       </div>

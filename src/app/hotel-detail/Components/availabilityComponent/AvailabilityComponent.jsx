@@ -1,116 +1,3 @@
-// import React from 'react'
-// import styles from './AvailabilityComponent.module.css'
-// import { MoveDiagonal } from 'lucide-react'
-// const AvailabilityComponent = () => {
-//     return (
-//         <div className={styles.availabilitySection}>
-//             <h3 className={styles.heading}>Availability</h3>
-//             <div className={styles.CardSection}>
-//                 <div className={styles.imagesNestedCarousel}>
-//                     <img src="/images/hotelImage1.png" alt="" />
-//                 </div>
-//                 <div className={styles.cardDetails}>
-//                     <div className={styles.cardDetailLeft}>
-//                         <div className={styles.hotelHeadCont}>
-//                             <h3 className={styles.hotelTitle}>Deluxe Private AC Room with Ensuite Bathroom</h3>
-//                             <div className={styles.bedMainCont}>
-//                                 <div className={styles.bedCount}>
-//                                     <img src="/icons/bedIcon.svg" alt="" />
-//                                     <span>2 Single bed</span>
-//                                     <span>X</span>
-//                                     {/* <MoveDiagonal size={18} /> */}
-//                                 </div>
-//                                 <span className={styles.persons}>2 Persons</span>
-
-//                             </div>
-//                         </div>
-//                         <div className={styles.featureSec}>
-//                             <ul className={styles.featureList}>
-//                                 <li>
-//                                     <div className={styles.iconCont}>
-//                                         <img src="/icons/arrows-expand.svg" alt="" />
-//                                     </div>
-//                                     30 m2</li>
-//                                 <li >
-//                                     <div className={styles.iconCont}>
-//                                         <img src="/icons/no-smoking.svg" alt="" />
-//                                     </div>
-//                                     No Smoking</li>
-//                                 <li>
-//                                     <div className={styles.iconCont}>
-//                                         <img src="/icons/greenTick.svg" alt="" /></div>
-//                                     Breakfast</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div> Laundry Service</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div>  Air Conditioner</li>
-//                             </ul>
-//                             <ul className={styles.featureList}>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div>  1 King Bed</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div>  Valley View</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div> Iron/Ironing Board</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div>  Laundry Service</li>
-//                                 <li><div className={styles.iconCont}>
-//                                     <img src="/icons/greenTick.svg" alt="" /></div>  Free Wifi</li>
-//                             </ul>
-//                         </div>
-//                         <div className={styles.benefitsSec}>
-//                             <ul className={styles.benefitsList}>
-//                                 <li>Free stay for the kid</li>
-//                                 <li>1 Extra bed/mattress will be provided at no extra cost</li>
-//                                 <li>15% off on Food &amp; Beverage services</li>
-//                                 <li>Complimentary Welcome Drink on arrival</li>
-//                             </ul>
-//                         </div>
-//                         <div className={styles.btnContainer}>
-//                             <div className={styles.CalcellCont}>
-//                                 <div className={styles.iconCont}>
-//                                     <img src="/icons/blueTick.svg" alt="" />
-//                                 </div>
-//                                 <span>Free Cancellation before 19 Jan 02:59 PM</span>
-//                             </div>
-//                             <button className={styles.moreDetailsBtn}>More Details</button>
-//                         </div>
-//                     </div>
-//                     <div className={styles.br}> </div>
-//                     <div className={styles.cardDetailRight}>
-//                         <div className={styles.cardRightTop}>
-//                             <div className={styles.ExcellentCont}>
-//                                 <div className={styles.ExcellentText}>
-//                                     <span className={styles.Excellent}>Excellent</span>
-//                                     <span className={styles.reviews}>1,260  reviews </span>
-//                                 </div>
-//                                 <div className={styles.ratting}>5.0</div>
-//                             </div>
-//                             <div className={styles.priceContainer}>
-//                                 <div className={styles.price}>
-//                                     <span className={styles.actualPrice}>₹66,945</span>
-//                                     <span className={styles.offerPrice}>₹ 66,945</span>
-//                                 </div>
-//                                 <span className={styles.perNight}>x 5 night</span>
-//                                 <span className={styles.taxesPrice}>+ ₹ 226 Taxes & fees</span>
-//                             </div>
-//                         </div>
-//                         <div className={styles.bookroomContainer}>
-//                             <div className={styles.BookAmoutn}>
-//                                 Book with <span>₹ 0</span>
-//                             </div>
-//                             <button className={styles.addRoomBtn}>ADD ROOM</button>
-
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     )
-// }
-
-// export default AvailabilityComponent
-
 "use client"
 // Top pe yeh imports add karo
 import 'swiper/css';
@@ -120,6 +7,7 @@ import React, { useRef, useState } from 'react'
 import styles from './AvailabilityComponent.module.css'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
+import { useRouter } from 'next/navigation';
 
 const roomsData = [
     {
@@ -281,6 +169,7 @@ const roomsData = [
 
 
 const AvailabilityComponent = () => {
+    const router = useRouter();
     const swiperRefs = useRef({})
     const [swiperRef, setSwiperRef] = useState(null)
     const [activeIndex, setActiveIndex] = useState(0)
@@ -294,6 +183,9 @@ const AvailabilityComponent = () => {
 
     const handleNext = () => {
         swiperRef?.slideNext()
+    }
+    const handleAddRoom = () => {
+        router.push("/hotel-booking");
     }
     return (
         <div className={styles.availabilitySection}>
@@ -425,7 +317,7 @@ const AvailabilityComponent = () => {
                                 <div className={styles.BookAmoutn}>
                                     Book with <span>{room.price.bookWith}</span>
                                 </div>
-                                <button className={styles.addRoomBtn}>ADD ROOM</button>
+                                <button className={styles.addRoomBtn} onClick={handleAddRoom}>ADD ROOM</button>
                             </div>
                         </div>
                     </div>
