@@ -8,18 +8,18 @@ import WishList from "./components/wishList/WishList";
 import MyReview from "./components/myReview/MyReview";
 import Support from "./components/Support/support";
 import { useProfile } from "./context/ProfileContext";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const ProflePage = () => {
+const ProflePage = ({ searchParams }) => {
   const { activeMenu, setActiveMenu } = useProfile();
 
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const router = useRouter();
   useEffect(() => {
-    const isMyTrips = searchParams.get("my-trips");
+    const isMyTrips = searchParams?.["my-trips"] === "true";
 
-    if (isMyTrips === "true") {
+    if (isMyTrips) {
       setActiveMenu("trip");
       if (router) {
         router.replace("/profile", { scroll: false });

@@ -4,7 +4,7 @@ import React from "react";
 import styles from "./BookingStepper.module.css";
 import { Check } from "lucide-react";
 import { useFlightBooking } from "../FlightBookingContext";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 const steps = [
     { id: 1, label: "Trip info" },
