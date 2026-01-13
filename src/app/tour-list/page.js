@@ -33,7 +33,7 @@
 // export default ToursPage;
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import styles from "./layout.module.css";
 import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
 import FlightFilters from "./components/flightFilter/FlightsFilters";
@@ -48,7 +48,9 @@ const ToursPage = () => {
   return (
     <>
       {/* HERO SECTION */}
-      <TourHeroSection />
+      <Suspense fallback={<div>Loading...</div>}>
+        <TourHeroSection />
+      </Suspense>
 
       {/* MAIN CONTENT */}
       <section className={styles.tourContent}>
