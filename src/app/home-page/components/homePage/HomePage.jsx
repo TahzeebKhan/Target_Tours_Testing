@@ -778,7 +778,7 @@ const HomePage = () => {
         <header className={`${styles.homeSection} w-full h-[100vh]`}>
           <video
             className="absolute inset-0 w-full h-full object-cover"
-            // src="/videos/hero.mp4"
+            key={heroData.videoUrl}  
             src={heroData.videoUrl}
             poster="/images/hero-poster.jpg"
             autoPlay

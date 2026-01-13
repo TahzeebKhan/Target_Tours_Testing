@@ -18,7 +18,14 @@ const TourBookingHeroSection = () => {
               <div className={styles.leftTop}>
                 <div className={styles.fromToCont}>
                   <span className={styles.from}>Toronto</span>
-                  <span>→</span>
+                  <span>
+                    <svg className={styles.homeArrow} width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.05255 1.85251C5.91587 1.98919 5.91587 2.2108 6.05255 2.34749L8.95505 5.25H1.40003C1.20673 5.25 1.05003 5.40671 1.05003 5.6C1.05003 5.79329 1.20673 5.95 1.40003 5.95H8.95505L6.05255 8.85252C5.91587 8.98921 5.91587 9.21079 6.05255 9.34747C6.18924 9.48416 6.41081 9.48416 6.54751 9.34747L10.0475 5.84747C10.1842 5.71079 10.1842 5.48921 10.0475 5.35253L6.54751 1.85251C6.41081 1.71583 6.18924 1.71583 6.05255 1.85251Z" fill="white" />
+                    </svg>
+
+
+
+                  </span>
                   <span className={styles.to}>Ottawa</span>
                 </div>
                 <h2 className={styles.header}>Splendors of the
