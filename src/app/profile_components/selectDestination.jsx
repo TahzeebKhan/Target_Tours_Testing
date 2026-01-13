@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./selectDestination.module.css";
 
@@ -30,9 +30,24 @@ const COUNTRIES = [
   "Sierra Leone",
 ];
 
-export default function SelectDestination() {
+export default function SelectDestination({ onClose }) {
+  const [open, setOpen] = useState(true);
   const [activeRegion, setActiveRegion] = useState("africa");
   const [selectedCountries, setSelectedCountries] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const closeModal = () => {
+    setOpen(false);
+    onClose?.();
+  };
 
   const toggleCountry = (country) => {
     setSelectedCountries((prev) =>
@@ -47,17 +62,23 @@ export default function SelectDestination() {
     setActiveRegion("africa");
   };
 
+  if (!open) return null;
+
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.container}>
-        {/* Header Section */}
+    <div className={styles.modalOverlay} onClick={closeModal}>
+      <div
+        className={styles.container}
+        onClick={(e) => e.stopPropagation()} // prevent close inside
+      >
+        {/* Header */}
         <header className={styles.header}>
           <div className={styles.headerTop}>
             <div className={styles.titleStack}>
               <span className={styles.labelSmall}>DESTINATIONS</span>
               <h1 className={styles.titleLarge}>Africa</h1>
             </div>
-            <button className={styles.closeButton}>
+
+            <button className={styles.closeButton} onClick={closeModal}>
               <svg
                 width="20"
                 height="20"
@@ -72,12 +93,14 @@ export default function SelectDestination() {
           </div>
         </header>
 
+        {/* Content */}
         <main className={styles.content}>
           {/* Region Selection */}
           <section className={styles.section}>
             <h2 className={styles.sectionHeading}>
               SELECT A GEOGRAPHICAL REGION
             </h2>
+
             <div className={styles.regionGrid}>
               {REGIONS.map((region) => (
                 <div
@@ -116,6 +139,7 @@ export default function SelectDestination() {
           {/* Country Selection */}
           <section className={styles.section}>
             <h2 className={styles.sectionHeading}>SELECT COUNTRY</h2>
+
             <div className={styles.countryGrid}>
               {COUNTRIES.map((country) => (
                 <button
@@ -134,12 +158,14 @@ export default function SelectDestination() {
           </section>
         </main>
 
-        {/* Footer Actions */}
+        {/* Footer */}
         <footer className={styles.footer}>
           <button className={styles.resetBtn} onClick={handleReset}>
             RESET
           </button>
-          <button className={styles.applyBtn}>APPLY FILTERS</button>
+          <button className={styles.applyBtn} onClick={closeModal}>
+            APPLY FILTERS
+          </button>
         </footer>
       </div>
     </div>

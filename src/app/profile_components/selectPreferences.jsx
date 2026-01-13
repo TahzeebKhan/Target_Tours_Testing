@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./selectPreferences.module.css";
 
@@ -8,11 +8,7 @@ const preferenceData = [
   { id: "adventure", label: "Adventure", src: "/images/adventure.svg" },
   { id: "beach", label: "Beach", src: "/images/beach.svg" },
   { id: "culture", label: "Culture", src: "/images/culture.svg" },
-  {
-    id: "sustainable",
-    label: "Sustainable Tour",
-    src: "/images/sustainable.svg",
-  },
+  { id: "sustainable", label: "Sustainable Tour", src: "/images/sustainable.svg" },
   { id: "food", label: "Food & Culinary", src: "/images/food.svg" },
   { id: "luxury", label: "Luxury", src: "/images/luxury.svg" },
   { id: "nature", label: "Nature", src: "/images/nature.svg" },
@@ -21,8 +17,23 @@ const preferenceData = [
   { id: "wildlife", label: "Wildlife", src: "/images/wildlife.svg" },
 ];
 
-export default function SelectPreferences() {
+export default function SelectPreferences({ onClose }) {
+  const [open, setOpen] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const closeModal = () => {
+    setOpen(false);
+    onClose?.();
+  };
 
   const togglePreference = (id) => {
     setSelectedIds((prev) => {
@@ -40,15 +51,26 @@ export default function SelectPreferences() {
     setSelectedIds([]);
   };
 
+  if (!open) return null;
+
   return (
-    <div className={styles.overlay}>
-      <section className={styles.container}>
+    <div className={styles.overlay} onClick={closeModal}>
+      <section
+        className={styles.container}
+        onClick={(e) => e.stopPropagation()} // prevent backdrop close
+      >
         <header className={styles.header}>
           <div className={styles.topRow}>
             <div className={styles.breadcrumb}>
               <span className={styles.breadcrumbLabel}>YOUR PREFERENCES</span>
             </div>
-            <button className={styles.closeButton} aria-label="Close">
+
+            {/* ❌ CLOSE BUTTON */}
+            <button
+              className={styles.closeButton}
+              aria-label="Close"
+              onClick={closeModal}
+            >
               <svg
                 width="20"
                 height="20"
@@ -87,7 +109,7 @@ export default function SelectPreferences() {
                   {selectedIds.includes(item.id) && (
                     <div className={styles.checkIcon}>
                       <Image
-                        src="/images/check-white.svg" 
+                        src="/images/check-white.svg"
                         alt="selected"
                         width={8}
                         height={8}
@@ -106,7 +128,9 @@ export default function SelectPreferences() {
           <button className={styles.resetButton} onClick={handleReset}>
             RESET
           </button>
-          <button className={styles.searchButton}>SEARCH</button>
+          <button className={styles.searchButton} onClick={closeModal}>
+            SEARCH
+          </button>
         </footer>
       </section>
     </div>

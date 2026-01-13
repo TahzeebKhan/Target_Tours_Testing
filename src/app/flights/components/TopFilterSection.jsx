@@ -611,15 +611,16 @@ const TopFilterSection = ({
                         }}
                       />
 
-{fromSuggestionsOpen && activeMultiFromIndex === 0 && (
-  <SuggestionBox
-    boxRef={fromSuggestionRef}
-    heading="RECENT SEARCH"
-    suggestions={getFilteredSuggestions(multiSegments[0].from)}
-    onSelect={(s) => selectSuggestion(s, "from")}
-  />
-)}
-
+                      {fromSuggestionsOpen && activeMultiFromIndex === 0 && (
+                        <SuggestionBox
+                          boxRef={fromSuggestionRef}
+                          heading="RECENT SEARCH"
+                          suggestions={getFilteredSuggestions(
+                            multiSegments[0].from
+                          )}
+                          onSelect={(s) => selectSuggestion(s, "from")}
+                        />
+                      )}
                     </div>
                     <div
                       className={`${styles.arrowbox} ${
@@ -655,35 +656,35 @@ const TopFilterSection = ({
                         className={styles.contant}
                         placeholder="Destination"
                         value={tripType === "multi" ? multiSegments[0].to : to}
-onFocus={() => {
-  setToSuggestionsOpen(true);
-  setActiveMultiToIndex(0);
-}}
-onClick={() => {
-  setToSuggestionsOpen(true);
-  setActiveMultiToIndex(0);
-}}
-onChange={(e) => {
-  if (tripType === "multi") {
-    updateSegment(0, "to", e.target.value);
-    setActiveMultiToIndex(0);
-  } else {
-    setTo(e.target.value);
-  }
-  setToSuggestionsOpen(true);
-}}
-
+                        onFocus={() => {
+                          setToSuggestionsOpen(true);
+                          setActiveMultiToIndex(0);
+                        }}
+                        onClick={() => {
+                          setToSuggestionsOpen(true);
+                          setActiveMultiToIndex(0);
+                        }}
+                        onChange={(e) => {
+                          if (tripType === "multi") {
+                            updateSegment(0, "to", e.target.value);
+                            setActiveMultiToIndex(0);
+                          } else {
+                            setTo(e.target.value);
+                          }
+                          setToSuggestionsOpen(true);
+                        }}
                       />
 
-{toSuggestionsOpen && activeMultiToIndex === 0 && (
-  <SuggestionBox
-    boxRef={toSuggestionRef}
-    heading="RECENT SEARCH"
-    suggestions={getFilteredSuggestions(multiSegments[0].to)}
-    onSelect={(s) => selectSuggestion(s, "to")}
-  />
-)}
-
+                      {toSuggestionsOpen && activeMultiToIndex === 0 && (
+                        <SuggestionBox
+                          boxRef={toSuggestionRef}
+                          heading="RECENT SEARCH"
+                          suggestions={getFilteredSuggestions(
+                            multiSegments[0].to
+                          )}
+                          onSelect={(s) => selectSuggestion(s, "to")}
+                        />
+                      )}
                     </div>
 
                     <div
@@ -898,15 +899,17 @@ onChange={(e) => {
                             }}
                           />
 
-{fromSuggestionsOpen && activeMultiFromIndex === 1 && (
-  <SuggestionBox
-    boxRef={fromSuggestionRef}
-    heading="RECENT SEARCH"
-    suggestions={getFilteredSuggestions(multiSegments[1].from)}
-    onSelect={(s) => selectSuggestion(s, "from")}
-  />
-)}
-
+                          {fromSuggestionsOpen &&
+                            activeMultiFromIndex === 1 && (
+                              <SuggestionBox
+                                boxRef={fromSuggestionRef}
+                                heading="RECENT SEARCH"
+                                suggestions={getFilteredSuggestions(
+                                  multiSegments[1].from
+                                )}
+                                onSelect={(s) => selectSuggestion(s, "from")}
+                              />
+                            )}
 
                           <div
                             className={`${styles.arrowbox} ${styles.arrowbox3} ${styles.arrowboxBottomRow} `}
@@ -947,15 +950,16 @@ onChange={(e) => {
                             }}
                           />
 
-{toSuggestionsOpen && activeMultiToIndex === 1 && (
-  <SuggestionBox
-    boxRef={toSuggestionRef}
-    heading="RECENT SEARCH"
-    suggestions={getFilteredSuggestions(multiSegments[1].to)}
-    onSelect={(s) => selectSuggestion(s, "to")}
-  />
-)}
-
+                          {toSuggestionsOpen && activeMultiToIndex === 1 && (
+                            <SuggestionBox
+                              boxRef={toSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(
+                                multiSegments[1].to
+                              )}
+                              onSelect={(s) => selectSuggestion(s, "to")}
+                            />
+                          )}
                         </div>
 
                         <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
