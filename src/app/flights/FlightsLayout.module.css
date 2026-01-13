@@ -18,7 +18,8 @@
   width: 100%;
   /* align-items: center; */
   justify-content: center;
-  padding: 24px;
+  /* padding: 24px; */
+  padding-top: 42px;
   display: grid;
   grid-template-columns: 356px 1fr;
   grid-template-rows: auto 1fr;
@@ -255,6 +256,11 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@media (max-width: 1460px) {
+  .container {
+    padding: 24px;
   }
 }
 

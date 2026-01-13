@@ -331,8 +331,8 @@ const RoundTrip = () => {
       <section className={styles.container}>
         <div className={styles.FlightBookingTextContainer}>
           <h2 className={styles.heading}>
-            Flight from <span>{from || "Jakarta"}</span> to{" "}
-            <span>{to || "Singapore"}</span>
+            Flight from <span>{from || "Jakarta (CGK)"}</span> to{" "}
+            <span>{to || "Singapore (SIN)"}</span>
           </h2>
           <div className={styles.subTextContainer}>
             <span className={styles.priceInfo}>

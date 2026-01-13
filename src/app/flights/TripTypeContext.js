@@ -26,9 +26,9 @@ export function TripTypeProvider({ children }) {
   });
   const [travelClass, setTravelClass] = useState("ECONOMY");
   const [committedSearches, setCommittedSearches] = useState({
-    oneway: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
-    round: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
-    multi: { from: getParam("from") || "Jakarta", to: getParam("to") || "Singapore" },
+    oneway: { from: getParam("from") || "Jakarta (CGK)", to: getParam("to") || "Singapore (SIN)" },
+    round: { from: getParam("from") || "Jakarta (CGK)", to: getParam("to") || "Singapore (SIN)" },
+    multi: { from: getParam("from") || "Jakarta (CGK)", to: getParam("to") || "Singapore (SIN)" },
   });
 
   // Effect to update state when URL params change (e.g. on navigation)

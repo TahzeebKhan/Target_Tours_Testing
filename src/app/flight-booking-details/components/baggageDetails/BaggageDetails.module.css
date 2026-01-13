@@ -62,7 +62,7 @@
 .dot {
   width: 4px;
   height: 4px;
-  background-color: #000000;
+  background-color: #4A5565;
   border-radius: 50%;
   align-self: center;
 }
@@ -84,7 +84,12 @@
 }
 
 /* Header inside expandable */
-.flightExpandableHeader {
+.flightExpandableHeader{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.flightExpandableHeader  h3{
   font-family: "Antic Didone";
   font-weight: 400;
   font-size: 20px;
@@ -227,6 +232,7 @@
 
 .proTip {
   padding: 12px 12px;
+  padding-right: 0px;
   display: flex;
   align-items: center;
   gap: 4px;

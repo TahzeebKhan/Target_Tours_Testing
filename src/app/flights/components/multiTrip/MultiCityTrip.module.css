@@ -91,6 +91,7 @@
   /* background-color: #ffffff; */
   transition: all 0.3s ease;
   height: 52px;
+  border: 1px solid #0000001A;
   cursor: pointer;
 }
 .sortedItem.activeSortedItem {
@@ -264,7 +265,7 @@
 }
 
 /* ================= SORT ITEM ================= */
-.sortedItem {
+/* .sortedItem {
   display: flex;
   gap: 6px;
   align-items: center;
@@ -278,7 +279,7 @@
 .sortedItem.activeSortedItem {
   background-color: #ffffff;
   border: 0.69px solid #0000001a;
-}
+} */
 
 .sortedTextContainer {
   display: flex;
