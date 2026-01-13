@@ -123,7 +123,7 @@ const Testimonial = () => {
                       </div>
                     </div>
 
-                    <img src="/icons/testimonialIcon.svg" alt="quote" className={styles.TestimonialIcon} />
+                    <img src="/icons/testimonialIcons.svg" alt="quote" className={styles.TestimonialIcon} />
                   </div>
 
                   {/* Rating */}

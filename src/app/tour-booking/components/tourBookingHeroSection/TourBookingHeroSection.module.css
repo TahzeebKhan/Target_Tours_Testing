@@ -255,3 +255,125 @@
         font-size: 26px;
     }
 }
+
+@media (max-width: 1080px) {
+    .header{
+        font-size: 48px;
+    }
+    .tags{
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+    .fromToCont span{
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 991px) {
+    .header{
+        font-size: 44px;
+    }
+    .leftBottom p{
+        font-size: 16px;
+    }
+    .rightContainer{
+        max-width: 379px;
+        width: 100%;
+    }
+    .price span{
+        font-size: 28px;
+    }
+    .person{
+        font-size: 18px;
+    }
+    .privateText{
+        font-size: 18px;
+    }
+    .tags{
+        padding: 7px 12px;
+    }
+    .bottomRight{
+        padding: 9px 24px;
+    }
+}
+
+@media (max-width: 821px) {
+    .header{
+        font-size: 38px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header{
+        font-size: 32px;
+    }
+    .leftContainer{
+        gap: 20px;
+    }
+    .container{
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 20px;
+        gap: 120px;
+    }
+    .leftBottom p{
+        font-size: 14px;
+    }
+    .overlay{
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+
+    }
+    /* .leftBottom{
+        display: none;
+    } */
+}
+
+@media (max-width: 660px) {
+    .container{
+        gap: 100px;
+    }
+}
+
+@media (max-width: 430px) {
+    .container{
+        gap: 159px;
+        padding: 0;
+    }
+    .header{
+        font-size: 42px;
+    }
+    .leftBottom{
+        display: none;
+    }
+    .heroContainer{
+        padding: 0 16px;
+    }
+    .fromToCont{
+        font-size: 20px;
+    }
+    .privateText{
+        font-size: 16px;
+    }
+    .tags{
+        font-size: 12px;
+    }
+    .tailor_made{
+        font-size: 16px;;
+    }
+    .price span{
+        font-size: 32px;
+    }
+    .person{
+        font-size: 14px;
+    }
+    .heroContainer{
+        bottom: -33px;
+    }
+    .bottomRight{
+        font-size: 14px;
+    }
+    .overlay{
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+
+    }
+}
