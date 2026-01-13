@@ -1,139 +1,3 @@
-// "use client";
-// import React, { useEffect, useRef, useState } from "react";
-// import styles from "./UpcomingDepartures.module.css";
-
-// const UpcomingDepartures = () => {
-//     const months = [
-//         "FEB 2026",
-//         "MAR 2026",
-//         "APR 2026",
-//         "MAY 2026",
-//         "JUN 2026",
-//         "JUL 2026",
-//         "AUG 2026",
-//         "SEP 2026",
-//         "OCT 2026",
-//     ];
-//     const BookingData = [
-//         {
-//             id: 1,
-//             month: "SEP 2026",
-//             departureDate: "Thu, 03 Sept 2026",
-//             returnDate: "Tue, 15 Sept 2026",
-//             pricePerPerson: 66945,
-//             singleOccupantCharge: 6945,
-//             availability: "Available",
-//         },
-//         {
-//             id: 2,
-//             month: "SEP 2026",
-//             departureDate: "Thu, 10 Sept 2026",
-//             returnDate: "Tue, 22 Sept 2026",
-//             pricePerPerson: 66945,
-//             singleOccupantCharge: 6945,
-//             availability: "Available",
-//         },
-//         {
-//             id: 3,
-//             month: "MAR 2026", // ✅ ONLY MARCH DATA
-//             departureDate: "Thu, 12 Mar 2026",
-//             returnDate: "Tue, 24 Mar 2026",
-//             pricePerPerson: 58999,
-//             singleOccupantCharge: 5999,
-//             availability: "Available",
-//         },
-//     ];
-
-
-//     const [activeTab, setActiveTab] = useState(months[0]);
-//     const tabsRef = useRef(null);
-
-//     const handleTabChange = (t) => {
-//         setActiveTab(t);
-//     };
-
-//     // underline position logic
-//     useEffect(() => {
-//         if (!tabsRef.current) return;
-
-//         const tabs = tabsRef.current;
-//         const activeEl = tabs.querySelector(`.${styles.active}`);
-//         if (!activeEl) return;
-
-//         tabs.style.setProperty(
-//             "--indicator-width",
-//             `${activeEl.offsetWidth}px`
-//         );
-//         tabs.style.setProperty(
-//             "--indicator-left",
-//             `${activeEl.offsetLeft}px`
-//         );
-//     }, [activeTab]);
-
-//     return (
-//         <section className={styles.section}>
-//             <h3 className={styles.heading}>Upcoming Departures</h3>
-//             <nav className={styles.tabsWrap}>
-//                 <ul className={styles.tabs} ref={tabsRef}>
-//                     {months.map((t) => (
-//                         <li
-//                             key={t}
-//                             className={`${styles.tab} ${activeTab === t ? styles.active : ""
-//                                 }`}
-//                             onClick={() => handleTabChange(t)}
-//                         >
-//                             <button className={styles.tabBtn}>{t}</button>
-//                         </li>
-//                     ))}
-//                 </ul>
-//             </nav>
-//             <div className={styles.container}>
-//                 {BookingData.map((item, i) => (
-//                     <div key={i} item={item} className={styles.row} >
-//                         {/* DATE */}
-//                         <div className={styles.col}>
-//                             <div className={styles.colItem}>
-//                                 <p className={styles.departure_date}>{item.departureDate}</p>
-//                                 <p className={styles.return_date}>
-//                                     Return: {item.returnDate}
-//                                 </p>
-//                             </div>
-
-//                         </div>
-
-//                         {/* PRICE */}
-//                         <div className={styles.col}>
-//                             <div className={styles.colItem}>
-//                                 <p className={styles.price}>
-//                                     From <span>₹ {item.pricePerPerson}</span>{" "}
-//                                     <small>/ PERSON</small>
-//                                 </p>
-//                                 <p className={styles.extra}>
-//                                     + ₹ {item.singleOccupantCharge} Single occupant
-//                                 </p>
-//                             </div>
-//                         </div>
-
-//                         {/* STATUS */}
-//                         <div className={styles.col}>
-//                             <span className={styles.available}>Available</span>
-//                         </div>
-
-//                         {/* CTA */}
-//                         <div className={styles.col}>
-//                             <button className={styles.bookBtn}>
-//                                 BOOK NOW
-//                             </button>
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-//         </section>
-//     );
-// };
-
-// export default UpcomingDepartures;
-
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -242,6 +106,9 @@ const UpcomingDepartures = () => {
             else if (screen >= 1440) content = 1080;
             else if (screen >= 1280) content = 960;
             else if (screen >= 1200) content = 840;
+            else if (screen >= 1156) content = 800;
+            else if (screen >= 991) content = 720;
+
             else content = screen - 32;
 
             const offsetVal = (screen - content) / 2;
@@ -329,6 +196,15 @@ const UpcomingDepartures = () => {
                     slidesOffsetBefore={offset}
                     slidesOffsetAfter={offset}
                     spaceBetween={24}
+                    breakpoints={{
+                        0: {
+                            spaceBetween: 12,   // mobile
+                        },
+                        768: {
+                            spaceBetween: 16,   // tablet & desktop
+                        },
+                    }}
+
                     className={styles.carousel}
                 >
                     {groupedData.map((group) => (
@@ -338,40 +214,84 @@ const UpcomingDepartures = () => {
                                     <p className={styles.noData}></p>
                                 ) : (
                                     group.items.map((item) => (
-                                        <div key={item.id} className={styles.row}>
-                                            {/* DATE */}
-                                            <div className={styles.col}>
-                                                <p className={styles.departure_date}>
-                                                    {item.departureDate}
-                                                </p>
-                                                <p className={styles.return_date}>
-                                                    Return: {item.returnDate}
-                                                </p>
-                                            </div>
+                                        <>
+                                            <div key={item.id} className={styles.row}>
+                                                {/* DATE */}
 
-                                            {/* PRICE */}
-                                            <div className={styles.col}>
-                                                <p className={styles.price}>
-                                                    From <span>₹ {item.pricePerPerson}</span>{" "}
-                                                    <small>/ PERSON</small>
-                                                </p>
-                                                <p className={styles.extra}>
-                                                    + ₹ {item.singleOccupantCharge} Single occupant
-                                                </p>
-                                            </div>
+                                                <div className={styles.col}>
+                                                    <p className={styles.departure_date}>
+                                                        {item.departureDate}
+                                                    </p>
+                                                    <p className={styles.return_date}>
+                                                        Return: {item.returnDate}
+                                                    </p>
+                                                </div>
 
-                                            {/* STATUS */}
-                                            <div className={styles.col}>
-                                                <span className={styles.available}>
-                                                    {item.availability}
-                                                </span>
-                                            </div>
+                                                {/* PRICE */}
+                                                <div className={styles.col}>
+                                                    <p className={styles.price}>
+                                                        From <span>₹ {item.pricePerPerson}</span>{" "}
+                                                        <small>/ PERSON</small>
+                                                    </p>
+                                                    <p className={styles.extra}>
+                                                        + ₹ {item.singleOccupantCharge} Single occupant
+                                                    </p>
+                                                </div>
 
-                                            {/* CTA */}
-                                            <div className={styles.col}>
-                                                <button className={styles.bookBtn}>BOOK NOW</button>
+                                                {/* STATUS */}
+                                                <div className={styles.col}>
+                                                    <span className={styles.available}>
+                                                        {item.availability}
+                                                    </span>
+                                                </div>
+
+
+                                                {/* CTA */}
+                                                <div className={styles.col}>
+                                                    <button className={styles.bookBtn}>BOOK NOW</button>
+                                                </div>
                                             </div>
-                                        </div>
+                                            <div key={item.id} className={styles.rowMobile}>
+                                                {/* DATE */}
+
+                                                <div className={styles.mobileColContainer}>
+                                                    <div className={styles.col}>
+                                                        <p className={styles.departure_date}>
+                                                            {item.departureDate}
+                                                        </p>
+                                                        <p className={styles.return_date}>
+                                                            Return: {item.returnDate}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* PRICE */}
+                                                    <div className={styles.col}>
+                                                        <p className={styles.price}>
+                                                            From <span>₹ {item.pricePerPerson}</span>{" "}
+                                                            <small>/ PERSON</small>
+                                                        </p>
+                                                        <p className={styles.extra}>
+                                                            + ₹ {item.singleOccupantCharge} Single occupant
+                                                        </p>
+                                                    </div>
+
+                                                    {/* STATUS */}
+                                                    <div className={`${styles.colmobileLastChild} ${styles.col}`}>
+                                                        <span className={styles.available}>
+                                                            {item.availability}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+
+                                                {/* CTA */}
+                                                <div className={styles.colmobile}>
+                                                    <button className={styles.bookBtn}>BOOK NOW</button>
+                                                </div>
+                                            </div>
+                                        </>
+
+
                                     ))
                                 )}
                             </div>

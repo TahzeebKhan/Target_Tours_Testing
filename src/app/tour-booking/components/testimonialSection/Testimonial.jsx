@@ -105,6 +105,19 @@ const Testimonial = () => {
             onSlideChange={handleSlideChange}
             slidesPerView={'auto'}
             spaceBetween={24}
+            breakpoints={
+              {
+                0:{
+                  spaceBetween:9
+                },
+                430:{
+                  spaceBetween:16
+                },
+                768:{
+                  spaceBetween:24
+                }
+              }
+            }
             className={styles.carousel}
           >
             {testimonialData.map((item) => (

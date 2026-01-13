@@ -1,8 +1,8 @@
-.section{
+.section {
     padding: 60px 20px 80px 20px;
 }
 
-.container{
+.container {
     margin: 0 auto;
     max-width: 1520px;
     width: 100%;
@@ -10,7 +10,8 @@
     flex-direction: column;
     gap: 42px;
 }
-.heading{
+
+.heading {
     font-family: Antic Didone;
     font-weight: 400;
     font-style: Regular;
@@ -22,12 +23,13 @@
 
 }
 
-.testimonialContainer{
+.testimonialContainer {
     display: flex;
     align-items: center;
     gap: 24px;
 }
-.testimonialCard{
+
+.testimonialCard {
     max-width: 384px;
     width: 100%;
     padding: 24px;
@@ -37,30 +39,32 @@
     background-color: #F9F9F9;
 }
 
-.profileCont{
+.profileCont {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.profile{
+
+.profile {
     display: flex;
     gap: 20px;
 }
 
-.profileIcon{
+.profileIcon {
     width: 51px;
     height: 51px;
     border-radius: 50%;
     background-color: #D9D9D9;
 }
-.profileAddressCont{
+
+.profileAddressCont {
     display: flex;
     flex-direction: column;
 
 
 }
 
-.profileName{
+.profileName {
     font-family: Antic Didone;
     font-weight: 400;
     font-style: Regular;
@@ -70,7 +74,8 @@
     color: #000033;
 
 }
-.profileAddress{
+
+.profileAddress {
     font-family: var(--font-inter);
     font-weight: 400;
     font-style: Regular;
@@ -80,17 +85,20 @@
     color: rgba(0, 0, 0, 0.6);
 
 }
-.TestimonialIcon{
+
+.TestimonialIcon {
     width: 48px;
     height: 48px;
 }
-.ratingStart{
+
+.ratingStart {
     display: flex;
     align-items: center;
     gap: 7px;
 }
-.testimonialPara p{
-        font-family: var(--font-inter);
+
+.testimonialPara p {
+    font-family: var(--font-inter);
     font-weight: 300;
     font-style: Light;
     font-size: 14px;
@@ -100,7 +108,7 @@
 
 }
 
-.testimonialDate span{
+.testimonialDate span {
     font-family: var(--font-inter);
     font-weight: 400;
     font-style: Regular;
@@ -142,7 +150,67 @@
 .btn:hover img {
     filter: invert(1);
 }
-.slide{
+
+.slide {
     width: 384px;
-    
+
+}
+
+@media (max-width: 1200px) {
+    .heading {
+        font-size: 40px;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .heading {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .heading {
+        font-size: 32px;
+    }
+    .container{
+        gap: 24px;
+    }
+    .section{
+        padding: 20px;
+    }
+}
+
+@media (max-width: 520px) {
+    .testimonialCard {
+        max-width: 324px;
+        width: 100%;
+        padding: 16px;
+        gap: 16px;
+    }
+    .testimonialPara p{
+        font-size: 12px;
+    }
+
+    .section{
+        padding: 20px 16px;
+    }
+
+    .slide {
+        width: 324px;
+    }
+    .profileIcon{
+        width: 48px;
+        height: 48px;
+    }
+    .profileAddress{
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .heading {
+        font-size: 28px;
+    }
+
 }

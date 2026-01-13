@@ -19,9 +19,12 @@
 .leftSection img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .rightSection {
+  max-width: 444px;
+  width: 100%;
   padding: 16px 24px 16px 0px;
   display: flex;
   flex-direction: column;
@@ -295,4 +298,84 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+@media (max-width: 1400px) {
+  .rightMiddle p{
+    font-size: 12px;
+  }
+}
+@media (max-width: 1200px) {
+  .rightMiddle{
+    font-size: 12px;
+  }
+  .rightSection{
+    gap: 12px;
+  }
+  .rightSection{
+    padding-right: 10px;
+  }
+  .section{
+    gap: 17px;
+  }
+  .heading{
+    font-size: 16px;
+  }
+  .downtown{
+    font-size: 11px;
+  }
+  .schaduleTime span{
+    font-size: 10px;
+  }
+  .schaduleTime img{
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 1156px) {
+  .rightSection{
+    justify-content: space-between;
+  }
+  .section{
+    gap: 12px;
+  }
+}
+@media (max-width: 1156px) {
+  .leftSection{
+    max-width: 100%;
+    height: 249px;
+  }
+  .section{
+    flex-direction: column;
+  }
+  .rightSection{
+    padding-left: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .leftSection{
+    max-width: 244px;
+    width: 100%;
+    height: 249px;
+  }
+  .ArrivalContainer{
+    height: auto;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .section{
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 470px) {
+   .leftSection{
+    max-width: 100%;
+    height: 211px;
+  }
+  .section{
+    flex-direction: column;
+  }
 }

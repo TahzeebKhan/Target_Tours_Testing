@@ -138,3 +138,59 @@
 .slide{
     width: 482px !important;
 }
+
+@media (max-width: 1200px) {
+    .heading {
+        font-size: 40px;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .heading {
+        font-size: 36px;
+    }
+    .card{
+        max-width: 400px;
+        width: 100%;
+    }
+    .slide{
+        width: 400px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .heading {
+        font-size: 32px;
+    }
+    .container{
+        gap: 24px;
+    }
+    .section{
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 520px) {
+    .card{
+        max-width: 310px;
+        width: 100%;
+    }
+    .slide{
+        width: 310px !important;
+    }
+    .cardSubHeading{
+        font-size: 12px;
+    }
+    
+
+
+
+}
+
+@media (max-width: 400px) {
+    .heading {
+        font-size: 28px;
+    }
+
+}

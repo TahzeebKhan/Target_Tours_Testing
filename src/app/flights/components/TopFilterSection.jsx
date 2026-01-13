@@ -797,7 +797,7 @@ const TopFilterSection = ({
                     >
                       <div className={styles.lable}>Travellers & Class</div>
                       <div className={styles.iconCont}>
-                        <div className={styles.contant}>
+                        <div className={`${styles.contant} ${styles.contantTra}`}>
                           {passengers.adult +
                             passengers.child +
                             passengers.infant}{" "}
