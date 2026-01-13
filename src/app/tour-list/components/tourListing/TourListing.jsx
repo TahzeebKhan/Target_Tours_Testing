@@ -8,8 +8,13 @@ import { Pencil, SlidersHorizontal } from "lucide-react";
 import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
 import SortBySheet from "../sortBySheet/SortBySheet";
 import PreferencesSection from "../preferencesSection/PreferencesSection";
+import SelectDestination from "@/app/profile_components/selectDestination";
+import SelectTravellerProfile from "@/app/profile_components/selectTravellerProfile";
+import SelectPreferences from "@/app/profile_components/selectPreferences";
 
 const TourListing = () => {
+
+  const [activePreferenceView, setActivePreferenceView] = useState(null);
 
   const [openFilter, setOpenFilter] = useState(false);
   const [openSortByFilter, setOpenSortByFilter] = useState(false);
@@ -454,8 +459,10 @@ const TourListing = () => {
             {openPreferencesFilter && (
               <PreferencesSection
                 onClose={() => setOpenPreferencesFilter(false)}
-                open={openPreferencesFilter}
-                setOpen={setOpenPreferencesFilter}
+                onSelect={(view) => {
+                  setOpenPreferencesFilter(false);
+                  setActivePreferenceView(view);
+                }}
               />
             )}
           </div>
@@ -569,6 +576,18 @@ const TourListing = () => {
             ))}
           </div>
         </div>
+
+        {activePreferenceView === "DESTINATIONS" && (
+          <SelectDestination onClose={() => setActivePreferenceView(null)} />
+        )}
+
+        {activePreferenceView === "TRAVELLER" && (
+          <SelectTravellerProfile onClose={() => setActivePreferenceView(null)} />
+        )}
+
+        {activePreferenceView === "PREFERENCES" && (
+          <SelectPreferences onClose={() => setActivePreferenceView(null)} />
+        )}
       </section>
     </>
   );

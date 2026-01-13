@@ -6,7 +6,7 @@ import SelectDestination from "@/app/profile_components/selectDestination";
 import SelectTravellerProfile from "@/app/profile_components/selectTravellerProfile";
 import SelectPreferences from "@/app/profile_components/selectPreferences";
 
-export default function PreferencesSection({ onClose }) {
+export default function PreferencesSection({ onClose, onSelect }) {
   const wrapperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(null);
   const [currentView, setCurrentView] = useState(null);
@@ -52,31 +52,29 @@ export default function PreferencesSection({ onClose }) {
 
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
-      {currentView === "DESTINATIONS" && (
-        <SelectDestination onClose={() => setCurrentView(null)} />
-      )}
-
-      {currentView === "TRAVELER_PROFILES" && (
-        <SelectTravellerProfile onClose={() => setCurrentView(null)} />
-      )}
-
-      {currentView === "PREFERENCES" && (
-        <SelectPreferences onClose={() => setCurrentView(null)} />
-      )}
-
-      {!currentView &&
-        items.map((item, index) => (
-          <div
-            key={index}
-            className={`${styles.card} ${
-              activeIndex === index ? styles.active : ""
-            }`}
-            onClick={() => handleCardClick(item, index)}
-          >
-            <h2>{item.title}</h2>
-            <p>{item.subtitle}</p>
-          </div>
-        ))}
+      <div
+        className={`${styles.card
+          }`}
+        onClick={() => onSelect("DESTINATIONS")}
+      >
+        <h2>DESTINATIONS</h2>
+        <p>Where would you like to go?</p>
+      </div>
+      <div
+        className={`${styles.card}`}
+        onClick={() => onSelect("TRAVELLER")}
+      >
+        <h2>TRAVELER PROFILES</h2>
+        <p>What is your traveler profile?</p>
+      </div>
+      <div
+        className={`${styles.card
+          }`}
+        onClick={() => onSelect("PREFERENCES")}
+      >
+        <h2>YOUR PREFERENCES</h2>
+        <p>Any specific preference?</p>
+      </div>
     </div>
   );
 }

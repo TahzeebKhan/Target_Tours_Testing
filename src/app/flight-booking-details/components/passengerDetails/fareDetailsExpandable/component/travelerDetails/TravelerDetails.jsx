@@ -2,17 +2,38 @@ import React, { useState } from "react";
 import styles from "./TravelerDetails.module.css";
 
 const TravelerDetails = () => {
-    const [travelers, setTravelers] = useState([1]); // start with 1 traveler
+    const [travelers, setTravelers] = useState([
+        { id: 1, isOpen: true }
+    ]); // start with 1 traveler
 
     // ➕ Add Traveler
-    const addTraveler = () => {
-        setTravelers(prev => [...prev, prev.length + 1]);
+    // const addTraveler = () => {
+    //     setTravelers(prev => [...prev, prev.length + 1]);
+    // };
+   const addTraveler = () => {
+  setTravelers(prev => [
+    ...prev,
+    { id: prev.length + 1, isOpen: true }
+  ]);
+};
+
+
+    const toggleTraveler = (index) => {
+        setTravelers(prev =>
+            prev.map((t, i) =>
+                i === index
+                    ? { ...t, isOpen: !t.isOpen }
+                    : t
+            )
+        );
     };
 
-    // ➖ Remove Traveler
-    const removeTraveler = (index) => {
-        setTravelers(prev => prev.filter((_, i) => i !== index));
-    };
+
+
+    // // ➖ Remove Traveler
+    // const removeTraveler = (index) => {
+    //     setTravelers(prev => prev.filter((_, i) => i !== index));
+    // };
 
     return (
         <div className={styles.wrapper}>
@@ -22,24 +43,37 @@ const TravelerDetails = () => {
             </div>
 
             {/* Traveler Cards */}
-            {travelers.map((traveler, index) => (
-                <div key={traveler} className={styles.card}>
+            <div className={styles.travelerCards}>
+                {travelers.map((traveler, index) => (
+                <div key={traveler.id} className={styles.card}>
                     <div className={styles.cardHeader}>
                         <h3>TRAVELER {index + 1} - ADULT</h3>
 
                         {/* Remove button (hide for first traveler) */}
-                        {index > 0 && (
-                            <span
+                        {/* {index > 0 && ( */}
+                        {/* <span
                                 className={styles.collapse}
-                                onClick={() => removeTraveler(index)}
-                                style={{ cursor: "pointer" }}
+                                // onClick={() => removeTraveler(index)}
+                                onClick={() => toggleTraveler(index)}
                             >
+                                {traveler.isOpen ? "—" : "+"}
+                            </span> */}
+                        {/* )} */}
+
+                        <span className={styles.iconWrapper} onClick={() => toggleTraveler(index)}>
+                            <span className={`${styles.icon} ${traveler.isOpen ? styles.hide : styles.show}`}>
+                                +
+                            </span>
+                            <span className={`${styles.icon} ${traveler.isOpen ? styles.show : styles.hide}`}>
                                 —
                             </span>
-                        )}
+                        </span>
                     </div>
 
-                    <div className={styles.cardBody}>
+                    <div
+                        className={`${styles.cardBody} ${traveler.isOpen ? styles.open : styles.closed
+                            }`}
+                    >
                         <div className={styles.grid}>
                             <div className={styles.field}>
                                 <label className={styles.label}>First Name</label>
@@ -98,6 +132,7 @@ const TravelerDetails = () => {
                             </div>
                         </div>
                     </div>
+
                 </div>
             ))}
 
@@ -132,6 +167,7 @@ const TravelerDetails = () => {
                         />
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );
