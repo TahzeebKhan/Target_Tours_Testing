@@ -331,11 +331,10 @@ function LayoutContent({ children }) {
         <SidebarContext.Provider value={{ isSidebarOpen, setIsSidebarOpen }}>
           <div
             ref={containerRef}
-            className={`${styles.container} ${
-              tripType === "round"
+            className={`${styles.container} ${tripType === "round"
                 ? styles.wideContainer
                 : styles.normalContainer
-            }`}
+              }`}
           >
             {isTablet && (
               <button
@@ -353,14 +352,12 @@ function LayoutContent({ children }) {
             )}
             {/* Sidebar */}
             <aside
-              className={`${styles.sidebar} ${
-                isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
-              }`}
+              className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
+                }`}
             >
               <div
-                className={`${styles.sidebarSticky} ${
-                  tripType === "multi" ? styles.sidebarStickyMultiCity : ""
-                }`}
+                className={`${styles.sidebarSticky} ${tripType === "multi" ? styles.sidebarStickyMultiCity : ""
+                  }`}
                 ref={sidebarRef}
               >
                 <FlightFilters />
@@ -376,12 +373,16 @@ function LayoutContent({ children }) {
   );
 }
 
+import { Suspense } from "react";
+
 export default function FlightsLayout({ children }) {
   return (
     <FlightFilterProvider>
-      <TripTypeProvider>
-        <LayoutContent>{children}</LayoutContent>
-      </TripTypeProvider>
+      <Suspense fallback={<div>Loading...</div>}>
+        <TripTypeProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </TripTypeProvider>
+      </Suspense>
     </FlightFilterProvider>
   );
 }
