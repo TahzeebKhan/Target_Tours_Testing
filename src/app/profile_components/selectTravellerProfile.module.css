@@ -4,8 +4,11 @@
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    background-color: rgba(0, 0, 0, 0.4);
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.2);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
 }
 
 .container {
