@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./ProfileSection.module.css";
 import { useEffect, useRef } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 const ProfileSection = () => {
   const dropdownRef = useRef(null);
@@ -18,6 +21,41 @@ const ProfileSection = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const validateProfile = () => {
+    const get = (label) =>
+      profileFields.find((f) => f.label === label)?.value?.trim() || "";
+
+    const errors = [];
+
+    if (!get("Full Name")) errors.push("Full Name is required");
+    if (!get("Display Name")) errors.push("Display Name is required");
+
+    const dob = get("Date of Birth");
+    if (!dob) {
+      errors.push("Date of Birth is required");
+    } else if (isNaN(new Date(dob).getTime())) {
+      errors.push("Date of Birth is invalid");
+    }
+
+    if (!get("Nationality")) errors.push("Nationality is required");
+    if (!get("Address")) errors.push("Address is required");
+    if (!get("Country")) errors.push("Country is required");
+
+    const zip = get("Zip Code");
+    if (!zip) {
+      errors.push("Zip Code is required");
+    } else if (!/^\d{4,10}$/.test(zip)) {
+      errors.push("Zip Code is invalid");
+    }
+
+    const passport = get("Passport Details");
+    if (!passport) {
+      errors.push("Passport Details are required");
+    }
+
+    return errors;
+  };
 
   const [profileFields, setProfileFields] = useState([
     { label: "Full Name", value: "Demian Satria", isEditing: false },
@@ -80,6 +118,159 @@ const ProfileSection = () => {
       ],
     },
   ]);
+  const mapApiToFields = (data) => [
+    { label: "Full Name", value: data.full_name || "", isEditing: false },
+
+    {
+      label: "Display Name",
+      value: data.display_name || "",
+      placeholder: "Choose how your name appears across Transpeed.",
+      isEditing: false,
+    },
+
+    {
+      label: "Email Address",
+      value: data.email || "", // fallback if backend adds later
+      isVerified: true,
+      isEditing: false,
+    },
+
+    {
+      label: "Phone Number",
+      value: data.phone || "",
+      isEditing: false,
+    },
+
+    {
+      label: "Date of Birth",
+      value: data.date_of_birth || "",
+      placeholder: "Add your date of birth",
+      isEditing: false,
+    },
+
+    {
+      label: "Nationality",
+      value: data.nationality || "",
+      hasFlag: true,
+      isEditing: false,
+    },
+
+    {
+      label: "Passport Details",
+      value: data.passport_detail || "",
+      placeholder: "Not provided",
+      actionText: "Add Passport",
+      isEditing: false,
+    },
+
+    {
+      label: "Address",
+      value: data.address || "",
+      placeholder: "Add your address",
+      isEditing: false,
+    },
+
+    {
+      label: "Zip Code",
+      value: data.zip_code || "",
+      placeholder: "Enter Zipcode",
+      isEditing: false,
+    },
+
+    {
+      label: "Country",
+      value: data.country || "",
+      isDropdown: true,
+      isEditing: false,
+      isOpen: false,
+      options: [
+        "United States",
+        "India",
+        "United Kingdom",
+        "Canada",
+        "Australia",
+      ],
+    },
+  ];
+
+  const buildPayload = () => {
+    const get = (label) =>
+      profileFields.find((f) => f.label === label)?.value || "";
+
+    return {
+      full_name: get("Full Name"),
+      display_name: get("Display Name"),
+      date_of_birth: get("Date of Birth"),
+      nationality: get("Nationality"),
+      address: get("Address"),
+      country: get("Country"),
+      zip_code: get("Zip Code"),
+      passport_detail: get("Passport Details"),
+      profile_completed: true,
+    };
+  };
+  const updateProfile = async () => {
+    try {
+      const errors = validateProfile();
+
+      if (errors.length > 0) {
+        toast.error(errors.join("\n"));
+        return; // ❌ stop API call
+      }
+
+      const userId = Cookies.get("user_id");
+      const token = Cookies.get("auth_token");
+
+      if (!userId) {
+        throw new Error("User ID missing in cookies");
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
+      const payload = buildPayload();
+
+      const res = await axios.put(url, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      alert("Profile updated successfully");
+    } catch (err) {
+      console.error("Profile update failed", err.response?.data || err.message);
+      alert("Failed to update profile");
+    }
+  };
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = Cookies.get("user_id");
+        const token = Cookies.get("auth_token");
+
+        if (!userId) return;
+
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
+
+        const res = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
+        // ✅ Prefill fields
+        setProfileFields(mapApiToFields(res.data));
+      } catch (err) {
+        console.error(
+          "Failed to fetch profile",
+          err.response?.data || err.message
+        );
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = (index, value) => {
     const updated = [...profileFields];
@@ -87,9 +278,16 @@ const ProfileSection = () => {
     setProfileFields(updated);
   };
 
-  const toggleEdit = (index) => {
+  const toggleEdit = async (index) => {
     const updated = [...profileFields];
-    updated[index].isEditing = !updated[index].isEditing;
+    const field = updated[index];
+
+    // If clicking SAVE → call API
+    if (field.isEditing) {
+      await updateProfile();
+    }
+
+    updated[index].isEditing = !field.isEditing;
     setProfileFields(updated);
   };
 
