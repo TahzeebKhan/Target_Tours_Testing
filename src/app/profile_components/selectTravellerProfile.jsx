@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./selectTravellerProfile.module.css";
 
@@ -11,8 +11,24 @@ const profiles = [
   { id: "romantic", label: "Romantic", src: "/images/romantic.svg" },
 ];
 
-export default function SelectTravellerProfile() {
+export default function SelectTravellerProfile({ onClose }) {
+  const [open, setOpen] = useState(true);
   const [selectedId, setSelectedId] = useState("family");
+
+  // 🔒 Background scroll lock
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const closeModal = () => {
+    setOpen(false);
+    onClose?.();
+  };
 
   const handleSelect = (id) => {
     setSelectedId(id);
@@ -22,18 +38,30 @@ export default function SelectTravellerProfile() {
     setSelectedId(null);
   };
 
+  if (!open) return null;
+
   return (
-    <div className={styles.overlay}>
-      <section className={styles.container}>
+    <div className={styles.overlay} onClick={closeModal}>
+      <section
+        className={styles.container}
+        onClick={(e) => e.stopPropagation()} // prevent backdrop close
+      >
         <header className={styles.header}>
           <div className={styles.topRow}>
             <div className={styles.breadcrumb}>
-              <span className={styles.breadcrumbLabel}>TRAVELER PROFILES</span>
+              <span className={styles.breadcrumbLabel}>
+                TRAVELER PROFILES
+              </span>
               <h2 className={styles.currentSelection}>
                 {profiles.find((p) => p.id === selectedId)?.label || "Select"}
               </h2>
             </div>
-            <button className={styles.closeButton} aria-label="Close">
+
+            <button
+              className={styles.closeButton}
+              aria-label="Close"
+              onClick={closeModal}
+            >
               <svg
                 width="20"
                 height="20"
@@ -47,6 +75,7 @@ export default function SelectTravellerProfile() {
             </button>
           </div>
         </header>
+
         <div className={styles.sectionWrapper}>
           <h1 className={styles.title}>SELECT YOUR TRAVELER PROFILE</h1>
 
@@ -71,7 +100,7 @@ export default function SelectTravellerProfile() {
                   {selectedId === profile.id && (
                     <div className={styles.checkIcon}>
                       <Image
-                        src="/images/check-white.svg" 
+                        src="/images/check-white.svg"
                         alt="selected"
                         width={8}
                         height={8}
@@ -90,7 +119,9 @@ export default function SelectTravellerProfile() {
           <button className={styles.resetButton} onClick={handleReset}>
             RESET
           </button>
-          <button className={styles.searchButton}>SEARCH</button>
+          <button className={styles.searchButton} onClick={closeModal}>
+            SEARCH
+          </button>
         </footer>
       </section>
     </div>

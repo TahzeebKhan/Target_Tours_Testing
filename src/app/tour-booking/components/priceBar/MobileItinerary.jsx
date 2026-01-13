@@ -1,29 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import styles from "./MobileItinerary.module.css";
 
-const MobileItinerary = ({ hotel }) => {
-  const [isOpen, setIsOpen] = useState(false);
+/* ✅ REQUIRED CONSTANTS (WERE MISSING) */
+const MIN = 5000;
+const MAX = 100000;
+const GAP = 5000;
+const STEP = 1000;
+
+const MobileItinerary = ({ isOpen, onClose, hotel }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Form State
+  // 🔒 Lock background scroll
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // ===== FORM STATE (UNCHANGED) =====
   const [travelDateType, setTravelDateType] = useState(null);
   const [departureCity, setDepartureCity] = useState("");
   const [hotelCategory, setHotelCategory] = useState("Standard");
   const [selectedAddons, setSelectedAddons] = useState([]);
-
-  // Slider State for Step 2
-  const [minPrice, setMinPrice] = useState(5000);
-  const [maxPrice, setMaxPrice] = useState(100000);
-
+  const [minPrice, setMinPrice] = useState(MIN);
+  const [maxPrice, setMaxPrice] = useState(MAX);
   const [notes, setNotes] = useState("");
-  const [contactInfo, setContactInfo] = useState({
-    firstName: "",
-    email: "",
-    phone: "",
-  });
   const [contactPreference, setContactPreference] = useState("Email");
 
   const addonOptions = [
@@ -42,24 +47,28 @@ const MobileItinerary = ({ hotel }) => {
   };
 
   const handleNext = () => {
-    if (currentStep < 3) setCurrentStep((s) => s + 1);
-    else {
-      setIsOpen(false);
+    if (currentStep < 3) {
+      setCurrentStep((s) => s + 1);
+    } else {
       setCurrentStep(1);
+      onClose?.();
     }
   };
 
-  const MIN = 5000;
-  const MAX = 100000;
-  const GAP = 5000;
-  const STEP = 1000;
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep((s) => s - 1);
+    } else {
+      onClose?.();
+    }
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           className={styles.popupOverlay}
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}   /* ✅ FIXED */
         >
           <motion.div
             className={styles.popupCard}
@@ -75,7 +84,7 @@ const MobileItinerary = ({ hotel }) => {
                 <h4 className={styles.stepNumber}>STEP {currentStep}-3</h4>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={onClose}   /* ✅ FIXED */
                 className={styles.closeBtn}
               >
                 ✕
@@ -308,7 +317,8 @@ const MobileItinerary = ({ hotel }) => {
                 onClick={() =>
                   currentStep > 1
                     ? setCurrentStep(currentStep - 1)
-                    : setIsOpen(false)
+                    : onClose?.()
+
                 }
               >
                 BACK

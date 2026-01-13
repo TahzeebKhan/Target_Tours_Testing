@@ -10,6 +10,7 @@
     background: rgba(10, 10, 10, 0.2);
     backdrop-filter: blur(6px);
     z-index: 9999;
+    overscroll-behavior: contain;
 }
 
 .container {
@@ -107,7 +108,6 @@
 .imageWrapper {
   position: relative;
   aspect-ratio: 1 / 1;
-  border-radius: 4px;
   overflow: hidden;
 
   display: flex;
