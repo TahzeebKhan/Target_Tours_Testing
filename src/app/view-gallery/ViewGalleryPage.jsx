@@ -1,15 +1,15 @@
-"use client"
-import React from 'react'
-import styles from './ViewGalleryPage.module.css'
-import ActivityGalleryCarousel from './activityGalleryCarousel/ActivityGalleryCarousel'
-import GallerySection from './gallerySection/GallerySection'
-import { useRouter } from 'next/navigation'
+"use client";
+import React from "react";
+import styles from "./ViewGalleryPage.module.css";
+import ActivityGalleryCarousel from "./activityGalleryCarousel/ActivityGalleryCarousel";
+import GallerySection from "./gallerySection/GallerySection";
+import { useRouter } from "next/navigation";
 
 const ViewGalleryPage = () => {
   const router = useRouter();
- const handleBack = () => {
+  const handleBack = () => {
     router.back();
-  } 
+  };
   const galleryData = [
     {
       title: "ALPINE HIKING TRAIL",
@@ -18,8 +18,8 @@ const ViewGalleryPage = () => {
         "/gallery/Alpine2.png",
         "/gallery/Alpine3.png",
         "/gallery/Alpine4.png",
-        "/gallery/Alpine5.png"
-      ]
+        "/gallery/Alpine5.png",
+      ],
     },
     {
       title: "GLACIER WALK EXPERIENCE",
@@ -28,8 +28,8 @@ const ViewGalleryPage = () => {
         "/gallery/Glacier2.png",
         "/gallery/Glacier3.png",
         "/gallery/Glacier4.png",
-        "/gallery/Glacier5.png"
-      ]
+        "/gallery/Glacier5.png",
+      ],
     },
     {
       title: "Wildlife Safari Experience",
@@ -38,9 +38,9 @@ const ViewGalleryPage = () => {
         "/gallery/Safari2.png",
         "/gallery/Safari3.png",
         "/gallery/Safari4.png",
-        "/gallery/Safari5.png"
-      ]
-    }
+        "/gallery/Safari5.png",
+      ],
+    },
   ];
 
   return (
@@ -53,11 +53,11 @@ const ViewGalleryPage = () => {
       <div className={styles.container}>
         <ActivityGalleryCarousel />
         {galleryData.map((data, index) => (
-          <GallerySection key={index} data={data} />
+          <GallerySection key={index} data={data} hideOnMobile />
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ViewGalleryPage
+export default ViewGalleryPage;
