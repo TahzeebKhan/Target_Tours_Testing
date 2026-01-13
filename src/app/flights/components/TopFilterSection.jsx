@@ -95,10 +95,10 @@ const TopFilterSection = ({
     setEndDate,
     handleSearch,
   } = useTripType();
-
+  const [openCalendarFor, setOpenCalendarFor] = useState(null);
   const [directOnly, setDirectOnly] = useState(true);
   const isScrolled = parentScrolled || false;
-  const [showCalendar, setShowCalendar] = useState(false);
+  // const [showCalendar, setShowCalendar] = useState(false);
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);
   const [activeTile, setActiveTile] = useState([]);
   const [dateTiles, setDateTiles] = useState([]);
@@ -193,32 +193,32 @@ const TopFilterSection = ({
   };
 
   const handleDateClick = (date) => {
+    // Multi-city logic
     if (tripType === "multi" && activeMultiIndex !== null) {
       setMultiSegments((prev) =>
         prev.map((seg, i) => (i === activeMultiIndex ? { ...seg, date } : seg))
       );
-      setShowCalendar(false);
+      setOpenCalendarFor(null); // ✅ Close via state
       setActiveMultiIndex(null);
       return;
     }
 
+    // Oneway logic
     if (calendarTripType === "oneway") {
       setStartDate(date);
       setEndDate(null);
+      setOpenCalendarFor(null); // ✅ Close via state
       return;
     }
 
-    // ROUND TRIP
+    // Roundtrip logic
     if (!startDate || endDate) {
-      // first click OR restart selection
       setStartDate(date);
       setEndDate(null);
     } else if (new Date(date) >= new Date(startDate)) {
-      // valid end date
       setEndDate(date);
-      setShowCalendar(false);
+      setOpenCalendarFor(null); // ✅ Close via state
     } else {
-      // clicked date before start → restart range
       setStartDate(date);
       setEndDate(null);
     }
@@ -310,18 +310,17 @@ const TopFilterSection = ({
     );
   };
 
-  useEffect(() => {
-    if (!showCalendar) return;
+  // useEffect(() => {
+  //   if (!showCalendar) return;
 
-    const handleClickOutside = (e) => {
-      if (calendarRef.current && !calendarRef.current.contains(e.target)) {
-        // setShowCalendar(false);
-      }
-    };
+  //   const handleClickOutside = (e) => {
+  //     if (calendarRef.current && !calendarRef.current.contains(e.target)) {
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showCalendar]);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, [showCalendar]);
 
   const tripOrder = ["round", "oneway", "multi"];
 
@@ -386,10 +385,10 @@ const TopFilterSection = ({
     }
   };
 
-  const openRoundTripCalendar = () => {
-    setCalendarTripType("round");
-    setShowCalendar(true);
-  };
+  // const openRoundTripCalendar = () => {
+  //   setCalendarTripType("round");
+  //   setShowCalendar(true);
+  // };
 
   const [scrollY, setScrollY] = useState(0);
 
@@ -697,7 +696,7 @@ const TopFilterSection = ({
                       }`}
                     >
                       <div className={styles.lable}>Departure Date</div>
-                      {showCalendar && (
+                      {openCalendarFor === "main" && (
                         <DateCalendarModal
                           mode={
                             calendarTripType === "round"
@@ -710,7 +709,7 @@ const TopFilterSection = ({
                             )
                           }
                           onClose={() => {
-                            setShowCalendar(false);
+                            setOpenCalendarFor(null);
                             setActiveMultiIndex(null);
                           }}
                         >
@@ -727,16 +726,11 @@ const TopFilterSection = ({
                         className={styles.dateInputWrapper}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (tripType === "multi") {
-                            setCalendarTripType("oneway");
-                            setActiveMultiIndex(0);
-                            setShowCalendar(true);
-                          } else {
-                            setCalendarTripType("oneway");
-                            if (tripType === "round")
-                              setCalendarTripType("round");
-                            setShowCalendar(true);
-                          }
+                          setCalendarTripType(
+                            tripType === "round" ? "round" : "oneway"
+                          );
+                          setActiveMultiIndex(tripType === "multi" ? 0 : null);
+                          setOpenCalendarFor("main"); // ✅ Trigger specific calendar
                         }}
                       >
                         <input
@@ -768,7 +762,9 @@ const TopFilterSection = ({
                       } ${tripType === "round" ? styles.roundTripBtn : ""}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openRoundTripCalendar();
+                        setCalendarTripType("round");
+                        setActiveMultiIndex(null);
+                        setOpenCalendarFor("main");
                       }}
                     >
                       <div className={styles.lable}>Return Date</div>
@@ -964,11 +960,11 @@ const TopFilterSection = ({
 
                         <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
                           <div className={styles.lable}>Departure Date</div>
-                          {showCalendar && (
+                          {openCalendarFor === "multi-1" && (
                             <DateCalendarModal
                               mode="oneway"
                               onClose={() => {
-                                setShowCalendar(false);
+                                setOpenCalendarFor(null);
                                 setActiveMultiIndex(null);
                               }}
                             >
@@ -981,12 +977,13 @@ const TopFilterSection = ({
                               </div>
                             </DateCalendarModal>
                           )}
+
                           <div
                             className={styles.dateInputWrapper}
                             onClick={() => {
                               setCalendarTripType("oneway");
                               setActiveMultiIndex(1);
-                              setShowCalendar(true);
+                              setOpenCalendarFor("multi-1");
                             }}
                           >
                             <input

@@ -40,9 +40,7 @@ const PriceBar = ({
 const handlePersonalize = (e) => {
   onPersonalize?.(e);
 
-  const isMobileNow = window.innerWidth <= 600;
-
-  if (isMobileNow) {
+  if (isMobile) {
     setItineraryOpen(false);
     setMobileItineraryOpen(true);
   } else {
@@ -50,6 +48,7 @@ const handlePersonalize = (e) => {
     setItineraryOpen(true);
   }
 };
+
 
 
   const handleBookNow = () => {
