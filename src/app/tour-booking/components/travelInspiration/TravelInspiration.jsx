@@ -98,11 +98,13 @@ const TravelInspiration = () => {
                         {travelTipsData.map((item) => (
                             <SwiperSlide key={item.id} className={styles.slide}>
                                 <div key={item.id} className={styles.card}>
-                                    <img
+                                    <div className={styles.cardImgContainer}>
+                                        <img
                                         src={item.image}
                                         alt={item.title}
                                         className={styles.cardImg}
                                     />
+                                    </div>
 
                                     <div className={styles.cardTextConatiner}>
                                         <div className={styles.travleTrip}>

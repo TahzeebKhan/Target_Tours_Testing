@@ -20,7 +20,7 @@
   flex-direction: column;
   gap: 12px;
   top: calc(100% + 8px); /* just below input */
-  left: -1px; /* left aligned */
+  left: auto; /* left aligned */
   background: #171717;
   border: .5px solid #FFFFFF;
   backdrop-filter: blur(39.2px);

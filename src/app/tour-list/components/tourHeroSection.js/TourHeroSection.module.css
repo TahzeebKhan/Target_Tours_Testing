@@ -27,12 +27,13 @@
   position: relative;
   z-index: 50;
   gap: 98px;
+  margin-bottom: 70px;
 }
 
 /* ===== HOLIDAY SEARCH PANEL ===== */
 
 .serarchingCont {
-  padding: 24px;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -41,7 +42,7 @@
 
 .searchFormContainer {
   position: relative;
-  min-height: 106px;
+  /* min-height: 106px; */
 }
 
 .glass_panel {
@@ -424,6 +425,10 @@
 
   .container {
     margin-top: 60px;
+    margin-bottom: 0;
+  }
+  .heading{
+    margin-bottom: 47px;
   }
 
   .searchResultsContainer {

@@ -24,7 +24,7 @@ const page = () => {
         <PriceBar />
       </div>
       <ArrivalToronto />
-      <InfoStrip />
+      {/* <InfoStrip /> */}
       <WhereWillYouStay />
       <Testimonial />
       <TravelInspiration />
