@@ -6,16 +6,14 @@ import MobileFareComparisonModal from "../flights/components/onewayTrip/expendab
 import SelectDestination from "./selectDestination";
 import SelectTravellerProfile from "./selectTravellerProfile";
 import SelectPreferences from "./selectPreferences";
+import MobileItinerary from "./MobileItinerary";
 
 export default function ProfilePage() {
 
   return (
     <main>
 
-<SelectDestination />
-<SelectTravellerProfile />
-<SelectPreferences />
-      
+  <MobileItinerary />      
     </main>
   );
 }
