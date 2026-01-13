@@ -17,6 +17,10 @@
     z-index: 5;
 }
 
+.homeArrow{
+    width:24px !important;
+    height: 24px !important;
+}
 .overlay {
     width: 100%;
     height: 100%;
@@ -71,7 +75,7 @@
 
 .fromToCont {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     align-items: center;
 }
 
@@ -223,4 +227,31 @@
     gap: 12px;
     background-color: rgba(255, 255, 255, 0.14);
     cursor: pointer;
+}
+
+
+@media (max-width: 1440px) {
+    .header{
+        font-size: 70px;
+    }
+    .container{
+        gap: 20px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .leftBottom p{
+        font-size: 18px;
+    }
+    .leftContainer{
+        gap: 140px;
+    }
+}
+@media (max-width: 1200px) {
+    .header{
+        font-size: 56px;
+    }
+    .fromToCont span{
+        font-size: 26px;
+    }
 }
