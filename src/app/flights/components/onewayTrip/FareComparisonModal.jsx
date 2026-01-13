@@ -157,7 +157,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                                         <div className={styles.bigDot}></div>
                                     </div>
                                 </div>
-
+ 
                                 <div className={styles.priceContainer}>
                                     <span className={styles.duration}>
                                         {flight.duration.hours}
