@@ -20,11 +20,7 @@ const Navbar = () => {
       <div className={styles.overlay}></div>
 
       {/* GRADIENT OVERLAY */}
-      <img
-        className={styles.gradient}
-        src="/images/gradient.png"
-        alt=""
-      />
+      <img className={styles.gradient} src="/images/gradient.png" alt="" />
 
       {/* NAVBAR */}
       <div className={styles.navContainer}>
@@ -49,9 +45,19 @@ const Navbar = () => {
       {/* HERO CONTENT */}
       <div className={styles.homePageContainer}>
         <div className={styles.InspiredSection}>
-          <h1>All your travel worries, taken care of.</h1>
+          <h1 className={styles.heroTitleMain}>
+            All your travel worries, taken care of.
+          </h1>
+
+          <h1 className={styles.heroTitleSub}>
+            <span className={styles.line}>All your travel</span>
+            <span className={styles.line}>worries,</span>
+            <span className={styles.line}>taken care of.</span>
+          </h1>
+
           <p>
-            Travel with confidence knowing we’ve got you covered—from medical emergencies to trip disruptions.
+            Travel with confidence knowing we’ve got you covered—from medical
+            emergencies to trip disruptions.
           </p>
           <div className={styles.plans}>
             Plans starting at just ₹65/day with tax
@@ -59,8 +65,6 @@ const Navbar = () => {
         </div>
 
         <TravelInsuranceSearch />
-
-        
       </div>
     </header>
   );

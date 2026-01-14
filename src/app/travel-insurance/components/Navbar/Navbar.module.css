@@ -100,6 +100,8 @@
   max-width: 700px;
 }
 
+
+
 .InspiredSection p {
   max-width: 636px;
   width: 100%;
@@ -213,6 +215,17 @@
   gap: 2px;
 }
 
+.heroTitle span {
+  display: inline;
+}
+
+.heroTitleMain {
+  display: block;
+}
+
+.heroTitleSub {
+  display: none;
+}
 
 /* ================= RESPONSIVE ================= */
 
@@ -236,15 +249,45 @@
     padding: 10px 48px;
     font-size: 18px;
   }
+
+  .homePageContainer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .InspiredSection{
+    gap: 17px;
+  }
+
+  .InspiredSection h1 {
+    font-size: 42px;
+
+  }
+  .InspiredSection p{
+    display: none;
+  }
+  .heroTitleMain {
+    display: none;
+  }
+
+  .heroTitleSub {
+    display: block;
+  }
+
+  .heroTitleSub .line {
+    display: block;
+    line-height: 1.2;
+  }
 }
 
 @media (max-width: 480px) {
   .plans {
     width: 100%;
-    max-width: 360px;
-
-    padding: 10px 24px;
+    max-width: 100%;
+    font-weight: 300;
+    padding: 10px 0px;
     font-size: 16px;
     line-height: 150%;
   }
 }
+
