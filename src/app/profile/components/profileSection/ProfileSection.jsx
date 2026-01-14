@@ -10,6 +10,15 @@ import { toast } from "react-toastify";
 
 const ProfileSection = () => {
   const dropdownRef = useRef(null);
+  const getUserEmailFromCookie = () => {
+    try {
+      const userCookie = Cookies.get("user");
+      if (!userCookie) return "";
+      return JSON.parse(userCookie).email || "";
+    } catch {
+      return "";
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -96,7 +105,7 @@ const ProfileSection = () => {
 
     {
       label: "Email Address",
-      value: data.email || "", // fallback if backend adds later
+      value: getUserEmailFromCookie(),
       isVerified: true,
       isEditing: false,
     },
