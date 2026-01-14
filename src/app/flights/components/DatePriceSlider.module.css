@@ -31,13 +31,13 @@
   flex: 1;
   overflow-x: auto;
   scroll-behavior: smooth;
-   scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;  
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
 }
 
 .dateCard {
   min-width: 108px;
-  padding: 11px 16px;
+  padding: 10px 9px;
   border: 1px solid #0000001a;
   background: #ffffff;
   text-align: center;
@@ -48,7 +48,7 @@
 }
 
 .dateCard:hover {
-  background: #F1F5F9;
+  background: #f1f5f9;
 }
 .selected {
   border-color: #000033; /* strong navy */
@@ -77,7 +77,7 @@
   font-weight: 400;
   white-space: nowrap;
   color: #000000;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .price {
@@ -94,6 +94,5 @@
 .high {
   color: #dc2626;
 }
-@media (max-width: 1321px){
-  
+@media (max-width: 1321px) {
 }

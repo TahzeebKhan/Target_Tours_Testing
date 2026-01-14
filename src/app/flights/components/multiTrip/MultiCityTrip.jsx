@@ -394,7 +394,10 @@ const MultiCityTrip = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.sortByContainer}>
+            <div
+              onClick={() => setOpenSort(true)}
+              className={styles.sortByContainer}
+            >
               <img src="/icons/sort.svg" alt="" />
               <span className={styles.sortByText}>Sort by</span>
             </div>

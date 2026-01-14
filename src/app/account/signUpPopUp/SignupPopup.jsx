@@ -10,6 +10,9 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -18,9 +21,55 @@ export default function SignupPopup({ onNavigate, onClose }) {
     };
   }, []);
 
+  const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const isPhoneValid = (value) => /^[6-9]\d{9}$/.test(value); // Indian 10-digit phone
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+
+    let hasError = false;
+
+    // 🔹 Email / Phone validation
+    if (!email.trim()) {
+      setEmailError("Email or phone number is required");
+      hasError = true;
+    } else {
+      const isNumeric = /^\d+$/.test(email);
+
+      if (isNumeric) {
+        if (!isPhoneValid(email)) {
+          setEmailError("Enter a valid 10-digit phone number");
+          hasError = true;
+        }
+      } else {
+        if (!isEmailValid(email)) {
+          setEmailError("Enter a valid email address");
+          hasError = true;
+        }
+      }
+    }
+
+    // 🔹 Password validation
+    if (!password.trim()) {
+      setPasswordError("Password is required");
+      hasError = true;
+    } 
+
+    // 🔹 Confirm password validation
+    if (!confirmPassword.trim()) {
+      setConfirmPasswordError("Please confirm your password");
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -31,7 +80,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
       setLoading(true);
 
       const res = await fetch(
-        "http://139.84.175.121:1337/api/frontend-user/register",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/register`,
         {
           method: "POST",
           headers: {
@@ -54,7 +103,6 @@ export default function SignupPopup({ onNavigate, onClose }) {
       // ✅ SUCCESS
       console.log("Signup success:", data);
       onNavigate("login"); // move to login screen
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -71,7 +119,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
         {/* Left Section */}
         <section className={styles.imageSection}>
           <Image
-            src="/images/signup-hero.jpg"
+            src="/images/signup-hero.webp"
             alt="Scenic mountain view"
             fill
             className={styles.heroImage}
@@ -114,30 +162,51 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 </label>
                 <input
                   type="text"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    emailError ? styles.error : ""
+                  }`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
+                {emailError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Enter password</label>
                 <input
                   type="password"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    passwordError ? styles.error : ""
+                  }`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+
+                {passwordError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {passwordError}
+                  </p>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Confirm password</label>
                 <input
                   type="password"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    confirmPasswordError ? styles.error : ""
+                  }`}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
+
+                {confirmPasswordError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {confirmPasswordError}
+                  </p>
+                )}
               </div>
 
               {error && (

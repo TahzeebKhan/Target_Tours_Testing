@@ -192,37 +192,66 @@ import Image from "next/image";
 import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import { useAuth } from "@/app/profile/context/AuthContext";
 
-export default function LoginPopup({ setIsLoggedIn, onNavigate, onClose }) {
+export default function LoginPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
+  const { login } = useAuth();
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
   }, []);
+  const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const setCookie = (name, value, days = 7) => {
-    const expires = new Date(
-      Date.now() + days * 24 * 60 * 60 * 1000
-    ).toUTCString();
-
-    document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-  };
+  const isPhoneValid = (value) => /^[6-9]\d{9}$/.test(value); // Indian 10-digit numbers
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setEmailError("");
+    setPasswordError("");
+
+    let hasError = false;
+
+    if (!email.trim()) {
+      setEmailError("Email or phone number is required");
+      hasError = true;
+    } else {
+      const isNumeric = /^\d+$/.test(email);
+
+      if (isNumeric) {
+        if (!isPhoneValid(email)) {
+          setEmailError("Enter a valid 10-digit phone number");
+          hasError = true;
+        }
+      } else {
+        if (!isEmailValid(email)) {
+          setEmailError("Enter a valid email address");
+          hasError = true;
+        }
+      }
+    }
+
+    if (!password.trim()) {
+      setPasswordError("Password is required");
+      hasError = true;
+    }
+    if (hasError) return;
 
     try {
       setLoading(true);
 
+      // 1️⃣ LOGIN API
       const res = await fetch(
-        "http://139.84.175.121:1337/api/frontend-user/login",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/login`,
         {
           method: "POST",
           headers: {
@@ -242,13 +271,38 @@ export default function LoginPopup({ setIsLoggedIn, onNavigate, onClose }) {
         throw new Error(data?.error?.message || "Login failed");
       }
 
-      // ✅ STORE TOKEN IN COOKIE
-      setCookie("auth_token", data.token, 7);
-      setIsLoggedIn(true);
-      Cookies.set("user", JSON.stringify(data.user), { expires: 7 });
-      // Optional: user info bhi cookie ya localStorage me
-      setCookie("user_id", data.user.id, 7);
+      // 2️⃣ STORE AUTH DATA
+      login({
+        token: data.token,
+        user: data.user,
+      });
 
+      // 3️⃣ FETCH USER PROFILE (IMPORTANT PART)
+      try {
+        const profileRes = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${data.user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+            },
+          }
+        )
+          .then((res) => res.ok && res.json())
+          .then((profile) => {
+            if (profile) {
+              Cookies.set("user_profile", JSON.stringify(profile), {
+                expires: 7,
+              });
+            }
+          })
+          .catch(() => {
+            console.log("Profile fetch failed (non-blocking)");
+          });
+      } catch (profileErr) {
+        console.error("Profile API error:", profileErr);
+      }
+
+      // 5️⃣ CLOSE POPUP
       onClose();
     } catch (err) {
       setError(err.message || "Something went wrong");
@@ -266,7 +320,7 @@ export default function LoginPopup({ setIsLoggedIn, onNavigate, onClose }) {
         {/* Left Section */}
         <section className={styles.imageSection}>
           <Image
-            src="/images/travel-hero.jpg"
+            src="/images/travel-hero.webp"
             alt="Scenic view of Ko Tapu"
             fill
             className={styles.heroImage}
@@ -309,22 +363,34 @@ export default function LoginPopup({ setIsLoggedIn, onNavigate, onClose }) {
                 </label>
                 <input
                   type="text"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    emailError ? styles.error : ""
+                  }`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  // required
                 />
+
+                {emailError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Enter password</label>
                 <input
                   type="password"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    passwordError ? styles.error : ""
+                  }`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                 />
+                {passwordError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {passwordError}
+                  </p>
+                )}
               </div>
 
               {error && (

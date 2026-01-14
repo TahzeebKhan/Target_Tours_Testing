@@ -13,7 +13,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .mainContainer {
@@ -36,7 +36,8 @@
     width: 129px;
     height: 108px;
   }
-  .mainContainer, .pageWrapper {
+  .mainContainer,
+  .pageWrapper {
     padding: 0;
   }
 }
@@ -45,7 +46,7 @@
   max-width: 593px;
   width: 100%;
   position: relative;
-  max-height: 765px; 
+  max-height: 765px;
   height: 100%;
 }
 
@@ -147,6 +148,9 @@
   background: rgba(250, 250, 250, 1);
   line-height: 24px;
   letter-spacing: -0.02em;
+}
+.error {
+  border: 1px solid red;
 }
 
 .formOptions {

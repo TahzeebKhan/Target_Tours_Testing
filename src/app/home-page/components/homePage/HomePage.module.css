@@ -138,9 +138,17 @@
 }
 .logggedInBtn {
   text-transform: uppercase;
-  gap: 10px;
-  display: flex;
-  align-items: center;
+  padding: 8px 18px;
+  /* border: 0.5px solid #E4E6E8 !important; */
+
+  /* color: #ffffff; */
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: #15151512;
+
+  text-transform: uppercase;
+  cursor: pointer;
 }
 .initial {
   display: flex;
@@ -1219,6 +1227,8 @@
 
 .navRight {
   align-items: center;
+  gap: 16px;
+  position: relative;
 }
 
 .suggestionText {

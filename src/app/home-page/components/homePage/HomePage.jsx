@@ -24,9 +24,11 @@ import FlightSearchMobile from "./flightSearchMobile/FlightSearchMobile";
 import HotelSearchMobile from "./hotelSearchMobile/HotelSearchMobile";
 import HolidaySearchMobile from "./holidaySearchMobile/HolidaySearchMobile";
 import InsuranceSearchMobile from "./insuranceSearchMobile/InsuranceSearchMobile";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import ProfileModal from "./modals/ProfileModal";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/app/profile/context/AuthContext";
+import Cookies from "js-cookie";
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true);
@@ -39,7 +41,6 @@ const HomePage = () => {
   const [checkOut, setCheckOut] = useState("");
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
-  const [user, setUser] = useState({});
   const [heroData, setHeroData] = useState({
     heading: "",
     description: "",
@@ -60,7 +61,6 @@ const HomePage = () => {
 
   const router = useRouter();
 
-
   // Hotel calendar states
   const hotelCalendarRef = useRef(null);
   const [showHotelCalendar, setShowHotelCalendar] = useState(false);
@@ -77,31 +77,22 @@ const HomePage = () => {
   const [showInsuranceCalendar, setShowInsuranceCalendar] = useState(false);
   const [insuranceStartDate, setInsuranceStartDate] = useState("");
   const [insuranceEndDate, setInsuranceEndDate] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInitial, setUserInitial] = useState("");
 
   const [activeFeature, setActiveFeature] = useState(1);
   const featureRowRef = useRef(null);
   const progressRef = useRef(null);
 
+  // const router = useRouter();
+  const searchParams = useSearchParams(); // ✅ correct
+  useEffect(() => console.log("isLoggedIn", isLoggedIn), []);
   useEffect(() => {
-    const token = Cookies.get("auth_token");
-    setIsLoggedIn(!!token);
+    const openLogin = searchParams.get("openLogin") === "true";
 
-    const userCookie = Cookies.get("user");
-
-    if (userCookie) {
-      try {
-        const user = JSON.parse(decodeURIComponent(userCookie));
-        setUser(user);
-        const source = user.name || user.email || "";
-
-        setUserInitial(source.charAt(0).toUpperCase());
-      } catch (err) {
-        console.error("Failed to parse user cookie", err);
-      }
+    if (openLogin) {
+      setShowLogin(true);
+      router.replace("/", { scroll: false });
     }
-  }, []);
+  }, [searchParams, router]);
 
   useEffect(() => {
     const fetchHeroSection = async () => {
@@ -170,7 +161,12 @@ const HomePage = () => {
     },
     multi: [{ date: "" }, { date: "" }],
   });
-
+  const {
+    isLoggedIn,
+    profile: userProfile,
+    user,
+    loading: authLoading,
+  } = useAuth();
   const [travellerDestination, setTravellerDestination] =
     useState("SELECT DESTINATION");
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER");
@@ -410,6 +406,7 @@ const HomePage = () => {
   const tabOrder = ["hotel", "flight", "holiday", "insurance"];
   const tripOrder = ["round", "oneway", "multi"];
 
+  const profileBtnRef = useRef(null);
   const handleTripTypeChange = (nextType) => {
     const prevIndex = tripOrder.indexOf(tripType);
     const nextIndex = tripOrder.indexOf(nextType);
@@ -436,7 +433,6 @@ const HomePage = () => {
 
     setBookingType(feature.type);
   };
-
   useEffect(() => {
     setFromSuggestionsOpen(false);
     setToSuggestionsOpen(false);
@@ -507,7 +503,7 @@ const HomePage = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showHotelCalendar]);
-
+  // const [userProfile, setUserProfile] = useState(null);
   // Holiday calendar outside click
   useEffect(() => {
     if (!showHolidayCalendar) return;
@@ -688,16 +684,23 @@ const HomePage = () => {
     return `${day}-${month}-${year}`;
   };
 
-
-
-
   const handleSearch = () => {
     if (bookingType === "flight") {
       router.push(
         `/flights?from=${from}&to=${to}&tripType=${tripType}&start=${flightDates.round.start}&end=${flightDates.round.end}`
       );
     }
+    if (bookingType === "flight") {
+      router.push(
+        `/flights?from=${from}&to=${to}&tripType=${tripType}&start=${flightDates.round.start}&end=${flightDates.round.end}`
+      );
+    }
 
+    if (bookingType === "hotel") {
+      router.push(
+        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`
+      );
+    }
     if (bookingType === "hotel") {
       router.push(
         `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`
@@ -777,7 +780,7 @@ const HomePage = () => {
         <header className={`${styles.homeSection} w-full h-[100vh]`}>
           {/* <video
             className="absolute inset-0 w-full h-full object-cover"
-            key={heroData.videoUrl}  
+            key={heroData.videoUrl}
             src={heroData.videoUrl}
             poster="/images/hero-poster.jpg"
             autoPlay
@@ -817,19 +820,23 @@ const HomePage = () => {
                   Sign In
                 </button>
               ) : (
-                <button
-                  onClick={() => setShowProfileModal(true)}
-                  className={styles.logggedInBtn}
-                  type="button"
-                >
-                  <div className={styles.initial}>{userInitial}</div>
-                  <div
-                    className={`${styles.arrow}  ${showProfileModal ? styles.arrowOpen : ""
-                      }`}
+                <>
+                  <button
+                    ref={profileBtnRef}
+                    onClick={() => setShowProfileModal(true)}
+                    className={`${styles.glass_button} ${styles.logggedInBtn}`}
+                    type="button"
                   >
-                    <ChevronDown color="black" />{" "}
-                  </div>
-                </button>
+                    Hi, {userProfile?.display_name || "User"}
+                  </button>
+
+                  {showProfileModal && (
+                    <ProfileModal
+                      anchorRef={profileBtnRef}
+                      onClose={() => setShowProfileModal(false)}
+                    />
+                  )}
+                </>
               )}
 
               <button
@@ -1378,12 +1385,16 @@ const HomePage = () => {
                               </div>
 
                               {actualIndex === multiCity.length - 1 ? (
-                                <div className={styles.multisearchBtn} onClick={handleSearch}>
+                                <div
+                                  className={styles.multisearchBtn}
+                                  onClick={handleSearch}
+                                >
                                   Search
                                 </div>
                               ) : (
                                 <div
-                                  className={`${styles.multisearchBtn} opacity-0 pointer-events-none`} onClick={handleSearch}
+                                  className={`${styles.multisearchBtn} opacity-0 pointer-events-none`}
+                                  onClick={handleSearch}
                                 >
                                   Search
                                 </div>
@@ -1847,8 +1858,6 @@ const HomePage = () => {
         )}
         {showLogin && authView === "login" && (
           <LoginPopup
-            isLoggedIn={isLoggedIn}
-            setIsLoggedIn={setIsLoggedIn}
             onClose={() => setShowLogin(false)}
             onNavigate={setAuthView}
           />
@@ -1861,12 +1870,6 @@ const HomePage = () => {
           />
         )}
       </section>
-      {showProfileModal && (
-        <ProfileModal
-          userEmail={user.email}
-          onClose={() => setShowProfileModal(false)}
-        />
-      )}
     </>
   );
 };
