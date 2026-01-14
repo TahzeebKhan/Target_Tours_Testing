@@ -183,7 +183,7 @@
 //           <HoverExpandCarousel activeTab={activeTab} cards={cardsForTab} />
 //         </div>
 //         <div className={styles.mobileCarousel}>
-          
+
 //           <MobileCarousel activeTab={activeTab} cards={cardsForTab} />
 //         </div>
 //         {/* 
@@ -209,7 +209,7 @@ import HoverExpandCarousel from "./components/page";
 import MobileCarousel from "./components/MobileCarousel";
 import Cookies from "js-cookie";
 
-const API_BASE = "http://139.84.175.121:1337";
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = Cookies.get("auth_token");
 
 const TAB_REGION_MAP = {
@@ -272,6 +272,7 @@ const TargetTours = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   // 🔹 Fetch once
   useEffect(() => {
@@ -307,7 +308,7 @@ const TargetTours = () => {
 
     return filtered.map((pkg) => ({
       id: pkg.id,
-      title: `${ pkg.duration_days} Days - ${pkg.title}`,
+      title: `${pkg.duration_days} Days - ${pkg.title}`,
       cities: pkg.description,
       badge: `${pkg.duration_days} Days & ${pkg.duration_nights} Nights`,
       price: "INR 2,30,000", // 🔁 replace when backend sends price
@@ -319,29 +320,51 @@ const TargetTours = () => {
   }, [packages, activeTab]);
 
   const finalCards =
-  cardsForTab && cardsForTab.length > 0
-    ? cardsForTab
-    : STATIC_CARDS;
+    cardsForTab && cardsForTab.length > 0
+      ? cardsForTab
+      : STATIC_CARDS;
 
   // 🔹 Animated tab indicator
+  // useEffect(() => {
+  //   if (!tabsRef.current) return;
+  //   const activeEl = tabsRef.current.querySelector(`.${styles.activeTab}`);
+  //   if (!activeEl) return;
+
+  //   tabsRef.current.style.setProperty(
+  //     "--indicator-width",
+  //     `${activeEl.offsetWidth}px`
+  //   );
+  //   tabsRef.current.style.setProperty(
+  //     "--indicator-left",
+  //     `${activeEl.offsetLeft}px`
+  //   );
+  // }, [activeTab]);
+
   useEffect(() => {
     if (!tabsRef.current) return;
-    const activeEl = tabsRef.current.querySelector(`.${styles.activeTab}`);
-    if (!activeEl) return;
 
-    tabsRef.current.style.setProperty(
-      "--indicator-width",
-      `${activeEl.offsetWidth}px`
-    );
-    tabsRef.current.style.setProperty(
-      "--indicator-left",
-      `${activeEl.offsetLeft}px`
-    );
+    requestAnimationFrame(() => {
+      const activeEl = tabsRef.current.querySelector(
+        `.${styles.activeTab}`
+      );
+
+      if (!activeEl) return;
+
+      tabsRef.current.style.setProperty(
+        "--indicator-width",
+        `${activeEl.offsetWidth}px`
+      );
+      tabsRef.current.style.setProperty(
+        "--indicator-left",
+        `${activeEl.offsetLeft}px`
+      );
+    });
   }, [activeTab]);
 
-  if (loading) {
-    return <div className={styles.loading}>Loading tours...</div>;
-  }
+
+  // if (loading) {
+  //   return <div className={styles.loading}>Loading tours...</div>;
+  // }
 
   return (
     <section className={styles.section}>
@@ -354,9 +377,8 @@ const TargetTours = () => {
             {tabs.map((tab) => (
               <li
                 key={tab}
-                className={`${styles.tab} ${
-                  activeTab === tab ? styles.activeTab : ""
-                }`}
+                className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ""
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 <button className={styles.tabBtn}>{tab}</button>
@@ -364,6 +386,61 @@ const TargetTours = () => {
             ))}
           </ul>
         </nav>
+
+        <div className={styles.mobileSelectWrap}>
+          <button
+            className={styles.mobileSelect}
+            onClick={() => setIsOpen((prev) => !prev)}
+          >
+            <span>{activeTab.toUpperCase()}</span>
+            <svg
+              width="14"
+              height="10"
+              viewBox="0 0 14 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clipPath="url(#clip0_1073_7659)">
+                <path
+                  d="M2 2.5L7 7.5L12 2.5"
+                  stroke="#000033"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_1073_7659">
+                  <rect
+                    width="12"
+                    height="7"
+                    fill="white"
+                    transform="translate(1 1.5)"
+                  />
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
+
+          {isOpen && (
+            <ul className={styles.mobileOptions}>
+              {tabs.map((t) => (
+                <li
+                  key={t}
+                  className={t === activeTab ? styles.activeOption : ""}
+                  onClick={() => {
+                    setActiveTab(t);
+                    setIsOpen(false);
+                  }}
+                >
+                  {t.toUpperCase()}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+
 
         {/* Desktop */}
         <div className={styles.desktopCarousel}>

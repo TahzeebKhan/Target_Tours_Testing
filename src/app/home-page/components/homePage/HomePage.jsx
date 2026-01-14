@@ -19,6 +19,8 @@ import RecentSearch from "@/app/components/recentSearch/RecentSearch";
 
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { useQuery } from "@tanstack/react-query";
+import { getHeroSection } from "@/app/service/heroApi";
 
 import FlightSearchMobile from "./flightSearchMobile/FlightSearchMobile";
 import HotelSearchMobile from "./hotelSearchMobile/HotelSearchMobile";
@@ -93,63 +95,103 @@ const HomePage = () => {
       router.replace("/", { scroll: false });
     }
   }, [searchParams, router]);
+  const {
+    data: heroResponse,
+    isLoading: heroLoading,
+    isError: heroError,
+  } = useQuery({
+    queryKey: ["hero-section"],
+    queryFn: getHeroSection,
+    staleTime: 1000 * 60 * 10, // 10 minutes cache
+  });
 
   useEffect(() => {
-    const fetchHeroSection = async () => {
-      try {
-        // Get token from cookie
-        const getCookie = (name) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop().split(";").shift();
-        };
+  if (!heroResponse) return;
 
-        const token = getCookie("auth_token");
+  setHeroData({
+    heading: heroResponse.heading || "",
+    description: heroResponse.description || "",
+    videoUrl: heroResponse.media?.url
+      ? `http://139.84.175.121:1337${heroResponse.media.url}`
+      : "/videos/hero.mp4",
+  });
+}, [heroResponse]);
 
-        const headers = {
-          "Content-Type": "application/json",
-        };
+  // useEffect(() => {
+  //   const token = Cookies.get("auth_token");
+  //   setIsLoggedIn(!!token);
 
-        // Add Authorization header if token exists
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
+  //   const userCookie = Cookies.get("user");
 
-        const res = await fetch(
-          "http://139.84.175.121:1337/api/hero-section/company",
-          {
-            method: "GET",
-            headers,
-            credentials: "include", // Still include for cookie-based auth
-          }
-        );
+  //   if (userCookie) {
+  //     try {
+  //       const user = JSON.parse(decodeURIComponent(userCookie));
+  //       setUser(user);
+  //       const source = user.name || user.email || "";
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+  //       setUserInitial(source.charAt(0).toUpperCase());
+  //     } catch (err) {
+  //       console.error("Failed to parse user cookie", err);
+  //     }
+  //   }
+  // }, []);
 
-        const data = await res.json();
+  // useEffect(() => {
+  //   const fetchHeroSection = async () => {
+  //     try {
+  //       // Get token from cookie
+  //       const getCookie = (name) => {
+  //         const value = `; ${document.cookie}`;
+  //         const parts = value.split(`; ${name}=`);
+  //         if (parts.length === 2) return parts.pop().split(";").shift();
+  //       };
 
-        setHeroData({
-          heading: data.heading || "",
-          description: data.description || "",
-          videoUrl: data.media?.url
-            ? `http://139.84.175.121:1337${data.media.url}`
-            : "/videos/hero.mp4",
-        });
-      } catch (error) {
-        console.error("Hero section fetch failed:", error);
-        // Optionally set default/fallback data
-        setHeroData({
-          heading: "Welcome to Our Platform",
-          description: "Discover amazing travel experiences",
-          videoUrl: "/videos/hero.mp4",
-        });
-      }
-    };
+  //       const token = getCookie("auth_token");
 
-    fetchHeroSection();
-  }, []);
+  //       const headers = {
+  //         "Content-Type": "application/json",
+  //       };
+
+  //       // Add Authorization header if token exists
+  //       if (token) {
+  //         headers["Authorization"] = `Bearer ${token}`;
+  //       }
+
+  //       const res = await fetch(
+  //         "http://139.84.175.121:1337/api/hero-section/company",
+  //         {
+  //           method: "GET",
+  //           headers,
+  //           credentials: "include", // Still include for cookie-based auth
+  //         }
+  //       );
+
+  //       if (!res.ok) {
+  //         throw new Error(`HTTP error! status: ${res.status}`);
+  //       }
+
+  //       const data = await res.json();
+
+  //       setHeroData({
+  //         heading: data.heading || "",
+  //         description: data.description || "",
+  //         videoUrl: data.media?.url
+  //           ? `http://139.84.175.121:1337${data.media.url}`
+  //           : "/videos/hero.mp4",
+  //       });
+  //     } catch (error) {
+  //       console.error("Hero section fetch failed:", error);
+  //       // Optionally set default/fallback data
+  //       setHeroData({
+  //         heading: "Welcome to Our Platform",
+  //         description: "Discover amazing travel experiences",
+  //         videoUrl: "/videos/hero.mp4",
+  //       });
+  //     }
+  //   };
+
+  //   fetchHeroSection();
+  // }, []);
 
   const [flightDates, setFlightDates] = useState({
     round: {
@@ -861,8 +903,8 @@ const HomePage = () => {
           >
             <div
               className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
-                  ? styles.noAnimation
-                  : ""
+                ? styles.noAnimation
+                : ""
                 }`}
             >
               {bookingType === "flight" && (
@@ -913,10 +955,10 @@ const HomePage = () => {
                         >
                           <div
                             className={`${styles.arrowbox} ${tripType === "oneway"
-                                ? styles.arrowboxOneWay
-                                : tripType === "multi"
-                                  ? styles.multiArrow
-                                  : ""
+                              ? styles.arrowboxOneWay
+                              : tripType === "multi"
+                                ? styles.multiArrow
+                                : ""
                               }`}
                             onClick={() =>
                               swapLocations(tripType === "multi" ? 0 : undefined)
@@ -1000,8 +1042,8 @@ const HomePage = () => {
 
                           <div
                             className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
-                                ? styles.growRight
-                                : ""
+                              ? styles.growRight
+                              : ""
                               } ${styles.calendarAnchor}`}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1130,8 +1172,8 @@ const HomePage = () => {
                           <div
                             ref={travellerRef}
                             className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
-                                ? styles.growRight
-                                : ""
+                              ? styles.growRight
+                              : ""
                               }`}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1150,8 +1192,8 @@ const HomePage = () => {
 
                               <ChevronDown
                                 className={`${styles.chevron} ${travellerOpend
-                                    ? styles.openChevron
-                                    : styles.closeChevron
+                                  ? styles.openChevron
+                                  : styles.closeChevron
                                   }`}
                                 size={16}
                                 color="#FFFFFF"
@@ -1693,8 +1735,8 @@ const HomePage = () => {
 
                           <ChevronDown
                             className={`${styles.chevron} ${travellerOpend
-                                ? styles.openChevron
-                                : styles.closeChevron
+                              ? styles.openChevron
+                              : styles.closeChevron
                               }`}
                             size={16}
                             color="#FFFFFF"
