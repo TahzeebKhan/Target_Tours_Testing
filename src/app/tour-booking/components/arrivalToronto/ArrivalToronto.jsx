@@ -45,7 +45,7 @@ const ArrivalToronto = () => {
     const openYourActivityPopup = (activity) => {
         setSelectedHotel(activity);
         setIsYourActivityPopupOpen(true);
-    }; 
+    };
 
 
 
@@ -193,7 +193,7 @@ const ArrivalToronto = () => {
         location: "Toronto, Canada",
         desc: "Cozy boutique hotel with comfortable rooms and easy access to local attractions.",
         images: ["/images/yourAtivityImage1.png"]
-    }; 
+    };
 
 
     const dayImgeFilter = [
@@ -278,7 +278,7 @@ const ArrivalToronto = () => {
                         {activeTab === "DAY Itinerary" && (
 
                             <div className={styles.leftBottomCont}>
-                                <div className={styles.ArrivalContainer}>
+                                <div className={`${styles.ArrivalContainer} ${styles.ArrivalContainerDayIn}`}>
                                     <div className={styles.ArrivalRight}>
                                         <h2>Day 1 – Arrival in Toronto</h2>
                                     </div>
@@ -300,324 +300,215 @@ const ArrivalToronto = () => {
                                         {/* <HotelRoom/> */}
                                     </div>
 
+                                    <div className={`${styles.expandableMainContainer} ${styles.expandableArrival}`}>
+                                        <div className={`${styles.expandableTab} ${openAccordion === "arrival" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("arrival")} >
+                                            <div className={`${styles.ArrivalContainerMobile}`}>
+                                                <div className={styles.ArrivalRight}>
+                                                    <h2>Day 1 – Arrival in Toronto</h2>
+                                                </div>
+                                                <div className={styles.ArrivalLeft}>
+                                                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                                                </div>
 
-
-
-                                    <div className={styles.expandableMainContainer}>
-                                        <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
-                                            <h2>International Flight</h2>
-                                            <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
+                                            </div>
+                                            <img className={`${styles.arrow} ${openAccordion === "arrival" ? styles.rotate : ""
                                                 }`} src="/icons/DownArrows.svg" alt="" />
                                         </div>
                                         <div
-                                            className={`${styles.expandableContent} ${openAccordion === "flight" ? styles.open : ""
+                                            className={`${styles.expandableContent} ${openAccordion === "arrival" ? styles.open : ""
                                                 }`}
                                         >
-                                            <div className={styles.expandableTop}>
-                                                <div className={styles.fromToContainer}>
-                                                    <span>New Delhi (DEL) </span>
-                                                    <img src="/icons/rightArrow1.svg" alt="" />
-                                                    <span>Toronto (NMI)</span>
-                                                </div>
-                                                <div>
-                                                    <button className={styles.viewDetails}>View Details</button>
+                                            <div className={styles.expandableContentWrapper}>
+                                                <div className={`${styles.paraCoontainer} ${styles.paraCoontainerMobile}`}>
+                                                    <p>Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure</p>
+                                                    {/* <HotelRoom/> */}
                                                 </div>
                                             </div>
-                                            <div className={styles.flightDetailsCont}>
-                                                <div className={styles.flightDetailsSubCont}>
-                                                    <div className={styles.flightDetails}>
-                                                        <img src="/images/Flight.png" alt="" />
-                                                        <div className={styles.flightNameContainer}>
-                                                            <h2>IndiGo</h2>
-                                                            <span>6E-541</span>
+
+                                        </div>
+                                    </div>
+
+
+
+                                    <div className={styles.expandableMainContainerMobileWrapper}>
+                                        <div className={styles.expandableMainContainer}>
+
+                                            <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
+                                                <h2>International Flight</h2>
+                                                <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
+                                                    }`} src="/icons/DownArrows.svg" alt="" />
+                                            </div>
+                                            <div
+                                                className={`${styles.expandableContent} ${openAccordion === "flight" ? styles.open : ""
+                                                    }`}
+                                            >
+                                                <div className={styles.expandableContentWrapper}>
+                                                    <div className={styles.expandableTop}>
+                                                        <div className={styles.fromToContainer}>
+                                                            <span>New Delhi (DEL) </span>
+                                                            <img src="/icons/rightArrow1.svg" alt="" />
+                                                            <span>Toronto (NMI)</span>
+                                                        </div>
+                                                        <div>
+                                                            <button className={styles.viewDetails}>View Details</button>
                                                         </div>
                                                     </div>
-                                                    <div className={styles.flightTimingContainer}>
-                                                        <FlightTimingDetail flight={flight} />
-
-                                                    </div>
-                                                </div>
-                                                <div className={styles.br}></div>
-                                                <div className={styles.cabinCont}>
-                                                    <div className={styles.cabinRow}>
-                                                        <img src="/icons/cabinSvg.svg" alt="" />
-                                                        <span>Cabin: 7 Kgs (1 Piece Only)</span>
-                                                    </div>
-                                                    <div className={styles.cabinRow}>
-                                                        <img src="/icons/checkSvg.svg" alt="" />
-                                                        <span>Cabin: 7 Kgs (1 Piece Only)</span>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                    <div className={styles.expandableMainContainer}>
-                                        <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
-                                            <h2>Private Transfer</h2>
-                                            <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
-                                                }`} src="/icons/DownArrows.svg" alt="" />
-                                        </div>
-                                        <div
-                                            className={`${styles.expandableContent} ${openAccordion === "transfer" ? styles.open : ""
-                                                }`}
-                                        >
-
-                                            <div className={styles.PremiumContainer}>
-                                                <img src="/images/cardImg.png" alt="" />
-                                                <div className={styles.PremiumTextContainer}>
-                                                    <h3>Premium Airport Transfer</h3>
-                                                    <p>Enjoy a seamless arrival with our luxury private transfer service. Your personal chauffeur will meet you at arrivals with a nameplate and escort you to your premium vehicle.</p>
-                                                    <div className={styles.ApproximatelyTime}>
-                                                        <img src="/icons/watchBlack.svg" alt="" />
-                                                        <span>Approximately 45 minutes</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                    <div className={styles.yourActivityContainer}>
-                                        <div className={styles.yourActivityContainerTop}>
-                                            <div className={styles.yourActivityContainerTopLeft}>
-                                                <h2 className={styles.youHeading}>your hotel</h2>
-                                            </div>
-                                            <div className={styles.yourActivityContainerTopRight}>
-                                                <h2 className={styles.youHeading} >your ACTIVITY</h2>
-                                                <div className={styles.btnContainer}>
-                                                    <div
-                                                        className={styles.btn}
-                                                        onClick={handlePrev}
-                                                    >
-                                                        <img src="/icons/left.svg" alt="Previous" />
-                                                    </div>
-                                                    <div
-                                                        className={styles.btn}
-                                                        onClick={handleNext}
-                                                    >
-                                                        <img src="/icons/right.svg" alt="Next" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className={styles.yourActivityContainerBottom}>
-                                            <div className={styles.yourActivityContainerBottomLeft}>
-                                                <div className={styles.card}>
-                                                    <img className={styles.cardImage} src="/images/yourAtivityImage1.png" alt="" />
-                                                    <div className={styles.cardTextContainer}>
-                                                        <span className={styles.cardTextAddress}>Toronto, canada</span>
-                                                        <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
-                                                    <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className={styles.yourActivityContainerBottomRight}>
-                                                <Swiper
-                                                    modules={[Navigation]}
-                                                    onSwiper={setSwiperRef}
-                                                    onSlideChange={handleSlideChange}
-                                                    slidesPerView={'auto'}
-                                                    spaceBetween={12}
-                                                    className={styles.carousel}
-                                                >
-                                                    {activitiesData.map((item) => (
-                                                        <SwiperSlide key={item.id} className={styles.slide}>
-                                                            <div key={item.id} className={styles.cardCarousell}>
-                                                                <img className={styles.cardImage} src={item.image} alt="" />
-
-                                                                <div className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}>
-                                                                    <span className={styles.cardTextAddress}>{item.category}</span>
-                                                                    <h3 className={styles.TextTitle}>{item.title}</h3>
-
-                                                                    <div className={styles.btnsCon}>
-                                                                        {item.actions.map((btn, i) => (
-                                                                            <button
-                                                                                key={i}
-                                                                                className={styles.cardButton}
-                                                                                onClick={() => {
-                                                                                    if (btn.type === 'view') openYourActivityPopup(item);
-                                                                                    else if (btn.type === 'add') {
-                                                                                        console.log('add action for', item);
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                {btn.label}
-                                                                            </button>
-                                                                        ))}
-                                                                    </div>
+                                                    <div className={styles.flightDetailsCont}>
+                                                        <div className={styles.flightDetailsSubCont}>
+                                                            <div className={styles.flightDetails}>
+                                                                <img src="/images/Flight.png" alt="" />
+                                                                <div className={styles.flightNameContainer}>
+                                                                    <h2>IndiGo</h2>
+                                                                    <span>6E-541</span>
                                                                 </div>
                                                             </div>
-                                                        </SwiperSlide>
-                                                    ))}
-                                                </Swiper>
-                                            </div>
+                                                            <div className={styles.flightTimingContainer}>
+                                                                <FlightTimingDetail flight={flight} />
 
-                                        </div>
-                                    </div>
-                                </motion.div>
+                                                            </div>
+                                                        </div>
+                                                        <div className={styles.br}></div>
+                                                        <div className={styles.cabinCont}>
+                                                            <div className={styles.cabinRow}>
+                                                                <img src="/icons/cabinSvg.svg" alt="" />
+                                                                <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                                            </div>
+                                                            <div className={styles.cabinRow}>
+                                                                <img src="/icons/checkSvg.svg" alt="" />
+                                                                <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                                            </div>
 
-                            </div>
-                        )}
-
-
-                        {activeTab === "Hotels" && (
-
-                            <div className={styles.leftBottomCont}>
-                                <div className={styles.ArrivalContainer}>
-                                    <div className={styles.ArrivalRight}>
-                                        <h2>Day 1 – Arrival in Toronto</h2>
-                                    </div>
-                                    <div className={styles.ArrivalLeft}>
-                                        1 flight, 1 hotel, 1 meal, 1 Transfer
-                                    </div>
-
-                                </div>
-                                <motion.div
-                                    key="hotels"
-                                    variants={tabVariants}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    className={styles.leftBottomCont}
-                                >
-                                    <div className={styles.paraCoontainer}>
-                                        <HotelRoom hotel={hotelData} onViewHotel={openHotelPopup} />
-                                    </div>
-                                </motion.div>
-                            </div>
-
-                        )}
-
-                        {activeTab === "Transport" && (
-                            <div className={styles.leftBottomCont}>
-                                <div className={styles.ArrivalContainer}>
-                                    <div className={styles.ArrivalRight}>
-                                        <h2>Day 1 – Arrival in Toronto</h2>
-                                    </div>
-                                    <div className={styles.ArrivalLeft}>
-                                        1 flight, 1 hotel, 1 meal, 1 Transfer
-                                    </div>
-
-                                </div>
-                                <motion.div
-                                    key="day"
-                                    variants={tabVariants}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    className={styles.leftBottomCont}
-                                >
-
-
-
-
-
-                                    <div className={styles.expandableMainContainer}>
-                                        <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
-                                            <h2>International Flight</h2>
-                                            <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
-                                                }`} src="/icons/DownArrows.svg" alt="" />
-                                        </div>
-                                        <div
-                                            className={`${styles.expandableContent} ${openAccordion === "flight" ? styles.open : ""
-                                                }`}
-                                        >
-                                            <div className={styles.expandableTop}>
-                                                <div className={styles.fromToContainer}>
-                                                    <span>New Delhi (DEL) </span>
-                                                    <img src="/icons/rightArrow1.svg" alt="" />
-                                                    <span>Toronto (NMI)</span>
-                                                </div>
-                                                <div>
-                                                    <button className={styles.viewDetails}>View Details</button>
-                                                </div>
-                                            </div>
-                                            <div className={styles.flightDetailsCont}>
-                                                <div className={styles.flightDetailsSubCont}>
-                                                    <div className={styles.flightDetails}>
-                                                        <img src="/images/Flight.png" alt="" />
-                                                        <div className={styles.flightNameContainer}>
-                                                            <h2>IndiGo</h2>
-                                                            <span>6E-541</span>
                                                         </div>
                                                     </div>
-                                                    <div className={styles.flightTimingContainer}>
-                                                        <FlightTimingDetail flight={flight} />
-
-                                                    </div>
-                                                </div>
-                                                <div className={styles.br}></div>
-                                                <div className={styles.cabinCont}>
-                                                    <div className={styles.cabinRow}>
-                                                        <img src="/icons/cabinSvg.svg" alt="" />
-                                                        <span>Cabin: 7 Kgs (1 Piece Only)</span>
-                                                    </div>
-                                                    <div className={styles.cabinRow}>
-                                                        <img src="/icons/checkSvg.svg" alt="" />
-                                                        <span>Cabin: 7 Kgs (1 Piece Only)</span>
-                                                    </div>
 
                                                 </div>
                                             </div>
-
                                         </div>
-                                    </div>
 
 
-                                    <div className={styles.expandableMainContainer}>
-                                        <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
-                                            <h2>Private Transfer</h2>
-                                            <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
-                                                }`} src="/icons/DownArrows.svg" alt="" />
-                                        </div>
-                                        <div
-                                            className={`${styles.expandableContent} ${openAccordion === "transfer" ? styles.open : ""
-                                                }`}
-                                        >
 
-                                            <div className={styles.PremiumContainer}>
-                                                <img src="/images/cardImg.png" alt="" />
-                                                <div className={styles.PremiumTextContainer}>
-                                                    <h3>Premium Airport Transfer</h3>
-                                                    <p>Enjoy a seamless arrival with our luxury private transfer service. Your personal chauffeur will meet you at arrivals with a nameplate and escort you to your premium vehicle.</p>
-                                                    <div className={styles.ApproximatelyTime}>
-                                                        <img src="/icons/watchBlack.svg" alt="" />
-                                                        <span>Approximately 45 minutes</span>
+
+                                        <div className={styles.expandableMainContainer}>
+                                            <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
+                                                <h2>Private Transfer</h2>
+                                                <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
+                                                    }`} src="/icons/DownArrows.svg" alt="" />
+                                            </div>
+                                            <div
+                                                className={`${styles.expandableContent} ${openAccordion === "transfer" ? styles.open : ""
+                                                    }`}
+                                            >
+                                                <div className={styles.expandableContentWrapper}>
+                                                    <div className={styles.PremiumContainer}>
+                                                        <img src="/images/cardImg.png" alt="" />
+                                                        <div className={styles.PremiumTextContainer}>
+                                                            <h3>Premium Airport Transfer</h3>
+                                                            <p>Enjoy a seamless arrival with our luxury private transfer service. Your personal chauffeur will meet you at arrivals with a nameplate and escort you to your premium vehicle.</p>
+                                                            <div className={styles.ApproximatelyTime}>
+                                                                <img src="/icons/watchBlack.svg" alt="" />
+                                                                <span>Approximately 45 minutes</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
 
+                                        <div className={`${styles.expandableMainContainer} ${styles.expandableMainContainerMobile}`}>
+                                            <div className={`${styles.expandableTab} ${openAccordion === "yourHotel" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("yourHotel")} >
+                                                <h2>Your hotel</h2>
+                                                <img className={`${styles.arrow} ${openAccordion === "yourHotel" ? styles.rotate : ""
+                                                    }`} src="/icons/DownArrows.svg" alt="" />
+                                            </div>
+                                            <div
+                                                className={`${styles.expandableContent} ${openAccordion === "yourHotel" ? styles.open : ""
+                                                    }`}
+                                            >
+                                                <div className={styles.expandableContentWrapper}>
+                                                    <div className={styles.card}>
+                                                        <img className={styles.cardImage} src="/images/yourAtivityImage1.png" alt="" />
+                                                        <div className={styles.cardTextContainer}>
+                                                            <span className={styles.cardTextAddress}>Toronto, canada</span>
+                                                            <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
+                                                            <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div className={`${styles.expandableMainContainer} ${styles.expandableMainContainerMobile}`}>
+                                            <div className={`${styles.expandableTab} ${openAccordion === "yourActivity" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("yourActivity")} >
+                                                <h2>Your ACTIVITY</h2>
+                                                <img className={`${styles.arrow} ${openAccordion === "yourActivity" ? styles.rotate : ""
+                                                    }`} src="/icons/DownArrows.svg" alt="" />
+                                            </div>
+                                            <div
+                                                className={`${styles.expandableContent} ${openAccordion === "yourActivity" ? styles.open : ""
+                                                    }`}
+                                            >
+                                                <div className={styles.expandableContentWrapper}>
+                                                    <div className={styles.yourActivityContainerBottomRight}>
+                                                        <Swiper
+                                                            modules={[Navigation]}
+                                                            onSwiper={setSwiperRef}
+                                                            onSlideChange={handleSlideChange}
+                                                            slidesPerView={'auto'}
+                                                            spaceBetween={12}
+                                                            className={styles.carousel}
+                                                        >
+                                                            {activitiesData.map((item) => (
+                                                                <SwiperSlide key={item.id} className={styles.slide}>
+                                                                    <div key={item.id} className={styles.cardCarousell}>
+                                                                        <img className={styles.cardImage} src={item.image} alt="" />
+
+                                                                        <div className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}>
+                                                                            <span className={styles.cardTextAddress}>{item.category}</span>
+                                                                            <h3 className={styles.TextTitle}>{item.title}</h3>
+
+                                                                            <div className={styles.btnsCon}>
+                                                                                {item.actions.map((btn, i) => (
+                                                                                    <button
+                                                                                        key={i}
+                                                                                        className={styles.cardButton}
+                                                                                        onClick={() => {
+                                                                                            if (btn.type === 'view') openYourActivityPopup(item);
+                                                                                            else if (btn.type === 'add') {
+                                                                                                console.log('add action for', item);
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        {btn.label}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </SwiperSlide>
+                                                            ))}
+                                                        </Swiper>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className={`${styles.btnContainer} ${styles.btnContainerMobileView}`}>
+                                            <div
+                                                className={styles.btn}
+                                                onClick={handlePrev}
+                                            >
+                                                <img src="/icons/left.svg" alt="Previous" />
+                                            </div>
+                                            <div
+                                                className={styles.btn}
+                                                onClick={handleNext}
+                                            >
+                                                <img src="/icons/right.svg" alt="Next" />
+                                            </div>
                                         </div>
                                     </div>
-                                </motion.div>
 
-                            </div>
-                        )}
 
-                        {activeTab === "ACTIVITIES" && (
-                            <div className={styles.leftBottomCont}>
-                                <div className={styles.ArrivalContainer}>
-                                    <div className={styles.ArrivalRight}>
-                                        <h2>Day 1 – Arrival in Toronto</h2>
-                                    </div>
-                                    <div className={styles.ArrivalLeft}>
-                                        1 flight, 1 hotel, 1 meal, 1 Transfer
-                                    </div>
-
-                                </div>
-                                <motion.div
-                                    key="day"
-                                    variants={tabVariants}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    className={styles.leftBottomCont}
-                                >
                                     <div className={styles.yourActivityContainer}>
                                         <div className={styles.yourActivityContainerTop}>
                                             <div className={styles.yourActivityContainerTopLeft}>
@@ -693,6 +584,326 @@ const ArrivalToronto = () => {
                                                 </Swiper>
                                             </div>
 
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                            </div>
+                        )}
+
+
+                        {activeTab === "Hotels" && (
+
+                            <div className={styles.leftBottomCont}>
+                                <div className={styles.ArrivalContainer}>
+                                    <div className={styles.ArrivalRight}>
+                                        <h2>Day 1 – Arrival in Toronto</h2>
+                                    </div>
+                                    <div className={styles.ArrivalLeft}>
+                                        1 flight, 1 hotel, 1 meal, 1 Transfer
+                                    </div>
+
+                                </div>
+                                <motion.div
+                                    key="hotels"
+                                    variants={tabVariants}
+                                    initial="initial"
+                                    animate="animate"
+                                    exit="exit"
+                                    className={styles.leftBottomCont}
+                                >
+                                    {/* <div className={styles.paraCoontainer}> */}
+                                    <HotelRoom hotel={hotelData} onViewHotel={openHotelPopup} />
+                                    {/* </div> */}
+                                </motion.div>
+                            </div>
+
+                        )}
+
+                        {activeTab === "Transport" && (
+                            <div className={styles.leftBottomCont}>
+                                <div className={styles.ArrivalContainer}>
+                                    <div className={styles.ArrivalRight}>
+                                        <h2>Day 1 – Arrival in Toronto</h2>
+                                    </div>
+                                    <div className={styles.ArrivalLeft}>
+                                        1 flight, 1 hotel, 1 meal, 1 Transfer
+                                    </div>
+
+                                </div>
+                                <motion.div
+                                    key="day"
+                                    variants={tabVariants}
+                                    initial="initial"
+                                    animate="animate"
+                                    exit="exit"
+                                    className={styles.leftBottomCont}
+                                >
+
+
+
+
+
+                                    <div className={styles.expandableMainContainer}>
+                                        <div className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("flight")} >
+                                            <h2>International Flight</h2>
+                                            <img className={`${styles.arrow} ${openAccordion === "flight" ? styles.rotate : ""
+                                                }`} src="/icons/DownArrows.svg" alt="" />
+                                        </div>
+                                        <div
+                                            className={`${styles.expandableContent} ${openAccordion === "flight" ? styles.open : ""
+                                                }`}
+                                        >
+                                            <div className={styles.expandableContentWrapper}>
+                                                <div className={styles.expandableTop}>
+                                                    <div className={styles.fromToContainer}>
+                                                        <span>New Delhi (DEL) </span>
+                                                        <img src="/icons/rightArrow1.svg" alt="" />
+                                                        <span>Toronto (NMI)</span>
+                                                    </div>
+                                                    <div>
+                                                        <button className={styles.viewDetails}>View Details</button>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.flightDetailsCont}>
+                                                    <div className={styles.flightDetailsSubCont}>
+                                                        <div className={styles.flightDetails}>
+                                                            <img src="/images/Flight.png" alt="" />
+                                                            <div className={styles.flightNameContainer}>
+                                                                <h2>IndiGo</h2>
+                                                                <span>6E-541</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className={styles.flightTimingContainer}>
+                                                            <FlightTimingDetail flight={flight} />
+
+                                                        </div>
+                                                    </div>
+                                                    <div className={styles.br}></div>
+                                                    <div className={styles.cabinCont}>
+                                                        <div className={styles.cabinRow}>
+                                                            <img src="/icons/cabinSvg.svg" alt="" />
+                                                            <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                                        </div>
+                                                        <div className={styles.cabinRow}>
+                                                            <img src="/icons/checkSvg.svg" alt="" />
+                                                            <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div className={styles.expandableMainContainer}>
+                                        <div className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("transfer")} >
+                                            <h2>Private Transfer</h2>
+                                            <img className={`${styles.arrow} ${openAccordion === "transfer" ? styles.rotate : ""
+                                                }`} src="/icons/DownArrows.svg" alt="" />
+                                        </div>
+                                        <div
+                                            className={`${styles.expandableContent} ${openAccordion === "transfer" ? styles.open : ""
+                                                }`}
+                                        >
+                                            <div className={styles.expandableContentWrapper}>
+                                                <div className={styles.PremiumContainer}>
+                                                    <img src="/images/cardImg.png" alt="" />
+                                                    <div className={styles.PremiumTextContainer}>
+                                                        <h3>Premium Airport Transfer</h3>
+                                                        <p>Enjoy a seamless arrival with our luxury private transfer service. Your personal chauffeur will meet you at arrivals with a nameplate and escort you to your premium vehicle.</p>
+                                                        <div className={styles.ApproximatelyTime}>
+                                                            <img src="/icons/watchBlack.svg" alt="" />
+                                                            <span>Approximately 45 minutes</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                            </div>
+                        )}
+
+                        {activeTab === "ACTIVITIES" && (
+                            <div className={styles.leftBottomCont}>
+                                <div className={styles.ArrivalContainer}>
+                                    <div className={styles.ArrivalRight}>
+                                        <h2>Day 1 – Arrival in Toronto</h2>
+                                    </div>
+                                    <div className={styles.ArrivalLeft}>
+                                        1 flight, 1 hotel, 1 meal, 1 Transfer
+                                    </div>
+
+                                </div>
+                                <motion.div
+                                    key="day"
+                                    variants={tabVariants}
+                                    initial="initial"
+                                    animate="animate"
+                                    exit="exit"
+                                    className={styles.leftBottomCont}
+                                >
+                                    <div className={styles.yourActivityContainer}>
+                                        <div className={styles.yourActivityContainerTop}>
+                                            <div className={styles.yourActivityContainerTopLeft}>
+                                                <h2 className={styles.youHeading}>your hotel</h2>
+                                            </div>
+                                            <div className={styles.yourActivityContainerTopRight}>
+                                                <h2 className={styles.youHeading} >your ACTIVITY</h2>
+                                                <div className={styles.btnContainer}>
+                                                    <div
+                                                        className={styles.btn}
+                                                        onClick={handlePrev}
+                                                    >
+                                                        <img src="/icons/left.svg" alt="Previous" />
+                                                    </div>
+                                                    <div
+                                                        className={styles.btn}
+                                                        onClick={handleNext}
+                                                    >
+                                                        <img src="/icons/right.svg" alt="Next" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={styles.yourActivityContainerBottom}>
+                                            <div className={styles.yourActivityContainerBottomLeft}>
+                                                <div className={styles.card}>
+                                                    <img className={styles.cardImage} src="/images/yourAtivityImage1.png" alt="" />
+                                                    <div className={styles.cardTextContainer}>
+                                                        <span className={styles.cardTextAddress}>Toronto, canada</span>
+                                                        <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
+                                                        <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.yourActivityContainerBottomRight}>
+                                                <Swiper
+                                                    modules={[Navigation]}
+                                                    onSwiper={setSwiperRef}
+                                                    onSlideChange={handleSlideChange}
+                                                    slidesPerView={'auto'}
+                                                    spaceBetween={12}
+                                                    className={styles.carousel}
+                                                >
+                                                    {activitiesData.map((item) => (
+                                                        <SwiperSlide key={item.id} className={styles.slide}>
+                                                            <div key={item.id} className={styles.cardCarousell}>
+                                                                <img className={styles.cardImage} src={item.image} alt="" />
+
+                                                                <div className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}>
+                                                                    <span className={styles.cardTextAddress}>{item.category}</span>
+                                                                    <h3 className={styles.TextTitle}>{item.title}</h3>
+
+                                                                    <div className={styles.btnsCon}>
+                                                                        {item.actions.map((btn, i) => (
+                                                                            <button
+                                                                                key={i}
+                                                                                className={styles.cardButton}
+                                                                                onClick={() => {
+                                                                                    if (btn.type === 'view') openYourActivityPopup(item);
+                                                                                    else if (btn.type === 'add') {
+                                                                                        console.log('add action for', item);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {btn.label}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </SwiperSlide>
+                                                    ))}
+                                                </Swiper>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                    <div className={`${styles.expandableMainContainer} ${styles.expandableMainContainerMobile}`}>
+                                        <div className={`${styles.expandableTab} ${openAccordion === "yourHotel" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("yourHotel")} >
+                                            <h2>Your hotel</h2>
+                                            <img className={`${styles.arrow} ${openAccordion === "yourHotel" ? styles.rotate : ""
+                                                }`} src="/icons/DownArrows.svg" alt="" />
+                                        </div>
+                                        <div
+                                            className={`${styles.expandableContent} ${openAccordion === "yourHotel" ? styles.open : ""
+                                                }`}
+                                        >
+                                            <div className={styles.expandableContentWrapper}>
+                                                <div className={styles.card}>
+                                                    <img className={styles.cardImage} src="/images/yourAtivityImage1.png" alt="" />
+                                                    <div className={styles.cardTextContainer}>
+                                                        <span className={styles.cardTextAddress}>Toronto, canada</span>
+                                                        <h3 className={styles.cardTextTitle}>Serene Haven Inn</h3>
+                                                        <button className={styles.cardTextButton} onClick={() => openHotelPopup(sereneHotel)}>view hotel options</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div className={`${styles.expandableMainContainer} ${styles.expandableMainContainerMobile}`}>
+                                        <div className={`${styles.expandableTab} ${openAccordion === "yourActivity" ? styles.activeTabs : ""}`} onClick={() => toggleExpand("yourActivity")} >
+                                            <h2>Your ACTIVITY</h2>
+                                            <img className={`${styles.arrow} ${openAccordion === "yourActivity" ? styles.rotate : ""
+                                                }`} src="/icons/DownArrows.svg" alt="" />
+                                        </div>
+                                        <div
+                                            className={`${styles.expandableContent} ${openAccordion === "yourActivity" ? styles.open : ""
+                                                }`}
+                                        >
+                                            <div className={styles.expandableContentWrapper}>
+                                                <div className={styles.yourActivityContainerBottomRight}>
+                                                    <Swiper
+                                                        modules={[Navigation]}
+                                                        onSwiper={setSwiperRef}
+                                                        onSlideChange={handleSlideChange}
+                                                        slidesPerView={'auto'}
+                                                        spaceBetween={12}
+                                                        className={styles.carousel}
+                                                    >
+                                                        {activitiesData.map((item) => (
+                                                            <SwiperSlide key={item.id} className={styles.slide}>
+                                                                <div key={item.id} className={styles.cardCarousell}>
+                                                                    <img className={styles.cardImage} src={item.image} alt="" />
+
+                                                                    <div className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}>
+                                                                        <span className={styles.cardTextAddress}>{item.category}</span>
+                                                                        <h3 className={styles.TextTitle}>{item.title}</h3>
+
+                                                                        <div className={styles.btnsCon}>
+                                                                            {item.actions.map((btn, i) => (
+                                                                                <button
+                                                                                    key={i}
+                                                                                    className={styles.cardButton}
+                                                                                    onClick={() => {
+                                                                                        if (btn.type === 'view') openYourActivityPopup(item);
+                                                                                        else if (btn.type === 'add') {
+                                                                                            console.log('add action for', item);
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    {btn.label}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </SwiperSlide>
+                                                        ))}
+                                                    </Swiper>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>

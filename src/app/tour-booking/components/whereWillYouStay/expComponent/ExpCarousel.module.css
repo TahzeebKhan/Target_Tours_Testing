@@ -273,10 +273,10 @@ justify-content: space-between; */
 
 
 @media (max-width: 1540px) {
-    .swiperContainer {
+    /* .swiperContainer {
         padding-left: 20px;
         padding-right: 20px;
-    }
+    } */
 
 
 
@@ -378,5 +378,12 @@ justify-content: space-between; */
 
     .btnContainer {
         margin-top: 24px;
+    }
+}
+
+@media (max-width: 520px) {
+    .swiperContainer {
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }

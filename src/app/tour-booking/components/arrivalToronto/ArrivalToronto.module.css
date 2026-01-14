@@ -126,6 +126,7 @@
 .tabs {
     position: relative;
     display: flex;
+    overflow: scroll;
 }
 
 /* MOVING UNDERLINE */
@@ -243,7 +244,7 @@
     align-items: end;
     width: 50%;
     background-color: #ffffff;
-    padding: 42px 48px 48px 0;
+    padding: 42px 48px 48px 20px;
 }
 
 .leftBottomCont {
@@ -314,11 +315,13 @@
     border-bottom: 1px solid #E4E6E8;
     cursor: pointer;
 }
-.activeTabs{
+
+.activeTabs {
     border-bottom: none;
     /* background-color: red; */
-    
+
 }
+
 .expandableTab h2 {
     font-family: Antic Didone;
     font-weight: 400;
@@ -338,7 +341,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 24px;
+    /* margin-top: 24px; */
 }
 
 
@@ -365,7 +368,8 @@
 
 /* scoped open state for accordion content */
 .expandableContent.open {
-    max-height: 800px; /* large enough for content */
+    max-height: 800px;
+    /* large enough for content */
     transform: scaleY(1);
     opacity: 1;
     /* border-bottom: 1px solid #E4E6E8; */
@@ -604,7 +608,7 @@
 .PremiumContainer {
     display: flex;
     gap: 22px;
-    padding: 24px 12px 12px 12px;
+    padding: 0 12px 12px 12px;
 
 }
 
@@ -740,6 +744,9 @@
     padding-bottom: 12px;
 }
 
+
+
+
 .cardImage {
     width: 100%;
     object-fit: cover;
@@ -791,10 +798,11 @@
     cursor: pointer;
     transition: all 0.45s ease;
 }
-.cardTextButton:hover{
+
+.cardTextButton:hover {
     background-color: #000033;
     color: #FFFFFF;
-    
+
 }
 
 .yourActivityContainerBottomRight {
@@ -804,6 +812,7 @@
     padding-left: 10px;
     display: flex;
     gap: 12px;
+    overflow: hidden;
     /* border-right: 1px solid #E4E6E8; */
 
 }
@@ -849,7 +858,8 @@
     cursor: pointer;
     transition: all 0.45s ease;
 }
-.cardButton:hover{
+
+.cardButton:hover {
     background-color: #000033;
     color: #FFFFFF;
 }
@@ -957,6 +967,23 @@
     color: #434343;
 
 }
+ .btnContainerMobileView{
+        display: none !important;
+    }
+.ArrivalContainerMobile{
+    display: none !important;
+    flex-direction: column;
+    gap: 4px;
+}
+.expandableMainContainerMobileWrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.paraCoontainerMobile{
+    display: none !important;
+}
 
 .list {
     padding-left: 16px;
@@ -996,31 +1023,326 @@
     color: #434343;
 
 }
+.expandableContentWrapper{
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
+.expandableMainContainerMobile {
+    display: none !important;
+}
+.expandableArrival{
+    display: none !important;
+}
 /* ================= RESPONSIVE ================= */
+
+
+@media (max-width: 1440px) {
+    .leftBottomCont {
+        gap: 16px;
+    }
+
+    .flightDetailsSubCont {
+        gap: 12px;
+    }
+
+    .flightDetailsSubCont {
+        max-width: 415px;
+        width: 100%;
+    }
+
+    .flightTimingContainer {
+        max-width: 314px;
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 1400px) {
+    .cabinCont span {
+        font-size: 10px;
+    }
+
+    .flightDetailsSubCont {
+        max-width: 388px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 1280px) {
+    .leftBottomCont {
+        gap: 16px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .flightDetailsCont {
+        flex-direction: column;
+        gap: 10px;
+
+    }
+
+    .cabinCont {
+        width: 100%;
+        flex-direction: row;
+
+
+
+    }
+
+    .br {
+        display: none;
+    }
+
+    .flightDetailsSubCont {
+        max-width: unset;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .flightTimingContainer {
+        max-width: unset;
+        width: 100%;
+    }
+}
+
+@media (max-width: 1156px) {
+    .ArrivalRight h2 {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .leftContainer {
+        padding-right: 36px;
+        gap: 30px;
+    }
+
+    .card {
+        width: 225px;
+    }
+
+    .inclusionText{
+        font-size: 14px;
+    }
+    .expandableContent {
+    /* padding-top: 12px; */
+}
+}
+
+
+@media (max-width: 1100px) {
+    /* .expandableTop {
+        margin-top: 8px;
+    } */
+
+    .ArrivalLeft {
+        font-size: 12px;
+    }
+
+    .ArrivalContainer {
+        height: 36px;
+    }
+
+    .PremiumContainer {
+        padding-top: 8px;
+    }
+
+    .wrapper {
+        gap: 19px;
+    }
+
+    .expandableMainContainerMobile {
+        display: block !important;
+    }
+
+    .yourActivityContainer {
+        display: none !important;
+    }
+
+    .btnContainer {
+        justify-content: flex-start;
+    }
+
+    .expandableContent {
+        /* padding-top: 16px; */
+        border-top: 1px solid #E4E6E8;
+        border-bottom: none !important;
+    }
+
+    .yourActivityContainerBottomRight {
+        padding: 0;
+    }
+
+}
+
+@media (max-width: 1025px) {
+    .ArrivalContainer {
+        height: 30px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 17px;
+    }
+
+    .ArrivalLeft {
+        font-size: 11px;
+    }
+
+}
+
+@media (max-width: 991px) {
+    .flightDetailsSubCont {
+        gap: 10px;
+    }
+
+    .flightDetails img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .PremiumTextContainer p {
+        font-size: 12px;
+    }
+
+    .leftContainer {
+        padding-left: 16px;
+        padding-right: 20px;
+    }
+
+    .dayNumber {
+        font-size: 18px;
+    }
+
+    .expandableTab {
+        height: auto;
+        padding-bottom: 6px;
+    }
+    .expandableTop{
+        margin-top: 0px;
+    }
+    .inclusionWrapper{
+        gap: 24px;
+    }
+    
+}
 
 @media (max-width: 768px) {
     .tabsWrap {
         justify-content: flex-start;
+    }
+    .PremiumContainer{
+        padding-top: 0;
+        padding-bottom:0px;
+    }
+
+    .expandableTab h2 {
+        font-size: 16px;
+    }
+    .ArrivalContainerDayIn{
+        display: none !important;
+    }
+    .leftContainer{
+        padding: 0 16px 20px 16px;
+    }
+    
+
+    .ArrivalContainer {
+        height: auto;
+        flex-direction: column;
+        gap: 4px;
+        padding-bottom: 6px;
+    }
+
+    .ArrivalLeft {
+        font-size: 12px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 16px;
     }
 
     .tabs {
         overflow-x: auto;
         scrollbar-width: none;
     }
+
+    .rightContainer {
+        display: none;
+    }
+    .ArrivalContainerMobile{
+        display: flex !important;
+        padding: 0;
+    }
+    .paraCoontainerMobile{
+        display: flex !important;
+    }
+    .paraCoontainer{
+        display: none ;
+    }
+    .yourActivityContainerBottomRight{
+        max-width: 100%;
+    }
+    .btnContainerMobileView{
+        display: flex !important;
+    }
+    .leftContainer {
+        width: 100%;
+    }
+
+    .section {
+        padding-bottom: 12px;
+        background-color: #FFFFFF;
+    }
+
+    .leftContainer {
+        padding-top: 0;
+    }
+
+    .section {
+        gap: 24px;
+    }
+
+    .card {
+        width: 222px;
+    }
+
+    .expandableMainContainerMobileWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .expandableArrival{
+        display: block !important;
+    }
 }
 
 @media (max-width: 488px) {
     .tabs {
-        display: none;
+        /* display: none; */
     }
 
     .tabsWrap {
-        border-bottom: none;
+        /* border-bottom: none; */
         justify-content: center;
     }
 
+
     .mobileSelectWrap {
         display: flex;
+    }
+    .flightDetailsCont{
+padding-left: 5px;
+        padding-right: 5px;
+    }
+}
+
+@media (max-width: 400px) {
+    .flightDetailsCont{
+        
     }
 }

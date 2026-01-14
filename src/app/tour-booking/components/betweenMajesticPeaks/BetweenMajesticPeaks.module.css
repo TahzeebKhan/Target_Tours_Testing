@@ -10,6 +10,7 @@
     display: flex;
     flex-direction: column;
     gap: 100px;
+    padding: 0 20px;
 }
 
 .topContainer {
@@ -301,4 +302,94 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
+}
+
+@media (max-width: 1440px){
+    .bottomContainerRef{
+        gap: 16px;
+    }
+    .rightGrid{
+        gap: 16px;
+    }
+}
+
+@media (max-Width: 991px){
+    .bottomContainerRef{
+        margin-top: 60px;
+        /* flex-direction: column; */
+        /* height: auto; */
+    }
+    /* .rightImage{
+        width: 100%;
+
+    }
+    .rightGrid{
+        width: 100%;
+    } */
+    .Section{
+        padding-top: 50px;
+    }
+    .heading{
+        font-size: 40px;
+    }
+    .viewGalleryBtn{
+        right: 13px;
+        bottom: 13px;
+    }
+}
+
+@media (max-width: 768px){
+    .bottomContainerRef{
+        flex-direction: column;
+        height: 700px;
+        margin-top: 40px;
+
+    }
+    .rightImage{
+        width: 100%;
+        height: 45%;
+
+    }
+    .rightGrid{
+        width: 100%;
+        height: 55%;
+    }
+    .Section{
+        padding-top: 20px;
+    }
+    .heading{
+        font-size: 36px;
+    }
+    .paraContainer{
+        /* gap: 14px; */
+    }
+    .paraContainer p{
+        font-size: 14px;
+    }
+    .topContainer{
+        /* gap: 14px; */
+    }
+}
+
+@media (max-width: 650px){
+    .heading{
+        font-size: 32px;
+    }
+    .container{
+        padding: 0 16px;
+    }
+}
+@media (max-width: 430px){
+    .bottomContainerRef{
+        height: 568px;
+        gap: 4px;
+    }
+    .rightImage{
+        height: 240px;
+    }
+    .rightGrid{
+        flex: 1;
+        gap: 4px;
+
+    }
 }

@@ -85,7 +85,7 @@
 .card {
   position: relative;
   background: white;
-  width: 195px;
+  width: 100%;
   cursor: pointer;
   padding: 0;
 }

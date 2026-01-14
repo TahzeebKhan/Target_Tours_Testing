@@ -272,7 +272,30 @@
 .btn:hover img {
     filter: invert(1);
 }
+.rowMobile{
+    display: none;
+    background-color: #FFFFFF;
+    flex-direction: column;
+    border: 1px solid transparent; /* hover ke liye ready */
+  transition: 
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+    /* cursor: pointer; */
+}
+.colmobile{
+  padding: 8px 12px;
+}
 
+.colmobileLastChild{
+  min-width: 65px;
+}
+
+.mobileColContainer{
+  display: flex;
+  align-items: center;
+
+}
 
 .container {
   width: 100%;
@@ -290,6 +313,58 @@
 @media (max-width: 1279px) {
   .slide { max-width: 960px; }
 }
+
+@media (max-width: 1155px) {
+  .slide { max-width: 800px; }
+}
+
+@media (max-width: 990px) {
+  .slide { max-width: 720px; }
+  .heading{
+    font-size: 40px;
+  }
+  .tab{
+    padding:   8px 20.5px;
+
+  }
+}
+
+@media (max-width: 1156px) {
+  .tab{
+        padding: 8px 26.5px;
+  }
+  .departure_date{
+    font-size: 14px;
+  }
+  .return_date{
+    font-size: 12px;
+  }
+  .price{
+    font-size: 16px;
+  }
+  .price span{
+    font-size: 16px;
+  }
+  .extra{
+    font-size: 12px;
+    text-align: start;
+  }
+  .tab{
+    padding: 8px 22.5px;
+  }
+}
+
+@media (max-width: 991px) {
+    .section{
+        padding-top: 50px;
+    }
+    .tabs{
+      overflow: scroll;
+    }
+    .tab{
+      white-space: nowrap;
+    }
+}
 /* RESPONSIVE (optional safe) */
 @media (max-width: 768px) {
   .tabs {
@@ -300,4 +375,73 @@
   .tab {
     white-space: nowrap;
   }
+  .row{
+    display: none;
+  }
+  .rowMobile{
+    display: flex;
+  }
+  .bookBtn{
+    width: 100%;
+  }
+  .col:nth-child(3){
+    border-right: none;
+    min-width: 65px;
 }
+.col{
+  min-width: 165px;
+}
+
+ /* .slide { max-width: 400px; } */
+ .price{
+    font-size: 14px;
+ }
+ .price span{
+    font-size: 14px;  
+  }
+  .price small{
+    font-size: 8px;
+  }
+  .section{
+    gap: 24px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 430px) {
+  .heading{
+    font-size: 32px;
+    text-align: start;
+  }
+}
+@media (max-width: 425px) {
+  .slide { max-width: 400px; }
+  .col{
+    min-width: 140px;
+  }
+  .return_date{
+    font-size: 8px;
+  }
+  .price{
+    font-size: 12px;
+  }
+  .price span{
+    font-size: 12px;
+  }
+  .extra{
+    font-size: 8px;
+  }
+  .available{
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 425px) {
+  .slide { max-width: 340px; }
+  .col{
+    min-width: 130px;
+  }
+ 
+}
+
+

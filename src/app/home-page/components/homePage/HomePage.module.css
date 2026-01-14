@@ -1545,4 +1545,8 @@
   .featurelabel {
     white-space: wrap;
   }
+  .round_tripBtnMbl {
+    padding: 8px 2px;
+    font-size: 11px;
+  }
 }
