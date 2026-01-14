@@ -173,10 +173,12 @@
     .heading {
         font-size: 32px;
     }
-    .container{
+
+    .container {
         gap: 24px;
     }
-    .section{
+
+    .section {
         padding: 20px;
     }
 }
@@ -188,22 +190,25 @@
         padding: 16px;
         gap: 16px;
     }
-    .testimonialPara p{
+
+    .testimonialPara p {
         font-size: 12px;
     }
 
-    .section{
+    .section {
         padding: 20px 16px;
     }
 
     .slide {
         width: 324px;
     }
-    .profileIcon{
+
+    .profileIcon {
         width: 48px;
         height: 48px;
     }
-    .profileAddress{
+
+    .profileAddress {
         font-size: 12px;
     }
 }
@@ -211,6 +216,18 @@
 @media (max-width: 400px) {
     .heading {
         font-size: 28px;
+    }
+
+}
+
+@media (max-width: 375px) {
+    .testimonialCard {
+        max-width: 300px;
+        width: 100%;
+    }
+
+    .slide {
+        width: 300px;
     }
 
 }

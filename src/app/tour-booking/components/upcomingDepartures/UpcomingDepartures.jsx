@@ -198,7 +198,7 @@ const UpcomingDepartures = () => {
                     spaceBetween={24}
                     breakpoints={{
                         0: {
-                            spaceBetween: 12,   // mobile
+                            spaceBetween: 9,   // mobile
                         },
                         768: {
                             spaceBetween: 16,   // tablet & desktop

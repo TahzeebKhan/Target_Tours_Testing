@@ -387,3 +387,15 @@ justify-content: space-between; */
         padding-right: 20px;
     }
 }
+
+
+@media (max-width: 400px) {
+    .swiperContainer {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .innerCarouselContent{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}

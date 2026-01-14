@@ -392,4 +392,10 @@
         gap: 4px;
 
     }
+    .heading{
+        font-size: 28px;
+    }
+    .viewGalleryBtn{
+        font-size: 10px;
+    }
 }

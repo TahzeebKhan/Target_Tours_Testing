@@ -168,4 +168,13 @@
   .dot {
     display: none;
   }
+  .fromName{
+    font-size: 8px;
+  }
+  .duration{
+    font-size: 8px;
+  }
+  .nonStop{
+    font-size: 8px;
+  }
 }

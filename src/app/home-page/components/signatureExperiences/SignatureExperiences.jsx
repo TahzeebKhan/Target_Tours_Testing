@@ -15,7 +15,7 @@ const baseCarouselData = [
     bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
   },
   {
-    id: 4,
+    id: 2,
     image: "/images/img2.jpg",
     title: "MADAGASCAR",
     description: "The North: National Parks And Paradise Like Beaches",
@@ -25,7 +25,7 @@ const baseCarouselData = [
     bottomDescription: "The North: National Parks And Paradise Like Beaches",
   },
   {
-    id: 5,
+    id: 3,
     image: "/images/img3.jpg",
     title: "JAPAN",
     description: "Japan In The Winter",
@@ -36,7 +36,7 @@ const baseCarouselData = [
     bottomDescription: "Japan In The Winter",
   },
   {
-    id: 3,
+    id: 4,
     image: "/images/img5.jpg",
     title: "UZBEKISTAN",
     description: "From Fergana To Khiva",
@@ -47,7 +47,7 @@ const baseCarouselData = [
     bottomDescription: "From Fergana To Khiva",
   },
   {
-    id: 2,
+    id: 5,
     image: "/images/img4.jpg",
     title: "SENEGAL",
     description: "In The Heart Of East Senegal And The Shine Shaloum",

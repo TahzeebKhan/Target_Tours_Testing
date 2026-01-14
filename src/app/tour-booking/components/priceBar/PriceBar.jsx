@@ -82,6 +82,31 @@ const handlePersonalize = (e) => {
           </button>
         </div>
       </div>
+      <div className={styles.containerMobile}>
+        <div className={styles.priceLeft}>
+          <span className={styles.tripInfo}>{days}</span>
+          <span className={styles.separator}>|</span>
+          <span className={styles.priceText}>
+            <strong>{price}</strong>
+            {/* <span className={styles.perPerson}></span> */}
+          </span>
+        </div>
+
+        {/* RIGHT */}
+        <div className={styles.priceRight}>
+          <button className={styles.iconBtn} onClick={onCall}>
+            <img src="/icons/blankPhone.svg" alt="Call" />
+          </button>
+
+          <button className={styles.personalizeBtn} onClick={handlePersonalize}>
+            PERSONALIZE
+          </button>
+
+          <button className={styles.bookNowBtn} onClick={handleBookNow}>
+            BOOK NOW
+          </button>
+        </div>
+      </div>
 
       <CustomItinerary
         isOpen={itineraryOpen}
