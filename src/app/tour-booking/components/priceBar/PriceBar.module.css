@@ -15,6 +15,11 @@
     margin: 0 auto;
 
 }
+.containerMobile{
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
 .priceLeft{
     display: flex;
     align-items: center;
@@ -203,4 +208,123 @@
 .viewHotel:hover {
   background-color: #000033;
   color: #ffffff;
+}
+
+
+@media (max-width: 991px) {
+   .priceBar{
+    padding: 20px 16px;
+   }
+   .tripInfo, .priceText{
+    font-size: 16px;
+   }
+   .priceText strong{
+    font-size: 22px;
+   }
+   .iconBtn{
+    width: 40px;
+    height: 40px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    padding: 10.5px 20px;
+   }
+}
+
+@media (max-width: 910px) {
+  .priceLeft{
+    max-width: 333px;
+    width: 100%;
+  }
+  .priceRight{
+    max-width: 453px;
+    justify-content: flex-end;
+  }
+  .tripInfo, .priceText{
+    font-size: 14px;
+   }
+   .priceText strong{
+    font-size: 20px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    max-width: 170px;
+    font-size: 14px;
+   }
+}
+
+
+@media (max-width: 800px) {
+  .priceRight{
+    max-width: 408px;
+  }
+  .personalizeBtn, .bookNowBtn{
+    max-width: 140px;
+    font-size: 14px;
+   }
+}
+
+@media (max-width: 768px){
+  .tripInfo, .priceText{
+    font-size: 12px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    max-width: 116px;
+    padding: 10.5px 6px;
+   }
+   .priceRight{
+    max-width: 306px;
+    width: 100%;
+   }
+
+}
+
+@media (max-width: 653px){
+  .priceLeft{
+    width: fit-content;
+  }
+  .container{
+    display: none;
+  }
+  .containerMobile{
+    display: flex;
+  }
+}
+
+@media (max-width: 554px){
+  .priceLeft{
+    flex-direction: column;
+    gap: 0;
+    align-items: end;
+  }
+  .separator{
+    display: none;
+  }
+  .priceText strong{
+    font-size: 18px;
+    text-align: end;
+  }
+  .priceRight{
+    max-width: 258px;
+    gap: 8px;
+  }
+  .personalizeBtn{
+    max-width: 107px;
+    padding: 10.5px 6px;
+   }
+    .bookNowBtn{
+      max-width: 94px;
+    }
+    .priceBar{
+    padding: 9.5px 16px;
+  }
+}
+@media (max-width: 392px){
+  .priceBar{
+    padding: 9.5px 10px;
+  }
+  .priceText, .tripInfo{
+    font-size: 10px;
+  }
+  .priceText strong{
+    font-size: 16px;
+  }
 }

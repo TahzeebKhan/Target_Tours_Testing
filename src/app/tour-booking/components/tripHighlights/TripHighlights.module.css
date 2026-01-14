@@ -93,3 +93,12 @@
         font-size: 32px;
     }
 }
+
+@media (max-width: 400px) {
+    .heading{
+        font-size: 28px;
+    }
+    .list li{
+        font-size: 12px;
+    }
+}

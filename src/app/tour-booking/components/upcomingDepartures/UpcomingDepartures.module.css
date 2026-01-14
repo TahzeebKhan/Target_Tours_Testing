@@ -443,5 +443,25 @@
   }
  
 }
+@media (max-width: 375px) {
+  .heading{
+    font-size: 28px;
+  }
+  .departure_date{
+    font-size: 11px;
+  }
+  .price{
+    font-size: 10px;
+  }
+  .price span{
+    font-size: 10px;
+  }
+  .col{
+    min-width: 115px
+  }
+  .tab{
+    padding: 8px 11px;
+  }
+}
 
 

@@ -2,6 +2,16 @@
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "139.84.175.121",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

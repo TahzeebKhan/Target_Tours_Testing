@@ -1339,10 +1339,62 @@
 padding-left: 5px;
         padding-right: 5px;
     }
+    .inclusionText{
+        font-size: 12px;
+    }
+    .icon{
+        width: 16px;
+        height: 16px;
+    }
+    .block{
+        gap: 16px;
+    }
+    .inclusionWrapper{
+        gap: 16px;
+    }
+    .tourPolicyWrapper{
+        gap: 16px;
+    }
+    .tourPolicyPara p{
+    font-size: 14px;
+   }
+   .list li{
+    font-size: 14px;
+   }
 }
 
 @media (max-width: 400px) {
-    .flightDetailsCont{
-        
-    }
+   .section{
+    padding-top: 20px;
+   }
+   .tab{
+    padding: 8px 11px;
+   }
+   .fromToContainer span{
+    font-size: 12px;
+   }
+   .flightDetails{
+    gap: 6px;
+   }
+   .cabinCont{
+    gap: 1px;
+   }
+   .list li{
+    font-size: 12px;
+   }
+   .PremiumTextContainer{
+    gap: 6px;
+   }
+   .PremiumTextContainer h3{
+    font-size: 12px;
+   }
+   .PremiumTextContainer p{
+    font-size: 9px;
+   }
+   .ApproximatelyTime span{
+    font-size: 10px;
+   }
+   .tourPolicyPara p{
+    font-size: 12px;
+   }
 }

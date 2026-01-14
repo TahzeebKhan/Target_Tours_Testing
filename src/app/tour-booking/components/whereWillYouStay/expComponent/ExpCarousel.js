@@ -236,7 +236,7 @@ export default function ExpCarousel({ activeTab }) {
                 },
 
                 769: {
-                  slidesPerView: 2,
+                  slidesPerView: 3,
                   centeredSlides: false,
                   spaceBetween: 16,
                 },
