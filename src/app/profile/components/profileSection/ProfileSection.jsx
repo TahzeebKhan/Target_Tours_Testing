@@ -22,41 +22,6 @@ const ProfileSection = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const validateProfile = () => {
-    const get = (label) =>
-      profileFields.find((f) => f.label === label)?.value?.trim() || "";
-
-    const errors = [];
-
-    if (!get("Full Name")) errors.push("Full Name is required");
-    if (!get("Display Name")) errors.push("Display Name is required");
-
-    const dob = get("Date of Birth");
-    if (!dob) {
-      errors.push("Date of Birth is required");
-    } else if (isNaN(new Date(dob).getTime())) {
-      errors.push("Date of Birth is invalid");
-    }
-
-    if (!get("Nationality")) errors.push("Nationality is required");
-    if (!get("Address")) errors.push("Address is required");
-    if (!get("Country")) errors.push("Country is required");
-
-    const zip = get("Zip Code");
-    if (!zip) {
-      errors.push("Zip Code is required");
-    } else if (!/^\d{4,10}$/.test(zip)) {
-      errors.push("Zip Code is invalid");
-    }
-
-    const passport = get("Passport Details");
-    if (!passport) {
-      errors.push("Passport Details are required");
-    }
-
-    return errors;
-  };
-
   const [profileFields, setProfileFields] = useState([
     { label: "Full Name", value: "Demian Satria", isEditing: false },
     {
@@ -67,10 +32,11 @@ const ProfileSection = () => {
     },
     {
       label: "Email Address",
-      value: "demiansatria@gmail.com",
+      value: getUserEmailFromCookie(),
       isVerified: true,
       isEditing: false,
     },
+
     { label: "Phone Number", value: "0892-1293-3941", isEditing: false },
     {
       label: "Date of Birth",
@@ -225,13 +191,6 @@ const ProfileSection = () => {
 
   const updateProfile = async () => {
     try {
-      const errors = validateProfile();
-
-      if (errors.length > 0) {
-        toast.error(errors.join("\n"));
-        return; // ❌ stop API call
-      }
-
       const userId = Cookies.get("user_id");
       const token = Cookies.get("auth_token");
 
@@ -239,17 +198,24 @@ const ProfileSection = () => {
         throw new Error("User ID missing in cookies");
       }
 
-      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
       const payload = buildPayload();
 
-      const res = await axios.put(url, payload, {
+      // 🔥 nothing to update
+      if (Object.keys(payload).length === 1) {
+        toast.info("No changes to update");
+        return;
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
+
+      await axios.put(url, payload, {
         headers: {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
 
-      console.log("Profile updated successfully");
+      toast.success("Profile updated successfully");
     } catch (err) {
       console.error("Profile update failed", err.response?.data || err.message);
       toast.error("Failed to update profile");
