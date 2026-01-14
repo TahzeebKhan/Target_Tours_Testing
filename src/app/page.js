@@ -10,22 +10,25 @@ import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPri
 import FeatureSection from "./home-page/components/featureSection/FeatureSection";
 import Footer from "./home-page/components/footer/Footer";
 import PrivateGroup from "./home-page/components/privateGroup/PrivateGroup";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
     <>
-    <HomePage/>
-    <SignatureExperiences/>
-    <PopularFlights/>
-    <TopToFlights/>
-    
-    <TargetTours/>
-    <PrivateGroup/>
-    <LimitedTimeOffer/>
-    <ExploreStays/>
-    <FeatureSection/>
-    <Footer/>
+      <Suspense fallback={null}>
+        <HomePage />
+      </Suspense>
+
+      <SignatureExperiences />
+      <PopularFlights />
+      <TopToFlights />
+
+      <TargetTours />
+      <PrivateGroup />
+      <LimitedTimeOffer />
+      <ExploreStays />
+      <FeatureSection />
+      <Footer />
     </>
-    
   );
 }
