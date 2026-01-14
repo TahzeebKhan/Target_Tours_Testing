@@ -1,6 +1,11 @@
 "use client";
+import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
+import { useEffect } from "react";
+import { useAuth } from "../profile/context/AuthContext";
 const Navbar = () => {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
   return (
     <>
       {" "}
@@ -8,7 +13,12 @@ const Navbar = () => {
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
-          <img src="./Logo.svg" alt="" />
+          <img
+            style={{ cursor: "pointer" }}
+            onClick={() => router.push("/")}
+            src="./Logo.svg"
+            alt=""
+          />
           <div className={`${styles.navRight} flex gap-3`}>
             {/* <div className={styles.sessionExpires}>
               <img src="/icons/watchIcon.svg" alt="" />
@@ -17,7 +27,15 @@ const Navbar = () => {
             <button className={`${styles.glass_button} ${styles.downloadBtn}`}>
               Download the App
             </button>
-            <button className={styles.signInBtn}>Sign In</button>
+            {!isLoggedIn && (
+              <button
+                onClick={() => router.push("/?openLogin=true")}
+                className={styles.signInBtn}
+              >
+                Sign In
+              </button>
+            )}
+
             <button className={styles.hamBurger}>
               <img src="/icons/hamBurger.png" alt="" />
               menu

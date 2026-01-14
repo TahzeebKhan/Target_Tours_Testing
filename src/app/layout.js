@@ -1,5 +1,8 @@
 import { Antic_Didone, Poppins, Jost, Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./profile/context/AuthContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Providers from "./utils/Provider";
 const inter = Inter({
   subsets: ["latin"],
@@ -44,7 +47,19 @@ export default function RootLayout({ children }) {
         <Providers>
 
    
-        {children}
+        <AuthProvider>{children}</AuthProvider>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          theme="light"
+          toastStyle={{
+            borderRadius: "0px",
+          }}
+        />
         </Providers>
       </body>
     </html>

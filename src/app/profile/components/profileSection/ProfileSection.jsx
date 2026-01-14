@@ -195,9 +195,9 @@ const ProfileSection = () => {
 
   const buildPayload = () => {
     const get = (label) =>
-      profileFields.find((f) => f.label === label)?.value || "";
+      profileFields.find((f) => f.label === label)?.value?.trim();
 
-    return {
+    const payload = {
       full_name: get("Full Name"),
       display_name: get("Display Name"),
       date_of_birth: get("Date of Birth"),
@@ -208,7 +208,21 @@ const ProfileSection = () => {
       passport_detail: get("Passport Details"),
       profile_completed: true,
     };
+
+    // 🔥 remove empty fields
+    Object.keys(payload).forEach((key) => {
+      if (
+        payload[key] === "" ||
+        payload[key] === null ||
+        payload[key] === undefined
+      ) {
+        delete payload[key];
+      }
+    });
+
+    return payload;
   };
+
   const updateProfile = async () => {
     try {
       const errors = validateProfile();
@@ -235,10 +249,10 @@ const ProfileSection = () => {
         },
       });
 
-      alert("Profile updated successfully");
+      console.log("Profile updated successfully");
     } catch (err) {
       console.error("Profile update failed", err.response?.data || err.message);
-      alert("Failed to update profile");
+      toast.error("Failed to update profile");
     }
   };
 
