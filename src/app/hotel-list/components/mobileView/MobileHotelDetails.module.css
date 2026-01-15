@@ -1,0 +1,112 @@
+/* ================= Trip Details Sticky Header ================= */
+
+.hotelDetailsMobileContainer{
+    width: 100%
+}
+.tripDetailsHeader {
+  background-color: #000033;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 99;
+}
+
+/* Sticky behaviour */
+.stickyHidden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.35s ease;
+}
+
+.stickyVisible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: all 0.35s ease;
+}
+
+/* Left section */
+.mainCotainer {
+  display: flex;
+  align-items: center;
+  gap: 8.5px;
+}
+
+/* Header content */
+.TripCardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.TripCardHeaderNav {
+  padding: 0;
+}
+
+/* Route row */
+.TripCardHeaderDetails {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.TripCardHeaderDetailsItemText {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* Dash between cities */
+.minDash {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 15px;
+  color: #ffffff;
+}
+
+/* Booking info row */
+.TripCardHeaderBookingDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.TripCardHeaderBookingDate p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 20px;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+/* Small dot */
+.navDot {
+  width: 4px;
+  height: 4px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+/* Edit icon */
+.editIcon {
+  cursor: pointer;
+}

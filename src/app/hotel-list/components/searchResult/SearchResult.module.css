@@ -66,3 +66,25 @@
     opacity: 1;
 }
 
+
+@media (max-width: 1056px) {
+    .viewTypeButtons {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 1038px) {
+
+    .viewType {
+        font-size: 12px;
+    }
+    .searchResultsLeft{
+        font-size: 12px;
+    }
+}
+@media (max-width: 1038px) {
+    .tourLayout{
+        padding-left: 14px;
+    }
+}

@@ -9,6 +9,7 @@
   position: sticky;
   top: 0;
   z-index: 99;
+  margin: 0 auto;
 }
 
 .overlay {
@@ -51,7 +52,8 @@
 }
 
 .glass_panel {
-  width: 1130px;
+  max-width: 1130px;
+  width: 100%;
   position: relative;
 }
 
