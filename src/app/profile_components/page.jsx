@@ -15,8 +15,9 @@ export default function ProfilePage() {
 
   return (
     <main>
-      {/* <SelectPlan /> */}
-      <TravellerDetails />
+      {/* <PriceSummary /> */}
+      <SelectPlan />
+      {/* <TravellerDetails /> */}
       {/* <AddTravellerDetails /> */}
     </main>
   );

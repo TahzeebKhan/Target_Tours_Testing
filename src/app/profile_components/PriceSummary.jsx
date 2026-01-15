@@ -1,42 +1,40 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import styles from "./PriceSummary.module.css";
 
-export default function PriceSummary() {
-  const [isActive, setIsActive] = useState(false);
-
-  const toggleActive = () => {
-    setIsActive(!isActive);
-  };
-
+export default function PriceSummary({ onClose }) {
   const lineItems = [
-    { label: "1x Adult", value: "₹ 64,126", isBold: false },
+    { label: "1x Adult", value: "₹ 64,126" },
     { label: "1x Cabin baggage", value: "Included", isGreen: true },
-    { label: "1x Checked baggabe 15kg", value: "Included", isGreen: true },
+    { label: "1x Checked baggage 15kg", value: "Included", isGreen: true },
     { label: "Seat Selection", value: "Free", isGreen: true },
     { label: "Meals", value: "Included", isGreen: true },
-    { label: "Taxes & Fees", value: "₹ 2,819", isBold: false },
+    { label: "Taxes & Fees", value: "₹ 2,819" },
   ];
 
   return (
-    <div
-      className={`${styles.container} ${isActive ? styles.active : ""}`}
-      onClick={toggleActive}
-    >
-      <div className={styles.modalOverlay}>
+    <div className={styles.container} onClick={onClose}>
+      <div
+        className={styles.modalOverlay}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.card}>
           <header className={styles.header}>
             <h2 className={styles.title}>PRICE SUMMARY</h2>
-            <div className={styles.closeIcon}>
+
+            <button
+              type="button"
+              className={styles.closeIcon}
+              onClick={onClose}
+            >
               <Image
                 src="/images/CLose.svg"
                 alt="Close"
                 width={20}
                 height={20}
               />
-            </div>
+            </button>
           </header>
 
           <div className={styles.content}>
@@ -55,13 +53,15 @@ export default function PriceSummary() {
           </div>
 
           <div className={styles.dividerWrapper}>
-            <div className={styles.divider}></div>
+            <div className={styles.divider} />
           </div>
 
           <div className={styles.totalSection}>
             <div className={styles.totalTextGroup}>
               <h3 className={styles.totalTitle}>Total Amount</h3>
-              <p className={styles.subtext}>Includes taxes and service fees</p>
+              <p className={styles.subtext}>
+                Includes taxes and service fees
+              </p>
             </div>
             <div className={styles.totalPrice}>₹ 66,945</div>
           </div>
