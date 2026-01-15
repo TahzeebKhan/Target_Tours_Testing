@@ -8,6 +8,9 @@ import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import HotelDateCalendarModal from "@/app/components/hotelCalendar/HotelDateCalendarModal";
+import HotelCalendarMonths from "@/app/components/hotelCalendar/HotelCalendarMonths";
+import { CalendarSVG } from "@/app/flights/components/SVGFile";
 
 const TourHeroSection = () => {
   const searchParams = useSearchParams();
@@ -17,6 +20,15 @@ const TourHeroSection = () => {
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  const hotelCalendarRef = useRef(null);
+  const [showHotelCalendar, setShowHotelCalendar] = useState(false);
+  const [hotelStartDate, setHotelStartDate] = useState(
+    searchParams.get("checkIn") || ""
+  );
+  const [hotelEndDate, setHotelEndDate] = useState(
+    searchParams.get("checkOut") || ""
+  );
 
 
   // Ye lines add karein:
@@ -120,6 +132,51 @@ const TourHeroSection = () => {
     }
   };
 
+
+  const handleHotelDateClick = (date) => {
+    if (!hotelStartDate || hotelEndDate) {
+      setHotelStartDate(date);
+      setHotelEndDate("");
+    } else if (new Date(date) >= new Date(hotelStartDate)) {
+      setHotelEndDate(date);
+      setShowHotelCalendar(false);
+    } else {
+      setHotelStartDate(date);
+      setHotelEndDate("");
+    }
+  };
+
+  useEffect(() => {
+    if (!showHotelCalendar) return;
+
+    const handleClickOutside = (e) => {
+      if (
+        hotelCalendarRef.current &&
+        !hotelCalendarRef.current.contains(e.target)
+      ) {
+        setShowHotelCalendar(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showHotelCalendar]);
+
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = date
+      .toLocaleString("en-US", { month: "short" })
+      .toUpperCase();
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
+
   const handleFieldClick = (e) => {
     const target = e.currentTarget;
     const input = target.querySelector("input");
@@ -154,7 +211,7 @@ const TourHeroSection = () => {
               className={`${styles.fromBtn} ${styles.pos1}`}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
-                From CITY
+                WHERE TO
               </div>
 
               <input
@@ -183,52 +240,74 @@ const TourHeroSection = () => {
 
             {/* Slot 2: Departure Date */}
             <div
+              className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`}
+            >
+              <div className={`${styles.lable} ${styles.labelFade}`}>
+                Check In
+              </div>
 
+              {showHotelCalendar && (
+                <HotelDateCalendarModal
+                  mode="roundtrip"
+                  onModeChange={() => { }}
+                  onClose={() => setShowHotelCalendar(false)}
+                >
+                  <div ref={hotelCalendarRef}>
+                    <HotelCalendarMonths
+                      startDate={hotelStartDate}
+                      endDate={hotelEndDate}
+                      onDateClick={handleHotelDateClick}
+                    />
+                  </div>
+                </HotelDateCalendarModal>
+              )}
+
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowHotelCalendar(true);
+                }}
+              >
+                <input
+                  type="text"
+                  readOnly
+                  className={styles.contant}
+                  placeholder="ADD DATES"
+                  value={formatDate(hotelStartDate)}
+                />
+                <button type="button" className={styles.calendarIcon}>
+                  <CalendarSVG />
+                </button>
+              </div>
+            </div>
+            <div
               className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
-                Departure Date
+                Check Out
               </div>
-              <div className={`${styles.dateInputWrapper} ${styles.contentFade}`}>
-                <DateField
-                  label={""}
-                  placeholder={"ADD DATES"}
-                  value={departureDate}
-                  onChange={(e) => setDepartureDate(e.target.value)}
+
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowHotelCalendar(true);
+                }}
+              >
+                <input
+                  type="text"
+                  readOnly
+                  className={styles.contant}
+                  placeholder="ADD DATES"
+                  value={formatDate(hotelEndDate)}
                 />
+                <button type="button" className={styles.calendarIcon}>
+                  <CalendarSVG />
+                </button>
               </div>
             </div>
 
-            {/* Slot 3: To City / Country / Category */}
-            {/* Slot 3: To City / Country / Category */}
-            <div
-              ref={toWrapperRef}
-              className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField}`}
-              onClick={handleFieldClick}
-            >
-              <div className={`${styles.lable} ${styles.labelFade}`}>
-                To CITY/COUNTRY, CATEGORY
-              </div>
-              <input
-                type="text"
-                className={`${styles.contant} ${styles.contentFade}`}
-                placeholder="Destination"
-                value={to}
-                onChange={(e) => {
-                  setTo(e.target.value);
-                  setShowToSuggestion(true);
-                }}
-                onFocus={() => setShowToSuggestion(true)}
-              />
-              {showToSuggestion && (
-                <SuggestionBox
-                  boxRef={toSuggestionRef}
-                  heading="POPULAR DESTINATIONS"
-                  suggestions={toSuggestions}
-                  onSelect={handleToSelect}
-                />
-              )}
-            </div>
 
             <div
               className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.pos4}`}
@@ -237,7 +316,7 @@ const TourHeroSection = () => {
                 setTravellerOpen((o) => !o);
               }}
             >
-              <div className={styles.lable}>Travellers & Class</div>
+              <div className={styles.lable}>GUESTS & ROOMS</div>
               <div className={styles.iconCont}>
                 <div className={styles.contant}>
                   {truncate(`${totalPassengers} Adult${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`, 20)}

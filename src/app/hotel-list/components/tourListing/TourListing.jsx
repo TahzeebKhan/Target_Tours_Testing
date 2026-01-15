@@ -97,6 +97,8 @@ const TourListing = () => {
   };
 
   return (
+
+    <>
     <section className={styles.tourListSection}>
       <SearchResults viewType={viewType} setViewType={setViewType} />
 
@@ -362,6 +364,10 @@ const TourListing = () => {
         )}
       </AnimatePresence>
     </section>
+    <section className={styles.tourListSectionMobileView}>
+
+    </section>
+    </>
   );
 };
 

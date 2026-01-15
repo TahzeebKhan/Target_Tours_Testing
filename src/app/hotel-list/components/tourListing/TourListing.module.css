@@ -24,8 +24,8 @@
 }
 
 .gridWrapper{
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
 .card::after {
@@ -347,7 +347,9 @@
 .featuresCont{
     display: flex;
     align-items: center;
-    gap: 8px;
+    /* justify-content: space-between; */
+    gap: 4px;
+    flex-wrap: wrap;
 }
 .featureItem{
     display: flex;
@@ -732,9 +734,158 @@
     height: 100%;
 }
 .gridCardText{
-    height: 285px;
+    /* height: 285px; */
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 24px;
 }
+.tourListSectionMobileView{
+    display: none;
+}
+
+@media (max-width: 1870px) {
+   .gridCardText{
+    height: auto;
+   }
+}
+@media (max-width: 1747px) {
+   .gridCardText{
+    padding: 22px;
+   }
+   .topTextHead h2{
+    font-size: 19px;
+   }
+   .bookNowBtn{
+    max-width: 177px;
+    padding: 12px 9px;
+   }
+}
+
+@media (max-width: 1665px) {
+   .topTextHead h2{
+    font-size: 18px;
+   }
+   
+}
+
+@media (max-width: 1600px) {
+    .topTextHead h2{
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 1520px) {
+    .gridCardText{
+        padding: 20px 16px;
+    }
+}
+@media (max-width: 1480px) {
+    .ListViewCardTextTop{
+        gap: 10px;
+    }
+    .gridCardText{
+        gap: 16px;
+        padding: 16px 16px;
+    }
+    .topTextHead h2{
+        font-size: 16px;
+    }
+    .priceSec{
+        font-size: 26px;
+
+    }
+    .totalPrice span{
+        font-size: 13px;
+    }
+    .gridWrapper{
+        gap: 16px;
+    }
+    .bookNowBtn{
+        max-width: 144px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .topTextHeadAddress span{
+        font-size: 11px;
+    }
+    .tourLayout{
+        gap: 16px;
+
+    }
+    .featureItem p{
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 1386px) {
+    .gridCardText{
+        padding: 14px;
+
+    }
+    /* .topTextHead h2{
+        font-size: 14px;
+    } */
+}
+
+@media (max-width: 1280px) {
+    .bookNowBtn{
+        max-width: 133px;
+        font-size: 12px;
+    }
+    .tourLayout{
+        gap: 16px;
+    }
+}
+
+@media (max-width: 1168px) {
+     .topTextHead h2{
+        font-size: 14px;
+    }
+    .topTextHeadAddress img{
+        width: 16px;
+        height: 16px;
+    }
+    .priceSec{
+        font-size: 24px;
+    }
+    .totalPrice span{
+        font-size: 12px;
+    }
+
+}
+
+
+@media (max-width: 1080px) {
+    .bookNowBtn{
+        max-width: 124px;
+    }
+    .priceSec{
+        font-size: 22px;
+    }
+    .totalPrice span{
+        font-size: 11px;
+    }
+    .gridWrapper{
+        /* grid-template-columns: repeat(1, 1fr); */
+    }
+
+}
+@media (max-width: 1024px) {
+    .gridWrapper{
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+
+@media (max-width: 430px) {
+    .tourListSection{
+        display: none;
+    }
+    .tourListSectionMobileView{
+        display: flex;
+    }
+}
+
+

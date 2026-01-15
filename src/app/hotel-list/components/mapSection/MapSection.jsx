@@ -1,5 +1,6 @@
 // app/map/page.js or pages/map.js
 'use client'; // if using App Router
+import styles from './MapSection.module.css';
 
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 
@@ -8,7 +9,7 @@ export default function MapSection() {
 
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
-      <div style={{ height: '500px', width: '100%' }}>
+      <div className={styles.mapContainer}>
         <Map
           defaultCenter={position}
           defaultZoom={12}

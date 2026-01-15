@@ -1,8 +1,8 @@
-.tourContent{
-    width: 100%;
-    background-color: #F9F9F9;
-    position: relative;
-    /* z-index: -1; */
+.tourContent {
+  width: 100%;
+  background-color: #F9F9F9;
+  position: relative;
+  /* z-index: -1; */
 }
 
 .tourLayout {
@@ -10,7 +10,60 @@
   width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 916px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   padding: 42px 0px 24px 64px;
+}
+
+.tourListSectionMobileView{
+  display: none;
+}
+
+@media (max-width: 1400px) {
+  .tourLayout {
+    grid-template-columns: 1fr minmax(0, 600px);
+  }
+}
+
+@media (max-width: 1331px) {
+  .tourLayout {
+    grid-template-columns: 1fr minmax(0, 560px);
+  }
+}
+
+@media (max-width: 1288px) {
+  .tourLayout {
+    grid-template-columns: 1fr minmax(0, 520px);
+  }
+}
+
+@media (max-width: 1241px) {
+  .tourLayout {
+    grid-template-columns: 1fr minmax(0, 488px);
+  }
+}
+
+@media (max-width: 1280px) {
+  .tourLayout {
+    gap: 16px;
+  }
+
+  .tourLayout {
+    padding-left: 24px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .tourLayout {
+    grid-template-columns: 1fr minmax(0, 552px);
+  }
+}
+
+@media (max-width: 430px) {
+  .tourListSectionWrappper {
+    display: none;
+  }
+  .tourListSectionMobileView{
+    display: flex;
+  }
 }
