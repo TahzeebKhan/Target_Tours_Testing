@@ -40,6 +40,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" as="image" href="/images/signup-hero.webp" />
+      </head>
       <body
         className={`${anticDidone.variable} ${jost.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-inter)" }}
