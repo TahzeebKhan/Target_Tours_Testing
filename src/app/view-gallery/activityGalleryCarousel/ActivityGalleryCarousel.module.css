@@ -114,7 +114,6 @@
         aspect-ratio: 4 / 3;
         /* matches screenshot proportions */
         object-fit: cover;
-        border-radius: 4px;
     }
 
     .mobileItem h3 {

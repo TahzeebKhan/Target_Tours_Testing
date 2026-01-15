@@ -132,23 +132,35 @@
 
 @media (max-width: 768px) {
     .sectionContainer {
-        padding: 40px 16px;
-        gap: 32px;
+        padding: 24px 16px;
+        gap: 24px;
+    }
+
+    .header{
+        gap: 24px;
     }
 
     .gridContainer {
         grid-template-columns: 1fr;
+        gap: 32px;
     }
 
     .mainHeading {
-        font-size: 28px;
+        font-size: 32px;
+        text-align: left;
     }
 
     .subHeading {
-        font-size: 14px;
+        font-size: 15px;
+        text-align: left;
     }
 
     .card {
-        padding: 24px;
+        padding: 12px;
+        gap: 19px;
+    }
+    .ctaButton{
+        margin-top: 8px;
+        width: 100%;
     }
 }

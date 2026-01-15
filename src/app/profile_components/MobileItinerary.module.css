@@ -222,7 +222,7 @@
     transform: translateY(-50%);
     background: none;
     /* This allows clicks to pass through the 'invisible' parts of the input */
-    pointer-events: auto;
+    pointer-events: none;
     appearance: none;
     -webkit-appearance: none;
     margin: 0;
@@ -245,7 +245,7 @@
     outline: 1px solid rgba(123, 135, 153, 0.6);
     /* dull outer border */
     outline-offset: 0;
-
+    pointer-events: auto;
     cursor: pointer;
 }
 

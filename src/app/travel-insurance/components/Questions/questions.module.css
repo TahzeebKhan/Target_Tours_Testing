@@ -132,19 +132,31 @@
 /* Responsive Breakpoints */
 @media (max-width: 768px) {
     .title {
-        font-size: 32px;
+        font-size: 31px;
     }
 
     .questionText {
         font-size: 16px;
+        font-weight: 500;
     }
 
     .faqSection {
-        padding: 40px 16px;
+        padding: 24px 16px;
+    }
+    .headerContainer{
+        align-items: flex-start;
+        text-align: left;
+    }
+    .subtitle{
+        font-size: 12px;
+        color: rgba(123, 135, 153, 1);
+    }
+    .answerText{
+        font-size: 12px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
     .title {
         font-size: 28px;
     }
