@@ -7,13 +7,17 @@ import SelectDestination from "./selectDestination";
 import SelectTravellerProfile from "./selectTravellerProfile";
 import SelectPreferences from "./selectPreferences";
 import MobileItinerary from "./MobileItinerary";
+import SelectPlan from "./SelectPlan";
+import TravellerDetails from "./TravellerDetails";
+import AddTravellerDetails from "./AddTravellerDetails";
 
 export default function ProfilePage() {
 
   return (
     <main>
-
-  <MobileItinerary />      
+      {/* <SelectPlan /> */}
+      <TravellerDetails />
+      {/* <AddTravellerDetails /> */}
     </main>
   );
 }

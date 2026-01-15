@@ -3,8 +3,8 @@
 .homeSection {
   position: relative;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  height: 656px;
+  overflow: visible;
 }
 
 /* Background video */
@@ -236,9 +236,18 @@
   }
 }
 
+@media(max-width: 1024px){
+  .homeSection{
+    height: 800px;
+  }
+}
+
 @media (max-width: 768px) {
   .signInBtn {
     display: none;
+  }
+    .homeSection{
+    height: 700px;
   }
 
   .hamBurger {
@@ -253,6 +262,7 @@
   .homePageContainer {
     padding-left: 16px;
     padding-right: 16px;
+    padding-top: 24px
   }
 
   .InspiredSection{
