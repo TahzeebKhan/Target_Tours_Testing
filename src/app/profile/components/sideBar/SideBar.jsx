@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const SideBar = () => {
-  const { activeMenu, setActiveMenu } = useProfile();
+  const { activeMenu, setActiveMenu, profilePhoto } = useProfile();
   const { logout } = useAuth();
   const router = useRouter();
   const [openTrips, setOpenTrips] = useState(false);
@@ -18,7 +19,18 @@ const SideBar = () => {
     <div className={styles.sideBarContianer}>
       <div className={styles.sideBarTop}>
         <div className={styles.sideBarProfileDetails}>
-          <img className={styles.avatar} src="/images/Avatar.png" alt="" />
+          <div className={styles.avatar}>
+            <Image
+              src={profilePhoto}
+              alt="User Avatar"
+              width={56}
+              height={56}
+              onError={(e) => {
+                e.currentTarget.src = "/images/profile1.jpg";
+              }}
+            />
+          </div>
+
           <div className={styles.sideBarProfileDetailsText}>
             <h3>Emmily Morgan</h3>
             <p>Customer Operations</p>

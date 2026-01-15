@@ -48,21 +48,20 @@ export default function RootLayout({ children }) {
         style={{ fontFamily: "var(--font-inter)" }}
       >
         <Providers>
+          <AuthProvider>{children}</AuthProvider>
 
-   
-        <AuthProvider>{children}</AuthProvider>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnHover
-          theme="light"
-          toastStyle={{
-            borderRadius: "0px",
-          }}
-        />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            theme="light"
+            toastStyle={{
+              borderRadius: "0px",
+            }}
+          />
         </Providers>
       </body>
     </html>

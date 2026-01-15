@@ -14,8 +14,72 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { useProfile } from "../../context/ProfileContext";
 
 const ProfileSection = () => {
+  const fileInputRef = useRef(null);
+  const { setProfilePhoto } = useProfile();
+
+  const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
+  const [uploading, setUploading] = useState(false);
+  const handleChangePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      return;
+    }
+
+    const userId = Cookies.get("user_id");
+    const token = Cookies.get("auth_token");
+
+    if (!userId) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append("profile_photo", file); // ✅ backend key
+
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/profile-photo/${userId}`;
+
+      const res = await axios.post(url, formData, {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      // Preview after success
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+      // setAvatarPreview(
+      //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${res.data.profile_photo}`
+      // );
+      setProfilePhoto(previewUrl);
+
+      toast.success("Profile photo updated successfully");
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to upload profile photo";
+      setAvatarPreview(URL.createObjectURL(file));
+
+      toast.error(message);
+    } finally {
+      setUploading(false);
+      e.target.value = ""; // reset input
+    }
+  };
+
   const dropdownRef = useRef(null);
   const [dob, setDob] = useState(null);
   const formatForBackend = (date) => {
@@ -271,6 +335,9 @@ const ProfileSection = () => {
         // ✅ Prefill fields
         setProfileFields(mapApiToFields(res.data));
         setDob(parseFromBackend(res.data.date_of_birth));
+        // 🔥 MAP PROFILE PHOTO
+        setAvatarPreview(getProfilePhotoUrl(res.data.profile_photo));
+        setProfilePhoto(getProfilePhotoUrl(res.data.profile_photo));
       } catch (err) {
         console.error(
           "Failed to fetch profile",
@@ -313,19 +380,34 @@ const ProfileSection = () => {
     updated[index].isOpen = false;
     setProfileFields(updated);
   };
+  const getProfilePhotoUrl = (photo) => {
+    if (!photo) return "/images/profile1.jpg"; // fallback avatar
+
+    return `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${photo}`;
+  };
+  // const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
 
   return (
     <section className={styles.container}>
       <header className={styles.header}>
         <div className={styles.avatarWrapper}>
           <div className={styles.avatarCircle}>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              hidden
+              onChange={handlePhotoSelect}
+            />
+
             <div className={styles.avatarCircle}>
               <Image
-                src="/images/profile1.jpg"
+                src={avatarPreview}
                 alt="Profile Avatar"
                 fill
                 className={styles.avatar}
                 sizes="102px"
+                onError={() => setAvatarPreview("/images/profile1.jpg")}
               />
             </div>
           </div>
@@ -336,7 +418,13 @@ const ProfileSection = () => {
               Keep your details up to date to make your bookings and travel
               smoother.
             </p>
-            <button className={styles.changePhotoBtn}>Change photo</button>
+            <button
+              className={styles.changePhotoBtn}
+              onClick={handleChangePhotoClick}
+              disabled={uploading}
+            >
+              {uploading ? "Uploading..." : "Change photo"}
+            </button>
           </div>
         </div>
       </header>

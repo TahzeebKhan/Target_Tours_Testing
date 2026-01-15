@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
 
         const parsedUser = JSON.parse(userCookie);
         setUser(parsedUser);
+        setIsLoggedIn(true);
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${parsedUser.id}`,

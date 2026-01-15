@@ -1272,6 +1272,19 @@
 .arrow.arrowOpen {
   transform: rotate(-180deg);
 }
+.customLoaderContainer {
+  transition: all 0.8s ease;
+  position: fixed;
+  inset: 0;
+  z-index: 9999999;
+  pointer-events: none;
+}
+.loaderClose {
+  transform: translateY(-100vh);
+}
+.loaderOpen {
+  transform: translateY(0vh);
+}
 @media (max-width: 1600px) {
   .navbar {
     padding-left: 20px;
