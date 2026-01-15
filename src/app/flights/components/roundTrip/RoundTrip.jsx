@@ -41,7 +41,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
 
@@ -67,7 +67,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
   },
@@ -100,7 +100,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
 
@@ -126,7 +126,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
   },
@@ -159,7 +159,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
 
@@ -185,7 +185,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
   },
@@ -218,7 +218,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
 
@@ -244,7 +244,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
   },
@@ -277,7 +277,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
 
@@ -303,7 +303,7 @@ const flightResults = [
         minutes: 50,
       },
       stops: {
-        type: "Non Stop",
+        type: "Non-Stop",
       },
     },
   },

@@ -29,7 +29,7 @@ import InsuranceSearchMobile from "./insuranceSearchMobile/InsuranceSearchMobile
 // import Cookies from "js-cookie";
 import ProfileModal from "./modals/ProfileModal";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/app/profile/context/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 
 const HomePage = () => {

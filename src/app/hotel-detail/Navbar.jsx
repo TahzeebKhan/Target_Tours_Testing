@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { useEffect } from "react";
-import { useAuth } from "../profile/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 const Navbar = () => {
   const router = useRouter();
   const { isLoggedIn } = useAuth();

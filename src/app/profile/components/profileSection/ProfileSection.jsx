@@ -7,9 +7,27 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 const ProfileSection = () => {
   const dropdownRef = useRef(null);
+  const [dob, setDob] = useState(null);
+  const formatForBackend = (date) => {
+    if (!date) return "";
+    return format(date, "yyyy-MM-dd");
+  };
+
+  const parseFromBackend = (dateStr) => {
+    if (!dateStr) return null;
+    return new Date(dateStr);
+  };
+
   const getUserEmailFromCookie = () => {
     try {
       const userCookie = Cookies.get("user");
@@ -181,10 +199,12 @@ const ProfileSection = () => {
       country: get("Country"),
       zip_code: get("Zip Code"),
       passport_detail: get("Passport Details"),
+      phone_no: get("Phone Number"), // ✅ FIX
+      profile_photo: null, // ✅ SAFE
       profile_completed: true,
     };
 
-    // 🔥 remove empty fields
+    // remove empty fields
     Object.keys(payload).forEach((key) => {
       if (
         payload[key] === "" ||
@@ -250,6 +270,7 @@ const ProfileSection = () => {
 
         // ✅ Prefill fields
         setProfileFields(mapApiToFields(res.data));
+        setDob(parseFromBackend(res.data.date_of_birth));
       } catch (err) {
         console.error(
           "Failed to fetch profile",
@@ -373,6 +394,34 @@ const ProfileSection = () => {
                     className={styles.arrowIcon}
                   />
                 </div>
+              ) : field.label === "Date of Birth" && field.isEditing ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className={styles.input} type="button">
+                      {dob ? format(dob, "dd MMM yyyy") : "Select date"}
+                    </button>
+                  </PopoverTrigger>
+
+                  <PopoverContent
+                    side="bottom"
+                    align="start"
+                    sideOffset={6}
+                    className="w-auto p-0"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={dob}
+                      onSelect={(date) => {
+                        setDob(date);
+                        handleChange(index, formatForBackend(date));
+                      }}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <input
                   type="text"

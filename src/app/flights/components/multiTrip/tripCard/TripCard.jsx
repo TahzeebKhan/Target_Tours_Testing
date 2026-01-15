@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./TripCard.module.css";
-import FlightTimingDetail from "../../flightTimingDetails/FlightTimingDetail";
+import FlightTimingDetail from "../FlightTimingDetail";
 import ExpandableTabs from "@/app/flights/components/onewayTrip/expendableTabs/ExpandableTabs";
 import RoundTripExpendable from "../multiTripExpendable/MultiTripExpendable";
 import MultiTripExpendable from "../multiTripExpendable/MultiTripExpendable";

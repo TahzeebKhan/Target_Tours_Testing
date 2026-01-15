@@ -1,6 +1,6 @@
 import { Antic_Didone, Poppins, Jost, Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "./profile/context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Providers from "./utils/Provider";
