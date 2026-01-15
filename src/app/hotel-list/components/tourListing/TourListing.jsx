@@ -164,22 +164,22 @@ const TourListing = () => {
                         <div className={styles.featureItem}>
                           <img src="/icons/AirConditioning.svg" alt="" />
                           <p>Air conditioning</p>
-                          <span>•</span>
+                          <span></span>
                         </div>
                         <div className={styles.featureItem}>
                           <img src="/icons/Wifi.svg" alt="" />
                           <p>Wifi</p>
-                          <span>•</span>
+                          <span></span>
                         </div>
                         <div className={styles.featureItem}>
                           <img src="/icons/Kitchen.svg" alt="" />
                           <p>Kitchen</p>
-                          <span>•</span>
+                          <span></span>
                         </div>
                         <div className={styles.featureItem}>
                           <img src="/icons/Pool.svg" alt="" />
                           <p>Pool</p>
-                          <span>•</span>
+                          <span></span>
                         </div>
                         <div className={styles.featureItem}>
                           <img src="" alt="" />

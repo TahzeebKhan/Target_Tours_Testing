@@ -1,105 +1,105 @@
-.card{
-    max-width: 400px;
-    width: 100%;
-    background-color: #FFFFFF;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    border: 1px solid #DDDFE3;
+.card {
+  max-width: 400px;
+  width: 100%;
+  background-color: #ffffff;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid #e4e6e8;
 }
-.innerBox{
-    border: 1px solid #DDDFE3;
-    display: flex;
-    flex-direction: column;
+.innerBox {
+  border: 1px solid #dddfe3;
+  display: flex;
+  flex-direction: column;
 }
-.datesRow{
-    display: flex;
-    align-items: center;
-    
+.datesRow {
+  display: flex;
+  align-items: center;
+}
+.dateItem {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 22px 16px 22px 24px;
+}
+.label {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000000;
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.date {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 14px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0%;
+  text-align: end;
+  color: #000000;
+}
+.date span {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+.textCont {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.divider {
+  border: 0.5px solid #b5bac2;
+  height: 58px;
+}
+.roomsSection {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #dddfe3;
+  padding: 20px 24px;
+}
 
+.guestRoomCont {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
-.dateItem{
-    width: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-    padding: 12px 16px;
+.roomsText {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000000;
 }
-.label{
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 14px;
-    line-height: 24px;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #000000;
+.selectBtn {
+  padding: 12px 24px;
+  background: #fcc800;
 
-}
-.item{
-    display:flex;
-    flex-direction: column;
-}
-.date{
-    font-weight: 600;
-    font-style: Semi Bold;
-    font-size: 14px;
-    line-height: 24px;
-    letter-spacing: 0%;
-    text-align: end;
-    color: #000000;
-
-}
-.textCont{
-    display: flex;
-    gap: 10px;
-
-}
-.divider{
-    border: 0.5px solid #B5BAC2;
-    height: 58px;
-}
-.roomsSection{
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid #DDDFE3;
-    padding: 12px 16px;
-}
-
-.guestRoomCont{
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-.roomsText{
-    font-weight: 600;
-    font-style: Semi Bold;
-    font-size: 14px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #000000;
-
-}
-.selectBtn{
-    padding: 12px 24px;
-    background: #FCC800;
-
-
-
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.2;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #000033;
-    cursor: pointer;
-
-
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
 }
 
 @media (max-width: 1156px){

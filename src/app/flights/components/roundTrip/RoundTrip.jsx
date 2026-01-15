@@ -826,7 +826,7 @@ const RoundTrip = () => {
           <RoundTripSkeleton />
         ) : (
           flightResults.map((flight, index) => (
-            <FlightDetailsCard key={flight.id + index} flight={flight} />
+            <FlightDetailsCard setFareModalOpen={setFareModalOpen} key={flight.id + index} flight={flight} />
           ))
         )}
         {fareModalOpen && (

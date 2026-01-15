@@ -5,7 +5,7 @@ import FlightTimingDetail from "../FlightTimingDetail";
 import ExpandableTabs from "@/app/flights/components/onewayTrip/expendableTabs/ExpandableTabs";
 import RoundTripExpendable from "../multiTripExpendable/MultiTripExpendable";
 import MultiTripExpendable from "../multiTripExpendable/MultiTripExpendable";
-const TripCard = () => {
+const TripCard = ({ setFareModalOpen }) => {
   const [openId, setOpenId] = useState(null);
 
   const flight = {
@@ -119,7 +119,12 @@ const TripCard = () => {
             <div className={styles.fareDetails}>
               <div className={styles.totalFare}>
                 <span className={styles.fareText}>{flight.fare.totalFare}</span>
-                <button className={styles.viewBtn}>VIEW FARES</button>
+                <button
+                  onClick={() => setFareModalOpen(true)}
+                  className={styles.viewBtn}
+                >
+                  VIEW FARES
+                </button>
               </div>
               <div className={styles.fareAmount}>
                 <span className={styles.fare}>

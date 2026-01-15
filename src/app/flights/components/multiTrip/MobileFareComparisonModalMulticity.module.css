@@ -1,6 +1,7 @@
 /* Modal Overlay */
 .modalOverlay {
   position: fixed;
+  overflow-y: auto;
   top: 0;
   left: 0;
   right: 0;
@@ -24,6 +25,33 @@
   height: 100%;
   background-color: rgba(249, 249, 249, 1);
   padding: 16px;
+}
+.toggleTabContainer {
+  width: 100%;
+  display: flex;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.toggleTab {
+  width: 100%;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  border-bottom: 3px solid transparent;
+  transition: all 0.5s ease;
+}
+.activeTab {
+  border-bottom: 3px solid #000033;
 }
 .tripDetailsContainer {
   width: 100%;
@@ -276,7 +304,7 @@
 .premiumBadge {
   position: absolute;
   right: 0;
-  top: 10px;
+  top: 3px;
   padding: 7px 15px;
   background-color: #000033;
   font-family: var(--font-inter);
@@ -645,7 +673,11 @@
   line-height: 1;
   color: rgba(123, 135, 153, 1);
 }
-
+@media (max-width: 509px) {
+  .modalContent {
+    padding-top: 36px;
+  }
+}
 @media (max-width: 326px) {
   .lockPriceBtn,
   .bookNowBtn {

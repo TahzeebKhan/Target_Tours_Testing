@@ -797,7 +797,9 @@ const TopFilterSection = ({
                     >
                       <div className={styles.lable}>Travellers & Class</div>
                       <div className={styles.iconCont}>
-                        <div className={`${styles.contant} ${styles.contantTra}`}>
+                        <div
+                          className={`${styles.contant} ${styles.contantTra}`}
+                        >
                           {passengers.adult +
                             passengers.child +
                             passengers.infant}{" "}
@@ -923,6 +925,7 @@ const TopFilterSection = ({
                         </div>
 
                         <div
+                          style={{ zIndex: "-999" }}
                           className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.toBtn}`}
                         >
                           <div className={styles.lable}>To</div>

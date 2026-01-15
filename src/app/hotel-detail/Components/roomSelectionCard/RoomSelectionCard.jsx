@@ -12,11 +12,11 @@ export default function RoomSelectionCard({onBookNow}) {
                     <div className={styles.dateItem}>
                         <div className={styles.item}>
                             <div className={styles.textCont}>
-                                <CalendarDays size={20} />
+                                <CalendarDays size={24} />
 
                                 <p className={styles.label}>CHECK-IN</p>
                             </div>
-                            <p className={styles.date}>08/14/2025</p>
+                            <p className={styles.date}> <span></span>08/14/2025</p>
 
                         </div>
                     </div>
@@ -26,11 +26,11 @@ export default function RoomSelectionCard({onBookNow}) {
                     <div className={styles.dateItem}>
                         <div className={styles.item}>
                             <div className={styles.textCont}>
-                                <CalendarDays size={20} />
+                                <CalendarDays size={24} />
 
                                 <p className={styles.label}>CHECK-OUT</p>
                             </div>
-                            <p className={styles.date}>08/19/2025</p>
+                            <p className={styles.date}> <span></span>08/19/2025</p>
 
                         </div>
 
