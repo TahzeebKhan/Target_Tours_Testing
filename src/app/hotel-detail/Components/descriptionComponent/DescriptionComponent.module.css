@@ -33,4 +33,11 @@
     text-align: start;
     cursor: pointer;
     width: fit-content;
+    text-underline-offset: 4px;
+}
+
+@media (max-width: 640px){
+    .DescriptionSection{
+        padding: 24px 16px
+    }
 }

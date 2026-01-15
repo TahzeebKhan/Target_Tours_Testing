@@ -2,3 +2,10 @@
   display: flex;
   gap: 50px;
 }
+
+
+@media (max-width: 991px) {
+    .months{
+        gap: 20px;
+    }
+}

@@ -23,3 +23,49 @@
     margin-top: -37px;
     margin-bottom: 41px;
 }
+
+@media (max-width: 1520px) {
+    .heading {
+        padding-left: 20px;
+    }
+
+
+}
+
+@media (max-width: 1200px) {
+    .heading {
+        font-size: 30;
+    }
+
+}
+@media (max-width: 1156px) {
+    .heading {
+        font-size: 28px;
+    }
+
+}
+@media (max-width: 1080px) {
+    .heading {
+        font-size: 26px;
+    }
+
+}
+@media (max-width: 1040px) {
+    .heading {
+        font-size: 22px;
+    }
+
+}
+
+
+@media (max-width: 991px) {
+    .expCarousel {
+        margin-top: -5px;
+    }
+}
+
+@media (max-width: 640px) {
+    .container{
+        margin-top: 0;
+    }
+}

@@ -73,15 +73,19 @@ const CustomerReviews = () => {
 
                     {/* RIGHT SIDE */}
                     <div className={styles.rightSection}>
+
                         {scoreDetails.map((item) => (
-                            <div key={item.label} className={styles.scoreBox}>
-                                <div className={styles.scoreLabelBox}>
-                                    <p className={styles.scoreLabel}>{item.label}</p>
+                            <div className={styles.scoreContainer}>
+                                <div key={item.label} className={styles.scoreBox}>
+                                    <div className={styles.scoreLabelBox}>
+                                        <p className={styles.scoreLabel}>{item.label}</p>
+                                    </div>
+                                    <p className={styles.scoreValue}>{item.score.toFixed(1)}</p>
                                 </div>
-                                <p className={styles.scoreValue}>{item.score.toFixed(1)}</p>
                             </div>
 
                         ))}
+
                     </div>
                 </div>
             </div>
@@ -112,10 +116,10 @@ const CustomerReviews = () => {
 
                             {/* FOOTER */}
                             <div className={styles.footer}>
-                                 <img src="/icons/likeIcon.svg" alt="" />
+                                <img src="/icons/likeIcon.svg" alt="" />
                                 <span className={styles.helpful}>
-                                   
-                                 Helpful ({review.helpful})
+
+                                    Helpful ({review.helpful})
                                 </span>
                             </div>
 

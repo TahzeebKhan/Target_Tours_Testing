@@ -4,7 +4,12 @@
     margin: 0 auto;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #c4c4c4;
+    border-top: 1px solid #E4E6E8;
+    border-bottom: 1px solid #DDDFE3;
+    overflow: scroll;
+    background-color: #F9F9F9;
+    padding-top: 15px;
+    padding-left: 16px;
     
 }
 
@@ -40,6 +45,7 @@
     color: inherit;
     text-transform: inherit;
     font-size: inherit;
+    white-space: nowrap;
 }
 
 .active {
@@ -52,15 +58,13 @@
     position: absolute;
     bottom: -1px;
     left: 0;
-    height: 2px;
+    height: 3px;
     width: var(--indicator-width);
     transform: translateX(var(--indicator-left));
     background-color: #000033;
     transition: transform 0.25s ease, width 0.25s ease;
 }
 @media (max-width: 1520px){
-    .tabsWrap{
-        padding-left: 16px;
-    }
+   
     
 }

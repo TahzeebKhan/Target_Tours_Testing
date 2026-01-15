@@ -91,8 +91,8 @@ const Page = () => {
         <HotelPolicies />
       </section>
 
-<section ref={sectionRefs.Reviews}>
-      <CustomerReviews />
+      <section className={styles.Reviews} ref={sectionRefs.Reviews}>
+        <CustomerReviews />
       </section>
       <BarcelonaSection />
 

@@ -43,6 +43,16 @@
     gap: 5px;
 }
 
+.scoreContainer{
+    
+   height: 100px;
+    max-width: 163px;
+    border-left: 1px solid #DDDFE3;
+    /* border-right: 1px solid; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .star {
     width: 32px;
     font-weight: 400;
@@ -86,8 +96,8 @@
 .rightSection {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-    border-left: 1px solid #e5e7eb;
+    /* gap: 16px; */
+    /* border-left: 1px solid #e5e7eb; */
 }
 
 .scoreBox {
@@ -102,7 +112,7 @@
     padding: 12px 16px;
 }
 
-.scoreBox::after {
+/* .scoreBox::after {
     content: "";
     position: absolute;
     right: -9px;
@@ -124,7 +134,7 @@
 
 .scoreBox:last-child::after {
     display: none;
-}
+} */
 
 .scoreLabel {
     font-family: var(--font-inter);
@@ -250,4 +260,71 @@
     letter-spacing: 0px;
     text-align: center;
     color: #4A5565;
+}
+
+/* @media (max-width: 1520px){
+   .scoreBox:first-child::before {
+    right: 141px;
+   }
+}
+*/
+@media (max-width: 1400px){
+    .rightSection{
+        /* gap: 10px; */
+    }
+} 
+
+@media (max-width: 1280px){
+    .scoreLabelBox{
+        padding: 12px;
+    }
+    .rightSection{
+        /* gap: 6px; */
+    }
+    .scoreBox:first-child::before {
+    right: 132px;
+   }
+} 
+
+@media (max-width: 1200px){
+    .heading{
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 1156px){
+    .heading{
+        font-size: 28px;
+    }
+    .scoreLabel{
+        font-size: 14px;
+    }
+    .scoreBox:first-child::before {
+    right: 118px;
+   }
+}
+@media (max-width: 1080px){
+    .heading{
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 991px){
+    .avatar{
+        max-width: 40px;
+        height: 40px;
+    }
+    .wrapper{
+        gap: 28px;
+    }
+    .reviewList{
+        gap: 28px;
+    }
+}
+
+@media (max-width: 900px){
+    .reviewContainer{
+        flex-direction: column;
+        align-items: start;
+    }
 }

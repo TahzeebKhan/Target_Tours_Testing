@@ -6,11 +6,8 @@
   height: 91vh;
   background: #fff;
   border-radius: 16px 16px 0 0;
-  z-index: 100;
+  /* z-index: 100; */
   touch-action: none;
-   /* touch-action: pan-y;
-   display: flex;
-  flex-direction: column; */
 }
 
 .headerCont {
