@@ -88,7 +88,7 @@
   transition: all 0.3s ease;
   padding: 7px 8px;
   cursor: pointer;
-  border: 1px solid #0000001A;
+  border: 1px solid #0000001a;
 }
 
 .sortedItem.activeSortedItem {
@@ -667,15 +667,37 @@
   align-items: center;
   justify-content: center;
 }
+@media (max-width: 1418px) {
+  .flightFareDetailsContainer {
+    gap: 40px;
+  }
+}
+@media (max-width: 1333px) {
+  .flightFareDetailsContainer {
+    gap: 20px;
+  }
+}
+@media (max-width: 1326px) {
+  .dashBorder {
+    width: 95px;
+  }
+}
 @media (max-width: 1264px) {
   .flightFareDetailsContainer {
     gap: 4px;
+  }
+  .flightFareDetails {
+    padding-right: 0;
+  }
+  .dashBorder {
+    width: 65px;
   }
 }
 
 @media (max-width: 1200px) {
   .flightDetail {
     gap: 15px;
+    max-width: unset;
   }
 
   .container {
@@ -685,8 +707,35 @@
   .FlightBookingTextContainer {
     gap: 20px;
   }
+  .dashBorder {
+    width: 100%;
+  }
+  .flightAnimation {
+    width: 100%;
+  }
+  .flightDotedcontainer {
+    width: 95%;
+  }
+  .flightFareDetails {
+    max-width: 841px;
+  }
 }
-
+@media (max-width: 1131px) {
+  .flightDetail {
+    max-width: 71vw;
+  }
+}
+@media (max-width: 1022px) {
+  .flightNameContainer {
+    min-width: 179px;
+  }
+}
+@media (max-width: 914px) {
+  .flightNameContainer {
+    min-width: 152px;
+    /* max-width: 102px; */
+  }
+}
 @media (max-width: 830px) {
   .departureTime {
     font-size: 26px;
@@ -715,8 +764,11 @@
 
   .flightNameContainer {
     gap: 5px;
+    min-width: 119px;
   }
-
+  .flightFareDetailsContainer {
+    gap: 10px;
+  }
   .flightNameContainer img {
     width: 27px;
     height: 27px;
@@ -756,7 +808,7 @@
   }
 }
 
-@media (max-width: 690px) {
+@media (max-width: 730px) {
   .flightFareDetailsContainer {
     flex-direction: column;
   }
@@ -862,4 +914,3 @@
     display: none;
   }
 }
-

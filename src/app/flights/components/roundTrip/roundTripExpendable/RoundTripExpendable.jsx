@@ -40,7 +40,7 @@ const RoundTripExpendable = () => {
       minutes: "50",
     },
 
-    stops: "Non Stop",
+    stops: "Non-Stop",
   };
 
   const flight2 = {
@@ -73,7 +73,7 @@ const RoundTripExpendable = () => {
       minutes: "50",
     },
 
-    stops: "Non Stop",
+    stops: "Non-Stop",
   };
 
   const flight3 = {
@@ -106,7 +106,7 @@ const RoundTripExpendable = () => {
       minutes: "50",
     },
 
-    stops: "Non Stop",
+    stops: "Non-Stop",
   };
 
   useEffect(() => {
@@ -149,7 +149,9 @@ const RoundTripExpendable = () => {
               <div className={styles.flightHeading}>
                 <h3>
                   Jakrata <img src="/icons/flightIconBlue.svg" alt="" />{" "}
-                  Singapore, 18 Dec 2025
+                  <span className={styles.smallerHeadingText}>
+                    Singapore, 18 Dec 2025
+                  </span>
                 </h3>
               </div>
               <div className={styles.mainBody}>
@@ -167,7 +169,9 @@ const RoundTripExpendable = () => {
               <div className={styles.flightHeading}>
                 <h3>
                   Singapore <img src="/icons/flightIconBlue.svg" alt="" />{" "}
-                  Jakrata, 25 Dec 2025
+                  <span className={styles.smallerHeadingText}>
+                    Jakrata, 25 Dec 2025
+                  </span>
                 </h3>
               </div>
               <div className={styles.mainBody}>

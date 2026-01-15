@@ -428,15 +428,15 @@
   display: flex;
   background-color: #000033;
   /* gap: 34px; */
-  /* justify-content: space-between; */
+  justify-content: space-between;
   color: #ffffff;
 }
-.tableHeader .airlineCellHead{
+.tableHeader .airlineCellHead {
   text-align: start;
 }
 
 .tableHeader span {
-  width: 33%;
+  /* width: 33%; */
   font-family: var(--font-inter);
   font-weight: 400;
   font-size: 14px;
@@ -455,7 +455,8 @@
   align-items: center;
   border: 1px solid #e4e6e8;
 }
-.tableRow .baggage, .tableRow .airlineCell{
+.tableRow .baggage,
+.tableRow .airlineCell {
   width: 33%;
 }
 

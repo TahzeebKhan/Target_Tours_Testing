@@ -192,7 +192,7 @@ import Image from "next/image";
 import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { useAuth } from "@/app/profile/context/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function LoginPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
