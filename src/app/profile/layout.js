@@ -6,16 +6,11 @@ import styles from "./Profile.module.css";
 import { ProfileProvider } from "./context/ProfileContext";
 
 const ProfileLayout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className={styles.profileLayout}>
       <Navbar />
-      <button
-        className={styles.sidebarToggle}
-        onClick={() => setSidebarOpen((p) => !p)}
-      >
-        ☰
-      </button>
+     
       <div className={styles.profileContainer}>
         <ProfileProvider>
           <SideBar />

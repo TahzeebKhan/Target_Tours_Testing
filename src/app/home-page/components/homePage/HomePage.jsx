@@ -31,6 +31,7 @@ import ProfileModal from "./modals/ProfileModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
+import CustomLoaderHomePage from "@/app/components/CustomLoaderHomePage";
 
 const HomePage = () => {
   const [directOnly, setDirectOnly] = useState(true);
@@ -46,7 +47,7 @@ const HomePage = () => {
   const [heroData, setHeroData] = useState({
     heading: "",
     description: "",
-    videoUrl: "/videos/hero.mp4"
+    videoUrl: "/videos/hero.mp4",
   });
 
   // refs for the date inputs
@@ -77,7 +78,7 @@ const HomePage = () => {
   // Insurance calendar states
   const insuranceCalendarRef = useRef(null);
   const [showInsuranceCalendar, setShowInsuranceCalendar] = useState(false);
-  const [insuranceStartDate, setInsuranceStartDate] = useState("");
+  const [insuranceStartDate, setInsurancsetHeroDataeStartDate] = useState("");
   const [insuranceEndDate, setInsuranceEndDate] = useState("");
 
   const [activeFeature, setActiveFeature] = useState(1);
@@ -106,16 +107,16 @@ const HomePage = () => {
   });
 
   useEffect(() => {
-  if (!heroResponse) return;
+    if (!heroResponse) return;
 
-  setHeroData({
-    heading: heroResponse.heading || "",
-    description: heroResponse.description || "",
-    videoUrl: heroResponse.media?.url
-      ? `http://139.84.175.121:1337${heroResponse.media.url}`
-      : "/videos/hero.mp4",
-  });
-}, [heroResponse]);
+    setHeroData({
+      heading: heroResponse.heading || "",
+      description: heroResponse.description || "",
+      videoUrl: heroResponse.media?.url
+        ? `http://139.84.175.121:1337${heroResponse.media.url}`
+        : "/videos/hero.mp4",
+    });
+  }, [heroResponse]);
 
   // useEffect(() => {
   //   const token = Cookies.get("auth_token");
@@ -750,9 +751,7 @@ const HomePage = () => {
     }
 
     if (bookingType === "holiday") {
-      router.push(
-        `/tour-list?from=${from}&to=${to}&date=${holidayStartDate}`
-      );
+      router.push(`/tour-list?from=${from}&to=${to}&date=${holidayStartDate}`);
     }
 
     if (bookingType === "insurance") {
@@ -762,13 +761,39 @@ const HomePage = () => {
     }
   };
 
+  const [showLoader, setShowLoader] = useState(true);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    // Logged-in users must wait for:
+    // 1. Hero API
+    // 2. Video readiness
+    if (isLoggedIn) {
+      setShowLoader(heroLoading || !videoReady);
+      return;
+    }
+
+    // Logged-out users:
+    // Hero API may fail fast → ignore it
+    // Only wait for video
+    setShowLoader(!videoReady);
+  }, [isLoggedIn, heroLoading, videoReady]);
 
   return (
     <>
+      <div
+        className={`${styles.customLoaderContainer} ${
+          !showLoader ? styles.loaderClose : styles.loaderOpen
+        }`}
+      >
+        <CustomLoaderHomePage />
+      </div>
+
       <section className="relative w-full h-[100vh]">
         <div
-          className={`${styles.menuSection} ${menuOpen ? styles.menuOpen : styles.menuClose
-            }`}
+          className={`${styles.menuSection} ${
+            menuOpen ? styles.menuOpen : styles.menuClose
+          }`}
         >
           <div className={`${styles.navContainer} top-0 z-20`}>
             <div
@@ -839,6 +864,7 @@ const HomePage = () => {
             loop
             playsInline
             preload="auto"
+            onCanPlayThrough={() => setVideoReady(true)}
           />
           <img className={styles.gradient} src="/images/gradient.png" />
         </header>
@@ -902,10 +928,11 @@ const HomePage = () => {
             className={`${styles.searchSec} flex flex-col gap-[127px] items-center`}
           >
             <div
-              className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
-                ? styles.noAnimation
-                : ""
-                }`}
+              className={`${styles.searchPanelWrapper} ${
+                bookingType === "holiday" || bookingType === "insurance"
+                  ? styles.noAnimation
+                  : ""
+              }`}
             >
               {bookingType === "flight" && (
                 <div
@@ -914,24 +941,27 @@ const HomePage = () => {
                   <div className={styles.serarchingContTop}>
                     <div className={styles.serarchingContTop_left}>
                       <button
-                        className={`${styles.round_tripBtn} ${tripType === "round" ? styles.activeTrip : ""
-                          }`}
+                        className={`${styles.round_tripBtn} ${
+                          tripType === "round" ? styles.activeTrip : ""
+                        }`}
                         onClick={() => handleTripTypeChange("round")}
                       >
                         Round-trip
                       </button>
 
                       <button
-                        className={`${styles.round_tripBtn} ${tripType === "oneway" ? styles.activeTrip : ""
-                          }`}
+                        className={`${styles.round_tripBtn} ${
+                          tripType === "oneway" ? styles.activeTrip : ""
+                        }`}
                         onClick={() => handleTripTypeChange("oneway")}
                       >
                         One-way
                       </button>
 
                       <button
-                        className={`${styles.round_tripBtn} ${tripType === "multi" ? styles.activeTrip : ""
-                          }`}
+                        className={`${styles.round_tripBtn} ${
+                          tripType === "multi" ? styles.activeTrip : ""
+                        }`}
                         onClick={() => handleTripTypeChange("multi")}
                       >
                         Multi-City
@@ -949,102 +979,153 @@ const HomePage = () => {
                     {(tripType === "round" ||
                       tripType === "oneway" ||
                       tripType === "multi") && (
+                      <div
+                        key="row1"
+                        className={`${styles.serarchingContBottom} ${styles.formVisible}`}
+                      >
                         <div
-                          key="row1"
-                          className={`${styles.serarchingContBottom} ${styles.formVisible}`}
-                        >
-                          <div
-                            className={`${styles.arrowbox} ${tripType === "oneway"
+                          className={`${styles.arrowbox} ${
+                            tripType === "oneway"
                               ? styles.arrowboxOneWay
                               : tripType === "multi"
-                                ? styles.multiArrow
-                                : ""
-                              }`}
-                            onClick={() =>
-                              swapLocations(tripType === "multi" ? 0 : undefined)
+                              ? styles.multiArrow
+                              : ""
+                          }`}
+                          onClick={() =>
+                            swapLocations(tripType === "multi" ? 0 : undefined)
+                          }
+                        >
+                          <ArrowLeftRight
+                            size={16}
+                            className={styles.arrowIcon}
+                          />
+                        </div>
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromInput}`}
+                          onClick={handleFieldClick}
+                        >
+                          <div className={styles.lable}>From</div>
+                          <input
+                            ref={fromInputRef}
+                            type="text"
+                            className={styles.contant}
+                            placeholder="Departure"
+                            value={
+                              tripType === "multi"
+                                ? multiCity[0]?.from || ""
+                                : from
                             }
-                          >
-                            <ArrowLeftRight
-                              size={16}
-                              className={styles.arrowIcon}
-                            />
-                          </div>
-                          <div
-                            className={`${styles.fromBtn} ${styles.fromInput}`}
-                            onClick={handleFieldClick}
-                          >
-                            <div className={styles.lable}>From</div>
-                            <input
-                              ref={fromInputRef}
-                              type="text"
-                              className={styles.contant}
-                              placeholder="Departure"
-                              value={
-                                tripType === "multi"
-                                  ? multiCity[0]?.from || ""
-                                  : from
+                            onFocus={() => setFromSuggestionsOpen(true)}
+                            onClick={() => setFromSuggestionsOpen(true)}
+                            onChange={(e) => {
+                              if (tripType === "multi") {
+                                updateMultiLeg(0, "from", e.target.value);
+                              } else {
+                                setFrom(e.target.value);
+                                setFromSuggestionsOpen(true);
                               }
-                              onFocus={() => setFromSuggestionsOpen(true)}
-                              onClick={() => setFromSuggestionsOpen(true)}
-                              onChange={(e) => {
-                                if (tripType === "multi") {
-                                  updateMultiLeg(0, "from", e.target.value);
-                                } else {
-                                  setFrom(e.target.value);
-                                  setFromSuggestionsOpen(true);
-                                }
-                              }}
-                            />
+                            }}
+                          />
 
-                            {fromSuggestionsOpen && (
-                              <SuggestionBox
-                                boxRef={fromSuggestionRef}
-                                heading="RECENT SEARCH"
-                                suggestions={getFilteredSuggestions(from)}
-                                onSelect={(s) => selectSuggestion(s, "from")}
-                              />
-                            )}
-                          </div>
-                          <div
-                            className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`}
-                            onClick={handleFieldClick}
-                          >
-                            <div className={styles.lable}>To</div>
-                            <input
-                              ref={toInputRef}
-                              type="text"
-                              className={styles.contant}
-                              placeholder="Destination"
-                              value={
-                                tripType === "multi" ? multiCity[0]?.to || "" : to
+                          {fromSuggestionsOpen && (
+                            <SuggestionBox
+                              boxRef={fromSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(from)}
+                              onSelect={(s) => selectSuggestion(s, "from")}
+                            />
+                          )}
+                        </div>
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromInput} ${styles.toInput}`}
+                          onClick={handleFieldClick}
+                        >
+                          <div className={styles.lable}>To</div>
+                          <input
+                            ref={toInputRef}
+                            type="text"
+                            className={styles.contant}
+                            placeholder="Destination"
+                            value={
+                              tripType === "multi" ? multiCity[0]?.to || "" : to
+                            }
+                            onFocus={() => setToSuggestionsOpen(true)}
+                            onClick={() => setToSuggestionsOpen(true)}
+                            onChange={(e) => {
+                              if (tripType === "multi") {
+                                updateMultiLeg(0, "to", e.target.value);
+                              } else {
+                                setTo(e.target.value);
+                                setToSuggestionsOpen(true);
                               }
-                              onFocus={() => setToSuggestionsOpen(true)}
-                              onClick={() => setToSuggestionsOpen(true)}
-                              onChange={(e) => {
-                                if (tripType === "multi") {
-                                  updateMultiLeg(0, "to", e.target.value);
-                                } else {
-                                  setTo(e.target.value);
-                                  setToSuggestionsOpen(true);
-                                }
-                              }}
+                            }}
+                          />
+
+                          {toSuggestionsOpen && (
+                            <SuggestionBox
+                              boxRef={toSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(to)}
+                              onSelect={(s) => selectSuggestion(s, "to")}
                             />
+                          )}
+                        </div>
 
-                            {toSuggestionsOpen && (
-                              <SuggestionBox
-                                boxRef={toSuggestionRef}
-                                heading="RECENT SEARCH"
-                                suggestions={getFilteredSuggestions(to)}
-                                onSelect={(s) => selectSuggestion(s, "to")}
-                              />
-                            )}
-                          </div>
-
-                          <div
-                            className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                            tripType === "oneway" || tripType === "multi"
                               ? styles.growRight
                               : ""
-                              } ${styles.calendarAnchor}`}
+                          } ${styles.calendarAnchor}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (tripType === "multi") {
+                              setCalendarTripType("oneway");
+                              setActiveMultiIndex(0);
+                              setShowCalendar(true);
+                            } else {
+                              setCalendarTripType("oneway");
+                              if (tripType === "round")
+                                setCalendarTripType("round");
+                              setShowCalendar(true);
+                            }
+                          }}
+                        >
+                          <div className={styles.lable}>Departure Date</div>
+                          {showCalendar && (
+                            <DateCalendarModal
+                              mode={
+                                tripType === "round" ? "roundtrip" : "oneway"
+                              }
+                              onModeChange={() => {}}
+                              onClose={() => {
+                                setShowCalendar(false);
+                                setActiveMultiIndex(null);
+                              }}
+                            >
+                              <div ref={calendarRef}>
+                                <CalendarMonths
+                                  startDate={
+                                    tripType === "round"
+                                      ? flightDates.round.start
+                                      : tripType === "oneway"
+                                      ? flightDates.oneway.start
+                                      : flightDates.multi[activeMultiIndex ?? 0]
+                                          ?.date
+                                  }
+                                  endDate={
+                                    tripType === "round"
+                                      ? flightDates.round.end
+                                      : null
+                                  }
+                                  onDateClick={handleDateClick}
+                                />
+                              </div>
+                            </DateCalendarModal>
+                          )}
+
+                          <div
+                            className={styles.dateInputWrapper}
                             onClick={(e) => {
                               e.stopPropagation();
                               if (tripType === "multi") {
@@ -1059,166 +1140,123 @@ const HomePage = () => {
                               }
                             }}
                           >
-                            <div className={styles.lable}>Departure Date</div>
-                            {showCalendar && (
-                              <DateCalendarModal
-                                mode={
-                                  tripType === "round" ? "roundtrip" : "oneway"
-                                }
-                                onModeChange={() => { }}
-                                onClose={() => {
-                                  setShowCalendar(false);
-                                  setActiveMultiIndex(null);
-                                }}
-                              >
-                                <div ref={calendarRef}>
-                                  <CalendarMonths
-                                    startDate={
-                                      tripType === "round"
-                                        ? flightDates.round.start
-                                        : tripType === "oneway"
-                                          ? flightDates.oneway.start
-                                          : flightDates.multi[activeMultiIndex ?? 0]
-                                            ?.date
-                                    }
-                                    endDate={
-                                      tripType === "round"
-                                        ? flightDates.round.end
-                                        : null
-                                    }
-                                    onDateClick={handleDateClick}
-                                  />
-                                </div>
-                              </DateCalendarModal>
-                            )}
-
-                            <div
-                              className={styles.dateInputWrapper}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (tripType === "multi") {
-                                  setCalendarTripType("oneway");
-                                  setActiveMultiIndex(0);
-                                  setShowCalendar(true);
-                                } else {
-                                  setCalendarTripType("oneway");
-                                  if (tripType === "round")
-                                    setCalendarTripType("round");
-                                  setShowCalendar(true);
-                                }
-                              }}
-                            >
-                              <input
-                                type="text"
-                                readOnly
-                                className={styles.contant}
-                                placeholder="ADD DATE"
-                                value={
-                                  tripType === "round"
-                                    ? formatDate(flightDates.round.start)
-                                    : tripType === "oneway"
-                                      ? formatDate(flightDates.oneway.start)
-                                      : formatDate(flightDates.multi[0]?.date)
-                                }
-                              />
-
-                              <button
-                                type="button"
-                                className={styles.calendarIcon}
-                              >
-                                <CalendarSVG />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div
-                            className={`${styles.fromBtn} ${styles.fromInput} ${styles.returnDateField
-                              } ${tripType === "oneway" || tripType === "multi"
-                                ? styles.hiddenField
-                                : ""
-                              }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-
-                              if (tripType === "round") {
-                                setCalendarTripType("round");
-                                setShowCalendar(true);
+                            <input
+                              type="text"
+                              readOnly
+                              className={styles.contant}
+                              placeholder="ADD DATE"
+                              value={
+                                tripType === "round"
+                                  ? formatDate(flightDates.round.start)
+                                  : tripType === "oneway"
+                                  ? formatDate(flightDates.oneway.start)
+                                  : formatDate(flightDates.multi[0]?.date)
                               }
-                            }}
+                            />
+
+                            <button
+                              type="button"
+                              className={styles.calendarIcon}
+                            >
+                              <CalendarSVG />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromInput} ${
+                            styles.returnDateField
+                          } ${
+                            tripType === "oneway" || tripType === "multi"
+                              ? styles.hiddenField
+                              : ""
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            if (tripType === "round") {
+                              setCalendarTripType("round");
+                              setShowCalendar(true);
+                            }
+                          }}
+                        >
+                          <div className={styles.lable}>Return Date</div>
+                          <div
+                            className={styles.dateInputWrapper}
+                            onClick={openReturnPicker}
                           >
-                            <div className={styles.lable}>Return Date</div>
-                            <div
-                              className={styles.dateInputWrapper}
+                            <input
+                              type="text"
+                              readOnly
+                              className={styles.contant}
+                              placeholder="ADD DATE"
+                              value={formatDate(flightDates.round.end)}
+                            />
+                            <button
+                              type="button"
+                              aria-label="Open return date picker"
+                              className={styles.calendarIcon}
                               onClick={openReturnPicker}
                             >
-                              <input
-                                type="text"
-                                readOnly
-                                className={styles.contant}
-                                placeholder="ADD DATE"
-                                value={formatDate(flightDates.round.end)}
-                              />
-                              <button
-                                type="button"
-                                aria-label="Open return date picker"
-                                className={styles.calendarIcon}
-                                onClick={openReturnPicker}
-                              >
-                                <img src="/icons/calander.svg" alt="" />
-                              </button>
-                            </div>
+                              <img src="/icons/calander.svg" alt="" />
+                            </button>
                           </div>
+                        </div>
 
-                          <div
-                            ref={travellerRef}
-                            className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
+                        <div
+                          ref={travellerRef}
+                          className={`${styles.fromBtn} ${styles.fromBtn2} ${
+                            tripType === "oneway" || tripType === "multi"
                               ? styles.growRight
                               : ""
-                              }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setTravellerOpend((o) => !o);
-                            }}
-                          >
-                            <div className={styles.lable}>Travellers & Class</div>
-                            <div className={styles.iconCont}>
-                              <div className={styles.contant}>
-                                {truncate(
-                                  `${totalPassengers} Traveller${totalPassengers > 1 ? "s" : ""
-                                  }, ${travelClass}`,
-                                  17
-                                )}
-                              </div>
-
-                              <ChevronDown
-                                className={`${styles.chevron} ${travellerOpend
-                                  ? styles.openChevron
-                                  : styles.closeChevron
-                                  }`}
-                                size={16}
-                                color="#FFFFFF"
-                              />
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTravellerOpend((o) => !o);
+                          }}
+                        >
+                          <div className={styles.lable}>Travellers & Class</div>
+                          <div className={styles.iconCont}>
+                            <div className={styles.contant}>
+                              {truncate(
+                                `${totalPassengers} Traveller${
+                                  totalPassengers > 1 ? "s" : ""
+                                }, ${travelClass}`,
+                                17
+                              )}
                             </div>
 
-                            <PassengerClassSelector
-                              open={travellerOpend}
-                              setOpen={setTravellerOpend}
-                              passengers={passengers}
-                              setPassengers={setPassengers}
-                              travelClass={travelClass}
-                              setTravelClass={setTravelClass}
+                            <ChevronDown
+                              className={`${styles.chevron} ${
+                                travellerOpend
+                                  ? styles.openChevron
+                                  : styles.closeChevron
+                              }`}
+                              size={16}
+                              color="#FFFFFF"
                             />
                           </div>
 
-                          <div
-                            className={`${styles.searchBtn} ${tripType === "multi" ? styles.hiddenField : ""
-                              }`}
-                            onClick={handleSearch}
-                          >
-                            <img src="/images/searchIcon.svg" alt="" />
-                          </div>
+                          <PassengerClassSelector
+                            open={travellerOpend}
+                            setOpen={setTravellerOpend}
+                            passengers={passengers}
+                            setPassengers={setPassengers}
+                            travelClass={travelClass}
+                            setTravelClass={setTravelClass}
+                          />
                         </div>
-                      )}
+
+                        <div
+                          className={`${styles.searchBtn} ${
+                            tripType === "multi" ? styles.hiddenField : ""
+                          }`}
+                          onClick={handleSearch}
+                        >
+                          <img src="/images/searchIcon.svg" alt="" />
+                        </div>
+                      </div>
+                    )}
 
                     {tripType === "multi" && (
                       <div className={styles.multiSearch}>
@@ -1278,9 +1316,9 @@ const HomePage = () => {
                                   activeSuggestion.field === "from" && (
                                     <SuggestionBox
                                       boxRef={(el) =>
-                                      (multiSuggestionRefs.current[
-                                        actualIndex
-                                      ] = el)
+                                        (multiSuggestionRefs.current[
+                                          actualIndex
+                                        ] = el)
                                       }
                                       heading="RECENT SEARCH"
                                       suggestions={getFilteredSuggestions(
@@ -1328,9 +1366,9 @@ const HomePage = () => {
                                   activeSuggestion.field === "to" && (
                                     <SuggestionBox
                                       boxRef={(el) =>
-                                      (multiSuggestionRefs.current[
-                                        actualIndex
-                                      ] = el)
+                                        (multiSuggestionRefs.current[
+                                          actualIndex
+                                        ] = el)
                                       }
                                       heading="RECENT SEARCH"
                                       suggestions={getFilteredSuggestions(
@@ -1355,7 +1393,7 @@ const HomePage = () => {
                                   activeMultiIndex === actualIndex && (
                                     <DateCalendarModal
                                       mode="oneway"
-                                      onModeChange={() => { }}
+                                      onModeChange={() => {}}
                                       onClose={() => {
                                         setShowCalendar(false);
                                         setActiveMultiIndex(null);
@@ -1462,152 +1500,224 @@ const HomePage = () => {
               {(bookingType === "hotel" ||
                 bookingType === "holiday" ||
                 bookingType === "insurance") && (
+                <div
+                  className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}
+                >
                   <div
-                    className={`${styles.serarchingCont} ${styles.glass_panel} ${styles.searchFormContainer}`}
+                    className={`${styles.serarchingContBottom} ${
+                      bookingType === "holiday" ? styles.swapActive : ""
+                    }`}
                   >
-                    <div
-                      className={`${styles.serarchingContBottom} ${bookingType === "holiday" ? styles.swapActive : ""
-                        }`}
-                    >
-                      {bookingType === "insurance" ? (
-                        <TravellerSelector
-                          travellerClass={travellerDestination}
-                          setTravellerClass={setTravellerDestination}
-                          travellerOptions={TravellerDestinationOptions}
-                          styles={styles}
-                          name="TRAVEL DESTINATION"
-                          className={`${styles.pos1}`}
-                          enableEllipsis={false}
-                        />
-                      ) : (
-                        <div
-                          className={`${styles.fromBtn} ${styles.pos1}`}
-                          onClick={handleFieldClick}
-                        >
-                          <div className={`${styles.lable} ${styles.labelFade}`}>
-                            {bookingType === "hotel" ? "WHERE TO" : "From CITY"}
-                          </div>
-
-                          <input
-                            ref={
-                              bookingType === "hotel" ? toInputRef : fromInputRef
-                            }
-                            type="text"
-                            className={`${styles.contant} ${styles.contentFade}`}
-                            placeholder={
-                              bookingType === "hotel" ? "Where to" : "Departure"
-                            }
-                            value={bookingType === "hotel" ? to : from}
-                            onChange={(e) => {
-                              if (bookingType === "hotel") {
-                                setTo(e.target.value);
-                                setToSuggestionsOpen(true);
-                              } else {
-                                setFrom(e.target.value);
-                                setFromSuggestionsOpen(true);
-                              }
-                            }}
-                            onFocus={() => {
-                              if (bookingType === "hotel") {
-                                setToSuggestionsOpen(true);
-                              } else {
-                                setFromSuggestionsOpen(true);
-                              }
-                            }}
-                          />
-
-                          {bookingType === "hotel" && toSuggestionsOpen && (
-                            <div ref={toSuggestionRef}>
-                              <RecentSearch
-                                onSelect={(city) => {
-                                  setTo(city); // ✅ input value set
-                                  setToSuggestionsOpen(false); // ✅ dropdown close
-                                }}
-                              />
-                            </div>
-                          )}
-                          {bookingType === "holiday" && fromSuggestionsOpen && (
-                            <SuggestionBox
-                              boxRef={fromSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(from)}
-                              onSelect={(s) => selectSuggestion(s, "from")}
-                            />
-                          )}
-                        </div>
-                      )}
-
-                      {/* SLOT 2: Check In / Departure Date / Travel Date with Calendar */}
+                    {bookingType === "insurance" ? (
+                      <TravellerSelector
+                        travellerClass={travellerDestination}
+                        setTravellerClass={setTravellerDestination}
+                        travellerOptions={TravellerDestinationOptions}
+                        styles={styles}
+                        name="TRAVEL DESTINATION"
+                        className={`${styles.pos1}`}
+                        enableEllipsis={false}
+                      />
+                    ) : (
                       <div
-                        className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField} ${styles.calendarAnchor}`}
+                        className={`${styles.fromBtn} ${styles.pos1}`}
+                        onClick={handleFieldClick}
                       >
                         <div className={`${styles.lable} ${styles.labelFade}`}>
-                          {bookingType === "hotel"
-                            ? "Check In"
-                            : bookingType === "holiday"
-                              ? "Departure Date"
-                              : "Travel Date"}
+                          {bookingType === "hotel" ? "WHERE TO" : "From CITY"}
                         </div>
 
-                        {/* Hotel Calendar */}
-                        {bookingType === "hotel" && showHotelCalendar && (
-                          <HotelDateCalendarModal
-                            mode="roundtrip"
-                            onModeChange={() => { }}
-                            onClose={() => setShowHotelCalendar(false)}
-                          >
-                            <div ref={hotelCalendarRef}>
-                              <HotelCalendarMonths
-                                startDate={hotelStartDate}
-                                endDate={hotelEndDate}
-                                onDateClick={handleHotelDateClick}
-                              />
-                            </div>
-                          </HotelDateCalendarModal>
-                        )}
+                        <input
+                          ref={
+                            bookingType === "hotel" ? toInputRef : fromInputRef
+                          }
+                          type="text"
+                          className={`${styles.contant} ${styles.contentFade}`}
+                          placeholder={
+                            bookingType === "hotel" ? "Where to" : "Departure"
+                          }
+                          value={bookingType === "hotel" ? to : from}
+                          onChange={(e) => {
+                            if (bookingType === "hotel") {
+                              setTo(e.target.value);
+                              setToSuggestionsOpen(true);
+                            } else {
+                              setFrom(e.target.value);
+                              setFromSuggestionsOpen(true);
+                            }
+                          }}
+                          onFocus={() => {
+                            if (bookingType === "hotel") {
+                              setToSuggestionsOpen(true);
+                            } else {
+                              setFromSuggestionsOpen(true);
+                            }
+                          }}
+                        />
 
-                        {/* Holiday Calendar */}
-                        {bookingType === "holiday" && showHolidayCalendar && (
-                          <DateCalendarModal
-                            mode="oneway"
-                            onModeChange={() => { }}
-                            onClose={() => setShowHolidayCalendar(false)}
-                          >
-                            <div ref={holidayCalendarRef}>
-                              <CalendarMonths
-                                startDate={holidayStartDate}
-                                endDate={null}
-                                onDateClick={handleHolidayDateClick}
-                              />
-                            </div>
-                          </DateCalendarModal>
+                        {bookingType === "hotel" && toSuggestionsOpen && (
+                          <div ref={toSuggestionRef}>
+                            <RecentSearch
+                              onSelect={(city) => {
+                                setTo(city); // ✅ input value set
+                                setToSuggestionsOpen(false); // ✅ dropdown close
+                              }}
+                            />
+                          </div>
                         )}
+                        {bookingType === "holiday" && fromSuggestionsOpen && (
+                          <SuggestionBox
+                            boxRef={fromSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(from)}
+                            onSelect={(s) => selectSuggestion(s, "from")}
+                          />
+                        )}
+                      </div>
+                    )}
 
-                        {/* Insurance Calendar */}
-                        {bookingType === "insurance" && showInsuranceCalendar && (
-                          <DateCalendarModal
-                            mode="roundtrip"
-                            onModeChange={() => { }}
+                    {/* SLOT 2: Check In / Departure Date / Travel Date with Calendar */}
+                    <div
+                      className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField} ${styles.calendarAnchor}`}
+                    >
+                      <div className={`${styles.lable} ${styles.labelFade}`}>
+                        {bookingType === "hotel"
+                          ? "Check In"
+                          : bookingType === "holiday"
+                          ? "Departure Date"
+                          : "Travel Date"}
+                      </div>
+
+                      {/* Hotel Calendar */}
+                      {bookingType === "hotel" && showHotelCalendar && (
+                        <HotelDateCalendarModal
+                          mode="roundtrip"
+                          onModeChange={() => {}}
+                          onClose={() => setShowHotelCalendar(false)}
+                        >
+                          <div ref={hotelCalendarRef}>
+                            <HotelCalendarMonths
+                              startDate={hotelStartDate}
+                              endDate={hotelEndDate}
+                              onDateClick={handleHotelDateClick}
+                            />
+                          </div>
+                        </HotelDateCalendarModal>
+                      )}
+
+                      {/* Holiday Calendar */}
+                      {bookingType === "holiday" && showHolidayCalendar && (
+                        <DateCalendarModal
+                          mode="oneway"
+                          onModeChange={() => {}}
+                          onClose={() => setShowHolidayCalendar(false)}
+                        >
+                          <div ref={holidayCalendarRef}>
+                            <CalendarMonths
+                              startDate={holidayStartDate}
+                              endDate={null}
+                              onDateClick={handleHolidayDateClick}
+                            />
+                          </div>
+                        </DateCalendarModal>
+                      )}
+
+                      {/* Insurance Calendar */}
+                      {bookingType === "insurance" && showInsuranceCalendar && (
+                        <DateCalendarModal
+                          mode="roundtrip"
+                          onModeChange={() => {}}
                           // onClose={() => setShowInsuranceCalendar(false)}
-                          >
-                            <div ref={insuranceCalendarRef}>
-                              <CalendarMonths
-                                startDate={insuranceStartDate}
-                                endDate={insuranceEndDate}
-                                onDateClick={handleInsuranceDateClick}
-                              />
-                            </div>
-                          </DateCalendarModal>
-                        )}
+                        >
+                          <div ref={insuranceCalendarRef}>
+                            <CalendarMonths
+                              startDate={insuranceStartDate}
+                              endDate={insuranceEndDate}
+                              onDateClick={handleInsuranceDateClick}
+                            />
+                          </div>
+                        </DateCalendarModal>
+                      )}
 
+                      <div
+                        className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (bookingType === "hotel") {
+                            setShowHotelCalendar(true);
+                          } else if (bookingType === "holiday") {
+                            setShowHolidayCalendar(true);
+                          } else if (bookingType === "insurance") {
+                            setShowInsuranceCalendar(true);
+                          }
+                        }}
+                      >
+                        <input
+                          type="text"
+                          readOnly
+                          className={styles.contant}
+                          placeholder="ADD DATES"
+                          value={
+                            bookingType === "hotel"
+                              ? formatDate(hotelStartDate)
+                              : bookingType === "holiday"
+                              ? formatDate(holidayStartDate)
+                              : formatDate(insuranceStartDate)
+                          }
+                        />
+                        <button type="button" className={styles.calendarIcon}>
+                          <CalendarSVG />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* SLOT 3: Check Out / To City / Return Date */}
+                    <div
+                      className={`${styles.fromBtn} ${styles.pos3} ${
+                        styles.swapField
+                      } ${
+                        bookingType === "holiday" ? "" : styles.calendarAnchor
+                      }`}
+                    >
+                      <div className={`${styles.lable} ${styles.labelFade}`}>
+                        {bookingType === "hotel"
+                          ? "Check Out"
+                          : bookingType === "holiday"
+                          ? "To CITY/COUNTRY, CATEGORY"
+                          : "Return Date"}
+                      </div>
+
+                      {bookingType === "holiday" ? (
+                        <>
+                          <input
+                            ref={toInputRef}
+                            type="text"
+                            className={`${styles.contant} ${styles.contentFade}`}
+                            placeholder="Destination"
+                            value={to}
+                            onChange={(e) => {
+                              setTo(e.target.value);
+                              setToSuggestionsOpen(true);
+                            }}
+                            onFocus={() => setToSuggestionsOpen(true)}
+                          />
+
+                          {toSuggestionsOpen && (
+                            <SuggestionBox
+                              boxRef={toSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(to)}
+                              onSelect={(s) => selectSuggestion(s, "to")}
+                            />
+                          )}
+                        </>
+                      ) : (
                         <div
                           className={`${styles.dateInputWrapper} ${styles.contentFade}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (bookingType === "hotel") {
                               setShowHotelCalendar(true);
-                            } else if (bookingType === "holiday") {
-                              setShowHolidayCalendar(true);
                             } else if (bookingType === "insurance") {
                               setShowInsuranceCalendar(true);
                             }
@@ -1620,167 +1730,107 @@ const HomePage = () => {
                             placeholder="ADD DATES"
                             value={
                               bookingType === "hotel"
-                                ? formatDate(hotelStartDate)
-                                : bookingType === "holiday"
-                                  ? formatDate(holidayStartDate)
-                                  : formatDate(insuranceStartDate)
+                                ? formatDate(hotelEndDate)
+                                : formatDate(insuranceEndDate)
                             }
                           />
                           <button type="button" className={styles.calendarIcon}>
                             <CalendarSVG />
                           </button>
                         </div>
+                      )}
+                    </div>
+
+                    <div
+                      ref={travellerRef}
+                      className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTravellerOpend((prev) => !prev);
+                      }}
+                    >
+                      <div className={styles.lable}>
+                        {bookingType === "hotel"
+                          ? "GUESTS & ROOMS"
+                          : bookingType === "holiday"
+                          ? "ROOMS & GUESTS"
+                          : "TRAVELLERS"}
                       </div>
 
-                      {/* SLOT 3: Check Out / To City / Return Date */}
-                      <div
-                        className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField
-                          } ${bookingType === "holiday" ? "" : styles.calendarAnchor
-                          }`}
-                      >
-                        <div className={`${styles.lable} ${styles.labelFade}`}>
-                          {bookingType === "hotel"
-                            ? "Check Out"
-                            : bookingType === "holiday"
-                              ? "To CITY/COUNTRY, CATEGORY"
-                              : "Return Date"}
-                        </div>
-
-                        {bookingType === "holiday" ? (
-                          <>
-                            <input
-                              ref={toInputRef}
-                              type="text"
-                              className={`${styles.contant} ${styles.contentFade}`}
-                              placeholder="Destination"
-                              value={to}
-                              onChange={(e) => {
-                                setTo(e.target.value);
-                                setToSuggestionsOpen(true);
-                              }}
-                              onFocus={() => setToSuggestionsOpen(true)}
-                            />
-
-                            {toSuggestionsOpen && (
-                              <SuggestionBox
-                                boxRef={toSuggestionRef}
-                                heading="RECENT SEARCH"
-                                suggestions={getFilteredSuggestions(to)}
-                                onSelect={(s) => selectSuggestion(s, "to")}
-                              />
-                            )}
-                          </>
-                        ) : (
-                          <div
-                            className={`${styles.dateInputWrapper} ${styles.contentFade}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (bookingType === "hotel") {
-                                setShowHotelCalendar(true);
-                              } else if (bookingType === "insurance") {
-                                setShowInsuranceCalendar(true);
-                              }
-                            }}
-                          >
-                            <input
-                              type="text"
-                              readOnly
-                              className={styles.contant}
-                              placeholder="ADD DATES"
-                              value={
-                                bookingType === "hotel"
-                                  ? formatDate(hotelEndDate)
-                                  : formatDate(insuranceEndDate)
-                              }
-                            />
-                            <button type="button" className={styles.calendarIcon}>
-                              <CalendarSVG />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div
-                        ref={travellerRef}
-                        className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTravellerOpend((prev) => !prev);
-                        }}
-                      >
-                        <div className={styles.lable}>
-                          {bookingType === "hotel"
-                            ? "GUESTS & ROOMS"
-                            : bookingType === "holiday"
-                              ? "ROOMS & GUESTS"
-                              : "TRAVELLERS"}
-                        </div>
-
-                        <div className={styles.iconCont}>
-                          <div className={styles.contant}>
-                            {truncate(
-                              bookingType === "hotel"
-                                ? `${totalHotelPassengers} Guest${totalHotelPassengers > 1 ? "s" : ""
-                                }, ${totalHotelPassengers} Room${totalHotelPassengers > 1 ? "s" : ""
+                      <div className={styles.iconCont}>
+                        <div className={styles.contant}>
+                          {truncate(
+                            bookingType === "hotel"
+                              ? `${totalHotelPassengers} Guest${
+                                  totalHotelPassengers > 1 ? "s" : ""
+                                }, ${totalHotelPassengers} Room${
+                                  totalHotelPassengers > 1 ? "s" : ""
                                 }`
-                                : bookingType === "holiday"
-                                  ? `${totalPassengers} Room${totalPassengers > 1 ? "s" : ""
-                                  }, ${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""
-                                  }`
-                                  : `${totalPassengers} Traveller${totalPassengers > 1 ? "s" : ""
-                                  }, ${travelClass}`,
-                              17
-                            )}
-                          </div>
+                              : bookingType === "holiday"
+                              ? `${totalPassengers} Room${
+                                  totalPassengers > 1 ? "s" : ""
+                                }, ${totalPassengers} Guest${
+                                  totalPassengers > 1 ? "s" : ""
+                                }`
+                              : `${totalPassengers} Traveller${
+                                  totalPassengers > 1 ? "s" : ""
+                                }, ${travelClass}`,
+                            17
+                          )}
+                        </div>
 
-                          <ChevronDown
-                            className={`${styles.chevron} ${travellerOpend
+                        <ChevronDown
+                          className={`${styles.chevron} ${
+                            travellerOpend
                               ? styles.openChevron
                               : styles.closeChevron
-                              }`}
-                            size={16}
-                            color="#FFFFFF"
-                          />
-                        </div>
-
-                        {bookingType === "hotel" && (
-                          <HotelDropDown
-                            open={travellerOpend}
-                            setOpen={setTravellerOpend}
-                            passengers={hotelGuestOpen}
-                            setPassengers={setHotelGuestOpen}
-                            travelClass={travelClass}
-                            setTravelClass={setTravelClass}
-                          />
-                        )}
-                        {bookingType === "holiday" && (
-                          <PassengerClassSelector
-                            open={travellerOpend}
-                            setOpen={setTravellerOpend}
-                            passengers={passengers}
-                            setPassengers={setPassengers}
-                            travelClass={travelClass}
-                            setTravelClass={setTravelClass}
-                          />
-                        )}
-                        {bookingType === "insurance" && (
-                          <PassengerClassSelector
-                            open={travellerOpend}
-                            setOpen={setTravellerOpend}
-                            passengers={passengers}
-                            setPassengers={setPassengers}
-                            travelClass={travelClass}
-                            setTravelClass={setTravelClass}
-                          />
-                        )}
+                          }`}
+                          size={16}
+                          color="#FFFFFF"
+                        />
                       </div>
 
-                      <div className={`${styles.searchBtn} ${styles.pos5}`} onClick={handleSearch}>
-                        <img src="/images/searchIcon.svg" alt="" />
-                      </div>
+                      {bookingType === "hotel" && (
+                        <HotelDropDown
+                          open={travellerOpend}
+                          setOpen={setTravellerOpend}
+                          passengers={hotelGuestOpen}
+                          setPassengers={setHotelGuestOpen}
+                          travelClass={travelClass}
+                          setTravelClass={setTravelClass}
+                        />
+                      )}
+                      {bookingType === "holiday" && (
+                        <PassengerClassSelector
+                          open={travellerOpend}
+                          setOpen={setTravellerOpend}
+                          passengers={passengers}
+                          setPassengers={setPassengers}
+                          travelClass={travelClass}
+                          setTravelClass={setTravelClass}
+                        />
+                      )}
+                      {bookingType === "insurance" && (
+                        <PassengerClassSelector
+                          open={travellerOpend}
+                          setOpen={setTravellerOpend}
+                          passengers={passengers}
+                          setPassengers={setPassengers}
+                          travelClass={travelClass}
+                          setTravelClass={setTravelClass}
+                        />
+                      )}
+                    </div>
+
+                    <div
+                      className={`${styles.searchBtn} ${styles.pos5}`}
+                      onClick={handleSearch}
+                    >
+                      <img src="/images/searchIcon.svg" alt="" />
                     </div>
                   </div>
-                )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1800,8 +1850,9 @@ const HomePage = () => {
               {features.map((f) => (
                 <button
                   key={f.id}
-                  className={`${styles.feature} ${activeFeature === f.id ? styles.featureActive : ""
-                    }`}
+                  className={`${styles.feature} ${
+                    activeFeature === f.id ? styles.featureActive : ""
+                  }`}
                   onClick={() => handleFeatureClick(f)}
                   type="button"
                 >

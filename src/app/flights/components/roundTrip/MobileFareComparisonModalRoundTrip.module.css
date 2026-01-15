@@ -1,0 +1,647 @@
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal Content */
+.modalContent {
+  background: white;
+  max-width: 1200px;
+  width: 100%;
+  overflow-y: auto;
+  position: absolute;
+  top: 60px;
+  padding-top: 0;
+  height: 100%;
+  background-color: rgba(249, 249, 249, 1);
+  padding: 16px;
+}
+.tripDetailsContainer {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #000033;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9;
+}
+
+.tripDetailsHeader {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tripDetails {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 100%;
+  text-transform: capitalize;
+  color: #ffffff;
+}
+
+/* Header */
+.header {
+  padding: 16px 16px;
+  padding-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: rgba(0, 0, 51, 1);
+}
+
+.TripCardHeader {
+  padding: 12px 16px;
+  background-color: #000033;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.TripCardHeaderDetails {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.TripCardHeaderDetailsItemText,
+.TripCardHeaderDetailsItemCode {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.TripCardHeaderDate {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  color: #ffffff;
+}
+
+/* .fareCards{
+    padding: 16px 32px 24px 32px;
+    display: flex;
+    gap: 24px;
+} */
+
+.fareCards {
+  padding-top: 0;
+  display: flex;
+  gap: 16px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none; /* Firefox */
+}
+
+.fareCards::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.fareCardContainer {
+  max-width: 300px;
+  width: 100%;
+  flex-shrink: 0;
+
+  border: 1px solid #e4e6e8;
+  padding: 16px;
+  position: relative;
+
+  /* scroll-snap-align: start; */
+  background: #ffffff;
+}
+
+.fareCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fareHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.fareName {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: rgba(118, 118, 118, 1);
+}
+.price {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: rgba(0, 0, 51, 1);
+}
+.farePrice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.pricePerAdult {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: rgba(0, 0, 51, 1);
+}
+.adult {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: rgba(0, 0, 0, 1);
+}
+.featureSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.featureTitle {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Bold;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: rgba(0, 0, 0, 1);
+}
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.featureItem span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: rgba(0, 0, 0, 1);
+}
+.fareActions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.lockPriceBtn {
+  max-width: 127px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0.5px solid rgba(228, 230, 232, 1);
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.45s ease-in-out;
+  color: rgba(0, 0, 51, 1);
+}
+
+.bookNowBtn {
+  max-width: 127px;
+  width: 100%;
+  padding: 12px 24px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  background-color: rgba(0, 0, 51, 1);
+  cursor: pointer;
+  transition: all 0.45s ease-in-out;
+}
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+.hr {
+  width: 100%;
+  border: 0.5px solid #e4e6e8;
+}
+.premiumBadge {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  padding: 7px 15px;
+  background-color: #000033;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: -2%;
+  color: #ffffff;
+}
+.premiumContainer {
+  background: linear-gradient(180deg, #c9e9ff 0%, #ffffff 50%);
+}
+
+/* sticky behavior */
+.stickyHidden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+.flightDepartureReturenDetailsContianerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stickyVisible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+
+.tripDetailsContainer {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #000033;
+}
+
+.tripDetailsHeader {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.TripCard {
+  margin-bottom: 16px;
+}
+
+.tripDetails {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #ffffff;
+}
+
+.TripCardContainer {
+  padding: 16px;
+  background: linear-gradient(180deg, #eef5ff 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  /* gap: 16px; */
+  padding-bottom: 143px;
+}
+
+.TripCardHeader {
+  padding: 12px 16px;
+  background-color: #000033;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.TripCardHeaderDetails {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.TripCardHeaderDetailsItemText,
+.TripCardHeaderDetailsItemCode {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.TripCardHeaderDate {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 20px;
+  vertical-align: middle;
+  color: #ffffff;
+}
+
+.TripFlightDetailsCard {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  /* gap: 16px; */
+  background-color: #ffffff;
+}
+
+.TripFlightDetailsCardCont {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.TripFlightDetailsCardImage {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.AirLineDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.AirLineDetailsItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.AirLineDetailsItemText,
+.AirLineCode {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #767676;
+  border-radius: 50%;
+}
+
+.AirLineBoeing,
+.AirLineDetailsItemCode {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #7b8799;
+}
+
+.br {
+  max-width: 374px;
+  width: 100%;
+  height: 1px;
+  /* border: .5px dashed #94A3B8; */
+  background-image: repeating-linear-gradient(
+    to right,
+    #94a3b8 0,
+    #94a3b8 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.74;
+  margin: 0 auto;
+}
+
+.FareDetailsTag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.blueDot {
+  width: 4px;
+  height: 4px;
+  background-color: #208ef5;
+  border-radius: 50%;
+}
+
+.FareDetailsTag span {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.18;
+  text-transform: capitalize;
+  color: #208ef5;
+}
+
+.flightDepartureReturenDetailsContianer {
+  padding: 12px;
+  border: 1px solid #e4e6e8;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.travelInsuranceContainer {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e4e6e8;
+}
+
+.travelInsuranceHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.footer {
+  padding: 24px 16px 55px;
+  background: #000033;
+  box-shadow: 0px -6px 10.2px 0px #0000001a;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 9;
+}
+
+.footerContainer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.amountSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  color: #ffffff;
+}
+
+.infoIcon {
+  border: 1.5px solid #7b8799;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  color: #7b8799;
+}
+
+.amount {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 20px;
+  line-height: 1.19;
+  color: #ffffff;
+}
+
+.continueBtn {
+  max-width: 240px;
+  width: 100%;
+  height: 48px;
+  padding: 10px 16px;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.TripCardHeaderNav {
+  padding: 0;
+}
+
+.TripCardHeaderBookingDate {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.TripCardHeaderBookingDate p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #ffffff;
+  opacity: 0.9;
+}
+.navDot {
+  width: 4px;
+  height: 4px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+.Airportname {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Airportname span {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(123, 135, 153, 1);
+}

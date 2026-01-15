@@ -11,6 +11,8 @@ import { SidebarContext } from "../../SidebarContext";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import RoundTripSkeleton from "./RoundTripSkeleton";
+import { useMediaQuery } from "@/app/hooks/useMediaQuery";
+import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
 const flightResults = [
   {
     id: 1,
@@ -308,14 +310,308 @@ const flightResults = [
     },
   },
 ];
+const tripCardsData = [
+  {
+    id: 1,
+    depart: {
+      airline: {
+        name: "Batik Air, Indones....",
+        code: "6E- 541",
+        logo: "/images/Flight1.png",
+      },
+      date: "WED, 17 DEC",
+      flight: {
+        departure: {
+          time: "06:45",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:00",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/Flight2.png",
+      },
+      date: "THU, 31 DEC",
+      flight: {
+        departure: {
+          time: "06:45",
+          city: "Singapore (SIN)",
+        },
+        arrival: {
+          time: "08:00",
+          city: "Jakarta (CGK)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    fare: {
+      totalFare: "₹ 3,22,000",
+      pricePerAdult: "₹ 12,000",
+      cabinClass: "ECONOMY",
+    },
+  },
 
+  {
+    id: 2,
+    depart: {
+      airline: {
+        name: "Batik Air, Indones....",
+        code: "6E- 541",
+        logo: "/images/Flight1.png",
+      },
+      date: "WED, 17 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:30",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "1 stop via KUL",
+        },
+      },
+    },
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/Flight2.png",
+      },
+      date: "THU, 31 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Singapore (SIN)",
+        },
+        arrival: {
+          time: "09:45",
+          city: "Jakarta (CGK)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    fare: {
+      totalFare: "₹ 3,22,000",
+      pricePerAdult: "₹ 12,000",
+      cabinClass: "ECONOMY",
+    },
+  },
+
+  {
+    id: 3,
+    depart: {
+      airline: {
+        name: "Batik Air, Indones....",
+        code: "6E- 541",
+        logo: "/images/Flight1.png",
+      },
+      date: "WED, 17 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "09:45",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/Flight2.png",
+      },
+      date: "THU, 31 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Singapore (SIN)",
+        },
+        arrival: {
+          time: "09:45",
+          city: "Jakarta (CGK)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    fare: {
+      totalFare: "₹ 3,22,000",
+      pricePerAdult: "₹ 12,000",
+      cabinClass: "ECONOMY",
+    },
+  },
+  {
+    id: 4,
+    depart: {
+      airline: {
+        name: "Batik Air, Indones....",
+        code: "6E- 541",
+        logo: "/images/Flight1.png",
+      },
+      date: "WED, 17 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:30",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "1 stop via KUL",
+        },
+      },
+    },
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/Flight2.png",
+      },
+      date: "THU, 31 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Singapore (SIN)",
+        },
+        arrival: {
+          time: "09:45",
+          city: "Jakarta (CGK)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    fare: {
+      totalFare: "₹ 3,22,000",
+      pricePerAdult: "₹ 12,000",
+      cabinClass: "ECONOMY",
+    },
+  },
+  {
+    id: 5,
+    depart: {
+      airline: {
+        name: "Batik Air, Indones....",
+        code: "6E- 541",
+        logo: "/images/Flight1.png",
+      },
+      date: "WED, 17 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:30",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "1 stop via KUL",
+        },
+      },
+    },
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/Flight2.png",
+      },
+      date: "THU, 31 DEC",
+      flight: {
+        departure: {
+          time: "09:15",
+          city: "Singapore (SIN)",
+        },
+        arrival: {
+          time: "09:45",
+          city: "Jakarta (CGK)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
+    },
+    fare: {
+      totalFare: "₹ 3,22,000",
+      pricePerAdult: "₹ 12,000",
+      cabinClass: "ECONOMY",
+    },
+  },
+];
 const RoundTrip = () => {
   const { committedSearches } = useTripType();
   const [isLoading, setIsLoading] = useState(false);
   const [openSort, setOpenSort] = useState(false);
   const { from, to } = committedSearches.round;
   const [selectedSort, setSelectedSort] = useState("");
-
+  const [fareModalOpen, setFareModalOpen] = useState(false);
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const {
     filters,
@@ -325,6 +621,7 @@ const RoundTrip = () => {
     selectDeparture,
     resetFilters,
   } = useFlightFilters();
+
   return (
     <>
       {" "}
@@ -400,7 +697,13 @@ const RoundTrip = () => {
           </div>
         </div>
         <div>
-          <TripCard></TripCard>
+          <TripCard
+            fareModalOpen={fareModalOpen}
+            selectedFlightId={selectedFlightId}
+            setSelectedFlightId={setSelectedFlightId}
+            setFareModalOpen={setFareModalOpen}
+            tripCardsData={tripCardsData}
+          ></TripCard>
         </div>
       </section>
       <section className={styles.isMobileView}>
@@ -525,6 +828,16 @@ const RoundTrip = () => {
           flightResults.map((flight, index) => (
             <FlightDetailsCard key={flight.id + index} flight={flight} />
           ))
+        )}
+        {fareModalOpen && (
+          <MobileFareComparisonModalRoundTrip
+            isOpen={fareModalOpen}
+            onClose={() => {
+              setFareModalOpen(false);
+              setSelectedFlightId(null);
+            }}
+            flightData={flightResults.find((f) => f.id === fareModalOpen)}
+          />
         )}
       </section>
       <SortBySheet open={openSort} onClose={() => setOpenSort(false)} />
