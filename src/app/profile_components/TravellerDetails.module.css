@@ -19,6 +19,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   flex: 1;
 }
@@ -58,6 +59,10 @@
   flex-direction: column;
   gap: 32px;
   background-color: #fff;
+}
+
+.extraCard {
+    gap: 16px;
 }
 
 .sectionTitle {

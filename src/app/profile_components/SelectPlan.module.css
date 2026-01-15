@@ -106,7 +106,7 @@
 
 .recommendedBadge {
     position: absolute;
-    top: -20px;
+    top: -23px;
     left: 0;
     right: 0;
     background: linear-gradient(90deg, #000033 0%, #000099 100%);

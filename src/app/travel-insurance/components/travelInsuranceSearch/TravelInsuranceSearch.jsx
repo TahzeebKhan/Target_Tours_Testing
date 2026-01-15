@@ -132,132 +132,134 @@ const TravelInsuranceSearch = () => {
   const [openMobileCalendar, setOpenMobileCalendar] = useState(false);
 
   return (
-    <div className={styles.glass_panel}>
-      <div className={styles.searchRow}>
-        {/* Travel Destination */}
-        <TravellerSelector
-          travellerClass={travellerDestination}
-          setTravellerClass={setTravellerDestination}
-          travellerOptions={TravellerDestinationOptions}
-          styles={styles}
-          name="TRAVEL DESTINATION"
-          className={`${styles.pos1}`}
-          enableEllipsis={false}
-        />
-        <div className={styles.dateGroup}>
-          {/* Start Date */}
-          <div
-            className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField} ${styles.calendarAnchor}`}
-          >
-            <div className={`${styles.lable} ${styles.labelFade}`}>
-              START DATE
-            </div>
-
-            <div
-              className={`${styles.dateInputWrapper} ${styles.contentFade}`}
-              onClick={handleStartDateClick}
-            >
-              <input
-                type="text"
-                readOnly
-                className={styles.contant}
-                placeholder="ADD DATES"
-                value={formatDate(insuranceStartDate)}
-              />
-              <button type="button" className={styles.calendarIcon}>
-                <CalendarSVG />
-              </button>
-            </div>
-          </div>
-
-          {/* Return Date */}
-          <div
-            className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField} ${styles.calendarAnchor}`}
-          >
-            <div className={`${styles.lable} ${styles.labelFade}`}>
-              RETURN DATE
-            </div>
-
-            <div
-              className={`${styles.dateInputWrapper} ${styles.contentFade}`}
-              onClick={handleEndDateClick}
-            >
-              <input
-                type="text"
-                readOnly
-                className={styles.contant}
-                placeholder="ADD DATES"
-                value={formatDate(insuranceEndDate)}
-              />
-              <button type="button" className={styles.calendarIcon}>
-                <CalendarSVG />
-              </button>
-            </div>
-          </div>
-
-          {/* Insurance Calendar Modal */}
-          {showInsuranceCalendar && (
-            <DateCalendarModal
-              mode="roundtrip"
-              onModeChange={() => {}}
-              onClose={() => setShowInsuranceCalendar(false)}
-            >
-              <div ref={calendarRef}>
-                <CalendarMonths
-                  startDate={insuranceStartDate}
-                  endDate={insuranceEndDate}
-                  onDateClick={handleInsuranceDateClick}
-                />
-              </div>
-            </DateCalendarModal>
-          )}
-          {openMobileCalendar && isMobile && (
-            <MobileViewCalender
-              onClose={() => setOpenMobileCalendar(false)}
-              inputType="roundtrip"
-              selectedDeparture={insuranceStartDate}
-              selectedReturn={insuranceEndDate}
-              onSelectDate={({ departure, returnDate }) => {
-                if (departure) setInsuranceStartDate(departure);
-                if (returnDate) setInsuranceEndDate(returnDate);
-                setOpenMobileCalendar(false);
-              }}
-            />
-          )}
-        </div>
-        {/* Travellers */}
-        <div
-          ref={travellerRef}
-          className={`${styles.fromBtn} ${styles.fromBtn2}`}
-          onClick={() => setTravellerOpend((o) => !o)}
-        >
-          <div className={styles.lable}>TRAVELLERS</div>
-          <div className={styles.iconCont}>
-            <div className={styles.contant}>
-              {totalPassengers} Traveller{totalPassengers > 1 ? "s" : ""}
-            </div>
-            <ChevronDown
-              size={16}
-              className={`${styles.chevron} ${
-                travellerOpend ? styles.openChevron : ""
-              }`}
-            />
-          </div>
-
-          <PassengerClassSelector
-            open={travellerOpend}
-            setOpen={setTravellerOpend}
-            passengers={passengers}
-            setPassengers={setPassengers}
-            travelClass={travelClass}
-            setTravelClass={setTravelClass}
+    <>
+      <div className={styles.glass_panel}>
+        <div className={styles.searchRow}>
+          {/* Travel Destination */}
+          <TravellerSelector
+            travellerClass={travellerDestination}
+            setTravellerClass={setTravellerDestination}
+            travellerOptions={TravellerDestinationOptions}
+            styles={styles}
+            name="TRAVEL DESTINATION"
+            className={`${styles.pos1}`}
+            enableEllipsis={false}
           />
-        </div>
+          <div className={styles.dateGroup}>
+            {/* Start Date */}
+            <div
+              className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField} ${styles.calendarAnchor}`}
+            >
+              <div className={`${styles.lable} ${styles.labelFade}`}>
+                START DATE
+              </div>
 
-        {/* Search */}
-        <div className={styles.searchBtn}>SEARCH</div>
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                onClick={handleStartDateClick}
+              >
+                <input
+                  type="text"
+                  readOnly
+                  className={styles.contant}
+                  placeholder="ADD DATES"
+                  value={formatDate(insuranceStartDate)}
+                />
+                <button type="button" className={styles.calendarIcon}>
+                  <CalendarSVG />
+                </button>
+              </div>
+            </div>
+
+            {/* Return Date */}
+            <div
+              className={`${styles.fromBtn} ${styles.pos3} ${styles.swapField} ${styles.calendarAnchor}`}
+            >
+              <div className={`${styles.lable} ${styles.labelFade}`}>
+                RETURN DATE
+              </div>
+
+              <div
+                className={`${styles.dateInputWrapper} ${styles.contentFade}`}
+                onClick={handleEndDateClick}
+              >
+                <input
+                  type="text"
+                  readOnly
+                  className={styles.contant}
+                  placeholder="ADD DATES"
+                  value={formatDate(insuranceEndDate)}
+                />
+                <button type="button" className={styles.calendarIcon}>
+                  <CalendarSVG />
+                </button>
+              </div>
+            </div>
+
+            {/* Insurance Calendar Modal */}
+            {showInsuranceCalendar && (
+              <DateCalendarModal
+                mode="roundtrip"
+                onModeChange={() => {}}
+                onClose={() => setShowInsuranceCalendar(false)}
+              >
+                <div ref={calendarRef}>
+                  <CalendarMonths
+                    startDate={insuranceStartDate}
+                    endDate={insuranceEndDate}
+                    onDateClick={handleInsuranceDateClick}
+                  />
+                </div>
+              </DateCalendarModal>
+            )}
+          </div>
+          {/* Travellers */}
+          <div
+            ref={travellerRef}
+            className={`${styles.fromBtn} ${styles.fromBtn2}`}
+            onClick={() => setTravellerOpend((o) => !o)}
+          >
+            <div className={styles.lable}>TRAVELLERS</div>
+            <div className={styles.iconCont}>
+              <div className={styles.contant}>
+                {totalPassengers} Traveller{totalPassengers > 1 ? "s" : ""}
+              </div>
+              <ChevronDown
+                size={16}
+                className={`${styles.chevron} ${
+                  travellerOpend ? styles.openChevron : ""
+                }`}
+              />
+            </div>
+
+            <PassengerClassSelector
+              open={travellerOpend}
+              setOpen={setTravellerOpend}
+              passengers={passengers}
+              setPassengers={setPassengers}
+              travelClass={travelClass}
+              setTravelClass={setTravelClass}
+            />
+          </div>
+
+          {/* Search */}
+          <div className={styles.searchBtn}>SEARCH</div>
+        </div>
       </div>
-    </div>
+      {openMobileCalendar && isMobile && (
+        <MobileViewCalender
+          onClose={() => setOpenMobileCalendar(false)}
+          inputType="roundtrip"
+          selectedDeparture={insuranceStartDate}
+          selectedReturn={insuranceEndDate}
+          onSelectDate={({ departure, returnDate }) => {
+            if (departure) setInsuranceStartDate(departure);
+            if (returnDate) setInsuranceEndDate(returnDate);
+            setOpenMobileCalendar(false);
+          }}
+        />
+      )}
+    </>
   );
 };
 
