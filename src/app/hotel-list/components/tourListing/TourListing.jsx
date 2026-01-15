@@ -344,17 +344,17 @@ const TourListing = () => {
 
                   <div className={styles.ListViewCardTextBottom}>
                     <div className={styles.priceContainer}>
-                      <div className={styles.priceSec}>
+                      <div className={`${styles.priceSec} ${styles.ListViewPriceSec}`}>
                         {item.price}
                       </div>
 
-                      <div className={styles.totalPrice}>
+                      <div className={`${styles.totalPrice} ${styles.ListViewTotalPrice}`}>
 
                         <span>1 night, 2 adults</span>
                       </div>
                     </div>
 
-                    <button className={styles.bookNowBtn} onClick={handleBookNow}>SEE AVAILABILITY</button>
+                    <button className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`} onClick={handleBookNow}>SEE AVAILABILITY</button>
                   </div>
                 </div>
               </motion.div>

@@ -368,3 +368,19 @@
   position: relative;
   margin-top: 27px;
 }
+
+
+@media (max-width: 991px) {
+    .fromBtn{
+        min-width: 160px;
+    }
+    .contant{
+      font-size: 12px;
+    }
+}
+
+@media (max-width: 991px) {
+   .fromBtn{
+        min-width: 130px;
+    }
+}

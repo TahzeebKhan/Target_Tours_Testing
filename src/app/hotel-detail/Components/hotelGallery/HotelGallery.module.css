@@ -62,8 +62,40 @@
     gap: 8px;
 }
 
+@media (max-width: 1280px){
+    .rightGrid{
+        gap: 16px;
+    }
+    .bottomContainerRef{
+        gap: 16px;
+        /* height: 530px; */
+    }
+}
+
+@media (max-width: 991px){
+    .bottomContainerRef{
+        height: 530px;
+    }
+    .bottomContainerRef{
+        height: 460px;
+    }
+   
+}
+@media (max-width: 813px){
+    .bottomContainerRef{
+        height: 490px;
+    }
+}
+
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
+    .rightGrid{
+        gap: 12px;
+    }
+    .bottomContainerRef{
+        gap: 12px;
+    }
     .galleryWrapper {
         grid-template-columns: 1fr;
         height: auto;

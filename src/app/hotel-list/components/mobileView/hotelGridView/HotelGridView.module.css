@@ -6,7 +6,7 @@
 
 .gridWrapper {
     display: grid;
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
 
@@ -139,6 +139,7 @@
     color: #000000;
 
 }
+
 .topTextHeadAddress {
     display: flex;
     align-items: center;
@@ -170,7 +171,7 @@
 }
 
 .featureItem p {
- font-weight: 400;
+    font-weight: 400;
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0px;
@@ -183,7 +184,7 @@
     gap: 5px;
 }
 
-.freeList li{
+.freeList li {
     font-weight: 400;
     font-size: 12px;
     line-height: 1.19;
@@ -261,3 +262,45 @@
     background-color: #FCC800;
     color: #000033;
 } */
+
+@media (max-width: 768px) {
+    .bookNowBtn {
+        max-width: 170px;
+    }
+}
+
+@media (max-width: 612px) {
+    .totalPrice {}
+
+    .gridWrapper {
+        gap: 16px;
+    }
+
+    .bookNowBtn {
+        max-width: 145px;
+        padding: 12px 6px;
+    }
+}
+
+@media (max-width: 540px) {
+
+
+    .gridWrapper {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 24px;
+    }
+    .bookNowBtn {
+max-width: 210px;
+        padding: 12px 24px;
+    }
+
+}
+
+@media (max-width: 375px) {
+    .bookNowBtn {
+        max-width: 145px;
+        padding: 12px 6px;
+    }
+}
+

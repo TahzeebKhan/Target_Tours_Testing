@@ -101,3 +101,22 @@
 
 
 }
+
+@media (max-width: 1156px){
+    .card{
+        padding: 16px;
+    }
+}
+@media (max-width: 1156px){
+    .card{
+        padding: 10px;
+    }
+}
+
+@media (max-width: 991px){
+    .card{
+        max-width: unset;
+        width: 100%;
+
+    }
+}

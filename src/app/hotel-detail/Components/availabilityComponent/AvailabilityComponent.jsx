@@ -27,16 +27,21 @@ const roomsData = [
             { icon: "/icons/no-smoking.svg", text: "No Smoking" },
             { icon: "/icons/greenTick.svg", text: "Breakfast" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-            { icon: "/icons/greenTick.svg", text: "Air Conditioner" }
-        ],
-
-        featuresRight: [
-            { icon: "/icons/greenTick.svg", text: "1 King Bed" },
+            { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
+             { icon: "/icons/greenTick.svg", text: "1 King Bed" },
             { icon: "/icons/greenTick.svg", text: "Valley View" },
             { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
             { icon: "/icons/greenTick.svg", text: "Free Wifi" }
         ],
+
+        // featuresRight: [
+        //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
+        //     { icon: "/icons/greenTick.svg", text: "Valley View" },
+        //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
+        //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
+        //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
+        // ],
 
         benefits: [
             "Free stay for the kid",
@@ -79,16 +84,21 @@ const roomsData = [
             { icon: "/icons/no-smoking.svg", text: "No Smoking" },
             { icon: "/icons/greenTick.svg", text: "Breakfast" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-            { icon: "/icons/greenTick.svg", text: "Air Conditioner" }
-        ],
-
-        featuresRight: [
+            { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
             { icon: "/icons/greenTick.svg", text: "1 King Bed" },
             { icon: "/icons/greenTick.svg", text: "Valley View" },
             { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
             { icon: "/icons/greenTick.svg", text: "Free Wifi" }
         ],
+
+        // featuresRight: [
+        //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
+        //     { icon: "/icons/greenTick.svg", text: "Valley View" },
+        //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
+        //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
+        //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
+        // ],
 
         benefits: [
             "Free stay for the kid",
@@ -131,16 +141,21 @@ const roomsData = [
             { icon: "/icons/no-smoking.svg", text: "No Smoking" },
             { icon: "/icons/greenTick.svg", text: "Breakfast" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-            { icon: "/icons/greenTick.svg", text: "Air Conditioner" }
-        ],
-
-        featuresRight: [
+            { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
             { icon: "/icons/greenTick.svg", text: "1 King Bed" },
             { icon: "/icons/greenTick.svg", text: "Valley View" },
             { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
             { icon: "/icons/greenTick.svg", text: "Laundry Service" },
             { icon: "/icons/greenTick.svg", text: "Free Wifi" }
         ],
+
+        // featuresRight: [
+        //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
+        //     { icon: "/icons/greenTick.svg", text: "Valley View" },
+        //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
+        //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
+        //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
+        // ],
 
         benefits: [
             "Free stay for the kid",
@@ -253,17 +268,6 @@ const AvailabilityComponent = () => {
                                         </li>
                                     ))}
                                 </ul>
-
-                                <ul className={styles.featureList}>
-                                    {room.featuresRight.map((item, idx) => (
-                                        <li key={idx}>
-                                            <div className={styles.iconCont}>
-                                                <img src={item.icon} alt="" />
-                                            </div>
-                                            {item.text}
-                                        </li>
-                                    ))}
-                                </ul>
                             </div>
 
                             {/* BENEFITS */}
@@ -284,9 +288,11 @@ const AvailabilityComponent = () => {
                                     <span>{room.cancellation}</span>
                                 </div>
 
-                                <button className={styles.moreDetailsBtn}>
+                                <div className={styles.btnCont}>
+                                    <button className={styles.moreDetailsBtn}>
                                     More Details
                                 </button>
+                                </div>
                             </div>
                         </div>
 

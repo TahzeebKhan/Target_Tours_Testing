@@ -88,3 +88,11 @@
         padding-left: 14px;
     }
 }
+@media (max-width: 991px) {
+    .searchResultsRight{
+        gap: 6px;
+    }
+   
+}
+
+

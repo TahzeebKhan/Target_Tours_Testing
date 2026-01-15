@@ -613,6 +613,7 @@
 
 .toBtn {
   padding-left: 11px;
+  z-index: -999;
 }
 
 .fromBtn2 {
