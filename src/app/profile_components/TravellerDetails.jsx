@@ -6,6 +6,7 @@ import styles from "./TravellerDetails.module.css";
 import TripSummaryHeader from "./TripSummaryHeader";
 import BookingSummaryFooter from "./BookingSummaryFooter";
 import PriceSummary from "./PriceSummary";
+import AddDetails from "./AddDetails";
 
 const TravellerDetails = () => {
   const [isPassengerOpen, setIsPassengerOpen] = useState(true);
@@ -53,9 +54,11 @@ const TravellerDetails = () => {
     },
   ];
 
+  const [openAddDetails, setOpenAddDetails] = useState(false);
+  
   /* ---------- Scroll lock for Price Summary ---------- */
   useEffect(() => {
-    if (openPriceSummary) {
+    if (openPriceSummary || openAddDetails) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -64,12 +67,14 @@ const TravellerDetails = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [openPriceSummary]);
+  }, [openPriceSummary, openAddDetails]);
+
+
 
   return (
     <>
       <div className={styles.Maincontainer}>
-        <TripSummaryHeader />
+        <TripSummaryHeader onEditClick={() => setOpenAddDetails(true)} />
 
         <div className={styles.container}>
           {/* Progress Bar */}
@@ -161,14 +166,16 @@ const TravellerDetails = () => {
         </div>
 
         {/* Footer */}
-        <BookingSummaryFooter
-          onInfoClick={() => setOpenPriceSummary(true)}
-        />
+        <BookingSummaryFooter onInfoClick={() => setOpenPriceSummary(true)} />
       </div>
 
       {/* Price Summary Modal */}
       {openPriceSummary && (
         <PriceSummary onClose={() => setOpenPriceSummary(false)} />
+      )}
+
+      {openAddDetails && (
+        <AddDetails onClose={() => setOpenAddDetails(false)} />
       )}
     </>
   );

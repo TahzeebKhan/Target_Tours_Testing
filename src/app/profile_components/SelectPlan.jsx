@@ -7,6 +7,7 @@ import TripSummaryHeader from "./TripSummaryHeader";
 import BookingSummaryFooter from "./BookingSummaryFooter";
 import PriceSummary from "./PriceSummary";
 import AddTravellerDetails from "./AddTravellerDetails";
+import AddDetails from "./AddDetails";
 
 const SelectPlan = () => {
   const [selectedCoverage, setSelectedCoverage] = useState(0);
@@ -59,11 +60,25 @@ const SelectPlan = () => {
   const STEP_SELECT_PLAN = 1;
   const STEP_ADD_TRAVELLER = 2;
 
+  const [openAddDetails, setOpenAddDetails] = useState(false);
+
+  useEffect(() => {
+    if (openPriceSummary || openAddDetails) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [openPriceSummary, openAddDetails]);
+
   return (
     <>
       {currentStep === STEP_SELECT_PLAN && (
         <div className={styles.Maincontainer}>
-          <TripSummaryHeader />
+          <TripSummaryHeader onEditClick={() => setOpenAddDetails(true)} />
 
           <div className={styles.container}>
             {/* Progress Bar */}
@@ -195,6 +210,10 @@ const SelectPlan = () => {
 
       {openPriceSummary && (
         <PriceSummary onClose={() => setOpenPriceSummary(false)} />
+      )}
+
+      {openAddDetails && (
+        <AddDetails onClose={() => setOpenAddDetails(false)} />
       )}
     </>
   );

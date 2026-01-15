@@ -11,6 +11,7 @@ const TripSummaryHeader = ({
   dateRange = "15 Jan - 23 Jan, 2026",
   onBack,
   onEdit,
+   onEditClick ,
 }) => {
   return (
     <div className={styles.tripDetailsHeader}>
@@ -52,6 +53,8 @@ const TripSummaryHeader = ({
           className={styles.editIcon}
           color="#FFFFFF"
           size={16}
+            onClick={onEditClick}
+  style={{ cursor: "pointer" }}
         />
       </button>
     </div>

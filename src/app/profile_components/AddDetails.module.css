@@ -1,0 +1,159 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 50;
+}
+.modalContainer {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 600px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0px -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  padding-top: 24px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.headerTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: rgba(123, 135, 153, 1);
+  font-weight: 400;
+  letter-spacing: -3%;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(10, 10, 10, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 1);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(228, 230, 232, 1);
+  box-shadow: 0px 1px 1.5px 0px rgba(44, 54, 53, 0.03);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: rgba(123, 135, 153, 1);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.input::placeholder {
+  color: rgba(156, 163, 175, 1);
+}
+
+/* Wrapper around input + icon */
+.dateField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+/* Make input take full width */
+.dateField input {
+  width: 100%;
+  padding-right: 40px; /* space for icon */
+  cursor: pointer;
+}
+
+/* Calendar icon positioning */
+.dateField img {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+}
+
+
+/* .input:focus {
+  border-color: rgba(0, 0, 51, 1);
+} */
+
+.modalFooter {
+  padding: 16px;
+  padding-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.backButton {
+  background-color: #ffffff;
+  border: 1px solid rgba(228, 230, 232, 1);
+  color: rgba(26, 32, 41, 1);
+  padding: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0px 1.5px 0.5px 0px rgba(255, 255, 255, 0.3) inset;
+
+}
+
+.continueButton {
+  background-color: rgba(0, 0, 51, 1);
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+}
+
+/* State Based Switching */
+/* .continueButton.active {
+    background-color: rgba(10, 10, 10, 1);
+    transform: scale(0.98);
+}
+
+.backButton:hover {
+    background-color: rgba(243, 244, 246, 1);
+}
+
+.continueButton:hover:not(.active) {
+    opacity: 0.9;
+} */

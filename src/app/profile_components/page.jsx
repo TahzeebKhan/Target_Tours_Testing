@@ -10,6 +10,7 @@ import MobileItinerary from "./MobileItinerary";
 import SelectPlan from "./SelectPlan";
 import TravellerDetails from "./TravellerDetails";
 import AddTravellerDetails from "./AddTravellerDetails";
+import AddDetails from "./AddDetails";
 
 export default function ProfilePage() {
 
@@ -19,6 +20,7 @@ export default function ProfilePage() {
       <SelectPlan />
       {/* <TravellerDetails /> */}
       {/* <AddTravellerDetails /> */}
+      {/* <AddDetails /> */}
     </main>
   );
 }

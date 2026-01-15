@@ -7,6 +7,7 @@ import TripSummaryHeader from "./TripSummaryHeader";
 import BookingSummaryFooter from "./BookingSummaryFooter";
 import TravellerDetails from "./TravellerDetails";
 import PriceSummary from "./PriceSummary";
+import AddDetails from "./AddDetails";
 
 const AddTravellerDetails = () => {
   const [travelers, setTravelers] = useState([
@@ -26,21 +27,25 @@ const AddTravellerDetails = () => {
 
   const [currentStep, setCurrentStep] = useState(STEP_ADD_TRAVELLER);
   const [openPriceSummary, setOpenPriceSummary] = useState(false);
+  const [openAddDetails, setOpenAddDetails] = useState(false);
 
   /* ---------- Scroll lock for Price Summary ---------- */
   useEffect(() => {
-    document.body.style.overflow = openPriceSummary ? "hidden" : "";
+    if (openPriceSummary || openAddDetails) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
     return () => {
       document.body.style.overflow = "";
     };
-  }, [openPriceSummary]);
+  }, [openPriceSummary, openAddDetails]);
 
   /* ---------- Handlers ---------- */
   const toggleTraveler = (id) => {
     setTravelers((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, isOpen: !t.isOpen } : t
-      )
+      prev.map((t) => (t.id === id ? { ...t, isOpen: !t.isOpen } : t))
     );
   };
 
@@ -51,12 +56,14 @@ const AddTravellerDetails = () => {
     ]);
   };
 
+
+
   return (
     <>
       {/* ================= ADD TRAVELLER STEP ================= */}
       {currentStep === STEP_ADD_TRAVELLER && (
         <div className={styles.Maincontainer}>
-          <TripSummaryHeader />
+          <TripSummaryHeader onEditClick={() => setOpenAddDetails(true)} />
 
           <div className={styles.container}>
             {/* Stepper */}
@@ -189,6 +196,10 @@ const AddTravellerDetails = () => {
       {/* ================= PRICE SUMMARY MODAL ================= */}
       {openPriceSummary && (
         <PriceSummary onClose={() => setOpenPriceSummary(false)} />
+      )}
+
+      {openAddDetails && (
+        <AddDetails onClose={() => setOpenAddDetails(false)} />
       )}
     </>
   );
