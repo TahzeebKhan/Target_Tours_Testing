@@ -1,7 +1,7 @@
 .glass_panel {
-    margin-top: 44px;
-    max-width: 1200px;
-    width: 100%;
+  margin-top: 44px;
+  max-width: 1200px;
+  width: 100%;
   padding: 24px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.6);
@@ -25,11 +25,13 @@
   flex: 1;
 }
 
-.contant::placeholder{
-    color: #FFFFFF;
+.contant::placeholder {
+  color: #FFFFFF;
 }
+
+.fromBtn,
 .fromBtn2 {
-  min-width: 220px;
+  width: 245.5px;
 }
 
 .lable {
@@ -90,22 +92,17 @@
   color: #000033;
 }
 
-@media (max-width: 1280px) {
-  .glass_panel {
-    max-width: 1000px;
-    padding: 20px;
-  }
 
-  .fromBtn2 {
-    min-width: 200px;
-  }
-  .fromBtn{
-    height: auto;
-  }
-  .searchBtn{
-    height: auto;
-  }
+.dateGroup {
+  position: relative;
+  display: flex;
+  gap: 12px;
 }
+
+.dateGroup .fromBtn {
+  flex: 1;
+}
+
 
 @media (max-width: 1024px) {
   .glass_panel {
@@ -119,6 +116,7 @@
 
   .fromBtn {
     padding: 8px 10px;
+    width: 180px;
   }
 
   .contant {
@@ -140,6 +138,10 @@
     border: none;
   }
 
+    .dateGroup{
+    flex-direction: column;
+  }
+
   .searchRow {
     flex-direction: column;
     gap: 12px;
@@ -149,7 +151,7 @@
   .fromBtn2 {
     width: 100%;
     min-width: unset;
-    height:51px;
+    height: 51px;
   }
 
   .searchBtn {
