@@ -12,6 +12,20 @@
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
+.logggedInBtn {
+  text-transform: uppercase;
+  padding: 8px 18px;
+  /* border: 0.5px solid #E4E6E8 !important; */
+
+  /* color: #ffffff; */
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: #15151512;
+
+  text-transform: uppercase;
+  cursor: pointer;
+}
 
 .navbar {
   max-width: 1520px;
@@ -23,7 +37,7 @@
 
   background-color: rgba(255, 255, 255, 0.12);
   /* glass base */
-  backdrop-filter: blur(0.2px);
+  backdrop-filter: blur(10px);
   /* blur the background */
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.6);
