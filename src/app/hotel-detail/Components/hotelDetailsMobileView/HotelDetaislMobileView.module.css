@@ -61,6 +61,35 @@
 
 }
 
+.imageBox {
+    position: relative;
+    overflow: hidden;
+}
+
+.imageBox img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* VIEW GALLERY BUTTON */
+.viewGalleryBtn {
+    position: absolute;
+    top: 230px;
+    right: 10px;
+    background: #FFFFFFA8;
+
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    font-size: 10px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .hotelName {
     font-family: Antic Didone;
     font-weight: 400;
@@ -83,7 +112,8 @@
     gap: 8px;
 }
 
-.reviewCount, .hotelAddress{
+.reviewCount,
+.hotelAddress {
     font-family: var(--font-inter);
     font-weight: 300;
     font-style: Light;
@@ -93,7 +123,7 @@
     color: #7B8799;
 }
 
-.HotelDetailsMobileViewContentHeader{
+.HotelDetailsMobileViewContentHeader {
     padding: 24px 0;
     display: flex;
     justify-content: center;

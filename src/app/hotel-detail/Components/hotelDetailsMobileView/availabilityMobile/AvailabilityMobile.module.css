@@ -1,0 +1,259 @@
+.availabilityMobileContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 16px;
+}
+
+.availabilityMobileTitle {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+
+}
+
+.Card {
+    padding: 12px;
+    border: 1px solid #E4E6E8;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+
+}
+
+.cardLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cardLeftTop {
+    display: flex;
+    gap: 12px;
+}
+
+.cardLeftTopImage {
+    max-width: 69px;
+    width: 100%;
+    /* height: 56px; */
+}
+
+.cardLeftTopImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cardLeftTopTextCont {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hotelName {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.19;
+
+}
+
+.bedIcon {
+    width: 14px;
+    height: 14px;
+}
+
+
+
+
+
+.br {
+    border: 0.5px solid #DDDFE3;
+    /* height: 100%; */
+}
+
+.priceContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    align-items: flex-end;
+}
+
+.priceTop {
+    display: flex;
+    flex-direction: column;
+}
+
+.price {
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    text-align: end;
+    color: #000000;
+    white-space: nowrap;
+}
+.nights, .taxes{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 10px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #4A5565;
+    white-space: nowrap;
+}
+
+
+.bedMainCont {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bedCount {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+}
+
+.bedCount span,
+.persons {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 10px;
+    line-height: 1.18;
+    letter-spacing: -2%;
+    color: #121316;
+}
+
+
+.featureSec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.featureList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: center;
+}
+
+.iconCont {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featureList li {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 10px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #0A0A0A;
+
+}
+.counter{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn{
+    width: 32px;
+    height: 32px;
+    border: 1px solid #000033;
+    color: #000033;
+}
+.priceBottom{
+    width: 100%;
+
+}
+.count{
+    font-family: var(--font-inter);
+font-weight: 600;
+font-size: 16px;
+line-height: 1.18;
+letter-spacing: -2%;
+
+}
+.addRoomBtn{
+    padding: 12px 11px;
+    background-color: #000000;
+    font-family: var(--font-inter);
+font-weight: 400;
+font-size: 14px;
+line-height: 1.18;
+letter-spacing: -2%;
+text-transform: uppercase;
+color: #FFFFFF;
+
+}
+@media (max-width: 424px) {
+    .hotelName{
+        font-size: 12px;
+    }
+    .Card{
+        padding: 10px;
+    }
+    
+}
+
+@media (max-width: 402px) {
+    .nights{
+        font-size: 9px;
+    }
+    .Card{
+        gap: 8px;
+    }
+}
+@media (max-width: 395px) {
+    .cardLeftTop{
+        gap: 8px;
+    }
+    .cardLeftTopImage{
+        max-width: 56px;
+    }
+}
+@media (max-width: 375px) {
+    .bedCount{
+        gap: 4px;
+    }
+    .cardLeftTop{
+        gap: 6px;
+    }
+    .featureList li{
+        font-size: 9px;
+    }
+    .addRoomBtn{
+        padding: 12px 11px ;
+        font-size: 12px;
+    }
+    .nights, .taxes{
+        font-size: 9px;
+    }
+}
+
+
+@media (max-width: 360px) {
+    .cardLeftTopImage{
+        max-width: 48px;
+    }
+}
