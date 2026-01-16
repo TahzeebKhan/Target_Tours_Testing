@@ -3,11 +3,14 @@ import React from "react";
 import styles from "./FlightDetailsCard.module.css";
 import FlightTimingDetail from "../../flightTimingDetails/FlightTimingDetail";
 
-const FlightDetailsCard = ({ flight }) => {
+const FlightDetailsCard = ({ flight, setFareModalOpen }) => {
   const { outbound, inbound, fare } = flight;
 
   return (
-    <div className={styles.mobileFlightContainer}>
+    <div
+      onClick={() => setFareModalOpen(true)}
+      className={styles.mobileFlightContainer}
+    >
       {/* ===== OUTBOUND HEADER ===== */}
       <div className={styles.flightDetails}>
         <div className={styles.flightDetailsLeft}>

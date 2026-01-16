@@ -1,92 +1,88 @@
 .searchResultsContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 .searchResultsLeft {
-    display: flex;
-    align-items: center;
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 14px;
-    line-height: 1.18;
-    letter-spacing: -2%;
-    color: #000000;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  color: #000000;
 }
 
 .searchResultsRight {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .viewTypeContainer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .viewType {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 12.6px;
-    line-height: 14px;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #000000;
-
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12.6px;
+  line-height: 14px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
 }
 
 .viewTypeButtons {
-    border: 1.25px solid rgba(228, 230, 232, 1);
+  border: 1.25px solid rgba(228, 230, 232, 1);
 
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .activeView {
-
-    border: 1.25px solid rgba(33, 33, 33, 0.39);
+  border: 1.25px solid rgba(33, 33, 33, 0.39);
 }
 
 .viewTypeButtons img {
-    opacity: 0.4;
-    transition: opacity 0.3s ease;
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
 }
 
 .activeView img {
-    opacity: 1;
+  opacity: 1;
 }
-
 
 @media (max-width: 1056px) {
-    .viewTypeButtons {
-        width: 36px;
-        height: 36px;
-    }
+  .viewTypeButtons {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (max-width: 1038px) {
-
-    .viewType {
-        font-size: 12px;
-    }
-    .searchResultsLeft{
-        font-size: 12px;
-    }
+  .viewType {
+    font-size: 12px;
+  }
+  .searchResultsLeft {
+    font-size: 12px;
+  }
 }
 @media (max-width: 1038px) {
-    .tourLayout{
-        padding-left: 14px;
-    }
+  .tourLayout {
+    padding-left: 14px;
+  }
 }
 @media (max-width: 991px) {
     .searchResultsRight{

@@ -11,6 +11,9 @@ import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import FlightDetailsCard from "../PhoneViewComponents/multiTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
+import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
+import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
+import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
 const MultiCityTrip = () => {
   const [selectedSort, setSelectedSort] = useState("cheapest");
   const { committedSearches } = useTripType();
@@ -27,7 +30,8 @@ const MultiCityTrip = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { setIsSidebarOpen } = useContext(SidebarContext);
-
+  const [fareModalOpen, setFareModalOpen] = useState(false);
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
   const flightResults = [
     {
       id: 1,
@@ -404,15 +408,21 @@ const MultiCityTrip = () => {
           </div>
         </div>
         <div className={styles.tripCardsContainer}>
-          <TripCard />
-          <TripCard />
-          <TripCard />
+          <TripCard setFareModalOpen={setFareModalOpen} />
+          <TripCard setFareModalOpen={setFareModalOpen} />
+          <TripCard setFareModalOpen={setFareModalOpen} />
           <OfferBanner />
-          <TripCard />
-          <TripCard />
-          <TripCard />
-          <TripCard />
+          <TripCard setFareModalOpen={setFareModalOpen} />
+          <TripCard setFareModalOpen={setFareModalOpen} />
+          <TripCard setFareModalOpen={setFareModalOpen} />
+          <TripCard setFareModalOpen={setFareModalOpen} />
         </div>
+        {
+          <FareComparisonModalMulticity
+            isOpen={fareModalOpen}
+            onClose={() => setFareModalOpen(false)}
+          />
+        }
       </section>
 
       <section className={styles.isMobileView}>
@@ -535,8 +545,23 @@ const MultiCityTrip = () => {
           <RoundTripSkeleton />
         ) : (
           flightResults.map((flight, index) => (
-            <FlightDetailsCard key={flight.id + index} flight={flight} />
+            <FlightDetailsCard
+              setFareModalOpen={setFareModalOpen}
+              key={flight.id + index}
+              flight={flight}
+            />
           ))
+        )}
+
+        {fareModalOpen && (
+          <MobileFareComparisonModalMulticity
+            isOpen={fareModalOpen}
+            onClose={() => {
+              setFareModalOpen(false);
+              setSelectedFlightId(null);
+            }}
+            flightData={flightResults.find((f) => f.id === fareModalOpen)}
+          />
         )}
       </section>
       <SortBySheet open={openSort} onClose={() => setOpenSort(false)} />

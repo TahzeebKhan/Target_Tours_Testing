@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import styles from "./MobileFareComparisonModalRoundTrip.module.css";
+import styles from "./MobileFareComparisonModalMulticity.module.css";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 
-const MobileFareComparisonModalRoundTrip = ({
+const MobileFareComparisonModalMulticity = ({
   isOpen,
   onClose,
   flightData,
@@ -173,15 +173,19 @@ const MobileFareComparisonModalRoundTrip = ({
         <div className={styles.toggleTabContainer}>
           <div
             onClick={() => setActibeTab("onward")}
-            className={`${styles.toggleTab} ${activeTab==="onward" ? styles.activeTab :""}`}
+            className={`${styles.toggleTab} ${
+              activeTab === "onward" ? styles.activeTab : ""
+            }`}
           >
-            ONWARD FLIGHT (DEL-CGK)
+            DEL-CGK
           </div>
           <div
             onClick={() => setActibeTab("return")}
-            className={`${styles.toggleTab} ${activeTab==="return" ? styles.activeTab :""}`}
+            className={`${styles.toggleTab} ${
+              activeTab === "return" ? styles.activeTab : ""
+            }`}
           >
-            return FLIGHT (cgk-del)
+            cgk-del
           </div>
         </div>
         <div className={styles.fareCards}>
@@ -282,4 +286,4 @@ const MobileFareComparisonModalRoundTrip = ({
   );
 };
 
-export default MobileFareComparisonModalRoundTrip;
+export default MobileFareComparisonModalMulticity;

@@ -1,14 +1,22 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 import styles from "./Navbar.module.css";
-const Navbar = ({scrollProgress={scrollProgress}}) => {
+const Navbar = ({ scrollProgress = { scrollProgress } }) => {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
   return (
     <>
       {" "}
-      <div style={{
-        // transform: `translateY(${-72 * scrollProgress}px)`,
-        // opacity: 1 - scrollProgress,
-      }}
-       className={`${styles.navContainer} top-0 z-1`}>
+      <div
+        style={
+          {
+            // transform: `translateY(${-72 * scrollProgress}px)`,
+            // opacity: 1 - scrollProgress,
+          }
+        }
+        className={`${styles.navContainer} top-0 z-1`}
+      >
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
@@ -17,7 +25,15 @@ const Navbar = ({scrollProgress={scrollProgress}}) => {
             <button className={`${styles.glass_button} ${styles.downloadBtn}`}>
               Download the App
             </button>
-            <button className={styles.signInBtn}>Sign In</button>
+            {!isLoggedIn && (
+              <button
+                onClick={() => router.push("/?openLogin=true")}
+                className={styles.signInBtn}
+              >
+                Sign In
+              </button>
+            )}
+
             <button className={styles.hamBurger}>
               <img src="/icons/hamBurger.png" alt="" />
               menu

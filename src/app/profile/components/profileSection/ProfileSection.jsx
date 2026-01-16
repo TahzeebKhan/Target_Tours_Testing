@@ -19,12 +19,17 @@ import { useProfile } from "../../context/ProfileContext";
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
   const { setProfilePhoto } = useProfile();
+  const [phoneError, setPhoneError] = useState(false);
 
   const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
   const [uploading, setUploading] = useState(false);
   const handleChangePhotoClick = () => {
     fileInputRef.current?.click();
   };
+  const isValidPhoneNumber = (phone) => {
+    return /^\d{10}$/.test(phone);
+  };
+
   const handlePhotoSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -291,6 +296,18 @@ const ProfileSection = () => {
         throw new Error("User ID missing in cookies");
       }
 
+      const phone = profileFields
+        .find((f) => f.label === "Phone Number")
+        ?.value?.trim();
+
+      // 🔥 PHONE VALIDATION
+      if (phone && !isValidPhoneNumber(phone)) {
+        setPhoneError(true);
+        toast.error("Enter a valid phone number");
+        return;
+      }
+
+      setPhoneError(false);
       const payload = buildPayload();
 
       // 🔥 nothing to update

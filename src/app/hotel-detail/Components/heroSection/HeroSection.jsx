@@ -19,6 +19,7 @@ const HeroSection = () => {
                                 <img src="/icons/tetimonialStart.svg" alt="" />
                                 <img src="/icons/tetimonialStart.svg" alt="" />
                                 <img src="/icons/tetimonialStart.svg" alt="" />
+                                <img src='/icons/conicstarEmpty.svg' alt=''/>
                             </div>
                             <div className={styles.reviewCount}>4.5 (371 reviews)</div>
                         </div>

@@ -280,7 +280,13 @@ const TripCard = ({
           </div>
         ))}
       </div>
-      
+
+      {
+        <FareComparisonModalRoundTrip
+          isOpen={fareModalOpen}
+          onClose={() => setFareModalOpen(false)}
+        />
+      }
     </>
   );
 };
