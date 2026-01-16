@@ -176,7 +176,7 @@ body {
   margin-left: 21px;
 }
 
-@media (max-width: 428px) {
+@media (max-width: 430px) {
   .limitedWrapper .swiper-wrapper {
     transform: translate3d(32.8%, 0, 0);
   }
