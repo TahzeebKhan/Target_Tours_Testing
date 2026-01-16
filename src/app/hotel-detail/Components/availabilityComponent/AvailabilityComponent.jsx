@@ -282,8 +282,8 @@ const AvailabilityComponent = () => {
                             {/* ACTIONS */}
                             <div className={styles.btnContainer}>
                                 <div className={styles.CalcellCont}>
-                                    <div className={styles.iconCont}>
-                                        <img src="/icons/blueTick.svg" alt="" />
+                                    <div className={styles.blueTickCont}>
+                                        <img src="/icons/bluetick.svg" alt="" />
                                     </div>
                                     <span>{room.cancellation}</span>
                                 </div>
