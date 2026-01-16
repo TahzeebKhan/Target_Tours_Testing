@@ -17,8 +17,32 @@ const Page = () => {
   const [showSummary, setShowSummary] = useState(false);
   const onBookNow = () => {
     setShowSummary(true);
-  }
-
+  };
+  const [roomList, setRoomList] = useState([
+    {
+      id: "deluxe_ac_room",
+      title: "Deluxe Private AC Room with Ensuite Bathroom",
+      image: "/images/hotelArt1.png",
+      pricePerNight: 1397.86,
+      quantity: 1,
+      maxQuantity: 5,
+      nights: 8,
+    },
+    {
+      id: "premium_ac_room",
+      title: "Premium Private AC Room with Ensuite Bathroom",
+      image: "/images/hotelArt1.png",
+      pricePerNight: 1397.86,
+      quantity: 1,
+      maxQuantity: 5,
+      nights: 8,
+    },
+  ]);
+  const removeRoom = (id) => {
+    setRoomList((prev) =>
+      prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room))
+    );
+  };
   const sectionRefs = {
     Description: useRef(null),
     Amenities: useRef(null),
@@ -70,24 +94,29 @@ const Page = () => {
 
         <div className={styles.rightSidebar}>
           <div
-            className={`${styles.roomWrapper} ${showSummary ? styles.hide : ""
-              }`}
+            className={`${styles.roomWrapper} ${
+              showSummary ? styles.hide : ""
+            }`}
           >
             <RoomSelectionCard onBookNow={() => setShowSummary(true)} />
           </div>
 
           {/* Booking Summary */}
           <div
-            className={`${styles.summaryWrapper} ${showSummary ? styles.show : ""
-              }`}
+            className={`${styles.summaryWrapper} ${
+              showSummary ? styles.show : ""
+            }`}
           >
-            <BookingSummary />
+            <BookingSummary roomList={roomList} onRemove={removeRoom} />
           </div>
         </div>
       </main>
 
       {/* SECTION 2: OUTSIDE contentWrapper */}
-      <section className={styles.policySection} ref={sectionRefs["HOTEL POLICY"]}>
+      <section
+        className={styles.policySection}
+        ref={sectionRefs["HOTEL POLICY"]}
+      >
         <HotelPolicies />
       </section>
 
@@ -95,7 +124,6 @@ const Page = () => {
         <CustomerReviews />
       </section>
       <BarcelonaSection />
-
     </>
   );
 };

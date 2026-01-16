@@ -123,6 +123,9 @@
   height: 14px;
   opacity: 0;
   transform: scale(0.6);
+  /* 🔥 keep mask ALWAYS */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
   transition: all 0.15s ease;
   background-color: transparent;
 }
@@ -137,8 +140,6 @@
   opacity: 1;
   transform: scale(1);
   background-color: white;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
-    no-repeat center / contain;
 }
 
 /* hover (optional polish) */
