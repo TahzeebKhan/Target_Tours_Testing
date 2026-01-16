@@ -15,10 +15,13 @@
     
 }
 .nav{
+    max-width: 1520px;
+    width: 100%;
     display: flex;
     justify-content: start;
     align-items: center;
-    padding: 40px 64px;
+    padding: 40px 0;
+    margin: 0 auto;
 
 }
 .navItem{
