@@ -1,4 +1,4 @@
-import Image from "next/image";
+"use client";
 import HomePage from "./home-page/components/homePage/HomePage";
 import TopToFlights from "./home-page/components/topToFlights/TopToFlights";
 import TargetTours from "./home-page/components/targetTours/TargetTours";
@@ -10,25 +10,29 @@ import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPri
 import FeatureSection from "./home-page/components/featureSection/FeatureSection";
 import Footer from "./home-page/components/footer/Footer";
 import PrivateGroup from "./home-page/components/privateGroup/PrivateGroup";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 export default function Home() {
+  const [homeReady, setHomeReady] = useState(false);
   return (
     <>
       <Suspense fallback={null}>
-        <HomePage />
+        <HomePage onReady={() => setHomeReady(true)} />
       </Suspense>
+      {homeReady && (
+        <>
+          <SignatureExperiences />
+          <PopularFlights />
+          <TopToFlights />
 
-      <SignatureExperiences />
-      <PopularFlights />
-      <TopToFlights />
-
-      <TargetTours />
-      <PrivateGroup />
-      <LimitedTimeOffer />
-      <ExploreStays />
-      <FeatureSection />
-      <Footer />
+          <TargetTours />
+          <PrivateGroup />
+          <LimitedTimeOffer />
+          <ExploreStays />
+          <FeatureSection />
+          <Footer />
+        </>
+      )}
     </>
   );
 }

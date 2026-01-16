@@ -1,607 +1,598 @@
 .CardSection {
-    display: flex;
-    gap: 24px;
-    background-color: #FFFFFF;
-    margin-top: 16px;
-    justify-content: space-between;
+  display: flex;
+  gap: 24px;
+  background-color: #ffffff;
+  margin-top: 16px;
+  justify-content: space-between;
 }
 
 .imagesNestedCarousel {
-    max-width: 313px;
-    width: 100%;
-    display: flex;
-    position: relative;
-    /* height: 327px; */
+  max-width: 313px;
+  width: 100%;
+  display: flex;
+  position: relative;
+  /* height: 327px; */
 }
 
 .slide {
-    width: 313px;
+  width: 313px;
 }
 
 .imagesNestedCarousel img {
-    width: 100%;
-    object-fit: cover;
-    background-position: center;
-    height: 100%;
+  width: 100%;
+  object-fit: cover;
+  background-position: center;
+  height: 100%;
 }
 
 .heading {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #000033;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
 }
 
 .cardDetails {
-    display: flex;
-    gap: 16px;
-    padding: 24px;
-    padding-left: 0 !important;
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  padding-left: 0 !important;
 }
 
 .cardDetailLeft {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .hotelHeadCont {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .hotelTitle {
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: -2%;
-    color: #000000;
-
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -2%;
+  color: #000000;
 }
 
 .bedMainCont {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .bedCount {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .bedCount span,
 .persons {
-    font-weight: 300;
-    font-style: Light;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    color: #121316;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  color: #121316;
 }
 
 .featureSec {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .featureList {
-    display: flex;
+  display: flex;
   flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
+  gap: 12px;
+  row-gap: 8px;
+  align-items: center;
 }
 
 .iconCont {
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blueTickCont {
+  width: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 15px;
+}
+.blueTickCont img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .featureList li {
-    display: flex;
-    align-items: center;
-    gap: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    color: #0A0A0A;
-
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #0a0a0a;
 }
 
 .benefitsList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-left: 16px;
-    list-style-type: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  list-style-type: disc;
 }
 
 .benefitsList li {
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    color: #343434;
-
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #343434;
 }
 
 .btnContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .CalcellCont {
-    display: flex;
-    align-items: center;
-    gap: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .CalcellCont span {
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    color: #0604B2;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #0604b2;
 }
 
 .moreDetailsBtn {
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-decoration: underline;
-    text-decoration-style: solid;
-    cursor: pointer;
-    color: #000033;
-
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  cursor: pointer;
+  color: #000033;
 }
 
 .br {
-    border: 1px solid #DDDFE3
+  border: 1px solid #dddfe3;
 }
 
 .cardRightTop {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .ExcellentCont {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .ExcellentText {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .Excellent {
-    font-weight: 500;
-    font-style: Medium;
-    font-size: 12px;
-    line-height: 14px;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #000000;
-
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #000000;
 }
 
 .reviews {
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 14px;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #4A5565;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #4a5565;
 }
 
 .ratting {
-    padding: 5px 4.8px;
-    background-color: #F1F2F3;
-
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: 0%;
-    text-align: center;
-    vertical-align: middle;
-    color: #000033;
-
+  padding: 5px 4.8px;
+  background-color: #f1f2f3;
+  height: 32px;
+  width: 32px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #000033;
 }
 
 .priceContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
 }
 
 .price {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .actualPrice {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: 0%;
-    text-align: center;
-    text-decoration: line-through;
-    color: #DC2626;
-
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0%;
+  text-align: center;
+  text-decoration: line-through;
+  color: #dc2626;
 }
 
 .offerPrice {
-    font-weight: 700;
-    font-style: Bold;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 0%;
-    text-align: center;
-    color: black;
-    white-space: nowrap;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-align: center;
+  color: black;
+  white-space: nowrap;
 }
 
 .perNight {
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #4A5565;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #4a5565;
 }
 
 .taxesPrice {
-
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #4A5565;
-
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #4a5565;
 }
 
 .cardDetailRight {
-    display: flex;
-    justify-content: space-between;
-    gap: 26px;
-    flex-direction: column;
-    align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  gap: 26px;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .BookAmoutn {
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #0604B2;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #0604b2;
 }
 
 .bookroomContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .BookAmoutn span {
-    font-weight: 700;
-    font-style: Bold;
-    font-size: 13px;
-    line-height: 1.19;
-    letter-spacing: 0%;
-    text-align: right;
-    color: #0604B2;
-
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #0604b2;
 }
 
 .addRoomBtn {
-    padding: 12px 24px;
-    background-color: #000033;
-    color: #FFFFFF;
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #ffffff;
 
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    text-transform: uppercase;
-    transition: all .45s ease;
-    cursor: pointer;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  transition: all 0.45s ease;
+  cursor: pointer;
 }
 
 .addRoomBtn:hover {
-    background-color: #FCC800;
-    color: #000033;
+  background-color: #fcc800;
+  color: #000033;
 }
 
 .leftBtn,
 .rightBtn {
-    background-color: #FFFFFF;
-    width: 24px;
-    height: 24px;
-    border-radius: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  background-color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .btns {
-    padding: 0 9px;
-    width: 100%;
-    position: absolute;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    top: 50%
+  padding: 0 9px;
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  top: 50%;
 }
 
 .rightBtn img {
-    width: 10px;
-    height: 10px;
+  width: 10px;
+  height: 10px;
 }
 
 .leftBtn img {
-    width: 10px;
-    height: 10px;
-    transform: rotate(0);
+  width: 10px;
+  height: 10px;
+  transform: rotate(0);
 }
 
 @media (max-width: 1530px) {
-    .cardDetails {
-        gap: 12px;
-    }
+  .cardDetails {
+    gap: 12px;
+  }
 
-    .featureList li {
-        font-size: 11px;
-    }
+  .featureList li {
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 1500px) {
-    .imagesNestedCarousel {
-        max-width: 288px
-    }
+  .imagesNestedCarousel {
+    max-width: 288px;
+  }
 
-    .slide {
-        width: 288px;
-    }
+  .slide {
+    width: 288px;
+  }
 
-    .CardSection {
-        gap: 20px;
-
-    }
+  .CardSection {
+    gap: 20px;
+  }
 }
 
 @media (max-width: 1480px) {
-
-    .featureList {
-        gap: 8px;
-    }
+  .featureList {
+    gap: 8px;
+  }
 }
 
 @media (max-width: 1440px) {
-    .CardSection {
-        gap: 16px;
-    }
+  .CardSection {
+    gap: 16px;
+  }
 
-    .offerPrice {
-        font-size: 16px;
-    }
-    .addRoomBtn{
-        padding: 12px 16px;
-    }
+  .offerPrice {
+    font-size: 16px;
+  }
+  .addRoomBtn {
+    padding: 12px 16px;
+  }
 }
 
 @media (max-width: 1420px) {
-    .offerPrice {
-        font-size: 14px;
-    }
+  .offerPrice {
+    font-size: 14px;
+  }
 
-    .cardDetails {
-        gap: 8px;
-    }
+  .cardDetails {
+    gap: 8px;
+  }
 
-    .imagesNestedCarousel {
-        max-width: 256px;
-    }
+  .imagesNestedCarousel {
+    max-width: 256px;
+  }
 
-    .slide {
-        width: 256px;
-    }
+  .slide {
+    width: 256px;
+  }
 }
 
 @media (max-width: 1400px) {
-    .taxesPrice {
-        font-size: 12px;
-    }
+  .taxesPrice {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 1372px) {
-    
-    .imagesNestedCarousel {
-        max-width: 230px;
-    }
+  .imagesNestedCarousel {
+    max-width: 230px;
+  }
 
-    .slide {
-        width: 230px;
-    }
-    .featureList{
-        gap: 6px;
-    }
-    .addRoomBtn{
-        padding: 12px 16px;
-    }
-    .actualPrice{
-        font-size: 13px;
-    }
+  .slide {
+    width: 230px;
+  }
+  .featureList {
+    gap: 6px;
+  }
+  .addRoomBtn {
+    padding: 12px 16px;
+  }
+  .actualPrice {
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 1334px) {
-    .featureList li{
-        font-size: 10px;
-    }
+  .featureList li {
+    font-size: 10px;
+  }
 }
 @media (max-width: 1300px) {
-    .hotelTitle{
-        font-size: 16px;
-    }
-    .featureList{
-        flex-wrap: wrap;
-    }
+  .hotelTitle {
+    font-size: 16px;
+  }
+  .featureList {
+    flex-wrap: wrap;
+  }
 }
 
-@media (max-width: 1280px){
-    .hotelTitle{
-        font-size: 14px;
-    }
+@media (max-width: 1280px) {
+  .hotelTitle {
+    font-size: 14px;
+  }
 }
 
-@media (max-width: 1220px){
-    .moreDetailsBtn{
-        font-size: 11px;
-    }
-    .CalcellCont span{
-        font-size: 11px;
-    }
-    .cardDetailLeft{
-        gap: 16px;
-    }
-    .actualPrice{
-        font-size: 12px;
-    }
-    .reviews{
-        font-size: 11px;
-    }
+@media (max-width: 1220px) {
+  .moreDetailsBtn {
+    font-size: 11px;
+  }
+  .CalcellCont span {
+    font-size: 11px;
+  }
+  .cardDetailLeft {
+    gap: 16px;
+  }
+  .actualPrice {
+    font-size: 12px;
+  }
+  .reviews {
+    font-size: 11px;
+  }
 }
 
-@media (max-width: 1199px){
-    .benefitsList li{
-        font-size: 11px;
-    }
-    .imagesNestedCarousel{
-        max-width: 210px;
-    }
-    .slide{
-        width: 100%;
-    }
+@media (max-width: 1199px) {
+  .benefitsList li {
+    font-size: 11px;
+  }
+  .imagesNestedCarousel {
+    max-width: 210px;
+  }
+  .slide {
+    width: 100%;
+  }
 }
 
-
-@media (max-width: 1156px){
-    .price{
-        gap: 6px;
-    }
-    .cardDetails{
-        padding: 14px;
-        padding-left:0 ;
-    }
+@media (max-width: 1156px) {
+  .price {
+    gap: 6px;
+  }
+  .cardDetails {
+    padding: 14px;
+    padding-left: 0;
+  }
 }
 
-@media (max-width: 1100px){
-    .moreDetailsBtn, .CalcellCont span{
-        font-size: 10px;
-    }
+@media (max-width: 1100px) {
+  .moreDetailsBtn,
+  .CalcellCont span {
+    font-size: 10px;
+  }
 }
-@media (max-width: 1040px){
-   .iconCont{
-        width: 12px;
-        height: 12px;
-    }
-    .cardDetailLeft{
-        gap: 12px;
-    }
-    .btnContainer{
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-start;
-    }
-    .btnCont{
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
-}
-
-@media (max-width: 1024px){
-    .benefitsList li{
-        font-size: 10px;
-    }
-    
-    .benefitsList{
-        padding-left: 10px;
-    }
-
-}
-@media (max-width: 991px){
-    .CardSection{
-        /* flex-direction: column; */
-
-    }
-    .imagesNestedCarousel{
-        max-width: 313px;
-    }
-    .slide{
-        width: 313px;
-    }
-    .btnContainer{
-        flex-direction: row;
-    }
-    .btnCont{
-        width: fit-content;
-    }
-    
-
-}
-@media (max-width: 838px){
-    .imagesNestedCarousel{
-        max-width: 288px;
-    }
-    .slide{
-        width: 288px;
-    }
+@media (max-width: 1040px) {
+  .iconCont {
+    width: 12px;
+    height: 12px;
+  }
+  .cardDetailLeft {
+    gap: 12px;
+  }
+  .btnContainer {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .btnCont {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
 }
 
-@media (max-width: 768px){
-    .imagesNestedCarousel{
-        max-width: 261px;
-    }
-    .slide{
-        width: 261px;
-    }
-    
+@media (max-width: 1024px) {
+  .benefitsList li {
+    font-size: 10px;
+  }
 
+  .benefitsList {
+    padding-left: 10px;
+  }
+}
+@media (max-width: 991px) {
+  .CardSection {
+    /* flex-direction: column; */
+  }
+  .imagesNestedCarousel {
+    max-width: 313px;
+  }
+  .slide {
+    width: 313px;
+  }
+  .btnContainer {
+    flex-direction: row;
+  }
+  .btnCont {
+    width: fit-content;
+  }
+}
+@media (max-width: 838px) {
+  .imagesNestedCarousel {
+    max-width: 288px;
+  }
+  .slide {
+    width: 288px;
+  }
+}
+
+@media (max-width: 768px) {
+  .imagesNestedCarousel {
+    max-width: 261px;
+  }
+  .slide {
+    width: 261px;
+  }
 }

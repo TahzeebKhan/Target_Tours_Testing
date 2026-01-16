@@ -31,7 +31,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 import CustomLoaderHomePage from "@/app/components/CustomLoaderHomePage";
 
-const HomePage = () => {
+const HomePage = ({ onReady }) => {
   const [directOnly, setDirectOnly] = useState(true);
   const [tripType, setTripType] = useState("round");
   const [bookingType, setBookingType] = useState("flight");
@@ -777,6 +777,11 @@ const HomePage = () => {
     // Only wait for video
     setShowLoader(!videoReady);
   }, [isLoggedIn, heroLoading, videoReady]);
+  useEffect(() => {
+    if (!showLoader && onReady) {
+      onReady();
+    }
+  }, [showLoader, onReady]);
 
   return (
     <>

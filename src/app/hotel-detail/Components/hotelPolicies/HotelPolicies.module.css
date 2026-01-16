@@ -43,7 +43,7 @@
     padding: 18px 24px;
     display: grid;
     grid-template-columns: 398px 1fr;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #DDDFE3;
 }
 
 .row:last-child {
