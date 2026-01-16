@@ -16,16 +16,28 @@ import { AnimatePresence } from "framer-motion";
 const ReviewPage = () => {
     // 👇 default open = flight
     const { setCurrentStep } = useFlightBooking();
-    const [openTab, setOpenTab] = useState("flight");
-
+    const [openTab, setOpenTab] = useState("dayByDayItinerary");
     const [showPriceSummary, setShowPriceSummary] = useState(false);
+       const router = useRouter();
 
     const toggleTab = (tabName) => {
         setOpenTab((prev) => (prev === tabName ? null : tabName));
     };
+ 
 
     return (
         <>
+            <div className={styles.tripDetailsContainer}>
+                <div className={styles.tripDetailsHeader}>
+                    <img
+                        onClick={() => router.back()}
+                        className={styles.backArrow}
+                        src="/icons/leftArrowTrip.svg"
+                        alt=""
+                    />
+                    <p className={styles.tripDetails}>Tour Details</p>
+                </div>
+            </div>
             <div className={styles.container}>
                 {/* HEADER */}
 
@@ -66,22 +78,22 @@ const ReviewPage = () => {
 
 
                 {/* FLIGHT DETAILS */}
-                <div className={`${styles.flightExpandableContainer} ${openTab === "flight" ? styles.flightActiveBorder : ""}`}>
+                <div className={`${styles.flightExpandableContainer} ${openTab === "dayByDayItinerary" ? styles.flightActiveBorder : ""}`}>
                     <div
                         className={styles.flightExpandableCard}
-                        onClick={() => toggleTab("flight")}
+                        onClick={() => toggleTab("dayByDayItinerary")}
                     >
                         <h3 className={styles.flightExpandableHeader}>Day-by-Day Itinerary</h3>
                         <img
                             src="/icons/DownArrows.svg"
                             alt=""
-                            className={`${styles.arrow} ${openTab === "flight" ? styles.arrowRotate : ""
+                            className={`${styles.arrow} ${openTab === "dayByDayItinerary" ? styles.arrowRotate : ""
                                 }`}
                         />
                     </div>
 
                     <div
-                        className={`${styles.expandWrap} ${openTab === "flight" ? styles.expandOpen : ""
+                        className={`${styles.expandWrap} ${openTab === "dayByDayItinerary" ? styles.expandOpen : ""
                             }`}
                     >
                         <DayByDayItinerary />
@@ -174,19 +186,21 @@ const ReviewPage = () => {
 
 
             </div>
-            <BookingFooter
-                title="Starting From"
-                amount="₹ 66,945"
-                onInfoClick={() => setShowPriceSummary(true)}
-                onContinue={() => setCurrentStep(3)}
-            />;
+            <div className={styles.footerContainer}>
+                <BookingFooter
+                    title="Starting From"
+                    amount="₹ 66,945"
+                    onInfoClick={() => setShowPriceSummary(true)}
+                    onContinue={() => setCurrentStep(3)}
+                />;
 
 
-            <AnimatePresence mode="wait">
-                {showPriceSummary && (
-                    <PriceSummary onClose={() => setShowPriceSummary(false)} />
-                )}
-            </AnimatePresence>
+                <AnimatePresence mode="wait">
+                    {showPriceSummary && (
+                        <PriceSummary onClose={() => setShowPriceSummary(false)} />
+                    )}
+                </AnimatePresence>
+            </div>
         </>
     );
 };

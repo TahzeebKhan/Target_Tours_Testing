@@ -17,16 +17,29 @@
   max-width: 1520px;
   width: 100%;
 }
+.logggedInBtn {
+  text-transform: uppercase;
+  padding: 8px 18px;
+  /* border: 0.5px solid #E4E6E8 !important; */
+
+  /* color: #ffffff; */
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: #15151512;
+
+  text-transform: uppercase;
+  cursor: pointer;
+}
 
 .glass_button {
   position: relative;
 
-  background-color: rgba(255, 255, 255, 0.12);
-  /* glass base */
+background: #15151512;
+
   backdrop-filter: blur(0.2px);
-  /* blur the background */
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 0.5px solid var(--Color, #FFFFFF);
 
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1),
     inset 0 0 20px rgba(255, 255, 255, 0.1);

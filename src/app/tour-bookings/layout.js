@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./FlightBookingDetailsLayout.module.css";
-import Navbar from "./Navbar";
+
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
 import { FlightBookingProvider } from "./FlightBookingContext";
+import Navbar from "../flight-booking-details/Navbar";
 
 export default function FlightBookingDetailsLayout({ children }) {
   return (

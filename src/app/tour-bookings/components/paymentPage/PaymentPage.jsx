@@ -4,12 +4,17 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
 import { tripSummaryData } from "./components/dummyData";
-import PassengerInfo from "./components/PassengerInfo";
+
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
+import PassengerInfo from "./components/passengerInfo/PassengerInfo";
+import BookingFooter from "../review/components/bookingFooter/BookingFooter";
+import { AnimatePresence } from "framer-motion";
+import PriceSummary from "../review/components/priceSummary/PriceSummary";
 const PaymentPage = () => {
   const { setCurrentStep } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
+  const [showPriceSummary, setShowPriceSummary] = useState(false);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -17,6 +22,17 @@ const PaymentPage = () => {
 
   return (
     <>
+      <div className={styles.tripDetailsContainer}>
+        <div className={styles.tripDetailsHeader}>
+          <img
+            onClick={() => setCurrentStep(2)}
+            className={styles.backArrow}
+            src="/icons/leftArrowTrip.svg"
+            alt=""
+          />
+          <p className={styles.tripDetails}>Review and Payment</p>
+        </div>
+      </div>
       <div className={styles.container}>
         {/* HEADER */}
         <div className={styles.passengerDetailsHeader}>
@@ -154,7 +170,8 @@ const PaymentPage = () => {
         {/* Passenger info */}
         <div className={styles.flightExpandableContainer}>
           <div
-            className={styles.flightExpandableCard}
+            className={`${styles.flightExpandableCard} ${openTab === "passengerInfo" ? styles.open : ""
+              }`}
             onClick={() => toggleTab("passengerInfo")}
           >
             <h3 className={styles.flightExpandableHeader}>
@@ -201,7 +218,7 @@ const PaymentPage = () => {
         </div> */}
 
         <div className={styles.flightExpandableContainer}>
-          <div className={styles.flightExpandableCard}>
+          <div className={`${styles.flightExpandableCard} ${styles.payWithContainer}`}>
             <h3 className={styles.flightExpandableHeader}>Pay with</h3>
           </div>
           <PayWithOptions />
@@ -213,6 +230,23 @@ const PaymentPage = () => {
         >
           <button className={styles.continueButton}>CONTINUE</button>
         </div> */}
+
+
+      </div>
+      <div className={styles.footerContainer}>
+        <BookingFooter
+          title="Starting From"
+          amount="₹ 66,945"
+          onInfoClick={() => setShowPriceSummary(true)}
+          onContinue={() => setCurrentStep(3)}
+        />;
+
+
+        <AnimatePresence mode="wait">
+          {showPriceSummary && (
+            <PriceSummary onClose={() => setShowPriceSummary(false)} />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

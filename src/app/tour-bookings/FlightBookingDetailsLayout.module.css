@@ -2,13 +2,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 42px;
   padding-top: 73px;
   background-color: #f9f9f9;
-
   background: #f9f9f9;
 }
 
+.bookingStepper{
+  position: sticky;
+  top: 73px;
+  z-index: 999;
+}
 .mainContent {
   display: grid;
   grid-template-columns: 1fr 356px;
@@ -34,7 +37,7 @@
 
 .sidebarSticky {
   position: sticky;
-  top: 192px; /* navbar (96px) + stepper (~90px) */
+  top: 224px; /* navbar (96px) + stepper (~90px) */
   align-self: flex-start;
 }
 
@@ -80,4 +83,11 @@ grid-template-columns: 1fr 320px;
   .mainContent{
     padding: 0;
   }
+  .layoutWrapper{
+    padding-top: 0;
+  }
+  /* .layoutWrapper{
+    background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+
+  } */
 }

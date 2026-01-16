@@ -5,6 +5,7 @@
 
 .navBar {
     /* margin-bottom: 73px; */
+    position: relative;
 }
 
 .pageSection {
