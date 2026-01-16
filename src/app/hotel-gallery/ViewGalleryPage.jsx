@@ -18,6 +18,8 @@ const ViewGalleryPage = () => {
         "/gallery/kitchen1.png",
         "/gallery/kitchen2.png",
         "/gallery/kitchen3.png",
+        "/gallery/kitchen1.png",
+        "/gallery/kitchen2.png",
       ]
     },
     {
@@ -26,6 +28,8 @@ const ViewGalleryPage = () => {
         "/gallery/bathroom1.png",
         "/gallery/bathroom2.png",
         "/gallery/bathroom3.png",
+        "/gallery/bathroom1.png",
+        "/gallery/bathroom2.png",
       ]
     },
     {
@@ -34,6 +38,8 @@ const ViewGalleryPage = () => {
         "/gallery/bedroom1.png",
         "/gallery/bedroom2.png",
         "/gallery/bedroom3.png",
+        "/gallery/bedroom1.png",
+        "/gallery/bedroom2.png",
       ]
     },
     {
@@ -42,6 +48,8 @@ const ViewGalleryPage = () => {
         "/gallery/livingroom1.png",
         "/gallery/livingroom2.png",
         "/gallery/livingroom3.png",
+        "/gallery/livingroom1.png",
+        "/gallery/livingroom2.png",
       ]
     }
   ];
@@ -56,7 +64,7 @@ const ViewGalleryPage = () => {
       <div className={styles.container}>
         <ActivityGalleryCarousel />
         {galleryData.map((data, index) => (
-          <GallerySection key={index} data={data} />
+          <GallerySection key={index} data={data} hideOnMobile/>
         ))}
       </div>
     </div>

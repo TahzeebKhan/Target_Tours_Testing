@@ -44,3 +44,24 @@
 .navItem:hover img{
     filter: invert(1);
 }
+@media(max-width: 1200px) {
+    .container{
+        gap: 36px;
+    }
+    .nav{
+        padding: 24px 0;
+    }
+    
+}
+
+@media(max-width: 600px) {
+    .wrapper {
+        padding: 16px;
+    }
+
+    .nav {
+        padding: 0;
+        padding-bottom: 24px;
+    }
+}
+

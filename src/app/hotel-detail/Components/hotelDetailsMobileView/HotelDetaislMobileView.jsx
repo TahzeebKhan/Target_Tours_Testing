@@ -13,6 +13,7 @@ import Availabilitymobile from './availabilityMobile/Availabilitymobile'
 import BookingFooter from './bookingFooter/BookingFooter'
 import PriceSummary from './priceSummary/PriceSummary'
 import { AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 const HotelDetaislMobileView = () => {
     const [showPriceSummary, setShowPriceSummary] = useState(false);
@@ -24,6 +25,10 @@ const HotelDetaislMobileView = () => {
         Reviews: useRef(null),
         "HOTEL POLICY": useRef(null),
     };
+    const router = useRouter();
+    const hotelGallery = () => {
+        router.push('/hotel-gallery');
+    }
 
 
     const handleTabChange = (tab) => {
@@ -40,7 +45,7 @@ const HotelDetaislMobileView = () => {
                 <div className={styles.HotelDetaislMobileViewImageContainer}>
                     <img className={styles.hotleImg} src="/images/hotelArt1.png" alt="" />
 
-                    <button className={styles.viewGalleryBtn} >
+                    <button className={styles.viewGalleryBtn}  onClick={hotelGallery}>
                         <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                     </button>
                     <div className={styles.HotelTopButtonsContainer}>
