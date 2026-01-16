@@ -1285,6 +1285,12 @@
 .loaderOpen {
   transform: translateY(0vh);
 }
+
+.downloadBtnMobile{
+  background: #15151512 !important;
+  border: 0.5px solid #E4E6E8 !important;
+
+}
 @media (max-width: 1600px) {
   .navbar {
     padding-left: 20px;
@@ -1549,6 +1555,12 @@
   }
 }
 
+
+@media (max-width: 640px) {
+  .downloadBtn {
+    display: none;
+  }
+}
 @media (max-width: 556px) {
   .featureRow {
     gap: 8px;

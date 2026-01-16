@@ -272,6 +272,7 @@
 
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
 import styles from "./SignatureExperiences.module.css";
 import Carousel from "@/app/3dCarousel/component/Carousel";
 import CarouselMobile from "@/app/3dCarousel/component/CarouselMobile";
@@ -301,132 +302,124 @@ const SignatureExperiences = () => {
 
   const FALLBACK_CAROUSEL_DATA = [
     {
-    id: 1,
-    image: "/images/img1.jpg",
-    title: "TANZANIA & ZANZIBAR",
-    description: "SAFARI IN THE LAND OF THE MASAI HAKUNA MATATA ON...",
-    price: "₹20,000",
-    hasNewTag: true,
-    bottomTitle: "Tanzania & Zanzibar",
-    bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
-  },
-  {
-    id: 2,
-    image: "/images/img2.jpg",
-    title: "MADAGASCAR",
-    description: "The North: National Parks And Paradise Like Beaches",
-    price: "₹22,000",
-    hasNewTag: true,
-    bottomTitle: "Madagascar",
-    bottomDescription: "The North: National Parks And Paradise Like Beaches",
-  },
-  {
-    id: 3,
-    image: "/images/img3.jpg",
-    title: "JAPAN",
-    description: "Japan In The Winter",
-    smallContent: true,
-    price: "₹25,000",
-    hasNewTag: false,
-    bottomTitle: "Japan",
-    bottomDescription: "Japan In The Winter",
-  },
-  {
-    id: 4,
-    image: "/images/img5.jpg",
-    title: "UZBEKISTAN",
-    description: "From Fergana To Khiva",
-    price: "₹18,000",
-    smallContent: true,
-    hasNewTag: false,
-    bottomTitle: "Uzbekistan",
-    bottomDescription: "From Fergana To Khiva",
-  },
-  {
-    id: 5,
-    image: "/images/img4.jpg",
-    title: "SENEGAL",
-    description: "In The Heart Of East Senegal And The Shine Shaloum",
-    price: "₹15,000",
-    hasNewTag: true,
-    bottomTitle: "Senegal",
-    bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
-  },
-  {
-    id: 6,
-    image: "/images/img1.jpg",
-    title: "ICELAND",
-    description: "Land of Fire and Ice",
-    price: "₹30,000",
-    hasNewTag: false,
-    bottomTitle: "Iceland",
-    bottomDescription: "Land of Fire and Ice",
-  },
-  {
-    id: 7,
-    image: "/images/img3.jpg",
-    title: "NEW ZEALAND",
-    description: "Adventure awaits in Middle Earth",
-    price: "₹35,000",
-    hasNewTag: true,
-    bottomTitle: "New Zealand",
-    bottomDescription: "Adventure awaits in Middle Earth",
-  },
-  {
-    id: 8,
-    image: "/images/img4.jpg",
-    title: "THAILAND",
-    description: "Tropical Paradise",
-    price: "₹12,000",
-    hasNewTag: false,
-    bottomTitle: "Thailand",
-    bottomDescription: "Tropical Paradise",
-  },
-  {
-    id: 9,
-    image: "/images/img4.jpg",
-    title: "NEW ZEALAND",
-    description: "Adventure awaits in Middle Earth",
-    price: "₹35,000",
-    hasNewTag: true,
-    bottomTitle: "New Zealand",
-    bottomDescription: "Adventure awaits in Middle Earth",
-  },
-  {
-    id: 10,
-    image: "/images/img4.jpg",
-    title: "THAILAND",
-    description: "Tropical Paradise",
-    price: "₹12,000",
-    hasNewTag: false,
-    bottomTitle: "Thailand",
-    bottomDescription: "Tropical Paradise",
-  },
+      id: 1,
+      image: "/images/img1.jpg",
+      title: "TANZANIA & ZANZIBAR",
+      description: "SAFARI IN THE LAND OF THE MASAI HAKUNA MATATA ON...",
+      price: "₹20,000",
+      hasNewTag: true,
+      bottomTitle: "Tanzania & Zanzibar",
+      bottomDescription: "Safari In The Land Of The Masai Hakuna Matata On...",
+    },
+    {
+      id: 2,
+      image: "/images/img2.jpg",
+      title: "MADAGASCAR",
+      description: "The North: National Parks And Paradise Like Beaches",
+      price: "₹22,000",
+      hasNewTag: true,
+      bottomTitle: "Madagascar",
+      bottomDescription: "The North: National Parks And Paradise Like Beaches",
+    },
+    {
+      id: 3,
+      image: "/images/img3.jpg",
+      title: "JAPAN",
+      description: "Japan In The Winter",
+      smallContent: true,
+      price: "₹25,000",
+      hasNewTag: false,
+      bottomTitle: "Japan",
+      bottomDescription: "Japan In The Winter",
+    },
+    {
+      id: 4,
+      image: "/images/img5.jpg",
+      title: "UZBEKISTAN",
+      description: "From Fergana To Khiva",
+      price: "₹18,000",
+      smallContent: true,
+      hasNewTag: false,
+      bottomTitle: "Uzbekistan",
+      bottomDescription: "From Fergana To Khiva",
+    },
+    {
+      id: 5,
+      image: "/images/img4.jpg",
+      title: "SENEGAL",
+      description: "In The Heart Of East Senegal And The Shine Shaloum",
+      price: "₹15,000",
+      hasNewTag: true,
+      bottomTitle: "Senegal",
+      bottomDescription: "In The Heart Of East Senegal And The Shine Shaloum",
+    },
+    {
+      id: 6,
+      image: "/images/img1.jpg",
+      title: "ICELAND",
+      description: "Land of Fire and Ice",
+      price: "₹30,000",
+      hasNewTag: false,
+      bottomTitle: "Iceland",
+      bottomDescription: "Land of Fire and Ice",
+    },
+    {
+      id: 7,
+      image: "/images/img3.jpg",
+      title: "NEW ZEALAND",
+      description: "Adventure awaits in Middle Earth",
+      price: "₹35,000",
+      hasNewTag: true,
+      bottomTitle: "New Zealand",
+      bottomDescription: "Adventure awaits in Middle Earth",
+    },
+    {
+      id: 8,
+      image: "/images/img4.jpg",
+      title: "THAILAND",
+      description: "Tropical Paradise",
+      price: "₹12,000",
+      hasNewTag: false,
+      bottomTitle: "Thailand",
+      bottomDescription: "Tropical Paradise",
+    },
+    {
+      id: 9,
+      image: "/images/img4.jpg",
+      title: "NEW ZEALAND",
+      description: "Adventure awaits in Middle Earth",
+      price: "₹35,000",
+      hasNewTag: true,
+      bottomTitle: "New Zealand",
+      bottomDescription: "Adventure awaits in Middle Earth",
+    },
+    {
+      id: 10,
+      image: "/images/img4.jpg",
+      title: "THAILAND",
+      description: "Tropical Paradise",
+      price: "₹12,000",
+      hasNewTag: false,
+      bottomTitle: "Thailand",
+      bottomDescription: "Tropical Paradise",
+    },
   ];
 
-
-  /* ===================== COOKIE READER ===================== */
-  const getCookie = (name) => {
-    if (typeof document === "undefined") return null;
-    return document.cookie
-      .split("; ")
-      .find(row => row.startsWith(`${name}=`))
-      ?.split("=")[1];
-  };
 
   /* ===================== FETCH API ONCE ===================== */
   useEffect(() => {
     const fetchSignatureExperiences = async () => {
       try {
-        const token = getCookie("auth_token");
+        const token = Cookies.get("auth_token");
+
+        const headers = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
 
         const res = await fetch(
           `${API_BASE}/api/signature-experience/company`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers }
         );
 
         const data = await res.json();
@@ -474,10 +467,10 @@ const SignatureExperiences = () => {
       };
     });
 
-    const finalCarouselData =
-  filteredCarouselData.length > 0
-    ? filteredCarouselData
-    : FALLBACK_CAROUSEL_DATA;
+  const finalCarouselData =
+    filteredCarouselData.length > 0
+      ? filteredCarouselData
+      : FALLBACK_CAROUSEL_DATA;
 
   /* ===================== TAB INDICATOR ===================== */
   useEffect(() => {
@@ -530,6 +523,21 @@ const SignatureExperiences = () => {
             onClick={() => setIsOpen(!isOpen)}
           >
             <span>{tabsData[activeTab].title}</span>
+            <svg
+              width="14"
+              height="10"
+              viewBox="0 0 14 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2 2.5L7 7.5L12 2.5"
+                stroke="#000033"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
           {isOpen && (

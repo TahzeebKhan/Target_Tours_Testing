@@ -1,8 +1,11 @@
 "use client";
+import Navbar from "@/app/flights/Navbar";
 import TravelInsuranceSearch from "../travelInsuranceSearch/TravelInsuranceSearch";
 import styles from "./Navbar.module.css";
+import { useState } from "react";
 
-const Navbar = () => {
+const TravelInsurance = () => {
+   const [scrollProgress, setScrollProgress] = useState(0);
   return (
     <header className={styles.homeSection}>
       {/* HERO VIDEO */}
@@ -23,7 +26,7 @@ const Navbar = () => {
       <img className={styles.gradient} src="/images/gradient.png" alt="" />
 
       {/* NAVBAR */}
-      <div className={styles.navContainer}>
+      {/* <div className={styles.navContainer}>
         <div className={styles.navbar}>
           <img src="/Logo.svg" alt="Logo" />
 
@@ -40,7 +43,9 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
+      <Navbar scrollProgress={scrollProgress}/>
+
 
       {/* HERO CONTENT */}
       <div className={styles.homePageContainer}>
@@ -70,4 +75,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default TravelInsurance;

@@ -4,12 +4,13 @@ import Claim from './components/Claim/Claim'
 import Questions from './components/Questions/questions'
 import FeatureSection from '../home-page/components/featureSection/FeatureSection'
 import Footer from '../home-page/components/footer/Footer'
-import Navbar from './components/Navbar/Navbar'
+import TravelInsurance from './components/Navbar/TravelInsurance'
+
 
 const page = () => {
   return (
     <div>
-      <Navbar />
+      <TravelInsurance />
       <Comprehensive />
           <Claim />
           <Questions />
