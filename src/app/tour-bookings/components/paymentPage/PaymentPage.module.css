@@ -5,16 +5,19 @@
   flex-direction: column;
   gap: 24px;
 }
+
 .passengerDetailsHeader {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .fromToContainer {
   display: flex;
   gap: 6px;
   align-items: center;
 }
+
 .from,
 .to {
   font-family: Antic Didone;
@@ -55,6 +58,7 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .flightExpandableHeader {
   font-family: Antic Didone;
   font-weight: 400;
@@ -67,16 +71,20 @@
 }
 
 .expandWrap {
-  max-height: 0; /* start closed */
-  overflow: hidden; /* hide content */
+  max-height: 0;
+  /* start closed */
+  overflow: hidden;
+  /* hide content */
   opacity: 0;
   transition: max-height 0.35s ease-in-out, opacity 0.4s ease-in-out;
 }
 
 .expandOpen {
-  max-height: 1000px; /* enough to hold content */
+  max-height: 1000px;
+  /* enough to hold content */
   opacity: 1;
 }
+
 .arrow {
   transition: transform 0.35s ease;
 }
@@ -84,18 +92,21 @@
 .arrowRotate {
   transform: rotate(180deg);
 }
+
 .continueButtonContainer {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: end;
 }
+
 .flightExpandableContainer2 {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .continueButton {
   display: flex;
   align-items: center;
@@ -152,7 +163,8 @@
 /* OPEN STATE */
 .tripSummaryVisible {
   opacity: 1;
-  max-height: 200px; /* enough for the card */
+  max-height: 200px;
+  /* enough for the card */
   margin-top: 16px;
 }
 
@@ -174,12 +186,9 @@
 
 .route {
   font-family: var(--font-inter);
-
-  font-family: Inter;
   font-weight: 500;
   font-style: Medium;
   font-size: 18px;
-  leading-trim: NONE;
   line-height: 100%;
   letter-spacing: 0%;
   color: black;
@@ -205,4 +214,208 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+
+
+.tripSummaryContainer {
+  padding: 16px 24px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tourName {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 18px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+
+}
+
+.tripSummaryContent {
+  display: flex;
+  gap: 10px;
+}
+
+.imgContainer {
+  max-width: 52px;
+  width: 100%;
+  /* max-height: 52px; */
+}
+
+.imgContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.textContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.subTextContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dateLocationContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dateLocation {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.dayNightContainer {
+  display: flex;
+  align-items: center;
+}
+
+.dayNightChip {
+  padding: 2px 6px;
+  border: 0.5px solid #000033;
+  background-color: #DFF9FF;
+
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.dash {
+  width: 19px;
+  height: 1px;
+  background-color: #000033;
+}
+
+.itineraryContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.boldSpan {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.ubudText {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+@media (max-width: 1200px) {
+  .dateLocation {
+    font-size: 12px;
+  }
+
+  .ubudText {
+    font-size: 12px;
+  }
+
+  .boldSpan {
+    font-size: 12px;
+  }
+
+  .from,
+  .to {
+    font-size: 26px;
+  }
+
+  .route {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 1156px){
+  .dayNightChip{
+    font-size: 12px;
+  }
+  .dateLocation{
+    font-size: 11px;
+  }
+  .boldSpan{
+      font-size: 11px;
+  }
+  .tripSummaryContainer{
+    padding: 16px 12px ;
+  }
+}
+
+@media (max-width: 1080px) {
+  .dayNightChip {
+    font-size: 12px;
+  }
+
+  .dash {
+    width: 12px;
+  }
+
+  .dayNightChip {
+    padding: 2px 4px;
+  }
+
+  .dateLocationContainer {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 1010px) {
+  .dateLocation{
+    font-size: 10px;
+  }
+  .dayNightChip{
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 991px){
+  .container{
+    max-width: unset;
+  }
+}
+
+@media (max-width: 645px){
+  .subTextContainer{
+    flex-direction: column;
+    align-items: start;
+    /* gap: 4px; */
+  }
+  .textContainer{
+    gap: 2px;
+  }
+  .container{
+    padding: 0 16px;
+  }
 }

@@ -37,3 +37,47 @@
   top: 192px; /* navbar (96px) + stepper (~90px) */
   align-self: flex-start;
 }
+
+
+@media (max-width: 1290px){
+  .mainContent{
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 1050px){
+  .mainContent{
+    column-gap: 20px;
+  }
+}
+@media (max-width: 1040px){
+  .mainContent{
+grid-template-columns: 1fr 320px;
+  }
+}
+
+@media (max-width: 991px){
+  .mainContent{
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 24px;
+  }
+  .sidebar{
+    min-height: auto;
+  }
+}
+
+@media (max-width: 645px){
+  .navbar{
+    display: none;
+  }
+  .bookingStepper{
+    display: none;
+  }
+  .sidebar{
+    display: none;
+  }
+  .mainContent{
+    padding: 0;
+  }
+}

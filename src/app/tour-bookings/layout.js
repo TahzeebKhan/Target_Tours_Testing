@@ -9,8 +9,12 @@ export default function FlightBookingDetailsLayout({ children }) {
   return (
     <FlightBookingProvider>
       <div className={styles.layoutWrapper}>
-        <Navbar />
-        <BookingStepper />
+        <div className={styles.navbar}>
+          <Navbar />
+        </div>
+        <div className={styles.bookingStepper}>
+          <BookingStepper />
+        </div>
 
         <main className={styles.mainContent}>
           <div className={styles.container}>{children}</div>

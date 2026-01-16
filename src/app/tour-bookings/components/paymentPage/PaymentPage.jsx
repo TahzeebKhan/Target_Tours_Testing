@@ -36,7 +36,7 @@ const PaymentPage = () => {
         </div>
 
         {/* Trip Summary */}
-        <div className={styles.flightExpandableContainer}>
+        {/* <div className={styles.flightExpandableContainer}>
           <div
             className={styles.flightExpandableCard}
             onClick={() => toggleTab("tripSummary")}
@@ -115,6 +115,40 @@ const PaymentPage = () => {
           >
             <TripSummaryExpandable data={tripSummaryData} />
           </div>
+        </div> */}
+
+        <div className={styles.tripSummaryContainer}>
+          <h3 className={styles.flightExpandableHeader}>trip summary</h3>
+          <div className={styles.tripSummaryContent}>
+            <div className={styles.imgContainer}>
+              <img src="/images/splendorsImg.png" alt="" />
+            </div>
+            <div className={styles.textContainer}>
+              <h3 className={styles.tourName}>Splendors of the Canadian West</h3>
+              <div className={styles.subTextContainer}>
+                <div className={styles.dateLocationContainer}>
+                  <span className={styles.dateLocation}>Sun, Jan 11, 2026</span>
+                  <div className={styles.dayNightContainer}>
+                    <div className={styles.dash}></div>
+                    <span className={styles.dayNightChip}>7D/6N</span>
+                    <div className={styles.dash}></div>
+                  </div>
+                  <span className={styles.dateLocation}>Sat, Jan 17, 2026 / From New Delhi</span>
+                </div>
+                <div className={styles.itineraryContainer}>
+                  <span className={styles.boldSpan}>2N</span>
+                  <span className={styles.ubudText}>Ubud</span>
+                  <span>•</span>
+                  <span className={styles.boldSpan}>1N</span>
+                  <span className={styles.ubudText}>Toronto</span>
+                  <span>•</span>
+                  <span className={styles.boldSpan}>3N</span>
+                  <span className={styles.ubudText}>Oikawa</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* Passenger info */}
@@ -129,22 +163,20 @@ const PaymentPage = () => {
             <img
               src="/icons/DownArrows.svg"
               alt=""
-              className={`${styles.arrow} ${
-                openTab === "passengerInfo" ? styles.arrowRotate : ""
-              }`}
+              className={`${styles.arrow} ${openTab === "passengerInfo" ? styles.arrowRotate : ""
+                }`}
             />
           </div>
 
           <div
-            className={`${styles.expandWrap} ${
-              openTab === "passengerInfo" ? styles.expandOpen : ""
-            }`}
+            className={`${styles.expandWrap} ${openTab === "passengerInfo" ? styles.expandOpen : ""
+              }`}
           >
             <PassengerInfo />
           </div>
         </div>
 
-        <div className={styles.flightExpandableContainer}>
+        {/* <div className={styles.flightExpandableContainer}>
           <div
             className={styles.flightExpandableCard}
             onClick={() => toggleTab("extras")}
@@ -166,7 +198,7 @@ const PaymentPage = () => {
           >
             <ExtrasSummary />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.flightExpandableContainer}>
           <div className={styles.flightExpandableCard}>

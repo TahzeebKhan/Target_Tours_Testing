@@ -77,16 +77,3 @@ height: 38px;
   font-weight: 400;
   color: #767676;
 }
-
-
-@media (max-width: 1156px){
-  .row{
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 1080px){
-  .row{
-    font-size: 11px;
-  }
-}

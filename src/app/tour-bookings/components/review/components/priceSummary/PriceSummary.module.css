@@ -1,0 +1,123 @@
+.container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+
+  justify-content: flex-end;   
+  align-items: flex-end;    
+
+  background-color: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+
+.modalOverlay {
+  width: 100%;
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+
+
+.card {
+    background-color: #ffffff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    display: grid;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    padding-top: 24px;
+    border-bottom: 1px solid rgba(219, 226, 235, 1);
+}
+
+.title {
+    font-size: 13px;
+    color: rgba(123, 135, 153, 1);
+    line-height: 150%;
+    letter-spacing: -3%;
+}
+
+.content {
+    display: grid;
+    padding: 24px 16px;
+    gap: 12px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    font-size: 14px;
+    color: rgba(74, 85, 101, 1);
+    line-height: 100%;
+    letter-spacing: -2%;
+}
+
+.value {
+    font-size: 14px;
+    color: rgba(10, 10, 10, 1);
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: -2%;
+}
+
+.green {
+    color: rgba(78, 135, 41, 1);
+    /* Standard UI green for 'Included/Free' */
+}
+
+.dividerWrapper {
+  padding: 0 16px;
+}
+
+.divider {
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    rgba(228, 230, 232, 1) 50%,
+    transparent 50%
+  );
+  background-size: 9px 9px;
+  background-repeat: repeat-x;
+}
+
+
+.totalSection {
+    padding: 24px 16px;
+    padding-top: 12px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.totalTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(10, 10, 10, 1);
+    line-height: 28px;
+    letter-spacing: -0.44px;
+}
+
+.subtext {
+    font-size: 12px;
+    color: rgba(123, 135, 153, 1);
+    line-height: 150%;
+    letter-spacing: -3%;
+}
+
+.totalPrice {
+    font-size: 24px;
+    font-weight: 700;
+    color: rgba(0, 0, 51, 1);
+    line-height: 32px;
+    letter-spacing: -2%;
+}
