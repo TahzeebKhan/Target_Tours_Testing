@@ -1,17 +1,208 @@
-.contentWrapper{
-    padding-top: 64px;
-    background-color: #F9F9F9;
+.contentWrapper {
+  padding-top: 64px;
+  padding-bottom: 40px;
+  background-color: #f9f9f9;
 }
-.navbarWrapper{
-    margin-bottom: 73px;
+.navbarWrapper {
+  margin-bottom: 73px;
 }
-.childrenWrapper{
-  
-    max-width: 1280px;
+.childrenWrapper {
+  max-width: 1280px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 856px 1fr;
+  gap: 24px;
+  margin: 0 auto;
+}
+.tripDetailsContainer {
+  display: none;
+}
+.sideBarMobile {
+  display: none;
+}
+.mobileView {
+  display: none;
+}
+@media (max-width: 1310px) {
+  .childrenWrapper {
+    padding: 0px 20px;
+  }
+}
+
+@media (max-width: 1246px) {
+  .childrenWrapper {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
+
+@media (max-width: 640px) {
+  .contentWrapper {
+    padding-bottom: 144px;
+    padding-top: 75px;
+  }
+  .isMobileView {
+    display: block;
+  }
+  .navbarWrapper {
+    display: none;
+  }
+  .tripDetailsContainer {
+    display: block;
+  }
+  .tripDetailsHeader {
+    padding: 10px 0;
+    display: flex;
+    color: white;
+    align-items: center;
+    gap: 10px;
+  }
+  .tripDetailsHeader p {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+  }
+  .sideBarDesktop {
+    display: none;
+  }
+  .tripDetailsContainer {
+    position: fixed;
+    top: 0;
     width: 100%;
-    display: grid;
-    grid-template-columns: 856px 1fr;
-    gap: 24px;
-    margin: 0 auto;
-    
+    max-width: 100vw;
+    overflow-x: hidden;
+    padding: 10px 16px;
+    background-color: #000033;
+  }
+  .sideBarMobile {
+    display: block;
+  }
+  .mobileView {
+    display: block;
+  }
+  .sideBarMobile {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100dvh;
+    background: transparent;
+    z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    /* start hidden below screen */
+    transform: translateY(100%);
+    transition: transform 0.4s ease-in-out;
+  }
+  .mobileBackdrop {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a33;
+    /* subtle dark overlay */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* Safari */
+    z-index: 995;
+  }
+  /* OPEN → move UP */
+  .openSidebar {
+    transform: translateY(0);
+  }
+
+  /* CLOSE → move DOWN */
+  .closeSidebar {
+    transform: translateY(100%);
+  }
+
+  .footer {
+    padding: 24px 16px;
+    background: #000033;
+    box-shadow: 0px -6px 10.2px 0px #0000001a;
+    position: fixed;
+    bottom: 0;
+    padding-bottom: 55px;
+    width: 100%;
+    z-index: 9;
+  }
+
+  .footerContainer {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .amountSection {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -3%;
+    color: #ffffff;
+  }
+
+  .infoIcon {
+    border: 1.5px solid #7b8799;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #7b8799;
+  }
+
+  .amount {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 1.19;
+    color: #ffffff;
+  }
+  .continueBtn {
+    max-width: 240px;
+    width: 100%;
+    height: 48px;
+    cursor: pointer;
+    padding: 10px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+  .amountSection,
+  .label {
+    min-width: 152px;
+    white-space: nowrap;
+  }
+  .footerContainer{
+    gap: 10px;
+  }
+  .infoIcon{
+    min-width: 20px;
+  }
 }

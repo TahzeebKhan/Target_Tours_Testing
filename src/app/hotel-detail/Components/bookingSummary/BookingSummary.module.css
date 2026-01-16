@@ -228,6 +228,14 @@
     color: #4A5565;
 }
 
+@media (max-width: 1246px){
+    .wrapper{
+        width: 100%;
+        max-width: unset;
+
+    }
+}
+
 @media (max-width: 991px){
     .wrapper{
         max-width: unset;

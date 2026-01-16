@@ -185,15 +185,30 @@
 
 }
 
-/* @media (max-width: 430px){
+@media (max-width: 530px){
     .wrapper{
-        padding: 0px;
-        border-top: none;
+        padding: 16px;
+        gap: 8px;
     }
-    .notes{
-        display: none;
-    }
-    .topInfo{
-        display: none;
-    }
-} */
+   .mainText{
+    font-size: 14px;
+   }
+   .subText,.label,.amount,.nonRefundable{
+    font-size: 12px;
+   }
+   .right{
+    gap: 13px;
+    justify-content: flex-end;
+   }
+   .dateRow{
+    margin-bottom: 10px;
+   }
+   .notes{
+    gap: 10px;
+   }
+   .notes li{
+    font-size: 12px;
+    line-height: 1.3;
+   }
+}
+

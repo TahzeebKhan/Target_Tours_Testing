@@ -248,7 +248,7 @@
 }
 
 .price {
-    margin-bottom: 1px;
+  margin-bottom: 1px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -312,7 +312,9 @@
 }
 
 .bookroomContainer {
+  position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 6px;
 }
@@ -328,18 +330,21 @@
 }
 
 .addRoomBtn {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
   padding: 12px 24px;
+
   background-color: #000033;
   color: #ffffff;
 
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.19;
-  letter-spacing: -2%;
-  vertical-align: middle;
   text-transform: uppercase;
-  transition: all 0.45s ease;
   cursor: pointer;
+
+  transition: background-color 0.35s ease, color 0.35s ease, opacity 0.35s ease,
+    transform 0.35s ease;
 }
 
 .addRoomBtn:hover {
@@ -378,6 +383,62 @@
   width: 10px;
   height: 10px;
   transform: rotate(0);
+}
+
+.counter {
+  width: 100%;
+  height: 40px;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+  gap: 26.5px;
+}
+
+.btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #000033;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease;
+}
+.btn svg path {
+  transition: all 0.5s ease;
+}
+.btn:hover svg path {
+  fill: white;
+}
+.btn:hover {
+  background-color: #000033;
+}
+.hideAddRoom {
+  opacity: 0;
+}
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  /* cursor: not-allowed; */
+}
+.fadeIn {
+  opacity: 1;
+  /* transform: translateY(0); */
+  /* pointer-events: auto; */
+}
+
+.fadeOut {
+  opacity: 0;
+  /* transform: translateY(6px); */
+  pointer-events: none;
+}
+
+/* Shared animation base */
+.addRoomBtn,
+.counter {
+  transition: all 0.5s ease;
 }
 
 @media (max-width: 1530px) {
