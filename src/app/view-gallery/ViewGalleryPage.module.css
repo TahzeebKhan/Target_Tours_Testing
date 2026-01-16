@@ -16,10 +16,12 @@
 }
 
 .nav {
+    max-width: 1520px;
+    width: 100%;
     display: flex;
     justify-content: start;
     align-items: center;
-    padding: 40px 64px;
+    padding: 40px 0;
 
 }
 
@@ -49,6 +51,16 @@
 
 .navItem:hover img {
     filter: invert(1);
+}
+
+@media(max-width: 1200px) {
+    .container{
+        gap: 36px;
+    }
+    .nav{
+        padding: 24px 0;
+    }
+    
 }
 
 @media(max-width: 600px) {

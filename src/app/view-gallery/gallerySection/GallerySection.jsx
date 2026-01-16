@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./GallerySection.module.css";
 
-const GallerySection = ({ data, hideOnMobile = false }) => {
+const GallerySection = ({ data, hideOnMobile = false }) => { 
   const { title, images = [] } = data || {};
 
   if (!images.length) return null;
