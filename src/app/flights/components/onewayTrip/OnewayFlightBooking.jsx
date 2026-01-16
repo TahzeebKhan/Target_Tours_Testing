@@ -615,19 +615,13 @@ const OnewayFlightBooking = () => {
         {/* Fare Comparison Modal */}
         {mounted && fareModalOpen !== null && (
           <>
-            {isMobile ? (
-              <MobileFareComparisonModal
-                isOpen
-                onClose={() => setFareModalOpen(null)}
-                flightData={flightResults.find((f) => f.id === fareModalOpen)}
-              />
-            ) : (
-              <FareComparisonModal
-                isOpen
-                onClose={() => setFareModalOpen(null)}
-                flightData={flightResults.find((f) => f.id === fareModalOpen)}
-              />
-            )}
+            (
+            <FareComparisonModal
+              isOpen={fareModalOpen}
+              onClose={() => setFareModalOpen(null)}
+              flightData={flightResults.find((f) => f.id === fareModalOpen)}
+            />
+            )
           </>
         )}
       </section>
@@ -722,11 +716,20 @@ const OnewayFlightBooking = () => {
             </div>
           </div>
         </div>
+        <MobileFareComparisonModal
+          isOpen={fareModalOpen}
+          onClose={() => setFareModalOpen(null)}
+          flightData={flightResults.find((f) => f.id === fareModalOpen)}
+        />
         {isLoading ? (
           <OnewaySkeleton />
         ) : (
           flightResults.map((flight, index) => (
-            <FlightDetailsCard key={flight.id + index} flight={flight} />
+            <FlightDetailsCard
+              setFareModalOpen={setFareModalOpen}
+              key={flight.id + index}
+              flight={flight}
+            />
           ))
         )}
       </section>

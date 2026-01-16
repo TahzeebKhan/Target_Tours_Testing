@@ -22,10 +22,8 @@
   top: calc(100% + 8px); /* just below input */
   left: auto; /* left aligned */
   background: #171717;
-  border: .5px solid #FFFFFF;
+  border: 0.5px solid #ffffff;
   backdrop-filter: blur(39.2px);
-
-
 
   padding: 16px;
   padding-bottom: 36px;
@@ -47,7 +45,7 @@
   letter-spacing: 0%;
   text-transform: uppercase;
 
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .toggle {
@@ -57,14 +55,14 @@
   padding: 4px;
   gap: 8px;
   overflow: hidden;
-border: 1px solid #FFFFFF66;
+  border: 1px solid #ffffff66;
   align-self: flex-end;
 }
-.oneway{
+.oneway {
   max-width: 110px;
   width: 100%;
   padding: 5px 8px;
-  background-color: #FCC800;
+  background-color: #fcc800;
 
   font-weight: 400;
   font-size: 12px;
@@ -72,10 +70,7 @@ border: 1px solid #FFFFFF66;
   letter-spacing: -2%;
   text-transform: uppercase;
   color: #000033;
-cursor: pointer;
-
-
-
+  cursor: pointer;
 }
 .toggle button {
   padding: 5px 8px;
@@ -91,7 +86,7 @@ cursor: pointer;
   justify-content: center;
   text-align: center;
   transition: all 0.4s ease;
-  color: #FFFFFF;
+  color: #ffffff;
 
   font-family: "Inter";
   font-weight: 400;
@@ -102,7 +97,7 @@ cursor: pointer;
 }
 
 .toggle .active {
-  background: #FCC800;
+  background: #fcc800;
   color: #000033;
 }
 
@@ -113,17 +108,21 @@ cursor: pointer;
   cursor: pointer;
 }
 
-@media (max-width: 1056px){
-  .modal{
+@media (max-width: 1056px) {
+  .modal {
     left: auto;
   }
 }
 
-
-
-@media (max-width: 991px){
-  .modal{
+@media (max-width: 991px) {
+  .modal {
     left: auto;
     /* right: 0; */
+  }
+}
+
+@media (max-width: 895px) {
+  .modal {
+    display: none;
   }
 }

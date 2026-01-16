@@ -44,7 +44,7 @@
     border-top: 0.5px solid #E4E6E8;
 }
 .tableCard {
-  max-width: 534px;
+  /* max-width: 534px; */
   width: 100%;
   display: flex;
   flex-direction: column;

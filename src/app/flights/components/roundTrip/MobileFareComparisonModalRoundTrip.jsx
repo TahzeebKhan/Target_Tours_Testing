@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styles from "./MobileFareComparisonModalRoundTrip.module.css";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
+import { useRouter } from "next/navigation";
 
 const MobileFareComparisonModalRoundTrip = ({
   isOpen,
@@ -10,6 +11,11 @@ const MobileFareComparisonModalRoundTrip = ({
   flightData,
 }) => {
   if (!isOpen) return null;
+  const router = useRouter();
+
+  const handleBookNow = () => {
+    router.push("/flight-booking-details");
+  };
   const [activeTab, setActibeTab] = useState("onward");
   const fareOptions = [
     {
@@ -173,13 +179,17 @@ const MobileFareComparisonModalRoundTrip = ({
         <div className={styles.toggleTabContainer}>
           <div
             onClick={() => setActibeTab("onward")}
-            className={`${styles.toggleTab} ${activeTab==="onward" ? styles.activeTab :""}`}
+            className={`${styles.toggleTab} ${
+              activeTab === "onward" ? styles.activeTab : ""
+            }`}
           >
             ONWARD FLIGHT (DEL-CGK)
           </div>
           <div
             onClick={() => setActibeTab("return")}
-            className={`${styles.toggleTab} ${activeTab==="return" ? styles.activeTab :""}`}
+            className={`${styles.toggleTab} ${
+              activeTab === "return" ? styles.activeTab : ""
+            }`}
           >
             return FLIGHT (cgk-del)
           </div>
@@ -272,7 +282,9 @@ const MobileFareComparisonModalRoundTrip = ({
               {/* Action Buttons */}
               <div className={styles.fareActions}>
                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                <button className={styles.bookNowBtn}>BOOK NOW</button>
+                <button onClick={handleBookNow} className={styles.bookNowBtn}>
+                  BOOK NOW
+                </button>
               </div>
             </div>
           ))}
