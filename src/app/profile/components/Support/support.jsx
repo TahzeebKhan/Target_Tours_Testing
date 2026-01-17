@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./support.module.css";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const SUPPORT_OPTIONS = [
   { id: "chat", label: "CHAT NOW", icon: "/icons/chat-text.svg" },
@@ -19,6 +22,67 @@ export default function Support() {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [rating, setRating] = useState(null);
+
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!rating) newErrors.rating = "Rating is required";
+    if (!message.trim()) newErrors.message = "Message cannot be empty";
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!validateEmail(email)) newErrors.email = "Invalid email format";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    const token = Cookies.get("auth_token");
+    if (!token) {
+      toast.error("You must be logged in to submit feedback");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-support`,
+        {
+          recommendation_points: rating,
+          feedback: message,
+          email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setIsOverlayOpen(false);
+      setIsSuccessOpen(true);
+      setRating(null);
+      setMessage("");
+      setEmail("");
+      setErrors({});
+    } catch (error) {
+      const backendMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Something went wrong";
+
+      toast.error(backendMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Prevent scrolling when any overlay is open
   useEffect(() => {
@@ -39,12 +103,6 @@ export default function Support() {
   const closeFeedback = () => {
     setIsOverlayOpen(false);
     setRating(null);
-  };
-
-  const handleSubmit = () => {
-    setIsOverlayOpen(false);
-    setRating(null);
-    setIsSuccessOpen(true);
   };
 
   return (
@@ -104,7 +162,7 @@ export default function Support() {
               <h2 className={styles.overlayTitle}>Share your feedback</h2>
               <button className={styles.closeBtn} onClick={closeFeedback}>
                 <Image
-                  src="/icons/close.svg"
+                  src="/icons/Close.svg"
                   alt="Close"
                   width={24}
                   height={24}
@@ -132,6 +190,9 @@ export default function Support() {
                     </button>
                   ))}
                 </div>
+                {errors.rating && (
+                  <p className={styles.errorText}>{errors.rating}</p>
+                )}
               </div>
 
               <div className={styles.formGroup}>
@@ -139,18 +200,35 @@ export default function Support() {
                   Please include anything else you like us to know
                 </label>
                 <textarea
-                  className={styles.textarea}
+                  className={`${styles.textarea} ${
+                    errors.message ? styles.inputError : ""
+                  }`}
                   placeholder="Enter your comments here"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                 />
+
+                {errors.message && (
+                  <p className={styles.errorText}>{errors.message}</p>
+                )}
               </div>
 
               <div className={styles.formGroup}>
                 <label className={styles.fieldLabel}>Email address</label>
                 <input
                   type="email"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    errors.email ? styles.inputError : ""
+                  }`}
                   placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
+
+                {errors.email && (
+                  <p className={styles.errorText2}>{errors.email}</p>
+                )}
+
                 <p className={styles.helperText}>
                   we will use your email address (emmily.morgan@gmail.com) to
                   follow-up on account issues, and for no other purpose.
@@ -168,8 +246,12 @@ export default function Support() {
                 />
                 BACK
               </button>
-              <button className={styles.sendBtn} onClick={handleSubmit}>
-                SEND FEEDBACK
+              <button
+                className={styles.sendBtn}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "SENDING..." : "SEND FEEDBACK"}
               </button>
             </footer>
           </div>
@@ -187,7 +269,6 @@ export default function Support() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.successBody}>
-
               <h2 className={styles.successTitle}>
                 Thank you for your feedback
               </h2>
