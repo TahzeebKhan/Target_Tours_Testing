@@ -4,6 +4,7 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/plane";
 import BelowPlane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/below_plane";
 import Mobile_footer from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
+import PriceSummary from "@/app/profile_components/PriceSummary";
 const rowData = [
   { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
   { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
@@ -41,6 +42,8 @@ const SeatingDetails = () => {
   const [openTab, setOpenTab] = useState("");
   const [selectedPassenger, setSelectedPassenger] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState(["3-A", "3-B"]);
+
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   const toggleTab = (tab) => {
     if (openTab !== tab) setOpenTab(tab);
   };
@@ -246,10 +249,14 @@ const SeatingDetails = () => {
           rowData={rowData}
         />
         <BelowPlane />
+
         <Mobile_footer
+          setShowPriceSummaryPopup={setShowPriceSummaryPopup}
           setCurrentStep={setCurrentStep}
           currentStep={currentStep}
         />
+
+        {showPriceSummaryPopup && <PriceSummary onClose={()=>setShowPriceSummaryPopup(false)} />}
       </div>
     </>
   );

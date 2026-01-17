@@ -10,7 +10,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  useEffect(() => {
+    console.log("chnaged profile", profile);
+  }, [setProfile, profile]);
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -104,6 +106,7 @@ export const AuthProvider = ({ children }) => {
         isLoggedIn,
         user,
         profile,
+        setProfile,
         loading,
         login,
         logout,

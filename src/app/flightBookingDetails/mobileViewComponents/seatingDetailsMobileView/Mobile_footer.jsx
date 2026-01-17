@@ -5,7 +5,11 @@ import Image from "next/image";
 import styles from "./Mobile_footer.module.css";
 import { useFlightBooking } from "@/app/travel-insurance-booking/FlightBookingContext";
 
-export default function Mobile_footer({ setCurrentStep, currentStep }) {
+export default function Mobile_footer({
+  setShowPriceSummaryPopup,
+  setCurrentStep,
+  currentStep,
+}) {
   const [isActive, setIsActive] = useState(false);
 
   const toggleActive = () => {
@@ -23,7 +27,12 @@ export default function Mobile_footer({ setCurrentStep, currentStep }) {
             <div className={styles.footerLabelGroup}>
               <span className={styles.footerTotalLabel}>Total Amount</span>
 
-              <span className={styles.infoIcon}>!</span>
+              <span
+                onClick={() => setShowPriceSummaryPopup(true)}
+                className={styles.infoIcon}
+              >
+                !
+              </span>
             </div>
 
             <div className={styles.footerPrice}>₹ 66,945</div>

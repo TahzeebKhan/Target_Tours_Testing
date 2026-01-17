@@ -15,12 +15,13 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useProfile } from "../../context/ProfileContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
   const { setProfilePhoto } = useProfile();
   const [phoneError, setPhoneError] = useState(false);
-
+  const { setProfile } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
   const [uploading, setUploading] = useState(false);
   const handleChangePhotoClick = () => {
@@ -69,7 +70,6 @@ const ProfileSection = () => {
       //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${res.data.profile_photo}`
       // );
       setProfilePhoto(previewUrl);
-
       toast.success("Profile photo updated successfully");
     } catch (err) {
       const message =
@@ -318,12 +318,14 @@ const ProfileSection = () => {
 
       const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
 
-      await axios.put(url, payload, {
+      const res = await axios.put(url, payload, {
         headers: {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
+
+      setProfile(res?.data?.data);
 
       toast.success("Profile updated successfully");
     } catch (err) {

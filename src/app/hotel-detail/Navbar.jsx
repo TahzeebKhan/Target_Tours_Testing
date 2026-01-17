@@ -1,11 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
-import { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-const Navbar = () => {
+import { useEffect, useState } from "react";
+const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const [isMounted, setisMounted] = useState(false);
+  useEffect(() => setisMounted(true), []);
+  // const { isLoggedIn } = useAuth();
   return (
     <>
       {" "}
@@ -24,16 +25,22 @@ const Navbar = () => {
               <img src="/icons/watchIcon.svg" alt="" />
               <p className={styles.sessionExpiresText}>Session expires in <span>14:32</span></p>
             </div> */}
-            <button className={`${styles.glass_button} ${styles.downloadBtn}`}>
-              Download the App
-            </button>
-            {!isLoggedIn && (
-              <button
-                onClick={() => router.push("/?openLogin=true")}
-                className={styles.signInBtn}
-              >
-                Sign In
-              </button>
+            {isMounted && (
+              <>
+                <button
+                  className={`${styles.glass_button} ${styles.downloadBtn}`}
+                >
+                  Download the App
+                </button>
+                {!isLoggedIn && (
+                  <button
+                    onClick={() => router.push("/?openLogin=true")}
+                    className={styles.signInBtn}
+                  >
+                    Sign In
+                  </button>
+                )}
+              </>
             )}
 
             <button className={styles.hamBurger}>
