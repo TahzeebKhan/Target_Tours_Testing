@@ -8,10 +8,23 @@ import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import { formatRoleUnderscoreToSpaceSeparated } from "@/app/utils/formatters";
+import { getParsedCookie } from "@/app/utils/getParsedCookie";
 
 const SideBar = () => {
   const { activeMenu, setActiveMenu, profilePhoto } = useProfile();
-  const { logout } = useAuth();
+  const { logout, profile } = useAuth();
+  // console.log("profile", profile);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const user = getParsedCookie("user");
+
+  // console.log(user);
+
   const router = useRouter();
   const [openTrips, setOpenTrips] = useState(false);
   const [activeTrip, setActiveTrip] = useState("All");
@@ -35,8 +48,8 @@ const SideBar = () => {
           </div>
 
           <div className={styles.sideBarProfileDetailsText}>
-            <h3>Emmily Morgan</h3>
-            <p>Customer Operations</p>
+            <h3>{profile?.full_name || ""}</h3>
+            <p>{formatRoleUnderscoreToSpaceSeparated(user?.role)}</p>
           </div>
         </div>
         <div className={styles.br}></div>

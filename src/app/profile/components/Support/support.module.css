@@ -23,7 +23,7 @@
 }
 
 .title {
-  font-family: 'Antic Didone', serif;
+  font-family: "Antic Didone", serif;
   font-size: 28px;
   color: rgba(0, 0, 51, 1);
   font-weight: 400;
@@ -32,7 +32,7 @@
 }
 
 .subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   color: rgba(0, 0, 0, 1);
 }
@@ -91,7 +91,6 @@
   opacity: 1;
 }
 
-
 .contentLeft {
   display: flex;
   align-items: center;
@@ -105,7 +104,7 @@
 }
 
 .label {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: rgba(0, 0, 0, 1);
@@ -123,11 +122,11 @@
   .container {
     padding: 24px 16px;
   }
-  
+
   .title {
     font-size: 28px;
   }
-  
+
   .item {
     padding: 16px;
   }
@@ -146,12 +145,12 @@
 }
 
 .overlayContent {
-  background: rgba(249, 250, 251, 1);
+  background-color: #ffffff;
   width: 100%;
   max-width: 800px;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(228, 230, 232, 1);
+  border: 1px solid #e4e6e8;
 }
 
 .overlayHeader {
@@ -163,7 +162,7 @@
 }
 
 .overlayTitle {
-  font-family: 'Antic Didone', serif;
+  font-family: "Antic Didone", serif;
   font-size: 20px;
   color: rgba(0, 0, 51, 1);
   font-weight: 400;
@@ -171,7 +170,12 @@
   letter-spacing: 0%;
 }
 
-.closeBtn { background: none; border: none; cursor: pointer; padding: 0; }
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
 
 .overlayBody {
   padding: 16px 32px;
@@ -180,17 +184,25 @@
   gap: 24px;
 }
 
-.formGroup { display: flex; flex-direction: column; gap: 24px; }
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
 .fieldLabel {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
   font-size: 16px;
   color: rgba(0, 0, 0, 1);
-    line-height: 100%;
+  line-height: 100%;
   letter-spacing: 0%;
 }
 
-.ratingGroup { display: flex; gap: 8px; }
+.ratingGroup {
+  display: flex;
+  gap: 8px;
+}
 
 /* Base state */
 .ratingBox {
@@ -203,7 +215,7 @@
   border: 1px solid rgba(228, 230, 232, 1);
   background: #fff;
 
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: rgba(69, 76, 88, 1);
@@ -211,9 +223,7 @@
   cursor: pointer;
 
   /* Default / deselect animation */
-  transition:
-    background-color 300ms ease-out,
-    border-color 300ms ease-out,
+  transition: background-color 300ms ease-out, border-color 300ms ease-out,
     color 300ms ease-out;
 }
 
@@ -222,9 +232,7 @@
   background: rgba(240, 243, 255, 1);
   border-color: rgba(0, 0, 51, 1);
 
-  transition:
-    background-color 300ms ease-in,
-    border-color 300ms ease-in,
+  transition: background-color 300ms ease-in, border-color 300ms ease-in,
     color 300ms ease-in;
 }
 
@@ -234,16 +242,13 @@
   border-color: rgba(0, 0, 51, 1);
   color: #ffffff;
 
-  transition:
-    background-color 300ms ease-in,
-    border-color 300ms ease-in,
+  transition: background-color 300ms ease-in, border-color 300ms ease-in,
     color 300ms ease-in;
 }
 
-
 /* Base state */
 
-.textarea{
+.textarea {
   height: 180px;
 }
 .textarea,
@@ -252,8 +257,8 @@
   padding: 16px;
   border: 1px solid rgba(228, 230, 232, 1);
   background: #fff;
-  
-  font-family: 'Inter', sans-serif;
+
+  font-family: "Inter", sans-serif;
   font-size: 16px;
   color: rgba(139, 148, 164, 1);
 
@@ -261,11 +266,11 @@
   outline: none;
 
   /* Default → ease-out */
-  transition:
-    border-color 300ms ease-out,
-    color 300ms ease-out;
+  transition: border-color 300ms ease-out, color 300ms ease-out;
 }
-
+.input {
+  margin: -12px 0px;
+}
 /* Placeholder — base */
 .textarea::placeholder,
 .input::placeholder {
@@ -279,9 +284,7 @@
   border-color: rgba(69, 76, 88, 1);
   color: rgba(69, 76, 88, 1);
 
-  transition:
-    border-color 300ms ease-in,
-    color 300ms ease-in;
+  transition: border-color 300ms ease-in, color 300ms ease-in;
 }
 
 /* Hover → Placeholder */
@@ -297,9 +300,7 @@
   border-color: rgba(69, 76, 88, 1);
   color: rgba(69, 76, 88, 1);
 
-  transition:
-    border-color 300ms ease-in,
-    color 300ms ease-in;
+  transition: border-color 300ms ease-in, color 300ms ease-in;
 }
 
 /* Focus → Placeholder */
@@ -309,9 +310,8 @@
   transition: color 300ms ease-in;
 }
 
-
 .helperText {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 16px;
   color: rgba(74, 85, 101, 1);
   line-height: 160%;
@@ -323,7 +323,7 @@
   justify-content: space-between;
   align-items: center;
   background: rgba(249, 249, 249, 1);
-  border-top: 1px solid rgba(243, 244, 246, 1);
+  border-top: 1px solid rgba(228, 230, 232, 1);
 }
 
 .backBtn {
@@ -332,7 +332,7 @@
   gap: 1px;
   background: none;
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   color: rgba(165, 165, 165, 1);
   cursor: pointer;
@@ -345,7 +345,7 @@
   padding: 12px 24px;
   border: none;
 
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 100%;
@@ -353,9 +353,7 @@
   cursor: pointer;
 
   /* Default → ease-out */
-  transition:
-    background-color 300ms ease-out,
-    color 300ms ease-out,
+  transition: background-color 300ms ease-out, color 300ms ease-out,
     transform 300ms ease-out;
 }
 
@@ -364,9 +362,7 @@
   background: rgba(252, 200, 0, 1);
   color: rgba(0, 0, 51, 1);
 
-  transition:
-    background-color 300ms ease-in,
-    color 300ms ease-in,
+  transition: background-color 300ms ease-in, color 300ms ease-in,
     transform 300ms ease-in;
 }
 
@@ -375,6 +371,21 @@
   transform: scale(0.97);
 }
 
+.inputError {
+  border: 1px solid #ff4d4f !important;
+}
+
+.errorText,
+.errorText2 {
+  color: #ff4d4f;
+  font-size: 12px;
+
+  margin-top: -20px;
+}
+
+.errorText2 {
+  margin-top: -9px;
+}
 
 @media (max-width: 900px) {
   .wrapper {
@@ -393,7 +404,6 @@
     padding: 16px 24px;
   }
 }
-
 
 @media (max-width: 640px) {
   /* Main layout */
@@ -530,10 +540,8 @@
   margin: 0 auto;
 }
 
-
-
 .successTitle {
-  font-family: 'Antic Didone', serif;
+  font-family: "Antic Didone", serif;
   font-size: 24px;
   font-weight: 400;
   color: rgba(0, 0, 51, 1);
