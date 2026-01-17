@@ -1,3 +1,174 @@
 .container {
   overflow-x: hidden;
 }
+.menuSection {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 25.82%, #000000 96.29%), #000033;
+
+  z-index: 1001;
+
+  /* IMPORTANT: hidden by default */
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 350ms ease;
+}
+
+/* WHEN MENU IS OPEN */
+.menuOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* WHEN MENU IS CLOSED */
+.menuClose {
+  opacity: 0;
+  pointer-events: none;
+}
+.navContainer {
+  width: 100%;
+  border-bottom: 1px solid rgba(227, 227, 227, 0.5);
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar {
+  max-width: 1520px;
+  width: 100%;
+}
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+.menuContainer {
+  padding: 27px 28px 76px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menuItems ul {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  margin-bottom: 216px;
+}
+
+.menuItems ul li a {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 26px;
+  color: #ffffff;
+}
+.menuBottom {
+  min-height: 67px;
+  border-top: 1px solid #ffffff;
+  display: flex;
+  align-items: end;
+}
+
+.accountBtn {
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 37px;
+  background-color: #f2f3f7;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+}
+.glass_button {
+  padding: 8px 18px;
+  border: 0.5px solid #e4e6e8;
+  height: 37px;
+  font-size: 14px;
+  color: white;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  text-transform: uppercase;
+  background: #15151512;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+.glass_button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+
+  background: conic-gradient(
+    from -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 15%,
+    transparent 30%
+  );
+
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.glass_button:hover {
+  background-color: #ffffff;
+  color: #000033;
+}
+.logggedInBtn {
+  padding: 8px 18px;
+  font-size: 14px;
+  background: #15151512;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.logggedInBtnSidebar:hover {
+  background-color: white !important;
+}
+.hamBurger {
+  display: none;
+  cursor: pointer;
+}
+@media (max-width: 1600px) {
+  .navbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 895px) {
+  .hamBurger {
+    display: flex !important;
+  }
+
+  .menuSection {
+    display: block;
+  }
+
+  .signInBtn {
+    display: none;
+  }
+  .navContainer {
+    border-bottom: 1px solid rgba(227, 227, 227, 0.5);
+  }
+}
+@media (max-width: 504px) {
+  .logggedInBtnSidebar,
+  .logggedInBtn {
+    display: none;
+  }
+}

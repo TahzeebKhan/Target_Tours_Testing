@@ -10,6 +10,7 @@ import DateCalendarModal from "@/app/home-page/components/homePage/calendar/Date
 import CalendarMonths from "@/app/home-page/components/homePage/calendar/CalendarMonths";
 import MobileViewCalender from "@/app/components/mobileViewCalendar/MobileViewCalender";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
+import { useRouter } from "next/navigation";
 
 const TravelInsuranceSearch = () => {
   const travellerRef = useRef(null);
@@ -165,7 +166,7 @@ const TravelInsuranceSearch = () => {
     },
   ];
   const destinationRef = useRef(null);
-
+  const router = useRouter();
   return (
     <>
       <div className={styles.glass_panel}>
@@ -321,7 +322,10 @@ const TravelInsuranceSearch = () => {
           </div>
 
           {/* Search */}
-          <div className={styles.searchBtn}>
+          <div
+            onClick={() => router && router.push("/travel-insurance-booking")}
+            className={styles.searchBtn}
+          >
             <svg
               width="24"
               height="24"

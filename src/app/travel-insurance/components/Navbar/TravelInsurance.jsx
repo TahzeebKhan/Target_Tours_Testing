@@ -4,7 +4,7 @@ import TravelInsuranceSearch from "../travelInsuranceSearch/TravelInsuranceSearc
 import styles from "./Navbar.module.css";
 import { useState } from "react";
 
-const TravelInsurance = () => {
+const TravelInsurance = ({ setMenuOpen }) => {
   const [scrollProgress, setScrollProgress] = useState(0);
   return (
     <header className={styles.homeSection}>
@@ -45,7 +45,10 @@ const TravelInsurance = () => {
 
               <button className={styles.signInBtn}>Sign In</button>
 
-              <button className={styles.hamBurger}>
+              <button
+                onClick={() => setMenuOpen(true)}
+                className={styles.hamBurger}
+              >
                 <svg
                   width="24"
                   height="24"
