@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./PassengerDetailsMobile.module.css";
 import FlightTimeline from "../components/flightTimeline/FlightTimeline";
 import FlightTabs from "../components/FlightTabs/FlightTabs";
@@ -13,8 +13,47 @@ import { useRouter } from "next/navigation";
 const PassengerDetailsMobile = () => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
+
+  const [showBaggageRulesPopup, setShowaggageRulesPopup] = useState(false);
   const router = useRouter();
+
+  const [activeTab, setActiveTab] = useState(0);
   const { setCurrentStep } = useFlightBooking();
+  const flightDetailsRef = useRef(null);
+  const travelInsuranceRef = useRef(null);
+  const cancellationRef = useRef(null);
+  const tabsRef = useRef(null);
+  const scrollWithStickyOffset = (element) => {
+    if (!element) return;
+
+    const stickyHeight = tabsRef.current?.offsetHeight || 0;
+
+    const y =
+      element.getBoundingClientRect().top +
+      window.pageYOffset -
+      stickyHeight -
+      12; // small breathing space
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab === 0 && flightDetailsRef.current) {
+      scrollWithStickyOffset(flightDetailsRef.current);
+    }
+
+    if (activeTab === 1 && travelInsuranceRef.current) {
+      scrollWithStickyOffset(travelInsuranceRef.current);
+    }
+
+    if (activeTab === 2 && cancellationRef.current) {
+      scrollWithStickyOffset(cancellationRef.current);
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 40) {
@@ -190,31 +229,49 @@ const PassengerDetailsMobile = () => {
             <div className={styles.br}></div>
 
             <div className={styles.FareDetailsTag}>
-              <span>Fare Details</span>
+              <span onClick={() => setShowFareDetailsPopup(true)}>
+                Fare Details
+              </span>
               <div className={styles.blueDot}></div>
-              <span>Baggage Rules</span>
+              <span onClick={() => setShowaggageRulesPopup(true)}>
+                {" "}
+                Baggage Rules
+              </span>
             </div>
           </div>
         </div>
         {/* <div> */}
-        <FlightTabs onFlightDetailsClick={() => setShowFareDetailsPopup(true)} />
-          {/* {showFareDetailsPopup && (
-            <FareDetailsPop onClose={() => setShowFareDetailsPopup(false)} />
-          )} */}
-          {showFareDetailsPopup && (
-            <BaggageRules onClose={() => setShowFareDetailsPopup(false)} />
-          )}
+        <div className={styles.stickytabsCont} ref={tabsRef}>
+          <FlightTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onFlightDetailsClick={() => setShowFareDetailsPopup(true)}
+          />
+        </div>
+
+        {showFareDetailsPopup && (
+          <FareDetailsPop onClose={() => setShowFareDetailsPopup(false)} />
+        )}
+        {showBaggageRulesPopup && (
+          <BaggageRules onClose={() => setShowaggageRulesPopup(false)} />
+        )}
         {/* </div> */}
 
         <div className={styles.flightDepartureReturenDetailsContianerWrapper}>
-          <div className={styles.flightDepartureReturenDetailsContianer}>
+          <div
+            ref={flightDetailsRef}
+            className={styles.flightDepartureReturenDetailsContianer}
+          >
             <FlightSection />
             <div className={styles.br}></div>
 
             <FlightSection flight={returnFlightData} />
           </div>
 
-          <div className={styles.travelInsuranceContainer}>
+          <div
+            ref={travelInsuranceRef}
+            className={styles.travelInsuranceContainer}
+          >
             <h2 className={styles.travelInsuranceHeading}>
               Add Travel Insurance (₹399/Person)
             </h2>
@@ -223,7 +280,10 @@ const PassengerDetailsMobile = () => {
             </div>
           </div>
 
-          <div className={styles.travelInsuranceContainer}>
+          <div
+            ref={cancellationRef}
+            className={`${styles.travelInsuranceContainer} `}
+          >
             <h2 className={styles.travelInsuranceHeading}>
               Cancellation & Date Change Policy
             </h2>
@@ -240,7 +300,12 @@ const PassengerDetailsMobile = () => {
           <div className={styles.amountSection}>
             <div className={styles.label}>
               Total Amount
-              <span className={styles.infoIcon}>!</span>
+              <span
+                // onClick={() => setShowFareDetailsPopup(true)}
+                className={styles.infoIcon}
+              >
+                !
+              </span>
             </div>
             <div className={styles.amount}>₹ 66,945</div>
           </div>

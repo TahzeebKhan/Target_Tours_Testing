@@ -163,8 +163,6 @@
 //   fetchSignatureExperiences();
 // }, []);
 
-
-
 //   const [isOpen, setIsOpen] = useState(false);
 //   const rotate = (arr, n) => [...arr.slice(n), ...arr.slice(0, n)];
 //   const tabsData = [
@@ -179,8 +177,6 @@
 //     // { title: "Bali", carouselData: rotate(baseCarouselData, 4) },
 //     // { title: "Maldives", carouselData: rotate(baseCarouselData, 0) },
 //   ];
-
-
 
 //   const tabsRef = useRef(null);
 
@@ -294,7 +290,7 @@ const REGION_MAP = {
   "South America": "SOUTH_AMERICA",
 };
 
-const SignatureExperiences = () => {
+const SignatureExperiences = ({ isMultiTripMobile }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [allPackages, setAllPackages] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -405,7 +401,6 @@ const SignatureExperiences = () => {
     },
   ];
 
-
   /* ===================== FETCH API ONCE ===================== */
   useEffect(() => {
     const fetchSignatureExperiences = async () => {
@@ -445,18 +440,13 @@ const SignatureExperiences = () => {
   ];
 
   const filteredCarouselData = allPackages
-    .filter(
-      (pkg) =>
-        pkg.region === REGION_MAP[tabsData[activeTab].title]
-    )
+    .filter((pkg) => pkg.region === REGION_MAP[tabsData[activeTab].title])
     .map((pkg, index) => {
       const media = pkg.media?.[0]?.package_media?.[0];
 
       return {
         id: index + 1, // 🔥 carousel MUST be sequential
-        image: media
-          ? `${API_BASE}${media.url}`
-          : "/images/img1.jpg",
+        image: media ? `${API_BASE}${media.url}` : "/images/img1.jpg",
         title: pkg.description?.toUpperCase(),
         description: pkg.title,
         price: "₹20,000",
@@ -480,19 +470,17 @@ const SignatureExperiences = () => {
     const activeTabEl = tabs.querySelector(`.${styles.activeTab}`);
     if (!activeTabEl) return;
 
-    tabs.style.setProperty(
-      "--indicator-width",
-      `${activeTabEl.offsetWidth}px`
-    );
-    tabs.style.setProperty(
-      "--indicator-left",
-      `${activeTabEl.offsetLeft}px`
-    );
+    tabs.style.setProperty("--indicator-width", `${activeTabEl.offsetWidth}px`);
+    tabs.style.setProperty("--indicator-left", `${activeTabEl.offsetLeft}px`);
   }, [activeTab]);
 
   /* ===================== JSX ===================== */
   return (
-    <section className={styles.section}>
+    <section
+      className={`${styles.section} ${
+        isMultiTripMobile ? styles.multiMargin : ""
+      }`}
+    >
       <div className={styles.container}>
         <h2 className={styles.heading}>
           Signature Experiences by Target Tours
@@ -504,13 +492,12 @@ const SignatureExperiences = () => {
             {tabsData.map((tab, index) => (
               <li
                 key={tab.title}
-                className={`${styles.tab} ${index === activeTab ? styles.activeTab : ""
-                  }`}
+                className={`${styles.tab} ${
+                  index === activeTab ? styles.activeTab : ""
+                }`}
                 onClick={() => setActiveTab(index)}
               >
-                <button className={styles.tabBtn}>
-                  {tab.title}
-                </button>
+                <button className={styles.tabBtn}>{tab.title}</button>
               </li>
             ))}
           </ul>
@@ -545,9 +532,7 @@ const SignatureExperiences = () => {
               {tabsData.map((tab, index) => (
                 <li
                   key={tab.title}
-                  className={
-                    index === activeTab ? styles.activeOption : ""
-                  }
+                  className={index === activeTab ? styles.activeOption : ""}
                   onClick={() => {
                     setActiveTab(index);
                     setIsOpen(false);
@@ -574,5 +559,3 @@ const SignatureExperiences = () => {
 };
 
 export default SignatureExperiences;
-
-

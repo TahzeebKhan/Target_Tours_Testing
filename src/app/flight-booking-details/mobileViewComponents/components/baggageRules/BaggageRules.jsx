@@ -14,7 +14,7 @@ const BaggageRules = ({ onClose }) => {
             <div className={styles.fareDetialsContainre} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.fareDetailsTop}>
                     <div className={styles.headerTop}>
-                        <p className={styles.fareDetailsText}>FARE DETAILS</p>
+                        <p className={styles.fareDetailsText}>Baggage Rules</p>
                         <img className={styles.closeIcon} src="/icons/CLose.svg" alt="" onClick={onClose} />
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
 import PassengerClassSelector from "../PassengerClassSelector";
@@ -10,7 +10,9 @@ import SeatClassPopup from "@/app/components/seatClassPopup/SeatClassPopup";
 import MultiCityMobile from "./MultiCityMobile";
 
 const FlightSearchMobile = ({
+  handleSearch,
   styles,
+  setIsMultiTripMobile,
   swapLocations,
   from,
   setFrom,
@@ -65,6 +67,9 @@ const FlightSearchMobile = ({
   const passengerText = `${passengers.adult} Adult${
     passengers.adult > 1 ? "s" : ""
   }, ${passengers.children} Child${passengers.children > 1 ? "ren" : ""}`;
+  useEffect(() => {
+    setIsMultiTripMobile(tripType === "multi");
+  }, [tripType]);
 
   return (
     <div className={styles.flightSectionMain}>
@@ -248,7 +253,9 @@ const FlightSearchMobile = ({
               )}
             </div>
 
-            <button className={styles.searchBtna}>SEARCH</button>
+            <button onClick={handleSearch} className={styles.searchBtna}>
+              SEARCH
+            </button>
           </>
         )}
         {tripType === "oneway" && (
@@ -376,7 +383,9 @@ const FlightSearchMobile = ({
               )}
             </div>
 
-            <button className={styles.searchBtna}>SEARCH</button>
+            <button onClick={handleSearch} className={styles.searchBtna}>
+              SEARCH
+            </button>
           </>
         )}
         {openCalendar && (
@@ -406,7 +415,12 @@ const FlightSearchMobile = ({
             passengerText={passengerText}
             travelClass={travelClass}
             swapLocations={swapLocations}
-            onSearch={() => {}}
+            onSearch={() =>
+              handleSearch({
+                tripType: "multi",
+                multiFlights,
+              })
+            }
             formatDate={formatDate}
           />
         )}

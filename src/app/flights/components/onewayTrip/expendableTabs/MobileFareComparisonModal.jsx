@@ -3,10 +3,15 @@ import React from "react";
 import styles from "./MobileFareComparisonModal.module.css";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
+import { useRouter } from "next/navigation";
 
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
   if (!isOpen) return null;
+  const router = useRouter();
 
+  const handleBookNow = () => {
+    router.push("/flight-booking-details");
+  };
   const fareOptions = [
     {
       id: "saver",
@@ -100,7 +105,9 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
               onClick={onClose} // or router.back() if needed
               style={{ cursor: "pointer" }}
             />
-            <p className={styles.tripDetails}>Compare fares and choose what fits your journey</p>
+            <p className={styles.tripDetails}>
+              Compare fares and choose what fits your journey
+            </p>
           </div>
         </div>
 
@@ -252,7 +259,9 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
               {/* Action Buttons */}
               <div className={styles.fareActions}>
                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                <button className={styles.bookNowBtn}>BOOK NOW</button>
+                <button onClick={handleBookNow} className={styles.bookNowBtn}>
+                  BOOK NOW
+                </button>
               </div>
             </div>
           ))}

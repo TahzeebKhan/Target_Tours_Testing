@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styles from "./MobileFareComparisonModalMulticity.module.css";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
+import { useRouter } from "next/navigation";
 
 const MobileFareComparisonModalMulticity = ({
   isOpen,
@@ -10,6 +11,11 @@ const MobileFareComparisonModalMulticity = ({
   flightData,
 }) => {
   if (!isOpen) return null;
+  const router = useRouter();
+
+  const handleBookNow = () => {
+    router.push("/flight-booking-details");
+  };
   const [activeTab, setActibeTab] = useState("onward");
   const fareOptions = [
     {
@@ -276,7 +282,9 @@ const MobileFareComparisonModalMulticity = ({
               {/* Action Buttons */}
               <div className={styles.fareActions}>
                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                <button className={styles.bookNowBtn}>BOOK NOW</button>
+                <button onClick={handleBookNow} className={styles.bookNowBtn}>
+                  BOOK NOW
+                </button>
               </div>
             </div>
           ))}

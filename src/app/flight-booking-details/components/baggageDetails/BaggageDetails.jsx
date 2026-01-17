@@ -14,7 +14,7 @@ import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHea
 const EXTRA_BAGGAGE_ROWS = [
   [
     { image: "bags/redBag.png", weight: "5 Kg", price: 3100 },
-    { image: "bags/BoxBag.png", weight: "10 Kg", price: 6200 },
+    { image: "bags/boxBag.png", weight: "10 Kg", price: 6200 },
   ],
   [
     { image: "bags/pinkBag.svg", weight: "15 Kg", price: 9300 },

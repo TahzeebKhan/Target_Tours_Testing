@@ -93,9 +93,10 @@
   font-size: 18px;
   cursor: pointer;
 }
-@media (max-width:1350px) {
-  .modal{
+@media (max-width: 1350px) {
+  .modal {
     left: unset;
     right: -293px;
   }
 }
+

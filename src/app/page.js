@@ -14,14 +14,18 @@ import { Suspense, useState } from "react";
 
 export default function Home() {
   const [homeReady, setHomeReady] = useState(false);
+  const [isMultiTripMobile, setIsMultiTripMobile] = useState(false);
   return (
     <>
       <Suspense fallback={null}>
-        <HomePage onReady={() => setHomeReady(true)} />
+        <HomePage
+          setIsMultiTripMobile={setIsMultiTripMobile}
+          onReady={() => setHomeReady(true)}
+        />
       </Suspense>
       {homeReady && (
         <>
-          <SignatureExperiences />
+          <SignatureExperiences isMultiTripMobile={isMultiTripMobile} />
           <PopularFlights />
           <TopToFlights />
 
