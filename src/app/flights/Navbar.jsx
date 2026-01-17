@@ -5,12 +5,14 @@ import LoginPopup from "../account/loginPopUp/LoginPopup";
 import SignupPopup from "../account/signUpPopUp/SignupPopup";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useAuth } from "../context/AuthContext";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
 const Navbar = ({ scrollProgress = { scrollProgress } }) => {
-
-  const { isLoggedIn, profile: userProfile } = useAuth();
+  const hasToken = !!Cookies.get("auth_token");
+  const [isLoggedIn, setIsLoggedIn] = useState(hasToken);
+  const { profile: userProfile } = useAuth();
   const profileBtnRef = useRef(null);
-
+  const [isMounted, setIsmounted] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -18,14 +20,21 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
   const handleLogoClick = () => {
     router.push("/");
   };
+  useEffect(() => {
+    setIsmounted(true);
+  }, []);
   return (
     <>
       {" "}
-      <div style={{
-        // transform: `translateY(${-72 * scrollProgress}px)`,
-        // opacity: 1 - scrollProgress,
-      }}
-        className={`${styles.navContainer} top-0 z-1`}>
+      <div
+        style={
+          {
+            // transform: `translateY(${-72 * scrollProgress}px)`,
+            // opacity: 1 - scrollProgress,
+          }
+        }
+        className={`${styles.navContainer} top-0 z-1`}
+      >
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
@@ -37,29 +46,33 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
               Download the App
             </button>
             {/* <button className={styles.signInBtn}>Sign In</button> */}
-            {!isLoggedIn ? (
-              <button
-                className={styles.signInBtn}
-                onClick={() => setShowLogin(true)}
-              >
-                Sign In
-              </button>
-            ) : (
+            {isMounted && (
               <>
-                <button
-                  ref={profileBtnRef}
-                  onClick={() => setShowProfileModal(true)}
-                  className={`${styles.glass_button} ${styles.logggedInBtn}`}
-                  type="button"
-                >
-                  Hi, {userProfile?.display_name || "User"}
-                </button>
+                {!isLoggedIn ? (
+                  <button
+                    className={styles.signInBtn}
+                    onClick={() => setShowLogin(true)}
+                  >
+                    Sign In
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      ref={profileBtnRef}
+                      onClick={() => setShowProfileModal(true)}
+                      className={`${styles.glass_button} ${styles.logggedInBtn}`}
+                      type="button"
+                    >
+                      Hi, {userProfile?.display_name || "User"}
+                    </button>
 
-                {showProfileModal && (
-                  <ProfileModal
-                    anchorRef={profileBtnRef}
-                    onClose={() => setShowProfileModal(false)}
-                  />
+                    {showProfileModal && (
+                      <ProfileModal
+                        anchorRef={profileBtnRef}
+                        onClose={() => setShowProfileModal(false)}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}
