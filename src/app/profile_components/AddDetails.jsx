@@ -20,6 +20,7 @@ const AddDetails = ({ onClose }) => {
   const [isActive, setIsActive] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [activeCalendarField, setActiveCalendarField] = useState(null); // "start" | "end"
+  const [isClosing, setIsClosing] = useState(false);
 
   /* ------------------ DATE CLICK LOGIC ------------------ */
   const handleDateClick = (date) => {
@@ -77,19 +78,26 @@ const AddDetails = ({ onClose }) => {
     console.log("Form Data:", formData);
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 300); // Match the animation duration
+  };
+
   return (
     <div className={styles.overlay}>
-      <section className={styles.modalContainer}>
+      <section className={`${styles.modalContainer} ${isClosing ? styles.slideOut : ''}`}>
         {/* HEADER */}
         <header className={styles.modalHeader}>
           <span className={styles.headerTitle}>ENTER DETAILS</span>
           <button
-  className={styles.closeButton}
-  onClick={onClose}
-  aria-label="Close"
->
-  ✕
-</button>
+            className={styles.closeButton}
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
 
         </header>
 
@@ -167,9 +175,8 @@ const AddDetails = ({ onClose }) => {
         <footer className={styles.modalFooter}>
           <button className={styles.backButton}>BACK</button>
           <button
-            className={`${styles.continueButton} ${
-              isActive ? styles.active : ""
-            }`}
+            className={`${styles.continueButton} ${isActive ? styles.active : ""
+              }`}
             onClick={handleContinue}
           >
             CONTINUE
@@ -181,7 +188,7 @@ const AddDetails = ({ onClose }) => {
       {showCalendar && (
         <DateCalendarModal
           mode="roundtrip"
-          onModeChange={() => {}}
+          onModeChange={() => { }}
           onClose={() => setShowCalendar(false)}
         >
           <div ref={calendarRef}>
