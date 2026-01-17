@@ -34,7 +34,7 @@
 
 .glass_button {
   position: relative;
-
+  height: 37px;
   background-color: rgba(255, 255, 255, 0.12);
   /* glass base */
   backdrop-filter: blur(10px);

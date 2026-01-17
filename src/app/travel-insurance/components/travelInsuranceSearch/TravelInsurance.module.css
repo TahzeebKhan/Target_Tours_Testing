@@ -15,23 +15,26 @@
 }
 
 .fromBtn {
-  height: 58px;
+  /* height: 54px; */
+  width: 100%;
+  max-width: 262px;
   display: flex;
   flex-direction: column;
   padding: 8px 12px;
   border: 0.5px solid #e6e8ec;
   background: rgba(0, 0, 0, 0.35);
   cursor: pointer;
+  gap: 5px;
   flex: 1;
 }
 
 .contant::placeholder {
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .fromBtn,
 .fromBtn2 {
-  width: 245.5px;
+  /* width: 245.5px; */
 }
 
 .lable {
@@ -75,8 +78,8 @@
 }
 
 .searchBtn {
-  min-width: 120px;
-  height: 58px;
+  min-width: 56px;
+  height: auto;
   background: #000033;
   display: flex;
   justify-content: center;
@@ -84,14 +87,19 @@
   cursor: pointer;
   font-size: 14px;
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
-
+.searchBtn svg path {
+  transition: all 0.5s ease;
+}
 .searchBtn:hover {
   background: #ffffff;
   color: #000033;
 }
 
+.searchBtn:hover svg path {
+  fill: #000033;
+}
 
 .dateGroup {
   position: relative;
@@ -102,8 +110,76 @@
 .dateGroup .fromBtn {
   flex: 1;
 }
+.destinationDropdown {
+  position: absolute;
+  top: calc(100% + 6px); /* ⬇️ below the button */
+  left: 0;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 8px 0;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
 
+.destinationItem {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  transition: background 0.2s ease;
+}
 
+.destinationItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.calendarAnchor {
+  position: relative;
+}
+.dateGroup {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+.calendarContainer {
+  position: absolute;
+  height: 100%;
+  left: 50%;
+  width: 100%;
+}
+@media (max-width: 1200px) {
+  .fromBtn,
+  .fromBtn2 {
+    flex: 1 1 0;
+    min-width: 262px;
+    max-width: unset;
+  }
+  .searchBtn {
+    height: 58px;
+  }
+  .dateGroup {
+    width: 100%;
+  }
+  .dateGroup .fromBtn {
+    flex: 1 1 0;
+  }
+  .searchRow {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 1197px) {
+  .calendarContainer {
+    left: 34.7%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1156px) {
+    .calendarContainer {
+    left: 38.8%
+  }
+}
 @media (max-width: 1024px) {
   .glass_panel {
     max-width: 900px;
@@ -127,6 +203,9 @@
     min-width: 110px;
     font-size: 13px;
   }
+  .calendarContainer {
+    display: none;
+  }
 }
 
 @media (max-width: 950px) {
@@ -138,7 +217,7 @@
     border: none;
   }
 
-    .dateGroup{
+  .dateGroup {
     flex-direction: column;
   }
 
