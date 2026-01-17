@@ -40,7 +40,7 @@ const TourListing = () => {
   const [expandedId, setExpandedId] = useState(null);
   const router = useRouter();
   const handleBookNow = () => {
-    router.push("/tour-booking"); // 👈 your page route
+    router.push("/tour-details"); // 👈 your page route
   };
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));

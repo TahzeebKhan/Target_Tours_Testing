@@ -29,6 +29,7 @@ export default function CancellationPolicy() {
 
                 {/* Progress Bar */}
                 <div className={styles.progressBarContainer}>
+                    <div className={styles.leftProgress}></div>
                     <div className={styles.progressBar}></div>
                 </div>
 
@@ -58,7 +59,7 @@ export default function CancellationPolicy() {
                 </li>
                 <li>
                     Cancellation charges shown is exclusive of all taxes and taxes will be
-                    added as per applicable.
+                    added as per applicable
                 </li>
             </ul>
         </div>

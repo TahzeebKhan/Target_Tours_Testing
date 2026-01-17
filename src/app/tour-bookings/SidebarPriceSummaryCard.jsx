@@ -61,7 +61,7 @@ export default function SidebarPriceSummaryCard() {
         </div>
         <p className={styles.note}>Includes taxes and service fees</p>
       </div>
-      {currentStep === 6 && (
+      {currentStep === 3 && (
         <>
           <button className={styles.bookNowBtn}>Continue Payment</button>
           <div className={styles.safeBadge}>

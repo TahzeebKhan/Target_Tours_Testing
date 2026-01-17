@@ -45,7 +45,7 @@ const HotelDetaislMobileView = () => {
                 <div className={styles.HotelDetaislMobileViewImageContainer}>
                     <img className={styles.hotleImg} src="/images/hotelArt1.png" alt="" />
 
-                    <button className={styles.viewGalleryBtn}  onClick={hotelGallery}>
+                    <button className={styles.viewGalleryBtn} onClick={hotelGallery}>
                         <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                     </button>
                     <div className={styles.HotelTopButtonsContainer}>
@@ -84,11 +84,21 @@ const HotelDetaislMobileView = () => {
                         activeTab={activeTab}
                         onChange={handleTabChange}
                     />
-                    <DescriptionComponent />
-                    <Amenities />
-                    <Availabilitymobile />
-                    <HotelPolicies />
-                    <Testimonial />
+                    <div ref={sectionRefs.Description}>
+                        <DescriptionComponent />
+                    </div>
+                    <div ref={sectionRefs.Amenities}>
+                        <Amenities />
+                    </div>
+                    <div ref={sectionRefs.Rooms}>
+                        <Availabilitymobile />
+                    </div>
+                    <div ref={sectionRefs["HOTEL POLICY"]}>
+                        <HotelPolicies />
+                    </div>
+                    <div ref={sectionRefs.Reviews}>
+                        <Testimonial />
+                    </div>
                     <BarcelonaSection />
                     <FeatureSection />
                     <Footer />

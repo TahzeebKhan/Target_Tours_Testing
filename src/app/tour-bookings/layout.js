@@ -1,16 +1,21 @@
 import React from "react";
 import styles from "./FlightBookingDetailsLayout.module.css";
-import Navbar from "./Navbar";
+
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
 import { FlightBookingProvider } from "./FlightBookingContext";
+import Navbar from "../flight-booking-details/Navbar";
 
 export default function FlightBookingDetailsLayout({ children }) {
   return (
     <FlightBookingProvider>
       <div className={styles.layoutWrapper}>
-        <Navbar />
-        <BookingStepper />
+        <div className={styles.navbar}>
+          <Navbar />
+        </div>
+        <div className={styles.bookingStepper}>
+          <BookingStepper />
+        </div>
 
         <main className={styles.mainContent}>
           <div className={styles.container}>{children}</div>

@@ -957,10 +957,44 @@
     .tourListMobileSection {
         display: block;
     }
+    .priceSec{
+        font-size: 21px;
+    }
+    .bookNowBtn{
+        max-width: 138px;
+    }
+    .priceSec span{
+
+        font-size: 12px;
+    }
+    .totalPrice{
+        font-size: 12px;
+    }
+    .totalPrice span{
+        font-size: 12px;
+    }
+}
+@media (max-width: 670px){
+    .topTextHead{
+        font-size: 18px;
+    }
+    .tag{
+        font-size: 10px;
+    }
+    .bottomItem{
+        font-size: 10px;
+    }
+    .bookNowBtn{
+        font-size: 12px;
+        padding: 12px 8px;
+    }
 }
 
 @media (max-width: 618px) {
     .ListViewWrapperMobile {
         grid-template-columns: repeat(1, 1fr);
+    }
+    .ListViewCardContainer{
+        max-width: unset;
     }
 }

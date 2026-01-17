@@ -14,10 +14,13 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <div className={styles.layoutWrapper}>
-        <div className={styles.navBar}>
-          <Navbar />
+    <div className={styles.navBar}>
+          <div className={styles.navBarContainer}>
+            <Navbar />
+          </div>
         </div>
+      <div className={styles.layoutWrapper}>
+        
         <div className={styles.pageSection}>
           <HeroSection />
           {/* PAGE DECIDES WHAT GOES WHERE */}
