@@ -283,7 +283,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
       (s) =>
         s.label.toLowerCase().includes(q) ||
         s.detail.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q)
+        s.code.toLowerCase().includes(q),
     );
   };
 
@@ -330,8 +330,10 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
     if (typeof index === "number" && tripType === "multi") {
       setMultiCity((prev) =>
         prev.map((leg, i) =>
-          i === index ? { ...leg, from: leg.to || "", to: leg.from || "" } : leg
-        )
+          i === index
+            ? { ...leg, from: leg.to || "", to: leg.from || "" }
+            : leg,
+        ),
       );
       return;
     }
@@ -345,13 +347,13 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
 
   const updateMultiLeg = (index, field, value) => {
     setMultiCity((prev) =>
-      prev.map((leg, i) => (i === index ? { ...leg, [field]: value } : leg))
+      prev.map((leg, i) => (i === index ? { ...leg, [field]: value } : leg)),
     );
   };
 
   const removeMultiLeg = (index) => {
     setMultiCity((prev) =>
-      prev.length > 1 ? prev.filter((_, i) => i !== index) : prev
+      prev.length > 1 ? prev.filter((_, i) => i !== index) : prev,
     );
   };
 
@@ -735,7 +737,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
         const params = multiFlights
           .map(
             (leg, i) =>
-              `from${i}=${leg.from}&to${i}=${leg.to}&date${i}=${leg.departureDate}`
+              `from${i}=${leg.from}&to${i}=${leg.to}&date${i}=${leg.departureDate}`,
           )
           .join("&");
 
@@ -752,19 +754,19 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
       const endDate = finalTripType === "round" ? flightDates.round.end : "";
 
       router.push(
-        `/flights?from=${from}&to=${to}&tripType=${finalTripType}&start=${startDate}&end=${endDate}`
+        `/flights?from=${from}&to=${to}&tripType=${finalTripType}&start=${startDate}&end=${endDate}`,
       );
       return;
     }
 
     if (bookingType === "hotel") {
       router.push(
-        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`
+        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`,
       );
     }
     if (bookingType === "hotel") {
       router.push(
-        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`
+        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`,
       );
     }
 
@@ -774,7 +776,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
 
     if (bookingType === "insurance") {
       router.push(
-        `/travel-insurance?destination=${travellerDestination}&start=${insuranceStartDate}&end=${insuranceEndDate}`
+        `/travel-insurance?destination=${travellerDestination}&start=${insuranceStartDate}&end=${insuranceEndDate}`,
       );
     }
   };
@@ -845,7 +847,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                     <button
                       ref={profileBtnRef}
                       onClick={() => setShowProfileModal(true)}
-                      className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile}`}
+                      className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile} ${styles.logggedInBtnSidebar}`}
                       type="button"
                     >
                       Hi, {userProfile?.display_name || "User"}
@@ -891,8 +893,16 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                 </li>
               </ul>
             </div>
+
             <div className={styles.menuBottom}>
-              <button className={styles.accountBtn}>ACCOUNT LOGIN</button>
+              {!isLoggedIn && (
+                <button
+                  onClick={() => router.push("./?openLogin=true")}
+                  className={styles.accountBtn}
+                >
+                  ACCOUNT LOGIN
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1041,8 +1051,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                             tripType === "oneway"
                               ? styles.arrowboxOneWay
                               : tripType === "multi"
-                              ? styles.multiArrow
-                              : ""
+                                ? styles.multiArrow
+                                : ""
                           }`}
                           onClick={() =>
                             swapLocations(tripType === "multi" ? 0 : undefined)
@@ -1162,9 +1172,10 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                     tripType === "round"
                                       ? flightDates.round.start
                                       : tripType === "oneway"
-                                      ? flightDates.oneway.start
-                                      : flightDates.multi[activeMultiIndex ?? 0]
-                                          ?.date
+                                        ? flightDates.oneway.start
+                                        : flightDates.multi[
+                                            activeMultiIndex ?? 0
+                                          ]?.date
                                   }
                                   endDate={
                                     tripType === "round"
@@ -1202,8 +1213,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                 tripType === "round"
                                   ? formatDate(flightDates.round.start)
                                   : tripType === "oneway"
-                                  ? formatDate(flightDates.oneway.start)
-                                  : formatDate(flightDates.multi[0]?.date)
+                                    ? formatDate(flightDates.oneway.start)
+                                    : formatDate(flightDates.multi[0]?.date)
                               }
                             />
 
@@ -1275,7 +1286,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                 `${totalPassengers} Traveller${
                                   totalPassengers > 1 ? "s" : ""
                                 }, ${travelClass}`,
-                                17
+                                17,
                               )}
                             </div>
 
@@ -1359,7 +1370,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                     updateMultiLeg(
                                       actualIndex,
                                       "from",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                 />
@@ -1375,7 +1386,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                       }
                                       heading="RECENT SEARCH"
                                       suggestions={getFilteredSuggestions(
-                                        leg.from || ""
+                                        leg.from || "",
                                       )}
                                       onSelect={(s) =>
                                         selectSuggestion(s, "from", actualIndex)
@@ -1409,7 +1420,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                     updateMultiLeg(
                                       actualIndex,
                                       "to",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                 />
@@ -1425,7 +1436,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                       }
                                       heading="RECENT SEARCH"
                                       suggestions={getFilteredSuggestions(
-                                        leg.to || ""
+                                        leg.to || "",
                                       )}
                                       onSelect={(s) =>
                                         selectSuggestion(s, "to", actualIndex)
@@ -1473,7 +1484,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                           onDateClick={(date) => {
                                             handleMultiDateClick(
                                               actualIndex,
-                                              date
+                                              date,
                                             );
                                             setShowCalendar(false);
                                             setActiveMultiIndex(null);
@@ -1498,7 +1509,7 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                     className={styles.contant}
                                     placeholder="ADD DATES"
                                     value={formatDate(
-                                      flightDates.multi[actualIndex]?.date
+                                      flightDates.multi[actualIndex]?.date,
                                     )}
                                     required
                                   />
@@ -1637,8 +1648,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                         {bookingType === "hotel"
                           ? "Check In"
                           : bookingType === "holiday"
-                          ? "Departure Date"
-                          : "Travel Date"}
+                            ? "Departure Date"
+                            : "Travel Date"}
                       </div>
 
                       {/* Hotel Calendar */}
@@ -1714,8 +1725,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                             bookingType === "hotel"
                               ? formatDate(hotelStartDate)
                               : bookingType === "holiday"
-                              ? formatDate(holidayStartDate)
-                              : formatDate(insuranceStartDate)
+                                ? formatDate(holidayStartDate)
+                                : formatDate(insuranceStartDate)
                           }
                         />
                         <button type="button" className={styles.calendarIcon}>
@@ -1736,8 +1747,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                         {bookingType === "hotel"
                           ? "Check Out"
                           : bookingType === "holiday"
-                          ? "To CITY/COUNTRY, CATEGORY"
-                          : "Return Date"}
+                            ? "To CITY/COUNTRY, CATEGORY"
+                            : "Return Date"}
                       </div>
 
                       {bookingType === "holiday" ? (
@@ -1806,8 +1817,8 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                         {bookingType === "hotel"
                           ? "GUESTS & ROOMS"
                           : bookingType === "holiday"
-                          ? "ROOMS & GUESTS"
-                          : "TRAVELLERS"}
+                            ? "ROOMS & GUESTS"
+                            : "TRAVELLERS"}
                       </div>
 
                       <div className={styles.iconCont}>
@@ -1820,15 +1831,15 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
                                   totalHotelPassengers > 1 ? "s" : ""
                                 }`
                               : bookingType === "holiday"
-                              ? `${totalPassengers} Room${
-                                  totalPassengers > 1 ? "s" : ""
-                                }, ${totalPassengers} Guest${
-                                  totalPassengers > 1 ? "s" : ""
-                                }`
-                              : `${totalPassengers} Traveller${
-                                  totalPassengers > 1 ? "s" : ""
-                                }, ${travelClass}`,
-                            17
+                                ? `${totalPassengers} Room${
+                                    totalPassengers > 1 ? "s" : ""
+                                  }, ${totalPassengers} Guest${
+                                    totalPassengers > 1 ? "s" : ""
+                                  }`
+                                : `${totalPassengers} Traveller${
+                                    totalPassengers > 1 ? "s" : ""
+                                  }, ${travelClass}`,
+                            17,
                           )}
                         </div>
 
