@@ -41,6 +41,10 @@
 
 .mobileView{
   display: none;
+  flex-direction: column;
+  /* gap: 32px; */
+  height: 100vh;
+  background: rgba(249, 249, 249, 1);
 }
 
 
@@ -71,6 +75,6 @@
     display: none;
   }
   .mobileView{
-    display: block;
+    display: flex;
   }
 }

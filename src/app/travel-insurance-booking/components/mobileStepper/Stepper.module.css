@@ -1,29 +1,29 @@
 .container {
-    /* max-width: 600px; */
+    max-width: 600px;
     padding: 32px 16px;
-    padding-top: 0px;
     display: flex;
     flex-direction: column;
     gap: 24px;
     font-family: 'Inter', sans-serif;
     color: rgba(0, 0, 0, 1);
     background: rgba(249, 249, 249, 1);
-    padding-bottom: 140px;
 }
 
 /* Stepper Navigation */
 .stepper {
     display: flex;
     justify-content: space-between;
-    /* gap: 16px; */
+    padding: 32px 16px 24px 16px;
+    position: sticky;
+    top: 74px;
+    z-index: 9;
+ background: rgba(249, 249, 249, 1);
 }
 
 .step {
     font-size: 10px;
     font-weight: 600;
     text-align: center;
-    /* padding-bottom: 7px;
-  border-bottom: 6px solid rgba(228, 230, 232, 1); */
     color: rgba(16, 24, 40, 1);
     line-height: 16px;
     letter-spacing: -2%;
@@ -57,7 +57,6 @@
 .stepDividerActive {
     background-color: rgba(134, 197, 86, 1);
 }
-
 
 .stepActive {
     border-bottom-color: rgba(134, 197, 86, 1);
@@ -207,7 +206,6 @@
     font-weight: 500;
     color: rgba(0, 0, 0, 1);
 }
-
 
 .featureItem {
     display: flex;

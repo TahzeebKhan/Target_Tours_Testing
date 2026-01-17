@@ -74,23 +74,9 @@ const TravellerDetails = () => {
   return (
     <>
       <div className={styles.Maincontainer}>
-        <TripSummaryHeader onEditClick={() => setOpenAddDetails(true)} />
+        
 
         <div className={styles.container}>
-          {/* Progress Bar */}
-          <nav className={styles.stepper}>
-            {steps.map((label, index) => (
-              <div key={label} className={styles.stepWrapper}>
-                <span className={styles.stepLabel}>{label}</span>
-                <div
-                  className={`${styles.stepDivider} ${
-                    index <= 3 ? styles.stepDividerActive : ""
-                  }`}
-                />
-              </div>
-            ))}
-          </nav>
-
           <header className={styles.header}>
             <h1 className={styles.mainTitle}>REVIEW AND PAYMENT</h1>
           </header>

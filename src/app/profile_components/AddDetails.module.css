@@ -4,9 +4,12 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
+  background: rgba(10, 10, 10, 0.2);
+  backdrop-filter: blur(8px);
+
   z-index: 50;
 }
+
 .modalContainer {
   background-color: #ffffff;
   width: 100%;
@@ -17,6 +20,38 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0px -4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 127px;
+
+  /* Slide in from bottom */
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slideOut {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }
 
 .modalHeader {
@@ -93,7 +128,8 @@
 /* Make input take full width */
 .dateField input {
   width: 100%;
-  padding-right: 40px; /* space for icon */
+  padding-right: 40px;
+  /* space for icon */
   cursor: pointer;
 }
 

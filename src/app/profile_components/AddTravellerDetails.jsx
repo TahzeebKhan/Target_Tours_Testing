@@ -9,7 +9,7 @@ import TravellerDetails from "./TravellerDetails";
 import PriceSummary from "./PriceSummary";
 import AddDetails from "./AddDetails";
 
-const AddTravellerDetails = () => {
+const AddTravellerDetails = ({ setCurrentStep }) => {
   const [travelers, setTravelers] = useState([
     { id: 1, type: "ADULT", isOpen: true },
     { id: 2, type: "CHILD", isOpen: true },
@@ -25,7 +25,7 @@ const AddTravellerDetails = () => {
   const STEP_ADD_TRAVELLER = 2;
   const STEP_REVIEW_PAY = 3;
 
-  const [currentStep, setCurrentStep] = useState(STEP_ADD_TRAVELLER);
+  // const [currentStep, setCurrentStep] = useState(STEP_ADD_TRAVELLER);
   const [openPriceSummary, setOpenPriceSummary] = useState(false);
   const [openAddDetails, setOpenAddDetails] = useState(false);
 
@@ -61,25 +61,10 @@ const AddTravellerDetails = () => {
   return (
     <>
       {/* ================= ADD TRAVELLER STEP ================= */}
-      {currentStep === STEP_ADD_TRAVELLER && (
+      {/* {currentStep === STEP_ADD_TRAVELLER && ( */}
         <div className={styles.Maincontainer}>
-          <TripSummaryHeader onEditClick={() => setOpenAddDetails(true)} />
-
+        
           <div className={styles.container}>
-            {/* Stepper */}
-            <nav className={styles.stepper}>
-              {steps.map((label, index) => (
-                <div key={label} className={styles.stepWrapper}>
-                  <span className={styles.stepLabel}>{label}</span>
-                  <div
-                    className={`${styles.stepDivider} ${
-                      index <= currentStep ? styles.stepDividerActive : ""
-                    }`}
-                  />
-                </div>
-              ))}
-            </nav>
-
             {/* Header */}
             <div className={styles.headerRow}>
               <h1 className={styles.mainTitle}>TRAVELER DETAILS</h1>
@@ -184,14 +169,14 @@ const AddTravellerDetails = () => {
 
           {/* Footer */}
           <BookingSummaryFooter
-            onContinue={() => setCurrentStep(STEP_REVIEW_PAY)}
+            onContinue={() => setCurrentStep(4)}
             onInfoClick={() => setOpenPriceSummary(true)}
           />
         </div>
-      )}
+      {/* )} */}
 
       {/* ================= REVIEW & PAY STEP ================= */}
-      {currentStep === STEP_REVIEW_PAY && <TravellerDetails />}
+      {/* {currentStep === STEP_REVIEW_PAY && <TravellerDetails />} */}
 
       {/* ================= PRICE SUMMARY MODAL ================= */}
       {openPriceSummary && (

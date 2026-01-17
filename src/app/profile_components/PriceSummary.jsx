@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import styles from "./PriceSummary.module.css";
+import { useState } from "react";
 
 export default function PriceSummary({ onClose }) {
   const lineItems = [
@@ -13,10 +14,19 @@ export default function PriceSummary({ onClose }) {
     { label: "Taxes & Fees", value: "₹ 2,819" },
   ];
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () =>{
+    setIsClosing(true);
+    setTimeout(()=>{
+      onClose();
+    }, 300);
+  }
+
   return (
     <div className={styles.container} onClick={onClose}>
       <div
-        className={styles.modalOverlay}
+        className={`${styles.modalOverlay} ${isClosing ? styles.slideOut : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.card}>
@@ -26,7 +36,8 @@ export default function PriceSummary({ onClose }) {
             <button
               type="button"
               className={styles.closeIcon}
-              onClick={onClose}
+              onClick={handleClose}
+              aria-label="Close"
             >
               <Image
                 src="/images/CLose.svg"
