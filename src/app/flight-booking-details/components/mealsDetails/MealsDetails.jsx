@@ -7,6 +7,7 @@ import MobileFlightMeals from "./Components/MobileFlightMeals";
 import { useFlightBooking } from "../../FlightBookingContext";
 import { meals, beverages } from "./mealsData";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
+import PriceSummary from "@/app/profile_components/PriceSummary";
 
 // Helper to find meal info
 const allMeals = [...meals, ...beverages];
@@ -16,6 +17,7 @@ const MealsDetails = () => {
   const { setMeals, setCurrentStep, currentStep } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
 
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // State: { "DEL-BOM-1": 2, "BOM-DEL-7": 1 }
   // Key format: `${segment}-${mealId}`
   const [mealQuantities, setMealQuantities] = useState({});
@@ -263,13 +265,21 @@ const MealsDetails = () => {
           </div>
         </div>
 
+        {showPriceSummaryPopup && (
+          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+        )}
         <div className={styles.footer}>
           {/* LEFT */}
           <div className={styles.footerContainer}>
             <div className={styles.amountSection}>
               <div className={styles.label}>
                 Total Amount
-                <span className={styles.infoIcon}>!</span>
+                <span
+                  onClick={() => setShowPriceSummaryPopup(true)}
+                  className={styles.infoIcon}
+                >
+                  !
+                </span>
               </div>
               <div className={styles.amount}>₹ 66,945</div>
             </div>

@@ -8,6 +8,7 @@ import ExtraBaggageItem from "./Components/extraBaggageItem/ExtraBaggageItem";
 
 import { useFlightBooking } from "../../FlightBookingContext";
 import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
+import PriceSummary from "@/app/profile_components/PriceSummary";
 
 /* ================== DATA ================== */
 
@@ -153,6 +154,7 @@ const BaggageDetails = () => {
   const { setBaggage } = useFlightBooking();
   const { setCurrentStep, currentStep } = useFlightBooking();
 
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // 🔥 Quantity state (per flight + per baggage)
   const [quantities, setQuantities] = useState({});
 
@@ -359,6 +361,9 @@ const BaggageDetails = () => {
             </div>
           </div>
         </div>
+        {showPriceSummaryPopup && (
+          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+        )}
 
         <div className={styles.footer}>
           {/* LEFT */}
@@ -366,7 +371,12 @@ const BaggageDetails = () => {
             <div className={styles.amountSection}>
               <div className={styles.label}>
                 Total Amount
-                <span className={styles.infoIcon}>!</span>
+                <span
+                  onClick={() => setShowPriceSummaryPopup(true)}
+                  className={styles.infoIcon}
+                >
+                  !
+                </span>
               </div>
               <div className={styles.amount}>₹ 66,945</div>
             </div>

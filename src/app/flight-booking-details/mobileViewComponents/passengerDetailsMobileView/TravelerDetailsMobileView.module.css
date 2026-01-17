@@ -1,6 +1,6 @@
 .tripDetailsContainer {
     background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
-    padding: 76px 16px 100px 16px;
+    padding: 76px 16px 148px 16px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -166,7 +166,7 @@
 }
 
 .footer {
-    padding: 24px 16px;
+    padding: 24px 16px 55px;
     background: #000033;
     box-shadow: 0px -6px 10.2px 0px #0000001A;
     position: fixed;

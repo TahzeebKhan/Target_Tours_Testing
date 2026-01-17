@@ -1,23 +1,27 @@
-"use client"
-import TripDetailsHeader from '@/app/components/tripDetailsHeader/TripDetailsHeader'
-import React, { useState } from 'react'
-import styles from './TravelerDetailsMobileView.module.css'
+"use client";
+import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
+import React, { useState } from "react";
+import styles from "./TravelerDetailsMobileView.module.css";
+import { useFlightBooking } from "../../FlightBookingContext";
+import PriceSummary from "@/app/profile_components/PriceSummary";
 
-const TravelerDetailsMobileView = () => {
+const TravelerDetailsMobileView = ({ onClose }) => {
   const [travelers, setTravelers] = useState([1]); // start with 1 traveler
+  const { setCurrentStep } = useFlightBooking();
 
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // ➕ Add Traveler
   const addTraveler = () => {
-    setTravelers(prev => [...prev, prev.length + 1]);
+    setTravelers((prev) => [...prev, prev.length + 1]);
   };
 
   // ➖ Remove Traveler
   const removeTraveler = (index) => {
-    setTravelers(prev => prev.filter((_, i) => i !== index));
+    setTravelers((prev) => prev.filter((_, i) => i !== index));
   };
   return (
     <div className={styles.TriipWrapper}>
-      <TripDetailsHeader title='Passenger Info' />
+      <TripDetailsHeader onBack={onClose} title="Passenger Info" />
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
           <h2 className={styles.heading}>TRAVELER Details</h2>
@@ -66,7 +70,9 @@ const TravelerDetailsMobileView = () => {
                 <div className={`${styles.field} ${styles.selectField}`}>
                   <label className={styles.label}>Gender</label>
                   <select className={styles.select} defaultValue="">
-                    <option value="" disabled hidden>Select</option>
+                    <option value="" disabled hidden>
+                      Select
+                    </option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>
@@ -138,13 +144,21 @@ const TravelerDetailsMobileView = () => {
           </div>
         </div>
       </div>
+      {showPriceSummaryPopup && (
+        <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+      )}
       <div className={styles.footer}>
         {/* LEFT */}
         <div className={styles.footerContainer}>
           <div className={styles.amountSection}>
             <div className={styles.Btnlabel}>
               Total Amount
-              <span className={styles.infoIcon}>!</span>
+              <span
+                onClick={() => setShowPriceSummaryPopup(true)}
+                className={styles.infoIcon}
+              >
+                !
+              </span>
             </div>
             <div className={styles.amount}>₹ 66,945</div>
           </div>
@@ -159,7 +173,7 @@ const TravelerDetailsMobileView = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TravelerDetailsMobileView
+export default TravelerDetailsMobileView;

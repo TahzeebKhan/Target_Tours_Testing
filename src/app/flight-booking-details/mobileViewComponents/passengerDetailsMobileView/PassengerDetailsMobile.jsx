@@ -10,11 +10,15 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import FareDetailsPop from "../components/fareDetailsPop/FareDetailsPop";
 import BaggageRules from "../components/baggageRules/BaggageRules";
 import { useRouter } from "next/navigation";
-const PassengerDetailsMobile = () => {
+import PriceSummary from "@/app/profile_components/PriceSummary";
+import TravelerDetailsMobileView from "./TravelerDetailsMobileView";
+const PassengerDetailsMobile = ({ fromBaggage }) => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
-
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   const [showBaggageRulesPopup, setShowaggageRulesPopup] = useState(false);
+
+  const [showPassengerInfo, setShowPassengerInfo] = useState(false);
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -129,6 +133,12 @@ const PassengerDetailsMobile = () => {
     stops: "1 Stop",
   };
 
+  if (showPassengerInfo) {
+    return (
+      <TravelerDetailsMobileView onClose={() => setShowPassengerInfo(false)} />
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.tripDetailsContainer}>
@@ -153,7 +163,17 @@ const PassengerDetailsMobile = () => {
         }`}
       >
         <div className={styles.tripDetailsHeader}>
-          <img src="/icons/leftArrowTrip.svg" alt="" />
+          <img
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              if (!router) return;
+              else {
+                router.push("/flights");
+              }
+            }}
+            src="/icons/leftArrowTrip.svg"
+            alt=""
+          />
           <div
             className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
           >
@@ -293,7 +313,9 @@ const PassengerDetailsMobile = () => {
           </div>
         </div>
       </div>
-
+      {showPriceSummaryPopup && (
+        <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+      )}
       <div className={styles.footer}>
         {/* LEFT */}
         <div className={styles.footerContainer}>
@@ -301,7 +323,7 @@ const PassengerDetailsMobile = () => {
             <div className={styles.label}>
               Total Amount
               <span
-                // onClick={() => setShowFareDetailsPopup(true)}
+                onClick={() => setShowPriceSummaryPopup(true)}
                 className={styles.infoIcon}
               >
                 !
@@ -312,7 +334,7 @@ const PassengerDetailsMobile = () => {
 
           {/* RIGHT */}
           <button
-            onClick={() => setCurrentStep(3)}
+            onClick={() => setShowPassengerInfo(true)}
             className={styles.continueBtn}
           >
             CONTINUE BOOKING

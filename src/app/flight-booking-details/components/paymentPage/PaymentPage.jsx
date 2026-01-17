@@ -7,10 +7,13 @@ import { tripSummaryData } from "./components/dummyData";
 import PassengerInfo from "./components/PassengerInfo";
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
+import PriceSummary from "@/app/profile_components/PriceSummary";
 const PaymentPage = () => {
   const { setCurrentStep } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [paymentMethod, setPaymentMethod] = useState("credit");
+
+  const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
@@ -208,13 +211,21 @@ const PaymentPage = () => {
         </div> */}
       </div>
       <div className={styles.mobileView}>
+        {showPriceSummaryPopup && (
+          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+        )}
         <div className={styles.footer}>
           {/* LEFT */}
           <div className={styles.footerContainer}>
             <div className={styles.amountSection}>
               <div className={styles.label}>
                 Total Amount
-                <span className={styles.infoIcon}>!</span>
+                <span
+                  onClick={() => setShowPriceSummaryPopup(true)}
+                  className={styles.infoIcon}
+                >
+                  !
+                </span>
               </div>
               <div className={styles.amount}>₹ 66,945</div>
             </div>

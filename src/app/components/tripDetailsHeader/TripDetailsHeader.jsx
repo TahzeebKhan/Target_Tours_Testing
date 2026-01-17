@@ -4,7 +4,8 @@ import styles from "./TripDetailsHeader.module.css";
 const TripDetailsHeader = ({
   title = "Trip Details",
   onBack,
-  children
+  children,
+  fromTravellerdetails,
 }) => {
   return (
     <div className={styles.tripDetailsContainer}>
@@ -16,11 +17,7 @@ const TripDetailsHeader = ({
           style={{ cursor: onBack ? "pointer" : "default" }}
         />
 
-        {children ? (
-          children
-        ) : (
-          <p className={styles.tripDetails}>{title}</p>
-        )}
+        {children ? children : <p className={styles.tripDetails}>{title}</p>}
       </div>
     </div>
   );

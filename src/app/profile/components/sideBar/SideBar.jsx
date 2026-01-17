@@ -1,5 +1,5 @@
 "use client";
-import React, { useActionState, useState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 import styles from "./SideBar.module.css";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,9 @@ const SideBar = () => {
   const router = useRouter();
   const [openTrips, setOpenTrips] = useState(false);
   const [activeTrip, setActiveTrip] = useState("All");
+  useEffect(() => {
+    if (activeMenu !== "trip" && openTrips) setOpenTrips(false);
+  }, [setActiveMenu, activeMenu]);
   return (
     <div className={styles.sideBarContianer}>
       <div className={styles.sideBarTop}>
@@ -77,7 +80,7 @@ const SideBar = () => {
                   opacity: 1,
                   transitionEnd: { overflow: "visible" },
                 }}
-                exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+                exit={{ height: 0, opacity: 0, overflow: "auto" }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className={styles.subMenu}
               >
