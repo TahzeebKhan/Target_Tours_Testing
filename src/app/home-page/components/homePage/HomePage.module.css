@@ -1385,9 +1385,12 @@
     max-width: 204px;
     width: 100%;
   }
+  .arrowboxOneWay{
+    left: 20.5%;
+  }
 
   .arrowbox {
-    left: 23%;
+    left: 23% ;
   }
 
   .InspiredSection {
@@ -1401,6 +1404,7 @@
   .travellerClassField {
     min-width: 190px;
   }
+
 }
 
 @media (max-width: 895px) {
