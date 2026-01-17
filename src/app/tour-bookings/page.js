@@ -18,7 +18,7 @@ const FlightBookingDetailsPage = () => {
       {currentStep === 3 && (
         <>
           <PaymentPage />
-        </>
+         </>
       )}
     </div>
   );

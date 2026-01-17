@@ -54,3 +54,12 @@
 }
 
 /* ACTIVE / SELECTED */
+
+@media (max-width: 645px){
+    .wrapper{
+      border: 1px solid #E4E6E8;
+      border-top: 0;
+      padding: 12px;
+      padding-top:0 ;
+    }
+}

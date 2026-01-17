@@ -4,12 +4,17 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
 import { tripSummaryData } from "./components/dummyData";
-import PassengerInfo from "./components/PassengerInfo";
+
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
+import PassengerInfo from "./components/passengerInfo/PassengerInfo";
+import BookingFooter from "../review/components/bookingFooter/BookingFooter";
+import { AnimatePresence } from "framer-motion";
+import PriceSummary from "../review/components/priceSummary/PriceSummary";
 const PaymentPage = () => {
   const { setCurrentStep } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
+  const [showPriceSummary, setShowPriceSummary] = useState(false);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -17,6 +22,17 @@ const PaymentPage = () => {
 
   return (
     <>
+      <div className={styles.tripDetailsContainer}>
+        <div className={styles.tripDetailsHeader}>
+          <img
+            onClick={() => setCurrentStep(2)}
+            className={styles.backArrow}
+            src="/icons/leftArrowTrip.svg"
+            alt=""
+          />
+          <p className={styles.tripDetails}>Review and Payment</p>
+        </div>
+      </div>
       <div className={styles.container}>
         {/* HEADER */}
         <div className={styles.passengerDetailsHeader}>
@@ -36,7 +52,7 @@ const PaymentPage = () => {
         </div>
 
         {/* Trip Summary */}
-        <div className={styles.flightExpandableContainer}>
+        {/* <div className={styles.flightExpandableContainer}>
           <div
             className={styles.flightExpandableCard}
             onClick={() => toggleTab("tripSummary")}
@@ -115,12 +131,47 @@ const PaymentPage = () => {
           >
             <TripSummaryExpandable data={tripSummaryData} />
           </div>
+        </div> */}
+
+        <div className={styles.tripSummaryContainer}>
+          <h3 className={styles.flightExpandableHeader}>trip summary</h3>
+          <div className={styles.tripSummaryContent}>
+            <div className={styles.imgContainer}>
+              <img src="/images/splendorsImg.png" alt="" />
+            </div>
+            <div className={styles.textContainer}>
+              <h3 className={styles.tourName}>Splendors of the Canadian West</h3>
+              <div className={styles.subTextContainer}>
+                <div className={styles.dateLocationContainer}>
+                  <span className={styles.dateLocation}>Sun, Jan 11, 2026</span>
+                  <div className={styles.dayNightContainer}>
+                    <div className={styles.dash}></div>
+                    <span className={styles.dayNightChip}>7D/6N</span>
+                    <div className={styles.dash}></div>
+                  </div>
+                  <span className={styles.dateLocation}>Sat, Jan 17, 2026 / From New Delhi</span>
+                </div>
+                <div className={styles.itineraryContainer}>
+                  <span className={styles.boldSpan}>2N</span>
+                  <span className={styles.ubudText}>Ubud</span>
+                  <span>•</span>
+                  <span className={styles.boldSpan}>1N</span>
+                  <span className={styles.ubudText}>Toronto</span>
+                  <span>•</span>
+                  <span className={styles.boldSpan}>3N</span>
+                  <span className={styles.ubudText}>Oikawa</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* Passenger info */}
         <div className={styles.flightExpandableContainer}>
           <div
-            className={styles.flightExpandableCard}
+            className={`${styles.flightExpandableCard} ${openTab === "passengerInfo" ? styles.open : ""
+              }`}
             onClick={() => toggleTab("passengerInfo")}
           >
             <h3 className={styles.flightExpandableHeader}>
@@ -129,22 +180,20 @@ const PaymentPage = () => {
             <img
               src="/icons/DownArrows.svg"
               alt=""
-              className={`${styles.arrow} ${
-                openTab === "passengerInfo" ? styles.arrowRotate : ""
-              }`}
+              className={`${styles.arrow} ${openTab === "passengerInfo" ? styles.arrowRotate : ""
+                }`}
             />
           </div>
 
           <div
-            className={`${styles.expandWrap} ${
-              openTab === "passengerInfo" ? styles.expandOpen : ""
-            }`}
+            className={`${styles.expandWrap} ${openTab === "passengerInfo" ? styles.expandOpen : ""
+              }`}
           >
             <PassengerInfo />
           </div>
         </div>
 
-        <div className={styles.flightExpandableContainer}>
+        {/* <div className={styles.flightExpandableContainer}>
           <div
             className={styles.flightExpandableCard}
             onClick={() => toggleTab("extras")}
@@ -166,10 +215,10 @@ const PaymentPage = () => {
           >
             <ExtrasSummary />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.flightExpandableContainer}>
-          <div className={styles.flightExpandableCard}>
+          <div className={`${styles.flightExpandableCard} ${styles.payWithContainer}`}>
             <h3 className={styles.flightExpandableHeader}>Pay with</h3>
           </div>
           <PayWithOptions />
@@ -181,6 +230,23 @@ const PaymentPage = () => {
         >
           <button className={styles.continueButton}>CONTINUE</button>
         </div> */}
+
+
+      </div>
+      <div className={styles.footerContainer}>
+        <BookingFooter
+          title="Starting From"
+          amount="₹ 66,945"
+          onInfoClick={() => setShowPriceSummary(true)}
+          onContinue={() => setCurrentStep(3)}
+        />;
+
+
+        <AnimatePresence mode="wait">
+          {showPriceSummary && (
+            <PriceSummary onClose={() => setShowPriceSummary(false)} />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

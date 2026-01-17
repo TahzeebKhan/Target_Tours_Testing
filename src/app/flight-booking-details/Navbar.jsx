@@ -2,9 +2,15 @@
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { useAuth } from "../context/AuthContext";
+import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
+import { useRef, useState } from "react";
 const Navbar = () => {
+    const { isLoggedIn, profile: userProfile } = useAuth();
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const profileBtnRef = useRef(null);
+
   return (
     <>
       {" "}
@@ -28,13 +34,39 @@ const Navbar = () => {
             <button className={`${styles.glass_button} ${styles.downloadBtn}`}>
               Download the App
             </button>
-            {!isLoggedIn && (
+            {/* {!isLoggedIn && (
               <button
                 onClick={() => router.push("/?openLogin=true")}
                 className={styles.signInBtn}
               >
                 Sign In
               </button>
+            )} */}
+            {!isLoggedIn ? (
+              <button
+                className={styles.signInBtn}
+                onClick={() => setShowLogin(true)}
+              >
+                Sign In
+              </button>
+            ) : (
+              <>
+                <button
+                  ref={profileBtnRef}
+                  onClick={() => setShowProfileModal(true)}
+                  className={`${styles.glass_button} ${styles.logggedInBtn}`}
+                  type="button"
+                >
+                  Hi, {userProfile?.display_name || "User"}
+                </button>
+
+                {showProfileModal && (
+                  <ProfileModal
+                    anchorRef={profileBtnRef}
+                    onClose={() => setShowProfileModal(false)}
+                  />
+                )}
+              </>
             )}
 
             <button className={styles.hamBurger}>

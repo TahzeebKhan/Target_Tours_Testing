@@ -1,6 +1,6 @@
-import React from "react";
-import styles from "./FlightDetailsCard.module.css";
-import FlightTimingDetail from "@/app/tour-booking/components/arrivalToronto/flightTimingDetails/FlightTimingDetail";
+import React from 'react'
+import styles from './FlightDetailsCard.module.css'
+import FlightTimingDetail from '@/app/tour-details/components/arrivalToronto/flightTimingDetails/FlightTimingDetail';
 
 const FlightDetailsCard = ({ setFareModalOpen, flight }) => {
   // Get the first airline (or handle multiple airlines)

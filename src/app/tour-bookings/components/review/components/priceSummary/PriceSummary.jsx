@@ -1,0 +1,89 @@
+"use client";
+
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import styles from "./PriceSummary.module.css";
+
+export default function PriceSummary({ onClose }) {
+  const lineItems = [
+    { label: "1x Adult", value: "₹ 64,126" },
+    { label: "1x Cabin baggage", value: "Included", isGreen: true },
+    { label: "1x Checked baggage 15kg", value: "Included", isGreen: true },
+    { label: "Seat Selection", value: "Free", isGreen: true },
+    { label: "Meals", value: "Included", isGreen: true },
+    { label: "Taxes & Fees", value: "₹ 2,819" },
+  ];
+
+  return (
+ 
+      <motion.div
+      className={styles.container}
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* 👇 BOTTOM SHEET */}
+      <motion.div
+        className={styles.modalOverlay}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ y: "100%" }}   // ⬇️ start off-screen
+        animate={{ y: 0 }}        // ⬆️ slide up
+        exit={{ y: "100%" }}      // ⬇️ slide down
+        transition={{
+          type: "spring",
+          stiffness: 260,
+          damping: 30,
+        }}
+      >
+          <div className={styles.card}>
+            <header className={styles.header}>
+              <h2 className={styles.title}>PRICE SUMMARY</h2>
+
+              <button
+                type="button"
+                className={styles.closeIcon}
+                onClick={onClose}
+              >
+                <Image
+                  src="/images/CLose.svg"
+                  alt="Close"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </header>
+
+            <div className={styles.content}>
+              {lineItems.map((item, index) => (
+                <div key={index} className={styles.row}>
+                  <span className={styles.label}>{item.label}</span>
+                  <span
+                    className={`${styles.value} ${
+                      item.isGreen ? styles.green : ""
+                    }`}
+                  >
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.dividerWrapper}>
+              <div className={styles.divider} />
+            </div>
+
+            <div className={styles.totalSection}>
+              <div className={styles.totalTextGroup}>
+                <h3 className={styles.totalTitle}>Total Amount</h3>
+                <p className={styles.subtext}>
+                  Includes taxes and service fees
+                </p>
+              </div>
+              <div className={styles.totalPrice}>₹ 66,945</div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+  );
+}
