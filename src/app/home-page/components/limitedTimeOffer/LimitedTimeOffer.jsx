@@ -8,53 +8,80 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 import styles from "./LimitedTimeOffer.module.css";
+import { useHomePageOffer } from "@/app/hooks/useHomePageOffer";
+
+
+const FALLBACK_DATA = {
+  startPrice: 230000,
+  backgroundVideo: "/videos/Desert_Camels.mp4",
+  sliderData: [
+    {
+      id: 1,
+      image: "/images/exp3.png",
+      title: "Shoja",
+      subtitle: "Himachal Pradesh",
+    },
+    {
+      id: 2,
+      image: "/images/exp2.png",
+      title: "Jaisalmer",
+      subtitle: "Rajasthan",
+    },
+    {
+      id: 3,
+      image: "/images/exp1.png",
+      title: "Coorg",
+      subtitle: "Karnataka",
+    },
+    {
+      id: 4,
+      image: "/images/exp3.png",
+      title: "Coorg",
+      subtitle: "Karnataka",
+    },
+    {
+      id: 5,
+      image: "/images/exp2.png",
+      title: "Coorg",
+      subtitle: "Karnataka",
+    },
+  ],
+};
 
 const LimitedTimeOffer = () => {
   const swiperRef = useRef(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+  const { data, isLoading, isError } = useHomePageOffer();
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
-  // JSON DATA
-  const sliderData = [
-    {
-      img: "/images/exp3.png",
-      title: "Shoja",
-      subtitle: "Himachal Pradesh",
-    },
-    {
-      img: "/images/exp2.png",
-      title: "Jaisalmer",
-      subtitle: "Rajasthan",
-    },
-    {
-      img: "/images/exp1.png",
-      title: "Coorg",
-      subtitle: "Karnataka",
-    },
-    {
-      img: "/images/exp1.png",
-      title: "Tirthan",
-      subtitle: "Himachal Pradesh",
-    },
-    {
-      img: "/images/exp2.png",
-      title: "Manali",
-      subtitle: "Himachal Pradesh",
-    },
-    {
-      img: "/images/exp2.png",
-      title: "Manali",
-      subtitle: "Himachal Pradesh",
-    },
-  ];
+
+  const finalData = !isError && data ? data : FALLBACK_DATA;
+  const videoSrc = isVideoReady
+    ? finalData.backgroundVideo
+    : FALLBACK_DATA.backgroundVideo;
+
+  console.log(videoSrc);
 
   return (
     <section className="relative w-full h-[689px]">
       <header className={`${styles.homeSection} w-full`}>
+
+        {/* ---------------- HIDDEN MAIN VIDEO (PRELOAD ONLY) ---------------- */}
+        {data?.backgroundVideo && (
+          <video
+            src={data.backgroundVideo}
+            preload="auto"
+            muted
+            playsInline
+            onCanPlay={() => setIsVideoReady(true)}
+            style={{ display: "none" }}
+          />
+        )}
         <video
+          key={videoSrc}
           className="absolute inset-0 w-full h-full object-cover"
-          src="/videos/Desert_Camels.mp4"
-          poster="/images/hero-poster.jpg"
+          src={videoSrc}
           autoPlay
           muted
           loop
@@ -72,7 +99,7 @@ const LimitedTimeOffer = () => {
               <div className={styles.textContainer}>
                 <span className={styles.offer}>Offer Starting from</span>
                 <p className={styles.price}>
-                  INR 2,30,000/
+                  INR {finalData.startPrice.toLocaleString()}/
                   <span className={styles.adult}>Adult</span>
                 </p>
 
@@ -172,36 +199,10 @@ const LimitedTimeOffer = () => {
                   }}
 
                 >
-                  {/* <Swiper
-                                    spaceBetween={20}
-                                    modules={[Navigation]}
-                                    observer={true}
-                                    observeParents={true}
-                                    onSwiper={(swiper) => {
-                                        swiperRef.current = swiper;
-                                        setIsBeginning(swiper.isBeginning);
-                                        setIsEnd(swiper.isEnd);
-                                    }}
-                                    onSlideChange={(swiper) => {
-                                        setIsBeginning(swiper.isBeginning);
-                                        setIsEnd(swiper.isEnd);
-                                    }}
-                                    breakpoints={{
-                                        0: {
-                                            slidesPerView: 1,
-                                        },
-                                        768: {
-                                            slidesPerView: 2,
-                                        },
-                                        1100: {
-                                            slidesPerView: 3,
-                                        },
-                                    }}
-                                > */}
-                  {sliderData.map((item, index) => (
+                  {finalData.sliderData.map((item, index) => (
                     <SwiperSlide key={index} className={styles.swapperslider}>
                       <div className={styles.items}>
-                        <img src={item.img} alt="" />
+                        <img src={item.image} alt={item.title} />
 
                         <div className={styles.imgMainContainer}>
                           <div className={styles.imgBottom}>

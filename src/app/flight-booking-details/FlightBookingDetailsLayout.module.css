@@ -68,6 +68,9 @@
     padding-top: 0;
     min-height: unset;
   }
+   .sidebarSticky{
+    max-height: unset;
+  }
 }
 @media (max-width: 640px) {
   .mobileView {
@@ -76,4 +79,5 @@
   .layoutWrapper {
     display: none;
   }
+ 
 }
