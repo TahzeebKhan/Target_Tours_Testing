@@ -5,11 +5,11 @@ import Questions from './components/Questions/questions'
 import FeatureSection from '../home-page/components/featureSection/FeatureSection'
 import Footer from '../home-page/components/footer/Footer'
 import TravelInsurance from './components/Navbar/TravelInsurance'
-
+import styles from "./TravelInsurancePage.module.css"
 
 const page = () => {
   return (
-    <div>
+    <div className={styles.container}>
       <TravelInsurance />
       <Comprehensive />
           <Claim />
