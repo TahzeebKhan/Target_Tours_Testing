@@ -4,8 +4,220 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import styles from "./PersonalData.module.css";
 
+import axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+
+export const SetPasswordModal = ({ open, onClose }) => {
+  useLockBodyScroll(open);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    if (!open) {
+      setPassword("");
+      setConfirmPassword("");
+      setErrors({});
+      setIsSubmitting(false);
+    }
+  }, [open]);
+  if (!open) return null;
+  const validate = () => {
+    const newErrors = {};
+
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = "Confirm password is required";
+    }
+
+    if (password && confirmPassword && password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    const token = Cookies.get("auth_token");
+    if (!token) {
+      toast.error("You must be logged in");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/update-password`,
+        { password },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      toast.success("Password updated successfully");
+      onClose();
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to update password";
+
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        className={styles.overlayContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={styles.overlayHeader}>
+          <h2 className={styles.overlayTitle}>Set password</h2>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <Image src="/icons/Close.svg" alt="Close" width={24} height={24} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className={styles.overlayBody}>
+          <div className={styles.formGroup}>
+            <label className={styles.fieldLabel}>New password</label>
+            <input
+              type="password"
+              className={`${styles.input} ${
+                errors.password ? styles.inputError : ""
+              }`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter new password"
+            />
+            {errors.password && (
+              <p className={styles.errorText}>{errors.password}</p>
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.fieldLabel}>Confirm password</label>
+            <input
+              type="password"
+              className={`${styles.input} ${
+                errors.confirmPassword ? styles.inputError : ""
+              }`}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+            />
+            {errors.confirmPassword && (
+              <p className={styles.errorText}>{errors.confirmPassword}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className={styles.overlayFooter}>
+          <button className={styles.backBtn} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={styles.sendBtn}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "UPDATING..." : "SET PASSWORD"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+export const DeleteAccountModal = ({ open, onClose, onConfirm }) => {
+  useLockBodyScroll(open);
+
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setPassword("");
+      setError("");
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleDelete = () => {
+    if (!password.trim()) {
+      setError("Password is required");
+      return;
+    }
+
+    setError("");
+    onConfirm(password);
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        className={`${styles.overlayContent} ${styles.deleteContent}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.successBody}>
+          <h2 className={styles.deleteTitle}>Delete account?</h2>
+
+          <p className={styles.deleteDescription}>
+            This action is permanent and cannot be undone.
+          </p>
+
+          {/* PASSWORD INPUT */}
+          <div className={styles.formGroup} style={{ marginTop: "24px" }}>
+            <label className={styles.fieldLabel}>Enter your password</label>
+            <input
+              type="password"
+              className={`${styles.input} ${error ? styles.inputError : ""}`}
+              placeholder="Enter password to confirm"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {error && <p className={styles.errorText}>{error}</p>}
+          </div>
+
+          {/* ACTIONS */}
+          <div className={styles.deleteActions}>
+            <button className={styles.backBtn} onClick={onClose}>
+              Cancel
+            </button>
+
+            <button className={styles.deleteBtn} onClick={handleDelete}>
+              DELETE ACCOUNT
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function PersonalData() {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const [isSetPasswordOpen, setIsSetPasswordOpen] = useState(false);
+
   const [selectedCurrency, setSelectedCurrency] = useState("$ U.S. dollar");
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState({
@@ -58,6 +270,44 @@ export default function PersonalData() {
 
   const toggleRecommendations = () => {
     setIsRecommendationsActive((prev) => !prev);
+  };
+
+  const handleDeleteAccount = async (password) => {
+    const token = Cookies.get("auth_token");
+
+    if (!token) {
+      toast.error("You must be logged in");
+      return;
+    }
+
+    try {
+      const res = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/delete-account`,
+        { password },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      // ✅ show backend success message if present
+      toast.success(res?.data?.message || "Account deleted successfully");
+
+      setIsDeleteOpen(false);
+
+      // OPTIONAL
+      // Cookies.remove("auth_token");
+      // window.location.href = "/";
+    } catch (error) {
+      // ✅ ONLY backend message
+      const backendMsg =
+        error?.response?.data?.message || error?.response?.data?.error;
+
+      if (backendMsg) {
+        toast.error(backendMsg);
+      }
+    }
   };
 
   return (
@@ -252,7 +502,12 @@ export default function PersonalData() {
             </div>
 
             <div className={styles.control}>
-              <button className={styles.outlineButton}>SET PASSWORD</button>
+              <button
+                className={styles.outlineButton}
+                onClick={() => setIsSetPasswordOpen(true)}
+              >
+                SET PASSWORD
+              </button>
             </div>
           </div>
 
@@ -266,11 +521,26 @@ export default function PersonalData() {
             </div>
 
             <div className={styles.control}>
-              <button className={styles.deleteButton}>DELETE ACCOUNT</button>
+              <button
+                className={styles.deleteButton}
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                DELETE ACCOUNT
+              </button>
             </div>
           </div>
         </div>
       </section>
+      <DeleteAccountModal
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteAccount}
+      />
+
+      <SetPasswordModal
+        open={isSetPasswordOpen}
+        onClose={() => setIsSetPasswordOpen(false)}
+      />
     </div>
   );
 }
