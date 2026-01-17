@@ -332,3 +332,15 @@
 .continueButton:hover {
   background-color: #FCC800;
 }
+
+@media (max-width: 1024px){
+  .totalPrice{
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 991px){
+  .wrapper{
+    max-width: unset;
+  }
+}

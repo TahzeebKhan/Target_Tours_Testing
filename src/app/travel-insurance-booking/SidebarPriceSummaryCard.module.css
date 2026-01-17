@@ -57,6 +57,36 @@
   line-height: 20px;
   color: #0A0A0A;
 }
+.continueButtonContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-top: 24px;
+}
+
+.continueButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 100%;
+  background-color: #000033;
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+
+.continueButton:hover {
+  background-color: #FCC800;
+}
 
 .subText {
   font-family: var(--font-inter);
