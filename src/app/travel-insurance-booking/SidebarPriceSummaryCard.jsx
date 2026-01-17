@@ -1,11 +1,12 @@
 "use client"
-import { useFlightBooking } from "./FlightBookingContext";
 import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 import { Plane, ShieldCheck } from "lucide-react";
+import { useFlightBooking } from "./FlightBookingContext";
 
 export default function SidebarPriceSummaryCard() {
-  const { prices, currentStep } = useFlightBooking();
+  // const { prices, currentStep } = useFlightBooking();
+  const { currentStep, setCurrentStep } = useFlightBooking();
 
   return (
     <div className={styles.card}>
@@ -57,11 +58,22 @@ export default function SidebarPriceSummaryCard() {
       <div className={styles.totalBox}>
         <div className={styles.totalAmountCont}>
           <p className={styles.totalLabel}>Total Amount</p>
-           <p className={styles.totalAmount}>₹ 66,945</p>
-         
+          <p className={styles.totalAmount}>₹ 66,945</p>
+
         </div>
         <p className={styles.note}>Includes taxes and service fees</p>
       </div>
+
+      {currentStep === 4 && (
+        <div className={styles.continueButtonContainer}>
+          <button
+            className={styles.continueButton}
+            onClick={() => setCurrentStep(4)}
+          >
+            continue payment
+          </button>
+        </div>
+      )}
 
     </div>
   );
