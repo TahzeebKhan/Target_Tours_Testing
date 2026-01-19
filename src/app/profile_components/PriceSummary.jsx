@@ -16,9 +16,9 @@ export default function PriceSummary({ onClose }) {
 
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = () =>{
+  const handleClose = () => {
     setIsClosing(true);
-    setTimeout(()=>{
+    setTimeout(() => {
       onClose();
     }, 300);
   }
@@ -40,7 +40,7 @@ export default function PriceSummary({ onClose }) {
               aria-label="Close"
             >
               <Image
-                src="/images/CLose.svg"
+                src="/images/Close.svg"
                 alt="Close"
                 width={20}
                 height={20}
@@ -53,9 +53,8 @@ export default function PriceSummary({ onClose }) {
               <div key={index} className={styles.row}>
                 <span className={styles.label}>{item.label}</span>
                 <span
-                  className={`${styles.value} ${
-                    item.isGreen ? styles.green : ""
-                  }`}
+                  className={`${styles.value} ${item.isGreen ? styles.green : ""
+                    }`}
                 >
                   {item.value}
                 </span>

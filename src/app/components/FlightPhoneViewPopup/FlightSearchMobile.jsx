@@ -117,7 +117,7 @@ const FlightSearchMobile = ({ setIsOpecEditFields }) => {
     <div className={styles.flightSectionMain}>
 
       <div className={styles.closeBtn} onClick={() => setIsOpecEditFields(false)}>
-        <img src="/icons/CLose.svg" alt="" />
+        <img src="/icons/Close.svg" alt="" />
       </div>
       {tripType !== "multi" && (
         <button

@@ -17,12 +17,12 @@ const LocationPermissionModal = ({ open, onAllow, onClose }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Close */}
-               <div className={styles.closeIcon}>
-                 <button className={styles.closeBtn} onClick={onClose}>
-                    <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
-                </button>
+                <div className={styles.closeIcon}>
+                    <button className={styles.closeBtn} onClick={onClose}>
+                        <img src="/icons/Close.svg" alt="close" onClick={onClose} />
+                    </button>
 
-               </div>
+                </div>
                 {/* Illustration */}
                 <div className={styles.centerContainer}>
                     <img
@@ -34,21 +34,21 @@ const LocationPermissionModal = ({ open, onAllow, onClose }) => {
                     {/* Text */}
                     <div className={styles.popTextContainer}>
                         <h2 className={styles.title}>FIND AIRPORTS NEAR ME</h2>
-                    <p className={styles.subTitle}>
-                        See all airports around your area for quicker trip planning.
-                    </p>
+                        <p className={styles.subTitle}>
+                            See all airports around your area for quicker trip planning.
+                        </p>
                     </div>
                 </div>
 
                 {/* Actions */}
                 <div className={styles.buttonContainer}>
                     <button className={styles.allowBtn} onClick={onAllow}>
-                    ALLOW LOCATION ACCESS
-                </button>
+                        ALLOW LOCATION ACCESS
+                    </button>
 
-                <button className={styles.notNowBtn} onClick={onClose}>
-                    NOT NOW
-                </button>
+                    <button className={styles.notNowBtn} onClick={onClose}>
+                        NOT NOW
+                    </button>
                 </div>
             </div>
         </div>

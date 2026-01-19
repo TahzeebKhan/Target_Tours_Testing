@@ -185,10 +185,10 @@ export default function MobileViewCalender({ onClose,
 
                 {/* HEADER */}
                 <div className={styles.header}>
-                  
+
                     <div className={styles.inputRow}>
-                          <span className={styles.label}>{inputType}</span>
-                        <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
+                        <span className={styles.label}>{inputType}</span>
+                        <img src="/icons/Close.svg" alt="close" onClick={onClose} />
                     </div>
                     <div className={styles.selectedDate}>{formatHeaderDate()}</div>
                 </div>

@@ -15,7 +15,7 @@ const BaggageRules = ({ onClose }) => {
                 <div className={styles.fareDetailsTop}>
                     <div className={styles.headerTop}>
                         <p className={styles.fareDetailsText}>Baggage Rules</p>
-                        <img className={styles.closeIcon} src="/icons/CLose.svg" alt="" onClick={onClose} />
+                        <img className={styles.closeIcon} src="/icons/Close.svg" alt="" onClick={onClose} />
                     </div>
                 </div>
                 <div className={styles.tableContainer}>
