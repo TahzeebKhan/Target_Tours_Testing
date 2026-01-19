@@ -14,6 +14,7 @@ const PassengerClassSelector = ({
   travelClass,
   setTravelClass,
 }) => {
+  const { tripType } = useTripType();
   const ref = useRef(null);
 
   useEffect(() => {
@@ -47,14 +48,13 @@ const PassengerClassSelector = ({
   };
 
   if (!open) return null;
-  const { tripType } = useTripType();
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       className={`${styles.dropdown}
-      ${tripType==='oneway'? styles.oneWayDropdown :""}
-      ${tripType==='round'? styles.roundTripDropDown :""}
+      ${tripType === 'oneway' ? styles.oneWayDropdown : ""}
+      ${tripType === 'round' ? styles.roundTripDropDown : ""}
       `}
       ref={ref}
     >
@@ -97,9 +97,8 @@ const PassengerClassSelector = ({
         {CLASSES.map((cls) => (
           <button
             key={cls}
-            className={`${styles.classBtn} ${
-              travelClass === cls ? styles.active : ""
-            }`}
+            className={`${styles.classBtn} ${travelClass === cls ? styles.active : ""
+              }`}
             onClick={() => setTravelClass(cls)}
           >
             {cls}
