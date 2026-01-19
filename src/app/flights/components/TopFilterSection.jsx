@@ -354,6 +354,18 @@ const TopFilterSection = ({
     return `${day}-${month}-${year}`;
   };
 
+  const formatSubTextDate = (dateStr) => {
+    if (!dateStr) return "ADD DATES";
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "ADD DATES";
+
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+    });
+  };
+
   // handlers to open the native date picker (if supported)
   const openDeparturePicker = () => {
     const input = departureRef.current;
@@ -491,8 +503,8 @@ const TopFilterSection = ({
       >
         <div
           className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
-              ? styles.noAnimation
-              : ""
+            ? styles.noAnimation
+            : ""
             }`}
         >
           {bookingType === "flight" && (
@@ -576,8 +588,8 @@ const TopFilterSection = ({
                     >
                       <div
                         className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
-                            ? styles.growRight
-                            : ""
+                          ? styles.growRight
+                          : ""
                           } ${tripType === "round" ? styles.roundTripBtn : ""}`}
                       >
                         <div className={styles.lable}>From</div>
@@ -682,8 +694,8 @@ const TopFilterSection = ({
 
                       <div
                         className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
-                            ? styles.growRight
-                            : ""
+                          ? styles.growRight
+                          : ""
                           } ${styles.calendarAnchor} ${tripType === "round" ? styles.roundTripBtn : ""
                           }`}
                       >
@@ -776,8 +788,8 @@ const TopFilterSection = ({
 
                       <div
                         className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
-                            ? styles.growRight
-                            : ""
+                          ? styles.growRight
+                          : ""
                           } ${tripType === "round" ? styles.roundTripBtn : ""}`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -797,8 +809,8 @@ const TopFilterSection = ({
 
                           <ChevronDown
                             className={`${styles.chevron} ${travellerOpen
-                                ? styles.openChevron
-                                : styles.closeChevron
+                              ? styles.openChevron
+                              : styles.closeChevron
                               }`}
                             size={16}
                             color="#FFFFFF"
@@ -1054,12 +1066,12 @@ const TopFilterSection = ({
               {/* Middle: Content */}
               <div className={styles.middleContent}>
                 <div className={styles.routeText}>
-                  <span>JAKARTA (CGK)</span>
+                  <span>{from || "Departure"}</span>
                   <span>-</span>
-                  <span>SINGAPORE (SIN)</span>
+                  <span>{to || "Destination"}</span>
                 </div>
                 <div className={styles.subText}>
-                  Wed, 03 Dec • 1 Traveller • Economy
+                  {formatSubTextDate(startDate)} • {passengers.adult + (passengers.child || 0) + passengers.infant} Traveller • {travelClass}
                 </div>
               </div>
 
@@ -1067,10 +1079,10 @@ const TopFilterSection = ({
               <div className={styles.rightIcon} onClick={() => setIsOpecEditFields(true)}>
                 <PencilIcon />
               </div>
-              
+
 
             </div>
-           
+
             <div className={styles.datesContainer}>
               <div className={styles.datesScrollerWrapper}>
                 {/* Month badge */}
@@ -1089,10 +1101,10 @@ const TopFilterSection = ({
 
                         <div
                           className={`${styles.price} ${item.trend === "up"
-                              ? styles.priceUp
-                              : item.trend === "down"
-                                ? styles.priceDown
-                                : ""
+                            ? styles.priceUp
+                            : item.trend === "down"
+                              ? styles.priceDown
+                              : ""
                             }`}
                         >
                           ₹ {item.price.toLocaleString("en-IN")}
@@ -1109,7 +1121,7 @@ const TopFilterSection = ({
                 <FlightEditFieldPopup />
               )} */}
       </div>
-       
+
     </>
   );
 };

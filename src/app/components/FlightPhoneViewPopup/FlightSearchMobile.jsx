@@ -9,15 +9,33 @@ import MultiCityMobile from "./MultiCityMobile";
 import DateField from "@/app/home-page/components/homePage/DateField";
 // import styles from "@/app/home-page/components/homePage/HomePage.module.css"
 import styles from './FlightEditFieldPopup.module.css'
+import { useTripType } from "@/app/flights/TripTypeContext";
 
 const FlightSearchMobile = ({ setIsOpecEditFields }) => {
-  const [tripType, setTripType] = useState("round");
+  const {
+    tripType,
+    setTripType,
+    from,
+    setFrom,
+    to,
+    setTo,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    passengers,
+    setPassengers,
+    travelClass,
+    setTravelClass,
+    handleSearch: contextHandleSearch,
+  } = useTripType();
 
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-
-  const [departureDate, setDepartureDate] = useState(null);
-  const [returnDate, setReturnDate] = useState(null);
+  // Mapping context dates to local names for consistency with existing JSX if needed, 
+  // or just use context names directly. I'll use context names.
+  const departureDate = startDate;
+  const setDepartureDate = setStartDate;
+  const returnDate = endDate;
+  const setReturnDate = setEndDate;
 
 
   const [multiFlights, setMultiFlights] = useState([
@@ -29,15 +47,8 @@ const FlightSearchMobile = ({ setIsOpecEditFields }) => {
 
   const [openCalendar, setOpenCalendar] = useState(false);
   const [calendarType, setCalendarType] = useState("departure"); // "departure" | "return"
-  const [travelClass, setTravelClass] = useState("Premium Economy");
-
-  const [openPassengers, setOpenPassengers] = useState(false);
-  const [passengers, setPassengers] = useState({
-    adult: 1,
-    children: 0,
-    infant: 0,
-  });
   const [openSeatClass, setOpenSeatClass] = useState(false);
+  const [openPassengers, setOpenPassengers] = useState(false);
   const [openTo, setOpenTo] = useState(false);
   const [openFrom, setOpenFrom] = useState(false);
   const travellerRef = useRef(null);
@@ -46,20 +57,23 @@ const FlightSearchMobile = ({ setIsOpecEditFields }) => {
   };
   const isMultiTripMobile = tripType === "multi";
 
-  const formatDate = (date) =>
-    date
-      ? date.toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-      : "";
+  const formatDate = (date) => {
+    if (!date) return "";
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return "";
+
+    return dateObj.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   const totalPassengers =
-    passengers.adult + passengers.children + passengers.infant;
+    passengers.adult + (passengers.children || passengers.child || 0) + passengers.infant;
 
   const passengerText = `${passengers.adult} Adult${passengers.adult > 1 ? "s" : ""
-    }, ${passengers.children} Child${passengers.children > 1 ? "ren" : ""}`;
+    }, ${(passengers.children || passengers.child || 0)} Child${(passengers.children || passengers.child || 0) > 1 ? "ren" : ""}`;
   // useEffect(() => {
   //   setIsMultiTripMobile(tripType === "multi");
   // }, [tripType]);
@@ -421,7 +435,7 @@ const FlightSearchMobile = ({ setIsOpecEditFields }) => {
             selectedReturn={returnDate}
             onSelectDate={({ departure, returnDate }) => {
               if (departure) setDepartureDate(departure);
-              if (returnDate !== undefined) setReturenDate(returnDate);
+              if (returnDate !== undefined) setReturnDate(returnDate);
               setOpenCalendar(false);
             }}
           />
