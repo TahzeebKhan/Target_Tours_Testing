@@ -120,9 +120,8 @@ export default function Support() {
             <button
               key={option.id}
               onClick={() => handleItemClick(option.id, index)}
-              className={`${styles.item} ${
-                activeIndex === index ? styles.active : ""
-              }`}
+              className={`${styles.item} ${activeIndex === index ? styles.active : ""
+                }`}
             >
               <div className={styles.contentLeft}>
                 <div className={styles.iconWrapper}>
@@ -181,9 +180,8 @@ export default function Support() {
                     <button
                       key={num}
                       type="button"
-                      className={`${styles.ratingBox} ${
-                        rating === num ? styles.ratingActive : ""
-                      }`}
+                      className={`${styles.ratingBox} ${rating === num ? styles.ratingActive : ""
+                        }`}
                       onClick={() => setRating(num)}
                     >
                       {num}
@@ -200,9 +198,8 @@ export default function Support() {
                   Please include anything else you like us to know
                 </label>
                 <textarea
-                  className={`${styles.textarea} ${
-                    errors.message ? styles.inputError : ""
-                  }`}
+                  className={`${styles.textarea} ${errors.message ? styles.inputError : ""
+                    }`}
                   placeholder="Enter your comments here"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -217,9 +214,8 @@ export default function Support() {
                 <label className={styles.fieldLabel}>Email address</label>
                 <input
                   type="email"
-                  className={`${styles.input} ${
-                    errors.email ? styles.inputError : ""
-                  }`}
+                  className={`${styles.input} ${errors.email ? styles.inputError : ""
+                    }`}
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

@@ -647,9 +647,8 @@ const RoundTrip = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -667,9 +666,8 @@ const RoundTrip = () => {
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "fastest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("fastest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -723,25 +721,25 @@ const RoundTrip = () => {
           
             <p>No. of stops: Direct</p>
             <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
+              <img src="/icons/Close.svg" alt="" />
             </div>
           </div>
           <div className={styles.chips}>
             <p>Departure time: Morning, 06:00 - 12:00</p>
             <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
+              <img src="/icons/Close.svg" alt="" />
             </div>
           </div>
           <div className={styles.chips}>
             <p>Departure time: Morning, 06:00 - 12:00</p>
             <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
+              <img src="/icons/Close.svg" alt="" />
             </div>
           </div>
           <div className={styles.chips}>
             <p>Departure time: Morning, 06:00 - 12:00</p>
             <div className={styles.mobileCloseBtn}>
-              <img src="/icons/CLose.svg" alt="" />
+              <img src="/icons/Close.svg" alt="" />
             </div>
           </div>
         </div> */}
@@ -762,9 +760,8 @@ const RoundTrip = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
@@ -782,9 +779,8 @@ const RoundTrip = () => {
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${
-                    selectedSort === "fastest" ? styles.activeSortedItem : ""
-                  }`}
+                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    }`}
                   onClick={() => setSelectedSort("fastest")}
                 >
                   <img
@@ -813,9 +809,8 @@ const RoundTrip = () => {
             >
               <span className={styles.sortByText}>Sort by</span>
               <img
-                className={`${styles.chevronSort} ${
-                  openSort === true ? styles.open : ""
-                }`}
+                className={`${styles.chevronSort} ${openSort === true ? styles.open : ""
+                  }`}
                 src="/icons/DownArrows.svg"
                 alt=""
               />

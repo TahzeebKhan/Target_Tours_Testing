@@ -19,7 +19,7 @@ const BestFlightPopup = ({ open, onAllow, onClose }) => {
                 {/* Close */}
                 <div className={styles.closeIcon}>
                     <button className={styles.closeBtn} onClick={onClose}>
-                        <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
+                        <img src="/icons/Close.svg" alt="close" onClick={onClose} />
                     </button>
 
                 </div>

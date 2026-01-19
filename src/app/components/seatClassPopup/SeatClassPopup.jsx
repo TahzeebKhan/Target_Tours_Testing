@@ -28,7 +28,7 @@
 //                         <div className={styles.inputRow}>
 //                             <span className={styles.label}>{inputType}</span>
 
-//                             <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
+//                             <img src="/icons/Close.svg" alt="close" onClick={onClose} />
 //                         </div>
 //                         <div className={styles.selectedDate}>Premium Economy</div>
 //                     </div>
@@ -85,7 +85,7 @@ const SeatClassPopup = ({ value, onChange, onClose, inputType }) => {
                     <div className={styles.inputRow}>
                         <span className={styles.label}>{inputType}</span>
                         <img
-                            src="/icons/CLose.svg"
+                            src="/icons/Close.svg"
                             alt="close"
                             onClick={onClose}
                         />
@@ -108,9 +108,8 @@ const SeatClassPopup = ({ value, onChange, onClose, inputType }) => {
                                 onClick={() => onChange(item)}
                             >
                                 <div
-                                    className={`${styles.radio} ${
-                                        isActive ? styles.active : ""
-                                    }`}
+                                    className={`${styles.radio} ${isActive ? styles.active : ""
+                                        }`}
                                 >
                                     {isActive && (
                                         <div className={styles.dot} />

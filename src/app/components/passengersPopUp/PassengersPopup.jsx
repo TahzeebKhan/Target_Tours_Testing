@@ -27,7 +27,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
                         <div className={styles.selectedDate}>
                             {passengers.adult} Adult, {passengers.children} Children
                         </div>
-                        <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
+                        <img src="/icons/Close.svg" alt="close" onClick={onClose} />
                     </div>
                 </div>
 

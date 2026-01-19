@@ -15,8 +15,8 @@ export default function PriceSummary({ onClose }) {
   ];
 
   return (
- 
-      <motion.div
+
+    <motion.div
       className={styles.container}
       onClick={onClose}
       initial={{ opacity: 0 }}
@@ -36,54 +36,53 @@ export default function PriceSummary({ onClose }) {
           damping: 30,
         }}
       >
-          <div className={styles.card}>
-            <header className={styles.header}>
-              <h2 className={styles.title}>PRICE SUMMARY</h2>
+        <div className={styles.card}>
+          <header className={styles.header}>
+            <h2 className={styles.title}>PRICE SUMMARY</h2>
 
-              <button
-                type="button"
-                className={styles.closeIcon}
-                onClick={onClose}
-              >
-                <Image
-                  src="/images/CLose.svg"
-                  alt="Close"
-                  width={20}
-                  height={20}
-                />
-              </button>
-            </header>
+            <button
+              type="button"
+              className={styles.closeIcon}
+              onClick={onClose}
+            >
+              <Image
+                src="/images/Close.svg"
+                alt="Close"
+                width={20}
+                height={20}
+              />
+            </button>
+          </header>
 
-            <div className={styles.content}>
-              {lineItems.map((item, index) => (
-                <div key={index} className={styles.row}>
-                  <span className={styles.label}>{item.label}</span>
-                  <span
-                    className={`${styles.value} ${
-                      item.isGreen ? styles.green : ""
+          <div className={styles.content}>
+            {lineItems.map((item, index) => (
+              <div key={index} className={styles.row}>
+                <span className={styles.label}>{item.label}</span>
+                <span
+                  className={`${styles.value} ${item.isGreen ? styles.green : ""
                     }`}
-                  >
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.dividerWrapper}>
-              <div className={styles.divider} />
-            </div>
-
-            <div className={styles.totalSection}>
-              <div className={styles.totalTextGroup}>
-                <h3 className={styles.totalTitle}>Total Amount</h3>
-                <p className={styles.subtext}>
-                  Includes taxes and service fees
-                </p>
+                >
+                  {item.value}
+                </span>
               </div>
-              <div className={styles.totalPrice}>₹ 66,945</div>
-            </div>
+            ))}
           </div>
-        </motion.div>
+
+          <div className={styles.dividerWrapper}>
+            <div className={styles.divider} />
+          </div>
+
+          <div className={styles.totalSection}>
+            <div className={styles.totalTextGroup}>
+              <h3 className={styles.totalTitle}>Total Amount</h3>
+              <p className={styles.subtext}>
+                Includes taxes and service fees
+              </p>
+            </div>
+            <div className={styles.totalPrice}>₹ 66,945</div>
+          </div>
+        </div>
       </motion.div>
+    </motion.div>
   );
 }

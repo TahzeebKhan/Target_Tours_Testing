@@ -99,9 +99,8 @@ export const SetPasswordModal = ({ open, onClose }) => {
             <label className={styles.fieldLabel}>New password</label>
             <input
               type="password"
-              className={`${styles.input} ${
-                errors.password ? styles.inputError : ""
-              }`}
+              className={`${styles.input} ${errors.password ? styles.inputError : ""
+                }`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter new password"
@@ -115,9 +114,8 @@ export const SetPasswordModal = ({ open, onClose }) => {
             <label className={styles.fieldLabel}>Confirm password</label>
             <input
               type="password"
-              className={`${styles.input} ${
-                errors.confirmPassword ? styles.inputError : ""
-              }`}
+              className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ""
+                }`}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
@@ -352,9 +350,8 @@ export default function PersonalData() {
                       return (
                         <div
                           key={currency}
-                          className={`${styles.dropdownItem} ${
-                            isSelected ? styles.selectedItem : ""
-                          }`}
+                          className={`${styles.dropdownItem} ${isSelected ? styles.selectedItem : ""
+                            }`}
                           onClick={() => {
                             setSelectedCurrency(currency);
                             setIsCurrencyOpen(false);
@@ -423,9 +420,8 @@ export default function PersonalData() {
                       return (
                         <div
                           key={lang.label}
-                          className={`${styles.dropdownItem} ${
-                            isSelected ? styles.selectedItem : ""
-                          }`}
+                          className={`${styles.dropdownItem} ${isSelected ? styles.selectedItem : ""
+                            }`}
                           onClick={() => {
                             setSelectedLanguage(lang);
                             setIsLanguageOpen(false);
@@ -473,9 +469,8 @@ export default function PersonalData() {
 
             <div className={styles.control}>
               <button
-                className={`${styles.toggle} ${
-                  isRecommendationsActive ? styles.toggleActive : ""
-                }`}
+                className={`${styles.toggle} ${isRecommendationsActive ? styles.toggleActive : ""
+                  }`}
                 onClick={toggleRecommendations}
                 aria-pressed={isRecommendationsActive}
               >
