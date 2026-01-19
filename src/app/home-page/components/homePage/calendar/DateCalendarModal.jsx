@@ -11,24 +11,24 @@ export default function DateCalendarModal({
 }) {
   const rect = anchorEl?.getBoundingClientRect();
 
-  const style = rect
-    ? {
-      position: "absolute",
-      top: rect.bottom + window.scrollY + 8,
-      left: rect.left + window.scrollX,
-      zIndex: 9999,
-    }
-    : {};
+  // const style = rect
+  //   ? {
+  //     position: "absolute",
+  //     top: rect.bottom + window.scrollY + 8,
+  //     left: rect.left + window.scrollX,
+  //     zIndex: 9999,
+  //   }
+  //   : {};
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} style={style} >
+      <div className={styles.modal} >
         {/* Header */}
         <div className={styles.header}>
           <h3>SET THE DATE</h3>
 
           {/* <button className={styles.close} onClick={onClose}>
-            <X size={24} color="#1C1B1F" />
+            <X size={24} color="#8d7ac6ff" />
           </button> */}
           <div className={styles.toggle} onClick={(e) => e.stopPropagation()}>
             <button

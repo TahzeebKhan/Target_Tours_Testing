@@ -95,7 +95,7 @@
 }
 
 /* ensure the visible .contant layout is unchanged */
-.dateInputWrapper > .contant {
+.dateInputWrapper>.contant {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -103,13 +103,14 @@
 }
 
 /* small tweak so image arrow remains on right and not covered */
-.dateInputWrapper > img {
+.dateInputWrapper>img {
   position: relative;
   z-index: 31;
 }
 
 .downloadBtn {
-  padding: 8px 18px;
+  height: 37px;
+  padding: 8px 14.6px;
   border: 0.5px solid #e4e6e8;
   color: #ffffff;
   font-family: "Inter", sans-serif;
@@ -136,7 +137,9 @@
 .signInBtn:hover {
   background-color: #21347b;
 }
+
 .logggedInBtn {
+  height: 37px;
   text-transform: uppercase;
   padding: 8px 18px;
   /* border: 0.5px solid #E4E6E8 !important; */
@@ -150,6 +153,7 @@
   text-transform: uppercase;
   cursor: pointer;
 }
+
 .initial {
   display: flex;
   align-items: center;
@@ -159,6 +163,7 @@
   height: 37px;
   border-radius: 50%;
 }
+
 .homePageContainer {
   position: absolute;
   /* background-color: red; */
@@ -188,7 +193,7 @@
   /* top: 114px;
     left: 50%;
     transform: translate(-50%); */
-  max-width: 870px;
+  max-width: 700px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -473,12 +478,10 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(
-    from -90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 15%,
-    transparent 30%
-  );
+  background: conic-gradient(from -90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 15%,
+      transparent 30%);
 
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -512,12 +515,10 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(
-    from -90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 15%,
-    transparent 30%
-  );
+  background: conic-gradient(from -90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 15%,
+      transparent 30%);
 
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -559,6 +560,7 @@
   color: #ffffff;
   cursor: pointer;
 }
+
 .round_tripBtnMbl {
   max-width: 121px;
   width: 100%;
@@ -765,6 +767,7 @@
   cursor: pointer;
   /* Above background but below arrow box (10) */
 }
+
 .iconCont {
   display: flex;
   align-items: center;
@@ -986,9 +989,11 @@
   color: #000033;
   transition: color 0.25s ease;
 }
+
 .arrowbox:hover .arrowIcon {
   color: #ffffff;
 }
+
 .arrowboxOneWay {
   left: 21.5%;
   top: 50%;
@@ -1138,6 +1143,7 @@
 .fromToCont {
   display: flex;
 }
+
 .field {
   border: 0.5px solid #e6e8ec;
   padding: 8px;
@@ -1233,6 +1239,7 @@
   text-transform: uppercase;
   color: #c4c4c4;
 }
+
 .suggestionItem {
   display: flex;
   /* align-items: center; */
@@ -1241,6 +1248,7 @@
 
   cursor: pointer;
 }
+
 .field2 {
   padding-left: 20px;
 }
@@ -1257,6 +1265,7 @@
 
   gap: 2px;
 }
+
 .suggestionLabel {
   font-weight: 500;
   font-style: Medium;
@@ -1277,6 +1286,7 @@
   text-transform: capitalize;
   color: rgba(255, 255, 255, 0.82);
 }
+
 .suggestionCode {
   font-weight: 700;
   font-style: Bold;
@@ -1286,12 +1296,15 @@
   text-transform: capitalize;
   color: #ffffff;
 }
+
 .arrow {
   transition: all 0.5s ease;
 }
+
 .arrow.arrowOpen {
   transform: rotate(-180deg);
 }
+
 .customLoaderContainer {
   transition: all 1.5s ease;
   position: fixed;
@@ -1299,9 +1312,11 @@
   z-index: 9999999;
   pointer-events: none;
 }
+
 .loaderClose {
   transform: translateY(-150vh);
 }
+
 .loaderOpen {
   transform: translateY(0vh);
 }
@@ -1310,9 +1325,11 @@
   background: #15151512 !important;
   border: 0.5px solid #e4e6e8 !important;
 }
+
 .logggedInBtnSidebar:hover {
   background-color: white !important;
 }
+
 @media (max-width: 1600px) {
   .navbar {
     padding-left: 20px;
@@ -1328,6 +1345,7 @@
   .serarchingCont {
     padding: 16px;
   }
+
   .glass_panel {
     width: 1160px;
   }
@@ -1361,6 +1379,7 @@
   .serarchingContBottom {
     gap: 10px;
   }
+
   .multisearchBtn {
     max-width: 234px;
     width: 100%;
@@ -1379,12 +1398,15 @@
   .arrowbox {
     left: 15.5%;
   }
+
   .arrowboxOneWay {
     left: 21%;
   }
+
   .multiArrow {
     left: 23%;
   }
+
   .multisearchBtn {
     max-width: 222px;
     width: 100%;
@@ -1403,17 +1425,31 @@
   .glass_panel {
     width: 887px;
   }
+
   .multisearchBtn {
     max-width: 204px;
     width: 100%;
   }
-  .arrowboxOneWay{
+
+  .arrowbox {
+    left: 14.5%;
+  }
+
+  .arrowboxOneWay {
+    left: 20.5%;
+  }
+
+  .multiArrow {
+    left: 23%;
+  }
+
+  /* .arrowboxOneWay{
     left: 20.5%;
   }
 
   .arrowbox {
     left: 23% ;
-  }
+  } */
 
   .InspiredSection {
     gap: 9px;
@@ -1437,6 +1473,7 @@
   .flightSectionMain {
     display: block;
   }
+
   .field {
     width: 50%;
   }
@@ -1456,12 +1493,15 @@
     border: 0.67px solid #e4e6e8;
     left: 50%;
   }
+
   .HolidaySwapBtn {
     top: 40px;
   }
+
   .field3 {
     width: 100%;
   }
+
   .fromtoConSub {
     width: 50%;
   }
@@ -1506,6 +1546,7 @@
   .navContainer {
     border-bottom: 1px solid rgba(227, 227, 227, 0.5);
   }
+
   .serarchingContTop_left {
     gap: 16px;
   }
@@ -1592,15 +1633,20 @@
     gap: 8px;
   }
 }
+
 @media (max-width: 504px) {
-  .logggedInBtnSidebar,.logggedInBtn {
+
+  .logggedInBtnSidebar,
+  .logggedInBtn {
     display: none;
   }
 }
+
 @media (max-width: 431px) {
   .featureRow {
     gap: 0;
   }
+
   .InspiredSection {
     max-width: 338px;
     width: 100%;
@@ -1611,6 +1657,7 @@
   .featurelabel {
     white-space: wrap;
   }
+
   .round_tripBtnMbl {
     padding: 8px 2px;
     font-size: 11px;
