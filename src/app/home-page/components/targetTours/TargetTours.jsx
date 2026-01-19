@@ -244,7 +244,7 @@ const STATIC_CARDS = [
     img: "/images/tour.webp",
     badge: "17 Days & 16 Nights",
     title: "Best Of India Tour",
-    cities: "Delhi, Agra, Jaipur, Jodhpur",
+    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
     price: "INR 2,30,000",
   },
   {
@@ -252,7 +252,7 @@ const STATIC_CARDS = [
     img: "/images/tour2.webp",
     badge: "6 Days & 5 Nights",
     title: "Golden Triangle Tour",
-    cities: "Delhi, Agra, Jaipur",
+    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
     price: "INR 1,20,000",
     centerImage: true,
   },
@@ -261,7 +261,7 @@ const STATIC_CARDS = [
     img: "/images/tour3.webp",
     badge: "8 Days & 7 Nights",
     title: "Rajasthan In Depth",
-    cities: "Jaipur, Jodhpur, Udaipur",
+    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
     price: "INR 1,80,000",
   },
 ];

@@ -148,6 +148,10 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
                                 <CityRow
                                     key={`nearby-${index}`}
                                     item={item}
+                                    onSelect={(value) => {
+                                        onSelectCity(value);
+                                        onClose();
+                                    }}
                                 />
                             ))}
                         </>

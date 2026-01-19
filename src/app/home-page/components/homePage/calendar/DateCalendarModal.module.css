@@ -8,28 +8,33 @@
   z-index: 1000;
   left: 0;
 
-  background: transparent; /* NOT blocking */
+  background: transparent;
+  /* NOT blocking */
   pointer-events: none;
 }
+
 /* DateCalendarModal.module.css */
 
 .modal {
   pointer-events: auto;
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  top: calc(100% + 8px); /* just below input */
-  left: auto; /* left aligned */
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   background: #171717;
   border: 0.5px solid #ffffff;
   backdrop-filter: blur(39.2px);
+  /* width: calc(100% - 24px); */
+  max-width: 699px;
 
   padding: 16px;
   padding-bottom: 36px;
   z-index: 2000;
 
-  max-width: 6700px;
+  /* max-width: 6700px; */
 }
 
 .header {
@@ -58,6 +63,7 @@
   border: 1px solid #ffffff66;
   align-self: flex-end;
 }
+
 .oneway {
   max-width: 110px;
   width: 100%;
@@ -72,6 +78,7 @@
   color: #000033;
   cursor: pointer;
 }
+
 .toggle button {
   padding: 5px 8px;
   width: 110px;
@@ -110,13 +117,13 @@
 
 @media (max-width: 1056px) {
   .modal {
-    left: auto;
+    /* left: auto; */
   }
 }
 
 @media (max-width: 991px) {
   .modal {
-    left: auto;
+    /* left: auto; */
     /* right: 0; */
   }
 }
