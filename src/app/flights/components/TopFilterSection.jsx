@@ -12,6 +12,7 @@ import DateCalendarModal from "@/app/components/calendar/DateCalendarModal";
 import CalendarMonths from "@/app/components/calendar/CalendarMonths";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import { useRouter } from "next/navigation";
+import FlightEditFieldPopup from "@/app/components/FlightPhoneViewPopup/FlightEditFieldPopup";
 // import calendarSVG from "/icons/calendar.svg";
 
 const travellerOptions = [
@@ -69,6 +70,7 @@ const PencilIcon = () => {
 const TopFilterSection = ({
   isScrolled: parentScrolled = false,
   scrollProgress,
+  setIsOpecEditFields,
 }) => {
   const calendarRef = useRef(null);
   const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
@@ -421,6 +423,9 @@ const TopFilterSection = ({
   const marginTop = MAX_MARGIN * (1 - progress);
   const marginBottom = MAX_MARGIN_BOTTOM * (1 - progress);
   const padding = MAX_PADDING - (MAX_PADDING - MIN_PADDING) * progress;
+
+
+  // const [isOpecEditFields, setIsOpecEditFields] = useState(false);
   // ---------- DATE TILE DATA GENERATOR ----------
 
   // helpers
@@ -467,6 +472,7 @@ const TopFilterSection = ({
     );
   }, []);
 
+
   return (
     <>
       <div
@@ -478,18 +484,16 @@ const TopFilterSection = ({
             // transition: "none", // 👈 IMPORTANT
           }
         }
-        className={`${styles.searchSec} ${
-          tripType === "multi" ? styles.isMulti : ""
-        }
+        className={`${styles.searchSec} ${tripType === "multi" ? styles.isMulti : ""
+          }
         ${scrollProgress === 1 ? styles.scrolledSearchSec : ""}
          sticky top-0 flex flex-col gap-[127px] items-center`}
       >
         <div
-          className={`${styles.searchPanelWrapper} ${
-            bookingType === "holiday" || bookingType === "insurance"
+          className={`${styles.searchPanelWrapper} ${bookingType === "holiday" || bookingType === "insurance"
               ? styles.noAnimation
               : ""
-          }`}
+            }`}
         >
           {bookingType === "flight" && (
             <div
@@ -502,9 +506,8 @@ const TopFilterSection = ({
               <div className={styles.serarchingContTop}>
                 <div className={styles.tripTypeWrapper}>
                   <label
-                    className={`${styles.tripOption} ${
-                      tripType === "oneway" ? styles.active : ""
-                    }`}
+                    className={`${styles.tripOption} ${tripType === "oneway" ? styles.active : ""
+                      }`}
                   >
                     <input
                       type="radio"
@@ -518,9 +521,8 @@ const TopFilterSection = ({
                   </label>
 
                   <label
-                    className={`${styles.tripOption} ${
-                      tripType === "round" ? styles.active : ""
-                    }`}
+                    className={`${styles.tripOption} ${tripType === "round" ? styles.active : ""
+                      }`}
                   >
                     <input
                       type="radio"
@@ -534,9 +536,8 @@ const TopFilterSection = ({
                   </label>
 
                   <label
-                    className={`${styles.tripOption} ${
-                      tripType === "multi" ? styles.active : ""
-                    }`}
+                    className={`${styles.tripOption} ${tripType === "multi" ? styles.active : ""
+                      }`}
                   >
                     <input
                       type="radio"
@@ -564,287 +565,274 @@ const TopFilterSection = ({
                 {(tripType === "oneway" ||
                   tripType === "round" ||
                   tripType === "multi") && (
-                  <div
-                    className={`${styles.serarchingContBottom} ${
-                      styles.flightSearchFormWrapper
-                    } ${styles.formVisible} ${
-                      tripType === "round"
-                        ? styles.roundTripSerarchingContBottom
-                        : ""
-                    }
+                    <div
+                      className={`${styles.serarchingContBottom} ${styles.flightSearchFormWrapper
+                        } ${styles.formVisible} ${tripType === "round"
+                          ? styles.roundTripSerarchingContBottom
+                          : ""
+                        }
                      
                       `}
-                  >
-                    <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
-                        tripType === "oneway" || tripType === "multi"
-                          ? styles.growRight
-                          : ""
-                      } ${tripType === "round" ? styles.roundTripBtn : ""}`}
                     >
-                      <div className={styles.lable}>From</div>
-                      <input
-                        ref={fromInputRef}
-                        type="text"
-                        className={styles.contant}
-                        placeholder="Departure"
-                        value={
-                          tripType === "multi" ? multiSegments[0].from : from
-                        }
-                        onFocus={() => {
-                          setFromSuggestionsOpen(true);
-                          if (tripType === "multi") setActiveMultiFromIndex(0);
-                        }}
-                        onClick={() => {
-                          setFromSuggestionsOpen(true);
-                          if (tripType === "multi") setActiveMultiFromIndex(0);
-                        }}
-                        onChange={(e) => {
-                          if (tripType === "multi") {
-                            updateSegment(0, "from", e.target.value);
-                            setActiveMultiFromIndex(0);
-                          } else {
-                            setFrom(e.target.value);
-                          }
-                          setFromSuggestionsOpen(true);
-                        }}
-                      />
-
-                      {fromSuggestionsOpen && activeMultiFromIndex === 0 && (
-                        <SuggestionBox
-                          boxRef={fromSuggestionRef}
-                          heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(
-                            multiSegments[0].from
-                          )}
-                          onSelect={(s) => selectSuggestion(s, "from")}
-                        />
-                      )}
-                    </div>
-                    <div
-                      className={`${styles.arrowbox} ${
-                        tripType === "round" ? styles.arrowbox2 : ""
-                      } ${tripType === "multi" ? styles.arrowbox3 : ""}
-                      ${
-                        tripType === "multi" ? styles.multiCityArrowBoxTop : ""
-                      }`}
-                      onClick={() => {
-                        if (tripType === "multi") {
-                          const { from, to } = multiSegments[0];
-                          updateSegment(0, "from", to);
-                          updateSegment(0, "to", from);
-                        } else {
-                          swapLocations();
-                        }
-                      }}
-                    >
-                      <ArrowLeftRight size={16} className={styles.arrowIcon} />
-                    </div>
-                    <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
-                        styles.toBtn
-                      } ${
-                        tripType === "oneway" || tripType === "multi"
-                          ? styles.growRight
-                          : ""
-                      } ${tripType === "round" ? styles.roundTripBtn : ""}`}
-                    >
-                      <div className={styles.lable}>To</div>
-                      <input
-                        type="text"
-                        className={styles.contant}
-                        placeholder="Destination"
-                        value={tripType === "multi" ? multiSegments[0].to : to}
-                        onFocus={() => {
-                          setToSuggestionsOpen(true);
-                          setActiveMultiToIndex(0);
-                        }}
-                        onClick={() => {
-                          setToSuggestionsOpen(true);
-                          setActiveMultiToIndex(0);
-                        }}
-                        onChange={(e) => {
-                          if (tripType === "multi") {
-                            updateSegment(0, "to", e.target.value);
-                            setActiveMultiToIndex(0);
-                          } else {
-                            setTo(e.target.value);
-                          }
-                          setToSuggestionsOpen(true);
-                        }}
-                      />
-
-                      {toSuggestionsOpen && activeMultiToIndex === 0 && (
-                        <SuggestionBox
-                          boxRef={toSuggestionRef}
-                          heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(
-                            multiSegments[0].to
-                          )}
-                          onSelect={(s) => selectSuggestion(s, "to")}
-                        />
-                      )}
-                    </div>
-
-                    <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
-                        tripType === "oneway" || tripType === "multi"
-                          ? styles.growRight
-                          : ""
-                      } ${styles.calendarAnchor} ${
-                        tripType === "round" ? styles.roundTripBtn : ""
-                      }`}
-                    >
-                      <div className={styles.lable}>Departure Date</div>
-                      {openCalendarFor === "main" && (
-                        <DateCalendarModal
-                          mode={
-                            calendarTripType === "round"
-                              ? "roundtrip"
-                              : "oneway"
-                          }
-                          onModeChange={(mode) =>
-                            setCalendarTripType(
-                              mode === "roundtrip" ? "round" : "oneway"
-                            )
-                          }
-                          onClose={() => {
-                            setOpenCalendarFor(null);
-                            setActiveMultiIndex(null);
-                          }}
-                        >
-                          <div ref={calendarRef}>
-                            <CalendarMonths
-                              startDate={startDate}
-                              endDate={endDate}
-                              onDateClick={handleDateClick}
-                            />
-                          </div>
-                        </DateCalendarModal>
-                      )}
                       <div
-                        className={styles.dateInputWrapper}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCalendarTripType(
-                            tripType === "round" ? "round" : "oneway"
-                          );
-                          setActiveMultiIndex(tripType === "multi" ? 0 : null);
-                          setOpenCalendarFor("main"); // ✅ Trigger specific calendar
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
+                            ? styles.growRight
+                            : ""
+                          } ${tripType === "round" ? styles.roundTripBtn : ""}`}
+                      >
+                        <div className={styles.lable}>From</div>
+                        <input
+                          ref={fromInputRef}
+                          type="text"
+                          className={styles.contant}
+                          placeholder="Departure"
+                          value={
+                            tripType === "multi" ? multiSegments[0].from : from
+                          }
+                          onFocus={() => {
+                            setFromSuggestionsOpen(true);
+                            if (tripType === "multi") setActiveMultiFromIndex(0);
+                          }}
+                          onClick={() => {
+                            setFromSuggestionsOpen(true);
+                            if (tripType === "multi") setActiveMultiFromIndex(0);
+                          }}
+                          onChange={(e) => {
+                            if (tripType === "multi") {
+                              updateSegment(0, "from", e.target.value);
+                              setActiveMultiFromIndex(0);
+                            } else {
+                              setFrom(e.target.value);
+                            }
+                            setFromSuggestionsOpen(true);
+                          }}
+                        />
+
+                        {fromSuggestionsOpen && activeMultiFromIndex === 0 && (
+                          <SuggestionBox
+                            boxRef={fromSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(
+                              multiSegments[0].from
+                            )}
+                            onSelect={(s) => selectSuggestion(s, "from")}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className={`${styles.arrowbox} ${tripType === "round" ? styles.arrowbox2 : ""
+                          } ${tripType === "multi" ? styles.arrowbox3 : ""}
+                      ${tripType === "multi" ? styles.multiCityArrowBoxTop : ""
+                          }`}
+                        onClick={() => {
+                          if (tripType === "multi") {
+                            const { from, to } = multiSegments[0];
+                            updateSegment(0, "from", to);
+                            updateSegment(0, "to", from);
+                          } else {
+                            swapLocations();
+                          }
                         }}
                       >
+                        <ArrowLeftRight size={16} className={styles.arrowIcon} />
+                      </div>
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.toBtn
+                          } ${tripType === "oneway" || tripType === "multi"
+                            ? styles.growRight
+                            : ""
+                          } ${tripType === "round" ? styles.roundTripBtn : ""}`}
+                      >
+                        <div className={styles.lable}>To</div>
                         <input
                           type="text"
-                          readOnly
                           className={styles.contant}
-                          placeholder="ADD DATE"
-                          value={
-                            tripType === "multi"
-                              ? formatDate(multiSegments[0].date)
-                              : formatDate(startDate) || ""
-                          }
+                          placeholder="Destination"
+                          value={tripType === "multi" ? multiSegments[0].to : to}
+                          onFocus={() => {
+                            setToSuggestionsOpen(true);
+                            setActiveMultiToIndex(0);
+                          }}
+                          onClick={() => {
+                            setToSuggestionsOpen(true);
+                            setActiveMultiToIndex(0);
+                          }}
+                          onChange={(e) => {
+                            if (tripType === "multi") {
+                              updateSegment(0, "to", e.target.value);
+                              setActiveMultiToIndex(0);
+                            } else {
+                              setTo(e.target.value);
+                            }
+                            setToSuggestionsOpen(true);
+                          }}
                         />
 
-                        <button type="button" className={styles.calendarIcon}>
-                          <CalendarSVG />
-                        </button>
+                        {toSuggestionsOpen && activeMultiToIndex === 0 && (
+                          <SuggestionBox
+                            boxRef={toSuggestionRef}
+                            heading="RECENT SEARCH"
+                            suggestions={getFilteredSuggestions(
+                              multiSegments[0].to
+                            )}
+                            onSelect={(s) => selectSuggestion(s, "to")}
+                          />
+                        )}
                       </div>
-                    </div>
 
-                    {/* Return Date - conditionally hidden with CSS */}
-                    <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
-                        styles.returnDateField
-                      } ${
-                        tripType === "oneway" || tripType === "multi"
-                          ? styles.hiddenField
-                          : ""
-                      } ${tripType === "round" ? styles.roundTripBtn : ""}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCalendarTripType("round");
-                        setActiveMultiIndex(null);
-                        setOpenCalendarFor("main");
-                      }}
-                    >
-                      <div className={styles.lable}>Return Date</div>
-
-                      <div className={styles.dateInputWrapper}>
-                        <input
-                          type="text"
-                          readOnly
-                          className={styles.contant}
-                          placeholder="ADD DATE"
-                          value={formatDate(endDate) || ""}
-                        />
-
-                        <button type="button" className={styles.calendarIcon}>
-                          <CalendarSVG />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`${styles.fromBtn} ${styles.fromBtn2} ${
-                        tripType === "oneway" || tripType === "multi"
-                          ? styles.growRight
-                          : ""
-                      } ${tripType === "round" ? styles.roundTripBtn : ""}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTravellerOpen((o) => !o);
-                      }}
-                    >
-                      <div className={styles.lable}>Travellers & Class</div>
-                      <div className={styles.iconCont}>
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
+                            ? styles.growRight
+                            : ""
+                          } ${styles.calendarAnchor} ${tripType === "round" ? styles.roundTripBtn : ""
+                          }`}
+                      >
+                        <div className={styles.lable}>Departure Date</div>
+                        {openCalendarFor === "main" && (
+                          <DateCalendarModal
+                            mode={
+                              calendarTripType === "round"
+                                ? "roundtrip"
+                                : "oneway"
+                            }
+                            onModeChange={(mode) =>
+                              setCalendarTripType(
+                                mode === "roundtrip" ? "round" : "oneway"
+                              )
+                            }
+                            onClose={() => {
+                              setOpenCalendarFor(null);
+                              setActiveMultiIndex(null);
+                            }}
+                          >
+                            <div ref={calendarRef}>
+                              <CalendarMonths
+                                startDate={startDate}
+                                endDate={endDate}
+                                onDateClick={handleDateClick}
+                              />
+                            </div>
+                          </DateCalendarModal>
+                        )}
                         <div
-                          className={`${styles.contant} ${styles.contantTra}`}
+                          className={styles.dateInputWrapper}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCalendarTripType(
+                              tripType === "round" ? "round" : "oneway"
+                            );
+                            setActiveMultiIndex(tripType === "multi" ? 0 : null);
+                            setOpenCalendarFor("main"); // ✅ Trigger specific calendar
+                          }}
                         >
-                          {passengers.adult +
-                            passengers.child +
-                            passengers.infant}{" "}
-                          Traveller(s), {travelClass}
+                          <input
+                            type="text"
+                            readOnly
+                            className={styles.contant}
+                            placeholder="ADD DATE"
+                            value={
+                              tripType === "multi"
+                                ? formatDate(multiSegments[0].date)
+                                : formatDate(startDate) || ""
+                            }
+                          />
+
+                          <button type="button" className={styles.calendarIcon}>
+                            <CalendarSVG />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Return Date - conditionally hidden with CSS */}
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.returnDateField
+                          } ${tripType === "oneway" || tripType === "multi"
+                            ? styles.hiddenField
+                            : ""
+                          } ${tripType === "round" ? styles.roundTripBtn : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCalendarTripType("round");
+                          setActiveMultiIndex(null);
+                          setOpenCalendarFor("main");
+                        }}
+                      >
+                        <div className={styles.lable}>Return Date</div>
+
+                        <div className={styles.dateInputWrapper}>
+                          <input
+                            type="text"
+                            readOnly
+                            className={styles.contant}
+                            placeholder="ADD DATE"
+                            value={formatDate(endDate) || ""}
+                          />
+
+                          <button type="button" className={styles.calendarIcon}>
+                            <CalendarSVG />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi"
+                            ? styles.growRight
+                            : ""
+                          } ${tripType === "round" ? styles.roundTripBtn : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTravellerOpen((o) => !o);
+                        }}
+                      >
+                        <div className={styles.lable}>Travellers & Class</div>
+                        <div className={styles.iconCont}>
+                          <div
+                            className={`${styles.contant} ${styles.contantTra}`}
+                          >
+                            {passengers.adult +
+                              passengers.child +
+                              passengers.infant}{" "}
+                            Traveller(s), {travelClass}
+                          </div>
+
+                          <ChevronDown
+                            className={`${styles.chevron} ${travellerOpen
+                                ? styles.openChevron
+                                : styles.closeChevron
+                              }`}
+                            size={16}
+                            color="#FFFFFF"
+                          />
                         </div>
 
-                        <ChevronDown
-                          className={`${styles.chevron} ${
-                            travellerOpen
-                              ? styles.openChevron
-                              : styles.closeChevron
-                          }`}
-                          size={16}
-                          color="#FFFFFF"
+                        <PassengerClassSelector
+                          open={travellerOpen}
+                          setOpen={setTravellerOpen}
+                          passengers={passengers}
+                          setPassengers={setPassengers}
+                          travelClass={travelClass}
+                          setTravelClass={setTravelClass}
                         />
                       </div>
 
-                      <PassengerClassSelector
-                        open={travellerOpen}
-                        setOpen={setTravellerOpen}
-                        passengers={passengers}
-                        setPassengers={setPassengers}
-                        travelClass={travelClass}
-                        setTravelClass={setTravelClass}
-                      />
+                      {tripType !== "multi" && (
+                        <div className={styles.searchBtn} onClick={handleSearch}>
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
+                              fill="#000033"
+                            />
+                          </svg>
+                        </div>
+                      )}
                     </div>
-
-                    {tripType !== "multi" && (
-                      <div className={styles.searchBtn} onClick={handleSearch}>
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
-                            fill="#000033"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  )}
 
                 {/* Multi-city form - Additional Rows */}
                 {tripType === "multi" && (
@@ -857,19 +845,16 @@ const TopFilterSection = ({
                           We use paddingTop to space the second row. */}
 
                       <div
-                        className={`${styles.serarchingContBottom} ${
-                          styles.bottomRowAnimate
-                        } ${
-                          tripType === "multi"
+                        className={`${styles.serarchingContBottom} ${styles.bottomRowAnimate
+                          } ${tripType === "multi"
                             ? styles.animateIn
                             : styles.animateOut
-                        }
+                          }
                         
-                         ${
-                           tripType === "multi"
-                             ? styles.multiCitySerarchingContBottom
-                             : ""
-                         }`}
+                         ${tripType === "multi"
+                            ? styles.multiCitySerarchingContBottom
+                            : ""
+                          }`}
                         style={{ pointerEvents: "auto" }}
                       >
                         <div
@@ -1079,10 +1064,13 @@ const TopFilterSection = ({
               </div>
 
               {/* Right: Edit Icon */}
-              <div className={styles.rightIcon}>
+              <div className={styles.rightIcon} onClick={() => setIsOpecEditFields(true)}>
                 <PencilIcon />
               </div>
+              
+
             </div>
+           
             <div className={styles.datesContainer}>
               <div className={styles.datesScrollerWrapper}>
                 {/* Month badge */}
@@ -1093,21 +1081,19 @@ const TopFilterSection = ({
                     {dateTiles.map((item, i) => (
                       <div
                         key={i}
-                        className={`${styles.dateTile} ${
-                          activeTile.includes(i) ? styles.activeTile : ""
-                        }`}
+                        className={`${styles.dateTile} ${activeTile.includes(i) ? styles.activeTile : ""
+                          }`}
                         onClick={() => toggleTile(i)}
                       >
                         <div className={styles.dateLabel}>{item.label}</div>
 
                         <div
-                          className={`${styles.price} ${
-                            item.trend === "up"
+                          className={`${styles.price} ${item.trend === "up"
                               ? styles.priceUp
                               : item.trend === "down"
-                              ? styles.priceDown
-                              : ""
-                          }`}
+                                ? styles.priceDown
+                                : ""
+                            }`}
                         >
                           ₹ {item.price.toLocaleString("en-IN")}
                         </div>
@@ -1119,7 +1105,11 @@ const TopFilterSection = ({
             </div>
           </div>
         </div>
+        {/* {isOpecEditFields && (
+                <FlightEditFieldPopup />
+              )} */}
       </div>
+       
     </>
   );
 };

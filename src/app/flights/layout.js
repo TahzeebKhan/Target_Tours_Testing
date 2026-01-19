@@ -1,134 +1,3 @@
-// "use client";
-// import Navbar from "./Navbar";
-// import styles from "./FlightsLayout.module.css";
-// import DatePriceSlider from "./components/DatePriceSlider";
-// import FlightFilters from "./components/FlightsFilters";
-// import TopFilterSection from "./components/TopFilterSection";
-// import { useEffect, useRef, useState } from "react";
-// import { TripTypeProvider, useTripType } from "./TripTypeContext";
-// import TopFilterResponsiveSec from "./components/TopFilterResponsiveSec";
-
-// function LayoutContent({ children }) {
-//   const { tripType } = useTripType();
-//   const containerRef = useRef(null);
-
-//   const sidebarRef = useRef(null);
-//   const navbarRef = useRef(null);
-
-//   const [isScrolled, setIsScrolled] = useState(false);
-//   const [stickyTop, setStickyTop] = useState(0);
-
-//   // const [scrolled, setScrolled] = useState(false);
-
-//   // useEffect(() => {
-//   //   const onScroll = () => {
-//   //     setScrolled(window.scrollY > 40); // 🔥 threshold
-//   //   };
-//   //   window.addEventListener("scroll", onScroll);
-//   //   return () => window.removeEventListener("scroll", onScroll);
-//   // }, []);
-
-//   // Scroll detection for gap reduction
-//   // useEffect(() => {
-//   //   const handleScroll = () => {
-//   //     setIsScrolled(window.scrollY >= 100);
-//   //   };
-
-//   //   window.addEventListener("scroll", handleScroll);
-//   //   handleScroll();
-
-//   //   return () => window.removeEventListener("scroll", handleScroll);
-//   // }, []);
-
-//   useEffect(() => {
-//   let ticking = false;
-
-//   const updateOffsets = () => {
-//     if (!ticking) {
-//       window.requestAnimationFrame(() => {
-//         const scrolled = window.scrollY > 100;
-//         setIsScrolled(scrolled);
-
-//         const navRect = navbarRef.current?.getBoundingClientRect();
-//         // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
-//         const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
-//         setStickyTop(scrolled ? topOffset : 0);
-
-//         ticking = false;
-//       });
-//       ticking = true;
-//     }
-//   };
-
-//   window.addEventListener("scroll", updateOffsets, { passive: true });
-//   window.addEventListener("resize", updateOffsets);
-//   updateOffsets();
-
-//   return () => {
-//     window.removeEventListener("scroll", updateOffsets);
-//     window.removeEventListener("resize", updateOffsets);
-//   };
-// }, []);
-
-//   return (
-//     <>
-//       {" "}
-//       {/* Top Navbar */}
-//       <div className={styles.wrapper}>
-//         <div ref={navbarRef}>
-//           <Navbar />
-//         </div>
-//         <div
-//           className={`${styles.imageBackgound} ${isScrolled ? styles.sticky : ""}`}
-//           style={isScrolled ? { top: `${stickyTop}px` } : undefined}
-//         >
-//           <TopFilterSection isScrolled={isScrolled} />
-//         </div>
-//         {isScrolled && (
-//           <div
-//             className={styles.imageSpacer}
-//             aria-hidden="true"
-//             style={{ height: "147px" }}
-//           />
-//         )}
-//         {/* <div className={`${styles.imageBackgoundRes} ${isScrolled ? styles.visible : ""}`}>
-//           <TopFilterResponsiveSec />
-//         </div> */}
-//       </div>
-//       {/* Page Wrapper */}
-//       <main className={styles.page}>
-//         <div
-//           ref={containerRef}
-//           className={`${styles.container} ${tripType === "round" ? styles.wideContainer : styles.normalContainer
-//             }`}
-//         >
-//           {/* top date slider */}
-//           {/* <div className={styles.dateSlider}>
-
-//           </div> */}
-//           {/* Sidebar */}
-//           <aside className={styles.sidebar}>
-//             <div className={styles.sidebarSticky} ref={sidebarRef}>
-//               <FlightFilters />
-//             </div>
-//           </aside>
-
-//           {/* Main content */}
-//           <section className={styles.content}>{children}</section>
-//         </div>
-//       </main>
-//     </>
-//   );
-// }
-
-// export default function FlightsLayout({ children }) {
-//   return (
-//     <TripTypeProvider>
-//       <LayoutContent>{children}</LayoutContent>
-//     </TripTypeProvider>
-//   );
-// }
-
 "use client";
 import Navbar from "./Navbar";
 import styles from "./FlightsLayout.module.css";
@@ -256,6 +125,7 @@ function LayoutContent({ children }) {
   //   };
   // }, []);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isOpecEditFields, setIsOpecEditFields] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -307,6 +177,7 @@ function LayoutContent({ children }) {
           <TopFilterSection
             isMobile={isMobile}
             scrollProgress={scrollProgress}
+            setIsOpecEditFields={setIsOpecEditFields}
           />
         </div>
         {/* {isScrolled && (
@@ -331,11 +202,10 @@ function LayoutContent({ children }) {
         <SidebarContext.Provider value={{ isSidebarOpen, setIsSidebarOpen }}>
           <div
             ref={containerRef}
-            className={`${styles.container} ${
-              tripType === "round"
+            className={`${styles.container} ${tripType === "round"
                 ? styles.wideContainer
                 : styles.normalContainer
-            }`}
+              }`}
           >
             {isTablet && (
               <button
@@ -353,14 +223,12 @@ function LayoutContent({ children }) {
             )}
             {/* Sidebar */}
             <aside
-              className={`${styles.sidebar} ${
-                isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
-              }`}
+              className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarCollapsed
+                }`}
             >
               <div
-                className={`${styles.sidebarSticky} ${
-                  tripType === "multi" ? styles.sidebarStickyMultiCity : ""
-                }`}
+                className={`${styles.sidebarSticky} ${tripType === "multi" ? styles.sidebarStickyMultiCity : ""
+                  }`}
                 ref={sidebarRef}
               >
                 <FlightFilters />
@@ -372,12 +240,16 @@ function LayoutContent({ children }) {
           </div>
         </SidebarContext.Provider>
       </main>
+      {isOpecEditFields && (
+        <FlightEditFieldPopup setIsOpecEditFields={setIsOpecEditFields} />
+      )}
     </>
   );
 }
 
 import { Suspense } from "react";
 import CustomLoaderHomePage from "../components/CustomLoaderHomePage";
+import FlightEditFieldPopup from "../components/FlightPhoneViewPopup/FlightEditFieldPopup";
 
 export default function FlightsLayout({ children }) {
   return (
