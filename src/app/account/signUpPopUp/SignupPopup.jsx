@@ -3,6 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./SignupPopup.module.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
 
 export default function SignupPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
@@ -58,7 +63,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
     if (!password.trim()) {
       setPasswordError("Password is required");
       hasError = true;
-    } 
+    }
 
     // 🔹 Confirm password validation
     if (!confirmPassword.trim()) {
@@ -91,7 +96,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
             password: password,
             domain: "localhost:1337", // ❗ as required
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -110,6 +115,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
     }
   };
 
+  const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -118,13 +124,34 @@ export default function SignupPopup({ onNavigate, onClose }) {
       >
         {/* Left Section */}
         <section className={styles.imageSection}>
-          <Image
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            loop
+            className={styles.logoSwiper}
+          >
+            {slides.map((_, index) => (
+              <SwiperSlide key={index} className={styles.logoSlide}>
+                <Image
+                  src="/images/signup-hero.webp"
+                  alt="Target Tours Logo"
+                  width={87}
+                  priority
+                  unoptimized
+                  height={73}
+                  className={styles.slideImage}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          {/* <Image
             src="/images/signup-hero.webp"
             alt="Scenic mountain view"
             fill
             className={styles.heroImage}
             priority
-          />
+          /> */}
         </section>
 
         {/* Right Section */}
