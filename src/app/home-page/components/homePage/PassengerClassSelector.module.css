@@ -4,7 +4,7 @@
   right: 0;
   width: 388px;
   background: #171717;
-  box-shadow: 0px 4px 35px 0px #0000000D;
+  box-shadow: 0px 4px 35px 0px #0000000d;
   font-family: var(--font-inter);
   padding: 16px;
   z-index: 999;
@@ -12,14 +12,14 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  border: 0.5px solid #FFFFFF;
+  border: 0.5px solid #ffffff;
 }
 
 .heading {
   font-size: 14px;
   font-weight: 600;
   text-transform: capitalize;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .row {
@@ -31,15 +31,14 @@
 .label {
   font-size: 14px;
   font-weight: 300;
-  color: #FFFFFF;
+  color: #ffffff;
 }
-
 
 .minusBtn,
 .plusBtn {
   width: 32px;
   height: 32px;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #ffffff;
   /* padding: 11px 7px; */
   display: flex;
   align-items: center;
@@ -56,12 +55,16 @@
 
 .minusBtn:hover,
 .plusBtn:hover {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   color: #000033;
 }
 
 .minusBtn:hover {
   border-color: #000033;
+}
+.minusBtn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 /* .minusBtn svg path,
@@ -97,7 +100,7 @@
   text-align: center;
   font-weight: 600;
   font-size: 16px;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .counterDiv {
@@ -122,7 +125,7 @@
   justify-content: center;
   height: 37px;
   font-size: 13px;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 400;
   cursor: pointer;
   font-size: 14px;
@@ -151,7 +154,7 @@
   max-width: 170px;
   width: 100%;
   padding: 12px 24px;
-  background-color: #FCC800;
+  background-color: #fcc800;
 
   font-weight: 400;
   font-size: 14px;
@@ -161,6 +164,4 @@
   text-transform: uppercase;
   color: #000033;
   cursor: pointer;
-
-
 }

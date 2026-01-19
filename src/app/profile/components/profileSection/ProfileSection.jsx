@@ -54,6 +54,10 @@ const ProfileSection = () => {
 
       const formData = new FormData();
       formData.append("profile_photo", file); // ✅ backend key
+      if (!userId) {
+        console.log("user id not in cookies");
+        return;
+      }
 
       const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/profile-photo/${userId}`;
 
@@ -293,7 +297,8 @@ const ProfileSection = () => {
       const token = Cookies.get("auth_token");
 
       if (!userId) {
-        throw new Error("User ID missing in cookies");
+        console.log("User ID missing in cookies");
+        return;
       }
 
       const phone = profileFields
@@ -360,7 +365,7 @@ const ProfileSection = () => {
       } catch (err) {
         console.error(
           "Failed to fetch profile",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       }
     };

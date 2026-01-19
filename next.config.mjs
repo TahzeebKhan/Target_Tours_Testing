@@ -9,9 +9,13 @@ const nextConfig = {
         port: "1337",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "sprintsell.com",
+        pathname: "/uploads/**",
+      },
     ],
   },
-  
 };
 
 export default nextConfig;

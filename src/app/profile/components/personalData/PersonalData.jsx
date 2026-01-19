@@ -29,13 +29,13 @@ export const SetPasswordModal = ({ open, onClose }) => {
 
     if (!password.trim()) {
       newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (!confirmPassword.trim()) {
       newErrors.confirmPassword = "Confirm password is required";
-    }
-
-    if (password && confirmPassword && password !== confirmPassword) {
+    } else if (password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -44,7 +44,11 @@ export const SetPasswordModal = ({ open, onClose }) => {
   };
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    console.log("SET PASSWORD CLICKED");
+    if (!validate()) {
+      console.log("VALIDATION FAILED", errors);
+      return;
+    }
 
     const token = Cookies.get("auth_token");
     if (!token) {
@@ -216,7 +220,7 @@ export default function PersonalData() {
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const [isSetPasswordOpen, setIsSetPasswordOpen] = useState(false);
 
-  const [selectedCurrency, setSelectedCurrency] = useState("$ U.S. dollar");
+  const [selectedCurrency, setSelectedCurrency] = useState("₹ Indian Rupee");
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState({
     label: "English (US)",
@@ -229,27 +233,56 @@ export default function PersonalData() {
   const languageRef = useRef(null);
 
   const currencies = [
-    "$ U.S. dollar",
-    "£ Pound sterling",
-    "CNY Chinese yuan",
-    "SAR Saudi Arabian riyal",
-    "RUB Russian ruble",
-    "DKK Danish krone",
-    "AZN Azerbaijan, New Manats",
-    "TWD New Taiwan dollar",
+    "₹ Indian Rupee",
+    // "$ U.S. dollar",
+    // "£ Pound sterling",
+    // "CNY Chinese yuan",
+    // "SAR Saudi Arabian riyal",
+    // "RUB Russian ruble",
+    // "DKK Danish krone",
+    // "AZN Azerbaijan, New Manats",
+    // "TWD New Taiwan dollar",
   ];
 
   const languages = [
     { label: "English (US)", flag: "/images/us.svg" },
-    { label: "Deutsch", flag: "/icons/de.svg" },
-    { label: "Nederlands", flag: "/icons/bq.svg" },
-    { label: "Français", flag: "/icons/mf.svg" },
-    { label: "Español", flag: "/icons/es.svg" },
-    { label: "Español (AR)", flag: "/icons/ar.svg" },
-    { label: "Español (MX)", flag: "/icons/mx.svg" },
-    { label: "Italiano", flag: "/icons/it.svg" },
+    // { label: "Deutsch", flag: "/icons/de.svg" },
+    // { label: "Nederlands", flag: "/icons/bq.svg" },
+    // { label: "Français", flag: "/icons/mf.svg" },
+    // { label: "Español", flag: "/icons/es.svg" },
+    // { label: "Español (AR)", flag: "/icons/ar.svg" },
+    // { label: "Español (MX)", flag: "/icons/mx.svg" },
+    // { label: "Italiano", flag: "/icons/it.svg" },
+    // { label: "Hindi", flag: "/icons/india.svg" },
   ];
 
+  const updateProfile = async (payload) => {
+    const token = Cookies.get("auth_token");
+
+    if (!token) {
+      toast.error("You must be logged in");
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/update-profile`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to update profile";
+
+      toast.error(msg);
+    }
+  };
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -267,7 +300,15 @@ export default function PersonalData() {
   }, []);
 
   const toggleRecommendations = () => {
-    setIsRecommendationsActive((prev) => !prev);
+    setIsRecommendationsActive((prev) => {
+      const newValue = !prev;
+
+      updateProfile({
+        personalized_recommendation: newValue,
+      });
+
+      return newValue;
+    });
   };
 
   const handleDeleteAccount = async (password) => {
@@ -425,6 +466,10 @@ export default function PersonalData() {
                           onClick={() => {
                             setSelectedLanguage(lang);
                             setIsLanguageOpen(false);
+
+                            updateProfile({
+                              language: lang.label.toLowerCase(), // "english", "hindi", etc.
+                            });
                           }}
                         >
                           <div className={styles.flagWrapper}>

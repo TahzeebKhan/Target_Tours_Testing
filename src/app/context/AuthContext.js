@@ -27,14 +27,17 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(userCookie);
         setUser(parsedUser);
         setIsLoggedIn(true);
-
+        if (!parsedUser.id) {
+          console.log("no user id");
+          return;
+        }
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${parsedUser.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (res.ok) {
@@ -70,7 +73,7 @@ export const AuthProvider = ({ children }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (res.ok) {
