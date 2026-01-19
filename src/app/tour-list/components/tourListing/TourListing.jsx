@@ -13,7 +13,7 @@ import SelectTravellerProfile from "@/app/profile_components/selectTravellerProf
 import SelectPreferences from "@/app/profile_components/selectPreferences";
 import axios from "axios";
 import api from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchTours } from "@/app/service/tourPackage";
 
 
@@ -36,12 +36,22 @@ const TourListing = ({ filters, page, setPage }) => {
     data,
     isLoading,
     isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
     isError,
-  } = useQuery({
-    queryKey: ["tours", { filters, page }],
+  } = useInfiniteQuery({
+    queryKey: ["tours", { filters }],
     queryFn: fetchTours,
     keepPreviousData: true,
     staleTime: 1000 * 60 * 10,
+    getNextPageParam: (lastPage) => {
+      const pagination = lastPage.meta?.pagination;
+      if (!pagination) return undefined;
+
+      const { page, pageCount } = pagination;
+      return page < pageCount ? page + 1 : undefined;
+    },
   });
 
 
@@ -65,74 +75,75 @@ const TourListing = ({ filters, page, setPage }) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  // const tourData = [
-  //   {
-  //     id: 1,
-  //     image: "/tourList/cardItem1.jpg",
-  //     route: "TORONTO TO OTTAWA",
-  //     title: "Splendors of the Canadian West",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 2,
-  //     image: "/tourList/cardItem2.jpg",
-  //     route: "VANCOUVER TO CALGARY",
-  //     title: "Splendors of the Rocky Mountains",
-  //     days: "14 DAYS & 13 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 72,990",
-  //   },
-  //   {
-  //     id: 3,
-  //     image: "/tourList/cardItem3.jpg",
-  //     route: "TORONTO TO MONTREAL",
-  //     title: "Charms of Eastern Canada",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 4,
-  //     image: "/tourList/cardItem4.jpg",
-  //     route: "WHITEHORSE TO FAIRBANKS",
-  //     title: "Northern Lights of Canada",
-  //     days: "10 DAYS & 9 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "4 ACTIVITIES",
-  //     price: "₹ 89,900",
-  //   },
-  //   {
-  //     id: 5,
-  //     image: "/tourList/cardItem5.jpg",
-  //     route: "MONTREAL TO QUEBEC CITY",
-  //     title: "Colors of Quebec Fall",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 6,
-  //     image: "/tourList/cardItem6.jpg",
-  //     route: "VANCOUVER TO WHISTLER",
-  //     title: "Elegance of Canada's West Coast",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  // ];
+ 
+  const tourDataFallback = [
+    {
+      id: 1,
+      image: "/tourList/cardItem1.jpg",
+      route: "TORONTO TO OTTAWA",
+      title: "Splendors of the Canadian West",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 2,
+      image: "/tourList/cardItem2.jpg",
+      route: "VANCOUVER TO CALGARY",
+      title: "Splendors of the Rocky Mountains",
+      days: "14 DAYS & 13 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 72,990",
+    },
+    {
+      id: 3,
+      image: "/tourList/cardItem3.jpg",
+      route: "TORONTO TO MONTREAL",
+      title: "Charms of Eastern Canada",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 4,
+      image: "/tourList/cardItem4.jpg",
+      route: "WHITEHORSE TO FAIRBANKS",
+      title: "Northern Lights of Canada",
+      days: "10 DAYS & 9 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "4 ACTIVITIES",
+      price: "₹ 89,900",
+    },
+    {
+      id: 5,
+      image: "/tourList/cardItem5.jpg",
+      route: "MONTREAL TO QUEBEC CITY",
+      title: "Colors of Quebec Fall",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 6,
+      image: "/tourList/cardItem6.jpg",
+      route: "VANCOUVER TO WHISTLER",
+      title: "Elegance of Canada's West Coast",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+  ];
 
 
 
@@ -146,11 +157,32 @@ const TourListing = ({ filters, page, setPage }) => {
   };
 
 
-  const tourData = data?.data || [];
+  const tourData =
+    data?.pages.flatMap((page) => page.data) || tourDataFallback;
   const meta = data?.meta;
-  // console.log(`TourData ${tourData}`);
   console.log("TourData:", JSON.stringify(tourData, null, 2));
 
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 300 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+
+   const truncateText = (text = "", maxLength = 29) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  };
 
 
   return (
@@ -211,7 +243,7 @@ const TourListing = ({ filters, page, setPage }) => {
                           {item.route}
                         </p>
                         <h4 className={styles.cardItemCenterTextHeading}>
-                          {item.title}
+                          {truncateText(item.title, 31)}
                         </h4>
                       </div>
 
@@ -266,12 +298,11 @@ const TourListing = ({ filters, page, setPage }) => {
                           <div className={styles.expandableTopContainer}>
                             <div className={styles.expandableTop}>
                               <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
-                              <ul className={styles.list}>
-                                <li>Round Trip Flights</li>
-                                <li>4 Star Hotels</li>
-                                <li>Airport Transfers</li>
-                                <li>Intercity Car Transfers</li>
-                              </ul>
+                              {item?.package_inclusions?.map((inclusion, index) => (
+                                <ul className={styles.list}>
+                                  <li>{inclusion.title}</li>
+                                </ul>
+                              ))}
                             </div>
                             <div className={styles.expandableCenter}>
                               <div className={styles.expandableRow}>
@@ -294,7 +325,7 @@ const TourListing = ({ filters, page, setPage }) => {
                           </div>
                           <div className={styles.hr}></div>
                           <div className={styles.expandableFooter}>
-                            <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
+                            <div className={styles.expandableFooterText}>Total <span>{item.price}</span></div>
                             <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
                           </div>
                         </div>

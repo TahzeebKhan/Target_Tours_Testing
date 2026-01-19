@@ -33,11 +33,11 @@ const normalizeTour = (item) => ({
   raw: item,
 });
 
-export const fetchTours = async ({ queryKey }) => {
+export const fetchTours = async ({pageParam = 1, queryKey }) => {
   const [_key, { filters, page }] = queryKey;
 
   const params = {
-    page,
+    page:pageParam,
     perPage: 10,
     domain: "localhost:1337",
     ...filters,

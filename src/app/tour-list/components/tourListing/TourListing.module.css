@@ -566,7 +566,11 @@
     align-items: center;
     justify-content: space-between;
     list-style-type: disc;
-    padding-left: 16px;
+    padding-left: 14px;
+    flex-wrap: wrap;
+    gap: 6px 13px;
+
+
 
 }
 
@@ -639,7 +643,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 30px;
-    line-height: 1.15;
+    line-height: 1;
     letter-spacing: 0px;
     vertical-align: middle;
     text-transform: uppercase;
