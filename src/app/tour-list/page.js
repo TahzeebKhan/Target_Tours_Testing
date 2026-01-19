@@ -1,39 +1,5 @@
-// "use client"
-// import React, { useState } from "react";
-
-// import styles from "./layout.module.css";
-// import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
-// import FlightFilters from "./components/flightFilter/FlightsFilters";
-// import TourListing from "./components/tourListing/TourListing";
-
-// const ToursPage = () => {
-//   return (
-//     <>
-//       {/* HERO SECTION (Image + Search) */}
-//       <TourHeroSection />
-
-//       {/* MAIN CONTENT */}
-//       <section className={styles.tourContent}>
-//         <div className={styles.tourLayout}>
-//           {/* LEFT: FILTERS */}
-//           <aside className={styles.tourFilters}>
-//             <FlightFilters/>
-//           </aside>
-
-//           {/* RIGHT: RESULTS GRID */}
-//           <div className={styles.tourResults}>
-//             <TourListing/>
-//           </div>
-//         </div>
-//       </section>
-//     </>
-//   );
-// };
-
-// export default ToursPage;
-
 "use client";
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import styles from "./layout.module.css";
 import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
 import FlightFilters from "./components/flightFilter/FlightsFilters";
@@ -44,6 +10,54 @@ import { SidebarContext } from "./SidebarContext";
 const ToursPage = () => {
   const isTablet = useMediaQuery("(max-width: 1156px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // const [filters, setFilters] = useState({})
+  const [filters, setFilters] = useState({
+  nights: [1, 10],
+  price: [11307, 57295],
+  flightType: null,
+  packageType: null,
+  premiumPackages: {},
+  cities: {},
+});
+  const [page, setPage] = useState(1)
+
+
+  useEffect(() => {
+  const apiFilters = {};
+
+  if (Array.isArray(filters.nights)) {
+    apiFilters.min_nights = filters.nights[0];
+    apiFilters.max_nights = filters.nights[1];
+  }
+
+  if (Array.isArray(filters.price)) {
+    apiFilters.min_price = filters.price[0];
+    apiFilters.max_price = filters.price[1];
+  }
+
+  if (filters.flightType === "with") apiFilters.with_flight = true;
+  if (filters.flightType === "without") apiFilters.with_flight = false;
+
+  if (filters.packageType) {
+    apiFilters.package_type = filters.packageType;
+  }
+
+  if (filters.premiumPackages?.Premium) {
+    apiFilters.is_premium_package = true;
+  }
+
+  const cities = Object.keys(filters.cities || {}).filter(
+    (c) => filters.cities[c]
+  );
+  if (cities.length) {
+    apiFilters.city = cities.join(",");
+  }
+
+  // ❌ NO onApply here
+}, [filters]);
+
+
 
   return (
     <>
@@ -77,12 +91,25 @@ const ToursPage = () => {
                 : styles.sidebarCollapsed
                 }`}
             >
-              <FlightFilters />
+              <FlightFilters
+                onApply={(apiFilters) => {
+                  setFilters(apiFilters)
+                  setPage(1)
+                }}
+                onReset={() => {
+                  setFilters({});
+                  setPage(1);
+                }}
+              />
             </aside>
 
             {/* RESULTS */}
             <div className={styles.tourResults}>
-              <TourListing />
+              <TourListing
+                filters={filters}
+                page={page}
+                setPage={setPage}
+              />
             </div>
 
           </div>
