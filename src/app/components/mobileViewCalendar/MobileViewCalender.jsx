@@ -181,15 +181,16 @@ export default function MobileViewCalender({ onClose,
 
     return (
         <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+            <div className={`${styles.sheet}`} onClick={(e) => e.stopPropagation()}>
 
                 {/* HEADER */}
                 <div className={styles.header}>
-                    <span className={styles.label}>{inputType}</span>
+                  
                     <div className={styles.inputRow}>
-                        <div className={styles.selectedDate}>{formatHeaderDate()}</div>
+                          <span className={styles.label}>{inputType}</span>
                         <img src="/icons/CLose.svg" alt="close" onClick={onClose} />
                     </div>
+                    <div className={styles.selectedDate}>{formatHeaderDate()}</div>
                 </div>
 
 

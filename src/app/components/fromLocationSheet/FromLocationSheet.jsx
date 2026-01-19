@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import styles from "./FromLocationSheet.module.css";
 import LocationPermissionModal from "../locationPermissionModal/LocationPermissionModal";
+import BestFlightPopup from "../bestFlights/BestFlightPopup";
+import CouldntFindPopup from "../couldntFindPop/CouldntFindPopup";
+import FlightEditFieldPopup from "../FlightPhoneViewPopup/FlightEditFieldPopup";
 
 export default function FromLocationSheet({ onClose, inputType, onSelectCity }) {
     const [search, setSearch] = useState("");
@@ -110,11 +113,12 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
                         </div>
                     </div>
                     {currentLocation && (
-                        <LocationPermissionModal
+                        <CouldntFindPopup
                             open={currentLocation}
                             onAllow={() => setCurrentLocation(false)}
                             onClose={() => setCurrentLocation(false)}
                         />
+                   
                     )}
 
                     {/* POPULAR */}

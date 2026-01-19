@@ -82,7 +82,7 @@ const HolidaySearchMobile = ({
             className={`${styles.field} ${styles.field2}`}
             onClick={() => setOpenTo(true)}
           >
-            <label className={styles.label}>To CITY/COUNTRY,CATEGORY</label>
+            <label className={styles.label}>To CITY/COUNTRY</label>
             <input
               type="text"
               placeholder="Destination"
