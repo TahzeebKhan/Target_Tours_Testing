@@ -193,6 +193,11 @@ import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
 
 export default function LoginPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
@@ -201,6 +206,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
 
   const { login } = useAuth();
   useEffect(() => {
@@ -262,7 +268,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
             password,
             domain: "localhost:1337",
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -285,7 +291,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
             headers: {
               Authorization: `Bearer ${data.token}`,
             },
-          }
+          },
         )
           .then((res) => res.ok && res.json())
           .then((profile) => {
@@ -319,15 +325,36 @@ export default function LoginPopup({ onNavigate, onClose }) {
       >
         {/* Left Section */}
         <section className={styles.imageSection}>
-          <Image
+          {/* <Image
             src="/images/travel-hero.webp"
             alt="Scenic view of Ko Tapu"
             fill
             className={styles.heroImage}
             priority
-          />
-        </section>
+          /> */}
 
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            loop
+            className={styles.logoSwiper}
+          >
+            {slides.map((_, index) => (
+              <SwiperSlide key={index} className={styles.logoSlide}>
+                <Image
+                  src="/images/travel-hero.webp"
+                  alt="Target Tours Logo"
+                  width={87}
+                  priority
+                  unoptimized
+                  height={73}
+                  className={styles.slideImage}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </section>
         {/* Right Section */}
         <section className={styles.formSection}>
           <div className={styles.formContent}>
