@@ -1,79 +1,84 @@
 .overlay {
-     display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 10, 10, 0.2);
-    backdrop-filter: blur(6px);
-    z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.2);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
 }
 
 .container {
-    background-color: #ffffff;
-    border-radius: 16px 16px 0 0;
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  /* max-width: 600px; */
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
-    padding: 16px;
-    padding-top: 24px;
-    display: flex;
-    flex-direction: column;
-    border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding: 16px;
+  background-color: white;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
 }
 
 .topRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .breadcrumbLabel {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    color: rgba(123, 135, 153, 1);
-    text-transform: uppercase;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: rgba(123, 135, 153, 1);
+  text-transform: uppercase;
 }
 
 .closeButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: rgba(10, 10, 10, 1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(10, 10, 10, 1);
 }
 
 .sectionWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 16px;
+  padding-bottom: 102px;
 }
 
 .title {
-    font-family: 'Antic Didone', serif;
-    font-size: 20px;
-    color: rgba(0, 0, 0, 1);
-    text-transform: uppercase;
-    line-height: 100%;
-    letter-spacing: 0%;
+  font-family: "Antic Didone", serif;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 1);
+  text-transform: uppercase;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .card {
-    display: flex;
-    flex-direction: column;
-    gap: 5.4px;
-    cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5.4px;
+  cursor: pointer;
 }
 
 .imageWrapper {
@@ -84,9 +89,8 @@
 
   border: 2px solid transparent;
   transition: border-color 300ms ease-out;
-  line-height: 0; 
+  line-height: 0;
 }
-
 
 .active .imageWrapper {
   border: 2px solid rgba(0, 0, 51, 1);
@@ -119,8 +123,8 @@
 }
 
 .image {
-    object-fit: cover;
-    display: block; 
+  object-fit: cover;
+  display: block;
 }
 
 /* .selectedOverlay {
@@ -131,40 +135,44 @@
 } */
 
 .cardLabel {
-    font-family: "Antic Didone", serif;
-    font-size: 18px;
-    color: rgba(0, 0, 0, 1);
-    line-height: 100%;
-    letter-spacing: 0%;
+  font-family: "Antic Didone", serif;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 1);
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 16px;
-    padding-top: 24px;
-    gap: 12px;
-    border-bottom: 1px solid rgba(243, 244, 246, 1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 16px;
+  padding-top: 24px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(243, 244, 246, 1);
+  position: fixed;
+  bottom: 0;
+  background-color: white;
+  width: 100%;
 }
 
 .resetButton {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    background: white;
-    border: 1px solid rgba(228, 230, 232, 1);
-    padding: 16px;
-    cursor: pointer;
-    color: rgba(0, 0, 51, 1);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 16px;
+  cursor: pointer;
+  color: rgba(0, 0, 51, 1);
 }
 
 .searchButton {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    background: rgba(0, 0, 51, 1);
-    color: white;
-    border: none;
-    padding: 16px;
-    cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(0, 0, 51, 1);
+  color: white;
+  border: none;
+  padding: 16px;
+  cursor: pointer;
 }

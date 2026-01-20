@@ -131,17 +131,96 @@
 }
 
 /* checked state */
-.checkbox input:checked+.customCheckbox {
+.checkbox input:checked + .customCheckbox {
   background-color: #000033;
   /* royal blue */
   border-color: #000033;
 }
 
-.checkbox input:checked+.customCheckbox .checkIcon {
+.checkbox input:checked + .customCheckbox .checkIcon {
   opacity: 1;
   transform: scale(1);
   background-color: white;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+
+/* hover (optional polish) */
+.checkbox:hover .customCheckbox {
+  border-color: #000033;
+}
+
+/* Checkbox */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+/* hide native checkbox */
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* custom box */
+.customCheckbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 0px;
+  background-color: #ffffff;
+  border: 1px solid #d5d7da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.departureCard[data-active="true"] {
+  border-color: #0b0f3f;
+  background: #f6f8ff;
+}
+
+.border {
+  width: calc(100% + 32px);
+  transform: translateX(-16px);
+  height: 1px;
+  margin-top: 16px;
+  border-bottom: 1px solid #0000001a;
+}
+
+/* check icon */
+.checkIcon {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: scale(0.6);
+  /* 🔥 keep mask ALWAYS */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  transition: all 0.15s ease;
+  background-color: transparent;
+}
+
+/* checked state */
+.checkbox input:checked + .customCheckbox {
+  background-color: #000033; /* royal blue */
+  border-color: #000033;
+}
+
+.checkbox input:checked + .customCheckbox .checkIcon {
+  opacity: 1;
+  transform: scale(1);
+  background-color: white;
 }
 
 /* hover (optional polish) */
@@ -204,7 +283,9 @@
   border: 7px solid #ffffff;
   /* creates white ring */
 
-  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+  box-shadow:
+    0px 0px 0px 1px #c6d8e3,
+    0px 0px 25px 0px #0000001a;
 
   cursor: pointer;
 }
@@ -220,7 +301,9 @@
   background: #0b0f3f;
   border: 7px solid #ffffff;
 
-  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+  box-shadow:
+    0px 0px 0px 1px #c6d8e3,
+    0px 0px 25px 0px #0000001a;
 
   cursor: pointer;
 }
@@ -258,7 +341,6 @@
 
 .hotelCategoryGrid {
   grid-template-columns: repeat(4, 1fr);
-
 }
 
 /* Card */
@@ -310,7 +392,6 @@
   align-content: center;
   gap: 8px;
 }
-
 
 @media (max-width: 1156px) {
   .departureCard {
@@ -371,7 +452,7 @@
   cursor: pointer;
 }
 
-.chip>span {
+.chip > span {
   height: 24px;
   width: 24px;
   border-radius: 50%;
@@ -400,7 +481,7 @@
   line-height: 150%;
   letter-spacing: -3%;
   text-transform: uppercase;
-  color: #7B8799;
+  color: #7b8799;
 }
 
 .headerMobile {
@@ -437,6 +518,5 @@
 
   .filterChips {
     display: flex !important;
-
   }
 }
