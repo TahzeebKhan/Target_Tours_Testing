@@ -1,72 +1,129 @@
 .container {
-    background-color: #FFFFFF;
-    padding: 24px;
-    height: 100%;
-
+  background-color: #ffffff;
+  padding: 24px;
+  /* height: 100%; */
 }
 
 .contentWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .wishlistHead {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
 }
 
 .wishlistHeadLeft {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .wishlistHeadLeft h3 {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 28px;
-    line-height: 34px;
-    letter-spacing: 0%;
-    text-align: left;
-    color: #000033;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: 0%;
+  text-align: left;
+  color: #000033;
 }
 
 .wishlistHeadLeft p {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 14px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
 
-    line-height: 1.19;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    color: #000000;
-
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
 }
 
 .wishlistHeadRight {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 18px;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 18px;
+  leading-trim: NONE;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-align: right;
+  color: #070773;
+  cursor: pointer;
+  transition: all 0.45s ease;
+}
+.br {
+  width: 100%;
+  border: 0.5px solid #e4e6e8;
+}
+.mobileCreateBtn {
+  display: none;
+}
+.wishlistHeadRight:hover {
+  transition: all 0.45s ease;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+.containerMobile {
+  display: none;
+}
+
+@media (max-width: 895px) {
+  .container {
+    display: none;
+  }
+  .contentWrapper {
+    width: 100%;
+  }
+  .containerMobile {
+    display: flex;
+    padding: 0;
+  }
+  .wishlistHeadLeft {
+    display: none;
+  }
+  .wishlistHeadRight {
+    position: fixed;
+    top: 20px;
+    z-index: 9999;
+    right: 16px;
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
     leading-trim: NONE;
-    line-height: 1.19;
+    line-height: 20px;
     letter-spacing: 0%;
     text-align: right;
     color: #070773;
-    cursor: pointer;
-    transition: all 0.45s ease;
-
+  }
+  .destopCreateBtn {
+    display: none;
+  }
+  .mobileCreateBtn {
+    display: block;
+  }
+  .br {
+    display: none;
+  }
 }
-.br{
+
+@media (max-width: 783px) {
+  .stickyWrapper {
+    position: fixed;
     width: 100%;
-    border: .5px solid #E4E6E8;
-}
-
-.wishlistHeadRight:hover {
-    transition: all 0.45s ease;
-    text-decoration: underline;
-    text-underline-offset: 6px;
+    top: 60px; /* ✅ your requirement */
+    z-index: 1000;
+    background: #f0f3ff;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .contentWrapper {
+    padding-top: 19px;
+  }
 }

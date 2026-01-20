@@ -31,10 +31,13 @@ const ProfileClient = () => {
 
   return (
     <>
-      {activeMenu === "Personal Information" && <ProfileSection />}
+      {(activeMenu === "Personal Information" ||
+        activeMenu === "editProfile") && <ProfileSection />}
       {activeMenu === "paymentAccount" && <PaymentMethod />}
       {activeMenu === "trip" && <Trip />}
-      {activeMenu === "wishList" && <WishList />}
+      {(activeMenu === "wishList" || activeMenu === "myNextTrip") && (
+        <WishList />
+      )}
       {activeMenu === "support" && <Support />}
       {activeMenu === "myReviews" && <MyReview />}
       {activeMenu === "settings" && <PersonalData />}

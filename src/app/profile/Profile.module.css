@@ -16,7 +16,7 @@
   .mobileFooter {
     position: relative;
     padding: 24px;
-    padding-top: 84px;
+    /* padding-top: 84px; */
     background-size: cover;
     background-position: center;
     /* padding-bottom: calc(96px + env(safe-area-inset-bottom)); */

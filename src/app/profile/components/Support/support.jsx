@@ -63,7 +63,7 @@ export default function Support() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setIsOverlayOpen(false);
@@ -106,172 +106,349 @@ export default function Support() {
   };
 
   return (
-    <section className={styles.container}>
-      <div className={styles.wrapper}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Help and feedback</h1>
-          <p className={styles.subtitle}>
-            Have questions or feedback for us? We’re listening
-          </p>
-        </header>
+    <>
+      <section className={styles.container}>
+        <div className={styles.wrapper}>
+          <header className={styles.header}>
+            <h1 className={styles.title}>Help and feedback</h1>
+            <p className={styles.subtitle}>
+              Have questions or feedback for us? We’re listening
+            </p>
+          </header>
 
-        <div className={styles.list}>
-          {SUPPORT_OPTIONS.map((option, index) => (
-            <button
-              key={option.id}
-              onClick={() => handleItemClick(option.id, index)}
-              className={`${styles.item} ${activeIndex === index ? styles.active : ""
-                }`}
-            >
-              <div className={styles.contentLeft}>
-                <div className={styles.iconWrapper}>
-                  <Image src={option.icon} alt="" width={24} height={24} />
-                </div>
-                <span className={styles.label}>{option.label}</span>
-              </div>
-              <div className={styles.arrowWrapper}>
-                <Image
-                  src="/icons/Buttons.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className={styles.arrowDefault}
-                />
-                <Image
-                  src="/icons/angle-right-small.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className={styles.arrowHover}
-                />
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* FEEDBACK OVERLAY */}
-      {isOverlayOpen && (
-        <div className={styles.overlay} onClick={closeFeedback}>
-          <div
-            className={styles.overlayContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className={styles.overlayHeader}>
-              <h2 className={styles.overlayTitle}>Share your feedback</h2>
-              <button className={styles.closeBtn} onClick={closeFeedback}>
-                <Image
-                  src="/icons/Close.svg"
-                  alt="Close"
-                  width={24}
-                  height={24}
-                />
-              </button>
-            </header>
-
-            <div className={styles.overlayBody}>
-              <div className={styles.formGroup}>
-                <label className={styles.fieldLabel}>
-                  How likely are you to recommend target and tours to a friend
-                  or colleague?
-                </label>
-                <div className={styles.ratingGroup}>
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      className={`${styles.ratingBox} ${rating === num ? styles.ratingActive : ""
-                        }`}
-                      onClick={() => setRating(num)}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-                {errors.rating && (
-                  <p className={styles.errorText}>{errors.rating}</p>
-                )}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.fieldLabel}>
-                  Please include anything else you like us to know
-                </label>
-                <textarea
-                  className={`${styles.textarea} ${errors.message ? styles.inputError : ""
-                    }`}
-                  placeholder="Enter your comments here"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                />
-
-                {errors.message && (
-                  <p className={styles.errorText}>{errors.message}</p>
-                )}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.fieldLabel}>Email address</label>
-                <input
-                  type="email"
-                  className={`${styles.input} ${errors.email ? styles.inputError : ""
-                    }`}
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-
-                {errors.email && (
-                  <p className={styles.errorText2}>{errors.email}</p>
-                )}
-
-                <p className={styles.helperText}>
-                  we will use your email address (emmily.morgan@gmail.com) to
-                  follow-up on account issues, and for no other purpose.
-                </p>
-              </div>
-            </div>
-
-            <footer className={styles.overlayFooter}>
-              <button className={styles.backBtn} onClick={closeFeedback}>
-                <Image
-                  src="/icons/arrow-left.svg"
-                  alt=""
-                  width={16}
-                  height={16}
-                />
-                BACK
-              </button>
+          <div className={styles.list}>
+            {SUPPORT_OPTIONS.map((option, index) => (
               <button
-                className={styles.sendBtn}
-                onClick={handleSubmit}
-                disabled={isSubmitting}
+                key={option.id}
+                onClick={() => handleItemClick(option.id, index)}
+                className={`${styles.item} ${
+                  activeIndex === index ? styles.active : ""
+                }`}
               >
-                {isSubmitting ? "SENDING..." : "SEND FEEDBACK"}
+                <div className={styles.contentLeft}>
+                  <div className={styles.iconWrapper}>
+                    <Image src={option.icon} alt="" width={24} height={24} />
+                  </div>
+                  <span className={styles.label}>{option.label}</span>
+                </div>
+                <div className={styles.arrowWrapper}>
+                  <Image
+                    src="/icons/Buttons.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className={styles.arrowDefault}
+                  />
+                  <Image
+                    src="/icons/angle-right-small.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className={styles.arrowHover}
+                  />
+                </div>
               </button>
-            </footer>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* SUCCESS OVERLAY */}
-      {isSuccessOpen && (
-        <div
-          className={`${styles.overlay} ${styles.successOverlay}`}
-          onClick={() => setIsSuccessOpen(false)}
-        >
-          <div
-            className={`${styles.overlayContent} ${styles.successContent}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.successBody}>
-              <h2 className={styles.successTitle}>
-                Thank you for your feedback
-              </h2>
+        {/* FEEDBACK OVERLAY */}
+        {isOverlayOpen && (
+          <div className={styles.overlay} onClick={closeFeedback}>
+            <div
+              className={styles.overlayContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <header className={styles.overlayHeader}>
+                <h2 className={styles.overlayTitle}>Share your feedback</h2>
+                <button className={styles.closeBtn} onClick={closeFeedback}>
+                  <Image
+                    src="/icons/Close.svg"
+                    alt="Close"
+                    width={24}
+                    height={24}
+                  />
+                </button>
+              </header>
+
+              <div className={styles.overlayBody}>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>
+                    How likely are you to recommend target and tours to a friend
+                    or colleague?
+                  </label>
+                  <div className={styles.ratingGroup}>
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        className={`${styles.ratingBox} ${
+                          rating === num ? styles.ratingActive : ""
+                        }`}
+                        onClick={() => setRating(num)}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.rating && (
+                    <p className={styles.errorText}>{errors.rating}</p>
+                  )}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>
+                    Please include anything else you like us to know
+                  </label>
+                  <textarea
+                    className={`${styles.textarea} ${
+                      errors.message ? styles.inputError : ""
+                    }`}
+                    placeholder="Enter your comments here"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+
+                  {errors.message && (
+                    <p className={styles.errorText}>{errors.message}</p>
+                  )}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>Email address</label>
+                  <input
+                    type="email"
+                    className={`${styles.input} ${
+                      errors.email ? styles.inputError : ""
+                    }`}
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+
+                  {errors.email && (
+                    <p className={styles.errorText2}>{errors.email}</p>
+                  )}
+
+                  <p className={styles.helperText}>
+                    we will use your email address (emmily.morgan@gmail.com) to
+                    follow-up on account issues, and for no other purpose.
+                  </p>
+                </div>
+              </div>
+
+              <footer className={styles.overlayFooter}>
+                <button className={styles.backBtn} onClick={closeFeedback}>
+                  <Image
+                    src="/icons/arrow-left.svg"
+                    alt=""
+                    width={16}
+                    height={16}
+                  />
+                  BACK
+                </button>
+                <button
+                  className={styles.sendBtn}
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "SENDING..." : "SEND FEEDBACK"}
+                </button>
+              </footer>
             </div>
           </div>
+        )}
+
+        {/* SUCCESS OVERLAY */}
+        {isSuccessOpen && (
+          <div
+            className={`${styles.overlay} ${styles.successOverlay}`}
+            onClick={() => setIsSuccessOpen(false)}
+          >
+            <div
+              className={`${styles.overlayContent} ${styles.successContent}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.successBody}>
+                <h2 className={styles.successTitle}>
+                  Thank you for your feedback
+                </h2>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+      <section className={`${styles.container} ${styles.containerMobile}`}>
+        <div className={styles.wrapper}>
+          <header className={styles.header}>
+            <h1 className={styles.title}>Help and feedback</h1>
+            <p className={styles.subtitle}>
+              Have questions or feedback for us? We’re listening
+            </p>
+          </header>
+
+          <div className={styles.list}>
+            {SUPPORT_OPTIONS.map((option, index) => (
+              <button
+                key={option.id}
+                onClick={() => handleItemClick(option.id, index)}
+                className={`${styles.item} ${
+                  activeIndex === index ? styles.active : ""
+                }`}
+              >
+                <div className={styles.contentLeft}>
+                  <div className={styles.iconWrapper}>
+                    <Image src={option.icon} alt="" width={24} height={24} />
+                  </div>
+                  <span className={styles.label}>{option.label}</span>
+                </div>
+                <div className={styles.arrowWrapper}>
+                  <Image
+                    src="/icons/Buttons.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className={styles.arrowDefault}
+                  />
+                  <Image
+                    src="/icons/angle-right-small.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className={styles.arrowHover}
+                  />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-    </section>
+
+        {/* FEEDBACK OVERLAY */}
+        {isOverlayOpen && (
+          <div className={styles.overlay} onClick={closeFeedback}>
+            <div
+              className={styles.overlayContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <header className={styles.overlayHeader}>
+                <h2 className={styles.overlayTitle}>Share your feedback</h2>
+                <button className={styles.closeBtn} onClick={closeFeedback}>
+                  <Image
+                    src="/icons/Close.svg"
+                    alt="Close"
+                    width={24}
+                    height={24}
+                  />
+                </button>
+              </header>
+
+              <div className={styles.overlayBody}>
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>
+                    How likely are you to recommend target and tours to a friend
+                    or colleague?
+                  </label>
+                  <div className={styles.ratingGroup}>
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        className={`${styles.ratingBox} ${
+                          rating === num ? styles.ratingActive : ""
+                        }`}
+                        onClick={() => setRating(num)}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.rating && (
+                    <p className={styles.errorText}>{errors.rating}</p>
+                  )}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>
+                    Please include anything else you like us to know
+                  </label>
+                  <textarea
+                    className={`${styles.textarea} ${
+                      errors.message ? styles.inputError : ""
+                    }`}
+                    placeholder="Enter your comments here"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+
+                  {errors.message && (
+                    <p className={styles.errorText}>{errors.message}</p>
+                  )}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.fieldLabel}>Email address</label>
+                  <input
+                    type="email"
+                    className={`${styles.input} ${
+                      errors.email ? styles.inputError : ""
+                    }`}
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+
+                  {errors.email && (
+                    <p className={styles.errorText2}>{errors.email}</p>
+                  )}
+
+                  <p className={styles.helperText}>
+                    we will use your email address (emmily.morgan@gmail.com) to
+                    follow-up on account issues, and for no other purpose.
+                  </p>
+                </div>
+              </div>
+
+              <footer className={styles.overlayFooter}>
+                <button className={styles.backBtn} onClick={closeFeedback}>
+                  <Image
+                    src="/icons/arrow-left.svg"
+                    alt=""
+                    width={16}
+                    height={16}
+                  />
+                  BACK
+                </button>
+                <button
+                  className={styles.sendBtn}
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "SENDING..." : "SEND FEEDBACK"}
+                </button>
+              </footer>
+            </div>
+          </div>
+        )}
+
+        {/* SUCCESS OVERLAY */}
+        {isSuccessOpen && (
+          <div
+            className={`${styles.overlay} ${styles.successOverlay}`}
+            onClick={() => setIsSuccessOpen(false)}
+          >
+            <div
+              className={`${styles.overlayContent} ${styles.successContent}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.successBody}>
+                <h2 className={styles.successTitle}>
+                  Thank you for your feedback
+                </h2>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+    </>
   );
 }

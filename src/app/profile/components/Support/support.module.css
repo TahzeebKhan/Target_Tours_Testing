@@ -5,7 +5,9 @@
   background-color: #ffffff;
   height: 100%;
 }
-
+.containerMobile{
+  display: none;
+}
 .wrapper {
   display: flex;
   flex-direction: column;
