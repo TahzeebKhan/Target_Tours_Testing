@@ -13,13 +13,13 @@ import SelectTravellerProfile from "@/app/profile_components/selectTravellerProf
 import SelectPreferences from "@/app/profile_components/selectPreferences";
 import axios from "axios";
 import api from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchTours } from "@/app/service/tourPackage";
 
 
 
 
-const TourListing = ({ filters, page, setPage }) => {
+const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
@@ -36,12 +36,22 @@ const TourListing = ({ filters, page, setPage }) => {
     data,
     isLoading,
     isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
     isError,
-  } = useQuery({
-    queryKey: ["tours", { filters, page }],
+  } = useInfiniteQuery({
+    queryKey: ["tours", { filters }],
     queryFn: fetchTours,
     keepPreviousData: true,
     staleTime: 1000 * 60 * 10,
+    getNextPageParam: (lastPage) => {
+      const pagination = lastPage.meta?.pagination;
+      if (!pagination) return undefined;
+
+      const { page, pageCount } = pagination;
+      return page < pageCount ? page + 1 : undefined;
+    },
   });
 
 
@@ -65,74 +75,75 @@ const TourListing = ({ filters, page, setPage }) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  // const tourData = [
-  //   {
-  //     id: 1,
-  //     image: "/tourList/cardItem1.jpg",
-  //     route: "TORONTO TO OTTAWA",
-  //     title: "Splendors of the Canadian West",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 2,
-  //     image: "/tourList/cardItem2.jpg",
-  //     route: "VANCOUVER TO CALGARY",
-  //     title: "Splendors of the Rocky Mountains",
-  //     days: "14 DAYS & 13 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 72,990",
-  //   },
-  //   {
-  //     id: 3,
-  //     image: "/tourList/cardItem3.jpg",
-  //     route: "TORONTO TO MONTREAL",
-  //     title: "Charms of Eastern Canada",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 4,
-  //     image: "/tourList/cardItem4.jpg",
-  //     route: "WHITEHORSE TO FAIRBANKS",
-  //     title: "Northern Lights of Canada",
-  //     days: "10 DAYS & 9 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "4 ACTIVITIES",
-  //     price: "₹ 89,900",
-  //   },
-  //   {
-  //     id: 5,
-  //     image: "/tourList/cardItem5.jpg",
-  //     route: "MONTREAL TO QUEBEC CITY",
-  //     title: "Colors of Quebec Fall",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  //   {
-  //     id: 6,
-  //     image: "/tourList/cardItem6.jpg",
-  //     route: "VANCOUVER TO WHISTLER",
-  //     title: "Elegance of Canada's West Coast",
-  //     days: "17 DAYS & 16 NIGHTS",
-  //     meals: "SELECTED MEALS",
-  //     hotel: "4-STAR HOTEL",
-  //     activities: "3 ACTIVITIES",
-  //     price: "₹ 66,945",
-  //   },
-  // ];
+
+  const tourDataFallback = [
+    {
+      id: 1,
+      image: "/tourList/cardItem1.jpg",
+      route: "TORONTO TO OTTAWA",
+      title: "Splendors of the Canadian West",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 2,
+      image: "/tourList/cardItem2.jpg",
+      route: "VANCOUVER TO CALGARY",
+      title: "Splendors of the Rocky Mountains",
+      days: "14 DAYS & 13 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 72,990",
+    },
+    {
+      id: 3,
+      image: "/tourList/cardItem3.jpg",
+      route: "TORONTO TO MONTREAL",
+      title: "Charms of Eastern Canada",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 4,
+      image: "/tourList/cardItem4.jpg",
+      route: "WHITEHORSE TO FAIRBANKS",
+      title: "Northern Lights of Canada",
+      days: "10 DAYS & 9 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "4 ACTIVITIES",
+      price: "₹ 89,900",
+    },
+    {
+      id: 5,
+      image: "/tourList/cardItem5.jpg",
+      route: "MONTREAL TO QUEBEC CITY",
+      title: "Colors of Quebec Fall",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+    {
+      id: 6,
+      image: "/tourList/cardItem6.jpg",
+      route: "VANCOUVER TO WHISTLER",
+      title: "Elegance of Canada's West Coast",
+      days: "17 DAYS & 16 NIGHTS",
+      meals: "SELECTED MEALS",
+      hotel: "4-STAR HOTEL",
+      activities: "3 ACTIVITIES",
+      price: "₹ 66,945",
+    },
+  ];
 
 
 
@@ -146,11 +157,47 @@ const TourListing = ({ filters, page, setPage }) => {
   };
 
 
-  const tourData = data?.data || [];
-  const meta = data?.meta;
-  // console.log(`TourData ${tourData}`);
-  console.log("TourData:", JSON.stringify(tourData, null, 2));
+  const tourData =
+    data?.pages.flatMap((page) => page.data) || tourDataFallback;
+  /* 
+   * Extract meta from the first page of data.
+   * Since this is an infinite query, the most relevant "global" counts  
+   * usually come from the initial fetch or are consistent across pages.
+   */
+  const meta = data?.pages?.[0]?.meta;
 
+  useEffect(() => {
+    if (meta && onDataLoaded) {
+      onDataLoaded(meta);
+    }
+  }, [meta, onDataLoaded]);
+
+  console.log(
+    "First tour inclusions:",
+    tourData?.[0]?.package_inclusion
+  );
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 300 &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+
+  const truncateText = (text = "", maxLength = 29) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  };
 
 
   return (
@@ -211,7 +258,7 @@ const TourListing = ({ filters, page, setPage }) => {
                           {item.route}
                         </p>
                         <h4 className={styles.cardItemCenterTextHeading}>
-                          {item.title}
+                          {truncateText(item.title, 31)}
                         </h4>
                       </div>
 
@@ -274,7 +321,17 @@ const TourListing = ({ filters, page, setPage }) => {
                               </ul>
                             </div>
                             <div className={styles.expandableCenter}>
+
                               <div className={styles.expandableRow}>
+                                {item?.package_inclusion?.map((inclusion, index) => (
+
+                                  <div className={styles.expandableItem}>
+                                    <img src="/icons/checkIcon.svg" alt="" />
+                                    <span>{inclusion.description}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              {/* <div className={styles.expandableRow}>
                                 <div className={styles.expandableItem}>
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Banff Gondola Ride</span>
@@ -283,18 +340,18 @@ const TourListing = ({ filters, page, setPage }) => {
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Lake Louise Scenic Walk</span>
                                 </div>
-                              </div>
-                              <div className={styles.expandableRow}>
+                              </div> */}
+                              {/* <div className={styles.expandableRow}>
                                 <div className={styles.expandableItem}>
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Lake Louise Scenic Walk</span>
                                 </div>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                           <div className={styles.hr}></div>
                           <div className={styles.expandableFooter}>
-                            <div className={styles.expandableFooterText}>Total <span>₹1,66,945</span></div>
+                            <div className={styles.expandableFooterText}>Total <span>{item.price}</span></div>
                             <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
                           </div>
                         </div>
@@ -375,18 +432,17 @@ const TourListing = ({ filters, page, setPage }) => {
                         </div>
 
                         <div className={styles.ListViewCardTextTopBottom}>
-                          <div className={styles.bottomItem}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                            Banff Gondola Ride
-                          </div>
-                          <div className={styles.bottomItem}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                            Lake Louise Scenic Walk
-                          </div>
+                          {item?.package_inclusion?.map((inclusion, index) => (
+                            <div className={styles.bottomItem}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                              {inclusion.description}
+                            </div>
+                          ))}
+                          {/*
                           <div className={styles.bottomItem}>
                             <img src="/icons/checkIcon.svg" alt="" />
                             Icefields Parkway Glacier Tour
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
@@ -558,7 +614,13 @@ const TourListing = ({ filters, page, setPage }) => {
                       </div>
 
                       <div className={styles.ListViewCardTextTopBottomMobile}>
-                        <div className={styles.bottomItem}>
+                        {item?.package_inclusion?.map((inclusion, index) => (
+                          <div className={styles.bottomItem}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                            {inclusion.description}
+                          </div>
+                        ))}
+                        {/* <div className={styles.bottomItem}>
                           <img src="/icons/checkIcon.svg" alt="" />
                           Banff Gondola Ride
                         </div>
@@ -569,7 +631,7 @@ const TourListing = ({ filters, page, setPage }) => {
                         <div className={styles.bottomItem}>
                           <img src="/icons/checkIcon.svg" alt="" />
                           Icefields Parkway Glacier Tour
-                        </div>
+                        </div> */}
                       </div>
                     </div>
 

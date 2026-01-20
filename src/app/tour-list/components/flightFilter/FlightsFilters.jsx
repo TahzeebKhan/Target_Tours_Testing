@@ -1,15 +1,14 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "@/app/flights/components/SVGFile";
 
-export default function FlightFilters( {onClose, onReset}) {
+export default function FlightFilters({ onClose, onReset, onApply, filterData }) {
   const DEFAULT_NIGHTS = [1, 10];
   const DEFAULT_PRICE = [11307, 57295];
-
-
+  const isResettingRef = useRef(false);
   const [filters, setFilters] = useState({
     nights: DEFAULT_NIGHTS,
     flightType: null,
@@ -36,6 +35,67 @@ export default function FlightFilters( {onClose, onReset}) {
     aircraft: {},
     airlines: {},
   });
+
+
+
+
+
+
+  const buildApiFilters = (filters) => {
+    const api = {};
+
+    if (Array.isArray(filters.nights)) {
+      api.min_nights = filters.nights[0];
+      api.max_nights = filters.nights[1];
+    }
+
+    if (Array.isArray(filters.price)) {
+      api.min_price = filters.price[0];
+      api.max_price = filters.price[1];
+    }
+
+    if (filters.flightType === "with") api.with_flight = true;
+    if (filters.flightType === "without") api.with_flight = false;
+
+    if (filters.packageType) {
+      api.package_type = filters.packageType;
+    }
+
+    if (filters.premiumPackages?.Premium) {
+      api.is_premium_package = true;
+    }
+
+    if (filters.hotelCategory) {
+      api.hotel_category = filters.hotelCategory;
+    }
+
+    const cities = Object.keys(filters.cities || {}).filter(
+      (c) => filters.cities[c]
+    );
+    if (cities.length) api.city = cities.join(",");
+
+    const themes = Object.keys(filters.themes || {}).filter(
+      (t) => filters.themes[t]
+    );
+    if (themes.length) api.theme = themes.join(",");
+
+    return api;
+  };
+
+  //  const apiFilters = buildApiFilters(filters);
+  // onApply(apiFilters);
+
+  useEffect(() => {
+    if (isResettingRef.current) {
+      isResettingRef.current = false; // reset flag
+      return; // ❌ skip auto apply
+    }
+
+    const apiFilters = buildApiFilters(filters);
+    onApply?.(apiFilters);
+  }, [filters]);
+
+
   const price = filters.price;
   const toggleCheckbox = (group, key) => {
     setFilters((prev) => ({
@@ -52,13 +112,44 @@ export default function FlightFilters( {onClose, onReset}) {
       [type]: prev[type] === value ? null : value,
     }));
   };
+  // const handleReset = () => {
+  //   setFilters({
+  //     nights: DEFAULT_NIGHTS,
+  //     flightType: null,
+  //     packageType: null,          // ✅ for buttons
+  //     premiumPackages: {},        // ✅ for checkbox
+
+  //     price: DEFAULT_PRICE,
+  //     cities: {},
+  //     themes: {},
+  //     popular: {
+  //       refundable: false,
+  //       oneStop: false,
+  //       lateDeparture: false,
+  //       nonStop: false,
+  //     },
+  //     stops: {
+  //       nonStop: false,
+  //       oneStop: false,
+  //       twoPlus: false,
+  //     },
+  //     departureJakarta: null,
+  //     departureSingapore: null,
+  //     aircraft: {},
+  //     airlines: {},
+  //   });
+  //   onReset?.(); // 🔥 notify parent if needed
+  // };
+
   const handleReset = () => {
-    setFilters({
+    isResettingRef.current = true; // 🔥 tell effect to skip
+
+    const resetFilters = {
       nights: DEFAULT_NIGHTS,
       flightType: null,
-      packageType: null,          // ✅ for buttons
-      premiumPackages: {},        // ✅ for checkbox
-
+      packageType: null,
+      premiumPackages: {},
+      hotelCategory: null,
       price: DEFAULT_PRICE,
       cities: {},
       themes: {},
@@ -77,9 +168,15 @@ export default function FlightFilters( {onClose, onReset}) {
       departureSingapore: null,
       aircraft: {},
       airlines: {},
-    });
-    onReset?.(); // 🔥 notify parent if needed
+    };
+
+    setFilters(resetFilters);
+
+    onReset?.();              // optional UI sync
+    onApply?.({});            // ✅ manual reset apply
   };
+
+
   const toggleMapCheckbox = (group, key) => {
     setFilters((prev) => ({
       ...prev,
@@ -171,7 +268,7 @@ export default function FlightFilters( {onClose, onReset}) {
       <div className={styles.headerMobile}>
         <div className={styles.headerMobileFilter}>
           <p>FILTER</p>
-        <X onClick={onClose} />
+          <X onClick={onClose} />
         </div>
         {filterChips.length > 0 && (
           <div className={styles.filterChips}>
@@ -269,7 +366,7 @@ export default function FlightFilters( {onClose, onReset}) {
               }`}
           >
             <span className={styles.departureTime}>WITH FLIGHTS</span>
-            <span className={styles.departurePrice}>(240)</span>
+            <span className={styles.departurePrice}>({filterData?.with_flight || 0})</span>
           </button>
 
           <button
@@ -278,7 +375,7 @@ export default function FlightFilters( {onClose, onReset}) {
               }`}
           >
             <span className={styles.departureTime}>WITHOUT FLIGHTS</span>
-            <span className={styles.departurePrice}>(240)</span>
+            <span className={styles.departurePrice}>({filterData?.without_flight || 0})</span>
           </button>
         </div>
       </section>
@@ -410,119 +507,44 @@ export default function FlightFilters( {onClose, onReset}) {
       <section className={styles.section}>
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>CITIES</h4>
 
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.cities["Toronto"]}
-            onChange={() => toggleMapCheckbox("cities", "Toronto")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Toronto (32)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.cities["Vancouver"]}
-            onChange={() => toggleMapCheckbox("cities", "Vancouver")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Vancouver (52)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.cities["Calgary"]}
-            onChange={() => toggleMapCheckbox("cities", "Calgary")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Calgary (52)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.cities["Ottawa"]}
-            onChange={() => toggleMapCheckbox("cities", "Ottawa")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Ottawa (52)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.cities["Montreal"]}
-            onChange={() => toggleMapCheckbox("cities", "Montreal")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Montreal (52)
-        </label>
+        {filterData?.package_location_city_count &&
+          Object.entries(filterData.package_location_city_count).map(
+            ([city, count]) => (
+              <label key={city} className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={!!filters.cities[city]}
+                  onChange={() => toggleMapCheckbox("cities", city)}
+                />
+                <span className={styles.customCheckbox}>
+                  <span className={styles.checkIcon}></span>
+                </span>
+                {city} ({count})
+              </label>
+            )
+          )}
       </section>
 
 
       <div className={styles.border} />
+      <div className={styles.border} />
       <section className={styles.section}>
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>THEME</h4>
 
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.themes["Culture"]}
-            onChange={() => toggleMapCheckbox("themes", "Culture")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Culture (32)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.themes["Offbeat"]}
-            onChange={() => toggleMapCheckbox("themes", "Offbeat")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Offbeat (15)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.themes["Pahalgam"]}
-            onChange={() => toggleMapCheckbox("themes", "Pahalgam")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Pahalgam (26)
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.themes["Honeymoon"]}
-            onChange={() => toggleMapCheckbox("themes", "Honeymoon")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Honeymoon (52)
-        </label>
+        {filterData?.theme &&
+          Object.entries(filterData.theme).map(([theme, count]) => (
+            <label key={theme} className={styles.checkbox}>
+              <input
+                type="checkbox"
+                checked={!!filters.themes[theme]}
+                onChange={() => toggleMapCheckbox("themes", theme)}
+              />
+              <span className={styles.customCheckbox}>
+                <span className={styles.checkIcon}></span>
+              </span>
+              {theme} ({count})
+            </label>
+          ))}
       </section>
 
       <div className={styles.border} />
@@ -571,7 +593,7 @@ export default function FlightFilters( {onClose, onReset}) {
           <span className={styles.customCheckbox}>
             <span className={styles.checkIcon}></span>
           </span>
-          Premium Packages (112)
+          Premium Packages ({filterData?.premium_package_count?.["true"] || 0})
         </label>
       </section>
 

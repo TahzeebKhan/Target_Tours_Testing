@@ -278,7 +278,7 @@
 }
 
 .ListViewCardContainer {
-    height: 322px;
+    /* height: 322px; */
     display: flex;
     gap: 24px;
     background-color: #FFFFFF;
@@ -394,6 +394,8 @@
 .ListViewCardTextTopBottom {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    /* justify-content: start; */
     gap: 20px;
 }
 
@@ -566,7 +568,11 @@
     align-items: center;
     justify-content: space-between;
     list-style-type: disc;
-    padding-left: 16px;
+    padding-left: 14px;
+    flex-wrap: wrap;
+    gap: 6px 13px;
+
+
 
 }
 
@@ -592,6 +598,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 0px;
 }
 
 .expandableItem {
@@ -639,7 +647,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 30px;
-    line-height: 1.15;
+    line-height: 1;
     letter-spacing: 0px;
     vertical-align: middle;
     text-transform: uppercase;
@@ -877,7 +885,7 @@
 @media (max-width: 1440px) {
     .ListViewCardTextTopBottom {
         gap: 5px;
-        justify-content: space-between;
+        /* justify-content: space-between; */
     }
 }
 
@@ -917,7 +925,7 @@
     }
 
     .ListViewCardContainer {
-        height: 300px;
+        /* height: 300px; */
     }
 
     .ListViewCardText {
@@ -973,6 +981,9 @@
     .totalPrice span{
         font-size: 12px;
     }
+    .ListViewCardImageContainerMobile{
+        height: 280px;
+    }
 }
 @media (max-width: 670px){
     .topTextHead{
@@ -988,6 +999,7 @@
         font-size: 12px;
         padding: 12px 8px;
     }
+
 }
 
 @media (max-width: 618px) {
