@@ -11,16 +11,39 @@ import PreferencesSection from "../preferencesSection/PreferencesSection";
 import SelectDestination from "@/app/profile_components/selectDestination";
 import SelectTravellerProfile from "@/app/profile_components/selectTravellerProfile";
 import SelectPreferences from "@/app/profile_components/selectPreferences";
+import axios from "axios";
+import api from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTours } from "@/app/service/tourPackage";
 
-const TourListing = () => {
 
+
+
+const TourListing = ({ filters, page, setPage }) => {
+  const [likedTours, setLikedTours] = useState([]);
+  const [viewType, setViewType] = useState("grid");
+  const [expandedId, setExpandedId] = useState(null);
+  const router = useRouter();
   const [activePreferenceView, setActivePreferenceView] = useState(null);
-
   const [openFilter, setOpenFilter] = useState(false);
   const [openSortByFilter, setOpenSortByFilter] = useState(false);
   const [openPreferencesFilter, setOpenPreferencesFilter] = useState(false);
-
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+
+
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+  } = useQuery({
+    queryKey: ["tours", { filters, page }],
+    queryFn: fetchTours,
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 10,
+  });
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,10 +58,6 @@ const TourListing = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const [likedTours, setLikedTours] = useState([]);
-  const [viewType, setViewType] = useState("grid");
-  const [expandedId, setExpandedId] = useState(null);
-  const router = useRouter();
   const handleBookNow = () => {
     router.push("/tour-details"); // 👈 your page route
   };
@@ -46,74 +65,77 @@ const TourListing = () => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const tourData = [
-    {
-      id: 1,
-      image: "/tourList/cardItem1.jpg",
-      route: "TORONTO TO OTTAWA",
-      title: "Splendors of the Canadian West",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 2,
-      image: "/tourList/cardItem2.jpg",
-      route: "VANCOUVER TO CALGARY",
-      title: "Splendors of the Rocky Mountains",
-      days: "14 DAYS & 13 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 72,990",
-    },
-    {
-      id: 3,
-      image: "/tourList/cardItem3.jpg",
-      route: "TORONTO TO MONTREAL",
-      title: "Charms of Eastern Canada",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 4,
-      image: "/tourList/cardItem4.jpg",
-      route: "WHITEHORSE TO FAIRBANKS",
-      title: "Northern Lights of Canada",
-      days: "10 DAYS & 9 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "4 ACTIVITIES",
-      price: "₹ 89,900",
-    },
-    {
-      id: 5,
-      image: "/tourList/cardItem5.jpg",
-      route: "MONTREAL TO QUEBEC CITY",
-      title: "Colors of Quebec Fall",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 6,
-      image: "/tourList/cardItem6.jpg",
-      route: "VANCOUVER TO WHISTLER",
-      title: "Elegance of Canada's West Coast",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-  ];
+  // const tourData = [
+  //   {
+  //     id: 1,
+  //     image: "/tourList/cardItem1.jpg",
+  //     route: "TORONTO TO OTTAWA",
+  //     title: "Splendors of the Canadian West",
+  //     days: "17 DAYS & 16 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "3 ACTIVITIES",
+  //     price: "₹ 66,945",
+  //   },
+  //   {
+  //     id: 2,
+  //     image: "/tourList/cardItem2.jpg",
+  //     route: "VANCOUVER TO CALGARY",
+  //     title: "Splendors of the Rocky Mountains",
+  //     days: "14 DAYS & 13 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "3 ACTIVITIES",
+  //     price: "₹ 72,990",
+  //   },
+  //   {
+  //     id: 3,
+  //     image: "/tourList/cardItem3.jpg",
+  //     route: "TORONTO TO MONTREAL",
+  //     title: "Charms of Eastern Canada",
+  //     days: "17 DAYS & 16 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "3 ACTIVITIES",
+  //     price: "₹ 66,945",
+  //   },
+  //   {
+  //     id: 4,
+  //     image: "/tourList/cardItem4.jpg",
+  //     route: "WHITEHORSE TO FAIRBANKS",
+  //     title: "Northern Lights of Canada",
+  //     days: "10 DAYS & 9 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "4 ACTIVITIES",
+  //     price: "₹ 89,900",
+  //   },
+  //   {
+  //     id: 5,
+  //     image: "/tourList/cardItem5.jpg",
+  //     route: "MONTREAL TO QUEBEC CITY",
+  //     title: "Colors of Quebec Fall",
+  //     days: "17 DAYS & 16 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "3 ACTIVITIES",
+  //     price: "₹ 66,945",
+  //   },
+  //   {
+  //     id: 6,
+  //     image: "/tourList/cardItem6.jpg",
+  //     route: "VANCOUVER TO WHISTLER",
+  //     title: "Elegance of Canada's West Coast",
+  //     days: "17 DAYS & 16 NIGHTS",
+  //     meals: "SELECTED MEALS",
+  //     hotel: "4-STAR HOTEL",
+  //     activities: "3 ACTIVITIES",
+  //     price: "₹ 66,945",
+  //   },
+  // ];
+
+
+
 
   const toggleLike = (id) => {
     setLikedTours((prev) =>
@@ -122,6 +144,14 @@ const TourListing = () => {
         : [...prev, id]
     );
   };
+
+
+  const tourData = data?.data || [];
+  const meta = data?.meta;
+  // console.log(`TourData ${tourData}`);
+  console.log("TourData:", JSON.stringify(tourData, null, 2));
+
+
 
   return (
     <>
