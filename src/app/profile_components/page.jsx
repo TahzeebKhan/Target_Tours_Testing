@@ -11,16 +11,17 @@ import SelectPlan from "./SelectPlan";
 import TravellerDetails from "./TravellerDetails";
 import AddTravellerDetails from "./AddTravellerDetails";
 import AddDetails from "./AddDetails";
+import ActiveReservations from "./ActiveReservations";
+import Reservations from "../profile/components/reservations/Reservations";
+import IndividualProperty from "../profile/components/individualProperty/IndividualProperty";
+import BookingDetails from "./BookingDetails";
 
 export default function ProfilePage() {
 
   return (
     <main>
-      {/* <PriceSummary /> */}
-      <SelectPlan />
-      {/* <TravellerDetails /> */}
-      {/* <AddTravellerDetails /> */}
-      {/* <AddDetails /> */}
+      <ActiveReservations />
+      {/* <BookingDetails /> */}
     </main>
   );
 }
