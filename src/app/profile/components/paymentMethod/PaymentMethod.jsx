@@ -22,7 +22,7 @@ export default function PaymentMethod() {
           {!showChoosePayment ? (
             <div className={styles.row}>
               <div className={styles.textContent}>
-                <h2 className={styles.sectionTitle}>PAYMENT METHODS</h2>
+                <h2 className={styles.sectionTitle}>payment methods</h2>
                 <p className={styles.description}>
                   Add a payment method using our secure payment system, then
                   start planning your next trip.
@@ -32,23 +32,23 @@ export default function PaymentMethod() {
                 className={styles.button}
                 onClick={() => setShowChoosePayment(true)}
               >
-                ADD PAYMENT METHOD
+                Add Payment Method
               </button>
             </div>
           ) : (
             <ChoosePaymentMethod />
           )}
-
+          <div className={styles.br} />
           {/* Gift Credit Section */}
           <div className={styles.row}>
             <div className={styles.textContent}>
-              <h2 className={styles.sectionTitle}>TARGET TOURS GIFT CREDIT</h2>
+              <h2 className={styles.sectionTitle}>target tours gift credit</h2>
               <p className={styles.description}>
                 Add gift credits to your Tripto account to enhance your travel
                 experience.
               </p>
             </div>
-            <button className={styles.button}>ADD GIFT CARD</button>
+            <button className={styles.button}>Add Gift Card</button>
           </div>
         </section>
       </div>
@@ -57,11 +57,11 @@ export default function PaymentMethod() {
       <footer className={styles.footerSection}>
         <div className={styles.row}>
           <div className={`${styles.textContent} ${styles.fullWidth}`}>
-            <h2 className={styles.sectionTitle}>COUPONS</h2>
+            <h2 className={styles.sectionTitle}>coupons</h2>
             <p className={styles.description}>Your copons</p>
           </div>
 
-          <button className={styles.button}>ADD COPONS</button>
+          <button className={styles.button}>Add Coupons</button>
         </div>
       </footer>
     </main>

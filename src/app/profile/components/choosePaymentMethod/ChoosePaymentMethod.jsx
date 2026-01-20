@@ -8,14 +8,14 @@ const paymentMethods = [
     lastFour: "1316",
     expiry: "06/2022",
     isDefault: true,
-    logo: "/images/visa-logo.svg", 
+    logo: "/images/visa-logo.svg",
   },
   {
     id: 2,
     type: "MasterCard",
     lastFour: "2410",
     expiry: "06/2022",
-    isDefault: true,
+    isDefault: false,
     logo: "/images/Mastercard.svg",
   },
 ];
@@ -24,7 +24,10 @@ export default function ChoosePaymentMethod() {
   return (
     <section className={styles.container}>
       {paymentMethods.map((method) => (
-        <div key={method.id} className={styles.cardRow}>
+        <div
+          key={method.id}
+          className={`${styles.cardRow} ${method.id == 2 ? styles.cardRowLast : ""}`}
+        >
           <div className={styles.cardBrand}>
             <div className={styles.logoWrapper}>
               <Image
@@ -48,7 +51,7 @@ export default function ChoosePaymentMethod() {
               </div>
 
               {method.isDefault && (
-                <span className={styles.defaultBadge}>DEFAULT</span>
+                <span className={styles.defaultBadge}>default</span>
               )}
             </div>
           </div>

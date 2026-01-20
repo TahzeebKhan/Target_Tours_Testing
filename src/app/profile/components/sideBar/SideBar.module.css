@@ -216,4 +216,10 @@
     z-index: 2222;
     border-radius: 50%;
   }
+  .ChevronDownIcon {
+    transition: all 0.3s ease;
+  }
+   .ChevronDownIcon.activeChevron {
+    transform: rotate(90deg);
+  }
 }
