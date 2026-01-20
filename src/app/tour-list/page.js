@@ -13,49 +13,62 @@ const ToursPage = () => {
 
   // const [filters, setFilters] = useState({})
   const [filters, setFilters] = useState({
-  nights: [1, 10],
-  price: [11307, 57295],
-  flightType: null,
-  packageType: null,
-  premiumPackages: {},
-  cities: {},
-});
-  const [page, setPage] = useState(1)
+    nights: [1, 10],
+    price: [11307, 57295],
+    flightType: null,
+    packageType: null,
+    premiumPackages: {},
+    cities: {},
+  });
+  // const [filters, setFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [filterData, setFilterData] = useState(null); // 🔥 Store dynamic filter options from API
+
+  const handleDataLoaded = (meta) => {
+    if (meta?.counts) {
+      setFilterData(meta.counts);
+    }
+  };
+
+  const handleApplyFilters = (apiFilters) => {
+    setPage(1);                // 🔥 pagination reset
+    setFilters(apiFilters);    // 🔥 single source
+  };
 
 
   useEffect(() => {
-  const apiFilters = {};
+    const apiFilters = {};
 
-  if (Array.isArray(filters.nights)) {
-    apiFilters.min_nights = filters.nights[0];
-    apiFilters.max_nights = filters.nights[1];
-  }
+    if (Array.isArray(filters.nights)) {
+      apiFilters.min_nights = filters.nights[0];
+      apiFilters.max_nights = filters.nights[1];
+    }
 
-  if (Array.isArray(filters.price)) {
-    apiFilters.min_price = filters.price[0];
-    apiFilters.max_price = filters.price[1];
-  }
+    if (Array.isArray(filters.price)) {
+      apiFilters.min_price = filters.price[0];
+      apiFilters.max_price = filters.price[1];
+    }
 
-  if (filters.flightType === "with") apiFilters.with_flight = true;
-  if (filters.flightType === "without") apiFilters.with_flight = false;
+    if (filters.flightType === "with") apiFilters.with_flight = true;
+    if (filters.flightType === "without") apiFilters.with_flight = false;
 
-  if (filters.packageType) {
-    apiFilters.package_type = filters.packageType;
-  }
+    if (filters.packageType) {
+      apiFilters.package_type = filters.packageType;
+    }
 
-  if (filters.premiumPackages?.Premium) {
-    apiFilters.is_premium_package = true;
-  }
+    if (filters.premiumPackages?.Premium) {
+      apiFilters.is_premium_package = true;
+    }
 
-  const cities = Object.keys(filters.cities || {}).filter(
-    (c) => filters.cities[c]
-  );
-  if (cities.length) {
-    apiFilters.city = cities.join(",");
-  }
+    const cities = Object.keys(filters.cities || {}).filter(
+      (c) => filters.cities[c]
+    );
+    if (cities.length) {
+      apiFilters.city = cities.join(",");
+    }
 
-  // ❌ NO onApply here
-}, [filters]);
+    // ❌ NO onApply here
+  }, [filters]);
 
 
 
@@ -92,10 +105,12 @@ const ToursPage = () => {
                 }`}
             >
               <FlightFilters
+                filterData={filterData} // 🔥 Pass dynamic data
                 onApply={(apiFilters) => {
                   setFilters(apiFilters)
                   setPage(1)
                 }}
+                // onApply={handleApplyFilters}
                 onReset={() => {
                   setFilters({});
                   setPage(1);
@@ -109,6 +124,7 @@ const ToursPage = () => {
                 filters={filters}
                 page={page}
                 setPage={setPage}
+                onDataLoaded={handleDataLoaded} // 🔥 Receive data
               />
             </div>
 

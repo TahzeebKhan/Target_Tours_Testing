@@ -19,7 +19,7 @@ import { fetchTours } from "@/app/service/tourPackage";
 
 
 
-const TourListing = ({ filters, page, setPage }) => {
+const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
@@ -75,7 +75,7 @@ const TourListing = ({ filters, page, setPage }) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
- 
+
   const tourDataFallback = [
     {
       id: 1,
@@ -159,8 +159,23 @@ const TourListing = ({ filters, page, setPage }) => {
 
   const tourData =
     data?.pages.flatMap((page) => page.data) || tourDataFallback;
-  const meta = data?.meta;
-  console.log("TourData:", JSON.stringify(tourData, null, 2));
+  /* 
+   * Extract meta from the first page of data.
+   * Since this is an infinite query, the most relevant "global" counts  
+   * usually come from the initial fetch or are consistent across pages.
+   */
+  const meta = data?.pages?.[0]?.meta;
+
+  useEffect(() => {
+    if (meta && onDataLoaded) {
+      onDataLoaded(meta);
+    }
+  }, [meta, onDataLoaded]);
+
+  console.log(
+    "First tour inclusions:",
+    tourData?.[0]?.package_inclusion
+  );
 
   useEffect(() => {
     const onScroll = () => {
@@ -179,7 +194,7 @@ const TourListing = ({ filters, page, setPage }) => {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
 
-   const truncateText = (text = "", maxLength = 29) => {
+  const truncateText = (text = "", maxLength = 29) => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + "...";
   };
@@ -298,14 +313,25 @@ const TourListing = ({ filters, page, setPage }) => {
                           <div className={styles.expandableTopContainer}>
                             <div className={styles.expandableTop}>
                               <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
-                              {item?.package_inclusions?.map((inclusion, index) => (
-                                <ul className={styles.list}>
-                                  <li>{inclusion.title}</li>
-                                </ul>
-                              ))}
+                              <ul className={styles.list}>
+                                <li>Round Trip Flights</li>
+                                <li>4 Star Hotels</li>
+                                <li>Airport Transfers</li>
+                                <li>Intercity Car Transfers</li>
+                              </ul>
                             </div>
                             <div className={styles.expandableCenter}>
+
                               <div className={styles.expandableRow}>
+                                {item?.package_inclusion?.map((inclusion, index) => (
+
+                                  <div className={styles.expandableItem}>
+                                    <img src="/icons/checkIcon.svg" alt="" />
+                                    <span>{inclusion.description}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              {/* <div className={styles.expandableRow}>
                                 <div className={styles.expandableItem}>
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Banff Gondola Ride</span>
@@ -314,13 +340,13 @@ const TourListing = ({ filters, page, setPage }) => {
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Lake Louise Scenic Walk</span>
                                 </div>
-                              </div>
-                              <div className={styles.expandableRow}>
+                              </div> */}
+                              {/* <div className={styles.expandableRow}>
                                 <div className={styles.expandableItem}>
                                   <img src="/icons/checkIcon.svg" alt="" />
                                   <span>Lake Louise Scenic Walk</span>
                                 </div>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                           <div className={styles.hr}></div>
@@ -406,18 +432,17 @@ const TourListing = ({ filters, page, setPage }) => {
                         </div>
 
                         <div className={styles.ListViewCardTextTopBottom}>
-                          <div className={styles.bottomItem}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                            Banff Gondola Ride
-                          </div>
-                          <div className={styles.bottomItem}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                            Lake Louise Scenic Walk
-                          </div>
+                          {item?.package_inclusion?.map((inclusion, index) => (
+                            <div className={styles.bottomItem}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                              {inclusion.description}
+                            </div>
+                          ))}
+                          {/*
                           <div className={styles.bottomItem}>
                             <img src="/icons/checkIcon.svg" alt="" />
                             Icefields Parkway Glacier Tour
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
@@ -589,7 +614,13 @@ const TourListing = ({ filters, page, setPage }) => {
                       </div>
 
                       <div className={styles.ListViewCardTextTopBottomMobile}>
-                        <div className={styles.bottomItem}>
+                        {item?.package_inclusion?.map((inclusion, index) => (
+                          <div className={styles.bottomItem}>
+                            <img src="/icons/checkIcon.svg" alt="" />
+                            {inclusion.description}
+                          </div>
+                        ))}
+                        {/* <div className={styles.bottomItem}>
                           <img src="/icons/checkIcon.svg" alt="" />
                           Banff Gondola Ride
                         </div>
@@ -600,7 +631,7 @@ const TourListing = ({ filters, page, setPage }) => {
                         <div className={styles.bottomItem}>
                           <img src="/icons/checkIcon.svg" alt="" />
                           Icefields Parkway Glacier Tour
-                        </div>
+                        </div> */}
                       </div>
                     </div>
 
