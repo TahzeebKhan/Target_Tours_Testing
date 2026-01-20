@@ -53,7 +53,7 @@ export const beverages = [
     },
     {
         id: 8,
-        image: "/images/HotTea.png",
+        image: "/images/hotTea.png",
         title: "HOT TEA",
         price: 350,
         tag: "Vegetarian",

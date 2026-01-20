@@ -4,12 +4,28 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./selectDestination.module.css";
 
+// const REGIONS = [
+//   { id: "africa", name: "Africa", image: "/images/africa-map.svg" },
+//   { id: "asia", name: "Asia", image: "/images/asia-map.svg" },
+//   { id: "europe", name: "Europe", image: "/images/europe-map.svg" },
+// ];
 const REGIONS = [
-  { id: "africa", name: "Africa", image: "/images/africa-map.svg" },
-  { id: "asia", name: "Asia", image: "/images/asia-map.svg" },
-  { id: "europe", name: "Europe", image: "/images/europe-map.svg" },
+  { id: "africa", name: "Africa", image: "/images/africa.png" },
+  { id: "asia", name: "Asia", image: "/images/asia.png" },
+  { id: "europe", name: "Europe", image: "/images/europe.png" },
+  {
+    id: "north-america",
+    name: "North America",
+    image: "/images/northAmerica.png",
+  },
+  {
+    id: "south-america",
+    name: "South America",
+    image: "/images/southAmerica.png",
+  },
+  { id: "australia", name: "Australia", image: "/images/australia.png" },
+  { id: "antarctica", name: "Antarctica", image: "/images/antarctica.png" },
 ];
-
 const COUNTRIES = [
   "Zambia",
   "Kenya",

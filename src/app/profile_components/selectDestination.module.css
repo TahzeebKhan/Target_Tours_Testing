@@ -1,115 +1,124 @@
 /* Note: Fonts "Antic Didone" and "Inter" are applied via font-family */
 
 .modalOverlay {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    min-height: 650px;
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 10, 10, 0.2);
-    backdrop-filter: blur(6px);
-    z-index: 9999;
-    overscroll-behavior: contain;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 650px;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.2);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  overscroll-behavior: contain;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-    width: 100%;
-    max-width: 600px;
-    border-radius: 16px 16px 0 0;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  width: 100%;
+  /* max-width: 600px; */
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
 }
 
 /* Header Styles */
 .header {
-    padding: 16px;
-    padding-top: 24px;
-    border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding: 16px;
+  padding-top: 24px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
 }
 
 .headerTop {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .titleStack {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .labelSmall {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    letter-spacing: -3%;
-    line-height: 150%;
-    color: rgba(123, 135, 153, 1);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  letter-spacing: -3%;
+  line-height: 150%;
+  color: rgba(123, 135, 153, 1);
 }
 
 .titleLarge {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -3%;
-    line-height: 150%;
-    color: rgba(0, 0, 0, 1);
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -3%;
+  line-height: 150%;
+  color: rgba(0, 0, 0, 1);
 }
 
 .closeButton {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: rgba(10, 10, 10, 1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(10, 10, 10, 1);
 }
 
 /* Content Area */
 .content {
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
-    /* max-height: 70vh; */
-    overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .sectionHeading {
-    font-family: 'Antic Didone', serif;
-    font-size: 20px;
-    color: rgba(0, 0, 0, 1);
-    text-transform: uppercase;
-    letter-spacing: 0%;
-    line-height: 100%;
+  font-family: "Antic Didone", serif;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 1);
+  text-transform: uppercase;
+  letter-spacing: 0%;
+  line-height: 100%;
 }
 
 /* Region Grid */
 .regionGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 13.99px;
+  display: flex;
+  gap: 13.99px;
+  overflow-x: auto;
+
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  padding-bottom: 6px;
+}
+.regionGrid::-webkit-scrollbar {
+  display: none;
 }
 
 .regionCard {
-    display: flex;
-    flex-direction: column;
-    gap: 5.25px;
-    cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5.25px;
+  cursor: pointer;
 }
 
 .imageWrapper {
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-
+  width: 122px;
+  height: 122px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,26 +143,14 @@
   z-index: 1;
 }
 
-
 .regionName {
-    position: relative;
-    font-family: "Antic Didone", serif;
-    font-size: 14px;
-    color: rgba(10, 10, 10, 1);
-    padding-bottom: 8px;
-    line-height: 100%;
-    letter-spacing: 0%;
-}
-
-.activeRegion .regionName::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 4px;
-    border-radius: 99px;
-    background-color: rgba(229, 231, 235, 1);
+  position: relative;
+  font-family: "Antic Didone", serif;
+  font-size: 14px;
+  color: rgba(10, 10, 10, 1);
+  padding-bottom: 8px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .activeRegion .imageWrapper {
@@ -199,26 +196,24 @@
   }
 }
 
-
-
 /* Country Grid */
 .countryGrid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .countryTag {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    line-height: 100%;
-    letter-spacing: -2%;
-    padding: 9px 23px;
-    background-color: white;
-    border: 0.5px solid rgba(0, 0, 51, 1);
-    color: rgba(0, 0, 0, 1);
-    cursor: pointer;
-      transition:
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  padding: 9px 23px;
+  background-color: white;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  color: rgba(0, 0, 0, 1);
+  cursor: pointer;
+  transition:
     background-color 300ms ease-out,
     color 300ms ease-out,
     border-color 300ms ease-out;
@@ -230,7 +225,6 @@
   color: rgba(255, 255, 255, 1);
 }
 
-
 /* .activeCountry {
   background-color: rgba(0, 0, 51, 1);
   color: white;
@@ -239,35 +233,35 @@
 
 /* Footer Section */
 .footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 16px;
-    padding-top: 24px;
-    gap: 12px;
-    border-bottom: 1px solid rgba(228, 230, 232, 1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 16px;
+  padding-top: 24px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
 }
 
 .resetBtn {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    background: white;
-    border: 1px solid rgba(228, 230, 232, 1);
-    box-shadow: 0px 1.5px 0.5px 0px rgba(255, 255, 255, 0.3) inset;
-    padding: 15.5 24px;
-    cursor: pointer;
-    color: rgba(0, 0, 51, 1);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  border: 1px solid rgba(228, 230, 232, 1);
+  box-shadow: 0px 1.5px 0.5px 0px rgba(255, 255, 255, 0.3) inset;
+  padding: 15.5 24px;
+  cursor: pointer;
+  color: rgba(0, 0, 51, 1);
 }
 
 .applyBtn {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    background: rgba(0, 0, 51, 1);
-    color: rgba(255, 255, 255, 1);
-    border: none;
-    padding: 15.5px 24px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(0, 0, 51, 1);
+  color: rgba(255, 255, 255, 1);
+  border: none;
+  padding: 15.5px 24px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  cursor: pointer;
 }

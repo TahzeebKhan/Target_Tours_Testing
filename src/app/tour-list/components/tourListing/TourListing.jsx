@@ -525,7 +525,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
             {openSortByFilter && (
               <SortBySheet
                 open={openSortByFilter}
-                setOpen={setOpenSortByFilter}
+                onClose={() => setOpenSortByFilter(false)}
               />
             )}
             <button className={styles.filterCard} onClick={() => setOpenFilter(true)}>

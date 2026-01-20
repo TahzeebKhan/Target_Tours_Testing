@@ -72,7 +72,7 @@
 
 .currencyDropdown {
   width: 100%;
-  width: 161px;
+  max-width: 400px;
 }
 
 .languageDropdown {
@@ -161,7 +161,7 @@
 .dropdownWrapper {
   position: relative;
   width: 100%;
-  max-width: 300px;
+  /* max-width: 300px; */
 }
 
 .dropdownMenu {
@@ -243,6 +243,7 @@
 .overlayTitle {
   font-family: "Antic Didone", serif;
   font-size: 20px;
+  text-transform: capitalize;
   color: rgba(0, 0, 51, 1);
   font-weight: 400;
   line-height: 100%;

@@ -95,7 +95,7 @@
 }
 
 /* ensure the visible .contant layout is unchanged */
-.dateInputWrapper>.contant {
+.dateInputWrapper > .contant {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -103,7 +103,7 @@
 }
 
 /* small tweak so image arrow remains on right and not covered */
-.dateInputWrapper>img {
+.dateInputWrapper > img {
   position: relative;
   z-index: 31;
 }
@@ -478,10 +478,12 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(from -90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.4) 15%,
-      transparent 30%);
+  background: conic-gradient(
+    from -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 15%,
+    transparent 30%
+  );
 
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -515,10 +517,12 @@
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(from -90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.4) 15%,
-      transparent 30%);
+  background: conic-gradient(
+    from -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 15%,
+    transparent 30%
+  );
 
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -1462,7 +1466,6 @@
   .travellerClassField {
     min-width: 190px;
   }
-
 }
 
 @media (max-width: 895px) {
@@ -1636,7 +1639,6 @@
 }
 
 @media (max-width: 504px) {
-
   .logggedInBtnSidebar,
   .logggedInBtn {
     display: none;
