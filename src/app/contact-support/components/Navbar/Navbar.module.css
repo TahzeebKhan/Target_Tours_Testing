@@ -3,7 +3,7 @@
 .homeSection {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 503px;
 }
 
 /* Background video */
@@ -80,8 +80,6 @@
   gap: 23px;
 }
 
-
-
 .InspiredSection {
   padding: 0 20px;
   max-width: 870px;
@@ -138,7 +136,6 @@
   border: 0.5px solid rgba(230, 232, 236, 1);
 }
 
-
 .searchInput {
   flex: 1;
   background: transparent;
@@ -161,7 +158,6 @@
   height: 24px;
 }
 
-
 .searchBtn {
   flex: 0 0 56px;
   height: 54px;
@@ -175,8 +171,8 @@
   cursor: pointer;
 }
 
-.searchBtn:hover{
-    transition: 
+.searchBtn:hover {
+  transition:
     background-color 300ms ease-in,
     transform 300ms ease-in;
   background-color: rgba(255, 255, 255, 1);
@@ -204,7 +200,6 @@
 .searchBtn:hover .iconHover {
   opacity: 1;
 }
-
 
 /* ================= POPULAR TOPICS ================= */
 
@@ -242,13 +237,12 @@
   color: rgba(255, 255, 255, 1);
   cursor: pointer;
   line-height: 20px;
-letter-spacing: -0.15px;
-text-align: center;
-text-decoration-line: underline;
-text-decoration-style: solid;
-text-decoration-skip-ink: auto;
+  letter-spacing: -0.15px;
+  text-align: center;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
 }
-
 
 /* ================= BUTTONS ================= */
 
@@ -259,7 +253,8 @@ text-decoration-skip-ink: auto;
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.6);
 
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.1),
     inset 0 0 20px rgba(255, 255, 255, 0.1);
 
   color: #ffffff;
@@ -274,12 +269,16 @@ text-decoration-skip-ink: auto;
   border-radius: inherit;
   padding: 1px;
 
-  background: conic-gradient(from -90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.4) 15%,
-      transparent 30%);
+  background: conic-gradient(
+    from -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 15%,
+    transparent 30%
+  );
 
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
 }
 
@@ -314,10 +313,7 @@ text-decoration-skip-ink: auto;
   background-color: #21347b;
 }
 
-
-
 /* ================= HAMBURGER ================= */
-
 
 .hamBurger {
   display: none;
@@ -329,7 +325,9 @@ text-decoration-skip-ink: auto;
   flex-direction: column;
   gap: 2px;
 }
-
+.mobile {
+  display: none;
+}
 
 /* ================= RESPONSIVE ================= */
 
@@ -337,6 +335,121 @@ text-decoration-skip-ink: auto;
   .navbar {
     padding-left: 20px;
     padding-right: 20px;
+  }
+}
+
+@media (max-width: 895px) {
+  .mobile {
+    display: block;
+  }
+  .homeSection {
+    display: none;
+  }
+
+  /* Root */
+  .helpSearchSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 16px;
+    padding-top: 0;
+    gap: 16px;
+  }
+
+  /* Description */
+  .helpSearchDescription {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: black;
+  }
+  .br {
+    border-bottom: 1px solid #e4e6e8;
+    margin-top: 8px;
+    /* width: calc(100%); */
+  }
+  /* Search */
+  .helpSearchInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .helpSearchIcon {
+    position: absolute;
+    left: 12px;
+    font-size: 18px;
+    color: #9aa1b2;
+  }
+
+  .helpSearchInput {
+    width: 100%;
+    height: 36px;
+    padding: 8px 12px;
+    padding-left: 40px;
+    border: 1px solid #dbe2eb;
+    font-size: 15px;
+    outline: none;
+  }
+
+  .helpSearchInput::placeholder {
+    color: #9aa1b2;
+  }
+
+  /* Popular topics */
+  .helpPopularTopicsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .helpPopularTopicsTitle {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 160%;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+
+    color: #4a5565;
+  }
+
+  .helpPopularTopicsList {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .helpPopularTopicButton {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    color: #000033;
+    text-decoration: underline;
+    cursor: pointer;
+
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    leading-trim: NONE;
+    line-height: 140%;
+    letter-spacing: -0.15px;
+    text-align: center;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-offset: 25%;
+    text-decoration-thickness: 0%;
+    text-decoration-skip-ink: auto;
+    color: #4a5565;
   }
 }
 
@@ -348,7 +461,6 @@ text-decoration-skip-ink: auto;
   .hamBurger {
     display: flex !important;
   }
-
 
   .searchBtn {
     width: 100%;

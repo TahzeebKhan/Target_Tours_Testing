@@ -147,7 +147,7 @@
 }
 
 .logout {
-  color: #b91c1c;
+  color: #ef4444;
 }
 @media (max-width: 895px) {
   .sideBarContianer {
@@ -219,7 +219,7 @@
   .ChevronDownIcon {
     transition: all 0.3s ease;
   }
-   .ChevronDownIcon.activeChevron {
+  .ChevronDownIcon.activeChevron {
     transform: rotate(90deg);
   }
 }

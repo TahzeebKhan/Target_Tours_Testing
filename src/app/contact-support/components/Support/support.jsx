@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./support.module.css";
+import { useSupportFlow } from "@/app/context/SupportFlowContext";
 
 const supportData = [
   {
@@ -79,8 +80,10 @@ const supportData = [
   },
 ];
 
-export default function SupportPage() {
+export default function SupportPage({}) {
   const [activeIndex, setActiveIndex] = useState(null);
+
+  const { step, setStep } = useSupportFlow();
 
   const handleCardClick = (id) => {
     setActiveIndex(id);
@@ -98,7 +101,13 @@ export default function SupportPage() {
             onClick={() => handleCardClick(item.id)}
           >
             <div className={styles.iconWrapper}>
-              <Image src={item.icon} alt={item.title} width={32} height={32} />
+              <Image
+                className={styles.iconImg}
+                src={item.icon}
+                alt={item.title}
+                width={32}
+                height={32}
+              />
             </div>
             <div className={styles.cardContent}>
               <h2 className={styles.cardTitle}>{item.title}</h2>
@@ -123,18 +132,25 @@ export default function SupportPage() {
           <div className={styles.footerHeader}>
             <div className={styles.footerIcon}>
               <Image
+
                 src="/icons/support-icon.svg"
                 alt="Support"
                 width={28}
                 height={28}
               />
+              
             </div>
             <div className={styles.footerTextGroup}>
               <h3 className={styles.footerTitle}>Contact Support?</h3>
               <p className={styles.footerDescription}>
                 Not finding the help you need?
               </p>
-              <button className={styles.footerButton}>CONTACT US</button>
+              <button
+                onClick={() => setStep("contact")}
+                className={styles.footerButton}
+              >
+                CONTACT US
+              </button>
             </div>
           </div>
         </div>

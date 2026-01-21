@@ -16,6 +16,8 @@ const MobileView = ({ children }) => {
       router.push("/");
     } else if (activeMenu === "editProfile") {
       setActiveMenu("Personal Information");
+    } else if (activeMenu === "myNextTrip") {
+      setActiveMenu("wishList");
     } else {
       setActiveMenu("");
     }
@@ -47,7 +49,7 @@ const MobileView = ({ children }) => {
           {activeMenu === "paymentAccount" && "Payment Account"}
           {activeMenu === "trip" && "My Trips"}
           {activeMenu === "wishList" && "Wish List"}
-          {activeMenu === "support" && "Support"}
+          {activeMenu === "support" && "Help and Support"}
           {activeMenu === "myReviews" && "My Reviews"}
           {activeMenu === "settings" && "Settings"}
           {activeMenu === "editProfile" && "Edit Profile"}

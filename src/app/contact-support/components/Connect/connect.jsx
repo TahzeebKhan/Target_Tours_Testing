@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./connect.module.css";
+import { useSupportFlow } from "@/app/context/SupportFlowContext";
 
 const supportChannels = [
   {
@@ -25,11 +26,12 @@ const supportChannels = [
   },
 ];
 
-export default function Connect() {
+export default function Connect({}) {
   const [selectedId, setSelectedId] = useState(null);
 
+  const { setStep } = useSupportFlow();
   const handleBack = () => {
-    window.history.back();
+    setStep("help");
   };
 
   const handleContinue = () => {
@@ -41,7 +43,7 @@ export default function Connect() {
     <section className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>How Would You Like To Connect?</h1>
-        <p className={styles.subtitle}>CHOOSE YOUR PREFERRED SUPPORT CHANNEL</p>
+        <p className={styles.subtitle}>Choose your preferred support channel</p>
       </header>
 
       <main className={styles.card}>

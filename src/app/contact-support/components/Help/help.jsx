@@ -3,17 +3,21 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./help.module.css";
+import { useSupportFlow } from "@/app/context/SupportFlowContext";
 
-export default function HelpBooking() {
+export default function HelpBooking({}) {
   const [bookingId, setBookingId] = useState("");
 
+  const { setStep } = useSupportFlow();
   const handleBack = () => {
     // Logic for back navigation
     console.log("Navigating back...");
+    setStep("contact");
   };
 
   const handleContinue = () => {
     // Logic for search
+    setStep("connect");
     console.log("Searching for:", bookingId);
   };
 
@@ -22,7 +26,7 @@ export default function HelpBooking() {
       <header className={styles.header}>
         <h1 className={styles.title}>Help Us Find Your Booking</h1>
         <p className={styles.subtitle}>
-          SHARING YOUR BOOKING DETAILS HELPS US RESOLVE YOUR ISSUE FASTER.
+          Sharing your booking details helps us resolve your issue faster.{" "}
         </p>
       </header>
 
@@ -63,7 +67,8 @@ export default function HelpBooking() {
 
           <button
             className={styles.continueButton}
-            disabled={!bookingId}
+            // disabled={!bookingId}
+
             onClick={handleContinue}
             type="button"
           >
