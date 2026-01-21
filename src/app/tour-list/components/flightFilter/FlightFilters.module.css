@@ -3,7 +3,7 @@
   background: #ffffff;
   padding: 16px;
   font-family: var(--font-inter);
-  height: 100vh;
+  /* height: 100vh; */
   overflow: scroll;
 }
 

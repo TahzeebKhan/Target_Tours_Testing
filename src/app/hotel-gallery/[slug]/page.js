@@ -37,11 +37,11 @@ const GALLERY_DATA = {
   "living-room": {
     title: "Living Room",
     images: [
-      "/gallery/livingroom1.png",
-      "/gallery/livingroom2.png",
-      "/gallery/livingroom3.png",
-      "/gallery/livingroom1.png",
-      "/gallery/livingroom2.png",
+      "/gallery/livingRoom1.png",
+      "/gallery/livingRoom2.png",
+      "/gallery/livingRoom3.png",
+      "/gallery/livingRoom1.png",
+      "/gallery/livingRoom2.png",
     ],
   },
   "exterior": {
