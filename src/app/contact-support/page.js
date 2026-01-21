@@ -10,6 +10,7 @@ import Footer from "../home-page/components/footer/Footer";
 import { useSupportFlow } from "../context/SupportFlowContext";
 // import { useSupportFlow } from "./context/SupportFlowContext";
 import styles from "./page.module.css";
+import { MobileFooter } from "../profile/layout";
 
 export default function Page() {
   const { step } = useSupportFlow();
@@ -30,7 +31,7 @@ export default function Page() {
       <div className={styles.mobileView}>
         <Navbar />
         <SupportPage />
-        <FeatureSection />
+        <MobileFooter />
         {/* <Footer /> */}
       </div>
     </>

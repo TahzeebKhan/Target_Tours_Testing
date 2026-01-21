@@ -8,6 +8,48 @@ import Cookies from "js-cookie";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
 
+export const MobileFooter = () => (
+  <footer className={styles.mobileFooter}>
+    <div className={styles.footerContent}>
+      <div className={styles.footerTitleDiv}>
+        <p className={styles.footerTagline}>LIFE, WELL-TRAVELLED SINCE 1993</p>
+
+        <h2 className={styles.footerTitle}>Why choose Target Tours?</h2>
+      </div>
+
+      <ul className={styles.footerList}>
+        <li>
+          <h6>Unbeatable Deals</h6>
+          <p>
+            Score the best prices on flights, hotels, and holiday packages —
+            guaranteed.
+          </p>
+        </li>
+
+        <li>
+          <h6>Multiple Payment Methods</h6>
+          <p>
+            Flights, stays, cabs, visas — plan every part of your journey in one
+            place.
+          </p>
+        </li>
+
+        <li>
+          <h6>Trusted by Millions</h6>
+          <p>Join a growing community of happy travelers across the globe.</p>
+        </li>
+
+        <li>
+          <h6>24 / 7 Support</h6>
+          <p>
+            Need help mid-trip? Our travel experts are always just a call away.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </footer>
+);
+
 const MobileView = ({ children }) => {
   const router = useRouter();
   const { activeMenu, setActiveMenu } = useProfile();
@@ -64,50 +106,7 @@ const MobileView = ({ children }) => {
           <div className={styles.profileContent}>{children}</div>
         )}
       </div>
-      <footer className={styles.mobileFooter}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerTitleDiv}>
-            <p className={styles.footerTagline}>
-              LIFE, WELL-TRAVELLED SINCE 1993
-            </p>
-
-            <h2 className={styles.footerTitle}>Why choose Target Tours?</h2>
-          </div>
-
-          <ul className={styles.footerList}>
-            <li>
-              <h6>Unbeatable Deals</h6>
-              <p>
-                Score the best prices on flights, hotels, and holiday packages —
-                guaranteed.
-              </p>
-            </li>
-
-            <li>
-              <h6>Multiple Payment Methods</h6>
-              <p>
-                Flights, stays, cabs, visas — plan every part of your journey in
-                one place.
-              </p>
-            </li>
-
-            <li>
-              <h6>Trusted by Millions</h6>
-              <p>
-                Join a growing community of happy travelers across the globe.
-              </p>
-            </li>
-
-            <li>
-              <h6>24 / 7 Support</h6>
-              <p>
-                Need help mid-trip? Our travel experts are always just a call
-                away.
-              </p>
-            </li>
-          </ul>
-        </div>
-      </footer>
+      <MobileFooter />
     </div>
   );
 };
