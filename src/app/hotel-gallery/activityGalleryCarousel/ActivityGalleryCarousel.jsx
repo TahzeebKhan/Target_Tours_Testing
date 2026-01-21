@@ -60,7 +60,7 @@ const images = [
         {
             "id": 4,
             "title": "Living Room",
-            "image": "/gallery/livingroom2.png"
+            "image": "/gallery/livingRoom2.png"
         },
         {
             "id": 5,

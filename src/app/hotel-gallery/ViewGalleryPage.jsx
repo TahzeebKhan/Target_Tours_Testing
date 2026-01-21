@@ -45,11 +45,11 @@ const ViewGalleryPage = () => {
     {
       title: "LIVING ROOM",
       images: [
-        "/gallery/livingroom1.png",
-        "/gallery/livingroom2.png",
-        "/gallery/livingroom3.png",
-        "/gallery/livingroom1.png",
-        "/gallery/livingroom2.png",
+        "/gallery/livingRoom1.png",
+        "/gallery/livingRoom2.png",
+        "/gallery/livingRoom3.png",
+        "/gallery/livingRoom1.png",
+        "/gallery/livingRoom2.png",
       ]
     }
   ];
