@@ -1,7 +1,7 @@
 "use client";
 import React, { useActionState, useEffect, useState } from "react";
 import styles from "./SideBar.module.css";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useProfile } from "../../context/ProfileContext";
@@ -11,6 +11,7 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import { formatRoleUnderscoreToSpaceSeparated } from "@/app/utils/formatters";
 import { getParsedCookie } from "@/app/utils/getParsedCookie";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 const ChevronIcon = () => (
   <svg
@@ -32,6 +33,7 @@ const ChevronIcon = () => (
 
 const SideBar = () => {
   const { activeMenu, setActiveMenu, profilePhoto } = useProfile();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { logout, profile } = useAuth();
   // console.log("profile", profile);
@@ -70,6 +72,16 @@ const SideBar = () => {
 
     if (isMobileOrTablet) setActiveMenu("");
   }, []);
+
+  const handleLogoutClick = () => {
+    if (!isMobileOrTablet) {
+      logout();
+      router.replace("/");
+    } else {
+      setShowLogoutModal(true);
+    }
+  };
+
   return (
     <>
       {" "}
@@ -91,7 +103,9 @@ const SideBar = () => {
 
               <div className={styles.sideBarProfileDetailsText}>
                 <h3>{profile?.full_name || ""}</h3>
-                <p>{formatRoleUnderscoreToSpaceSeparated(user && user?.role)}</p>
+                <p>
+                  {formatRoleUnderscoreToSpaceSeparated(user && user?.role)}
+                </p>
               </div>
             </div>
             <div className={styles.br}></div>
@@ -206,10 +220,7 @@ const SideBar = () => {
           </div>
           <div className={styles.sideBarBottom}>
             <div
-              onClick={() => {
-                logout();
-                router.replace("/");
-              }}
+              onClick={handleLogoutClick}
               className={`${styles.logout} ${styles.item}`}
             >
               Logout
@@ -358,44 +369,10 @@ const SideBar = () => {
                 <ChevronIcon />
               </li>
               <div className={styles.br}></div>
-              <li
-                onClick={() => {
-                  logout();
-                  router.replace("/");
-                }}
-                className={` ${styles.item}`}
-              >
+              <li onClick={handleLogoutClick} className={` ${styles.item}`}>
                 <div className={`${styles.logout}`}>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 12.75L15.75 9L12 5.25"
-                      stroke="#EF4444"
-                      stroke-width="1.35"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M15.75 9H6.75"
-                      stroke="#EF4444"
-                      stroke-width="1.35"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M6.75 15.75H3.75C3.35218 15.75 2.97064 15.592 2.68934 15.3107C2.40804 15.0294 2.25 14.6478 2.25 14.25V3.75C2.25 3.35218 2.40804 2.97064 2.68934 2.68934C2.97064 2.40804 3.35218 2.25 3.75 2.25H6.75"
-                      stroke="#EF4444"
-                      stroke-width="1.35"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  Logout
+                  <LogOut size={18} />
+                  Log out
                 </div>
               </li>
             </ul>
@@ -404,6 +381,15 @@ const SideBar = () => {
             
           </div> */}
         </div>
+      )}
+      {showLogoutModal && (
+        <LogoutConfirmModal
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={() => {
+            logout();
+            router.replace("/");
+          }}
+        />
       )}
     </>
   );

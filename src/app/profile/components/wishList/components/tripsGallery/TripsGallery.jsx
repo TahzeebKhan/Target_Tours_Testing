@@ -32,7 +32,7 @@ const trips = [
 ];
 
 export default function TripsGallery() {
-  const { setActiveMenu } = useProfile();
+  const { setActiveMenu, activeMenu } = useProfile();
 
   const handleClick = (trip) => {
     if (trip.id === 1) {

@@ -6,6 +6,7 @@ import styles from "./support.module.css";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const SUPPORT_OPTIONS = [
   { id: "chat", label: "CHAT NOW", icon: "/icons/chat-text.svg" },
@@ -22,11 +23,13 @@ export default function Support() {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [rating, setRating] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateForm = () => {
@@ -97,12 +100,19 @@ export default function Support() {
     setActiveIndex(index);
     if (id === "feedback") {
       setIsOverlayOpen(true);
+    } else if (id === "help") {
+      router.push("/contact-support");
     }
   };
 
   const closeFeedback = () => {
-    setIsOverlayOpen(false);
-    setRating(null);
+    setIsClosing(true);
+
+    setTimeout(() => {
+      setIsOverlayOpen(false);
+      setIsClosing(false);
+      setRating(null);
+    }, 350); // match CSS animation time
   };
 
   return (
@@ -327,7 +337,9 @@ export default function Support() {
         {isOverlayOpen && (
           <div className={styles.overlay} onClick={closeFeedback}>
             <div
-              className={styles.overlayContent}
+              className={`${styles.overlayContent} ${
+                isClosing ? styles.overlayClosing : ""
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               <header className={styles.overlayHeader}>
@@ -410,13 +422,13 @@ export default function Support() {
 
               <footer className={styles.overlayFooter}>
                 <button className={styles.backBtn} onClick={closeFeedback}>
-                  <Image
+                  {/* <Image
                     src="/icons/arrow-left.svg"
                     alt=""
                     width={16}
                     height={16}
-                  />
-                  BACK
+                  /> */}
+                  Cancel
                 </button>
                 <button
                   className={styles.sendBtn}
