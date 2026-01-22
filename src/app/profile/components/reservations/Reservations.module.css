@@ -1,213 +1,224 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    max-width: 956px;
-    justify-self: center;
-    width: 100%;
-    gap: 24px;
-    font-family: 'Inter';
-    color: rgba(0, 0, 0, 1);
-    background-color: rgba(255, 255, 255, 1);
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  max-width: 956px;
+  justify-self: center;
+  width: 100%;
+  gap: 24px;
+  font-family: "Inter";
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(255, 255, 255, 1);
+  height: 100%;
 }
-
+.mobileView {
+  display: none;
+}
 .header {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    border-bottom: 1px solid rgba(228, 230, 232, 1);
-    padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding-bottom: 24px;
 }
 
 .title {
-    font-family: Antic Didone;
-    font-size: 28px;
-    color: rgba(0, 0, 51, 1);
+  font-family: Antic Didone;
+  font-size: 28px;
+  color: rgba(0, 0, 51, 1);
 }
 
 .subtitle {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .tabsContainer {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    background-color: rgba(240, 243, 255, 1);
-    width: 100%;
-    padding: 6px;
-    align-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background-color: rgba(240, 243, 255, 1);
+  width: 100%;
+  padding: 6px;
+  align-items: center;
 }
 
 .tabButton {
-    padding: 8px 24px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 300;
-    color: rgba(0, 0, 51, 1);
-    transition: all 0.3s ease;
+  padding: 8px 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(0, 0, 51, 1);
+  transition: all 0.3s ease;
 }
 
 .active {
-    background-color: rgba(0, 0, 51, 1);
-    color: rgba(255, 255, 255, 1);
+  background-color: rgba(0, 0, 51, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 7px 10px;
-    border-bottom: 1px solid rgba(228, 230, 232, 1);
-    gap: 20px;
-    padding-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  gap: 20px;
+  padding-bottom: 16px;
 }
 
 .cardMain {
-    display: flex;
-    gap: 20px;
-    flex: 1;
+  display: flex;
+  gap: 20px;
+  flex: 1;
 }
 
 .imageWrapper {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-    overflow: hidden;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
 }
 
 .cardHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
 }
 
 .hotelName {
-    font-family: Antic Didone;
-    font-size: 20px;
-    color: rgba(0, 0, 51, 1);
+  font-family: Antic Didone;
+  font-size: 20px;
+  color: rgba(0, 0, 51, 1);
 }
 
 .actionsWrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
 }
 
 .statusGroup {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .statusBadge {
-    padding: 4px 8px;
-    font-size: 14px;
-    border: 1px solid;
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid;
 }
 
 .confirmed {
-    background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
-    border: 1px solid rgba(4, 145, 83, 1);
-    color: rgba(4, 145, 83, 1);
+  background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
+  border: 1px solid rgba(4, 145, 83, 1);
+  color: rgba(4, 145, 83, 1);
 }
 
 .pending {
-    background: var(--Color-Orange-50, rgba(255, 247, 237, 1));
-    border: 1px solid var(--Color-Orange-600, rgba(234, 88, 12, 1));
-    color: rgba(234, 88, 12, 1);
+  background: var(--Color-Orange-50, rgba(255, 247, 237, 1));
+  border: 1px solid var(--Color-Orange-600, rgba(234, 88, 12, 1));
+  color: rgba(234, 88, 12, 1);
 }
 
 .idLabel {
-    font-size: 14px;
-    color: rgba(69, 76, 88, 1);
-    font-weight: 300;
+  font-size: 14px;
+  color: rgba(69, 76, 88, 1);
+  font-weight: 300;
 }
 
 .detailsGrid {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
 }
 
 .detailItem {
-    display: flex;
-    gap: 2px;
-    font-size: 12px;
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
 }
 
 .label {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 .value {
-    font-size: 12px;
-    font-weight: 300;
-    color: rgba(69, 76, 88, 1);
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(69, 76, 88, 1);
 }
 
 .checkDetails {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    white-space: nowrap;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 /* Responsiveness */
 
+@media (max-width: 895px) {
+  .mobileView {
+    display: block;
+  }
+  .container{
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
-    .tabsContainer {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .tabsContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-    .card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .cardHeader {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    .detailsGrid {
-        gap: 10px;
-        flex-direction: column;
-    }
+  .detailsGrid {
+    gap: 10px;
+    flex-direction: column;
+  }
 
-    .checkDetails {
-        align-self: flex-end;
-        padding-right: 0;
-    }
+  .checkDetails {
+    align-self: flex-end;
+    padding-right: 0;
+  }
 }
 
 @media (max-width: 480px) {
-    .cardMain {
-        flex-direction: column;
-    }
+  .cardMain {
+    flex-direction: column;
+  }
 
-    .imageWrapper {
-        width: 100%;
-        height: 180px;
-    }
+  .imageWrapper {
+    width: 100%;
+    height: 180px;
+  }
 }

@@ -5,7 +5,7 @@ const ProfileContext = createContext();
 
 export const ProfileProvider = ({ children }) => {
   const [activeMenu, setActiveMenu] = useState("Personal Information");
-
+  const [mobileTitle, setMobileTitle] = useState("");
   const [profilePhoto, setProfilePhoto] = useState("/images/profile1.jpg");
   useEffect(() => {
     if (window && window.innerWidth < 895) {
@@ -23,6 +23,8 @@ export const ProfileProvider = ({ children }) => {
         activeMenu,
         setActiveMenu,
         profilePhoto,
+        mobileTitle,
+        setMobileTitle,
         setProfilePhoto,
       }}
     >
@@ -31,4 +33,6 @@ export const ProfileProvider = ({ children }) => {
   );
 };
 
-export const useProfile = () => useContext(ProfileContext);
+export const useProfile = () => {
+  return useContext(ProfileContext) ?? {};
+};

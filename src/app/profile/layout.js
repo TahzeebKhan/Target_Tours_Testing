@@ -52,7 +52,7 @@ export const MobileFooter = () => (
 
 const MobileView = ({ children }) => {
   const router = useRouter();
-  const { activeMenu, setActiveMenu } = useProfile();
+  const { activeMenu, setActiveMenu, mobileTitle } = useProfile();
   const handleClickBack = (activeMenu) => {
     if (activeMenu === "") {
       router.push("/");
@@ -86,16 +86,16 @@ const MobileView = ({ children }) => {
         </span>
 
         <span>
-          {activeMenu === "" && "My Account"}
-          {activeMenu === "Personal Information" && "Personal Information"}
-          {activeMenu === "paymentAccount" && "Payment Account"}
-          {activeMenu === "trip" && "My Trips"}
-          {activeMenu === "wishList" && "Wish List"}
-          {activeMenu === "support" && "Help and Support"}
-          {activeMenu === "myReviews" && "My Reviews"}
-          {activeMenu === "settings" && "Settings"}
-          {activeMenu === "editProfile" && "Edit Profile"}
-          {activeMenu === "myNextTrip" && "My Next Trip"}
+          {mobileTitle ||
+            (activeMenu === "" && "My Account") ||
+            (activeMenu === "Personal Information" && "Personal Information") ||
+            (activeMenu === "paymentAccount" && "Payment Account") ||
+            (activeMenu === "trip" && "My Trips") ||
+            (activeMenu === "wishList" && "Wish List") ||
+            (activeMenu === "support" && "Help and Support") ||
+            (activeMenu === "myReviews" && "My Reviews") ||
+            (activeMenu === "settings" && "Settings") ||
+            (activeMenu === "editProfile" && "Edit Profile")}
         </span>
       </div>
 

@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./ActiveReservations.module.css";
+import { useProfile } from "../profile/context/ProfileContext";
+import FlightBooking from "./FlightBooking";
+import Packages from "./Packages";
+import TravelInsurence from "./TravelInsurence";
 
-const TABS = ["ALL", "Hotel Booking", "Flight Booking", "Packages"];
+const TABS = [
+  "ALL",
+  "Hotel Booking",
+  "Flight Booking",
+  "Packages",
+  "Travel Insurance",
+];
 
 const RESERVATIONS = [
   {
@@ -27,9 +37,15 @@ const RESERVATIONS = [
   },
 ];
 
-export default function ActiveReservations() {
-  const [activeTab, setActiveTab] = useState("Hotel Booking");
-
+export default function ActiveReservations({
+  activeTab,
+  setActiveTab,
+  onCheckDetails,
+}) {
+  const { setMobileTitle } = useProfile();
+  useEffect(() => {
+    setMobileTitle?.("Active Reservations");
+  }, []);
   return (
     <div className={styles.container}>
       {/* Tabs */}
@@ -47,54 +63,87 @@ export default function ActiveReservations() {
 
       {/* Content Area */}
       <main className={styles.mainContent}>
-        <div className={styles.cardList}>
-          {RESERVATIONS.map((res, index) => (
-            <section key={index} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div className={styles.imageWrapper}>
-                  <Image
-                    src={res.image}
-                    alt={res.hotelName}
-                    fill
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-                <div className={styles.hotelInfo}>
-                  <h2 className={styles.hotelName}>{res.hotelName}</h2>
-                  <span className={styles.statusBadge}>{res.status}</span>
-                </div>
-              </div>
+        {activeTab === "Hotel Booking" ? (
+          <>
+            <div className={styles.cardList}>
+              {RESERVATIONS.map((res, index) => (
+                <section key={index} className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.imageWrapper}>
+                      <Image
+                        src={res.image}
+                        alt={res.hotelName}
+                        fill
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                    <div className={styles.hotelInfo}>
+                      <h2 className={styles.hotelName}>{res.hotelName}</h2>
+                      <span className={styles.statusBadge}>{res.status}</span>
+                    </div>
+                  </div>
 
-              <div className={styles.detailsGrid}>
-                <div className={styles.detailRow}>
-                  <span className={styles.label}>ID</span>
-                  <span className={styles.dash}>---------</span>
+                  <div className={styles.detailsGrid}>
+                    <div className={styles.detailRow}>
+                      <span className={styles.label}>ID</span>
+                      <span className={styles.dash}>---------</span>
 
-                  <span className={styles.value}>{res.id}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span className={styles.label}>Check In:</span>
-                  <span className={styles.dash}>---------</span>
+                      <span className={styles.value}>{res.id}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span className={styles.label}>Check In:</span>
+                      <span className={styles.dash}>---------</span>
 
-                  <span className={styles.value}>{res.checkIn}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span className={styles.label}>Check out:</span>
-                  <span className={styles.dash}>---------</span>
+                      <span className={styles.value}>{res.checkIn}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span className={styles.label}>Check out:</span>
+                      <span className={styles.dash}>---------</span>
 
-                  <span className={styles.value}>{res.checkOut}</span>
-                </div>
-                <div className={styles.detailRow}>
-                  <span className={styles.label}>Guests:</span>
-                  <span className={styles.dash}>---------</span>
+                      <span className={styles.value}>{res.checkOut}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span className={styles.label}>Guests:</span>
+                      <span className={styles.dash}>---------</span>
 
-                  <span className={styles.value}>{res.guests}</span>
-                </div>
-                <button className={styles.detailsButton}>Check Details</button>
-              </div>
-            </section>
-          ))}
-        </div>
+                      <span className={styles.value}>{res.guests}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setMobileTitle?.("Booking Details");
+                        onCheckDetails();
+                      }}
+                      className={styles.detailsButton}
+                    >
+                      Check Details
+                    </button>
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
+        ) : activeTab === "Flight Booking" ? (
+          <>
+            <FlightBooking
+              setMobileTitle={setMobileTitle}
+              onCheckDetails={onCheckDetails}
+            />{" "}
+          </>
+        ) : activeTab === "Packages" ? (
+          <>
+            <Packages
+              setMobileTitle={setMobileTitle}
+              onCheckDetails={onCheckDetails}
+            />
+          </>
+        ) : activeTab === "Travel Insurance" ? (
+          <>
+            <TravelInsurence
+              setMobileTitle={setMobileTitle}
+              onCheckDetails={onCheckDetails}
+            />
+          </>
+        ) : null}
       </main>
     </div>
   );
