@@ -7,22 +7,30 @@ import IndividualProperty from "../individualProperty/IndividualProperty";
 
 const Trip = () => {
   const [step, setStep] = useState("EMPTY");
+
+  const [activeTab, setActiveTab] = useState("Hotel Booking");
   // EMPTY | RESERVATIONS | DETAILS
 
   if (step === "EMPTY") {
-    return (
-      <EmptyTrip onStartSearching={() => setStep("RESERVATIONS")} />
-    );
+    return <EmptyTrip onStartSearching={() => setStep("RESERVATIONS")} />;
   }
 
   if (step === "RESERVATIONS") {
     return (
-      <Reservations onCheckDetails={() => setStep("DETAILS")} />
+      <Reservations
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onCheckDetails={() => setStep("DETAILS")}
+      />
     );
   }
 
   return (
-    <IndividualProperty onBack={() => setStep("RESERVATIONS")} />
+    <IndividualProperty
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      onBack={() => setStep("RESERVATIONS")}
+    />
   );
 };
 

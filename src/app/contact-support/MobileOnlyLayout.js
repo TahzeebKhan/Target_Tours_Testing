@@ -47,7 +47,7 @@ export default function MobileOnlyLayout({ children }) {
           </svg>
         </span>
         <span className={styles.title}>
-          {step === "support" && "Help & Support"}
+          {step === "support" && "How Can We Help You?"}
           {step === "contact" && "Contact Support"}
           {step === "help" && "Help us find your booking"}
           {step === "connect" && "How would you like to connect?"}

@@ -82,6 +82,7 @@
 .imageWrapper {
   position: relative;
   width: 80px;
+  min-width: 80px;
   height: 80px;
   overflow: hidden;
 }
@@ -171,7 +172,15 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
+.h2Container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.hotelInfo {
+  width: 100%;
+}
 .detailsButton:hover {
   background-color: rgba(243, 244, 246, 1);
 }
@@ -196,5 +205,12 @@
   .tabItem {
     padding: 8px 16px;
     padding-bottom: 12px;
+  }
+}
+@media (max-width: 405px) {
+  .h2Container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 }

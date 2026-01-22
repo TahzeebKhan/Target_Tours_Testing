@@ -2,50 +2,27 @@
 
 import React from "react";
 import Image from "next/image";
-import styles from "./BookingDetails.module.css";
-import HotTubIcon from "../../../public/icons/hot-tub.svg";
-import FlightBookingDetails from "./FlightBookingDetails";
-import Packages from "./Packages";
-import PackageDetails from "./PackageDetails";
-import InsuranceDetails from "./InsuranceDetails";
+import styles from "./InsuranceDetails.module.css";
+// import HotTubIcon from "../../../public/icons/hot-tub.svg";
 
-const BookingDetails = ({ activeTab, setActiveTab }) => {
-  const amenities = [
-    { icon: "/icons/hot-tub.svg", label: "Hot tub" },
-    { icon: "/icons/city-view.svg", label: "City view" },
-    { icon: "/icons/ac.svg", label: "Air conditioning" },
-    { icon: "/icons/tv-retro.svg", label: "Tv" },
-    { icon: "/icons/fridge.svg", label: "Refrigerator" },
-    { icon: "/icons/hair-dryer.svg", label: "Hair dryer" },
-    { icon: "/icons/microwave.svg", label: "Microwave" },
-    { icon: "/icons/wifi copy.svg", label: "Wifi" },
-    { icon: "/icons/Plate.svg", label: "Plates" },
-    { icon: "/icons/camera-circle.svg", label: "Security Cameras" },
-    { icon: "/icons/coffee.svg", label: "Coffee machine" },
-    { icon: "/icons/towels.svg", label: "Towels" },
-    { icon: "/icons/sofa.svg", label: "Sofa" },
-  ];
+const amenities = [
+  { icon: "/icons/hot-tub.svg", label: "Hot tub" },
+  { icon: "/icons/city-view.svg", label: "City view" },
+  { icon: "/icons/ac.svg", label: "Air conditioning" },
+  { icon: "/icons/tv-retro.svg", label: "Tv" },
+  { icon: "/icons/fridge.svg", label: "Refrigerator" },
+  { icon: "/icons/hair-dryer.svg", label: "Hair dryer" },
+  { icon: "/icons/microwave.svg", label: "Microwave" },
+  { icon: "/icons/wifi copy.svg", label: "Wifi" },
+  { icon: "/icons/Plate.svg", label: "Plates" },
+  { icon: "/icons/camera-circle.svg", label: "Security Cameras" },
+  { icon: "/icons/coffee.svg", label: "Coffee machine" },
+  { icon: "/icons/towels.svg", label: "Towels" },
+  { icon: "/icons/sofa.svg", label: "Sofa" },
+];
 
+const InsuranceDetails = () => {
   const [activeAmenity, setActiveAmenity] = React.useState(null);
-  // if (activeTab === "ALL") return null;
-
-  if (activeTab === "Flight Booking") {
-    return (
-      <div>
-        <FlightBookingDetails />
-      </div>
-    );
-  }
-
-  if (activeTab === "Packages") {
-    return <PackageDetails />;
-  }
-
-  if (activeTab === "Travel Insurance") {
-    return <InsuranceDetails />;
-  }
-
-  if (activeTab !== "Hotel Booking") return null;
   return (
     <div className={styles.outerContainer}>
       <div className={styles.card}>
@@ -54,14 +31,14 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
           <div className={styles.hotelHeader}>
             <div className={styles.imageWrapper}>
               <Image
-                src="/images/hotel-thumbnail.jpg"
+                src="/images/travelInsurenceThumbnail.png"
                 alt="Golden Tulip"
                 fill
                 className={styles.objectFit}
               />
             </div>
             <div className={styles.hotelTitleGroup}>
-              <h1 className={styles.hotelName}>Golden Tulip Hotel Confirmed</h1>
+              <h1 className={styles.hotelName}>Worldwide Health Cover</h1>
               <span className={styles.confirmedBadge}>Confirmed</span>
             </div>
           </div>
@@ -69,36 +46,41 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
           <div className={styles.addressSection}>
             <div className={styles.addressBlock}>
               <p>
-                <span className={styles.label}>Address:</span>
+                <span className={styles.label}>Plan Type :</span>
               </p>
-              <p className={styles.value}>
-                Marina, 19-21, Ciutat Vella, 08005 Barcelona, Spain
-              </p>
+              <p className={styles.value}>Single Trip</p>
             </div>
 
             <div className={styles.addressBlock}>
               <p className={styles.labelSpacing}>
-                <span className={styles.label}>Phone:</span>
+                <span className={styles.label}>Trip Type:</span>
               </p>
-              <p className={styles.value}>+38 540 979 5428</p>
+              <div className={styles.baggage}>
+                <p className={styles.value}>International Trip</p>
+
+                {/* <p className={styles.value}>
+                  {" "}
+                  <span className={styles.dot}></span>7 kg Cabin
+                </p> */}
+              </div>
             </div>
 
             <div className={styles.addressBlock}>
               <p className={styles.labelSpacing}>
-                <span className={styles.label}>GPS coordinates:</span>
+                <span className={styles.label}>Travellers:</span>
               </p>
-              <p className={styles.value}>N 040* 50.963, E 14* 15.348</p>
+              <p className={styles.value}>4 Adults</p>
             </div>
           </div>
 
           <div className={styles.bookingMeta}>
             <div className={styles.metaBox}>
-              <span className={styles.metaLabel}>Check-In</span>
+              <span className={styles.metaLabel}>Policy Start</span>
               <div className={styles.dateBlock}>
                 <span className={styles.dateNumber}>14</span>
                 <span className={styles.month}>August</span>
               </div>
-              <div className={styles.timeWrapper}>
+              {/* <div className={styles.timeWrapper}>
                 <svg
                   width="15"
                   height="15"
@@ -112,18 +94,18 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
                   />
                 </svg>
 
-                <span>14:00 - 21:00</span>
-              </div>
+                <span>14:00 </span>
+              </div> */}
             </div>
             <div className={styles.verticalDivider} />
             <div className={styles.metaBox}>
-              <span className={styles.metaLabel}>Check-Out</span>
+              <span className={styles.metaLabel}>Policy End</span>
               <div className={styles.dateBlock}>
                 <span className={styles.dateNumber}>19</span>
                 <span className={styles.month}>August</span>
               </div>
 
-              <div className={styles.timeWrapper}>
+              {/* <div className={styles.timeWrapper}>
                 <svg
                   width="15"
                   height="15"
@@ -137,51 +119,109 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
                   />
                 </svg>
 
-                <span>08:00 - 10:00</span>
-              </div>
+                <span>08:00 </span>
+              </div> */}
             </div>
           </div>
 
           <div className={styles.statsRow}>
             <div className={styles.statItem}>
-              <span className={styles.statLabel}>Rooms</span>
-              <span className={styles.statValue}>15</span>
+              <span className={styles.statLabel}>Duration</span>
+              <span className={styles.statValue}>8 Days</span>
             </div>
-            <span className={styles.statSlash}>/</span>
+            {/* <span className={styles.statSlash}>/</span>
             <div className={styles.statItem}>
               <span className={styles.statLabel}>Nights</span>
               <span className={styles.statValue}>5</span>
-            </div>
+            </div> */}
           </div>
         </header>
       </div>
       {/* Content Section */}
       <main className={styles.content}>
-        <section className={styles.aboutSection}>
-          <h2 className={styles.sectionTitle}>About This Property</h2>
-          <h3 className={styles.roomSpecs}>
-            2 guests · Studio · 1 bed · 1.5 baths
-          </h3>
-          <p className={styles.description}>
-            Welcome to my fully refurbished 17 m² studio, ideally located in
-            Versailles, only a 10-minute walk to the Palace of Versailles and a
-            5-minute walk to the Rive Gauche train station.
-          </p>
-          <div className={styles.mapContainer}>
-            <Image
-              src="/images/map-view.png"
-              alt="Map"
-              fill
-              className={styles.objectFit}
-            />
+        {/* <section className={styles.aboutSection}>
+          <h2 className={styles.sectionTitle}>Flight Summary</h2>
+
+          <div className={styles.flightSummary}>
+
+            <div className={styles.flightTopRow}>
+              <span className={styles.flightLabel}>Departure</span>
+              <span className={styles.flightDuration}>01 h 30 m</span>
+              <span
+                className={`${styles.flightLabel} ${styles.flightLabelArrival}`}
+              >
+                Arrival
+              </span>
+            </div>
+
+            
+            <div className={styles.flightRouteRow}>
+              <div className={styles.airportCode}>DEL</div>
+
+              <div className={styles.flightPath}>
+                <span className={styles.dashedLine} />
+                <img src={"/icons/flightIcon.svg"} />
+                <span className={styles.dashedLine} />
+              </div>
+
+              <div className={styles.airportCode}>BOM</div>
+            </div>
+
+            
+            <div className={styles.flightDetailsRow}>
+              <div className={styles.flightColumn}>
+                <p className={styles.airportName}>
+                  Terminal 3 Indira Gandhi Airport, New Delhi
+                </p>
+                <p className={styles.flightDate}>Tue, 03 Dec 2024</p>
+                <p className={styles.flightTime}>06:30 AM</p>
+              </div>
+
+              <div className={styles.flightColumnRight}>
+                <p className={styles.airportName}>
+                  Terminal 1 Chhatrapati Shivaji Maharaj Airport, Mumbai
+                </p>
+                <p className={styles.flightDate}>Tue, 03 Dec 2024</p>
+                <p className={styles.flightTime}>07:45 AM</p>
+              </div>
+            </div>
+          </div>
+        </section> */}
+
+        <section className={styles.summarySection}>
+          <h2 className={styles.sectionTitle}>Coverage Details</h2>
+          <div className={styles.priceList}>
+            {[
+              //   { label: "₹2245.5 × 1 Room × 8 Nights", value: "₹ 64,126" },
+              { label: "Medical Expenses", value: "₹ 64,126" },
+              { label: "Emergency Hospitalization", value: "₹ 64,126" },
+              { label: "Trip Cancellation", value: "₹ 64,126" },
+              { label: "Trip Delay", value: "₹ 64,126" },
+              { label: "Baggage Loss", value: "₹ 64,126" },
+              { label: "Passport Loss", value: "₹ 64,126" },
+              { label: "Personal Accident", value: "₹ 64,126" },
+            ].map((item, idx) => (
+              <div key={idx} className={styles.priceRow}>
+                <span className={styles.pLabel}>{item.label}</span>
+                <div className={styles.valueRow}>
+                  <span className={styles.dash}>---------</span>
+                  <span className={styles.pValue}>{item.value}</span>
+                </div>
+              </div>
+            ))}
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>Total Amount</span>
+
+              <span className={styles.totalPrice}>₹ 66,945</span>
+            </div>
           </div>
         </section>
 
         <section className={styles.summarySection}>
-          <h2 className={styles.sectionTitle}>Booking Summary</h2>
+          <h2 className={styles.sectionTitle}>Premium Summary</h2>
           <div className={styles.priceList}>
             {[
-              { label: "₹2245.5 × 1 Room × 8 Nights", value: "₹ 64,126" },
+              //   { label: "₹2245.5 × 1 Room × 8 Nights", value: "₹ 64,126" },
               { label: "Base Price", value: "₹ 64,126" },
               { label: "Discount", value: "₹ 64,126" },
               { label: "Coupon Discount", value: "₹ 64,126" },
@@ -202,20 +242,49 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
             </div>
           </div>
         </section>
+        <section className={styles.passengerSection}>
+          {/* Header */}
+          <div className={styles.passengerHeader}>
+            <h2 className={styles.passengerTitle}>Passenger Details</h2>
+            <span className={styles.passengerCount}>4 Adults</span>
+          </div>
 
-        <section className={styles.guestSection}>
+          {/* Passenger List */}
+          <div className={styles.passengerList}>
+            <div className={styles.passengerRow}>
+              <div className={styles.passengerInfo}>
+                <div className={styles.passengerAvatar}>
+                  <img src="/images/passenger-avatar.png" alt="Passenger" />
+                </div>
+                <span className={styles.passengerName}>Mr Ayush Kumar</span>
+              </div>
+              <span className={styles.passengerStatus}>Confirmed</span>
+            </div>
+
+            <div className={styles.passengerRow}>
+              <div className={styles.passengerInfo}>
+                <div className={styles.passengerAvatar}>
+                  <img src="/images/passenger-avatar.png" alt="Passenger" />
+                </div>
+                <span className={styles.passengerName}>Mr Ayush Kumar</span>
+              </div>
+              <span className={styles.passengerStatus}>Confirmed</span>
+            </div>
+          </div>
+        </section>
+        {/* <section className={styles.guestSection}>
           <h2 className={styles.sectionTitle}>Guest name</h2>
           <p className={styles.guestDetail}>Anna George / for max. 2 people</p>
-        </section>
+        </section> */}
 
-        <section className={styles.mealSection}>
+        {/* <section className={styles.mealSection}>
           <h2 className={styles.sectionTitle}>Meal Plan</h2>
           <p className={styles.guestDetail}>
             There is no meal included in the rate for this apartment.
           </p>
-        </section>
+        </section> */}
 
-        <div className={styles.amenitiesGrid}>
+        {/* <div className={styles.amenitiesGrid}>
           {amenities.map((item, idx) => (
             <div
               key={idx}
@@ -235,7 +304,7 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
               <span className={styles.itemLabel}>{item.label}</span>
             </div>
           ))}
-        </div>
+        </div> */}
 
         <footer className={styles.actions}>
           <button className={styles.btnCancel}>Cancel Booking</button>
@@ -246,4 +315,4 @@ const BookingDetails = ({ activeTab, setActiveTab }) => {
   );
 };
 
-export default BookingDetails;
+export default InsuranceDetails;
