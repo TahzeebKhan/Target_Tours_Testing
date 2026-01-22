@@ -1,66 +1,70 @@
 .tabsWrap {
-    max-width: 1520px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #DDDFE3;
+  max-width: 1520px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #dddfe3;
+  position: sticky;
+  top: 73px;
+  background-color: #f9f9f9;
+  z-index: 20;
 }
 
 .tabs {
-    display: flex;
-    position: relative;
-    gap: 24px;
-    margin-top: 15.5px;
-    font-size: 14px;
-    text-transform: uppercase;
+  display: flex;
+  position: relative;
+  gap: 24px;
+  margin-top: 15.5px;
+  font-size: 14px;
+  text-transform: uppercase;
 
-    /* indicator vars */
-    --indicator-width: 0px;
-    --indicator-left: 0px;
+  /* indicator vars */
+  --indicator-width: 0px;
+  --indicator-left: 0px;
 }
 
 .tab {
-    padding-bottom: 16px;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 16px;
-    line-height: 26px;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    cursor: pointer;
-    color: #8B94A4;
-
+  padding-bottom: 16px;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 26px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #8b94a4;
 }
 
 .tabBtn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: inherit;
-    text-transform: inherit;
-    font-size: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  text-transform: inherit;
+  font-size: inherit;
 }
 
 .active {
-    color: #000033;
+  color: #000033;
 }
 
 /* Sliding underline */
 .tabs::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    height: 2px;
-    width: var(--indicator-width);
-    transform: translateX(var(--indicator-left));
-    background-color: #000033;
-    transition: transform 0.25s ease, width 0.25s ease;
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  width: var(--indicator-width);
+  transform: translateX(var(--indicator-left));
+  background-color: #000033;
+  transition:
+    transform 0.25s ease,
+    width 0.25s ease;
 }
-@media (max-width: 1520px){
-    .tabsWrap{
-        padding-left: 16px;
-    }
-    
+@media (max-width: 1520px) {
+  .tabsWrap {
+    padding-left: 16px;
+  }
 }

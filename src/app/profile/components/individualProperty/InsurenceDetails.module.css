@@ -56,6 +56,9 @@
   line-height: 24px;
   letter-spacing: 0%;
 }
+.hotelName span {
+  margin-left: 8px;
+}
 
 .textSecondary {
   display: flex;
@@ -85,9 +88,9 @@
 
 .metaBox {
   display: flex;
+  min-width: 123px;
   padding: 0px 3px;
   flex-direction: column;
-  min-width: 123px;
   align-items: center;
   gap: 8px;
   font-size: 14px;
@@ -169,6 +172,7 @@
 
 .roomCount {
   display: flex;
+  width: 100%;
   gap: 8px;
   align-items: center;
 }
@@ -176,6 +180,7 @@
 .countGroup {
   display: flex;
   flex-direction: column;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
 }
@@ -210,6 +215,7 @@
 .sectionTitle {
   font-size: 18px;
   font-weight: 600;
+  text-transform: uppercase;
   color: rgba(31, 34, 38, 1);
   line-height: 24px;
   letter-spacing: 0%;
@@ -447,6 +453,330 @@
   display: none;
 }
 /* Responsive */
+.flightSummarySection {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.flightSummaryTitle {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  color: #000033;
+}
+
+.flightSummaryCard {
+  display: grid;
+  grid-template-columns: 309px 1fr 330px;
+  gap: 32px;
+  /* padding: 20px; */
+  /* border: 1px solid #e5e7eb; */
+  /* border-radius: 8px; */
+  /* background: #fff; */
+}
+
+.flightPoint {
+  /* max-width: 288px; */
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 8px;
+}
+.flightPointRight {
+  align-items: flex-start;
+}
+
+.flightLabel {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.flightCity {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.flightCode {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.flightDate {
+  font-size: 13px;
+  color: #374151;
+}
+
+.flightTerminal {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #383e48;
+}
+
+.flightPoint > .flightTerminal {
+  text-align: end;
+}
+
+.flightPointRight > .flightTerminal {
+  text-align: start;
+}
+.flightTimeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.flightDuration {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.flightPath {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+.pathDot {
+  min-width: 12px;
+  height: 12px;
+  background: #7b8799;
+  border-radius: 50%;
+  margin: 0px -4px;
+}
+
+.pathLine {
+  width: 28px;
+  width: 100%;
+  height: 1px;
+  border: 1.48px dashed #94a3b8;
+}
+
+.flightIcon {
+  font-size: 14px;
+  color: #2563eb;
+}
+.flightIcon img {
+  min-width: 28px;
+  height: 28px;
+  width: 28px;
+}
+.passengerDetailsSection {
+}
+
+.passengerHeader {
+  margin-bottom: 12px;
+}
+
+.passengerTitle {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #000033;
+}
+
+.passengerCount {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #383e48;
+  margin-left: 8px;
+}
+
+.passengerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.passengerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.passengerInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.passengerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarIcon {
+  font-size: 14px;
+}
+
+.passengerName {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 2%;
+
+  color: #0a0a0a;
+}
+
+.passengerStatus {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 22px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #049153;
+}
+
+.mealPlanInfo {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #383e48;
+}
+
+.mealLabel {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  margin-right: 8px;
+}
+.flightsHead {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #1f2226;
+  margin-bottom: 8px;
+}
+.br {
+  width: 100%;
+  height: 1px;
+  border-bottom: 1px solid #e4e6e8;
+  margin: 8px 0px;
+}
+.mealText {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #383e48;
+}
+.activitiesSection {
+  /* margin-top: 32px; */
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+/* Title */
+.activitiesTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 600; /* Semi Bold */
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #1f2226;
+  margin-bottom: 8px;
+}
+
+/* List */
+.activitiesList {
+  list-style-type: disc;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* required gap */
+}
+
+/* List Item */
+.activityItem {
+  font-family: "Inter", sans-serif;
+  font-weight: 300; /* Light */
+  font-size: 14px;
+  line-height: 160%;
+  letter-spacing: 0%;
+  color: #1f2226;
+}
 
 @media (max-width: 1024px) {
   .aboutSection {

@@ -5,6 +5,9 @@ import Image from "next/image";
 import styles from "./IndividualProperty.module.css";
 import BookingDetails from "@/app/profile_components/BookingDetails";
 import { useProfile } from "../../context/ProfileContext";
+import FlightBookingDetails from "./FlightBookingDetails";
+import PackageDetails from "./PackageDetails";
+import InsurenceDetails from "./InsurenceDetails";
 
 const IndividualProperty = ({ activeTab, setActiveTab }) => {
   const [isActive, setIsActive] = useState(true);
@@ -17,7 +20,7 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
     { icon: "/icons/fridge.svg", label: "Refrigerator" },
     { icon: "/icons/hair-dryer.svg", label: "Hair dryer" },
     { icon: "/icons/microwave.svg", label: "Microwave" },
-    { icon: "/icons/wifi.svg", label: "Wifi" },
+    { icon: "/icons/wifi copy.svg", label: "Wifi" },
     { icon: "/icons/Plate.svg", label: "Plates" },
     { icon: "/icons/camera-circle.svg", label: "Security Cameras" },
     { icon: "/icons/coffee.svg", label: "Coffee machine" },
@@ -35,99 +38,101 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
   }, []);
   return (
     <>
-      <div className={styles.container}>
-        <div className={styles.innerContainer}>
-          {/* Header Section */}
-          <header className={styles.header}>
-            <div className={styles.hotelInfo}>
-              <div className={styles.imageWrapper}>
-                <Image
-                  src="/images/hotel-thumbnail.jpg"
-                  alt="Hotel Arts Barcelona"
-                  fill
-                  className={styles.objectFit}
-                />
-              </div>
-              <div className={styles.details}>
-                <h1 className={styles.hotelName}>Hotel Arts Barcelona</h1>
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>Address:</span>
-                  <span className={styles.infoValue}>
-                    Marina, 19-21, Ciutat Vella, 08005 Barcelona, Spain
-                  </span>
-                </p>
-
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>Phone:</span>
-                  <span className={styles.infoValue}>+38 540 979 5428</span>
-                </p>
-
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>GPS coordinates:</span>
-                  <span className={styles.infoValue}>
-                    N 040* 50.963, E 14* 15.348
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.bookingMeta}>
-              <div className={styles.metaBox}>
-                <span className={styles.label}>Check-In</span>
-                <span className={styles.dateNumber}>14</span>
-                <span className={styles.month}>August</span>
-                <div className={styles.timeWrapper}>
+      
+      {activeTab === "HOTEL BOOKING" && (
+        <div className={styles.container}>
+          <div className={styles.innerContainer}>
+            {/* Header Section */}
+            <header className={styles.header}>
+              <div className={styles.hotelInfo}>
+                <div className={styles.imageWrapper}>
                   <Image
-                    src="/icons/alarm-clock.svg"
-                    alt="Time"
-                    width={18}
-                    height={18}
-                    className={styles.timeIcon}
+                    src="/images/hotel-thumbnail.jpg"
+                    alt="Hotel Arts Barcelona"
+                    fill
+                    className={styles.objectFit}
                   />
-                  <span className={styles.time}>14:00 - 21:00</span>
+                </div>
+                <div className={styles.details}>
+                  <h1 className={styles.hotelName}>Hotel Arts Barcelona</h1>
+                  <p className={styles.textSecondary}>
+                    <span className={styles.infoLabel}>Address:</span>
+                    <span className={styles.infoValue}>
+                      Marina, 19-21, Ciutat Vella, 08005 Barcelona, Spain
+                    </span>
+                  </p>
+
+                  <p className={styles.textSecondary}>
+                    <span className={styles.infoLabel}>Phone:</span>
+                    <span className={styles.infoValue}>+38 540 979 5428</span>
+                  </p>
+
+                  <p className={styles.textSecondary}>
+                    <span className={styles.infoLabel}>GPS coordinates:</span>
+                    <span className={styles.infoValue}>
+                      N 040* 50.963, E 14* 15.348
+                    </span>
+                  </p>
                 </div>
               </div>
-              <div className={styles.divider} />
-              <div className={styles.metaBox}>
-                <span className={styles.label}>Check-Out</span>
-                <span className={styles.dateNumber}>19</span>
-                <span className={styles.month}>August</span>
-                <div className={styles.timeWrapper}>
-                  <Image
-                    src="/icons/alarm-clock.svg"
-                    alt="Time"
-                    width={18}
-                    height={18}
-                    className={styles.timeIcon}
-                  />
-                  <span className={styles.time}>08:00 - 10:00</span>
-                </div>
-              </div>
-              <div className={styles.divider} />
-              <div className={styles.statusSection}>
-                <button
-                  onClick={() => setIsActive(!isActive)}
-                  className={`${styles.statusBadge} ${
-                    isActive ? styles.active : ""
-                  }`}
-                >
-                  CONFIRMED
-                </button>
-                <div className={styles.roomCount}>
-                  <div className={styles.countGroup}>
-                    <span className={styles.label}>Rooms</span>
-                    <span className={styles.value}>15</span>
-                  </div>
-                  <span className={styles.slash}>/</span>
-                  <div className={styles.countGroup}>
-                    <span className={styles.label}>Nights</span>
-                    <span className={styles.value}>5</span>
+
+              <div className={styles.bookingMeta}>
+                <div className={styles.metaBox}>
+                  <span className={styles.label}>Check-In</span>
+                  <span className={styles.dateNumber}>14</span>
+                  <span className={styles.month}>August</span>
+                  <div className={styles.timeWrapper}>
+                    <Image
+                      src="/icons/alarm-clock.svg"
+                      alt="Time"
+                      width={18}
+                      height={18}
+                      className={styles.timeIcon}
+                    />
+                    <span className={styles.time}>14:00 - 21:00</span>
                   </div>
                 </div>
+                <div className={styles.divider} />
+                <div className={styles.metaBox}>
+                  <span className={styles.label}>Check-Out</span>
+                  <span className={styles.dateNumber}>19</span>
+                  <span className={styles.month}>August</span>
+                  <div className={styles.timeWrapper}>
+                    <Image
+                      src="/icons/alarm-clock.svg"
+                      alt="Time"
+                      width={18}
+                      height={18}
+                      className={styles.timeIcon}
+                    />
+                    <span className={styles.time}>08:00 - 10:00</span>
+                  </div>
+                </div>
+                <div className={styles.divider} />
+                <div className={styles.statusSection}>
+                  <button
+                    onClick={() => setIsActive(!isActive)}
+                    className={`${styles.statusBadge} ${
+                      isActive ? styles.active : ""
+                    }`}
+                  >
+                    CONFIRMED
+                  </button>
+                  <div className={styles.roomCount}>
+                    <div className={styles.countGroup}>
+                      <span className={styles.label}>Rooms</span>
+                      <span className={styles.value}>15</span>
+                    </div>
+                    <span className={styles.slash}>/</span>
+                    <div className={styles.countGroup}>
+                      <span className={styles.label}>Nights</span>
+                      <span className={styles.value}>5</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </header>
-
+            </header>
+          </div>
           <div className={styles.detailsWrapper}>
             {/* About Section */}
             <section className={styles.aboutSection}>
@@ -136,7 +141,9 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
                 <h3 className={styles.subTitle}>
                   2 guests · Studio · 1 bed · 1.5 baths
                 </h3>
-                <p className={styles.textSecondary}>
+                <p
+                  className={`${styles.textSecondary} ${styles.textSecondary2}`}
+                >
                   Welcome to my fully refurbished 17 m² studio, ideally located
                   in Versailles, only a 10-minute walk to the Palace of
                   Versailles and a 5-minute walk to the Rive Gauche train
@@ -229,7 +236,14 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
             </footer>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "FLIGHT BOOKING" && <FlightBookingDetails />}
+
+      {activeTab === "PACKAGES" && <PackageDetails />}
+
+      {activeTab === "TRAVEL INSURANCE" && <InsurenceDetails />}
+
       <div className={styles.mobileView}>
         <BookingDetails activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
