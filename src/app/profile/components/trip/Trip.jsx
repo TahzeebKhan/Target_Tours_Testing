@@ -8,7 +8,7 @@ import IndividualProperty from "../individualProperty/IndividualProperty";
 const Trip = () => {
   const [step, setStep] = useState("EMPTY");
 
-  const [activeTab, setActiveTab] = useState("Hotel Booking");
+  const [activeTab, setActiveTab] = useState("HOTEL BOOKING");
   // EMPTY | RESERVATIONS | DETAILS
 
   if (step === "EMPTY") {

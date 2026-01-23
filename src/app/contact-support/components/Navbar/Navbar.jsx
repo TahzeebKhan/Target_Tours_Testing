@@ -1,8 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 
 import styles from "./Navbar.module.css";
+import ProfileModal from "@/app/home-page/components/homePage/modals/ProfileModal";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 const HELP_POPULAR_TOPICS = [
   "Cancel booking",
   "Refund status",
@@ -11,6 +14,15 @@ const HELP_POPULAR_TOPICS = [
 ];
 const Navbar = () => {
   const [activeTopic, setActiveTopic] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const profileBtnRef = useRef(null);
+  const {
+    isLoggedIn,
+    profile: userProfile,
+    user,
+    loading: authLoading,
+  } = useAuth();
+  const router = useRouter();
   return (
     <>
       {" "}
@@ -35,7 +47,12 @@ const Navbar = () => {
         {/* NAVBAR */}
         <div className={styles.navContainer}>
           <div className={styles.navbar}>
-            <img src="/Logo.svg" alt="Logo" />
+            <img
+              style={{ cursor: "pointer" }}
+              onClick={() => router.push("/")}
+              src="/Logo.svg"
+              alt="Logo"
+            />
 
             <div className={styles.navRight}>
               <button
@@ -44,7 +61,34 @@ const Navbar = () => {
                 Download the App
               </button>
 
-              <button className={styles.signInBtn}>Sign In</button>
+              {!isLoggedIn ? (
+                <button
+                  className={`${styles.signInBtn} ${styles.downloadBtnMobile}`}
+                  onClick={() => router.push("/?openLogin=true")}
+                >
+                  Sign In
+                </button>
+              ) : (
+                <>
+                  <button
+                    ref={profileBtnRef}
+                    onClick={() => setShowProfileModal(true)}
+                    className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile} ${styles.logggedInBtnSidebar}`}
+                    type="button"
+                  >
+                    Hi, {userProfile?.display_name || "User"}
+                  </button>
+
+                  {showProfileModal && (
+                    <ProfileModal
+                      anchorRef={profileBtnRef}
+                      onClose={() => setShowProfileModal(false)}
+                    />
+                  )}
+                </>
+              )}
+
+              {/* <button className={styles.signInBtn}>Sign In</button> */}
 
               <button className={styles.hamBurger}>
                 <img src="/icons/hamBurger.png" alt="menu" />

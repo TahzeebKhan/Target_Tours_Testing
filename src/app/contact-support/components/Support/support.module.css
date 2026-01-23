@@ -10,7 +10,7 @@
 
 /* Grid Layout */
 .gridContainer {
-  max-width: 1402px;
+  max-width: 1440px;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
