@@ -207,6 +207,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
+  const [corporateLogin, setCorporateLogin] = useState(false);
 
   const { login } = useAuth();
   useEffect(() => {
@@ -317,6 +318,183 @@ export default function LoginPopup({ onNavigate, onClose }) {
     }
   };
 
+  if (corporateLogin)
+    return (
+      <div className={styles.overlay} onClick={onClose}>
+        <div
+          className={styles.mainContainer}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Left Section */}
+          <section className={styles.imageSection}>
+            {/* <Image
+            src="/images/travel-hero.webp"
+            alt="Scenic view of Ko Tapu"
+            fill
+            className={styles.heroImage}
+            priority
+          /> */}
+
+            <Swiper
+              modules={[Pagination, Autoplay]}
+              pagination={{ clickable: true }}
+              autoplay={{ delay: 5000, disableOnInteraction: false }}
+              loop
+              className={styles.logoSwiper}
+            >
+              {slides.map((_, index) => (
+                <SwiperSlide key={index} className={styles.logoSlide}>
+                  <Image
+                    src="/images/travel-hero.webp"
+                    alt="Target Tours Logo"
+                    width={87}
+                    priority
+                    unoptimized
+                    height={73}
+                    className={styles.slideImage}
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </section>
+          {/* Right Section */}
+          <section className={styles.formSection}>
+            <div className={styles.formContent}>
+              <header className={styles.header}>
+                <div className={styles.logoContainer}>
+                  <Image
+                    src="/images/tour-logo.svg"
+                    alt="Target Tours Logo"
+                    width={87}
+                    height={73}
+                    className={styles.logo}
+                  />
+                </div>
+
+                <div className={styles.titleWrapper}>
+                  <h1 className={styles.title}>Welcome back</h1>
+                  {/* <p className={styles.subtitle}>
+                    New here?{" "}
+                    <span
+                      className={styles.linkText}
+                      onClick={() => onNavigate("signup")}
+                    >
+                      Create an account
+                    </span>
+                  </p>
+                  <p className={styles.subtitle}>
+                    Corporate Employee?{" "}
+                    <span
+                      className={styles.linkText}
+                      onClick={() => setCorporateLogin(true)}
+                    >
+                      Sign In Here
+                    </span>
+                  </p> */}
+                </div>
+              </header>
+
+              <form className={styles.form} onSubmit={handleLogin}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>
+                    User ID
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="adfet465"
+                    className={`${styles.input} ${
+                      emailError ? styles.error : ""
+                    }`}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    // required
+                  />
+
+                  {emailError && (
+                    <p style={{ color: "red", fontSize: "12px" }}>
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Password</label>
+                  <input
+                    type="password"
+                    className={`${styles.input} ${
+                      passwordError ? styles.error : ""
+                    }`}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {passwordError && (
+                    <p style={{ color: "red", fontSize: "12px" }}>
+                      {passwordError}
+                    </p>
+                  )}
+                </div>
+
+                {error && (
+                  <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
+                )}
+
+                <div className={styles.formOptions}>
+                  <label className={styles.checkboxContainer}>
+                    <input type="checkbox" className={styles.checkboxInput} />
+                    <span className={styles.customCheckbox}></span>
+                    <span className={styles.checkboxLabel}>Remember me?</span>
+                  </label>
+                  <span className={styles.forgotPassword}>
+                    Forgot password?
+                  </span>
+                </div>
+
+                <button
+                  type="submit"
+                  className={styles.loginButton}
+                  disabled={loading}
+                >
+                  {loading ? "LOGGING IN..." : "LOGIN"}
+                </button>
+              </form>
+
+              {/* <div className={styles.divider}>
+                <span className={styles.dividerText}>Or sign in with</span>
+              </div>
+
+              <div className={styles.socialButtons}>
+                <button className={styles.socialButton}>
+                  <Image
+                    src="/icons/google-icon.svg"
+                    alt="Google"
+                    width={24}
+                    height={24}
+                  />
+                  SIGN IN WITH GOOGLE
+                </button>
+
+                <button className={styles.socialButtonFacebook}>
+                  <Image
+                    src="/icons/facebook-icon.svg"
+                    alt="Facebook"
+                    width={24}
+                    height={24}
+                  />
+                  SIGN IN WITH FACEBOOK
+                </button>
+              </div> */}
+
+              <footer className={styles.footer}>
+                <p className={styles.copyright}>
+                  Copyrights ©2023 Target tours. Build by Webninjaz.
+                </p>
+              </footer>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -378,6 +556,15 @@ export default function LoginPopup({ onNavigate, onClose }) {
                     onClick={() => onNavigate("signup")}
                   >
                     Create an account
+                  </span>
+                </p>
+                <p className={styles.subtitle}>
+                  Corporate Employee?{" "}
+                  <span
+                    className={styles.linkText}
+                    onClick={() => setCorporateLogin(true)}
+                  >
+                    Sign In Here
                   </span>
                 </p>
               </div>

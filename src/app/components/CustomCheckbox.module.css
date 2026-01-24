@@ -60,3 +60,7 @@
   font-weight: 500;
   white-space: nowrap;
 }
+
+.itemsStart{
+  align-items: flex-start;
+}

@@ -4,7 +4,8 @@
   padding: 16px;
   font-family: var(--font-inter);
   /* height: 100vh; */
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Header */

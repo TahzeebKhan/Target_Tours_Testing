@@ -137,7 +137,7 @@ const SideBar = () => {
                   setActiveMenu("trip");
                 }}
               >
-                <span>Trips</span>
+                <span>Orders And Bookings</span>
                 <ChevronDown size={16} />
               </li>
               <AnimatePresence>
@@ -278,7 +278,7 @@ const SideBar = () => {
                   setActiveMenu("trip");
                 }}
               >
-                <span>My Trips</span>
+                <span>Orders And Bookings</span>
                 <span
                   className={`${styles.ChevronDownIcon} ${openTrips ? styles.activeChevron : ""}`}
                 >

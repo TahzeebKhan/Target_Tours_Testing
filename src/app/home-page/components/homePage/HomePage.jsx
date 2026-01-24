@@ -30,8 +30,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 import CustomLoaderHomePage from "@/app/components/CustomLoaderHomePage";
-
-const HomePage = ({ onReady, setIsMultiTripMobile }) => {
+import CustomItinerary from "./customIternaryComponents/CustomItinerary";
+import MobileItinerary from "./customIternaryComponents/MobileItinerary";
+const sampleHotel = {
+  title: "SERENE HAVEN INN, TORONTO",
+  images: ["/images/hotel-placeholder.jpg"],
+};
+const HomePage = ({
+  itineraryType,
+  setIternaryType,
+  itineraryOpen,
+  setItineraryOpen,
+  onReady,
+  setIsMultiTripMobile,
+}) => {
   const [directOnly, setDirectOnly] = useState(true);
   const [tripType, setTripType] = useState("round");
   const [bookingType, setBookingType] = useState("flight");
@@ -200,6 +212,18 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
   const [activeSuggestion, setActiveSuggestion] = useState(null);
   const multiInputRefs = useRef([]);
   const multiSuggestionRefs = useRef([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      const mobile = window.innerWidth <= 895;
+      setIsMobile(mobile);
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const getFilteredSuggestions = (query) => {
     if (!query) return recentSearches;
@@ -728,15 +752,29 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
     if (bookingType !== "flight") setIsMultiTripMobile(false);
   }, [bookingType]);
 
+  // personalize handler
+
+  const handlePersonalize = (e) => {
+    // onPersonalize?.(e);
+
+    if (isMobile) {
+      setItineraryOpen(false);
+      setMobileItineraryOpen(true);
+    } else {
+      setMobileItineraryOpen(false);
+      setItineraryOpen(true);
+    }
+  };
+
   return (
     <>
-      <div
+      {/* <div
         className={`${styles.customLoaderContainer} ${
           !showLoader ? styles.loaderClose : styles.loaderOpen
         }`}
       >
         <CustomLoaderHomePage />
-      </div>
+      </div> */}
 
       <section className="relative w-full h-[100vh]">
         <div
@@ -2023,6 +2061,28 @@ const HomePage = ({ onReady, setIsMultiTripMobile }) => {
           />
         )}
       </section>
+
+      {isMobile ? (
+        <MobileItinerary
+          type={itineraryType}
+          isOpen={itineraryOpen}
+          hotel={sampleHotel}
+          onClose={() => {
+            setItineraryOpen(false);
+            setIternaryType(null);
+          }}
+        />
+      ) : (
+        <CustomItinerary
+          type={itineraryType}
+          isOpen={itineraryOpen}
+          hotel={sampleHotel}
+          onClose={() => {
+            setItineraryOpen(false);
+            setIternaryType(null);
+          }}
+        />
+      )}
     </>
   );
 };
