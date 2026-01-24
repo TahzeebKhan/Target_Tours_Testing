@@ -122,6 +122,7 @@
 }
 
 .signInBtn {
+  height: 37px;
   padding: 7px 16px;
   background-color: #000033;
   color: #ffffff;

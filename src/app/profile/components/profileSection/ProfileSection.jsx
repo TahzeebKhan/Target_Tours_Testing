@@ -186,6 +186,18 @@ const ProfileSection = () => {
       ],
     },
   ]);
+
+  const corporateMobileFields = [
+    {
+      label: "Hotel Budget for Each Booking",
+      value: profile?.hotel_budget || "₹ 0",
+    },
+    {
+      label: "Flight Budget for Each Booking",
+      value: profile?.flight_budget || "₹ 0",
+    },
+  ];
+
   const mapApiToFields = (data) => [
     { label: "Full Name", value: data.full_name || "", isEditing: false },
 
@@ -261,6 +273,11 @@ const ProfileSection = () => {
       ],
     },
   ];
+
+  const [corporateFields, setCorporateFields] = useState({
+    hotelBudget: "",
+    flightBudget: "",
+  });
 
   const buildPayload = () => {
     const get = (label) =>
@@ -414,6 +431,14 @@ const ProfileSection = () => {
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${photo}`;
   };
   // const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
+  const handleCorporateChange = (key, value) => {
+    setCorporateFields((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const isCorporate = false;
   return (
     <>
       <section className={styles.container}>
@@ -576,6 +601,48 @@ const ProfileSection = () => {
               </div>
             </div>
           ))}
+          {isCorporate && (
+            <>
+              <div className={styles.fieldWrapper}>
+                <div className={styles.fieldHeader}>
+                  <label className={styles.label}>
+                    Hotel Budget for Each Booking
+                  </label>
+                </div>
+                <div className={styles.inputContainer}>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={corporateFields.hotelBudget}
+                    placeholder="Enter hotel budget"
+                    onChange={(e) =>
+                      handleCorporateChange("hotelBudget", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.fieldWrapper}>
+                <div className={styles.fieldHeader}>
+                  <label className={styles.label}>
+                    Flight Budget for Each Booking
+                  </label>
+                </div>
+                <div className={styles.inputContainer}>
+                  {" "}
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={corporateFields.flightBudget}
+                    placeholder="Enter flight budget"
+                    onChange={(e) =>
+                      handleCorporateChange("flightBudget", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 

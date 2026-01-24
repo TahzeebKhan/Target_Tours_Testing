@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import styles from "./Reservations.module.css";
 import ActiveReservations from "@/app/profile_components/ActiveReservations";
+import CorporateReservationCard from "./CorporateReservationCard";
 
 const reservationData = [
   {
@@ -22,6 +23,35 @@ const reservationData = [
     checkOut: "24 Mar 2025",
     guests: "4 Adults",
     status: "PENDING",
+    image: "/images/hotel-thumbnail.jpg",
+  },
+];
+
+const corporateReservationData = [
+  {
+    id: "173826",
+    bkid: "#BK001235",
+    bkDate: "10 Jan 2026",
+    amt: "₹30,000",
+    location: "Colaba, Mumbai",
+    hotel: "Golden Tulip Hotel",
+    checkIn: "12 Mar 2021",
+    checkOut: "24 Mar 2025",
+    guests: "4 Adults",
+    status: "CONFIRMED",
+    image: "/images/hotel-thumbnail.jpg",
+  },
+  {
+    id: "173829",
+    bkid: "#BK001235",
+    bkDate: "10 Jan 2026",
+    amt: "₹30,000",
+    location: "Colaba, Mumbai",
+    hotel: "Golden Tulip Hotel",
+    checkIn: "12 Mar 2021",
+    checkOut: "24 Mar 2025",
+    guests: "4 Adults",
+    status: "CONFIRMED",
     image: "/images/hotel-thumbnail.jpg",
   },
 ];
@@ -102,6 +132,7 @@ const tabs = [
   "TRAVEL INSURANCE",
 ];
 
+const isCorporate = false;
 export default function Reservations({
   onCheckDetails,
   activeTab,
@@ -132,6 +163,10 @@ export default function Reservations({
             </button>
           ))}
         </nav>
+
+        {isCorporate && (
+          <CorporateReservationCard data={corporateReservationData} />
+        )}
 
         {activeTab === "ALL" && (
           <>

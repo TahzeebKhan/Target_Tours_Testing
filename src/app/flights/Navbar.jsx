@@ -51,7 +51,7 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
                 {!isLoggedIn ? (
                   <button
                     className={styles.signInBtn}
-                    onClick={() => setShowLogin(true)}
+                    onClick={() => router.push("/?openLogin=true")}
                   >
                     Sign In
                   </button>

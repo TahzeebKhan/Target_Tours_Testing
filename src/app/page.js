@@ -11,15 +11,40 @@ import FeatureSection from "./home-page/components/featureSection/FeatureSection
 import Footer from "./home-page/components/footer/Footer";
 import PrivateGroup from "./home-page/components/privateGroup/PrivateGroup";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 export default function Home() {
   const [homeReady, setHomeReady] = useState(false);
   const [isMultiTripMobile, setIsMultiTripMobile] = useState(false);
+  const [itineraryType, setItineraryType] = useState(null);
+
+  const [itineraryOpen, setItineraryOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 895px)");
+
+    const handleChange = (e) => {
+      setIsMobileView(e.matches);
+    };
+
+    // initial check
+    setIsMobileView(mediaQuery.matches);
+
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   return (
     <>
       <Suspense fallback={null}>
         <HomePage
+          itineraryType={itineraryType}
+          itineraryOpen={itineraryOpen}
+          setItineraryOpen={setItineraryOpen}
+          // mobileItineraryOpen={mobileItineraryOpen}
+          // setMobileItineraryOpen={setMobileItineraryOpen}
+          setIternaryType={setItineraryType}
           setIsMultiTripMobile={setIsMultiTripMobile}
           onReady={() => setHomeReady(true)}
         />
@@ -31,7 +56,30 @@ export default function Home() {
           <TopToFlights />
 
           <TargetTours />
-          <PrivateGroup />
+          {isMobileView ? (
+            <PrivateGroup
+              onGroupQuote={() => {
+                setItineraryType("group");
+                setItineraryOpen(true);
+              }}
+              onPrivateQuote={() => {
+                setItineraryType("private");
+                setItineraryOpen(true);
+              }}
+            />
+          ) : (
+            <GroupPrivateTrips
+              onGroupQuote={() => {
+                setItineraryType("group");
+                setItineraryOpen(true);
+              }}
+              onPrivateQuote={() => {
+                setItineraryType("private");
+                setItineraryOpen(true);
+              }}
+            />
+          )}
+
           <LimitedTimeOffer />
           <ExploreStays />
           <FeatureSection />

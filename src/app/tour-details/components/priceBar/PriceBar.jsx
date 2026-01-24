@@ -72,10 +72,10 @@ const handlePersonalize = (e) => {
           <button className={styles.iconBtn} onClick={onCall}>
             <img src="/icons/blankPhone.svg" alt="Call" />
           </button>
-
+{/* 
           <button className={styles.personalizeBtn} onClick={handlePersonalize}>
             PERSONALIZE
-          </button>
+          </button> */}
 
           <button className={styles.bookNowBtn} onClick={handleBookNow}>
             BOOK NOW
@@ -98,9 +98,9 @@ const handlePersonalize = (e) => {
             <img src="/icons/blankPhone.svg" alt="Call" />
           </button>
 
-          <button className={styles.personalizeBtn} onClick={handlePersonalize}>
+          {/* <button className={styles.personalizeBtn} onClick={handlePersonalize}>
             PERSONALIZE
-          </button>
+          </button> */}
 
           <button className={styles.bookNowBtn} onClick={handleBookNow}>
             BOOK NOW
