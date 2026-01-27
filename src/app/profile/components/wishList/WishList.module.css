@@ -76,7 +76,7 @@
     display: none;
   }
   .startBtn {
-    text-transform: capitalize;
+    /* text-transform: capitalize; */
   }
   .contentWrapper {
     gap: 12px;

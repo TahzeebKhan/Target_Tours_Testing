@@ -6,6 +6,13 @@
 .navbarWrapper {
   margin-bottom: 73px;
 }
+.sideBarDesktop{
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  max-height: calc(100vh - 147px);
+}
 .childrenWrapper {
   max-width: 1280px;
   width: 100%;

@@ -8,10 +8,17 @@ import { useProfile } from "../../context/ProfileContext";
 import FlightBookingDetails from "./FlightBookingDetails";
 import PackageDetails from "./PackageDetails";
 import InsurenceDetails from "./InsurenceDetails";
+import ModifyBookingModal from "./ModifyBookingModal";
+import CancelBookingModal from "./CancelBookingModal";
 
 const IndividualProperty = ({ activeTab, setActiveTab }) => {
   const [isActive, setIsActive] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
+  const openCancelModal = () => setShowCancelModal(true);
+  const closeCancelModal = () => setShowCancelModal(false);
+
+  const [showModifyModal, setShowModifyModal] = useState(false);
   const amenities = [
     { icon: "/icons/hot-tub.svg", label: "Hot tub" },
     { icon: "/icons/city-view.svg", label: "City view" },
@@ -36,9 +43,13 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
       setMobileTitle?.("Active Reservations");
     };
   }, []);
+  const isCorporate = false;
+
+  const openModifyModal = () => setShowModifyModal(true);
+  const closeModifyModal = () => setShowModifyModal(false);
+
   return (
     <>
-      
       {activeTab === "HOTEL BOOKING" && (
         <div className={styles.container}>
           <div className={styles.innerContainer}>
@@ -231,8 +242,14 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
 
             {/* Footer Actions */}
             <footer className={styles.footerActions}>
-              <button className={styles.btnSecondary}>CANCEL BOOKING</button>
-              <button className={styles.btnPrimary}>DOWNLOAD INVOICE</button>
+              <button onClick={openCancelModal} className={styles.btnSecondary}>CANCEL BOOKING</button>
+              {isCorporate ? (
+                <button onClick={openModifyModal} className={styles.btnPrimary}>
+                  MODIFY BOOKING
+                </button>
+              ) : (
+                <button className={styles.btnPrimary}>DOWNLOAD INVOICE</button>
+              )}
             </footer>
           </div>
         </div>
@@ -247,6 +264,24 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
       <div className={styles.mobileView}>
         <BookingDetails activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
+
+      {showModifyModal && (
+        <ModifyBookingModal
+          bookingId="BK001235"
+          checkIn="20 Jan 2026"
+          checkOut="22 Jan 2026"
+          onClose={closeModifyModal}
+        />
+      )}
+      {showCancelModal && (
+        <CancelBookingModal
+          hotelName={`Hotel Arts Barcelona`}
+          // airline="Air India"
+          // route="DEL to BOM"
+          bookingId="BK001234"
+          onClose={closeCancelModal}
+        />
+      )}
     </>
   );
 };

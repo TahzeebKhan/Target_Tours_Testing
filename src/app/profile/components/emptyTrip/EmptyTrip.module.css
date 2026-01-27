@@ -114,7 +114,7 @@
     padding: 0;
   }
   .searchButton {
-    text-transform: capitalize;
+    /* text-transform: capitalize; */
     width: 100%;
     max-width: 350px;
   }

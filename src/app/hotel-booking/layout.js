@@ -5,6 +5,7 @@ import styles from "./HotelBooking.module.css";
 import BookingSummary from "./components/review/components/BookingSummary";
 import { RoomProvider } from "../context/RoomContext";
 import { useRouter } from "next/navigation";
+import CorporateSidebarSummary from "./CorporateSidebarSummary";
 
 const layout = ({ children }) => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const layout = ({ children }) => {
   const [sidebarOpen, setSideBarOpen] = useState(false);
   const removeRoom = (id) => {
     setRoomList((prev) =>
-      prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room))
+      prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room)),
     );
   };
   const increaseRoom = (id) => {
@@ -39,8 +40,8 @@ const layout = ({ children }) => {
       prev.map((room) =>
         room.id === id && room.quantity < room.maxQuantity
           ? { ...room, quantity: room.quantity + 1 }
-          : room
-      )
+          : room,
+      ),
     );
   };
   const toggleSidebar = () => {
@@ -55,14 +56,14 @@ const layout = ({ children }) => {
     setRoomList((prev) =>
       prev
         .map((r) => (r.id === id ? { ...r, quantity: r.quantity - 1 } : r))
-        .filter((r) => r.quantity > 0)
+        .filter((r) => r.quantity > 0),
     );
   };
   const totalAmount = roomList.reduce(
     (sum, room) => sum + room.pricePerNight * room.quantity * room.nights,
-    0
+    0,
   );
-
+  const isCorporate = false;
   return (
     <RoomProvider value={{ roomList, increaseRoom, decreaseRoom, removeRoom }}>
       <section className={styles.contentWrapper}>
@@ -73,6 +74,7 @@ const layout = ({ children }) => {
           {children}
           <div className={styles.sideBarDesktop}>
             <BookingSummary roomList={roomList} onRemove={removeRoom} />
+            {isCorporate && <CorporateSidebarSummary />}
           </div>
         </div>
       </section>

@@ -70,14 +70,14 @@
   font-weight: 500;
   color: rgba(31, 34, 38, 1);
   white-space: nowrap;
-  line-height: 100%;
+  line-height: 16px;
   letter-spacing: 0%;
 }
 
 .infoValue {
   font-weight: 400;
   color: rgba(101, 111, 129, 1);
-  line-height: 100%;
+ line-height: 16px;
   letter-spacing: 0%;
 }
 

@@ -34,9 +34,13 @@
 
 .sidebarSticky {
   position: sticky;
-  max-height: 594px;
+  max-height: 690px;
   top: 202px; /* navbar (96px) + stepper (~90px) */
+  overflow-y: auto;
   align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .mobileView {
   display: none;

@@ -1,0 +1,178 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: #000000ad;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: #ffffff;
+  max-width: 584px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h2 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.bookingInfo {
+  padding: 12px;
+  gap: 12px;
+  display: flex;
+  border: 1px solid #e4e6e8;
+  justify-content: flex-start;
+}
+
+.label {
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 18px;
+}
+
+.subText {
+  font-family: Inter;
+  font-size: 14px;
+  color: #4a5565;
+}
+
+.notice {
+  background: #fefce8;
+  margin: 0 32px;
+  padding: 14px;
+  /* border-left: 4px solid #f59e0b; */
+}
+
+.notice strong {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 18px;
+  color: #7c2d12;
+}
+
+.notice p {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #9a3412;
+}
+
+.actions {
+  padding: 16px 32px;
+  display: flex;
+  background-color: #f9f9f9;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.cancel {
+  border: 1px solid #e4e6e8;
+  height: 41px;
+  background: #ffffff;
+  width: 100%;
+  cursor: pointer;
+}
+
+.confirm {
+  background: #000033;
+  color: #fff;
+  height: 41px;
+  width: 100%;
+  cursor: pointer;
+}
+/* Reset button styles inside modal */
+.header button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+}
+
+/* Form wrapper spacing */
+.form {
+  padding: 16px 32px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Uppercase confirmation text */
+.form .label {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 24px;
+  margin-bottom: 5px;
+  letter-spacing: -0.15px;
+  color: #000033;
+  text-transform: uppercase;
+}
+
+/* Booking info text spacing */
+.bookingInfo p {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #6a7282;
+}
+
+/* Actions buttons typography */
+.cancel,
+.confirm {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Hover states (important for UX polish) */
+.cancel:hover {
+  background: #f9fafb;
+}
+
+.confirm:hover {
+  background: #00004d;
+}
+.iconContainer {
+  width: 45px;
+  height: 45px;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.iconContainer img {
+  height: 22.5px;
+  width: 22.5px;
+}
+/* Mobile fallback (optional but recommended) */
+@media (max-width: 820px) {
+  .modal {
+    width: calc(100% - 32px);
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

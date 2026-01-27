@@ -45,6 +45,7 @@ export default function ActiveReservations({
   const { setMobileTitle } = useProfile();
   useEffect(() => {
     setMobileTitle?.("Active Reservations");
+    return () => setMobileTitle?.("");
   }, []);
   return (
     <div className={styles.container}>
