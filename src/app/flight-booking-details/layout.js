@@ -9,8 +9,10 @@ import {
   useFlightBooking,
 } from "./FlightBookingContext";
 import PassengerDetailsMobile from "./mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
+import CorporateSidebarSummary from "./CorporateSidebarSummary";
 
 export default function FlightBookingDetailsLayout({ children }) {
+  const isCorporate = false;
   return (
     <FlightBookingProvider>
       <div className={styles.layoutWrapper}>
@@ -22,6 +24,7 @@ export default function FlightBookingDetailsLayout({ children }) {
           <aside className={styles.sidebar}>
             <div className={styles.sidebarSticky}>
               <SidebarPriceSummaryCard />
+              {isCorporate && <CorporateSidebarSummary />}
             </div>
           </aside>
         </main>
