@@ -768,13 +768,13 @@ const HomePage = ({
 
   return (
     <>
-      {/* <div
+      <div
         className={`${styles.customLoaderContainer} ${
           !showLoader ? styles.loaderClose : styles.loaderOpen
         }`}
       >
         <CustomLoaderHomePage />
-      </div> */}
+      </div>
 
       <section className="relative w-full h-[100vh]">
         <div
