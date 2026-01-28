@@ -1659,12 +1659,23 @@ const HomePage = ({
                           </div>
                         )}
                         {bookingType === "holiday" && fromSuggestionsOpen && (
-                          <SuggestionBox
-                            boxRef={fromSuggestionRef}
-                            heading="RECENT SEARCH"
-                            suggestions={getFilteredSuggestions(from)}
-                            onSelect={(s) => selectSuggestion(s, "from")}
-                          />
+                          <>
+                            {" "}
+                            {/* <SuggestionBox
+                              boxRef={fromSuggestionRef}
+                              heading="RECENT SEARCH"
+                              suggestions={getFilteredSuggestions(from)}
+                              onSelect={(s) => selectSuggestion(s, "from")}
+                            /> */}
+                            <div ref={fromSuggestionRef}>
+                              <RecentSearch
+                                onSelect={(city) => {
+                                  setFrom(city); // ✅ input value set
+                                  setToSuggestionsOpen(false); // ✅ dropdown close
+                                }}
+                              />
+                            </div>
+                          </>
                         )}
                       </div>
                     )}
@@ -1796,12 +1807,21 @@ const HomePage = ({
                           />
 
                           {toSuggestionsOpen && (
-                            <SuggestionBox
-                              boxRef={toSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(to)}
-                              onSelect={(s) => selectSuggestion(s, "to")}
-                            />
+
+                             <div ref={toSuggestionRef}>
+                              <RecentSearch
+                                onSelect={(city) => {
+                                  setTo(city); // ✅ input value set
+                                  setToSuggestionsOpen(false); // ✅ dropdown close
+                                }}
+                              />
+                            </div>
+                            // <SuggestionBox
+                            //   boxRef={toSuggestionRef}
+                            //   heading="RECENT SEARCH"
+                            //   suggestions={getFilteredSuggestions(to)}
+                            //   onSelect={(s) => selectSuggestion(s, "to")}
+                            // />
                           )}
                         </>
                       ) : (
