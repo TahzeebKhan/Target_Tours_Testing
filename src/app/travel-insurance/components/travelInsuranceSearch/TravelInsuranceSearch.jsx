@@ -142,29 +142,30 @@ const TravelInsuranceSearch = () => {
   const destinationSuggestions = [
     {
       label: "MUMBAI, INDIA",
-      detail: "Chhatrapati Shivaji Maharaj International Airport",
-      code: "BOM",
+      // detail: "Chhatrapati Shivaji Maharaj International Airport",
+      // code: "BOM",
       value: "Mumbai",
     },
     {
       label: "PUNE, INDIA",
-      detail: "Pune International Airport",
-      code: "PNQ",
+      // detail: "Pune International Airport",
+      // code: "PNQ",
       value: "Pune",
     },
     {
       label: "DELHI, INDIA",
-      detail: "Indira Gandhi International Airport",
-      code: "DEL",
+      // detail: "Indira Gandhi International Airport",
+      // code: "DEL",
       value: "Delhi",
     },
-    {
-      label: "INTERNATIONAL",
-      detail: "Travel outside India",
-      code: "INTL",
-      value: "International",
-    },
+   
   ];
+
+  const handleDestinationSelect = (city) => {
+  setTravellerDestination(city); // city is already string
+  setDestinationOpen(false);
+};
+
   const destinationRef = useRef(null);
   const router = useRouter();
   return (

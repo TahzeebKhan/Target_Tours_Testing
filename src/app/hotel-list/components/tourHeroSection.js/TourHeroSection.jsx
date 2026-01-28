@@ -11,12 +11,15 @@ import { useSearchParams } from "next/navigation";
 import HotelDateCalendarModal from "@/app/components/hotelCalendar/HotelDateCalendarModal";
 import HotelCalendarMonths from "@/app/components/hotelCalendar/HotelCalendarMonths";
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
+import RecentSearch from "@/app/components/recentSearch/RecentSearch";
 
 const TourHeroSection = () => {
   const searchParams = useSearchParams();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState(searchParams.get("city") || "");
-  const [departureDate, setDepartureDate] = useState(searchParams.get("checkIn") || "");
+  const [departureDate, setDepartureDate] = useState(
+    searchParams.get("checkIn") || "",
+  );
   const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -24,12 +27,11 @@ const TourHeroSection = () => {
   const hotelCalendarRef = useRef(null);
   const [showHotelCalendar, setShowHotelCalendar] = useState(false);
   const [hotelStartDate, setHotelStartDate] = useState(
-    searchParams.get("checkIn") || ""
+    searchParams.get("checkIn") || "",
   );
   const [hotelEndDate, setHotelEndDate] = useState(
-    searchParams.get("checkOut") || ""
+    searchParams.get("checkOut") || "",
   );
-
 
   // Ye lines add karein:
   const [travellerOpen, setTravellerOpen] = useState(false);
@@ -42,14 +44,14 @@ const TourHeroSection = () => {
   const [travelClass, setTravelClass] = useState("Economy");
 
   // Ye line bhi add karein:
-  const totalPassengers = passengers.adult + passengers.child + passengers.infant;
+  const totalPassengers =
+    passengers.adult + passengers.child + passengers.infant;
 
   // Truncate function:
   const truncate = (str, maxLength) => {
     if (str.length <= maxLength) return str;
     return str.substring(0, maxLength - 3) + "...";
   };
-
 
   const fromWrapperRef = useRef(null);
   const fromSuggestionRef = useRef(null);
@@ -84,10 +86,11 @@ const TourHeroSection = () => {
     { label: "Asia Tour", detail: "Category", code: "ASIA" },
   ];
 
-  const handleFromSelect = (s) => {
-    setFrom(s.label);
+  const handleFromSelect = (city) => {
+    setFrom(city); // ✅ city is already a string
     setShowFromSuggestion(false);
   };
+
   const handleToSelect = (s) => {
     setTo(s.label);
     setShowToSuggestion(false);
@@ -102,10 +105,7 @@ const TourHeroSection = () => {
         setShowFromSuggestion(false);
       }
 
-      if (
-        toWrapperRef.current &&
-        !toWrapperRef.current.contains(e.target)
-      ) {
+      if (toWrapperRef.current && !toWrapperRef.current.contains(e.target)) {
         setShowToSuggestion(false);
       }
     };
@@ -131,7 +131,6 @@ const TourHeroSection = () => {
       input.click();
     }
   };
-
 
   const handleHotelDateClick = (date) => {
     if (!hotelStartDate || hotelEndDate) {
@@ -162,7 +161,6 @@ const TourHeroSection = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showHotelCalendar]);
 
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -175,7 +173,6 @@ const TourHeroSection = () => {
 
     return `${day}-${month}-${year}`;
   };
-
 
   const handleFieldClick = (e) => {
     const target = e.currentTarget;
@@ -227,16 +224,11 @@ const TourHeroSection = () => {
               />
 
               {showFromSuggestion && (
-                <SuggestionBox
-                  boxRef={fromSuggestionRef}
-                  heading="RECENT SEARCH"
-                  suggestions={fromSuggestions}
-                  onSelect={handleFromSelect}
-                />
+                <div ref={fromSuggestionRef}>
+                  <RecentSearch onSelect={handleFromSelect} />
+                </div>
               )}
             </div>
-
-
 
             {/* Slot 2: Departure Date */}
             <div
@@ -249,7 +241,7 @@ const TourHeroSection = () => {
               {showHotelCalendar && (
                 <HotelDateCalendarModal
                   mode="roundtrip"
-                  onModeChange={() => { }}
+                  onModeChange={() => {}}
                   onClose={() => setShowHotelCalendar(false)}
                 >
                   <div ref={hotelCalendarRef}>
@@ -308,7 +300,6 @@ const TourHeroSection = () => {
               </div>
             </div>
 
-
             <div
               className={`${styles.fromBtn} ${styles.fromBtn2} ${styles.pos4}`}
               onClick={(e) => {
@@ -319,7 +310,10 @@ const TourHeroSection = () => {
               <div className={styles.lable}>GUESTS & ROOMS</div>
               <div className={styles.iconCont}>
                 <div className={styles.contant}>
-                  {truncate(`${totalPassengers} Adult${totalPassengers > 1 ? 's' : ''}, ${totalPassengers} Room${totalPassengers > 1 ? 's' : ''}`, 20)}
+                  {truncate(
+                    `${totalPassengers} Adult${totalPassengers > 1 ? "s" : ""}, ${totalPassengers} Room${totalPassengers > 1 ? "s" : ""}`,
+                    20,
+                  )}
                 </div>
 
                 <ChevronDown
@@ -345,7 +339,6 @@ const TourHeroSection = () => {
             </div>
           </div>
         </div>
-
       </div>
       <div className={styles.textcontainer}>
         <p className={styles.para}>Showing Stays in</p>
