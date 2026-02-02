@@ -1,142 +1,137 @@
 .innerCarouselContent {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    /* margin: 24px 0; */
-    padding: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* margin: 24px 0; */
+  padding: 24px 24px;
 }
 
 .innerCarouselContentTitle {
-    color: #7F7F7F;
-    font-family: Inter;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-transform: uppercase;
+  color: #7f7f7f;
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-transform: uppercase;
 }
-.swiperSlide{
-    width: 294px !important;
+.swiperSlide {
+  width: 294px !important;
 }
 .cardItem {
-    max-width: 294px;
-    width: 100%;
-    background-color: #FFFFFF;
-    border: 1px solid #E4E6E8
+  max-width: 374px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e4e6e8;
 }
 
 .perNight {
-    font-weight: 600;
-    font-style: SemiBold;
-    font-size: 14px;
-    line-height: 1;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    text-transform: uppercase;
-
+  font-weight: 600;
+  font-style: SemiBold;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
 }
 
 .innerCarouselContentSubtitle {
-    color: var(--Black, #000);
-    font-family: "Antic Didone";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    letter-spacing: -0.56px;
+  color: var(--Black, #000);
+  font-family: "Antic Didone";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.56px;
 }
 
 .innerCarouselContentPrice {
-    display: flex;
-    justify-content: space-between;
-    /* width: 100%; */
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  /* width: 100%; */
+  align-items: center;
 }
 
 .innerCarouselContentPriceValue {
-    color: var(--ROYAL-BLUE, #003);
-    font-family: Inter;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    text-transform: uppercase;
-    display: flex;
-    align-items: end;
-    gap: 5px;
-    /* display: flex;
+  color: var(--ROYAL-BLUE, #003);
+  font-family: Inter;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-transform: uppercase;
+  display: flex;
+  align-items: end;
+  gap: 5px;
+  /* display: flex;
 justify-content: space-between; */
-
 }
 
 .innerCarouselContentPriceValuePrice {
-    color: var(--ROYAL-BLUE, #003);
-    font-family: Inter;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    text-transform: uppercase;
-
+  color: var(--ROYAL-BLUE, #003);
+  font-family: Inter;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-transform: uppercase;
 }
 
 .innerCarouselContentPriceRating {
-    display: flex;
-    align-items: center;
-    gap: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .ratting {
-    font-family: Inter;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    text-transform: capitalize;
-    color: black;
-
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: black;
 }
 
 .user {
-    font-family: Inter;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    text-transform: capitalize;
-    color: #7A7A7A;
-    opacity: 0.6;
-
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #7a7a7a;
+  opacity: 0.6;
 }
 
 .btnContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 60px;
 }
 
 .btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #212121;
-    border-radius: 100%;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #212121;
+  border-radius: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-.btn:hover{
-        background: #000000;
-        color: white;
-    }
-    .btn img {
+.btn:hover {
+  background: #000000;
+  color: white;
+}
+.btn img {
   filter: invert(0);
   transition: filter 0.2s ease;
 }
@@ -146,92 +141,85 @@ justify-content: space-between; */
 }
 
 @media (max-width: 1540px) {
-    .swiperContainer {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-
+  .swiperContainer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 @media (max-width: 1440px) {
-    .innerCarouselContentTitle {
-        font-size: 14px;
-    }
+  .innerCarouselContentTitle {
+    font-size: 14px;
+  }
 
-    .innerCarouselContentSubtitle {
-        font-size: 24px;
-    }
+  .innerCarouselContentSubtitle {
+    font-size: 24px;
+  }
 
-    .innerCarouselContentPriceValuePrice {
-        font-size: 16px;
-    }
+  .innerCarouselContentPriceValuePrice {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 1240px) {
-    .innerCarouselContentSubtitle {
-        font-size: 22px;
-    }
+  .innerCarouselContentSubtitle {
+    font-size: 22px;
+  }
 
-    .innerCarouselContentPriceValuePrice {
-        font-size: 14px;
-    }
+  .innerCarouselContentPriceValuePrice {
+    font-size: 14px;
+  }
 
-    .ratting {
-        font-size: 12px;
-
-    }
-
+  .ratting {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 1224px) {
-
-
 }
 
 @media (max-width: 1156px) {
-    .innerCarouselContentSubtitle {
-        font-size: 20px;
-    }
+  .innerCarouselContentSubtitle {
+    font-size: 20px;
+  }
 
-    .innerCarouselContent {
-        padding: 18px;
-    }
-
+  .innerCarouselContent {
+    padding: 18px;
+  }
 }
 
 @media (max-width: 1024px) {
-    .innerCarouselContent {
-        padding: 8px;
-    }
+  .innerCarouselContent {
+    padding: 8px;
+  }
 }
 
 @media (max-width: 768px) {
-    .innerCarouselContentTitle {
-        font-size: 16px;
-    }
+  .innerCarouselContentTitle {
+    font-size: 16px;
+  }
 
-    .innerCarouselContentSubtitle {
-        font-size: 24px;
-    }
+  .innerCarouselContentSubtitle {
+    font-size: 24px;
+  }
 
-    .user {
-        font-size: 12px;
-    }
+  .user {
+    font-size: 12px;
+  }
 
-    .innerCarouselContent {
-        padding: 24px;
-    }
+  .innerCarouselContent {
+    padding: 24px;
+  }
 
-    .nnerCarouselContentPriceValuePrice {
-        font-size: 18ox;
-    }
+  .nnerCarouselContentPriceValuePrice {
+    font-size: 18ox;
+  }
 
-    .cardItem {
-        margin-top: 32px;
-    }
+  .cardItem {
+    margin-top: 32px;
+  }
 
-    .btnContainer {
-        margin-top: 24px;
-    }
+  .btnContainer {
+    margin-top: 24px;
+  }
 }

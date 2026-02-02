@@ -1,18 +1,88 @@
+"use client";
 import React from "react";
 import styles from "./GroupPrivateTrips.module.css";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import Cookies from "js-cookie";
+
+const fetchTravelStyle = async () => {
+  const token = Cookies.get("auth_token");
+
+  const domain =
+    typeof window !== "undefined" ? window.location.host : "localhost:1337";
+
+  const headers = token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : {};
+
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/travel-style-selector?domain=${domain}`,
+    { headers },
+  );
+
+  return res.data?.data;
+};
+
+const CMS_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL; // important for images
 
 const GroupPrivateTrips = ({ onGroupQuote, onPrivateQuote }) => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["travel-style-selector"],
+    queryFn: fetchTravelStyle,
+  });
+  if (isError) {
+    console.warn("Failed to load travel style CMS");
+  }
+
+  // 🔹 FALLBACK CONTENT (existing hardcoded text)
+  const fallback = {
+    heading: "How Do You Want to Travel?",
+    description:
+      "Pick between expertly guided group trips or fully personalized private journeys designed around you.",
+    card1Title: "Group Trips",
+    card1Sub:
+      "Chill small group adventures led by experts, hanging out with fellow travelers who get you.",
+    card2Title: "Private Trips",
+    card2Sub:
+      "Custom luxury trips designed just for you, based on what you love and how you like to travel.",
+    cta: "GET QUOTE",
+    img1: "/images/GROUPTRIPS.png",
+    img2: "/images/privateTrips.png",
+  };
+
+  // 🔹 API → UI mapping with fallback
+  const content = {
+    heading: data?.heading || fallback.heading,
+    description: data?.description || fallback.description,
+
+    card1Title: data?.image_card_1_title || fallback.card1Title,
+    card1Sub: data?.image_card_1_sub_title || fallback.card1Sub,
+
+    card2Title: data?.image_card_2_title || fallback.card2Title,
+    card2Sub: data?.image_card_2_sub_title || fallback.card2Sub,
+
+    cta: data?.cta_text || fallback.cta,
+
+    img1: data?.image_card_1?.formats?.medium?.url
+      ? CMS_BASE_URL + data.image_card_1.formats.medium.url
+      : fallback.img1,
+
+    img2: data?.image_card_2?.formats?.medium?.url
+      ? CMS_BASE_URL + data.image_card_2.formats.medium.url
+      : fallback.img2,
+  };
   return (
     <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.titleContainer}>
-          <h5 className={styles.header}>How Do You Want to Travel?</h5>
-          <p className={styles.content}>
-            Pick between expertly guided group trips or fully personalized
-            private journeys designed around you.
-          </p>
+          <h5 className={styles.header}>{content.heading}</h5>
+
+          <p className={styles.content}>{content.description}</p>
+
           <button type="button" className={styles.getQuoteBtn}>
-            Get Quote{" "}
+            {content.cta}
             <svg
               width="14"
               height="9"
@@ -29,32 +99,28 @@ const GroupPrivateTrips = ({ onGroupQuote, onPrivateQuote }) => {
             </svg>
           </button>
         </div>
+
         <div className={styles.itemContainer}>
           <div className={styles.items}>
-            <img src="/images/GROUPTRIPS.png" alt="" />
-            {/* <img class={styles.gradient} src="/images/gradient.png"/> */}
+            <img src={content.img1} alt={content.card1Title} />
 
             <div className={styles.imgMainContainer}>
               <div className={styles.imgBottom}>
-                <p className={styles.imgHead}>Group Trips</p>
-                <p className={styles.imgSubHead}>
-                  Chill small group adventures led by experts, hanging out with
-                  fellow travelers who get you.
-                </p>
+                <p className={styles.imgHead}>{content.card1Title}</p>
+                <p className={styles.imgSubHead}>{content.card1Sub}</p>
+
                 <button onClick={onGroupQuote} className={styles.exploreBtn}>
-                  GET QUOTE
+                  {content.cta}
                   <svg
                     className={styles.arrow}
                     width="12"
                     height="8"
                     viewBox="0 0 12 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       fillRule="evenodd"
                       clipRule="evenodd"
-                      d="M7.27275 0.212166C7.59741 -0.0875191 8.10354 -0.067277 8.40322 0.257378L10.9878 3.05735C11.2707 3.36379 11.2707 3.83614 10.9878 4.14259L8.40323 6.94263C8.10355 7.26728 7.59742 7.28753 7.27276 6.98785C6.9481 6.68817 6.92785 6.18204 7.22754 5.85738L8.57282 4.39997L0.799999 4.39997C0.358172 4.39997 -6.11324e-07 4.0418 -6.29439e-07 3.59997C-6.47555e-07 3.15815 0.358172 2.79997 0.8 2.79997L8.5728 2.79997L7.22754 1.34263C6.92786 1.01798 6.9481 0.511851 7.27275 0.212166Z"
+                      d="M7.27275 0.212166C7.59741 -0.0875191 8.10354 -0.067277 8.40322 0.257378L10.9878 3.05735C11.2707 3.36379 11.2707 3.83614 10.9878 4.14259L8.40323 6.94263C8.10355 7.26728 7.59742 7.28753 7.27276 6.98785C6.9481 6.68817 6.92785 6.18204 7.22754 5.85738L8.57282 4.39997L0.8 4.39997C0.358172 4.39997 0 4.0418 0 3.59997C0 3.15815 0.358172 2.79997 0.8 2.79997L8.5728 2.79997L7.22754 1.34263C6.92786 1.01798 6.9481 0.511851 7.27275 0.212166Z"
                       fill="white"
                     />
                   </svg>
@@ -62,30 +128,27 @@ const GroupPrivateTrips = ({ onGroupQuote, onPrivateQuote }) => {
               </div>
             </div>
           </div>
+
           <div className={styles.items}>
-            <img src="/images/privateTrips.png" alt="" />
+            <img src={content.img2} alt={content.card2Title} />
 
             <div className={styles.imgMainContainer}>
               <div className={styles.imgBottom}>
-                <p className={styles.imgHead}>Private Trips</p>
-                <p className={styles.imgSubHead}>
-                  Custom luxury trips designed just for you, based on what you
-                  love and how you like to travel.
-                </p>
+                <p className={styles.imgHead}>{content.card2Title}</p>
+                <p className={styles.imgSubHead}>{content.card2Sub}</p>
+
                 <button onClick={onPrivateQuote} className={styles.exploreBtn}>
-                  GET QUOTE
+                  {content.cta}
                   <svg
                     className={styles.arrow}
                     width="12"
                     height="8"
                     viewBox="0 0 12 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       fillRule="evenodd"
                       clipRule="evenodd"
-                      d="M7.27275 0.212166C7.59741 -0.0875191 8.10354 -0.067277 8.40322 0.257378L10.9878 3.05735C11.2707 3.36379 11.2707 3.83614 10.9878 4.14259L8.40323 6.94263C8.10355 7.26728 7.59742 7.28753 7.27276 6.98785C6.9481 6.68817 6.92785 6.18204 7.22754 5.85738L8.57282 4.39997L0.799999 4.39997C0.358172 4.39997 -6.11324e-07 4.0418 -6.29439e-07 3.59997C-6.47555e-07 3.15815 0.358172 2.79997 0.8 2.79997L8.5728 2.79997L7.22754 1.34263C6.92786 1.01798 6.9481 0.511851 7.27275 0.212166Z"
+                      d="M7.27275 0.212166C7.59741 -0.0875191 8.10354 -0.067277 8.40322 0.257378L10.9878 3.05735C11.2707 3.36379 11.2707 3.83614 10.9878 4.14259L8.40323 6.94263C8.10355 7.26728 7.59742 7.28753 7.27276 6.98785C6.9481 6.68817 6.92785 6.18204 7.22754 5.85738L8.57282 4.39997L0.8 4.39997C0.358172 4.39997 0 4.0418 0 3.59997C0 3.15815 0.358172 2.79997 0.8 2.79997L8.5728 2.79997L7.22754 1.34263C6.92786 1.01798 6.9481 0.511851 7.27275 0.212166Z"
                       fill="white"
                     />
                   </svg>

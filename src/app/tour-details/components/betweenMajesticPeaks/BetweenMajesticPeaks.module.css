@@ -1,401 +1,393 @@
 .Section {
-    padding: 100px 0 20px 0;
-    background-color: #F9F9F9;
+  padding: 100px 0 20px 0;
+  background-color: #f9f9f9;
 }
 
 .container {
-    max-width: 1520px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 100px;
-    padding: 0 20px;
+  max-width: 1520px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+  padding: 0 20px;
 }
 
 .topContainer {
-    max-width: 788px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  max-width: 788px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 
-    margin: 0 auto;
+  margin: 0 auto;
 }
-.viewGalleryBtnIcon{
-    width: 12px !important;
-    height: 12px !important;
+.viewGalleryBtnIcon {
+  width: 12px !important;
+  height: 12px !important;
 }
 
 .bottomContainerRef {
-    display: flex;
-    gap: 24px;
-    max-width: 1920px;
-    width: 100%;
-    height: 581px;
-    margin: 0 auto;
-    margin-top: 100px;
-
+  display: flex;
+  gap: 24px;
+  max-width: 1920px;
+  width: 100%;
+  height: 581px;
+  margin: 0 auto;
+  margin-top: 100px;
 }
 
 .rightImage {
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
 }
 .rightImage img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-
-
 .rightGrid {
-    width: 50%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 1fr;
-    gap: 24px;
+  width: 50%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 24px;
 }
 
 .imageBox {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .imageBox img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* VIEW GALLERY BUTTON */
 .viewGalleryBtn {
-    position: absolute;
-    bottom: 23px;
-    right: 30px;
-    background: #fff;
-    color: #000;
-    border: none;
-    padding: 8px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  position: absolute;
+  bottom: 23px;
+  height: 40px;
+  max-width: 160px;
+  width: 100%;
+  justify-content: center;
+  right: 30px;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-    .galleryWrapper {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
+  .galleryWrapper {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
 
-    .rightGrid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .rightGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .heading {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 42px;
-    line-height: 1.19;
-
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 42px;
+  line-height: 1.19;
 }
 
 .paraContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .paraContainer p {
-    font-family: var(--font-inter);
-    font-weight: 200;
-    font-style: Extra Light;
-    font-size: 16px;
-    line-height: 20px;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    color: rgba(33, 33, 33, 0.78);
-
+  font-family: var(--font-inter);
+  font-weight: 200;
+  font-style: Extra Light;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: rgba(33, 33, 33, 0.78);
 }
 
 .btnContainer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #212121;
-    border-radius: 100%;
-    cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #212121;
+  border-radius: 100%;
+  cursor: pointer;
 }
 
 .btn:hover {
-    background: #000000;
-    color: white;
+  background: #000000;
+  color: white;
 }
 
 .btn img {
-    filter: invert(0);
-    transition: filter 0.2s ease;
+  filter: invert(0);
+  transition: filter 0.2s ease;
 }
 
 .btn:hover img {
-    filter: invert(1);
+  filter: invert(1);
 }
 
 .bottomContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .carouselWrapper {
-    width: 100%;
-    height: 288px;
-    position: relative;
-    overflow: hidden;
+  width: 100%;
+  height: 288px;
+  position: relative;
+  overflow: hidden;
 }
 
 .carousel {
-    width: 100%;
-    padding-bottom: 20px;
+  width: 100%;
+  padding-bottom: 20px;
 }
 
 .slide {
-    width: 432px !important;
-    height: auto;
-    flex-shrink: 0;
+  width: 432px !important;
+  height: auto;
+  flex-shrink: 0;
 }
 
 .imageContainer {
-    position: relative;
-    width: 432px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  position: relative;
+  width: 432px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .image {
-    width: 432px;
-    height: 288px;
-    object-fit: cover;
-    display: block;
+  width: 432px;
+  height: 288px;
+  object-fit: cover;
+  display: block;
 }
 
 .progressIndicator {
-    width: 33%;
-    height: 3px;
-    background-color: #1e3a8a;
-    border-radius: 2px;
-    margin-top: 12px;
-    animation: progressAnimation 0.3s ease-out;
+  width: 33%;
+  height: 3px;
+  background-color: #1e3a8a;
+  border-radius: 2px;
+  margin-top: 12px;
+  animation: progressAnimation 0.3s ease-out;
 }
 
 @keyframes progressAnimation {
-    from {
-        opacity: 0;
-        transform: scaleX(0);
-    }
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
 
-    to {
-        opacity: 1;
-        transform: scaleX(1);
-    }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 
 .controlsContainer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding-top: 24px;
-    gap: 22px;
-    position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 24px;
+  gap: 22px;
+  position: relative;
 }
 
 .br {
-    width: 100%;
-    height: 1px;
-    background-color: rgba(196, 196, 196, 1);
-    position: relative;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(196, 196, 196, 1);
+  position: relative;
 }
 
 .activeIndicator {
-    position: absolute;
-    top: -1px;
-    left: 0;
-    height: 2px;
-    background-color: #212121;
-    transition: width 0.3s ease;
+  position: absolute;
+  top: -1px;
+  left: 0;
+  height: 2px;
+  background-color: #212121;
+  transition: width 0.3s ease;
 }
 
-
-
-
-
 .previewOverlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 159px;
-    z-index: 9999;
-    background: rgba(255, 255, 255, 0.27);
-    backdrop-filter: blur(8.8px);
-    -webkit-backdrop-filter: blur(8.8px);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 159px;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.27);
+  backdrop-filter: blur(8.8px);
+  -webkit-backdrop-filter: blur(8.8px);
 }
 
 .previewBox {
-    position: relative;
-    max-width: 1080px;
-    width: 100%;
-    height: 632px;
-    overflow: hidden;
+  position: relative;
+  max-width: 1080px;
+  width: 100%;
+  height: 632px;
+  overflow: hidden;
 }
 
 .previewImage {
-    width: 100%;
-    object-fit: cover;
-    background-position: center;
+  width: 100%;
+  object-fit: cover;
+  background-position: center;
 }
 
 .leftArrow,
 .rightArrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    font-size: 40px;
-    cursor: pointer;
-    color: #000;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  color: #000;
 }
 
 .leftArrow {
-    left: -60px;
+  left: -60px;
 }
 
 .rightArrow {
-    right: -60px;
+  right: -60px;
 }
 
 .closeBtn {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
 }
 
-@media (max-width: 1440px){
-    .bottomContainerRef{
-        gap: 16px;
-    }
-    .rightGrid{
-        gap: 16px;
-    }
+@media (max-width: 1440px) {
+  .bottomContainerRef {
+    gap: 16px;
+  }
+  .rightGrid {
+    gap: 16px;
+  }
 }
 
-@media (max-Width: 991px){
-    .bottomContainerRef{
-        margin-top: 60px;
-        /* flex-direction: column; */
-        /* height: auto; */
-    }
-    /* .rightImage{
+@media (max-width: 991px) {
+  .bottomContainerRef {
+    margin-top: 60px;
+    /* flex-direction: column; */
+    /* height: auto; */
+  }
+  /* .rightImage{
         width: 100%;
 
     }
     .rightGrid{
         width: 100%;
     } */
-    .Section{
-        padding-top: 50px;
-    }
-    .heading{
-        font-size: 40px;
-    }
-    .viewGalleryBtn{
-        right: 13px;
-        bottom: 13px;
-    }
+  .Section {
+    padding-top: 50px;
+  }
+  .heading {
+    font-size: 40px;
+  }
+  .viewGalleryBtn {
+    right: 13px;
+    bottom: 13px;
+  }
 }
 
-@media (max-width: 768px){
-    .bottomContainerRef{
-        flex-direction: column;
-        height: 700px;
-        margin-top: 40px;
-
-    }
-    .rightImage{
-        width: 100%;
-        height: 45%;
-
-    }
-    .rightGrid{
-        width: 100%;
-        height: 55%;
-    }
-    .Section{
-        padding-top: 20px;
-    }
-    .heading{
-        font-size: 36px;
-    }
-    .paraContainer{
-        /* gap: 14px; */
-    }
-    .paraContainer p{
-        font-size: 14px;
-    }
-    .topContainer{
-        /* gap: 14px; */
-    }
+@media (max-width: 768px) {
+  .bottomContainerRef {
+    flex-direction: column;
+    height: 700px;
+    margin-top: 40px;
+  }
+  .rightImage {
+    width: 100%;
+    height: 45%;
+  }
+  .rightGrid {
+    width: 100%;
+    height: 55%;
+  }
+  .Section {
+    padding-top: 20px;
+  }
+  .heading {
+    font-size: 36px;
+  }
+  .paraContainer {
+    /* gap: 14px; */
+  }
+  .paraContainer p {
+    font-size: 14px;
+  }
+  .topContainer {
+    /* gap: 14px; */
+  }
 }
 
-@media (max-width: 650px){
-    .heading{
-        font-size: 32px;
-    }
-    .container{
-        padding: 0 16px;
-    }
+@media (max-width: 650px) {
+  .heading {
+    font-size: 32px;
+  }
+  .container {
+    padding: 0 16px;
+  }
 }
-@media (max-width: 430px){
-    .bottomContainerRef{
-        height: 568px;
-        gap: 4px;
-    }
-    .rightImage{
-        height: 240px;
-    }
-    .rightGrid{
-        flex: 1;
-        gap: 4px;
-
-    }
-    .heading{
-        font-size: 28px;
-    }
-    .viewGalleryBtn{
-        font-size: 10px;
-    }
+@media (max-width: 430px) {
+  .bottomContainerRef {
+    height: 568px;
+    gap: 4px;
+  }
+  .rightImage {
+    height: 240px;
+  }
+  .rightGrid {
+    flex: 1;
+    gap: 4px;
+  }
+  .heading {
+    font-size: 28px;
+  }
+  .viewGalleryBtn {
+    font-size: 10px;
+  }
 }
