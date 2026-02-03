@@ -1,75 +1,27 @@
 "use client";
-import { useProfile } from "@/app/profile/context/ProfileContext";
 import styles from "./TripsGallery.module.css";
+import WishlistImages from "./WishlistImages";
+import { useProfile } from "@/app/profile/context/ProfileContext";
 
-const trips = [
-  {
-    id: 1,
-    type: "collage",
-    title: "My Next Trip",
-    saved: 6,
-    images: [
-      "/hotelList/nextTrip1.png",
-      "/hotelList/nextTrip2.png",
-      "/hotelList/nextTrip3.png",
-      "/hotelList/nextTrip4.png",
-    ],
-  },
-  {
-    id: 2,
-    type: "single",
-    title: "Falkensee, Germany 2025",
-    saved: 2,
-    image: "/images/falkensee.jpg", // 👈 typo fix (.pns ❌)
-  },
-  {
-    id: 3,
-    type: "single",
-    title: "Prague, Czechia 2025",
-    saved: 1,
-    image: "/hotelList/Falkensee.png",
-  },
-];
-
-export default function TripsGallery() {
-  const { setActiveMenu, activeMenu } = useProfile();
-
-  const handleClick = (trip) => {
-    if (trip.id === 1) {
-      setActiveMenu("myNextTrip");
-    }
-  };
+export default function TripsGallery({ wishlists = [] }) {
+  const { setActiveMenu } = useProfile();
 
   return (
     <div className={styles.wrapper}>
-      {trips.map((trip) => (
+      {wishlists.map((list, idx) => (
         <div
-          key={trip.id}
-          onClick={() => handleClick(trip)}
+          key={idx}
           className={styles.card}
+          onClick={() =>
+            list.name.toLowerCase() === "my next trip" &&
+            setActiveMenu("myNextTrip")
+          }
         >
-          {/* ✅ COLLAGE (ONLY 4 IMAGES) */}
-          {trip.type === "collage" && (
-            <div className={styles.collage}>
-              {trip.images.map((img, i) => (
-                <img key={i} src={img} alt="" />
-              ))}
-            </div>
-          )}
+          <WishlistImages images={list.images} />
 
-          {/* ✅ SINGLE IMAGE */}
-          {trip.type === "single" && (
-            <img
-              className={styles.singleImage}
-              src={trip.image}
-              alt={trip.title}
-            />
-          )}
-
-          {/* INFO */}
           <div className={styles.info}>
-            <h3>{trip.title}</h3>
-            <span>{trip.saved} Saved</span>
+            <h3>{list.name}</h3>
+            <span>{list.total} Saved</span>
           </div>
         </div>
       ))}

@@ -14,7 +14,7 @@
   gap: 24px;
 }
 .profileContent {
-  max-height: calc(100vh - 171px);
+  /* max-height: calc(100vh - 171px); */
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;

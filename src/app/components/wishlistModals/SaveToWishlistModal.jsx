@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 
 export const fetchUserWishlists = async () => {
   const token = Cookies.get("auth_token");
-  const router = useRouter();
 
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/package?limit=10&page=1`,
@@ -104,7 +103,8 @@ const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew }) => {
         )}
 
         {/* FOOTER */}
-        <button
+        <div>
+ <button
           className={styles.primaryBtnFull}
           onClick={() => {
             onClose();
@@ -113,6 +113,8 @@ const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew }) => {
         >
           Create new wishlist
         </button>
+        </div>
+       
       </div>
     </div>
   );

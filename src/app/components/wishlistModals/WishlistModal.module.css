@@ -10,9 +10,11 @@
 
 .modal {
   background: #fff;
-  width: 420px;
+  width: 680px;
   padding: 24px;
   border-radius: 0;
+  max-height: 627px;
+  overflow-y: auto;
 }
 
 .large {
