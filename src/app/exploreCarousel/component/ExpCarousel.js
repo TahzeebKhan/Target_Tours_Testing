@@ -9,9 +9,9 @@ import "swiper/css/navigation";
 
 import InnerCarousel from "./InnerCarousel";
 import styles from "./ExpCarousel.module.css";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
-export default function ExpCarousel({ activeTab }) {
+export default function ExpCarousel({ onWishlistClick, activeTab }) {
   const [swiperRef, setSwiperRef] = useState(null);
   const [slidesPerViewLocal, setSlidesPerViewLocal] = useState(4);
 
@@ -198,7 +198,6 @@ export default function ExpCarousel({ activeTab }) {
       images: ["/images/4.webp", "/images/1.webp"],
     },
   ]);
-
   // Filter based on active tab
   const slides =
     activeTab === "All"
@@ -212,6 +211,7 @@ export default function ExpCarousel({ activeTab }) {
     const updated = [...allSlidesData];
     updated[index].favorite = !updated[index].favorite;
     setAllSlidesData(updated);
+     onWishlistClick?.();
   };
 
   useEffect(() => {
@@ -233,8 +233,6 @@ export default function ExpCarousel({ activeTab }) {
         style={{ maxWidth: "1520px", margin: "0 auto" }}
         className="ExpCarouselWrapper"
       >
-        
-
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab} // 🔑 IMPORTANT

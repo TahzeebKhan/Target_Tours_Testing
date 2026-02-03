@@ -4,12 +4,41 @@ import styles from "./TourListing.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import SearchResults from "../searchResult/SearchResults";
+import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
 
 const TourListing = () => {
-
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
+
+  const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
+  const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
+  const [wishlists, setWishlists] = useState([]); // fetch later from backend
+  const [selectedTourId, setSelectedTourId] = useState(null);
+
+  const handleHeartClick = (tourId) => {
+    setSelectedTourId(tourId);
+
+    if (!wishlists.length) {
+      setIsCreateWishlistOpen(true);
+    } else {
+      setIsSaveWishlistOpen(true);
+    }
+  };
+
+  const handleCreateWishlist = (name) => {
+    const newWishlist = {
+      id: Date.now(),
+      name,
+      count: 0,
+    };
+
+    setWishlists((prev) => [...prev, newWishlist]);
+
+    setIsCreateWishlistOpen(false);
+    setIsSaveWishlistOpen(true);
+  };
   const router = useRouter();
   const handleBookNow = () => {
     router.push("/hotel-detail"); // 👈 your page route
@@ -92,281 +121,308 @@ const TourListing = () => {
     setLikedTours((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
   return (
-
     <>
-    <section className={styles.tourListSection}>
-      <SearchResults viewType={viewType} setViewType={setViewType} />
+      <section className={styles.tourListSection}>
+        <SearchResults viewType={viewType} setViewType={setViewType} />
 
-      <AnimatePresence mode="popLayout">
-        {viewType === "grid" && (
-          <motion.div
-            className={styles.gridWrapper}
-            key="grid"
-            layout
-            initial={{ opacity: 0, y:0 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 0 }}
-            transition={{ duration: 0.55, ease: "easeInOut" }}
-          >
-            {tourData.map((item, index) => (
-              <div className={styles.gridCard}>
-                <div className={styles.gridCardImage}>
-                  <img className={styles.ListViewCardImage} src="/hotelList/hotelCardImg.png" alt="" />
-                  <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
-                    <div className={styles.headerLeft}>
-                      <div className={styles.new}>New</div>
-                      <div className={styles.private}>Flagship</div>
-                    </div>
-
-                    <img
-                      src={
-                        likedTours.includes(item.id)
-                          ? "/icons/heartIconFilled.svg"
-                          : "/icons/heartIcon.svg"
-                      }
-                      alt="wishlist"
-                      className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
-
-                      onClick={() => toggleLike(item.id)}
-                    />
-                  </div>
-                </div>
-                <div className={styles.gridCardText}>
-                  <div className={styles.cartListTop}>
-                    <div className={styles.ListViewCardTextTop}>
-                      <div className={styles.topTextHead}>
-                        <div className={styles.rating}>
-                          {[...Array(5)].map((_, index) => (
-                            <img
-                              key={index}
-                              src={
-                                index < rating
-                                  ? "/icons/conicstar.svg"
-                                  : "/icons/star-gray.svg"
-                              }
-                              alt="star"
-                            />
-                          ))}
-                        </div>
-                        <h2>{item.title}</h2>
-
-                        <div className={styles.topTextHeadAddress}>
-                          <img src="/icons/blackAddress.svg" alt="" />
-                          <span>{item.route}</span>
-                        </div>
-                      </div>
-                      <div className={styles.featuresCont}>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/AirConditioning.svg" alt="" />
-                          <p>Air conditioning</p>
-                          <span></span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Wifi.svg" alt="" />
-                          <p>Wifi</p>
-                          <span></span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Kitchen.svg" alt="" />
-                          <p>Kitchen</p>
-                          <span></span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Pool.svg" alt="" />
-                          <p>Pool</p>
-                          <span></span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="" alt="" />
-                          <p>Mixer</p>
-                        </div>
-                      </div>
-                      <ul className={styles.freeList}>
-                        <li>
-                          <div className={styles.tickCont}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                          </div>
-                          Free Cancellation till 7 Jan 2022
-                        </li>
-                        <li>
-                          <div className={styles.tickCont}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                          </div>
-                          Free Breakfast
-                        </li>
-                      </ul>
-
-
-                    </div>
-                  </div>
-
-                  <div className={styles.ListViewCardTextBottom}>
-                    <div className={styles.priceContainer}>
-                      <div className={styles.priceSec}>
-                        {item.price}
-                      </div>
-
-                      <div className={styles.totalPrice}>
-
-                        <span>1 night, 2 adults</span>
-                      </div>
-                    </div>
-
-                    <button className={styles.bookNowBtn} onClick={handleBookNow}>SEE AVAILABILITY</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-          // </div>
-        )}
-
-        {viewType === "list" && (
-          
+        <AnimatePresence mode="popLayout">
+          {viewType === "grid" && (
             <motion.div
-           className={styles.ListViewWrapper}
-            key="list"
-            layout
-            initial={{ opacity: 0, y:0 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 0 }}
-            transition={{ duration: 0.55, ease: "easeInOut" }}
-          >
-            {tourData.map((item, index) => (
-              <motion.div
-                className={styles.ListViewCardContainer}
-                key={item.id}
-                layoutId={index < 2 ? `card-${item.id}` : undefined}
-              >
-                <div className={styles.ListViewCardImageContainer}>
-                  <motion.img
-                    layoutId={index < 2 ? `image-${item.id}` : undefined}
-                    src={item.image}
-                    alt={item.title}
-                    className={styles.ListViewCardImage}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  />
-
-                  <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
-                    <div className={styles.headerLeft}>
-                      <div className={styles.new}>New</div>
-                      <div className={styles.private}>Flagship</div>
-                    </div>
-
+              className={styles.gridWrapper}
+              key="grid"
+              layout
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 0 }}
+              transition={{ duration: 0.55, ease: "easeInOut" }}
+            >
+              {tourData.map((item, index) => (
+                <div className={styles.gridCard}>
+                  <div className={styles.gridCardImage}>
                     <img
-                      src={
-                        likedTours.includes(item.id)
-                          ? "/icons/heartIconFilled.svg"
-                          : "/icons/heartIcon.svg"
-                      }
-                      alt="wishlist"
-                      className={styles.heartIcon}
-                      onClick={() => toggleLike(item.id)}
+                      className={styles.ListViewCardImage}
+                      src="/hotelList/hotelCardImg.png"
+                      alt=""
                     />
+                    <div
+                      className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
+                    >
+                      <div className={styles.headerLeft}>
+                        <div className={styles.new}>New</div>
+                        <div className={styles.private}>Flagship</div>
+                      </div>
+
+                      <img
+                        src={
+                          likedTours.includes(item.id)
+                            ? "/icons/heartIconFilled.svg"
+                            : "/icons/heartIcon.svg"
+                        }
+                        alt="wishlist"
+                        className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(item.id); // change icon
+                          handleHeartClick(item.id); // open modal
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.gridCardText}>
+                    <div className={styles.cartListTop}>
+                      <div className={styles.ListViewCardTextTop}>
+                        <div className={styles.topTextHead}>
+                          <div className={styles.rating}>
+                            {[...Array(5)].map((_, index) => (
+                              <img
+                                key={index}
+                                src={
+                                  index < rating
+                                    ? "/icons/conicstar.svg"
+                                    : "/icons/star-gray.svg"
+                                }
+                                alt="star"
+                              />
+                            ))}
+                          </div>
+                          <h2>{item.title}</h2>
+
+                          <div className={styles.topTextHeadAddress}>
+                            <img src="/icons/blackAddress.svg" alt="" />
+                            <span>{item.route}</span>
+                          </div>
+                        </div>
+                        <div className={styles.featuresCont}>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/AirConditioning.svg" alt="" />
+                            <p>Air conditioning</p>
+                            <span></span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Wifi.svg" alt="" />
+                            <p>Wifi</p>
+                            <span></span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Kitchen.svg" alt="" />
+                            <p>Kitchen</p>
+                            <span></span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Pool.svg" alt="" />
+                            <p>Pool</p>
+                            <span></span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="" alt="" />
+                            <p>Mixer</p>
+                          </div>
+                        </div>
+                        <ul className={styles.freeList}>
+                          <li>
+                            <div className={styles.tickCont}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                            </div>
+                            Free Cancellation till 7 Jan 2022
+                          </li>
+                          <li>
+                            <div className={styles.tickCont}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                            </div>
+                            Free Breakfast
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className={styles.ListViewCardTextBottom}>
+                      <div className={styles.priceContainer}>
+                        <div className={styles.priceSec}>{item.price}</div>
+
+                        <div className={styles.totalPrice}>
+                          <span>1 night, 2 adults</span>
+                        </div>
+                      </div>
+
+                      <button
+                        className={styles.bookNowBtn}
+                        onClick={handleBookNow}
+                      >
+                        SEE AVAILABILITY
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </motion.div>
+            // </div>
+          )}
 
-                <div
-                  className={styles.ListViewCardText}
+          {viewType === "list" && (
+            <motion.div
+              className={styles.ListViewWrapper}
+              key="list"
+              layout
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 0 }}
+              transition={{ duration: 0.55, ease: "easeInOut" }}
+            >
+              {tourData.map((item, index) => (
+                <motion.div
+                  className={styles.ListViewCardContainer}
+                  key={item.id}
+                  layoutId={index < 2 ? `card-${item.id}` : undefined}
                 >
-                  <div className={styles.cartListTop}>
-                    <div className={styles.ListViewCardTextTop}>
-                      <div className={styles.topTextHead}>
-                        <div className={styles.rating}>
-                          {[...Array(5)].map((_, index) => (
-                            <img
-                              key={index}
-                              src={
-                                index < rating
-                                  ? "/icons/conicstar.svg"
-                                  : "/icons/star-gray.svg"
-                              }
-                              alt="star"
-                            />
-                          ))}
-                        </div>
-                        <h2>{item.title}</h2>
+                  <div className={styles.ListViewCardImageContainer}>
+                    <motion.img
+                      layoutId={index < 2 ? `image-${item.id}` : undefined}
+                      src={item.image}
+                      alt={item.title}
+                      className={styles.ListViewCardImage}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    />
 
-                        <div className={styles.topTextHeadAddress}>
-                          <img src="/icons/blackAddress.svg" alt="" />
-                          <span>{item.route}</span>
-                        </div>
+                    <div
+                      className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
+                    >
+                      <div className={styles.headerLeft}>
+                        <div className={styles.new}>New</div>
+                        <div className={styles.private}>Flagship</div>
                       </div>
-                      <div className={styles.featuresCont}>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/AirConditioning.svg" alt="" />
-                          <p>Air conditioning</p>
-                          <span>•</span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Wifi.svg" alt="" />
-                          <p>Wifi</p>
-                          <span>•</span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Kitchen.svg" alt="" />
-                          <p>Kitchen</p>
-                          <span>•</span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="/icons/Pool.svg" alt="" />
-                          <p>Pool</p>
-                          <span>•</span>
-                        </div>
-                        <div className={styles.featureItem}>
-                          <img src="" alt="" />
-                          <p>Mixer</p>
-                        </div>
-                      </div>
-                      <ul className={styles.freeList}>
-                        <li>
-                          <div className={styles.tickCont}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                          </div>
-                          Free Cancellation till 7 Jan 2022
-                        </li>
-                        <li>
-                          <div className={styles.tickCont}>
-                            <img src="/icons/checkIcon.svg" alt="" />
-                          </div>
-                          Free Breakfast
-                        </li>
-                      </ul>
 
-
+                      <img
+                        src={
+                          likedTours.includes(item.id)
+                            ? "/icons/heartIconFilled.svg"
+                            : "/icons/heartIcon.svg"
+                        }
+                        alt="wishlist"
+                        className={styles.heartIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(item.id); // change icon
+                          handleHeartClick(item.id); // open modal
+                        }}
+                      />
                     </div>
                   </div>
 
-                  <div className={styles.ListViewCardTextBottom}>
-                    <div className={styles.priceContainer}>
-                      <div className={`${styles.priceSec} ${styles.ListViewPriceSec}`}>
-                        {item.price}
-                      </div>
+                  <div className={styles.ListViewCardText}>
+                    <div className={styles.cartListTop}>
+                      <div className={styles.ListViewCardTextTop}>
+                        <div className={styles.topTextHead}>
+                          <div className={styles.rating}>
+                            {[...Array(5)].map((_, index) => (
+                              <img
+                                key={index}
+                                src={
+                                  index < rating
+                                    ? "/icons/conicstar.svg"
+                                    : "/icons/star-gray.svg"
+                                }
+                                alt="star"
+                              />
+                            ))}
+                          </div>
+                          <h2>{item.title}</h2>
 
-                      <div className={`${styles.totalPrice} ${styles.ListViewTotalPrice}`}>
-
-                        <span>1 night, 2 adults</span>
+                          <div className={styles.topTextHeadAddress}>
+                            <img src="/icons/blackAddress.svg" alt="" />
+                            <span>{item.route}</span>
+                          </div>
+                        </div>
+                        <div className={styles.featuresCont}>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/AirConditioning.svg" alt="" />
+                            <p>Air conditioning</p>
+                            <span>•</span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Wifi.svg" alt="" />
+                            <p>Wifi</p>
+                            <span>•</span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Kitchen.svg" alt="" />
+                            <p>Kitchen</p>
+                            <span>•</span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="/icons/Pool.svg" alt="" />
+                            <p>Pool</p>
+                            <span>•</span>
+                          </div>
+                          <div className={styles.featureItem}>
+                            <img src="" alt="" />
+                            <p>Mixer</p>
+                          </div>
+                        </div>
+                        <ul className={styles.freeList}>
+                          <li>
+                            <div className={styles.tickCont}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                            </div>
+                            Free Cancellation till 7 Jan 2022
+                          </li>
+                          <li>
+                            <div className={styles.tickCont}>
+                              <img src="/icons/checkIcon.svg" alt="" />
+                            </div>
+                            Free Breakfast
+                          </li>
+                        </ul>
                       </div>
                     </div>
 
-                    <button className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`} onClick={handleBookNow}>SEE AVAILABILITY</button>
+                    <div className={styles.ListViewCardTextBottom}>
+                      <div className={styles.priceContainer}>
+                        <div
+                          className={`${styles.priceSec} ${styles.ListViewPriceSec}`}
+                        >
+                          {item.price}
+                        </div>
+
+                        <div
+                          className={`${styles.totalPrice} ${styles.ListViewTotalPrice}`}
+                        >
+                          <span>1 night, 2 adults</span>
+                        </div>
+                      </div>
+
+                      <button
+                        className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
+                        onClick={handleBookNow}
+                      >
+                        SEE AVAILABILITY
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
+      <section className={styles.tourListSectionMobileView}></section>
 
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-    <section className={styles.tourListSectionMobileView}>
+      <CreateWishlistModal
+        isOpen={isCreateWishlistOpen}
+        onClose={() => setIsCreateWishlistOpen(false)}
+        onCreate={handleCreateWishlist}
+      />
 
-    </section>
+      <SaveToWishlistModal
+        onCreateNew={() => setIsCreateWishlistOpen(true)}
+        isOpen={isSaveWishlistOpen}
+        wishlists={wishlists}
+        onClose={() => setIsSaveWishlistOpen(false)}
+      />
     </>
   );
 };

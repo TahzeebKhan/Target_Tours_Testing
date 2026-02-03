@@ -1,44 +1,74 @@
-import React from 'react'
-import styles from './TripHighlights.module.css'
+import React from "react";
+import styles from "./TripHighlights.module.css";
 
-const TripHighlights = () => {
-    return (
-        <div className={styles.ForMobile}>
-            <div className={`${styles.containerMobile}`}>
-                    <div className={styles.overlayCard}>
-                        <h2 className={styles.heading}>Trip Highlights</h2>
-                        <ul className={styles.list}>
-                            <li>Scenic exploration by private vehicle through Canada’s iconic landscapes</li>
-                            <li>Selected departure dates with an English-speaking local guide</li>
-                            <li>Lake cruise experience on a pristine alpine lake</li>
-                            <li>Guaranteed departure with 4 participants, maximum 12 travelers</li>
-                            <li>Optional panoramic helicopter flight over the Canadian Rockies</li>
-                            <li>Accommodation in comfortable lodges and hotels immersed in nature</li>
-                            <li>Air-conditioned private transport between cities and national parks</li>
-                            <li>Small-group experience with a maximum of 12 participants per departure</li>
-                        </ul>
-                    </div>
-                </div>
-            <section className={styles.section}>
-                <div className={styles.container}>
-                    <div className={styles.overlayCard}>
-                        <h2 className={styles.heading}>Trip Highlights</h2>
-                        <ul className={styles.list}>
-                            <li>Scenic exploration by private vehicle through Canada’s iconic landscapes</li>
-                            <li>Selected departure dates with an English-speaking local guide</li>
-                            <li>Lake cruise experience on a pristine alpine lake</li>
-                            <li>Guaranteed departure with 4 participants, maximum 12 travelers</li>
-                            <li>Optional panoramic helicopter flight over the Canadian Rockies</li>
-                            <li>Accommodation in comfortable lodges and hotels immersed in nature</li>
-                            <li>Air-conditioned private transport between cities and national parks</li>
-                            <li>Small-group experience with a maximum of 12 participants per departure</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
+const TripHighlights = ({ data }) => {
+  const highlightBlock = data?.package_highlights?.[0];
+
+  const highlights = Array.isArray(highlightBlock?.highlights)
+    ? highlightBlock.highlights
+    : [];
+
+  // Heading
+  const heading =
+    highlights.find((item) => item.type === "heading")?.children?.[0]?.text ||
+    "Trip Highlights";
+
+  // List items
+  const items = highlights
+    .filter((item) => item.type === "paragraph")
+    .map((item, index) => ({
+      id: index,
+      text: item?.children?.[0]?.text?.trim(),
+    }))
+    .filter((item) => item.text);
+
+  // ✅ Background image (safe)
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const bgImagePath =
+    highlightBlock?.background_media?.formats?.large?.url ||
+    highlightBlock?.background_media?.url ||
+    "";
+
+  const bgImage = BASE_URL && bgImagePath ? `${BASE_URL}${bgImagePath}` : null;
+
+  if (!items.length) return null;
+
+  return (
+    <div className={styles.ForMobile}>
+      {/* MOBILE */}
+      <div
+        className={styles.containerMobile}
+        style={bgImage ? { "--bg-image": `url(${bgImage})` } : undefined}
+      >
+        <div className={styles.overlayCard}>
+          <h2 className={styles.heading}>{heading}</h2>
+          <ul className={styles.list}>
+            {items.map((item) => (
+              <li key={item.id}>{item.text}</li>
+            ))}
+          </ul>
         </div>
+      </div>
 
-    )
-}
+      {/* DESKTOP */}
+      <section
+        className={styles.section}
+        style={bgImage ? { "--bg-image": `url(${bgImage})` } : undefined}
+      >
+        <div className={styles.container}>
+          <div className={styles.overlayCard}>
+            <h2 className={styles.heading}>{heading}</h2>
+            <ul className={styles.list}>
+              {items.map((item) => (
+                <li key={item.id}>{item.text}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
 
-export default TripHighlights
+export default TripHighlights;

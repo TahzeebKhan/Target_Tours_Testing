@@ -9,9 +9,9 @@ import "swiper/css/navigation";
 
 import InnerCarousel from "./InnerCarousel";
 import styles from "./ExpCarousel.module.css";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
-export default function ExpCarousel({ activeTab }) {
+export default function ExpCarousel({ activeTab, onWishlistClick }) {
   const [swiperRef, setSwiperRef] = useState(null);
   // track the current slidesPerView according to breakpoints so we can
   // conditionally show navigation buttons when there are more slides than visible
@@ -214,6 +214,7 @@ export default function ExpCarousel({ activeTab }) {
     const updated = [...allSlidesData];
     updated[index].favorite = !updated[index].favorite;
     setAllSlidesData(updated);
+    onWishlistClick?.();
   };
 
   useEffect(() => {
@@ -235,8 +236,6 @@ export default function ExpCarousel({ activeTab }) {
         style={{ maxWidth: "1520px", margin: "0 auto" }}
         className="ExpCarouselWrapper"
       >
-        
-
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab} // 🔑 IMPORTANT
