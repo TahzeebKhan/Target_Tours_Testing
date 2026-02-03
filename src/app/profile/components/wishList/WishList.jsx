@@ -8,6 +8,26 @@ import TourListing from "./components/tourListing/TourListing";
 import { useRouter } from "next/navigation";
 import MyNextTrip from "./components/myNextTrip/MyNextTrip";
 
+import axios from "axios";
+import Cookies from "js-cookie";
+
+export const fetchWishlists = async (type = "all") => {
+  const token = Cookies.get("auth_token");
+
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/${type}?limit=10&page=1`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return res.data?.data || {};
+};
+
 const WishList = () => {
   const router = useRouter("/");
   const [showTabs, setShowTabs] = useState(false);

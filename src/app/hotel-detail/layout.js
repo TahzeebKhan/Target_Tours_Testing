@@ -61,6 +61,8 @@ const Layout = ({ children }) => {
           setIsCreateWishlistOpen(false);
           setIsSaveWishlistOpen(true);
         }}
+        type="hotel"
+        ids={[]}
       />
 
       <SaveToWishlistModal

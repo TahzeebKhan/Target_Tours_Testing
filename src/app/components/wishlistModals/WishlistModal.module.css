@@ -73,7 +73,9 @@
   border: none;
   padding: 12px 20px;
   cursor: pointer;
-  transition: background 0.4s ease, color 0.4s ease;
+  transition:
+    background 0.4s ease,
+    color 0.4s ease;
 }
 
 .primaryBtn:hover,
@@ -86,7 +88,6 @@
   opacity: 0.4;
   /* cursor: not-allowed; */
   pointer-events: none;
-
 }
 
 .primaryBtnFull {
@@ -108,7 +109,7 @@
 
 .imagePlaceholder {
   background: #bdbdbd;
-  height: 160px;
+  /* height: 160px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,4 +123,21 @@
 .card span {
   font-size: 12px;
   color: #777;
+}
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.emptyState h3 {
+  font-family: Antic Didone;
+  font-size: 22px;
+  font-weight: 400;
+  color: #000033;
+  margin-bottom: 8px;
+}
+
+.emptyState p {
+  font-size: 14px;
+  color: #767676;
 }

@@ -415,6 +415,8 @@ const TourListing = () => {
         isOpen={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={handleCreateWishlist}
+        type="hotel"
+        ids={[]}
       />
 
       <SaveToWishlistModal

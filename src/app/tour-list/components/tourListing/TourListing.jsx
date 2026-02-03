@@ -782,6 +782,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
         isOpen={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={handleCreateWishlist}
+        type="package"
+        ids={selectedTourId ? [selectedTourId] : []}
       />
 
       <SaveToWishlistModal

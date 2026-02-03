@@ -18,7 +18,7 @@ const fetchTravelStyle = async () => {
     : {};
 
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/travel-style-selector?domain=${domain}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/travel-style-selector?domain=localhost:1337`,
     { headers },
   );
 
