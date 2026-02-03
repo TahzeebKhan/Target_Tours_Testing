@@ -15,6 +15,8 @@ import axios from "axios";
 import api from "@/lib/axios";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchTours } from "@/app/service/tourPackage";
+import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
 
 const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
@@ -26,6 +28,34 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [openSortByFilter, setOpenSortByFilter] = useState(false);
   const [openPreferencesFilter, setOpenPreferencesFilter] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
+  const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
+  const [wishlists, setWishlists] = useState([]); // fetch later from backend
+  const [selectedTourId, setSelectedTourId] = useState(null);
+
+  const handleHeartClick = (tourId) => {
+    setSelectedTourId(tourId);
+
+    if (!wishlists.length) {
+      setIsCreateWishlistOpen(true);
+    } else {
+      setIsSaveWishlistOpen(true);
+    }
+  };
+
+  const handleCreateWishlist = (name) => {
+    const newWishlist = {
+      id: Date.now(),
+      name,
+      count: 0,
+    };
+
+    setWishlists((prev) => [...prev, newWishlist]);
+
+    setIsCreateWishlistOpen(false);
+    setIsSaveWishlistOpen(true);
+  };
 
   const {
     data,
@@ -230,7 +260,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         className={styles.heartIcon}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id);
+                          toggleLike(item.id); // change icon
+                          handleHeartClick(item.id); // open modal
                         }}
                       />
                     </div>
@@ -402,7 +433,11 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         }
                         alt="wishlist"
                         className={styles.heartIcon}
-                        onClick={() => toggleLike(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(item.id); // change icon
+                          handleHeartClick(item.id); // open modal
+                        }}
                       />
                     </div>
                   </div>
@@ -618,7 +653,11 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       }
                       alt="wishlist"
                       className={styles.heartIcon}
-                      onClick={() => toggleLike(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(item.id); // change icon
+                        handleHeartClick(item.id); // open modal
+                      }}
                     />
                   </div>
                 </div>
@@ -738,6 +777,19 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
           <SelectPreferences onClose={() => setActivePreferenceView(null)} />
         )}
       </section>
+
+      <CreateWishlistModal
+        isOpen={isCreateWishlistOpen}
+        onClose={() => setIsCreateWishlistOpen(false)}
+        onCreate={handleCreateWishlist}
+      />
+
+      <SaveToWishlistModal
+        onCreateNew={() => setIsCreateWishlistOpen(true)}
+        isOpen={isSaveWishlistOpen}
+        wishlists={wishlists}
+        onClose={() => setIsSaveWishlistOpen(false)}
+      />
     </>
   );
 };

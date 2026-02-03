@@ -8,34 +8,74 @@ import Tabs from "./Components/tabs/Tabs";
 import Navbar from "./Navbar";
 import HotelDetaislMobileView from "./Components/hotelDetailsMobileView/HotelDetaislMobileView";
 import FeatureSection from "../home-page/components/featureSection/FeatureSection";
+import CreateWishlistModal from "../components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "../components/wishlistModals/SaveToWishlistModal";
+import Cookies from "js-cookie";
 
 const Layout = ({ children }) => {
   const [activeTab, setActiveTab] = useState("Description");
+  const [liked, setLiked] = useState(false);
+  const hasToken = !!Cookies.get("auth_token");
+  const [isLoggedIn, setIsLoggedIn] = useState(hasToken);
 
+  const [wishlists, setWishlists] = useState([]);
+  const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
+  const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
+
+  const handleWishlistClick = () => {
+    if (!wishlists.length) {
+      setIsCreateWishlistOpen(true);
+    } else {
+      setIsSaveWishlistOpen(true);
+    }
+  };
   return (
     <>
-    <div className={styles.navBar}>
-          <div className={styles.navBarContainer}>
-            <Navbar />
-          </div>
+      <div className={styles.navBar}>
+        <div className={styles.navBarContainer}>
+          <Navbar isLoggedIn={isLoggedIn} />
         </div>
+      </div>
       <div className={styles.layoutWrapper}>
-        
         <div className={styles.pageSection}>
-          <HeroSection />
+          <HeroSection
+            liked={liked}
+            onLike={() => {
+              setLiked(!liked);
+              handleWishlistClick();
+            }}
+          />
           {/* PAGE DECIDES WHAT GOES WHERE */}
           {children}
         </div>
-        <FeatureSection/>
+        <FeatureSection />
 
         <Footer />
       </div>
+      {/* 🔥 WISHLIST MODALS */}
+      <CreateWishlistModal
+        isOpen={isCreateWishlistOpen}
+        onClose={() => setIsCreateWishlistOpen(false)}
+        onCreate={(name) => {
+          setWishlists((prev) => [...prev, { id: Date.now(), name }]);
+          setIsCreateWishlistOpen(false);
+          setIsSaveWishlistOpen(true);
+        }}
+      />
+
+      <SaveToWishlistModal
+        isOpen={isSaveWishlistOpen}
+        wishlists={wishlists}
+        onClose={() => setIsSaveWishlistOpen(false)}
+        onCreateNew={() => {
+          setIsSaveWishlistOpen(false);
+          setIsCreateWishlistOpen(true);
+        }}
+      />
       <div className={styles.mobileView}>
-        <HotelDetaislMobileView/>
-        
+        <HotelDetaislMobileView />
       </div>
     </>
-
   );
 };
 
