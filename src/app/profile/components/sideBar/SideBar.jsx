@@ -185,7 +185,9 @@ const SideBar = () => {
 
               <li
                 className={`${styles.item} ${
-                  activeMenu === "wishList" ? styles.active : ""
+                  activeMenu === "wishList" || activeMenu === "myNextTrip"
+                    ? styles.active
+                    : ""
                 }`}
                 onClick={() => setActiveMenu("wishList")}
               >

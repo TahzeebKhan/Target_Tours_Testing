@@ -24,7 +24,7 @@ const WishListsTabsItems = () => {
               <h3>Wish Lists</h3>
               <p>Explore and save your favorite destinations here.</p>
             </div>
-            <div className={styles.wishlistHeadRight}>+Create a list</div>
+            {/* <div className={styles.wishlistHeadRight}>+Create a list</div> */}
           </div>
           <div className={styles.br}></div>
           <ExpandableTabs

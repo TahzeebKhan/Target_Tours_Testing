@@ -16,9 +16,6 @@ import api from "@/lib/axios";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchTours } from "@/app/service/tourPackage";
 
-
-
-
 const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
@@ -29,8 +26,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [openSortByFilter, setOpenSortByFilter] = useState(false);
   const [openPreferencesFilter, setOpenPreferencesFilter] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
-
-
 
   const {
     data,
@@ -54,13 +49,12 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     },
   });
 
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 184) {
-        setShowStickyHeader(true);   // 👈 scroll ke baad show
+        setShowStickyHeader(true); // 👈 scroll ke baad show
       } else {
-        setShowStickyHeader(false);  // 👈 top par hide
+        setShowStickyHeader(false); // 👈 top par hide
       }
     };
 
@@ -68,13 +62,13 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleBookNow = () => {
-    router.push("/tour-details"); // 👈 your page route
+  const handleBookNow = (id) => {
+    router.push(`/tour-details?id=${id}`);
   };
+
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
-
 
   const tourDataFallback = [
     {
@@ -145,23 +139,18 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     },
   ];
 
-
-
-
   const toggleLike = (id) => {
     setLikedTours((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
-
-  const tourData =
-    data?.pages.flatMap((page) => page.data) || tourDataFallback;
-  /* 
+  const tourData = data?.pages.flatMap((page) => page.data) || tourDataFallback;
+  /*
    * Extract meta from the first page of data.
-   * Since this is an infinite query, the most relevant "global" counts  
+   * Since this is an infinite query, the most relevant "global" counts
    * usually come from the initial fetch or are consistent across pages.
    */
   const meta = data?.pages?.[0]?.meta;
@@ -172,16 +161,13 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     }
   }, [meta, onDataLoaded]);
 
-  console.log(
-    "First tour inclusions:",
-    tourData?.[0]?.package_inclusion
-  );
+  console.log("First tour inclusions:", tourData?.[0]?.package_inclusion);
 
   useEffect(() => {
     const onScroll = () => {
       if (
         window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 300 &&
+          document.body.offsetHeight - 300 &&
         hasNextPage &&
         !isFetchingNextPage
       ) {
@@ -193,12 +179,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-
   const truncateText = (text = "", maxLength = 29) => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + "...";
   };
-
 
   return (
     <>
@@ -218,7 +202,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               {tourData.map((item, index) => (
                 <motion.div
                   className={styles.card}
-                  onClick={handleBookNow}
+                  onClick={() => handleBookNow(item.id)}
                   key={item.id}
                   layoutId={index < 2 ? `card-${item.id}` : undefined}
                 >
@@ -246,9 +230,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         className={styles.heartIcon}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id)
-                        }
-                        }
+                          toggleLike(item.id);
+                        }}
                       />
                     </div>
 
@@ -275,14 +258,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                         <div className={styles.bottomRow}>
                           <div className={styles.price}>
-                            FROM <strong>{item.price}</strong> <span>/ PERSON</span>
+                            FROM <strong>{item.price}</strong>{" "}
+                            <span>/ PERSON</span>
                           </div>
 
                           <button
                             className={styles.viewDetails}
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleExpand(item.id)
+                              toggleExpand(item.id);
                             }}
                           >
                             VIEW DETAILS
@@ -290,7 +274,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                               src="/icons/smallDropArrow.svg"
                               alt=""
                               style={{
-                                transform: expandedId === item.id ? "rotate(180deg)" : "rotate(0deg)",
+                                transform:
+                                  expandedId === item.id
+                                    ? "rotate(180deg)"
+                                    : "rotate(0deg)",
                                 transition: "0.3s",
                               }}
                             />
@@ -312,7 +299,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         <div className={styles.expandableContent}>
                           <div className={styles.expandableTopContainer}>
                             <div className={styles.expandableTop}>
-                              <h3 className={styles.expandableTopHeading}>Package Inclusions</h3>
+                              <h3 className={styles.expandableTopHeading}>
+                                Package Inclusions
+                              </h3>
                               <ul className={styles.list}>
                                 <li>Round Trip Flights</li>
                                 <li>4 Star Hotels</li>
@@ -321,15 +310,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                               </ul>
                             </div>
                             <div className={styles.expandableCenter}>
-
                               <div className={styles.expandableRow}>
-                                {item?.package_inclusion?.map((inclusion, index) => (
-
-                                  <div className={styles.expandableItem}>
-                                    <img src="/icons/checkIcon.svg" alt="" />
-                                    <span>{inclusion.description}</span>
-                                  </div>
-                                ))}
+                                {item?.package_inclusion?.map(
+                                  (inclusion, index) => (
+                                    <div className={styles.expandableItem}>
+                                      <img src="/icons/checkIcon.svg" alt="" />
+                                      <span>{inclusion.description}</span>
+                                    </div>
+                                  ),
+                                )}
                               </div>
                               {/* <div className={styles.expandableRow}>
                                 <div className={styles.expandableItem}>
@@ -351,8 +340,18 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                           </div>
                           <div className={styles.hr}></div>
                           <div className={styles.expandableFooter}>
-                            <div className={styles.expandableFooterText}>Total <span>{item.price}</span></div>
-                            <button className={styles.bookNow} onClick={handleBookNow}>BOOK NOW</button>
+                            <div className={styles.expandableFooterText}>
+                              Total <span>{item.price}</span>
+                            </div>
+                            <button
+                              className={styles.bookNow}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBookNow(item.id);
+                              }}
+                            >
+                              BOOK NOW
+                            </button>
                           </div>
                         </div>
                       </motion.div>
@@ -387,7 +386,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     />
 
-                    <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
+                    <div
+                      className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
+                    >
                       <div className={styles.headerLeft}>
                         <div className={styles.new}>New</div>
                         <div className={styles.private}>Private Tour</div>
@@ -408,10 +409,23 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                   <motion.div
                     className={styles.ListViewCardText}
-                    initial={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
-                    animate={index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined}
-                    exit={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
-                    transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    initial={
+                      index === 0
+                        ? { clipPath: "inset(0 100% 0 0)" }
+                        : undefined
+                    }
+                    animate={
+                      index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined
+                    }
+                    exit={
+                      index === 0
+                        ? { clipPath: "inset(0 100% 0 0)" }
+                        : undefined
+                    }
+                    transition={{
+                      duration: 0.3,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
                   >
                     <div className={styles.cartListTop}>
                       <div className={styles.ListViewCardTextTop}>
@@ -428,7 +442,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                           <div className={styles.tag}>Round Trip Flights</div>
                           <div className={styles.tag}>4 Star Hotels</div>
                           <div className={styles.tag}>Airport Transfers</div>
-                          <div className={styles.tag}>Intercity Car Transfers</div>
+                          <div className={styles.tag}>
+                            Intercity Car Transfers
+                          </div>
                         </div>
 
                         <div className={styles.ListViewCardTextTopBottom}>
@@ -454,7 +470,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                         <div className={styles.infoRowGrid}>
                           <div className={styles.infoItem}>{item.hotel}</div>
-                          <div className={styles.infoItem}>{item.activities}</div>
+                          <div className={styles.infoItem}>
+                            {item.activities}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -472,7 +490,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         </div>
                       </div>
 
-                      <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
+                      <button
+                        className={styles.bookNowBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookNow(item.id);
+                        }}
+                      >
+                        BOOK NOW
+                      </button>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -482,7 +508,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
         </AnimatePresence>
       </section>
       <section className={styles.tourListMobileSection}>
-
         <div
           className={`${styles.tripDetailsHeader} 
               ${showStickyHeader ? styles.stickyVisible : styles.stickyHidden}`}
@@ -493,7 +518,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
             >
               <div className={styles.TripCardHeaderDetails}>
-                <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+                <p className={styles.TripCardHeaderDetailsItemText}>
+                  New Delhi
+                </p>
                 {/* <span className={styles.TripCardHeaderDetailsItemCode}>
                 (DEL)
               </span> */}
@@ -519,7 +546,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
         <div className={styles.tourListMobileWrapper}>
           <div className={styles.filterContainer}>
-            <button className={styles.filterCard} onClick={() => setOpenSortByFilter(true)}>
+            <button
+              className={styles.filterCard}
+              onClick={() => setOpenSortByFilter(true)}
+            >
               Sort by
             </button>
             {openSortByFilter && (
@@ -528,18 +558,20 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                 onClose={() => setOpenSortByFilter(false)}
               />
             )}
-            <button className={styles.filterCard} onClick={() => setOpenFilter(true)}>
+            <button
+              className={styles.filterCard}
+              onClick={() => setOpenFilter(true)}
+            >
               FILTERS
               <img src="/icons/filterIcon.svg" alt="" />
             </button>
             {openFilter && (
-              <MobileFilterWrapper
-                open={openFilter}
-                setOpen={setOpenFilter}
-              />
+              <MobileFilterWrapper open={openFilter} setOpen={setOpenFilter} />
             )}
-            <button className={styles.filterCard} onClick={() => setOpenPreferencesFilter(true)}>
-
+            <button
+              className={styles.filterCard}
+              onClick={() => setOpenPreferencesFilter(true)}
+            >
               PREFERENCES
             </button>
             {openPreferencesFilter && (
@@ -555,21 +587,24 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
           <div
             className={`${styles.ListViewWrapper} ${styles.ListViewWrapperMobile}`}
-
           >
             {tourData.map((item, index) => (
               <div
                 className={`${styles.ListViewCardContainer} ${styles.ListViewCardContainerMobile}`}
                 key={item.id}
               >
-                <div className={`${styles.ListViewCardImageContainer}  ${styles.ListViewCardImageContainerMobile}`}>
+                <div
+                  className={`${styles.ListViewCardImageContainer}  ${styles.ListViewCardImageContainerMobile}`}
+                >
                   <img
                     src={item.image}
                     alt={item.title}
                     className={styles.ListViewCardImage}
                   />
 
-                  <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}>
+                  <div
+                    className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
+                  >
                     <div className={styles.headerLeft}>
                       <div className={styles.new}>New</div>
                       <div className={styles.private}>Private Tour</div>
@@ -590,9 +625,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                 <motion.div
                   className={`${styles.ListViewCardTextMobile}`}
-                  initial={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
-                  animate={index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined}
-                  exit={index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined}
+                  initial={
+                    index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined
+                  }
+                  animate={
+                    index === 0 ? { clipPath: "inset(0 0% 0 0)" } : undefined
+                  }
+                  exit={
+                    index === 0 ? { clipPath: "inset(0 100% 0 0)" } : undefined
+                  }
                   transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                   <div className={styles.cartListTop}>
@@ -610,7 +651,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         <div className={styles.tag}>Round Trip Flights</div>
                         <div className={styles.tag}>4 Star Hotels</div>
                         <div className={styles.tag}>Airport Transfers</div>
-                        <div className={styles.tag}>Intercity Car Transfers</div>
+                        <div className={styles.tag}>
+                          Intercity Car Transfers
+                        </div>
                       </div>
 
                       <div className={styles.ListViewCardTextTopBottomMobile}>
@@ -648,9 +691,13 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                     </div>
                   </div>
 
-                  <div className={`${styles.ListViewCardTextBottom} ${styles.ListViewCardTextBottomMobile}`}>
+                  <div
+                    className={`${styles.ListViewCardTextBottom} ${styles.ListViewCardTextBottomMobile}`}
+                  >
                     <div className={styles.priceContainer}>
-                      <div className={`${styles.priceSec} ${styles.mobilePrice}`}>
+                      <div
+                        className={`${styles.priceSec} ${styles.mobilePrice}`}
+                      >
                         {item.price}
                         <span>/PERSON</span>
                       </div>
@@ -661,7 +708,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       </div>
                     </div>
 
-                    <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
+                    <button
+                      className={styles.bookNowBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookNow(item.id);
+                      }}
+                    >
+                      BOOK NOW
+                    </button>
                   </div>
                 </motion.div>
               </div>
@@ -674,7 +729,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
         )}
 
         {activePreferenceView === "TRAVELLER" && (
-          <SelectTravellerProfile onClose={() => setActivePreferenceView(null)} />
+          <SelectTravellerProfile
+            onClose={() => setActivePreferenceView(null)}
+          />
         )}
 
         {activePreferenceView === "PREFERENCES" && (

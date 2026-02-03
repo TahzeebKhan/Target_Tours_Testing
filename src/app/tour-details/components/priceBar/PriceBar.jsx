@@ -3,53 +3,55 @@ import React, { useState, useEffect } from "react";
 import styles from "./PriceBar.module.css";
 import CustomItinerary from "./CustomItinerary";
 import MobileItinerary from "./MobileItinerary";
-
 import { useRouter } from "next/navigation";
 
 const PriceBar = ({
-  days = "17 days, 16 nights",
-  price = "₹ 66,945",
   onCall,
   onPersonalize,
   onBookNow,
   hotel = null,
+  data,
 }) => {
   const [itineraryOpen, setItineraryOpen] = useState(false);
+  const [mobileItineraryOpen, setMobileItineraryOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
-  // fallback hotel if none provided
+  // 🔹 API → UI mapping (safe)
+  const daysText =
+    data?.duration_days && data?.duration_nights
+      ? `${data.duration_days} days, ${data.duration_nights} nights`
+      : "";
+
+  const price =
+    data?.started_price
+      ? `₹ ${Number(data.started_price).toLocaleString("en-IN")}`
+      : "";
+
+  // fallback hotel
   const sampleHotel = hotel || {
     title: "SERENE HAVEN INN, TORONTO",
     images: ["/images/hotel-placeholder.jpg"],
   };
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkScreen = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-
-    checkScreen(); // initial check
+    const checkScreen = () => setIsMobile(window.innerWidth <= 600);
+    checkScreen();
     window.addEventListener("resize", checkScreen);
-
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  const [mobileItineraryOpen, setMobileItineraryOpen] = useState(false);
+  const handlePersonalize = (e) => {
+    onPersonalize?.(e);
 
-const handlePersonalize = (e) => {
-  onPersonalize?.(e);
-
-  if (isMobile) {
-    setItineraryOpen(false);
-    setMobileItineraryOpen(true);
-  } else {
-    setMobileItineraryOpen(false);
-    setItineraryOpen(true);
-  }
-};
-
-
+    if (isMobile) {
+      setItineraryOpen(false);
+      setMobileItineraryOpen(true);
+    } else {
+      setMobileItineraryOpen(false);
+      setItineraryOpen(true);
+    }
+  };
 
   const handleBookNow = () => {
     router.push("/tour-bookings");
@@ -57,9 +59,10 @@ const handlePersonalize = (e) => {
 
   return (
     <div className={styles.priceBar}>
+      {/* DESKTOP */}
       <div className={styles.container}>
         <div className={styles.priceLeft}>
-          <span className={styles.tripInfo}>{days}</span>
+          <span className={styles.tripInfo}>{daysText}</span>
           <span className={styles.separator}>|</span>
           <span className={styles.priceText}>
             From <strong>{price}</strong>
@@ -67,40 +70,31 @@ const handlePersonalize = (e) => {
           </span>
         </div>
 
-        {/* RIGHT */}
         <div className={styles.priceRight}>
           <button className={styles.iconBtn} onClick={onCall}>
             <img src="/icons/blankPhone.svg" alt="Call" />
           </button>
-{/* 
-          <button className={styles.personalizeBtn} onClick={handlePersonalize}>
-            PERSONALIZE
-          </button> */}
 
           <button className={styles.bookNowBtn} onClick={handleBookNow}>
             BOOK NOW
           </button>
         </div>
       </div>
+
+      {/* MOBILE */}
       <div className={styles.containerMobile}>
         <div className={styles.priceLeft}>
-          <span className={styles.tripInfo}>{days}</span>
+          <span className={styles.tripInfo}>{daysText}</span>
           <span className={styles.separator}>|</span>
           <span className={styles.priceText}>
             <strong>{price}</strong>
-            {/* <span className={styles.perPerson}></span> */}
           </span>
         </div>
 
-        {/* RIGHT */}
         <div className={styles.priceRight}>
           <button className={styles.iconBtn} onClick={onCall}>
             <img src="/icons/blankPhone.svg" alt="Call" />
           </button>
-
-          {/* <button className={styles.personalizeBtn} onClick={handlePersonalize}>
-            PERSONALIZE
-          </button> */}
 
           <button className={styles.bookNowBtn} onClick={handleBookNow}>
             BOOK NOW
@@ -108,6 +102,7 @@ const handlePersonalize = (e) => {
         </div>
       </div>
 
+      {/* ITINERARY MODALS */}
       <CustomItinerary
         isOpen={itineraryOpen}
         hotel={sampleHotel}

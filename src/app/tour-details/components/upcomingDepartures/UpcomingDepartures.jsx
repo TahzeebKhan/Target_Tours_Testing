@@ -5,76 +5,69 @@ import "swiper/css";
 import styles from "./UpcomingDepartures.module.css";
 import { Navigation } from "swiper/modules";
 import { useRouter } from "next/navigation";
+const safeDate = (value) => {
+  const d = new Date(value);
+  return isNaN(d) ? null : d;
+};
 
-const UpcomingDepartures = () => {
+const formatDate = (isoDate) => {
+  const d = safeDate(isoDate);
+  if (!d) return "--";
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatMonth = (isoDate) => {
+  const d = safeDate(isoDate);
+  if (!d) return "UNKNOWN";
+  return d
+    .toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    .toUpperCase();
+};
+
+const UpcomingDepartures = ({ data }) => {
   const router = useRouter();
-  const months = [
-    "FEB 2026",
-    "MAR 2026",
-    "APR 2026",
-    "MAY 2026",
-    "JUN 2026",
-    "JUL 2026",
-    "AUG 2026",
-    "SEP 2026",
-    "OCT 2026",
-  ];
 
-  const BookingData = [
-    {
-      id: 1,
-      month: "FEB 2026",
-      departureDate: "Thu, 03 Sept 2026",
-      returnDate: "Tue, 15 Sept 2026",
-      pricePerPerson: 66945,
-      singleOccupantCharge: 6945,
-      availability: "Available",
-    },
-    {
-      id: 2,
-      month: "FEB 2026",
-      departureDate: "Thu, 10 Sept 2026",
-      returnDate: "Tue, 22 Sept 2026",
-      pricePerPerson: 66945,
-      singleOccupantCharge: 6945,
-      availability: "Available",
-    },
-    {
-      id: 3,
-      month: "FEB 2026",
-      departureDate: "Thu, 12 Mar 2026",
-      returnDate: "Tue, 24 Mar 2026",
-      pricePerPerson: 58999,
-      singleOccupantCharge: 5999,
-      availability: "Available",
-    },
-    {
-      id: 4,
-      month: "MAR 2026",
-      departureDate: "Thu, 10 Sept 2026",
-      returnDate: "Tue, 22 Sept 2026",
-      pricePerPerson: 66945,
-      singleOccupantCharge: 6945,
-      availability: "Available",
-    },
-    {
-      id: 5,
-      month: "APR 2026",
-      departureDate: "Thu, 10 Sept 2026",
-      returnDate: "Tue, 22 Sept 2026",
-      pricePerPerson: 66945,
-      singleOccupantCharge: 6945,
-      availability: "Available",
-    },
-  ];
+  const departures = Array.isArray(data?.package_departures)
+    ? data.package_departures
+    : [];
+  const BookingData = departures.map((d = {}) => ({
+    id: d.id ?? `${d.departure_date}-${d.return_date}`,
 
-  const groupedData = months.map((month) => ({
-    month,
-    items: BookingData.filter((b) => b.month === month),
+    month: formatMonth(d.departure_date),
+    departureDate: formatDate(d.departure_date),
+    returnDate: formatDate(d.return_date),
+    pricePerPerson: d.base_price ?? 0,
+    singleOccupantCharge:
+      typeof d.base_price === "number" ? Math.round(d.base_price * 0.1) : 0,
+    availability:
+      d.status === "available"
+        ? "Available"
+        : d.status
+          ? d.status
+          : "Unavailable",
   }));
+  const months =
+    BookingData.length > 0
+      ? [...new Set(BookingData.map((b) => b.month))]
+      : ["NO DEPARTURES"];
+
+  const groupedData =
+    months[0] === "NO DEPARTURES"
+      ? [{ month: "NO DEPARTURES", items: [] }]
+      : months.map((month) => ({
+          month,
+          items: BookingData.filter((b) => b.month === month),
+        }));
+
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState(months[0]);
+  const [activeTab, setActiveTab] = useState(months[0] ?? "NO DEPARTURES");
+
   const tabsRef = useRef(null);
   const [offset, setOffset] = useState(0);
   const [slideWidth, setSlideWidth] = useState(0);
@@ -166,7 +159,9 @@ const UpcomingDepartures = () => {
                 activeTab === m ? styles.active : ""
               }`}
               onClick={() => {
-                swiperRef?.slideTo(index);
+                if (!swiperRef) return;
+                swiperRef.slideTo(index);
+                setActiveTab(m);
               }}
             >
               <button className={styles.tabBtn}>{m}</button>
@@ -214,8 +209,9 @@ const UpcomingDepartures = () => {
                   <p className={styles.noData}></p>
                 ) : (
                   group.items.map((item) => (
-                    <>
-                      <div key={item.id} className={styles.row}>
+                    <React.Fragment key={item.id}>
+                      {" "}
+                      <div className={styles.row}>
                         {/* DATE */}
 
                         <div className={styles.col}>
@@ -255,7 +251,7 @@ const UpcomingDepartures = () => {
                           </button>
                         </div>
                       </div>
-                      <div key={item.id} className={styles.rowMobile}>
+                      <div className={styles.rowMobile}>
                         {/* DATE */}
 
                         <div className={styles.mobileColContainer}>
@@ -299,7 +295,7 @@ const UpcomingDepartures = () => {
                           </button>
                         </div>
                       </div>
-                    </>
+                    </React.Fragment>
                   ))
                 )}
               </div>

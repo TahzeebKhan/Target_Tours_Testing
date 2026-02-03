@@ -1,12 +1,15 @@
-import React from 'react'
-import ViewGalleryPage from './ViewGalleryPage'
+import React, { Suspense } from "react";
+import ViewGalleryPage from "./ViewGalleryPage";
 
 const page = () => {
   return (
     <div>
-      <ViewGalleryPage />
+      <Suspense fallback={<div></div>}>
+        {" "}
+        <ViewGalleryPage />
+      </Suspense>
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

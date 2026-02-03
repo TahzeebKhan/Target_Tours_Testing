@@ -25,6 +25,7 @@ export default function InnerCarousel({ images = [], favorite, onFavorite }) {
           style={{
             "--swiper-navigation-color": "#fff",
             "--swiper-pagination-color": "#fff",
+            height: "238px",
           }}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
@@ -41,9 +42,7 @@ export default function InnerCarousel({ images = [], favorite, onFavorite }) {
           <div className={styles.heartIcon} onClick={onFavorite}>
             <img
               src={
-                favorite
-                  ? "/icons/heartIconFilled.svg"
-                  : "/icons/heartIcon.svg"
+                favorite ? "/icons/heartIconFilled.svg" : "/icons/heartIcon.svg"
               }
               alt=""
             />

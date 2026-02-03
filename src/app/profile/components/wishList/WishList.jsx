@@ -5,19 +5,22 @@ import WishListsTabsItems from "./components/wishListsTabsItmes/WishListsTabsIte
 import { useProfile } from "../../context/ProfileContext";
 // import MyNextTrip from "./components/myNextTrip/MyNextTrip";
 import TourListing from "./components/tourListing/TourListing";
+import { useRouter } from "next/navigation";
+import MyNextTrip from "./components/myNextTrip/MyNextTrip";
 
 const WishList = () => {
+  const router = useRouter("/");
   const [showTabs, setShowTabs] = useState(false);
+  const isEmpty = false;
 
   const { activeMenu, setActiveMenu } = useProfile();
-  if (showTabs && activeMenu === "wishList") {
-    return <WishListsTabsItems />;
-  }
+
+  if (activeMenu === "myNextTrip") return <MyNextTrip />;
 
   return (
     <>
-      {activeMenu === "myNextTrip" ? (
-        <TourListing />
+      {!isEmpty ? (
+        <WishListsTabsItems />
       ) : (
         <>
           {" "}
@@ -30,7 +33,7 @@ const WishList = () => {
               />
               <button
                 className={styles.startBtn}
-                onClick={() => setShowTabs(true)}
+                onClick={() => router.push("/")}
               >
                 start searching
               </button>

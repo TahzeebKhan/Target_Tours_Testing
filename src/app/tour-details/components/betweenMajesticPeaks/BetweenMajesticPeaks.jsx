@@ -1,99 +1,129 @@
 "use client";
-import React, { useState } from 'react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Navigation } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import styles from './BetweenMajesticPeaks.module.css'
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import styles from "./BetweenMajesticPeaks.module.css";
+import { useRouter } from "next/navigation";
 
-const BetweenMajesticPeaks = () => {
-    const [swiperRef, setSwiperRef] = useState(null)
-    const [activeIndex, setActiveIndex] = useState(0)
-    const router = useRouter();
+const BetweenMajesticPeaks = ({ data }) => {
+  const [swiperRef, setSwiperRef] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const router = useRouter();
+  const goToGallery = () => {
+    if (!data?.id) return;
 
-    const goToGallery = () => {
-        router.push('/view-gallery'); 
+    router.push(`/view-gallery?tourId=${data.id}`);
+  };
+
+  // Sample images - replace with your actual images
+  const carouselImages = [
+    "/tourBooking/ImagesItem1.png",
+    "/tourBooking/ImagesItem2.png",
+    "/tourBooking/ImagesItem3.png",
+    "/images/img1.jpg",
+    "/images/img2.jpg",
+    "/images/img3.jpg",
+    "/tourBooking/ImagesItem1.png",
+    "/tourBooking/ImagesItem2.png",
+    "/tourBooking/ImagesItem3.png",
+    "/tourBooking/ImagesItem1.png",
+    "/tourBooking/ImagesItem2.png",
+    "/tourBooking/ImagesItem3.png",
+  ];
+
+  const renderExtraInfo = (blocks) => {
+    if (!Array.isArray(blocks) || blocks.length === 0) return null;
+
+    return blocks.map((block, index) => {
+      switch (block.type) {
+        case "heading":
+          return (
+            <h2 key={index} className={styles.heading}>
+              {block.children?.map((child) => child.text).join("")}
+            </h2>
+          );
+
+        case "paragraph":
+          return (
+            <p key={index}>
+              {block.children?.map((child) => child.text).join("")}
+            </p>
+          );
+
+        default:
+          return null;
+      }
+    });
+  };
+
+  const handleSlideChange = (swiper) => {
+    setActiveIndex(swiper.activeIndex);
+  };
+
+  const getProgressPercentage = () => {
+    if (!swiperRef) return 0;
+
+    // Total slides
+    const totalSlides = carouselImages.length;
+
+    // Agar last slide visible hai to 100%
+    if (activeIndex >= totalSlides - 1) {
+      return 100;
     }
 
-    // Sample images - replace with your actual images
-    const carouselImages = [
-        '/tourBooking/ImagesItem1.png',
-        '/tourBooking/ImagesItem2.png',
-        '/tourBooking/ImagesItem3.png',
-        '/images/img1.jpg',
-        '/images/img2.jpg',
-        '/images/img3.jpg',
-        '/tourBooking/ImagesItem1.png',
-        '/tourBooking/ImagesItem2.png',
-        '/tourBooking/ImagesItem3.png',
-        '/tourBooking/ImagesItem1.png',
-        '/tourBooking/ImagesItem2.png',
-        '/tourBooking/ImagesItem3.png',
-    ]
+    // Otherwise calculate based on total progress
+    return ((activeIndex + 3) / totalSlides) * 100;
+  };
 
-    const handleSlideChange = (swiper) => {
-        setActiveIndex(swiper.activeIndex)
-    }
+  const handlePrev = () => {
+    swiperRef?.slidePrev();
+  };
 
-    const getProgressPercentage = () => {
-        if (!swiperRef) return 0;
+  const handleNext = () => {
+    swiperRef?.slideNext();
+  };
 
-        // Total slides
-        const totalSlides = carouselImages.length;
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-        // Agar last slide visible hai to 100%
-        if (activeIndex >= totalSlides - 1) {
-            return 100;
-        }
+  const openPreview = (index) => {
+    setCurrentIndex(index);
+    setIsOpen(true);
+  };
 
-        // Otherwise calculate based on total progress
-        return ((activeIndex + 3) / totalSlides) * 100;
-    }
+  const closePreview = () => setIsOpen(false);
 
-    const handlePrev = () => {
-        swiperRef?.slidePrev()
-    }
+  const prevImage = () => {
+    setCurrentIndex((prev) =>
+      prev === 0 ? carouselImages.length - 1 : prev - 1,
+    );
+  };
 
-    const handleNext = () => {
-        swiperRef?.slideNext()
-    }
+  const nextImage = () => {
+    setCurrentIndex((prev) =>
+      prev === carouselImages.length - 1 ? 0 : prev + 1,
+    );
+  };
+  const galleryImages =
+    data?.package_media
+      ?.flatMap((item) => item.package_media || [])
+      ?.sort((a, b) => (b.width || 0) - (a.width || 0)) // 🔥 biggest first
+      ?.slice(0, 5) || [];
 
-    const [isOpen, setIsOpen] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
+  const getImageUrl = (url) => `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
 
-    const openPreview = (index) => {
-        setCurrentIndex(index);
-        setIsOpen(true);
-    };
+  return (
+    <section className={styles.Section}>
+      <div className={styles.container}>
+        <div className={styles.topContainer}>
+          <div className={styles.paraContainer}>
+            {renderExtraInfo(data?.extra_info)}
+          </div>
+        </div>
 
-    const closePreview = () => setIsOpen(false);
-
-    const prevImage = () => {
-        setCurrentIndex((prev) =>
-            prev === 0 ? carouselImages.length - 1 : prev - 1
-        );
-    };
-
-    const nextImage = () => {
-        setCurrentIndex((prev) =>
-            prev === carouselImages.length - 1 ? 0 : prev + 1
-        );
-    };
-
-
-    return (
-        <section className={styles.Section}>
-            <div className={styles.container}>
-                <div className={styles.topContainer}>
-                    <h2 className={styles.heading}>Between majestic peaks and turquoise lakes: 12 days of discovery in the heart of Western Canada</h2>
-                    <div className={styles.paraContainer}>
-                        <p>Set out on an unforgettable journey through one of Canada's most spectacular regions. This 12-day adventure in Western Canada takes you across the legendary landscapes of the Canadian Rockies—where snow-capped mountains, emerald forests, and crystal-clear lakes create a setting of rare beauty.</p>
-                        <p>From iconic national parks to panoramic highways winding through alpine valleys, this journey reveals the very essence of the Canadian West. Along the way, you'll explore breathtaking natural wonders, experience the serenity of vast wilderness, and enjoy moments of connection with nature at every stop.</p>
-                        <p>This itinerary is crafted as a true immersion—where every day invites discovery, awe, and a sense of freedom found only in wide-open spaces.</p>
-                    </div>
-                </div>
-                {/* <div className={styles.bottomContainer}>
+        {/* <div className={styles.bottomContainer}>
                     <div className={styles.carouselWrapper}>
                         <Swiper
                             modules={[Navigation]}
@@ -172,35 +202,50 @@ const BetweenMajesticPeaks = () => {
                         </div>
                     </div>
                 </div> */}
+      </div>
+      <div className={styles.bottomContainerRef}>
+        {/* LEFT BIG IMAGE */}
+        <div className={styles.rightImage}>
+          {galleryImages[0] && (
+            <img
+              src={getImageUrl(galleryImages[0].url)}
+              alt={galleryImages[0].alternativeText || ""}
+            />
+          )}
+        </div>
 
-            </div>
-            <div className={styles.bottomContainerRef}>
-                <div className={styles.rightImage}>
-                    <img src={"/tourBooking/ToursImage1.png"} alt="" />
-                </div>
-                <div className={styles.rightGrid}>
-                    <div className={styles.imageBox}>
-                        <img src="/tourBooking/ImagesItem1.png" alt="" />
-                    </div>
+        {/* RIGHT GRID (4 images) */}
+        <div className={styles.rightGrid}>
+          {galleryImages.slice(1, 5).map((img, index) => {
+            const isLast = index === 3;
 
-                    <div className={styles.imageBox}>
-                        <img src="/tourBooking/ImagesItem2.png" alt="" />
-                    </div>
+            return (
+              <div key={img.id} className={styles.imageBox}>
+                <img
+                  src={getImageUrl(img.url)}
+                  alt={img.alternativeText || ""}
+                />
 
-                    <div className={styles.imageBox}>
-                        <img src="/tourBooking/ImagesItem3.png  " alt="" />
-                    </div>
+                {isLast && (
+                  <button
+                    className={styles.viewGalleryBtn}
+                    onClick={goToGallery}
+                  >
+                    <img
+                      className={styles.viewGalleryBtnIcon}
+                      src="/icons/dotBtn.svg"
+                      alt=""
+                    />
+                    VIEW GALLERY
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
 
-                    <div className={styles.imageBox}>
-                        <img src="/tourBooking/ImagesItem1.png" alt="" />
-                        <button className={styles.viewGalleryBtn} onClick={goToGallery}>
-                            <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    )
-}
-
-export default BetweenMajesticPeaks
+export default BetweenMajesticPeaks;
