@@ -1,33 +1,85 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./TripCard.module.css";
 import FlightTimingDetail from "../FlightTimingDetail";
 import ExpandableTabs from "@/app/flights/components/onewayTrip/expendableTabs/ExpandableTabs";
 import RoundTripExpendable from "../multiTripExpendable/MultiTripExpendable";
 import MultiTripExpendable from "../multiTripExpendable/MultiTripExpendable";
-const TripCard = ({ setFareModalOpen }) => {
+const TripCard = ({ setFareModalOpen, cardData }) => {
   const [openId, setOpenId] = useState(null);
 
-  const flight = {
-    departure: {
-      time: "06:45",
-      city: "Jakarta (CGK)",
+  const fallbackCard = {
+    id: "fallback-multi",
+    depart: {
+      airline: {
+        name: "Batik Airlines, Indones....",
+        code: "6E- 541",
+        logo: "/images/flightCompanyLogos/batikAirlines.png",
+      },
+      flight: {
+        departure: {
+          time: "06:45",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:00",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
     },
-    arrival: {
-      time: "08:00",
-      city: "Singapore (SIN)",
-    },
-    duration: {
-      hours: 1,
-      minutes: 50,
-    },
-    stops: {
-      type: "Non Stop",
+    return: {
+      airline: {
+        name: "Indonesia Airasia",
+        code: "6E- 541",
+        logo: "/images/flightCompanyLogos/indigo.png",
+      },
+      flight: {
+        departure: {
+          time: "06:45",
+          city: "Jakarta (CGK)",
+        },
+        arrival: {
+          time: "08:00",
+          city: "Singapore (SIN)",
+        },
+        duration: {
+          hours: 1,
+          minutes: 50,
+        },
+        stops: {
+          type: "Non Stop",
+        },
+      },
     },
     fare: {
       totalFare: "₹ 3,22,000",
       pricePerAdult: "₹ 12,000",
       cabinClass: "ECONOMY",
+    },
+  };
+
+  const item = useMemo(
+    () => (cardData?.depart && cardData?.return ? cardData : fallbackCard),
+    [cardData]
+  );
+
+  const flight = {
+    id: item.id,
+    departure: item.depart.flight.departure,
+    arrival: item.depart.flight.arrival,
+    duration: item.depart.flight.duration,
+    stops: item.depart.flight.stops,
+    fare: {
+      totalFare: item.fare.totalFare,
+      pricePerAdult: item.fare.pricePerAdult,
+      cabinClass: item.fare.cabinClass,
     },
   };
 
@@ -52,17 +104,19 @@ const TripCard = ({ setFareModalOpen }) => {
                       <div className={styles.airlineLogoContainer}>
                         <img
                           className={styles.flightLogo}
-                          src="/images/flightCompanyLogos/batikAirlines.png"
+                          src={item.depart.airline.logo}
                           alt="img"
                         />
                       </div>
 
                       <h3 className={styles.ariLineName}>
-                        Batik Airlines, Indones....{" "}
-                        <span className={styles.ariLineNumber}>6E- 541</span>
+                        {item.depart.airline.name}{" "}
+                        <span className={styles.ariLineNumber}>
+                          {item.depart.airline.code}
+                        </span>
                       </h3>
                     </div>
-                    <FlightTimingDetail flight={flight} />
+                    <FlightTimingDetail flight={item.depart.flight} />
                   </div>
                 </div>
               </div>
@@ -77,16 +131,18 @@ const TripCard = ({ setFareModalOpen }) => {
                       <div className={styles.airlineLogoContainer}>
                         <img
                           className={styles.flightLogo}
-                          src="/images/flightCompanyLogos/indigo.png"
+                          src={item.return.airline.logo}
                           alt="img"
                         />
                       </div>
                       <h3 className={styles.ariLineName}>
-                        Indonesia Airasia{" "}
-                        <span className={styles.ariLineNumber}>6E- 541</span>
+                        {item.return.airline.name}{" "}
+                        <span className={styles.ariLineNumber}>
+                          {item.return.airline.code}
+                        </span>
                       </h3>
                     </div>
-                    <FlightTimingDetail flight={flight} />
+                    <FlightTimingDetail flight={item.return.flight} />
                   </div>
                 </div>
               </div>
@@ -120,7 +176,7 @@ const TripCard = ({ setFareModalOpen }) => {
               <div className={styles.totalFare}>
                 <span className={styles.fareText}>{flight.fare.totalFare}</span>
                 <button
-                  onClick={() => setFareModalOpen(true)}
+                  onClick={() => setFareModalOpen(item.id)}
                   className={styles.viewBtn}
                 >
                   VIEW FARES

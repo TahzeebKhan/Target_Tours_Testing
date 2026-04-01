@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./PreferencesSection.module.css";
 
-import SelectDestination from "@/app/profile_components/selectDestination";
-import SelectTravellerProfile from "@/app/profile_components/selectTravellerProfile";
-import SelectPreferences from "@/app/profile_components/selectPreferences";
+import SelectDestination from "@/features/profile/components/selectDestination";
+import SelectTravellerProfile from "@/features/profile/components/selectTravellerProfile";
+import SelectPreferences from "@/features/profile/components/selectPreferences";
 
 export default function PreferencesSection({ onClose, onSelect }) {
   const wrapperRef = useRef(null);

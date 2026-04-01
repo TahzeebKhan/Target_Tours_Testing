@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./DestinationFilter.module.css";
-import CustomCheckbox from "@/app/components/CustomCheckbox";
+import CustomCheckbox from "@/shared/components/CustomCheckbox";
 
 const REGIONS = [
   { id: "africa", label: "Africa", imageUrl: "/images/africa.png" },

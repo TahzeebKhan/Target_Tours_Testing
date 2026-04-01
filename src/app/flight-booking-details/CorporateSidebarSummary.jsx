@@ -2,7 +2,7 @@
 import { useState } from "react";
 // import { useFlightBooking } from "./FlightBookingContext";
 import styles from "./CorporateSidebarSummary.module.css";
-import RequestBudgetModal from "../components/corporate/RequestBudgetModal";
+import RequestBudgetModal from "@/shared/components/corporate/RequestBudgetModal";
 
 export default function CorporateSidebarSummary() {
   const [showRequestBudgetModal, setShowRequestBudgetModal] = useState(false);

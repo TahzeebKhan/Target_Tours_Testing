@@ -1,12 +1,13 @@
 "use client";
 import React, { useEffect, useContext, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
 import FareComparisonModal from "./FareComparisonModal";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
-import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
+import FlightDetailsCard from "../phoneViewComponents/oneWayPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import SortBySheet from "../SortBySheet";
 import OnewaySkeleton from "./OnewaySkeleton";
@@ -14,17 +15,26 @@ import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
 
-const OnewayFlightBooking = () => {
+const OnewayFlightBooking = ({
+  flightData = [],
+  datewiseFareTiles = [],
+  selectedDepartureDate = "",
+  travellerSummary = null,
+  pagination = null,
+  sortHighlights = null,
+  hasSearched = false,
+  isLoading = false,
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { committedSearches } = useTripType();
   const { from, to } = committedSearches.oneway;
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
-  const [selectedSort, setSelectedSort] = useState("");
   const [fareModalOpen, setFareModalOpen] = useState(null); // Track which flight's fare modal is open
   const OFFER_INDEX = 3;
   const [openSort, setOpenSort] = useState(false);
-  const [isLoading, seIsloading] = useState(false);
   const { setIsSidebarOpen } = useContext(SidebarContext);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -317,6 +327,126 @@ const OnewayFlightBooking = () => {
       },
     },
   ];
+  const resolvedFlightResults = Array.isArray(flightData) ? flightData : [];
+
+  const parseFareValue = (fare) => {
+    const raw = String(fare?.totalFare || "").replace(/[^\d]/g, "");
+    const amount = Number(raw);
+    return Number.isFinite(amount) ? amount : Number.MAX_SAFE_INTEGER;
+  };
+
+  const getDurationMinutes = (flight) =>
+    (Number(flight?.duration?.hours || 0) * 60) +
+    Number(flight?.duration?.minutes || 0);
+
+  const resolveHighlightedFlight = (highlight) => {
+    if (!highlight || !resolvedFlightResults.length) return null;
+    const highlightId = String(highlight.id || highlight.index || "").trim();
+    if (highlightId) {
+      const byId = resolvedFlightResults.find(
+        (flight) => String(flight?.id || "").trim() === highlightId
+      );
+      if (byId) return byId;
+      const byCode = resolvedFlightResults.find((flight) =>
+        (flight?.airlines || []).some(
+          (airline) => String(airline?.code || "").trim() === highlightId
+        )
+      );
+      if (byCode) return byCode;
+    }
+    const time = (value) => {
+      const s = String(value || "");
+      const m = s.match(/(\d{2}:\d{2})/);
+      return m ? m[1] : "";
+    };
+    const dep = time(highlight?.departure);
+    const arr = time(highlight?.arrival);
+    const byTime = resolvedFlightResults.find(
+      (flight) =>
+        String(flight?.departure?.time || "") === dep &&
+        String(flight?.arrival?.time || "") === arr
+    );
+    if (byTime) return byTime;
+    return null;
+  };
+
+  const cheapestFallback =
+    resolvedFlightResults.length > 0
+      ? resolvedFlightResults.reduce((min, current) =>
+          parseFareValue(current?.fare) < parseFareValue(min?.fare)
+            ? current
+            : min
+        )
+      : null;
+
+  const fastestFallback =
+    resolvedFlightResults.length > 0
+      ? resolvedFlightResults.reduce((min, current) =>
+          getDurationMinutes(current) < getDurationMinutes(min)
+            ? current
+            : min
+        )
+      : null;
+
+  const cheapestHighlightedFlight = resolveHighlightedFlight(sortHighlights?.cheapest);
+  const fastestHighlightedFlight = resolveHighlightedFlight(sortHighlights?.fastest);
+  const cheapestFlight = cheapestHighlightedFlight || cheapestFallback;
+  const fastestFlight = fastestHighlightedFlight || fastestFallback;
+
+  const formatDurationText = (durationLabel = "") => {
+    const str = String(durationLabel || "").trim();
+    if (!str) return "";
+    const hm = str.match(/(\d+)\s*h(?:ours?)?\s*(\d+)\s*m/i);
+    if (hm) {
+      return `${String(hm[1]).padStart(2, "0")}h ${String(hm[2]).padStart(2, "0")}m`;
+    }
+    return str;
+  };
+  const renderDurationParts = (flight) => {
+    const hours = Number(flight?.duration?.hours);
+    const minutes = Number(flight?.duration?.minutes);
+    if (!Number.isFinite(hours) && !Number.isFinite(minutes)) {
+      return "N/A";
+    }
+
+    return `${Number.isFinite(hours) ? hours : "N/A"}h ${Number.isFinite(minutes) ? minutes : "N/A"}m`;
+  };
+
+  const cheapestMeta = {
+    logo: cheapestFlight?.airlines?.[0]?.logo || "/images/Flight.png",
+    price:
+      sortHighlights?.cheapest?.priceLabel ||
+      cheapestFlight?.fare?.pricePerAdult ||
+      "₹ 8500",
+    duration:
+      formatDurationText(sortHighlights?.cheapest?.durationLabel) ||
+      `${String(cheapestFlight?.duration?.hours ?? 0).padStart(2, "0")}h ${String(
+        cheapestFlight?.duration?.minutes ?? 0
+      ).padStart(2, "0")}m`,
+  };
+
+  const fastestMeta = {
+    logo:
+      fastestFlight?.airlines?.[0]?.logo ||
+      "/images/flightCompanyLogos/airIndia.png",
+    price:
+      sortHighlights?.fastest?.priceLabel ||
+      fastestFlight?.fare?.pricePerAdult ||
+      "₹ 8500",
+    duration:
+      formatDurationText(sortHighlights?.fastest?.durationLabel) ||
+      `${String(fastestFlight?.duration?.hours ?? 0).padStart(2, "0")}h ${String(
+        fastestFlight?.duration?.minutes ?? 0
+      ).padStart(2, "0")}m`,
+  };
+
+  const visibleFlights = resolvedFlightResults;
+  const hasNoData = hasSearched && !isLoading && visibleFlights.length === 0;
+
+  const resultsText = pagination
+    ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
+    : "Showing 1-10 of 100 results";
+
   const {
     filters,
     filterChips,
@@ -324,7 +454,25 @@ const OnewayFlightBooking = () => {
     toggleMapCheckbox,
     selectDeparture,
     resetFilters,
+    setSortBy,
   } = useFlightFilters();
+  const quickSort = filters.sortBy === "lowest"
+    ? "cheapest"
+    : filters.sortBy === "shortest"
+      ? "fastest"
+      : "";
+  const applyQuickSort = (type) => {
+    const targetSortBy = type === "cheapest" ? "lowest" : "shortest";
+    setSortBy(filters.sortBy === targetSortBy ? null : targetSortBy);
+  };
+
+  const handleDateSelect = (dateKey) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    nextParams.set("start", dateKey);
+    nextParams.set("tripType", "oneway");
+    nextParams.delete("end");
+    router.replace(`/flights?${nextParams.toString()}`, { scroll: false });
+  };
   return (
     <>
       {" "}
@@ -339,11 +487,15 @@ const OnewayFlightBooking = () => {
               The price is average for one person. Included all taxes and fees.
             </span>
             <span className={styles.itemsResult}>
-              Showing 1-10 of 100 results
+              {resultsText}
             </span>
           </div>
         </div>
-        <DatePriceSlider />
+        <DatePriceSlider
+          tiles={datewiseFareTiles}
+          selectedDate={selectedDepartureDate}
+          onSelectDate={handleDateSelect}
+        />
 
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
@@ -351,32 +503,32 @@ const OnewayFlightBooking = () => {
               <div className={styles.sortedItemContainer}>
                 <div
                   className={`${styles.sortedItem} ${
-                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    quickSort === "cheapest" ? styles.activeSortedItem : ""
                   }`}
-                  onClick={() => setSelectedSort("cheapest")}
+                  onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img
+                    src={cheapestMeta.logo}
+                    alt=""
+                  />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{cheapestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{cheapestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
 
                 <div
                   className={`${styles.sortedItem} ${
-                    selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    quickSort === "fastest" ? styles.activeSortedItem : ""
                   }`}
-                  onClick={() => setSelectedSort("fastest")}
+                  onClick={() => applyQuickSort("fastest")}
                 >
                   <img
-                    src="/images/flightCompanyLogos/airIndia.png"
+                    src={fastestMeta.logo}
                     height={36}
                     width={36}
                     alt=""
@@ -384,12 +536,9 @@ const OnewayFlightBooking = () => {
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>fastest</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{fastestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{fastestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
@@ -404,130 +553,129 @@ const OnewayFlightBooking = () => {
             </div>
           </div>
         </div>
-        {flightResults.map((flight, index) => (
-          <React.Fragment key={index}>
-            {" "}
-            <div
-              key={flight.id}
-              className={`${styles.expendableContainer} ${
-                openId === flight.id ? styles.flightOpenHoverNone : ""
-              }`}
-            >
+        {isLoading ? (
+          <OnewaySkeleton />
+        ) : hasNoData ? (
+          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+        ) : (
+          visibleFlights.map((flight, index) => (
+            <React.Fragment key={index}>
+              {" "}
               <div
                 key={flight.id}
-                className={`${styles.flightFareDetailsContainer} ${
-                  openId === flight.id
-                    ? styles.flightFareDetailsContainerOpen
-                    : ""
+                className={`${styles.expendableContainer} ${
+                  openId === flight.id ? styles.flightOpenHoverNone : ""
                 }`}
               >
-                <div className={styles.flightFareDetails}>
-                  <div className={styles.flightDetail}>
-                    <div className={styles.flightNameContainer}>
-                      {flight.airlines.length > 1 ? (
-                        <div className={styles.multiImageCont}>
-                          {flight.airlines.map((airline) => (
-                            <img
-                              key={airline.code}
-                              src={airline.logo}
-                              alt={airline.name}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <img
-                          src={flight.airlines[0].logo}
-                          alt={flight.airlines[0].name}
-                        />
-                      )}
-                      <div className={styles.flightName}>
-                        {/* Airline names */}
-                        <div className={styles.airlineName}>
-                          {flight.airlines.map((a) => a.name).join(", ")}
-                        </div>
-
-                        {/* Airline codes */}
-                        <div className={styles.flightNumber}>
-                          {flight.airlines.map((a) => a.code).join(", ")}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.departureDetail}>
-                      <div className={styles.departureTimeContainer}>
-                        <div className={styles.departureTime}>
-                          {flight.departure.time}{" "}
-                        </div>
-                        <div className={styles.flightAnimation}>
-                          <div className={styles.flightDotedcontainer}>
-                            <div className={styles.bigDot}></div>
-                            <div className={styles.dashBorder}></div>
+                <div
+                  key={flight.id}
+                  className={`${styles.flightFareDetailsContainer} ${
+                    openId === flight.id
+                      ? styles.flightFareDetailsContainerOpen
+                      : ""
+                  }`}
+                >
+                  <div className={styles.flightFareDetails}>
+                    <div className={styles.flightDetail}>
+                      <div className={styles.flightNameContainer}>
+                        {flight.airlines.length > 1 ? (
+                          <div className={styles.multiImageCont}>
+                            {flight.airlines.map((airline) => (
+                              <img
+                                key={airline.code}
+                                src={airline.logo}
+                                alt={airline.name}
+                              />
+                            ))}
                           </div>
-                          <img src="/icons/flightIcon.svg" alt="" />
-                          <div className={styles.flightDotedcontainer}>
-                            <div className={styles.dashBorder}></div>
-                            <div className={styles.bigDot}></div>
+                        ) : (
+                          <img
+                            src={flight.airlines[0].logo}
+                            alt={flight.airlines[0].name}
+                          />
+                        )}
+                        <div className={styles.flightName}>
+                          <div className={styles.airlineName}>
+                            {flight.airlines.map((a) => a.name).join(", ")}
+                          </div>
+                          <div className={styles.flightNumber}>
+                            {flight.airlines.map((a) => a.code).join(", ")}
                           </div>
                         </div>
-                        <div className={styles.departureTime}>
-                          {flight.stops.nextDay && (
-                            <span className={styles.nextDay}>+1 day </span>
-                          )}
-                          {flight.arrival.time}{" "}
-                        </div>
                       </div>
-                      <div className={styles.departureName}>
-                        <span className={styles.fromName}>
-                          {flight.departure.city}
-                        </span>
-                        <div className={styles.priceContainer}>
-                          <span className={styles.duration}>
-                            {flight.duration.hours}{" "}
-                            <span className={styles.hours}>h</span>{" "}
-                            {flight.duration.minutes}{" "}
-                            <span className={styles.hours}>m</span>
+                      <div className={styles.departureDetail}>
+                        <div className={styles.departureTimeContainer}>
+                          <div className={styles.departureTime}>
+                            {flight.departure.time}{" "}
+                          </div>
+                          <div className={styles.flightAnimation}>
+                            <div className={styles.flightDotedcontainer}>
+                              <div className={styles.bigDot}></div>
+                              <div className={styles.dashBorder}></div>
+                            </div>
+                            <img src="/icons/flightIcon.svg" alt="" />
+                            <div className={styles.flightDotedcontainer}>
+                              <div className={styles.dashBorder}></div>
+                              <div className={styles.bigDot}></div>
+                            </div>
+                          </div>
+                          <div className={styles.departureTime}>
+                            {flight.stops.nextDay && (
+                              <span className={styles.nextDay}>+1 day </span>
+                            )}
+                            {flight.arrival.time}{" "}
+                          </div>
+                        </div>
+                        <div className={styles.departureName}>
+                          <span className={styles.fromName}>
+                            {flight.departure.city}
                           </span>
-                          <div className={styles.dot}></div>
-                          <span className={styles.nonStop}>
-                            {flight.stops.type}
+                          <div className={styles.priceContainer}>
+                            <span className={styles.duration}>
+                              {renderDurationParts(flight)}
+                            </span>
+                            <div className={styles.dot}></div>
+                            <span className={styles.nonStop}>
+                              {flight.stops.type}
+                            </span>
+                          </div>
+                          <span className={styles.fromName}>
+                            {flight.arrival.city}
                           </span>
                         </div>
-                        <span className={styles.fromName}>
-                          {flight.arrival.city}
-                        </span>
+                        {flight.stops.via && (
+                          <div className={styles.goingVia}>
+                            via ({flight.stops.via})
+                          </div>
+                        )}
                       </div>
-                      {flight.stops.via && (
-                        <div className={styles.goingVia}>
-                          via ({flight.stops.via})
-                        </div>
-                      )}
                     </div>
-                  </div>
-                  <div
-                    className={styles.seeDetailsBtn}
-                    onClick={() =>
-                      setOpenId((prev) =>
-                        prev === flight.id ? null : flight.id
-                      )
-                    }
-                  >
-                    See Details
-                    <svg
-                      className={`${styles.downArrow} ${
-                        openId === flight.id ? styles.rotate : ""
-                      }`}
-                      width="8"
-                      height="5"
-                      viewBox="0 0 8 5"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      className={styles.seeDetailsBtn}
+                      onClick={() =>
+                        setOpenId((prev) =>
+                          prev === flight.id ? null : flight.id
+                        )
+                      }
                     >
-                      <path
-                        d="M3.55967 4.01408C3.47933 4.01408 3.40454 4.00126 3.33532 3.97562C3.26609 3.94997 3.20028 3.90596 3.13789 3.84357L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0.0482881 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357C3.91906 3.90596 3.85325 3.94997 3.78402 3.97562C3.7148 4.00126 3.64001 4.01408 3.55967 4.01408Z"
-                        fill="#000033"
-                      />
-                    </svg>
+                      See Details
+                      <svg
+                        className={`${styles.downArrow} ${
+                          openId === flight.id ? styles.rotate : ""
+                        }`}
+                        width="8"
+                        height="5"
+                        viewBox="0 0 8 5"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3.55967 4.01408C3.47933 4.01408 3.40454 4.00126 3.33532 3.97562C3.26609 3.94997 3.20028 3.90596 3.13789 3.84357L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0.0482881 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357C3.91906 3.90596 3.85325 3.94997 3.78402 3.97562C3.7148 4.00126 3.64001 4.01408 3.55967 4.01408Z"
+                          fill="#000033"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                </div>
                 <div className={styles.fareDetailsResponsive}>
                   <div
                     className={styles.seeDetailsBtn}
@@ -604,12 +752,17 @@ const OnewayFlightBooking = () => {
                   openId === flight.id ? styles.open : ""
                 }`}
               >
-                <ExpandableTabs />
+                <ExpandableTabs
+                  flightData={flight}
+                  selectedDepartureDate={selectedDepartureDate}
+                  travellerSummary={travellerSummary}
+                />
               </div>
             </div>
-            {index === OFFER_INDEX && <OfferBanner />}
-          </React.Fragment>
-        ))}
+              {index === OFFER_INDEX && <OfferBanner />}
+            </React.Fragment>
+          ))
+        )}
 
         {/* Fare Comparison Modal */}
         {/* Fare Comparison Modal */}
@@ -619,7 +772,7 @@ const OnewayFlightBooking = () => {
             <FareComparisonModal
               isOpen={fareModalOpen}
               onClose={() => setFareModalOpen(null)}
-              flightData={flightResults.find((f) => f.id === fareModalOpen)}
+              flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
             />
             )
           </>
@@ -628,7 +781,7 @@ const OnewayFlightBooking = () => {
       <section className={styles.isMobileView}>
         <div className={styles.mobileFlightContainer}>
           <p className={styles.mobileSubTextContainer}>
-            Showing 1-10 of 100 results
+            {resultsText}
           </p>
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -657,32 +810,32 @@ const OnewayFlightBooking = () => {
               <div className={styles.sortedItemContainer}>
                 <div
                   className={`${styles.sortedItem} ${
-                    selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                    quickSort === "cheapest" ? styles.activeSortedItem : ""
                   }`}
-                  onClick={() => setSelectedSort("cheapest")}
+                  onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img
+                    src={cheapestMeta.logo}
+                    alt=""
+                  />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{cheapestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{cheapestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
 
                 <div
                   className={`${styles.sortedItem} ${
-                    selectedSort === "fastest" ? styles.activeSortedItem : ""
+                    quickSort === "fastest" ? styles.activeSortedItem : ""
                   }`}
-                  onClick={() => setSelectedSort("fastest")}
+                  onClick={() => applyQuickSort("fastest")}
                 >
                   <img
-                    src="/images/flightCompanyLogos/airIndia.png"
+                    src={fastestMeta.logo}
                     height={36}
                     width={36}
                     alt=""
@@ -690,12 +843,9 @@ const OnewayFlightBooking = () => {
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>fastest</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{fastestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{fastestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
@@ -719,21 +869,30 @@ const OnewayFlightBooking = () => {
         <MobileFareComparisonModal
           isOpen={fareModalOpen}
           onClose={() => setFareModalOpen(null)}
-          flightData={flightResults.find((f) => f.id === fareModalOpen)}
+          flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
         />
         {isLoading ? (
           <OnewaySkeleton />
+        ) : hasNoData ? (
+          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
         ) : (
-          flightResults.map((flight, index) => (
+          visibleFlights.map((flight, index) => (
             <FlightDetailsCard
-              setFareModalOpen={setFareModalOpen}
+              setFareModalOpen={() => setFareModalOpen(flight.id)}
               key={flight.id + index}
               flight={flight}
             />
           ))
         )}
       </section>
-      <SortBySheet open={openSort} onClose={() => setOpenSort(false)} />
+      <SortBySheet
+        open={openSort}
+        onClose={() => setOpenSort(false)}
+        selectedValue={filters.sortBy}
+        onApply={(value) => {
+          setSortBy(value);
+        }}
+      />
     </>
   );
 };

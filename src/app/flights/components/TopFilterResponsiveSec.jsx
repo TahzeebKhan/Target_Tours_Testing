@@ -4,12 +4,13 @@ import styles from "./TopFilterResponsiveSec.module.css";
 // import Switch from "@/app/home-page/components/Switch";
 // import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
 import { ArrowLeftRight, ChevronDown } from "lucide-react";
-import CustomCheckbox from "@/app/components/CustomCheckbox";
+import CustomCheckbox from "@/shared/components/CustomCheckbox";
 import PassengerClassSelector from "./PassengerClassSelector";
 import { CalendarSVG } from "./SVGFile";
 import { useTripType } from "../TripTypeContext";
-import DateCalendarModal from "@/app/components/calendar/DateCalendarModal";
-import CalendarMonths from "@/app/components/calendar/CalendarMonths";
+import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
+import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
+import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 // import calendarSVG from "/icons/calendar.svg";
 
 const travellerOptions = [
@@ -39,6 +40,10 @@ const TopFilterResponsiveSec = () => {
         setFrom,
         to,
         setTo,
+        fromCode,
+        setFromCode,
+        toCode,
+        setToCode,
         passengers,
         setPassengers,
         travelClass,
@@ -73,6 +78,19 @@ const TopFilterResponsiveSec = () => {
     const travellerRef = useRef(null);
 
     const [calendarTripType, setCalendarTripType] = useState("oneway");
+    const { data: datewiseFareData } = useDatewiseFare({
+        tripType,
+        from,
+        to,
+        fromCode,
+        toCode,
+        startDate,
+        endDate,
+        provider: "both",
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+        enabled: true,
+    });
+    const datewiseFaresByDate = datewiseFareData?.faresByDate || {};
 
     // Scroll detection for gap reduction
     useEffect(() => {
@@ -126,9 +144,17 @@ const TopFilterResponsiveSec = () => {
         }
     }, [tripType]);
 
+    const handleCalendarModeChange = (mode) => {
+        const nextTripType = mode === "roundtrip" ? "round" : "oneway";
+        setCalendarTripType(nextTripType);
+        setTripType(nextTripType);
+    };
+
     const swapLocations = () => {
         setFrom(to);
         setTo(from);
+        setFromCode(toCode);
+        setToCode(fromCode);
     };
     const updateSegment = (index, field, value) => {
         setMultiSegments((prev) =>
@@ -182,8 +208,13 @@ const TopFilterResponsiveSec = () => {
         if (!showCalendar) return;
 
         const handleClickOutside = (e) => {
+            if (e.target.closest('[data-calendar-modal="true"]')) {
+                return;
+            }
+
             if (calendarRef.current && !calendarRef.current.contains(e.target)) {
-                // setShowCalendar(false);
+                setShowCalendar(false);
+                setActiveMultiIndex(null);
             }
         };
 
@@ -392,11 +423,7 @@ const TopFilterResponsiveSec = () => {
                                                             ? "roundtrip"
                                                             : "oneway"
                                                     }
-                                                    onModeChange={(mode) =>
-                                                        setCalendarTripType(
-                                                            mode === "roundtrip" ? "round" : "oneway"
-                                                        )
-                                                    }
+                                                    onModeChange={handleCalendarModeChange}
                                                     onClose={() => {
                                                         setShowCalendar(false);
                                                         setActiveMultiIndex(null);
@@ -407,6 +434,8 @@ const TopFilterResponsiveSec = () => {
                                                             startDate={startDate}
                                                             endDate={endDate}
                                                             onDateClick={handleDateClick}
+                                                            price={true}
+                                                            faresByDate={datewiseFaresByDate}
                                                         />
                                                     </div>
                                                 </DateCalendarModal>
@@ -600,6 +629,8 @@ const TopFilterResponsiveSec = () => {
                                                                     startDate={null}
                                                                     endDate={null}
                                                                     onDateClick={handleDateClick}
+                                                                    price={true}
+                                                                    faresByDate={datewiseFaresByDate}
                                                                 />
                                                             </div>
                                                         </DateCalendarModal>

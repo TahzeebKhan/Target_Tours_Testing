@@ -2,115 +2,15 @@ import React from 'react'
 import styles from './FareDetailsExpandable.module.css'
 import FlightTimeline from '../flightTimeline/FlightTimeline';
 import FlightFacilities from '../flightFacilities/FlightFacilities';
+import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 
 
 const FareDetailsExpandable = () => {
-    const flight = {
-        airline: {
-            name: "Garuda Indonesia",
-            code: "6E- 541",
-            logo: "/images/GarudaIndonesia.png"
-        },
-        aircraft: "Boeing 737",
-
-        flexiPlusFare: "Flexi Plus Fare",
-
-        travelClass: "Economy",
-        departure: {
-            date: "Thu, 18 Dec 2025",
-            time: "06:45",
-            airport: "CGK - Jakarta",
-            terminal: "Terminal 2",
-            city: "Jewel Changi Airport"
-        },
-
-        arrival: {
-            date: "THU, 25 DEC 2025",
-            time: "08:00",
-            airport: "CGK - JAKARTA",
-            terminal: "Terminal 3",
-            city: "Soekarno–Hatta International"
-        },
-
-        duration: {
-            hours: "01",
-            minutes: "50"
-        },
-
-        stops: "Non Stop"
-    };
-
-    const flight2 = {
-        airline: {
-            name: "Batik Air Malaysia",
-            code: "OD 804",
-            logo: "/images/AirlineLogos.png" // update path as per your project
-        },
-
-        aircraft: "Boeing 737",
-
-        travelClass: "Business",
-
-        departure: {
-            date: "Thu, 18 Dec 2025",
-            time: "06:45",
-            airport: "KUL - Kuala Lumpur",
-            terminal: null,
-            city: "Kuala Lumpur International Airport"
-        },
-
-        arrival: {
-            date: "Thu, 18 Dec 2025",
-            time: "08:00",
-            airport: "SIN - Singapore",
-            terminal: null,
-            city: "Changi Airport"
-        },
-
-        duration: {
-            hours: "01",
-            minutes: "50"
-        },
-
-        stops: "Non-stop"
-    };
-
-    const returnFlight = {
-        airline: {
-            name: "Garuda Indonesia",
-            code: "6E-541",
-            logo: "/images/GarudaIndonesia.png"
-        },
-
-        aircraft: "Boeing 737",
-
-        flexiPlusFare: "Flexi Plus Fare",
-
-        travelClass: "First Class",
-
-        departure: {
-            date: "Thu, 18 Dec 2025",
-            time: "06:45",
-            airport: "SIN - Singapore",
-            terminal: null,
-            city: "Changi Airport"
-        },
-
-        arrival: {
-            date: "Thu, 18 Dec 2025",
-            time: "08:00",
-            airport: "CGK - Jakarta",
-            terminal: null,
-            city: "Soekarno–Hatta International"
-        },
-
-        duration: {
-            hours: "01",
-            minutes: "50"
-        },
-
-        stops: "Non-Stop"
-    };
+    const { bookingSession } = useFlightBooking();
+    const bookingView = getBookingDetailsView(bookingSession);
+    const flight = bookingView?.departureFlight;
+    const returnFlight = bookingView?.returnFlight;
 
     const facilitiesData = [
         {
@@ -132,29 +32,28 @@ const FareDetailsExpandable = () => {
 
     return (
         <div className={styles.expandWrap}>
-            <div className={styles.flightDepartureContainer}>
-                <h3 className={styles.flightDepartureHeader}>DEPARTURE</h3>
-                <div className={styles.flightDepartureDetailsContainer}>
-                    <div className={styles.flightDepartureDetails}>
-                        <FlightTimeline flight={flight} />
-
-                        <div className={styles.changeOfPlanes}>
-                            Change of planes: <span className={styles.changeOfPlanesTiem}>  2  </span>  h  <span className={styles.changeOfPlanesTiem}>  15  </span> m <span className={styles.changeOfPlanesLocation}> Layover in Kuala Lumpur (KUL)</span>
+            {flight && (
+                <div className={styles.flightDepartureContainer}>
+                    <h3 className={styles.flightDepartureHeader}>DEPARTURE</h3>
+                    <div className={styles.flightDepartureDetailsContainer}>
+                        <div className={styles.flightDepartureDetails}>
+                            <FlightTimeline flight={flight} />
                         </div>
-                        <FlightTimeline flight={flight2} />
+                        <FlightFacilities />
                     </div>
-                    <FlightFacilities />
                 </div>
-            </div>
-            <div className={styles.flightDepartureContainer}>
-                <h3 className={styles.flightDepartureHeader}>RETURN</h3>
-                <div className={styles.flightDepartureDetailsContainer}>
-                    <div className={styles.flightDepartureDetails}>
-                        <FlightTimeline flight={returnFlight} />
+            )}
+            {returnFlight && (
+                <div className={styles.flightDepartureContainer}>
+                    <h3 className={styles.flightDepartureHeader}>RETURN</h3>
+                    <div className={styles.flightDepartureDetailsContainer}>
+                        <div className={styles.flightDepartureDetails}>
+                            <FlightTimeline flight={returnFlight} />
+                        </div>
+                        <FlightFacilities facilities={facilitiesData} className={styles.facilities} />
                     </div>
-                    <FlightFacilities facilities={facilitiesData} className={styles.facilities} />
                 </div>
-            </div>
+            )}
         </div>
     )
 }

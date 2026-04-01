@@ -4,12 +4,12 @@ import styles from "./FlightBookingDetailsLayout.module.css";
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
 import { FlightBookingProvider } from "./FlightBookingContext";
-import TripSummaryHeader from "../profile_components/TripSummaryHeader";
-import SelectPlan from "../profile_components/SelectPlan";
+import TripSummaryHeader from "@/features/profile/components/TripSummaryHeader";
+import SelectPlan from "@/features/profile/components/SelectPlan";
 import Stepper from "./components/mobileStepper/Stepper";
-import AddTravellerDetails from "../profile_components/AddTravellerDetails";
-import TravellerDetails from "../profile_components/TravellerDetails";
-import AddDetails from "../profile_components/AddDetails";
+import AddTravellerDetails from "@/features/profile/components/AddTravellerDetails";
+import TravellerDetails from "@/features/profile/components/TravellerDetails";
+import AddDetails from "@/features/profile/components/AddDetails";
 import Navbar from "../flight-booking-details/Navbar";
 
 export default function FlightBookingDetailsLayout({ children }) {

@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-
+import { useRouter } from "next/navigation";
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -54,6 +54,7 @@ const LimitedTimeOffer = () => {
   const [isEnd, setIsEnd] = useState(false);
   const { data, isLoading, isError } = useHomePageOffer();
   const [isVideoReady, setIsVideoReady] = useState(false);
+   const router = useRouter();
 
 
   const finalData = !isError && data ? data : FALLBACK_DATA;
@@ -201,7 +202,9 @@ const LimitedTimeOffer = () => {
                 >
                   {finalData.sliderData.map((item, index) => (
                     <SwiperSlide key={index} className={styles.swapperslider}>
-                      <div className={styles.items}>
+                      <div className={styles.items}
+                      onClick={()=> router.push(`/tour-details?id=${item.id}`)}
+                      >
                         <img src={item.image} alt={item.title} />
 
                         <div className={styles.imgMainContainer}>

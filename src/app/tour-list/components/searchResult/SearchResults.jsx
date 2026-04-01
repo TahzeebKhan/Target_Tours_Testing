@@ -4,7 +4,13 @@ import styles from "./SearchResult.module.css";
 import SortDropdown from "../sortDropdown/SortDropdown";
 import { SidebarContext } from "../../SidebarContext";
 
-const SearchResults = ({ viewType, setViewType }) => {
+const SearchResults = ({
+  viewType,
+  setViewType,
+  startResult = 0,
+  endResult = 0,
+  totalResults = 0,
+}) => {
   const [sort, setSort] = useState("recent");
   const { isSidebarOpen, setIsSidebarOpen, isTablet } =
     useContext(SidebarContext);
@@ -14,7 +20,8 @@ const SearchResults = ({ viewType, setViewType }) => {
     <div className={styles.searchResultsContainer}>
       <div className={styles.searchResultsLeft}>
         <div>
-          Showing <span>1</span> - <span>10</span> of <span>100</span> results
+          Showing <span>{startResult}</span> - <span>{endResult}</span> of{" "}
+          <span>{totalResults}</span> results
         </div>
       </div>
 

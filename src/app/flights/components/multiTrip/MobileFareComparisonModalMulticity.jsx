@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./MobileFareComparisonModalMulticity.module.css";
-import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
+import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter } from "next/navigation";
 

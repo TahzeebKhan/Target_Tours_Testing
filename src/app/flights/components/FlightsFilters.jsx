@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "./SVGFile";
 import { SidebarContext } from "../SidebarContext";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
+import { useTripType } from "../TripTypeContext";
 
 export default function FlightFilters() {
   const { setIsSidebarOpen, isSidebarOpen } = useContext(SidebarContext);
@@ -15,15 +16,91 @@ export default function FlightFilters() {
 
   const {
     filters,
+    apiFilterData,
     filterChips,
     toggleCheckbox,
     toggleMapCheckbox,
     selectDeparture,
+    setPriceRange,
     resetFilters,
-    setFilters, // needed only for price slider
   } = useFlightFilters();
+  const { tripType, committedSearches } = useTripType();
 
   const price = filters.price;
+  const activeRoute = committedSearches?.[tripType] || committedSearches?.oneway || {};
+
+  const getRouteLabel = (value, fallback) => {
+    const raw = String(value || "").trim();
+    if (!raw) return fallback;
+    const cityOnly = raw.replace(/\s*\([^)]+\)\s*$/, "").trim();
+    if (cityOnly) return cityOnly.toUpperCase();
+    return raw.toUpperCase();
+  };
+
+  const fromLabel = getRouteLabel(activeRoute.from, "JAKARTA");
+  const toLabel = getRouteLabel(activeRoute.to, "SINGAPORE");
+
+  const slotKeyMap = {
+    before6: "before_6am",
+    "6to12": "morning",
+    "12to6": "afternoon",
+    after6: "evening",
+    after12: "evening",
+  };
+
+  const formatSlotPrice = (value) => {
+    const normalizedValue =
+      typeof value === "object" && value !== null
+        ? value.price ?? value.amount ?? value.value
+        : value;
+
+    if (normalizedValue === undefined || normalizedValue === null || normalizedValue === "") {
+      return "₹ 0";
+    }
+
+    const amount = Number(normalizedValue);
+    if (!Number.isFinite(amount)) return "₹ 0";
+    return `₹ ${amount.toLocaleString("en-IN")}`;
+  };
+
+  const getSlotPrice = (bucket, uiSlot) => {
+    const key = slotKeyMap[uiSlot];
+    const slots = apiFilterData?.[bucket] || {};
+    const rawValue =
+      slots?.[key] ??
+      slots?.[key?.replace("_", "")] ??
+      slots?.[uiSlot] ??
+      slots?.[String(uiSlot).toLowerCase()];
+    return formatSlotPrice(rawValue);
+  };
+
+  const fallbackAircraftOptions = [
+    { key: "A380", label: "Airbus A380" },
+    { key: "B787", label: "Boeing 787" },
+    { key: "E190", label: "Embraer E190" },
+    { key: "CRJ", label: "Bombardier CRJ" },
+    { key: "ATR72", label: "ATR 72" },
+    { key: "C172", label: "Cessna 172" },
+    { key: "LJ60", label: "Learjet 60" },
+  ];
+
+  const apiAircraftOptions = Array.isArray(apiFilterData?.aircrafts)
+    ? apiFilterData.aircrafts
+        .map((item) => {
+          const code = String(item?.code || "").trim();
+          const name = String(item?.name || "").trim();
+          const key = code || name;
+          if (!key) return null;
+          return {
+            key,
+            label: name || code,
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  const aircraftOptions =
+    apiAircraftOptions.length > 0 ? apiAircraftOptions : fallbackAircraftOptions;
 
   return (
     <aside className={styles.sidebar}>
@@ -139,15 +216,10 @@ export default function FlightFilters() {
             min={10000}
             max={60000}
             value={price[0]}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                price: [
-                  Math.min(+e.target.value, prev.price[1] - 1000),
-                  prev.price[1],
-                ],
-              }))
-            }
+            onChange={(e) => {
+              const nextMin = Math.min(Number(e.target.value), price[1] - 1000);
+              setPriceRange(nextMin, price[1]);
+            }}
             className={`${styles.rangeInput} ${styles.rangeLeft}`}
           />
 
@@ -157,15 +229,10 @@ export default function FlightFilters() {
             min={10000}
             max={60000}
             value={price[1]}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                price: [
-                  prev.price[0],
-                  Math.max(+e.target.value, prev.price[0] + 1000),
-                ],
-              }))
-            }
+            onChange={(e) => {
+              const nextMax = Math.max(Number(e.target.value), price[0] + 1000);
+              setPriceRange(price[0], nextMax);
+            }}
             className={`${styles.rangeInput} ${styles.rangeRight}`}
           />
         </div>
@@ -219,7 +286,7 @@ export default function FlightFilters() {
 
       {/* departure from jakarta */}
       <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>DEPARTURE FROM JAKARTA</h4>
+        <h4 className={styles.sectionTitle}>DEPARTURE FROM {fromLabel}</h4>
 
         <div className={styles.departureGrid}>
           <button
@@ -234,7 +301,9 @@ export default function FlightFilters() {
               <SunriseSVG />
             </span>
             <span className={styles.departureTime}>Before 6AM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("departure_slots", "before6")}
+            </span>
           </button>
 
           <button
@@ -249,7 +318,9 @@ export default function FlightFilters() {
               <SunSVG />
             </span>
             <span className={styles.departureTime}>6AM – 12PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("departure_slots", "6to12")}
+            </span>
           </button>
 
           <button
@@ -264,13 +335,15 @@ export default function FlightFilters() {
               <MoonCloudSVG />
             </span>
             <span className={styles.departureTime}>12PM – 6PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("departure_slots", "12to6")}
+            </span>
           </button>
 
           <button
-            onClick={() => selectDeparture("departureJakarta", "after12")}
+            onClick={() => selectDeparture("departureJakarta", "after6")}
             className={`${styles.departureCard} ${
-              filters.departureJakarta === "after12"
+              filters.departureJakarta === "after6"
                 ? styles.activeDepartureCard
                 : ""
             }`}
@@ -279,7 +352,9 @@ export default function FlightFilters() {
               <MoonSVG />
             </span>
             <span className={styles.departureTime}>After 6PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("departure_slots", "after6")}
+            </span>
           </button>
         </div>
       </section>
@@ -287,7 +362,7 @@ export default function FlightFilters() {
       <div className={styles.border} />
 
       <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>DEPARTURE In Singapore</h4>
+        <h4 className={styles.sectionTitle}>DEPARTURE IN {toLabel}</h4>
 
         <div className={styles.departureGrid}>
           <button
@@ -302,7 +377,9 @@ export default function FlightFilters() {
               <SunriseSVG />
             </span>
             <span className={styles.departureTime}>Before 6AM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("arrival_slots", "before6")}
+            </span>
           </button>
 
           <button
@@ -317,7 +394,9 @@ export default function FlightFilters() {
               <SunSVG />
             </span>
             <span className={styles.departureTime}>6AM – 12PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("arrival_slots", "6to12")}
+            </span>
           </button>
 
           <button
@@ -332,7 +411,9 @@ export default function FlightFilters() {
               <MoonCloudSVG />
             </span>
             <span className={styles.departureTime}>12PM – 6PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("arrival_slots", "12to6")}
+            </span>
           </button>
 
           <button
@@ -347,7 +428,9 @@ export default function FlightFilters() {
               <MoonSVG />
             </span>
             <span className={styles.departureTime}>After 6PM</span>
-            <span className={styles.departurePrice}>₹ 712,000</span>
+            <span className={styles.departurePrice}>
+              {getSlotPrice("arrival_slots", "after6")}
+            </span>
           </button>
         </div>
       </section>
@@ -359,89 +442,19 @@ export default function FlightFilters() {
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Aircraft Model
         </h4>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["A380"]}
-            onChange={() => toggleMapCheckbox("aircraft", "A380")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Airbus A380
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["B787"]}
-            onChange={() => toggleMapCheckbox("aircraft", "B787")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Boeing 787
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["E190"]}
-            onChange={() => toggleMapCheckbox("aircraft", "E190")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Embraer E190
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["CRJ"]}
-            onChange={() => toggleMapCheckbox("aircraft", "CRJ")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Bombardier CRJ
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["ATR72"]}
-            onChange={() => toggleMapCheckbox("aircraft", "ATR72")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          ATR 72
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["C172"]}
-            onChange={() => toggleMapCheckbox("aircraft", "C172")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Cessna 172
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.aircraft["LJ60"]}
-            onChange={() => toggleMapCheckbox("aircraft", "LJ60")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Learjet 60
-        </label>
+        {aircraftOptions.map((aircraft) => (
+          <label key={aircraft.key} className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={!!filters.aircraft[aircraft.key]}
+              onChange={() => toggleMapCheckbox("aircraft", aircraft.key)}
+            />
+            <span className={styles.customCheckbox}>
+              <span className={styles.checkIcon}></span>
+            </span>
+            {aircraft.label}
+          </label>
+        ))}
       </section>
       <div className={styles.border} />
 

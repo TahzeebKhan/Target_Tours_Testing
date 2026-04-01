@@ -11,7 +11,7 @@ import PassengerClassSelector from "@/app/home-page/components/homePage/Passenge
 import { ChevronDown } from "lucide-react";
 import DateField from "../dateField/DateField";
 import { useSearchParams } from "next/navigation";
-import RecentSearch from "@/app/components/recentSearch/RecentSearch";
+import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 
 const TourHeroSection = () => {
   const searchParams = useSearchParams();

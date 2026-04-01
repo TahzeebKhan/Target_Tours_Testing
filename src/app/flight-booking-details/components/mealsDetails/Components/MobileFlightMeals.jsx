@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./Expandable.module.css";
-import { meals, beverages } from "../mealsData";
 
 const MobileFlightMeals = ({
   flightSegment,
@@ -8,6 +7,8 @@ const MobileFlightMeals = ({
   time,
   segmentQuantities,
   onUpdateQuantity,
+  meals = [],
+  beverages = [],
 }) => {
   return (
     <div className={styles.baggageMobileCard}>

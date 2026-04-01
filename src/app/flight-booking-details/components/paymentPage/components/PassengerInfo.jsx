@@ -1,60 +1,43 @@
 import styles from "./PassengerInfo.module.css";
+import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
 
-const passengers = [
-  {
-    name: "MS PRACHI MEHTA (ADULT)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MRS ARUN KUMAR (CHILD)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MS VIKAS MEHTA (INFANT)",
-    gender: "FEMALE",
-    email: "RYTC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MS PRACHI MEHTA (ADULT)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-];
-const passengers2 = [
-  {
-    name: "MS PRACHI MEHTA",
-    email: "ABC@GMAIL.COM",
-    phone: "+91 7875434345",
-    type: "Adult",
-    gender: "Male",
-  },
-  {
-    name: "MRS ARUN KUMAR (CHILD)",
-    email: "ABC@GMAIL.COM",
-    phone: "+91 7875434345",
-    type: "Child",
-    gender: "Male",
-  },
-  {
-    name: "MRS ARUN KUMAR (CHILD)",
-    email: "ABC@GMAIL.COM",
-    phone: "+91 7875434345",
-    type: "Child",
-    gender: "Male",
-  },
-];
+const GENDER_MAP = {
+  M: "MALE",
+  F: "FEMALE",
+};
+
+const TYPE_MAP = {
+  ADT: "Adult",
+  CHD: "Child",
+  INF: "Infant",
+};
+
+const formatPassengerName = (traveler) => {
+  const typeLabel = TYPE_MAP[traveler?.PTC] || traveler?.PTC || "Passenger";
+  return `${traveler?.Title || ""} ${traveler?.FName || ""} ${traveler?.LName || ""} (${typeLabel})`
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+};
 
 const PassengerInfo = () => {
+  const { travelerDetails, bookingContactDetails } = useFlightBooking();
+  const travelers = Array.isArray(travelerDetails)
+    ? travelerDetails
+    : [];
+  const contact = bookingContactDetails || {};
+
+  const passengers = travelers.map((traveler) => ({
+    name: formatPassengerName(traveler),
+    gender: GENDER_MAP[traveler?.Gender] || traveler?.Gender || "N/A",
+    email: traveler?.Email || contact?.Email || "N/A",
+    contact: traveler?.MobileNumber || contact?.MobileNumber || "N/A",
+    type: TYPE_MAP[traveler?.PTC] || traveler?.PTC || "Passenger",
+  }));
+
   return (
     <>
       <div className={styles.wrapper}>
-        {/* TABLE */}
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.header}`}>
             <span>NAME</span>
@@ -63,38 +46,39 @@ const PassengerInfo = () => {
             <span>CONTACT NUMBER</span>
           </div>
 
-          {passengers.map((p, index) => (
+          {passengers.map((passenger, index) => (
             <div key={index} className={styles.row}>
-              <span>{p.name}</span>
-              <span>{p.gender}</span>
-              <span>{p.email}</span>
-              <span>{p.contact}</span>
+              <span>{passenger.name}</span>
+              <span>{passenger.gender}</span>
+              <span>{passenger.email}</span>
+              <span>{passenger.contact}</span>
             </div>
           ))}
         </div>
 
-        {/* FOOTER INFO */}
         <div className={styles.footer}>
           <span className={styles.footerLabel}>
             Booking details will be sent to
           </span>
 
           <div className={styles.footerRight}>
-            <span className={styles.primary}> 
-              Prachi Kumari (primary), +4 Traveller
+            <span className={styles.primary}>
+              {(contact?.FName || contact?.Email || "Primary Contact")}
+              {travelers.length > 0
+                ? ` (primary), +${Math.max(travelers.length - 1, 0)} Traveller`
+                : ""}
             </span>
             <span className={styles.secondary}>
-              prachi1605@gmail.com, +91 78795465384
+              {[contact?.Email, contact?.MobileNumber].filter(Boolean).join(", ") || "N/A"}
             </span>
           </div>
         </div>
       </div>
+
       <div className={styles.wrapperMobile}>
-        {passengers2.map((passenger, index) => (
-          <>
-            {" "}
+        {passengers.map((passenger, index) => (
+          <div key={index}>
             <div
-              key={index}
               className={`${styles.passengerItemMobile} ${
                 index !== passengers.length - 1 ? styles.withBorderMobile : ""
               }`}
@@ -110,13 +94,13 @@ const PassengerInfo = () => {
 
               <div className={styles.rightMobile}>
                 <p className={styles.emailMobile}>{passenger.email}</p>
-                <p className={styles.phoneMobile}>{passenger.phone}</p>
+                <p className={styles.phoneMobile}>{passenger.contact}</p>
               </div>
             </div>
-            {index !== passengers2.length - 1 && (
+            {index !== passengers.length - 1 && (
               <div className={styles.dashedBorder} />
             )}
-          </>
+          </div>
         ))}
       </div>
     </>

@@ -1,11 +1,11 @@
 "use client"
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './DateField.module.css'
-// import DateCalendarModal from '@/app/components/calendar/DateCalendarModal'
-// import CalendarMonths from '@/app/components/calendar/CalendarMonths'
+// import DateCalendarModal from '@/shared/components/calendar/DateCalendarModal'
+// import CalendarMonths from '@/shared/components/calendar/CalendarMonths'
 import { CalendarSVG } from '@/app/flights/components/SVGFile'
-import DateCalendarModal from './calendar/DateCalendarModal';
-import CalendarMonths from './calendar/CalendarMonths';
+import DateCalendarModal from '@/shared/components/calendar/DateCalendarModal';
+import CalendarMonths from '@/shared/components/calendar/CalendarMonths';
 
 
 const DateField = ({

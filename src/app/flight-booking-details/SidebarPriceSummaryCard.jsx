@@ -4,7 +4,7 @@ import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
 export default function SidebarPriceSummaryCard() {
-  const { prices,currentStep  } = useFlightBooking();
+  const { prices,currentStep, submitItinerary, itineraryLoading  } = useFlightBooking();
 
   return (
     <div className={styles.card}>
@@ -63,7 +63,13 @@ export default function SidebarPriceSummaryCard() {
       </div>
       {currentStep === 6 && (
         <>
-          <button className={styles.bookNowBtn}>Continue Payment</button>
+          <button
+            className={styles.bookNowBtn}
+            onClick={submitItinerary}
+            disabled={itineraryLoading}
+          >
+            {itineraryLoading ? "Loading..." : "Continue Payment"}
+          </button>
           <div className={styles.safeBadge}>
             <img src="/images/secure.png" />
             <div className={styles.text}>

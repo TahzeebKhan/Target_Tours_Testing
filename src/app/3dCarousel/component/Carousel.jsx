@@ -2,14 +2,16 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Carousel.module.css";
+import { redirect } from "next/dist/server/api-utils";
 // import { ArrowLeft, ArrowRight } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 // Sample data for slides
 
 const Carousel = ({ slideData = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
+   const router = useRouter();
 
   useEffect(() => {
     setCurrentSlide(1);
@@ -145,10 +147,12 @@ const Carousel = ({ slideData = [] }) => {
         onMouseLeave={handleMouseLeave}
       >
         {/* Slides */}
-        {slideData.map((slide) => {
-          const slideNumber = slide.id;
+        {slideData.map((slide, index) => {
+           console.log("slide6",slide)
+          const slideNumber = slide.carouselId ?? index + 1;
           const isActive = currentSlide === slideNumber;
           const slideStyle = getSlideStyle(slideNumber);
+          const packageId = slide.packageId ?? slide.id;
 
           return (
             <div
@@ -157,11 +161,17 @@ const Carousel = ({ slideData = [] }) => {
                 isActive ? styles.activeSlide : ""
               }`}
               style={slideStyle}
-              onClick={() => handleSlideChange(slideNumber)}
+              onClick={() => {
+                handleSlideChange(slideNumber);
+                if (packageId ) {
+                  router.push(`/tour-details?id=${packageId}`);
+                }
+              }}
             >
               <div className={styles.slideContent}>
                 {/* Image Container */}
-                <div className={styles.imageContainer}>
+                <div className={styles.imageContainer}
+                >
                   <img
                     src={slide.image}
                     alt={slide.title}

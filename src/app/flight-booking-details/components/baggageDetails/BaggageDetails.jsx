@@ -1,32 +1,97 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import styles from "./BaggageDetails.module.css";
 import { useRouter } from "next/navigation";
 
-import CabinBaggageInfo from "./Components/cabinBaggageInfo/CabinBaggageInfo";
-import ExtraBaggageItem from "./Components/extraBaggageItem/ExtraBaggageItem";
+import CabinBaggageInfo from "./components/cabinBaggageInfo/CabinBaggageInfo";
+import ExtraBaggageItem from "./components/extraBaggageItem/ExtraBaggageItem";
 
 import { useFlightBooking } from "../../FlightBookingContext";
-import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
-import PriceSummary from "@/app/profile_components/PriceSummary";
+import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
+import PriceSummary from "@/features/profile/components/PriceSummary";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 
-/* ================== DATA ================== */
+const CABIN_IMAGES = ["/bags/redBag.png", "/bags/pinkBag.svg"];
+const CHECKED_IMAGES = ["/bags/boxBag.png", "/bags/trolly.svg"];
 
-const EXTRA_BAGGAGE_ROWS = [
-  [
-    { image: "bags/redBag.png", weight: "5 Kg", price: 3100 },
-    { image: "bags/boxBag.png", weight: "10 Kg", price: 6200 },
-  ],
-  [
-    { image: "bags/pinkBag.svg", weight: "15 Kg", price: 9300 },
-    { image: "bags/trolly.svg", weight: "25 Kg", price: 15500 },
-  ],
-];
+const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
-// Helper to find price by weight
-const getBaggageInfo = (weight) => {
-  const flatList = EXTRA_BAGGAGE_ROWS.flat();
-  return flatList.find((item) => item.weight === weight);
+const parseWeightValue = (value) => {
+  const match = String(value || "").match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+};
+
+const buildExtraBaggageData = (routeBaggage = []) => {
+  const normalized = routeBaggage.map((item, index) => {
+    const weightLabel = String(item?.weight || item?.name || "0 Kg").trim();
+    const weightValue = parseWeightValue(weightLabel);
+    const bucket = weightValue < 10 ? "cabin" : "checked";
+    const imagePool = bucket === "cabin" ? CABIN_IMAGES : CHECKED_IMAGES;
+
+    return {
+      id: item?.id || `${bucket}-${index}`,
+      code: item?.code || `${bucket}-${index}`,
+      image: imagePool[index % imagePool.length],
+      weight: weightLabel,
+      price: Number(item?.price || 0),
+      name: item?.name || weightLabel,
+      bucket,
+    };
+  });
+
+  const cabin = normalized.filter((item) => item.bucket === "cabin");
+  const checked = normalized.filter((item) => item.bucket === "checked");
+  const maxRows = Math.max(cabin.length, checked.length);
+  const rows = [];
+
+  for (let index = 0; index < maxRows; index += 1) {
+    rows.push([cabin[index], checked[index]].filter(Boolean));
+  }
+
+  return rows;
+};
+
+const buildRouteCards = (bookingSession, bookingView) => {
+  const formatted = bookingSession?.ssrResponse?.data?.formatted || {};
+  const entries = Object.entries(formatted);
+  const routes = entries.map(([routeKey, value], index) => {
+    const journey = routeKey.split("-");
+    const departureFlight =
+      index === 0 ? bookingView?.departureFlight : bookingView?.returnFlight;
+    const departureCode = journey[0] || "";
+    const arrivalCode = journey[1] || "";
+
+    return {
+      key: routeKey,
+      routeLabel: routeKey.replace(/-/g, "–"),
+      date: departureFlight?.departure?.date || "N/A",
+      time: `${departureFlight?.departure?.time || "N/A"} - ${departureFlight?.arrival?.time || "N/A"}`,
+      baggageRows: buildExtraBaggageData(value?.baggage || []),
+    };
+  });
+
+  if (routes.length > 0) return routes;
+
+  const fallbackRoutes = [];
+  if (bookingView?.departureFlight) {
+    fallbackRoutes.push({
+      key: "departure",
+      routeLabel: `${bookingView.header?.fromCode || "N/A"}–${bookingView.header?.toCode || "N/A"}`,
+      date: bookingView.departureFlight.departure.date,
+      time: `${bookingView.departureFlight.departure.time} - ${bookingView.departureFlight.arrival.time}`,
+      baggageRows: [],
+    });
+  }
+  if (bookingView?.returnFlight) {
+    fallbackRoutes.push({
+      key: "return",
+      routeLabel: `${bookingView.header?.toCode || "N/A"}–${bookingView.header?.fromCode || "N/A"}`,
+      date: bookingView.returnFlight.departure.date,
+      time: `${bookingView.returnFlight.departure.time} - ${bookingView.returnFlight.arrival.time}`,
+      baggageRows: [],
+    });
+  }
+  return fallbackRoutes;
 };
 
 const cabinBagData = {
@@ -54,7 +119,7 @@ const checkedBagData = {
 /* ================== FLIGHT CARD ================== */
 
 const FlightExpandableCard = ({
-  flightDestination,
+  flightCard,
   quantities,
   onIncrease,
   onDecrease,
@@ -62,11 +127,11 @@ const FlightExpandableCard = ({
   return (
     <div className={styles.flightExpandableCard}>
       <div className={styles.flightExpandableHeader}>
-        <h3>{flightDestination}</h3>
+        <h3>{flightCard.routeLabel}</h3>
         <div className={styles.aboutFlightContainerRight}>
-          <span>Fri, 26 Dec 2025</span>
+          <span>{flightCard.date}</span>
           <div className={styles.dot}></div>
-          <span>23:10 - 10:40</span>
+          <span>{flightCard.time}</span>
         </div>
       </div>
 
@@ -78,10 +143,10 @@ const FlightExpandableCard = ({
         </div>
 
         {/* Extra baggage */}
-        {EXTRA_BAGGAGE_ROWS.map((row, rowIndex) => (
+        {flightCard.baggageRows.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.flightExpandableRows}>
             {row.map((item) => {
-              const key = `${flightDestination}-${item.weight}`;
+              const key = `${flightCard.key}::${item.code}`;
               return (
                 <ExtraBaggageItem
                   key={key}
@@ -102,7 +167,7 @@ const FlightExpandableCard = ({
 };
 
 const MobileFlightCard = ({
-  flightDestination,
+  flightCard,
   quantities,
   onIncrease,
   onDecrease,
@@ -110,11 +175,11 @@ const MobileFlightCard = ({
   return (
     <div className={styles.baggageMobileCard}>
       <div className={styles.flightExpandableHeader}>
-        <h3 className={styles.mobileFlightDestinationName}>DEL–BOM</h3>
+        <h3 className={styles.mobileFlightDestinationName}>{flightCard.routeLabel}</h3>
         <div className={styles.aboutFlightContainerRight}>
-          <span>Fri, 26 Dec 2025</span>
+          <span>{flightCard.date}</span>
           <div className={styles.dot}></div>
-          <span>23:10 - 10:40</span>
+          <span>{flightCard.time}</span>
         </div>
       </div>
       <div className={styles.br}></div>
@@ -123,10 +188,10 @@ const MobileFlightCard = ({
           <CabinBaggageInfo data={cabinBagData} />
           <CabinBaggageInfo data={checkedBagData} />
         </div>
-        {EXTRA_BAGGAGE_ROWS.map((row, rowIndex) => (
+        {flightCard.baggageRows.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.flightExpandableRows}>
             {row.map((item) => {
-              const key = `${flightDestination}-${item.weight}`;
+              const key = `${flightCard.key}::${item.code}`;
 
               return (
                 <ExtraBaggageItem
@@ -151,8 +216,12 @@ const MobileFlightCard = ({
 
 const BaggageDetails = () => {
   const router = useRouter();
-  const { setBaggage } = useFlightBooking();
-  const { setCurrentStep, currentStep } = useFlightBooking();
+  const { setBaggage, setCurrentStep, currentStep, bookingSession } = useFlightBooking();
+  const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
+  const routeCards = useMemo(
+    () => buildRouteCards(bookingSession, bookingView),
+    [bookingSession, bookingView]
+  );
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // 🔥 Quantity state (per flight + per baggage)
@@ -163,31 +232,25 @@ const BaggageDetails = () => {
     const newBaggageList = [];
     Object.entries(quantities).forEach(([key, qty]) => {
       if (qty > 0) {
-        // Parse key "Destination-Weight"
-        // Adjust split to handle possible dashes in destination if needed,
-        // but here we know destination structure.
-        // A safer way is to store data differently, but let's stick to the key convention.
-        // unique separator or just suffix match.
-        const parts = key.split("-");
-        const weight = parts[parts.length - 1]; // "5 Kg"
-        // Reconstruct destination if needed, or just ignore.
-        // We only need price for the summary.
+        const baggageCode = key.split("::")[1];
+        const matchedItem = routeCards
+          .flatMap((card) => card.baggageRows.flat())
+          .find((item) => `${item.code}` === baggageCode);
 
-        const info = getBaggageInfo(weight);
+        const info = matchedItem || null;
         if (info) {
-          // Add an item for each quantity
           for (let i = 0; i < qty; i++) {
             newBaggageList.push({
               ...info,
               id: `${key}-${i}`, // unique id
-              label: `Extra Baggage ${weight}`,
+              label: `Extra Baggage ${info.weight}`,
             });
           }
         }
       }
     });
-    setBaggage(newBaggageList);
-  }, [quantities, setBaggage]);
+    setBaggage((current) => (areEqual(current, newBaggageList) ? current : newBaggageList));
+  }, [quantities, routeCards, setBaggage]);
 
   const increaseQty = useCallback((key) => {
     setQuantities((prev) => ({
@@ -221,21 +284,15 @@ const BaggageDetails = () => {
         </div>
 
         <div className={styles.flightExpandableContainer}>
-          {/* FLIGHT 1 */}
-          <FlightExpandableCard
-            flightDestination="DEL–BOM"
-            quantities={quantities}
-            onIncrease={increaseQty}
-            onDecrease={decreaseQty}
-          />
-
-          {/* FLIGHT 2 */}
-          <FlightExpandableCard
-            flightDestination="BOM–DEL"
-            quantities={quantities}
-            onIncrease={increaseQty}
-            onDecrease={decreaseQty}
-          />
+          {routeCards.map((flightCard) => (
+            <FlightExpandableCard
+              key={flightCard.key}
+              flightCard={flightCard}
+              quantities={quantities}
+              onIncrease={increaseQty}
+              onDecrease={decreaseQty}
+            />
+          ))}
 
           {/* BAGGAGE GUIDELINES */}
           <div className={styles.flightExpandableCard}>
@@ -302,18 +359,15 @@ const BaggageDetails = () => {
           title="Choose Your Baggage"
         />
         <div className={styles.mobileViewContainer}>
-          <MobileFlightCard
-            flightDestination="DEL–BOM"
-            quantities={quantities}
-            onIncrease={increaseQty}
-            onDecrease={decreaseQty}
-          />
-          <MobileFlightCard
-            flightDestination="BOM–DEL"
-            quantities={quantities}
-            onIncrease={increaseQty}
-            onDecrease={decreaseQty}
-          />
+          {routeCards.map((flightCard) => (
+            <MobileFlightCard
+              key={flightCard.key}
+              flightCard={flightCard}
+              quantities={quantities}
+              onIncrease={increaseQty}
+              onDecrease={decreaseQty}
+            />
+          ))}
 
           {/* BAGGAGE GUIDELINES */}
           <div className={styles.flightExpandableCard}>

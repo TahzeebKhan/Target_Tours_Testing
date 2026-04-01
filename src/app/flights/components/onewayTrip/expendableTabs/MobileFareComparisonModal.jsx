@@ -1,16 +1,47 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import styles from "./MobileFareComparisonModal.module.css";
-import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getSelectedFlightSummary } from "../fareComparisonUtils";
+import { toast } from "react-toastify";
+import { getFlightPrice } from "@/features/flights/services/flightBooking";
+import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
 
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
-  if (!isOpen) return null;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  if (!isOpen) return null;
 
-  const handleBookNow = () => {
-    router.push("/flight-booking-details");
+  const handleBookNow = async (selectedFare) => {
+    const priceRequest = flightData?.booking?.priceRequest;
+    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+      toast.error("Missing booking payload for the selected flight.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const priceResponse = await getFlightPrice(priceRequest);
+      writeFlightBookingSession({
+        selectedFlight: flightData,
+        selectedFare,
+        priceRequest,
+        priceResponse,
+        ssrRequest: null,
+        ssrResponse: null,
+      });
+      router.push("/flight-booking-details");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to continue with this flight right now."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const fareOptions = [
     {
@@ -72,27 +103,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
     },
   ];
 
-  const flight = {
-    departure: {
-      date: "THU, 18 DEC 2025",
-      time: "06:45",
-      airport: "DEL - DELHI",
-      terminal: "Terminal T2",
-      city: "Indira Gandhi International",
-    },
-    arrival: {
-      date: "THU, 18 DEC 2025",
-      time: "08:00",
-      airport: "HKT - PHUKET CITY",
-      terminal: "Terminal T3",
-      city: "Phuket International",
-    },
-    duration: {
-      hours: 1,
-      minutes: 50,
-    },
-    stops: "Non-Stop",
-  };
+  const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -115,52 +126,52 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
           {/* Header Section: Dark blue background with Route and Date */}
           <div className={styles.TripCardHeader}>
             <div className={styles.TripCardHeaderDetails}>
-              <p className={styles.TripCardHeaderDetailsItemText}>NEW DELHI</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{flight.route.fromName.toUpperCase()}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({flight.route.fromCode})
               </span>
 
               <img src="/icons/right-arrow.svg" alt="arrow" />
 
               <p className={styles.TripCardHeaderDetailsItemText}>
-                PHUKET CITY
+                {flight.route.toName.toUpperCase()}
               </p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (CGK)
+                ({flight.route.toCode})
               </span>
             </div>
-            <div className={styles.TripCardHeaderDate}>Wed-11 Feb 2026</div>
+            <div className={styles.TripCardHeaderDate}>{flight.mobileDate}</div>
           </div>
 
           {/* Content Section: White background with Airline, Timeline, and Links */}
           <div className={styles.TripFlightDetailsCard}>
-            <div className={styles.TripFlightDetailsCardCont}>
-              <div className={styles.TripFlightDetailsCardImage}>
-                <img src="/images/Flight.png" alt="" />
-              </div>
-              <div className={styles.AirLineDetails}>
-                <div className={styles.AirLineDetailsItem}>
-                  <span className={styles.AirLineDetailsItemText}>
-                    Air India
-                  </span>
-                  <div className={styles.dot}></div>
-                  <span className={styles.AirLineCode}>AI2380</span>
+              <div className={styles.TripFlightDetailsCardCont}>
+                <div className={styles.TripFlightDetailsCardImage}>
+                  <img src={flight.airline.logo} alt="" />
                 </div>
-                <div className={styles.AirLineDetailsItem}>
-                  <span className={styles.AirLineBoeing}>
-                    Boeing 787-9 Dreamliner
-                  </span>
-                  <div className={styles.dot}></div>
-                  <span className={styles.AirLineDetailsItemCode}>
-                    Economy Class
-                  </span>
+                <div className={styles.AirLineDetails}>
+                  <div className={styles.AirLineDetailsItem}>
+                    <span className={styles.AirLineDetailsItemText}>
+                      {flight.airline.name}
+                    </span>
+                    <div className={styles.dot}></div>
+                    <span className={styles.AirLineCode}>{flight.airline.code}</span>
+                  </div>
+                  <div className={styles.AirLineDetailsItem}>
+                    <span className={styles.AirLineBoeing}>
+                      {flight.airline.aircraft}
+                    </span>
+                    <div className={styles.dot}></div>
+                    <span className={styles.AirLineDetailsItemCode}>
+                      {flight.airline.cabinClass}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <FlightTimeline flight={flight} />
+              <FlightTimeline flight={flight} />
             <div className={styles.Airportname}>
-              <span>Indira Gandhi Internation</span>
-              <span>Phuket International</span>
+              <span>{flight.departure.city}</span>
+              <span>{flight.arrival.city}</span>
             </div>
           </div>
         </div>
@@ -259,8 +270,8 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
               {/* Action Buttons */}
               <div className={styles.fareActions}>
                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                <button onClick={handleBookNow} className={styles.bookNowBtn}>
-                  BOOK NOW
+                <button onClick={() => handleBookNow(fare)} className={styles.bookNowBtn}>
+                  {isSubmitting ? "LOADING..." : "BOOK NOW"}
                 </button>
               </div>
             </div>

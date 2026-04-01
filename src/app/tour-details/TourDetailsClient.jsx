@@ -19,7 +19,7 @@ import UpcomingDepartures from "./components/upcomingDepartures/UpcomingDepartur
 import ArrivalToronto from "./components/arrivalToronto/ArrivalToronto";
 import PriceBar from "./components/priceBar/PriceBar";
 import styles from "./page.module.css";
-import CustomLoaderHomePage from "../components/CustomLoaderHomePage";
+import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
 
 /* ---------------- Error UI ---------------- */
 const ErrorState = ({ title, description }) => {
@@ -50,7 +50,7 @@ const fetchTourDetails = async ({ queryKey }) => {
   const token = Cookies.get("auth_token");
 
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-packages/${tourId}?domain=localhost:1337`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-packages/${tourId}?domain=${process.env.NEXT_PUBLIC_DOMAIN}`,
     {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }

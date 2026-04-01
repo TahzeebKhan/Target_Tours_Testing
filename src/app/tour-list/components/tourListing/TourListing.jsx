@@ -8,15 +8,16 @@ import { Pencil, SlidersHorizontal } from "lucide-react";
 import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
 import SortBySheet from "../sortBySheet/SortBySheet";
 import PreferencesSection from "../preferencesSection/PreferencesSection";
-import SelectDestination from "@/app/profile_components/selectDestination";
-import SelectTravellerProfile from "@/app/profile_components/selectTravellerProfile";
-import SelectPreferences from "@/app/profile_components/selectPreferences";
-import axios from "axios";
-import api from "@/lib/axios";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { fetchTours } from "@/app/service/tourPackage";
-import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
+import SelectDestination from "@/features/profile/components/selectDestination";
+import SelectTravellerProfile from "@/features/profile/components/selectTravellerProfile";
+import SelectPreferences from "@/features/profile/components/selectPreferences";
+import { useInfiniteTours } from "@/features/tours/hooks/useInfiniteTours";
+import {
+  useToursData,
+  tourDataFallback,
+} from "@/features/tours/hooks/useToursData";
+import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
 const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
@@ -65,19 +66,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     fetchNextPage,
     hasNextPage,
     isError,
-  } = useInfiniteQuery({
-    queryKey: ["tours", { filters }],
-    queryFn: fetchTours,
-    keepPreviousData: true,
-    staleTime: 1000 * 60 * 10,
-    getNextPageParam: (lastPage) => {
-      const pagination = lastPage.meta?.pagination;
-      if (!pagination) return undefined;
-
-      const { page, pageCount } = pagination;
-      return page < pageCount ? page + 1 : undefined;
-    },
-  });
+  } = useInfiniteTours({ filters });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,75 +89,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const tourDataFallback = [
-    {
-      id: 1,
-      image: "/tourList/cardItem1.jpg",
-      route: "TORONTO TO OTTAWA",
-      title: "Splendors of the Canadian West",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 2,
-      image: "/tourList/cardItem2.jpg",
-      route: "VANCOUVER TO CALGARY",
-      title: "Splendors of the Rocky Mountains",
-      days: "14 DAYS & 13 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 72,990",
-    },
-    {
-      id: 3,
-      image: "/tourList/cardItem3.jpg",
-      route: "TORONTO TO MONTREAL",
-      title: "Charms of Eastern Canada",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 4,
-      image: "/tourList/cardItem4.jpg",
-      route: "WHITEHORSE TO FAIRBANKS",
-      title: "Northern Lights of Canada",
-      days: "10 DAYS & 9 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "4 ACTIVITIES",
-      price: "₹ 89,900",
-    },
-    {
-      id: 5,
-      image: "/tourList/cardItem5.jpg",
-      route: "MONTREAL TO QUEBEC CITY",
-      title: "Colors of Quebec Fall",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 6,
-      image: "/tourList/cardItem6.jpg",
-      route: "VANCOUVER TO WHISTLER",
-      title: "Elegance of Canada's West Coast",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-  ];
-
   const toggleLike = (id) => {
     setLikedTours((prev) =>
       prev.includes(id)
@@ -177,13 +97,14 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     );
   };
 
-  const tourData = data?.pages.flatMap((page) => page.data) || tourDataFallback;
-  /*
-   * Extract meta from the first page of data.
-   * Since this is an infinite query, the most relevant "global" counts
-   * usually come from the initial fetch or are consistent across pages.
-   */
-  const meta = data?.pages?.[0]?.meta;
+  const { tourData, meta } = useToursData({
+    data,
+    tourDataFallback,
+  });
+  const totalResults = Number(meta?.pagination?.total ?? tourData.length) || 0;
+  const loadedCount = tourData.length;
+  const startResult = loadedCount > 0 ? 1 : 0;
+  const endResult = totalResults > 0 ? Math.min(loadedCount, totalResults) : 0;
 
   useEffect(() => {
     if (meta && onDataLoaded) {
@@ -195,11 +116,16 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
   useEffect(() => {
     const onScroll = () => {
+      const scrollHeight =
+        document.documentElement?.scrollHeight || document.body.offsetHeight;
+      const hasReachedBottom =
+        window.innerHeight + window.scrollY >= scrollHeight - 300;
+
       if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 300 &&
+        hasReachedBottom &&
         hasNextPage &&
-        !isFetchingNextPage
+        !isFetchingNextPage &&
+        !isFetching
       ) {
         fetchNextPage();
       }
@@ -207,7 +133,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isFetching]);
 
   const truncateText = (text = "", maxLength = 29) => {
     if (text.length <= maxLength) return text;
@@ -217,7 +143,13 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   return (
     <>
       <section className={styles.tourListSection}>
-        <SearchResults viewType={viewType} setViewType={setViewType} />
+        <SearchResults
+          viewType={viewType}
+          setViewType={setViewType}
+          startResult={startResult}
+          endResult={endResult}
+          totalResults={totalResults}
+        />
 
         <AnimatePresence mode="popLayout">
           {viewType === "grid" && (

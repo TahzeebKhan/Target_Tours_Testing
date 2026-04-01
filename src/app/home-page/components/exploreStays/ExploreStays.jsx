@@ -2,8 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./ExploreStays.module.css";
 import ExpCarousel from "@/app/exploreCarousel/component/ExpCarousel";
-import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
+import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
 const ExploreStays = () => {
   const [activeTab, setActiveTab] = useState("All");

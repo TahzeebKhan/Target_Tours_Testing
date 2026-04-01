@@ -6,9 +6,9 @@ import { CalendarSVG } from "@/app/flights/components/SVGFile";
 
 import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
-import DateCalendarModal from "@/app/home-page/components/homePage/calendar/DateCalendarModal";
-import CalendarMonths from "@/app/home-page/components/homePage/calendar/CalendarMonths";
-import MobileViewCalender from "@/app/components/mobileViewCalendar/MobileViewCalender";
+import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
+import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
+import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import { useRouter } from "next/navigation";
 

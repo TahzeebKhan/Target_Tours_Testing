@@ -3,8 +3,8 @@ import React, { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
 import TravellerSelector from "../TravellerSelector";
-import MobileViewCalender from "@/app/components/mobileViewCalendar/MobileViewCalender";
-import PassengersPopup from "@/app/components/passengersPopUp/PassengersPopup";
+import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
+import PassengersPopup from "@/shared/components/passengersPopUp/PassengersPopup";
 
 const InsuranceSearchMobile = ({
   styles,

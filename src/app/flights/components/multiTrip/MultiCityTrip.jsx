@@ -9,14 +9,21 @@ import SortBySheet from "../SortBySheet";
 import RoundTripSkeleton from "../roundTrip/RoundTripSkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
-import FlightDetailsCard from "../PhoneViewComponents/multiTripPhoneView/FlightDetailsCard";
+import FlightDetailsCard from "../phoneViewComponents/multiTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
 import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
-const MultiCityTrip = () => {
-  const [selectedSort, setSelectedSort] = useState("cheapest");
-  const { committedSearches } = useTripType();
+const MultiCityTrip = ({
+  flightData = [],
+  tripCards = [],
+  datewiseFareTiles = [],
+  pagination = null,
+  sortHighlights = null,
+  hasSearched = false,
+  isLoading = false,
+}) => {
+  const { committedSearches, handleSearch } = useTripType();
   const [openSort, setOpenSort] = useState(false);
   const { from, to } = committedSearches.multi;
   const {
@@ -26,11 +33,15 @@ const MultiCityTrip = () => {
     toggleMapCheckbox,
     selectDeparture,
     resetFilters,
+    setSortBy,
   } = useFlightFilters();
-  const [isLoading, setIsLoading] = useState(false);
-
+  const quickSort = filters.sortBy === "lowest"
+    ? "cheapest"
+    : filters.sortBy === "shortest"
+      ? "fastest"
+      : "";
   const { setIsSidebarOpen } = useContext(SidebarContext);
-  const [fareModalOpen, setFareModalOpen] = useState(false);
+  const [fareModalOpen, setFareModalOpen] = useState(null);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
   const flightResults = [
     {
@@ -329,6 +340,98 @@ const MultiCityTrip = () => {
       },
     },
   ];
+  const resolvedFlightResults = Array.isArray(flightData) ? flightData : [];
+  const resolvedTripCards = Array.isArray(tripCards) ? tripCards : [];
+  const parseFareValue = (fare) => {
+    const raw = String(fare?.totalFare || "").replace(/[^\d]/g, "");
+    const amount = Number(raw);
+    return Number.isFinite(amount) ? amount : Number.MAX_SAFE_INTEGER;
+  };
+  const getTotalDurationMinutes = (flight) =>
+    Number(flight?.outbound?.duration?.hours || 0) * 60 +
+    Number(flight?.outbound?.duration?.minutes || 0) +
+    Number(flight?.inbound?.duration?.hours || 0) * 60 +
+    Number(flight?.inbound?.duration?.minutes || 0);
+  const resolveByHighlight = (highlight) => {
+    if (!highlight || !resolvedFlightResults.length) return null;
+    const token = String(highlight.id || highlight.index || "").trim();
+    const byId =
+      token
+        ? resolvedFlightResults.find((flight) => String(flight?.id || "").trim() === token)
+        : null;
+    if (byId) return byId;
+    if (token) {
+      const byCode = resolvedFlightResults.find((flight) => {
+        const outboundCodes = (flight?.outbound?.airlines || []).map((a) =>
+          String(a?.code || "").trim()
+        );
+        const inboundCodes = (flight?.inbound?.airlines || []).map((a) =>
+          String(a?.code || "").trim()
+        );
+        return [...outboundCodes, ...inboundCodes].includes(token);
+      });
+      if (byCode) return byCode;
+    }
+    const time = (value) => {
+      const s = String(value || "");
+      const m = s.match(/(\d{2}:\d{2})/);
+      return m ? m[1] : "";
+    };
+    const dep = time(highlight?.departure);
+    const arr = time(highlight?.arrival);
+    if (dep && arr) {
+      const byTime = resolvedFlightResults.find(
+        (flight) =>
+          String(flight?.outbound?.departure?.time || "") === dep &&
+          String(flight?.outbound?.arrival?.time || "") === arr
+      );
+      if (byTime) return byTime;
+    }
+    return null;
+  };
+  const cheapestFallback =
+    resolvedFlightResults.length > 0
+      ? resolvedFlightResults.reduce((min, current) =>
+          parseFareValue(current?.fare) < parseFareValue(min?.fare)
+            ? current
+            : min
+        )
+      : null;
+  const fastestFallback =
+    resolvedFlightResults.length > 0
+      ? resolvedFlightResults.reduce((min, current) =>
+          getTotalDurationMinutes(current) < getTotalDurationMinutes(min)
+            ? current
+            : min
+        )
+      : null;
+  const cheapestHighlightedFlight = resolveByHighlight(sortHighlights?.cheapest);
+  const fastestHighlightedFlight = resolveByHighlight(sortHighlights?.fastest);
+  const cheapestFlight = cheapestHighlightedFlight || cheapestFallback;
+  const fastestFlight = fastestHighlightedFlight || fastestFallback;
+  const visibleFlights = resolvedFlightResults;
+  const visibleTripCards = resolvedTripCards;
+  const cheapestMeta = {
+    price: sortHighlights?.cheapest?.priceLabel || "₹ 8500",
+    duration: sortHighlights?.cheapest?.durationLabel || "01h 50m",
+  };
+  const fastestMeta = {
+    price: sortHighlights?.fastest?.priceLabel || "₹ 8500",
+    duration: sortHighlights?.fastest?.durationLabel || "01h 50m",
+  };
+  const resultsText = pagination
+    ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
+    : "Showing 1-10 of 100 results";
+  const applyQuickSort = (type) => {
+    const targetSortBy = type === "cheapest" ? "lowest" : "shortest";
+    setSortBy(filters.sortBy === targetSortBy ? null : targetSortBy);
+  };
+  const hasNoData =
+    hasSearched &&
+    !isLoading &&
+    visibleFlights.length === 0 &&
+    visibleTripCards.length === 0;
+
   return (
     <>
       <section className={styles.container}>
@@ -342,39 +445,36 @@ const MultiCityTrip = () => {
               The price is average for one person. Included all taxes and fees.
             </span>
             <span className={styles.itemsResult}>
-              Showing 1-10 of 100 results
+              {resultsText}
             </span>
           </div>
         </div>
-        <DatePriceSlider />
+        <DatePriceSlider tiles={datewiseFareTiles} />
 
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                  className={`${styles.sortedItem} ${quickSort === "cheapest" ? styles.activeSortedItem : ""
                     }`}
-                  onClick={() => setSelectedSort("cheapest")}
+                  onClick={() => applyQuickSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{cheapestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{cheapestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                  className={`${styles.sortedItem} ${quickSort === "fastest" ? styles.activeSortedItem : ""
                     }`}
-                  onClick={() => setSelectedSort("fastest")}
+                  onClick={() => applyQuickSort("fastest")}
                 >
                   <img
                     height={36}
@@ -385,12 +485,9 @@ const MultiCityTrip = () => {
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>FASTEST</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{fastestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{fastestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
@@ -406,19 +503,24 @@ const MultiCityTrip = () => {
           </div>
         </div>
         <div className={styles.tripCardsContainer}>
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <OfferBanner />
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <TripCard setFareModalOpen={setFareModalOpen} />
-          <TripCard setFareModalOpen={setFareModalOpen} />
+          {isLoading ? (
+            <RoundTripSkeleton />
+          ) : hasNoData ? (
+            <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+          ) : (
+            visibleTripCards.map((card, index) => (
+              <div key={card.id || index}>
+                <TripCard cardData={card} setFareModalOpen={setFareModalOpen} />
+                {index === 2 && <OfferBanner />}
+              </div>
+            ))
+          )}
         </div>
         {
           <FareComparisonModalMulticity
             isOpen={fareModalOpen}
-            onClose={() => setFareModalOpen(false)}
+            onClose={() => setFareModalOpen(null)}
+            flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           />
         }
       </section>
@@ -426,7 +528,7 @@ const MultiCityTrip = () => {
       <section className={styles.isMobileView}>
         <div className={styles.mobileFlightContainer}>
           <p className={styles.mobileSubTextContainer}>
-            Showing 1-10 of 100 results
+            {resultsText}
           </p>
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -479,28 +581,25 @@ const MultiCityTrip = () => {
             <div className={styles.sortedItemMainContainer}>
               <div className={styles.sortedItemContainer}>
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "cheapest" ? styles.activeSortedItem : ""
+                  className={`${styles.sortedItem} ${quickSort === "cheapest" ? styles.activeSortedItem : ""
                     }`}
-                  onClick={() => setSelectedSort("cheapest")}
+                  onClick={() => applyQuickSort("cheapest")}
                 >
                   <img src="/images/Flight.png" alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{cheapestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{cheapestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
 
                 <div
-                  className={`${styles.sortedItem} ${selectedSort === "fastest" ? styles.activeSortedItem : ""
+                  className={`${styles.sortedItem} ${quickSort === "fastest" ? styles.activeSortedItem : ""
                     }`}
-                  onClick={() => setSelectedSort("fastest")}
+                  onClick={() => applyQuickSort("fastest")}
                 >
                   <img
                     src="/images/flightCompanyLogos/airIndia.png"
@@ -511,12 +610,9 @@ const MultiCityTrip = () => {
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>fastest</span>
                     <div className={styles.priceContainer}>
-                      <span className={styles.price}>₹ 8500</span>
+                      <span className={styles.price}>{fastestMeta.price}</span>
                       <div className={styles.dot}></div>
-                      <span className={styles.duration}>
-                        01 <span className={styles.hours}>h</span> 50{" "}
-                        <span className={styles.hours}>m</span>
-                      </span>
+                      <span className={styles.duration}>{fastestMeta.duration}</span>
                     </div>
                   </div>
                 </div>
@@ -538,8 +634,10 @@ const MultiCityTrip = () => {
         </div>
         {isLoading ? (
           <RoundTripSkeleton />
+        ) : hasNoData ? (
+          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
         ) : (
-          flightResults.map((flight, index) => (
+          visibleFlights.map((flight, index) => (
             <FlightDetailsCard
               setFareModalOpen={setFareModalOpen}
               key={flight.id + index}
@@ -552,14 +650,21 @@ const MultiCityTrip = () => {
           <MobileFareComparisonModalMulticity
             isOpen={fareModalOpen}
             onClose={() => {
-              setFareModalOpen(false);
+              setFareModalOpen(null);
               setSelectedFlightId(null);
             }}
-            flightData={flightResults.find((f) => f.id === fareModalOpen)}
+            flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           />
         )}
       </section>
-      <SortBySheet open={openSort} onClose={() => setOpenSort(false)} />
+      <SortBySheet
+        open={openSort}
+        onClose={() => setOpenSort(false)}
+        selectedValue={filters.sortBy}
+        onApply={(value) => {
+          setSortBy(value);
+        }}
+      />
     </>
   );
 };

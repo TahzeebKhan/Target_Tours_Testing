@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import RequestBudgetModal from "../components/corporate/RequestBudgetModal";
+import RequestBudgetModal from "@/shared/components/corporate/RequestBudgetModal";
 // import { useFlightBooking } from "./FlightBookingContext";
 import styles from "./CorporateSidebarSummary.module.css";
 

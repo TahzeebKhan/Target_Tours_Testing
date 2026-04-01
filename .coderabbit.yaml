@@ -1,0 +1,21 @@
+reviews:
+  auto_review:
+    enabled: true
+  profile: "assertive"
+
+path_filters:
+  include:
+    - "src/**"
+  exclude:
+    - "public/**"
+    - ".next/**"
+    - "node_modules/**"
+    - "package-lock.json"
+    - "**/*.css"
+    - "**/*.module.css"
+    - "**/*.svg"
+    - "**/*.png"
+    - "**/*.jpg"
+    - "**/*.jpeg"
+    - "**/*.webp"
+    - "**/*.mp4"

@@ -1,21 +1,98 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./MealsDetails.module.css";
-import Expandable from "./Components/Expandable";
-import MealGuidelineExpandable from "./Components/mealGuidelineExpandable/MealGuidelineExpandable";
-import MobileFlightMeals from "./Components/MobileFlightMeals";
+import Expandable from "./components/Expandable";
+import MealGuidelineExpandable from "./components/mealGuidelineExpandable/MealGuidelineExpandable";
+import MobileFlightMeals from "./components/MobileFlightMeals";
 import { useFlightBooking } from "../../FlightBookingContext";
 import { meals, beverages } from "./mealsData";
-import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
-import PriceSummary from "@/app/profile_components/PriceSummary";
+import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
+import PriceSummary from "@/features/profile/components/PriceSummary";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 
-// Helper to find meal info
-const allMeals = [...meals, ...beverages];
-const getMealInfo = (id) => allMeals.find((m) => m.id === id);
+const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
+
+const MAIN_MEAL_IMAGES = meals.map((item) => item.image);
+const BEVERAGE_IMAGES = beverages.map((item) => item.image);
+
+const buildMealRouteCards = (bookingSession, bookingView) => {
+  const formatted = bookingSession?.ssrResponse?.data?.formatted || {};
+  const entries = Object.entries(formatted);
+
+  const normalizeMealItem = (item, index) => {
+    const title = String(item?.name || "").trim() || "Meal";
+    const isBeverage = /beverage|tea|coffee|drink|juice/i.test(title);
+    const imagePool = isBeverage ? BEVERAGE_IMAGES : MAIN_MEAL_IMAGES;
+
+    return {
+      id: item?.id ?? index + 1,
+      image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
+      title,
+      price: Number(item?.price || 0),
+      tag: item?.type ? String(item.type).replace(/(^\w|\-\w)/g, (match) => match.replace("-", " ").toUpperCase()) : "",
+      isBeverage,
+    };
+  };
+
+  const routeCards = entries.map(([routeKey, value], index) => {
+    const flight =
+      index === 0 ? bookingView?.departureFlight : bookingView?.returnFlight;
+    const routeMeals = Array.isArray(value?.meals) ? value.meals.map(normalizeMealItem) : [];
+
+    return {
+      key: routeKey,
+      routeLabel: routeKey.replace(/-/g, "–"),
+      date: flight?.departure?.date || "N/A",
+      time: `${flight?.departure?.time || "N/A"} - ${flight?.arrival?.time || "N/A"}`,
+      meals: routeMeals.filter((item) => !item.isBeverage),
+      beverages: routeMeals.filter((item) => item.isBeverage),
+    };
+  });
+
+  if (routeCards.length > 0) return routeCards;
+
+  const fallback = [];
+  if (bookingView?.departureFlight) {
+    fallback.push({
+      key: "departure",
+      routeLabel: `${bookingView.header?.fromCode || "N/A"}–${bookingView.header?.toCode || "N/A"}`,
+      date: bookingView.departureFlight.departure.date,
+      time: `${bookingView.departureFlight.departure.time} - ${bookingView.departureFlight.arrival.time}`,
+      meals: [],
+      beverages: [],
+    });
+  }
+  if (bookingView?.returnFlight) {
+    fallback.push({
+      key: "return",
+      routeLabel: `${bookingView.header?.toCode || "N/A"}–${bookingView.header?.fromCode || "N/A"}`,
+      date: bookingView.returnFlight.departure.date,
+      time: `${bookingView.returnFlight.departure.time} - ${bookingView.returnFlight.arrival.time}`,
+      meals: [],
+      beverages: [],
+    });
+  }
+  return fallback;
+};
+
+const getMealInfo = (routeCards, routeKey, mealId) => {
+  const route = routeCards.find((item) => item.key === routeKey);
+  return [...(route?.meals || []), ...(route?.beverages || [])].find(
+    (item) => Number(item.id) === Number(mealId)
+  );
+};
 
 const MealsDetails = () => {
-  const { setMeals, setCurrentStep, currentStep } = useFlightBooking();
+  const { setMeals, setCurrentStep, currentStep, bookingSession } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
+  const bookingView = React.useMemo(
+    () => getBookingDetailsView(bookingSession),
+    [bookingSession]
+  );
+  const routeCards = React.useMemo(
+    () => buildMealRouteCards(bookingSession, bookingView),
+    [bookingSession, bookingView]
+  );
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // State: { "DEL-BOM-1": 2, "BOM-DEL-7": 1 }
@@ -31,9 +108,9 @@ const MealsDetails = () => {
     const selectedMeals = [];
     Object.entries(mealQuantities).forEach(([key, qty]) => {
       if (qty > 0) {
-        const [segment, mealIdStr] = key.split("-");
-        const mealId = parseInt(mealIdStr);
-        const info = getMealInfo(mealId);
+        const [segment, mealIdStr] = key.split("::");
+        const mealId = parseInt(mealIdStr, 10);
+        const info = getMealInfo(routeCards, segment, mealId);
 
         if (info) {
           for (let i = 0; i < qty; i++) {
@@ -47,11 +124,11 @@ const MealsDetails = () => {
         }
       }
     });
-    setMeals(selectedMeals);
-  }, [mealQuantities, setMeals]);
+    setMeals((current) => (areEqual(current, selectedMeals) ? current : selectedMeals));
+  }, [mealQuantities, routeCards, setMeals]);
 
   const handleUpdateQuantity = useCallback((segment, mealId, newQty) => {
-    const key = `${segment}-${mealId}`;
+    const key = `${segment}::${mealId}`;
     setMealQuantities((prev) => ({
       ...prev,
       [key]: Math.max(0, newQty),
@@ -63,8 +140,8 @@ const MealsDetails = () => {
   const getSegmentQuantities = (segment) => {
     const segmentQty = {};
     Object.entries(mealQuantities).forEach(([key, val]) => {
-      if (key.startsWith(segment)) {
-        const mealId = parseInt(key.split("-")[1]);
+      if (key.startsWith(`${segment}::`)) {
+        const mealId = parseInt(key.split("::")[1], 10);
         segmentQty[mealId] = val;
       }
     });
@@ -89,86 +166,53 @@ const MealsDetails = () => {
         </div>
 
         {/* FLIGHT DETAILS */}
-        <div
-          className={`${styles.flightExpandableContainer} ${
-            openTab === "flight" ? styles.flightActiveBorder : ""
-          }`}
-        >
-          <div
-            className={styles.flightExpandableCard}
-            onClick={() => toggleTab("flight")}
-          >
-            <div className={styles.flightExpandableHeaderContainer}>
-              <h3 className={styles.flightExpandableHeader}>DEL–BOM</h3>
-              <img
-                src="/icons/DownArrows.svg"
-                alt=""
-                className={`${styles.arrow} ${
-                  openTab === "flight" ? styles.arrowRotate : ""
+        {routeCards.map((routeCard, index) => {
+          const tabName = index === 0 ? "flight" : `flight-${index}`;
+          return (
+            <div
+              key={routeCard.key}
+              className={`${styles.flightExpandableContainer} ${
+                openTab === tabName ? styles.flightActiveBorder : ""
+              }`}
+            >
+              <div
+                className={styles.flightExpandableCard}
+                onClick={() => toggleTab(tabName)}
+              >
+                <div className={styles.flightExpandableHeaderContainer}>
+                  <h3 className={styles.flightExpandableHeader}>{routeCard.routeLabel}</h3>
+                  <img
+                    src="/icons/DownArrows.svg"
+                    alt=""
+                    className={`${styles.arrow} ${
+                      openTab === tabName ? styles.arrowRotate : ""
+                    }`}
+                  />
+                </div>
+                <div className={styles.aboutFlightContainerRight}>
+                  <span>{routeCard.date}</span>
+                  <div className={styles.dot}></div>
+                  <span>{routeCard.time}</span>
+                </div>
+              </div>
+
+              <div
+                className={`${styles.expandWrap} ${
+                  openTab === tabName ? styles.expandOpen : ""
                 }`}
-              />
+              >
+                <Expandable
+                  meals={routeCard.meals}
+                  beverages={routeCard.beverages}
+                  quantities={getSegmentQuantities(routeCard.key)}
+                  onUpdateQuantity={(id, qty) =>
+                    handleUpdateQuantity(routeCard.key, id, qty)
+                  }
+                />
+              </div>
             </div>
-            <div className={styles.aboutFlightContainerRight}>
-              <span>Fri, 26 Dec 2025</span>
-              <div className={styles.dot}></div>
-              <span>23:10 - 10:40</span>
-            </div>
-          </div>
-
-          <div
-            className={`${styles.expandWrap} ${
-              openTab === "flight" ? styles.expandOpen : ""
-            }`}
-          >
-            <Expandable
-              quantities={getSegmentQuantities("DEL–BOM")}
-              onUpdateQuantity={(id, qty) =>
-                handleUpdateQuantity("DEL–BOM", id, qty)
-              }
-            />
-          </div>
-        </div>
-
-        {/* RETURN FLIGHT DETAILS */}
-        <div
-          className={`${styles.flightExpandableContainer} ${
-            openTab === "returnFlight" ? styles.flightActiveBorder : ""
-          }`}
-        >
-          <div
-            className={styles.flightExpandableCard}
-            onClick={() => toggleTab("returnFlight")}
-          >
-            <div className={styles.flightExpandableHeaderContainer}>
-              <h3 className={styles.flightExpandableHeader}>BOM–DEL</h3>
-              <img
-                src="/icons/DownArrows.svg"
-                alt=""
-                className={`${styles.arrow} ${
-                  openTab === "returnFlight" ? styles.arrowRotate : ""
-                }`}
-              />
-            </div>
-            <div className={styles.aboutFlightContainerRight}>
-              <span>Sun, 28 Dec 2025</span>
-              <div className={styles.dot}></div>
-              <span>18:00 - 20:15</span>
-            </div>
-          </div>
-
-          <div
-            className={`${styles.expandWrap} ${
-              openTab === "returnFlight" ? styles.expandOpen : ""
-            }`}
-          >
-            <Expandable
-              quantities={getSegmentQuantities("BOM–DEL")}
-              onUpdateQuantity={(id, qty) =>
-                handleUpdateQuantity("BOM–DEL", id, qty)
-              }
-            />
-          </div>
-        </div>
+          );
+        })}
 
         <div
           className={`${styles.flightExpandableContainer} ${
@@ -214,24 +258,20 @@ const MealsDetails = () => {
           title="Choose Your Meals"
         />
         <div className={styles.mobileViewContainer}>
-          <MobileFlightMeals
-            flightSegment="DEL–BOM"
-            date="Fri, 26 Dec 2025"
-            time="23:10 - 10:40"
-            segmentQuantities={getSegmentQuantities("DEL–BOM")}
-            onUpdateQuantity={(id, qty) =>
-              handleUpdateQuantity("DEL–BOM", id, qty)
-            }
-          />
-          <MobileFlightMeals
-            flightSegment="DEL–BOM"
-            date="Fri, 26 Dec 2025"
-            time="23:10 - 10:40"
-            segmentQuantities={getSegmentQuantities("DEL–BOM")}
-            onUpdateQuantity={(id, qty) =>
-              handleUpdateQuantity("DEL–BOM", id, qty)
-            }
-          />
+          {routeCards.map((routeCard) => (
+            <MobileFlightMeals
+              key={routeCard.key}
+              flightSegment={routeCard.routeLabel}
+              date={routeCard.date}
+              time={routeCard.time}
+              meals={routeCard.meals}
+              beverages={routeCard.beverages}
+              segmentQuantities={getSegmentQuantities(routeCard.key)}
+              onUpdateQuantity={(id, qty) =>
+                handleUpdateQuantity(routeCard.key, id, qty)
+              }
+            />
+          ))}
 
           <div className={styles.mealGuideLineMobileView}>
             <h3 className={styles.mealHeading}>MEAL GUIDELINES</h3>

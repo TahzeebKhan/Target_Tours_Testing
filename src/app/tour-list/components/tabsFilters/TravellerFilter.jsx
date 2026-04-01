@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./TravellerFilter.module.css";
-import CustomCheckbox from "@/app/components/CustomCheckbox";
+import CustomCheckbox from "@/shared/components/CustomCheckbox";
 
 const TRAVELLER_PROFILES = [
   {

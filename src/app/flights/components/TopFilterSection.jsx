@@ -4,15 +4,16 @@ import styles from "./TopFilterSection.module.css";
 // import Switch from "@/app/home-page/components/Switch";
 // import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
 import { ArrowLeft, ArrowLeftRight, ChevronDown, Pencil } from "lucide-react";
-import CustomCheckbox from "@/app/components/CustomCheckbox";
+import CustomCheckbox from "@/shared/components/CustomCheckbox";
 import PassengerClassSelector from "./PassengerClassSelector";
 import { CalendarSVG } from "./SVGFile";
 import { useTripType } from "../TripTypeContext";
-import DateCalendarModal from "@/app/components/calendar/DateCalendarModal";
-import CalendarMonths from "@/app/components/calendar/CalendarMonths";
-import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
+import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
+import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
+import AirportSuggestionBox from "@/shared/components/airport/AirportSuggestionBox";
 import { useRouter } from "next/navigation";
-import FlightEditFieldPopup from "@/app/components/FlightPhoneViewPopup/FlightEditFieldPopup";
+import FlightEditFieldPopup from "@/shared/components/FlightPhoneViewPopup/FlightEditFieldPopup";
+import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 // import calendarSVG from "/icons/calendar.svg";
 
 const travellerOptions = [
@@ -87,6 +88,10 @@ const TopFilterSection = ({
     setFrom,
     to,
     setTo,
+    fromCode,
+    setFromCode,
+    toCode,
+    setToCode,
     passengers,
     setPassengers,
     travelClass,
@@ -116,31 +121,30 @@ const TopFilterSection = ({
     { from: "", to: "", date: "" },
   ]);
 
-  // Sample suggestions data
   const recentSearches = [
     {
       label: "CHENNAI, INDIA",
       detail: "Chennai International Airport, India",
       code: "CEN",
-      value: "Chennai, India",
+      value: "Chennai (MAA)",
     },
     {
       label: "MUMBAI, INDIA",
       detail: "Mumbai Chhatrapati Shivaji Maharaj International Airport, India",
       code: "BOM",
-      value: "Mumbai, India",
+      value: "Mumbai (BOM)",
     },
     {
       label: "KOLKATA, INDIA",
       detail: "Kolkata Netaji Subhas Chandra Bose International Airport, India",
-      code: "KLG",
-      value: "Kolkata, India",
+      code: "CCU",
+      value: "Kolkata (CCU)",
     },
     {
       label: "BENGALURU, INDIA",
       detail: "Bengaluru Kempegowda International Airport, India",
       code: "BLR",
-      value: "Bengaluru, India",
+      value: "Bengaluru (BLR)",
     },
   ];
 
@@ -153,29 +157,29 @@ const TopFilterSection = ({
   const travellerRef = useRef(null);
 
   const [calendarTripType, setCalendarTripType] = useState("oneway");
-
-  // Filter suggestions based on input
-  const getFilteredSuggestions = (input) => {
-    const query = typeof input === "string" ? input : input?.label || ""; // 🔥 object case handle
-
-    if (!query) return recentSearches;
-
-    const q = query.toLowerCase();
-
-    return recentSearches.filter(
-      (s) =>
-        s.label.toLowerCase().includes(q) ||
-        s.detail.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q),
-    );
-  };
+  const { data: datewiseFareData } = useDatewiseFare({
+    tripType,
+    from,
+    to,
+    fromCode,
+    toCode,
+    startDate,
+    endDate,
+    provider: "both",
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+    enabled: true,
+  });
+  const apiDateTiles = datewiseFareData?.tiles || [];
+  const datewiseFaresByDate = datewiseFareData?.faresByDate || {};
+  const visibleDateTiles = apiDateTiles.length > 0 ? apiDateTiles : dateTiles;
 
   const [activeMultiFromIndex, setActiveMultiFromIndex] = useState(null);
   const [activeMultiToIndex, setActiveMultiToIndex] = useState(null);
 
   // Handle suggestion selection
   const selectSuggestion = (suggestion, field) => {
-    const value = suggestion.label;
+    const value = suggestion?.value || suggestion?.label || "";
+    const iataCode = suggestion?.iataCode || suggestion?.code || "";
 
     if (tripType === "multi") {
       if (field === "from" && activeMultiFromIndex !== null) {
@@ -185,7 +189,13 @@ const TopFilterSection = ({
         updateSegment(activeMultiToIndex, "to", value);
       }
     } else {
-      field === "from" ? setFrom(value) : setTo(value);
+      if (field === "from") {
+        setFrom(value);
+        setFromCode(iataCode);
+      } else {
+        setTo(value);
+        setToCode(iataCode);
+      }
     }
 
     setFromSuggestionsOpen(false);
@@ -234,9 +244,17 @@ const TopFilterSection = ({
     }
   }, [tripType]);
 
+  const handleCalendarModeChange = (mode) => {
+    const nextTripType = mode === "roundtrip" ? "round" : "oneway";
+    setCalendarTripType(nextTripType);
+    setTripType(nextTripType);
+  };
+
   const swapLocations = () => {
     setFrom(to);
     setTo(from);
+    setFromCode(toCode);
+    setToCode(fromCode);
   };
 
   const updateSegment = (index, field, value) => {
@@ -312,17 +330,23 @@ const TopFilterSection = ({
     );
   };
 
-  // useEffect(() => {
-  //   if (!showCalendar) return;
+  useEffect(() => {
+    if (!openCalendarFor) return;
 
-  //   const handleClickOutside = (e) => {
-  //     if (calendarRef.current && !calendarRef.current.contains(e.target)) {
-  //     }
-  //   };
+    const handleClickOutside = (e) => {
+      if (e.target.closest('[data-calendar-modal="true"]')) {
+        return;
+      }
 
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, [showCalendar]);
+      if (calendarRef.current && !calendarRef.current.contains(e.target)) {
+        setOpenCalendarFor(null);
+        setActiveMultiIndex(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openCalendarFor]);
 
   const tripOrder = ["round", "oneway", "multi"];
 
@@ -621,6 +645,7 @@ const TopFilterSection = ({
                             setActiveMultiFromIndex(0);
                           } else {
                             setFrom(e.target.value);
+                            setFromCode("");
                           }
                           setFromSuggestionsOpen(true);
                         }}
@@ -629,14 +654,14 @@ const TopFilterSection = ({
                       {fromSuggestionsOpen &&
                         (tripType !== "multi" ||
                           activeMultiFromIndex === 0) && (
-                          <SuggestionBox
+                          <AirportSuggestionBox
                             boxRef={fromSuggestionRef}
-                            heading="RECENT SEARCH"
-                            suggestions={getFilteredSuggestions(
+                            query={
                               tripType === "multi"
                                 ? multiSegments[0].from
-                                : from,
-                            )}
+                                : from
+                            }
+                            fallbackSuggestions={recentSearches}
                             onSelect={(s) => selectSuggestion(s, "from")}
                           />
                         )}
@@ -689,18 +714,19 @@ const TopFilterSection = ({
                             setActiveMultiToIndex(0);
                           } else {
                             setTo(e.target.value);
+                            setToCode("");
                           }
                           setToSuggestionsOpen(true);
                         }}
                       />
 
                       {toSuggestionsOpen && activeMultiToIndex === 0 && (
-                        <SuggestionBox
+                        <AirportSuggestionBox
                           boxRef={toSuggestionRef}
-                          heading="RECENT SEARCH"
-                          suggestions={getFilteredSuggestions(
-                            multiSegments[0].to,
-                          )}
+                          query={
+                            tripType === "multi" ? multiSegments[0].to : to
+                          }
+                          fallbackSuggestions={recentSearches}
                           onSelect={(s) => selectSuggestion(s, "to")}
                         />
                       )}
@@ -723,11 +749,7 @@ const TopFilterSection = ({
                               ? "roundtrip"
                               : "oneway"
                           }
-                          onModeChange={(mode) =>
-                            setCalendarTripType(
-                              mode === "roundtrip" ? "round" : "oneway",
-                            )
-                          }
+                          onModeChange={handleCalendarModeChange}
                           onClose={() => {
                             setOpenCalendarFor(null);
                             setActiveMultiIndex(null);
@@ -738,6 +760,8 @@ const TopFilterSection = ({
                               startDate={startDate}
                               endDate={endDate}
                               onDateClick={handleDateClick}
+                              price={true}
+                              faresByDate={datewiseFaresByDate}
                             />
                           </div>
                         </DateCalendarModal>
@@ -919,12 +943,10 @@ const TopFilterSection = ({
 
                           {fromSuggestionsOpen &&
                             activeMultiFromIndex === 1 && (
-                              <SuggestionBox
+                              <AirportSuggestionBox
                                 boxRef={fromSuggestionRef}
-                                heading="RECENT SEARCH"
-                                suggestions={getFilteredSuggestions(
-                                  multiSegments[1].from,
-                                )}
+                                query={multiSegments[1].from}
+                                fallbackSuggestions={recentSearches}
                                 onSelect={(s) => selectSuggestion(s, "from")}
                               />
                             )}
@@ -970,12 +992,10 @@ const TopFilterSection = ({
                           />
 
                           {toSuggestionsOpen && activeMultiToIndex === 1 && (
-                            <SuggestionBox
+                            <AirportSuggestionBox
                               boxRef={toSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(
-                                multiSegments[1].to,
-                              )}
+                              query={multiSegments[1].to}
+                              fallbackSuggestions={recentSearches}
                               onSelect={(s) => selectSuggestion(s, "to")}
                             />
                           )}
@@ -996,6 +1016,8 @@ const TopFilterSection = ({
                                   startDate={null}
                                   endDate={null}
                                   onDateClick={handleDateClick}
+                                  price={true}
+                                  faresByDate={datewiseFaresByDate}
                                 />
                               </div>
                             </DateCalendarModal>
@@ -1116,9 +1138,9 @@ const TopFilterSection = ({
                 {/* Month badge */}
                 <div className={styles.monthBadge}>{currentMonth}</div>
                 {/* Scrollable dates */}
-                {dateTiles.length > 0 && (
+                {visibleDateTiles.length > 0 && (
                   <div className={styles.datesScroller}>
-                    {dateTiles.map((item, i) => (
+                    {visibleDateTiles.map((item, i) => (
                       <div
                         key={i}
                         className={`${styles.dateTile} ${

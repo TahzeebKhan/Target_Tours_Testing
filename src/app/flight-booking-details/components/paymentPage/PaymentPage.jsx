@@ -1,17 +1,72 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFlightBooking } from "../../FlightBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
-import { tripSummaryData } from "./components/dummyData";
 import PassengerInfo from "./components/PassengerInfo";
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
-import PriceSummary from "@/app/profile_components/PriceSummary";
+import PriceSummary from "@/features/profile/components/PriceSummary";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+
+const formatSummaryDuration = (duration = {}) =>
+  `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
+
+const buildTripCardData = (flight, selectedFare) => {
+  if (!flight) return null;
+
+  return {
+    airline: {
+      name: flight.airline?.name || "N/A",
+      code: flight.airline?.code || "N/A",
+      aircraft: flight.aircraft || "N/A",
+      logo: flight.airline?.logo || "/images/Flight.png",
+    },
+    fareType: selectedFare?.name || flight.flexiPlusFare || "N/A",
+    cabin: String(flight.travelClass || "N/A").toUpperCase(),
+    segments: [
+      {
+        date: String(flight.departure?.date || "N/A").toUpperCase(),
+        time: flight.departure?.time || "N/A",
+        city: flight.departure?.airport || "N/A",
+        terminal: flight.departure?.terminal || "Terminal N/A",
+        terminalName: flight.departure?.city || "N/A",
+      },
+      {
+        duration: {
+          hours: flight.duration?.hours || "00",
+          mins: flight.duration?.minutes || "00",
+        },
+        nonStop: /non/i.test(flight.stops || ""),
+      },
+      {
+        date: String(flight.arrival?.date || "N/A").toUpperCase(),
+        time: flight.arrival?.time || "N/A",
+        city: flight.arrival?.airport || "N/A",
+        terminal: flight.arrival?.terminal || "Terminal N/A",
+        terminalName: flight.arrival?.city || "N/A",
+      },
+    ],
+    facilities: [
+      "Baggage 15 kg, Cabin 7 kg",
+      "In-flight entertainment",
+      "Power & USB Port",
+    ],
+  };
+};
+
 const PaymentPage = () => {
-  const { setCurrentStep } = useFlightBooking();
+  const { setCurrentStep, submitItinerary, itineraryLoading, bookingSession } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [paymentMethod, setPaymentMethod] = useState("credit");
+  const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
+  const selectedFare = bookingSession?.selectedFare || {};
+  const header = bookingView?.header || {};
+  const tripSummaryData = useMemo(() => ({
+    onwardCards: [buildTripCardData(bookingView?.departureFlight, selectedFare)].filter(Boolean),
+    returnCards: [buildTripCardData(bookingView?.returnFlight, selectedFare)].filter(Boolean),
+  }), [bookingView, selectedFare]);
+  const summaryFlight = bookingView?.departureFlight;
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   const toggleTab = (tabName) => {
@@ -81,7 +136,7 @@ const PaymentPage = () => {
               >
                 <div className={styles.left}>
                   <img
-                    src="/images/AirlineLogos.png"
+                    src={summaryFlight?.airline?.logo || "/images/Flight.png"}
                     alt="Airline Logo"
                     className={styles.logo}
                   />
@@ -89,7 +144,9 @@ const PaymentPage = () => {
 
                 <div className={styles.right}>
                   <div className={styles.route}>
-                    <span className={styles.city}>New Delhi (DEL)</span>
+                    <span className={styles.city}>
+                      {header.fromName || "N/A"} ({header.fromCode || "N/A"})
+                    </span>
                     <span className={styles.arrowCard}>
                       <svg
                         width="24"
@@ -104,21 +161,23 @@ const PaymentPage = () => {
                         />
                       </svg>
                     </span>
-                    <span className={styles.city}>Navi Mumbai (NMI)</span>
+                    <span className={styles.city}>
+                      {header.toName || "N/A"} ({header.toCode || "N/A"})
+                    </span>
                   </div>
 
                   <div className={styles.meta}>
-                    <span>Thu, 22 Jan 2025</span>
+                    <span>{header.date || "N/A"}</span>
                     <span className={styles.dot}>|</span>
-                    <span> Air India Express </span>
+                    <span>{summaryFlight?.airline?.name || "N/A"}</span>
                     <span className={styles.dot}>•</span>
-                    <span>08:05–10:30</span>
+                    <span>{`${summaryFlight?.departure?.time || "N/A"}-${summaryFlight?.arrival?.time || "N/A"}`}</span>
                     <span className={styles.dot}>•</span>
-                    <span>Business</span>
+                    <span>{header.cabinClass || "N/A"}</span>
                     <span className={styles.dot}>•</span>
-                    <span>Non-stop</span>
+                    <span>{header.stops || "N/A"}</span>
                     <span className={styles.dot}>•</span>
-                    <span>02h 25m</span>
+                    <span>{formatSummaryDuration(summaryFlight?.duration)}</span>
                   </div>
                 </div>
               </div>
@@ -231,7 +290,9 @@ const PaymentPage = () => {
             </div>
 
             {/* RIGHT */}
-            <button className={styles.continueBtn}>CONTINUE PAYMENT</button>
+            <button className={styles.continueBtn} onClick={submitItinerary}>
+              {itineraryLoading ? "LOADING..." : "CONTINUE PAYMENT"}
+            </button>
           </div>
         </div>
       </div>

@@ -87,6 +87,10 @@
   color: #000000;
 }
 
+.pricePlaceholder {
+  min-height: 21px;
+}
+
 .low {
   color: #67aa38;
 }

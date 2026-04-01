@@ -8,8 +8,7 @@ import Cookies from "js-cookie";
 const fetchTravelStyle = async () => {
   const token = Cookies.get("auth_token");
 
-  const domain =
-    typeof window !== "undefined" ? window.location.host : "localhost:1337";
+  const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
   const headers = token
     ? {
@@ -18,7 +17,7 @@ const fetchTravelStyle = async () => {
     : {};
 
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/travel-style-selector?domain=localhost:1337`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/travel-style-selector?domain=${domain}`,
     { headers },
   );
 

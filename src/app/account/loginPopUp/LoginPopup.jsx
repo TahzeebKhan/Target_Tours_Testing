@@ -33,7 +33,7 @@
 //           body: JSON.stringify({
 //             email: email,
 //             password: password,
-//             domain: "localhost:1337", // ❗ required
+//             domain: process.env.NEXT_PUBLIC_DOMAIN, // ❗ required
 //           }),
 //         }
 //       );
@@ -191,6 +191,7 @@
 import Image from "next/image";
 import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -210,7 +211,9 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const [corporateLogin, setCorporateLogin] = useState(false);
 
   const { login } = useAuth();
+
   useEffect(() => {
+  
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
@@ -267,7 +270,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
           body: JSON.stringify({
             email,
             password,
-            domain: "localhost:1337",
+            domain: process.env.NEXT_PUBLIC_DOMAIN,
           }),
         },
       );
@@ -286,27 +289,22 @@ export default function LoginPopup({ onNavigate, onClose }) {
 
       // 3️⃣ FETCH USER PROFILE (IMPORTANT PART)
       try {
-        const profileRes = await fetch(
+        const profileRes = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${data.user.id}`,
           {
             headers: {
               Authorization: `Bearer ${data.token}`,
             },
-          },
-        )
-          .then((res) => res.ok && res.json())
-          .then((profile) => {
-            if (profile) {
-              Cookies.set("user_profile", JSON.stringify(profile), {
-                expires: 7,
-              });
-            }
-          })
-          .catch(() => {
-            console.log("Profile fetch failed (non-blocking)");
+          }
+        );
+
+        if (profileRes?.data) {
+          Cookies.set("user_profile", JSON.stringify(profileRes.data), {
+            expires: 7,
           });
+        }
       } catch (profileErr) {
-        console.error("Profile API error:", profileErr);
+        console.log("Profile fetch failed (non-blocking)");
       }
 
       // 5️⃣ CLOSE POPUP

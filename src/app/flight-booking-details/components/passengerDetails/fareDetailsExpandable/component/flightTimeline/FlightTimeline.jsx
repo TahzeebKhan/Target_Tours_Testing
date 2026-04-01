@@ -42,8 +42,8 @@ const FlightTimeline = ({ flight }) => {
                     <div className={styles.date}>{flight.departure.date}</div>
                     <div className={styles.time}>{flight.departure.time}</div>
                     <div className={styles.airport}>{flight.departure.airport}</div>
-                    {/* <div className={styles.terminal}>{flight.departure.terminal}</div>
-                    <div className={styles.city}>{flight.departure.city}</div> */}
+                    <div className={styles.terminal}>{flight.departure.terminal}</div>
+                    <div className={styles.city}>{flight.departure.city}</div>
                 </div>
 
                 {/* CENTER */}
@@ -87,8 +87,8 @@ const FlightTimeline = ({ flight }) => {
                     <div className={styles.date}>{flight.arrival.date}</div>
                     <div className={styles.time}>{flight.arrival.time}</div>
                     <div className={styles.airport}>{flight.arrival.airport}</div>
-                    {/* <div className={styles.terminal}>{flight.arrival.terminal}</div>
-                    <div className={styles.city}>{flight.arrival.city}</div> */}
+                    <div className={styles.terminal}>{flight.arrival.terminal}</div>
+                    <div className={styles.city}>{flight.arrival.city}</div>
                 </div>
             </div>
         </div>

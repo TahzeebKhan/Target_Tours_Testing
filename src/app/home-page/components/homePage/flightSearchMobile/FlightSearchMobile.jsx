@@ -3,10 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
 import PassengerClassSelector from "../PassengerClassSelector";
-import FromLocationSheet from "@/app/components/fromLocationSheet/FromLocationSheet";
-import MobileViewCalender from "@/app/components/mobileViewCalendar/MobileViewCalender";
-import PassengersPopup from "@/app/components/passengersPopUp/PassengersPopup";
-import SeatClassPopup from "@/app/components/seatClassPopup/SeatClassPopup";
+import FromLocationSheet from "@/shared/components/fromLocationSheet/FromLocationSheet";
+import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
+import PassengersPopup from "@/shared/components/passengersPopUp/PassengersPopup";
+import SeatClassPopup from "@/shared/components/seatClassPopup/SeatClassPopup";
 import MultiCityMobile from "./MultiCityMobile";
 
 const FlightSearchMobile = ({
@@ -16,8 +16,10 @@ const FlightSearchMobile = ({
   swapLocations,
   from,
   setFrom,
+  setFromCode,
   to,
   setTo,
+  setToCode,
   departureDate,
   setDepartureDate,
   returnDate,
@@ -122,14 +124,20 @@ const FlightSearchMobile = ({
                   placeholder="Departure"
                   className={styles.input}
                   value={from}
-                  onChange={(e) => setFrom(e.target.value)}
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                    setFromCode?.("");
+                  }}
                 />
               </div>
               {openFrom && (
                 <FromLocationSheet
                   onClose={() => setOpenFrom(false)}
                   inputType="from"
-                  onSelectCity={(value) => setFrom(value)}
+                  onSelectCity={(value, item) => {
+                    setFrom(value);
+                    setFromCode?.(item?.iataCode || item?.code || "");
+                  }}
                 />
               )}
 
@@ -144,14 +152,20 @@ const FlightSearchMobile = ({
                   className={styles.input}
                   value={to}
                   readOnly
-                  onChange={(e) => setTo(e.target.value)}
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                    setToCode?.("");
+                  }}
                 />
               </div>
               {openTo && (
                 <FromLocationSheet
                   onClose={() => setOpenTo(false)}
                   inputType="to"
-                  onSelectCity={(value) => setTo(value)}
+                  onSelectCity={(value, item) => {
+                    setTo(value);
+                    setToCode?.(item?.iataCode || item?.code || "");
+                  }}
                 />
               )}
             </div>
@@ -268,14 +282,20 @@ const FlightSearchMobile = ({
                   placeholder="Departure"
                   className={styles.input}
                   value={from}
-                  onChange={(e) => setFrom(e.target.value)}
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                    setFromCode?.("");
+                  }}
                 />
               </div>
               {openFrom && (
                 <FromLocationSheet
                   onClose={() => setOpenFrom(false)}
                   inputType="from"
-                  onSelectCity={(value) => setFrom(value)}
+                  onSelectCity={(value, item) => {
+                    setFrom(value);
+                    setFromCode?.(item?.iataCode || item?.code || "");
+                  }}
                 />
               )}
 
@@ -289,14 +309,20 @@ const FlightSearchMobile = ({
                   placeholder="Destination"
                   className={styles.input}
                   value={to}
-                  onChange={(e) => setTo(e.target.value)}
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                    setToCode?.("");
+                  }}
                 />
               </div>
               {openTo && (
                 <FromLocationSheet
                   onClose={() => setOpenTo(false)}
                   inputType="to"
-                  onSelectCity={(value) => setTo(value)}
+                  onSelectCity={(value, item) => {
+                    setTo(value);
+                    setToCode?.(item?.iataCode || item?.code || "");
+                  }}
                 />
               )}
             </div>

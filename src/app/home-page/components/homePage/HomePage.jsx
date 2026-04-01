@@ -6,19 +6,20 @@ import TravellerSelector from "./TravellerSelector";
 import Link from "next/link";
 import { ArrowLeftRight, ChevronDown } from "lucide-react";
 import PassengerClassSelector from "./PassengerClassSelector";
-import SuggestionBox from "./SuggestionBox";
+import AirportSuggestionBox from "@/shared/components/airport/AirportSuggestionBox";
+import { saveRecentFlightSearch } from "@/shared/services/recentSearch";
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
-import DateCalendarModal from "./calendar/DateCalendarModal";
-import CalendarMonths from "./calendar/CalendarMonths";
-import HotelDropDown from "@/app/components/hotelDropDown/HotelDropDown";
-import HotelDateCalendarModal from "@/app/components/hotelCalendar/HotelDateCalendarModal";
-import HotelCalendarMonths from "@/app/components/hotelCalendar/HotelCalendarMonths";
-import RecentSearch from "@/app/components/recentSearch/RecentSearch";
+import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
+import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
+import HotelDropDown from "@/shared/components/hotelDropDown/HotelDropDown";
+import HotelDateCalendarModal from "@/shared/components/hotelCalendar/HotelDateCalendarModal";
+import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
+import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { useQuery } from "@tanstack/react-query";
-import { getHeroSection } from "@/app/service/heroApi";
+import { getHeroSection } from "@/shared/services/heroApi";
 
 import FlightSearchMobile from "./flightSearchMobile/FlightSearchMobile";
 import HotelSearchMobile from "./hotelSearchMobile/HotelSearchMobile";
@@ -29,9 +30,10 @@ import ProfileModal from "./modals/ProfileModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
-import CustomLoaderHomePage from "@/app/components/CustomLoaderHomePage";
+import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
 import CustomItinerary from "./customIternaryComponents/CustomItinerary";
 import MobileItinerary from "./customIternaryComponents/MobileItinerary";
+import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 const sampleHotel = {
   title: "SERENE HAVEN INN, TORONTO",
   images: ["/images/hotel-placeholder.jpg"],
@@ -145,6 +147,7 @@ const HomePage = ({
     user,
     loading: authLoading,
   } = useAuth();
+  
   const [travellerDestination, setTravellerDestination] =
     useState("SELECT DESTINATION");
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER");
@@ -180,25 +183,25 @@ const HomePage = ({
       label: "CHENNAI, INDIA",
       detail: "Chennai International Airport, India",
       code: "CEN",
-      value: "Chennai, India",
+      value: "Chennai (MAA)",
     },
     {
       label: "MUMBAI, INDIA",
       detail: "Mumbai Chhatrapati Shivaji Maharaj International Airport, India",
       code: "BOM",
-      value: "Mumbai, India",
+      value: "Mumbai (BOM)",
     },
     {
       label: "KOLKATA, INDIA",
       detail: "Kolkata Netaji Subhas Chandra Bose International Airport, India",
-      code: "KLG",
-      value: "Kolkata, India",
+      code: "CCU",
+      value: "Kolkata (CCU)",
     },
     {
       label: "BENGALURU, INDIA",
       detail: "Bengaluru Kempegowda International Airport, India",
       code: "BLR",
-      value: "Bengaluru, India",
+      value: "Bengaluru (BLR)",
     },
   ];
 
@@ -225,30 +228,27 @@ const HomePage = ({
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  const getFilteredSuggestions = (query) => {
-    if (!query) return recentSearches;
-    const q = query.toLowerCase();
-    return recentSearches.filter(
-      (s) =>
-        s.label.toLowerCase().includes(q) ||
-        s.detail.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q),
-    );
-  };
-
   const selectSuggestion = (sugg, field = "from", index = null) => {
-    if (typeof index === "number") {
+    const iataCode = sugg?.iataCode || sugg?.code || "";
+
+    if (tripType === "multi" && typeof index === "number") {
       updateMultiLeg(index, field, sugg.value);
+      if (index === 0) {
+        if (field === "from") setFromCode(iataCode);
+        if (field === "to") setToCode(iataCode);
+      }
       setActiveSuggestion(null);
       return;
     }
 
     if (field === "from") {
       setFrom(sugg.value);
+      setFromCode(iataCode);
       setFromSuggestionsOpen(false);
       if (fromInputRef.current) fromInputRef.current.focus();
     } else {
       setTo(sugg.value);
+      setToCode(iataCode);
       setToSuggestionsOpen(false);
       if (toInputRef.current) toInputRef.current.focus();
     }
@@ -261,6 +261,8 @@ const HomePage = ({
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [fromCode, setFromCode] = useState("");
+  const [toCode, setToCode] = useState("");
 
   const [multiCity, setMultiCity] = useState([
     { from: "", to: "" },
@@ -269,6 +271,36 @@ const HomePage = ({
 
   const [direction, setDirection] = useState("right");
   const [flightDirection, setFlightDirection] = useState("right");
+  const activeLegIndex = activeMultiIndex ?? 0;
+  const datewiseFrom =
+    tripType === "multi"
+      ? multiCity?.[activeLegIndex]?.from || multiCity?.[0]?.from || from
+      : from;
+  const datewiseTo =
+    tripType === "multi"
+      ? multiCity?.[activeLegIndex]?.to || multiCity?.[0]?.to || to
+      : to;
+  const datewiseDepartureDate =
+    tripType === "round"
+      ? flightDates.round.start
+      : tripType === "oneway"
+        ? flightDates.oneway.start
+        : flightDates.multi?.[activeLegIndex]?.date;
+  const datewiseReturnDate =
+    tripType === "round" ? flightDates.round.end : "";
+  const { data: datewiseFareData } = useDatewiseFare({
+    tripType,
+    from: datewiseFrom,
+    to: datewiseTo,
+    fromCode,
+    toCode,
+    startDate: datewiseDepartureDate,
+    endDate: datewiseReturnDate,
+    provider: "both",
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+    enabled: bookingType === "flight",
+  });
+  const datewiseFaresByDate = datewiseFareData?.faresByDate || {};
 
   const swapLocations = (index) => {
     if (typeof index === "number" && tripType === "multi") {
@@ -464,6 +496,10 @@ const HomePage = ({
     if (!showCalendar) return;
 
     const handleClickOutsideCalendar = (e) => {
+      if (e.target.closest('[data-calendar-modal="true"]')) {
+        return;
+      }
+
       if (calendarRef.current && !calendarRef.current.contains(e.target)) {
         setShowCalendar(false);
         setActiveMultiIndex(null);
@@ -659,6 +695,12 @@ const HomePage = ({
     }
   }, [tripType]);
 
+  const handleCalendarModeChange = (mode) => {
+    const nextTripType = mode === "roundtrip" ? "round" : "oneway";
+    setCalendarTripType(nextTripType);
+    setTripType(nextTripType);
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -672,12 +714,25 @@ const HomePage = ({
     return `${day}-${month}-${year}`;
   };
 
-  const handleSearch = ({ tripType: incomingTripType, multiFlights } = {}) => {
+  const handleSearch = async ({ tripType: incomingTripType, multiFlights } = {}) => {
     const finalTripType = incomingTripType || tripType;
 
     if (bookingType === "flight") {
       // MULTI CITY
       if (finalTripType === "multi") {
+        const firstLeg = multiFlights?.[0];
+        if (firstLeg?.from && firstLeg?.to && firstLeg?.departureDate) {
+          try {
+            await saveRecentFlightSearch({
+              origin: firstLeg.from,
+              destination: firstLeg.to,
+              departureDate: firstLeg.departureDate,
+            });
+          } catch (error) {
+            console.error("Failed to save recent flight search", error);
+          }
+        }
+
         const params = multiFlights
           .map(
             (leg, i) =>
@@ -697,9 +752,27 @@ const HomePage = ({
 
       const endDate = finalTripType === "round" ? flightDates.round.end : "";
 
-      router.push(
-        `/flights?from=${from}&to=${to}&tripType=${finalTripType}&start=${startDate}&end=${endDate}`,
-      );
+      try {
+        await saveRecentFlightSearch({
+          origin: fromCode || from,
+          destination: toCode || to,
+          departureDate: startDate,
+          returnDate: endDate,
+        });
+      } catch (error) {
+        console.error("Failed to save recent flight search", error);
+      }
+
+      const params = new URLSearchParams({
+        from,
+        to,
+        tripType: finalTripType,
+        start: startDate || "",
+        end: endDate || "",
+      });
+      if (fromCode) params.set("origin", fromCode);
+      if (toCode) params.set("destination", toCode);
+      router.push(`/flights?${params.toString()}`);
       return;
     }
 
@@ -1041,20 +1114,24 @@ const HomePage = ({
                             onChange={(e) => {
                               if (tripType === "multi") {
                                 updateMultiLeg(0, "from", e.target.value);
+                                setFromCode("");
                               } else {
                                 setFrom(e.target.value);
+                                setFromCode("");
                                 setFromSuggestionsOpen(true);
                               }
                             }}
                           />
 
                           {fromSuggestionsOpen && (
-                            <SuggestionBox
+                            <AirportSuggestionBox
                               boxRef={fromSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(
-                                multiCity[0]?.from || "",
-                              )}
+                              query={
+                                tripType === "multi"
+                                  ? multiCity[0]?.from || ""
+                                  : from
+                              }
+                              fallbackSuggestions={recentSearches}
                               onSelect={(s) => selectSuggestion(s, "from", 0)}
                             />
                           )}
@@ -1077,20 +1154,22 @@ const HomePage = ({
                             onChange={(e) => {
                               if (tripType === "multi") {
                                 updateMultiLeg(0, "to", e.target.value);
+                                setToCode("");
                               } else {
                                 setTo(e.target.value);
+                                setToCode("");
                                 setToSuggestionsOpen(true);
                               }
                             }}
                           />
 
                           {toSuggestionsOpen && (
-                            <SuggestionBox
+                            <AirportSuggestionBox
                               boxRef={toSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(
-                                multiCity[0]?.to || "",
-                              )}
+                              query={
+                                tripType === "multi" ? multiCity[0]?.to || "" : to
+                              }
+                              fallbackSuggestions={recentSearches}
                               onSelect={(s) => selectSuggestion(s, "to", 0)}
                             />
                           )}
@@ -1125,7 +1204,7 @@ const HomePage = ({
                                 mode={
                                   tripType === "round" ? "roundtrip" : "oneway"
                                 }
-                                onModeChange={() => {}}
+                                onModeChange={handleCalendarModeChange}
                                 onClose={() => {
                                   setShowCalendar(false);
                                   setActiveMultiIndex(null);
@@ -1148,6 +1227,8 @@ const HomePage = ({
                                         : null
                                     }
                                     onDateClick={handleDateClick}
+                                    price={true}
+                                    faresByDate={datewiseFaresByDate}
                                   />
                                 </div>
                               </DateCalendarModal>
@@ -1342,16 +1423,14 @@ const HomePage = ({
                                 {activeSuggestion &&
                                   activeSuggestion.index === actualIndex &&
                                   activeSuggestion.field === "from" && (
-                                    <SuggestionBox
+                                    <AirportSuggestionBox
                                       boxRef={(el) =>
                                         (multiSuggestionRefs.current[
                                           actualIndex
                                         ] = el)
                                       }
-                                      heading="RECENT SEARCH"
-                                      suggestions={getFilteredSuggestions(
-                                        leg.from || "",
-                                      )}
+                                      query={leg.from || ""}
+                                      fallbackSuggestions={recentSearches}
                                       onSelect={(s) =>
                                         selectSuggestion(s, "from", actualIndex)
                                       }
@@ -1392,16 +1471,14 @@ const HomePage = ({
                                 {activeSuggestion &&
                                   activeSuggestion.index === actualIndex &&
                                   activeSuggestion.field === "to" && (
-                                    <SuggestionBox
+                                    <AirportSuggestionBox
                                       boxRef={(el) =>
                                         (multiSuggestionRefs.current[
                                           actualIndex
                                         ] = el)
                                       }
-                                      heading="RECENT SEARCH"
-                                      suggestions={getFilteredSuggestions(
-                                        leg.to || "",
-                                      )}
+                                      query={leg.to || ""}
+                                      fallbackSuggestions={recentSearches}
                                       onSelect={(s) =>
                                         selectSuggestion(s, "to", actualIndex)
                                       }
@@ -1421,7 +1498,7 @@ const HomePage = ({
                                   activeMultiIndex === actualIndex && (
                                     <DateCalendarModal
                                       mode="oneway"
-                                      onModeChange={() => {}}
+                                      onModeChange={handleCalendarModeChange}
                                       onClose={() => {
                                         setShowCalendar(false);
                                         setActiveMultiIndex(null);
@@ -1453,6 +1530,8 @@ const HomePage = ({
                                             setShowCalendar(false);
                                             setActiveMultiIndex(null);
                                           }}
+                                          price={true}
+                                          faresByDate={datewiseFaresByDate}
                                         />
                                       </div>
                                     </DateCalendarModal>
@@ -1721,6 +1800,7 @@ const HomePage = ({
                               startDate={holidayStartDate}
                               endDate={null}
                               onDateClick={handleHolidayDateClick}
+                              price={false}
                             />
                           </div>
                         </DateCalendarModal>
@@ -1738,6 +1818,7 @@ const HomePage = ({
                               startDate={insuranceStartDate}
                               endDate={insuranceEndDate}
                               onDateClick={handleInsuranceDateClick}
+                              price={false}
                             />
                           </div>
                         </DateCalendarModal>
@@ -1986,8 +2067,10 @@ const HomePage = ({
             swapLocations={swapLocations}
             from={from}
             setFrom={setFrom}
+            setFromCode={setFromCode}
             to={to}
             setTo={setTo}
+            setToCode={setToCode}
             handleSearch={handleSearch}
             departureDate={departureDate}
             setDepartureDate={setDepartureDate}

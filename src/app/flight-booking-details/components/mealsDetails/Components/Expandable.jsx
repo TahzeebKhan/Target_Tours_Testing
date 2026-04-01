@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
 import styles from "./Expandable.module.css";
-import { meals, beverages } from "../mealsData";
 
-const Expandable = ({ quantities, onUpdateQuantity }) => {
+const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }) => {
     return (
         <div className={styles.expandWrap}>
             <div className={styles.expandHeader}>
@@ -98,4 +97,3 @@ const MealItem = ({
         </div>
     );
 };
-

@@ -125,7 +125,7 @@ const ProfileSection = () => {
   }, []);
 
   const [profileFields, setProfileFields] = useState([
-    { label: "Full Name", value: "Demian Satria", isEditing: false },
+    { label: "Full Name", value: "", isEditing: false },
     {
       label: "Display Name",
       value: "",
@@ -139,7 +139,7 @@ const ProfileSection = () => {
       isEditing: false,
     },
 
-    { label: "Phone Number", value: "0892-1293-3941", isEditing: false },
+    { label: "Phone Number", value: "", isEditing: false },
     {
       label: "Date of Birth",
       value: "",
@@ -148,7 +148,7 @@ const ProfileSection = () => {
     },
     {
       label: "Nationality",
-      value: "United State of America",
+      value: "",
       hasFlag: true,
       isEditing: false,
     },
@@ -218,7 +218,7 @@ const ProfileSection = () => {
 
     {
       label: "Phone Number",
-      value: data.phone || "",
+      value: data.phone_no || "",
       isEditing: false,
     },
 

@@ -1,113 +1,147 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./DatePriceSlider.module.css";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const generateDates = (startDate, count = 40) => {
-  return Array.from({ length: count }, (_, i) => {
-    const date = new Date(startDate.getTime() + i * DAY_MS);
-    return {
-      id: date.toISOString(),
-      date,
-      price: 7324,
-      priceType: i === 6 || i === 7 ? "high" : i === 0 ? "normal" : "low",
-    };
-  });
+const normalizeDateKey = (value) => {
+  if (!value) return "";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
-export default function DatePriceSlider() {
-  const [startDate, setStartDate] = useState(new Date());
-  const [selected, setSelected] = useState([]);
+const buildDateWindow = (startDate, count = 30) =>
+  Array.from({ length: count }, (_, index) => {
+    const date = new Date(startDate.getTime() + index * DAY_MS);
+    return {
+      date,
+      dateKey: normalizeDateKey(date),
+    };
+  });
+
+export default function DatePriceSlider({
+  tiles = [],
+  selectedDate = "",
+  onSelectDate,
+}) {
   const [mounted, setMounted] = useState(false);
+  const [selectedKey, setSelectedKey] = useState("");
+  const rowRef = useRef(null);
+  const today = useRef(new Date(new Date().setHours(0, 0, 0, 0)));
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // const dates = generateDates(new Date());
-  const rowRef = useRef(null);
+  useEffect(() => {
+    setSelectedKey(normalizeDateKey(selectedDate));
+  }, [selectedDate]);
 
-  const today = useRef(new Date(new Date().setHours(0, 0, 0, 0)));
+  const priceMap = useMemo(
+    () =>
+      (Array.isArray(tiles) ? tiles : []).reduce((acc, tile) => {
+        const dateKey = normalizeDateKey(tile?.date);
+        if (!dateKey) return acc;
 
-  const dates = generateDates(today.current);
+        const normalizedPrice = Number(tile?.price);
+        acc[dateKey] = {
+          price: Number.isFinite(normalizedPrice) ? normalizedPrice : null,
+          priceType:
+            tile?.trend === "up"
+              ? "high"
+              : tile?.trend === "down"
+                ? "low"
+                : "normal",
+        };
+        return acc;
+      }, {}),
+    [tiles],
+  );
+
+  const dates = useMemo(
+    () =>
+      buildDateWindow(today.current).map((item) => {
+        const meta = priceMap[item.dateKey] || {};
+
+        return {
+          id: item.dateKey,
+          dateKey: item.dateKey,
+          label: mounted
+            ? item.date.toLocaleDateString("en-GB", {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+              })
+            : "",
+          price: meta.price ?? null,
+          priceType: meta.priceType || "normal",
+        };
+      }),
+    [mounted, priceMap],
+  );
 
   const scroll = (dir) => {
     if (!rowRef.current) return;
 
-    const CARD_WIDTH = 116; // card width + gap
+    const cardWidth = 116;
     rowRef.current.scrollBy({
-      left: dir === "left" ? -CARD_WIDTH * 3 : CARD_WIDTH * 3,
+      left: dir === "left" ? -cardWidth * 3 : cardWidth * 3,
       behavior: "smooth",
     });
   };
 
-  const toggleSelect = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+  const handleSelect = (dateKey) => {
+    setSelectedKey(dateKey);
+    onSelectDate?.(dateKey);
   };
-
-  const shiftLeft = () => {
-    setStartDate((d) => new Date(d.getTime() - DAY_MS));
-  };
-
-  // const shiftRight = () => {
-  //   setStartDate((d) => new Date(d.getTime() + DAY_MS));
-  // };
-  useEffect(() => {
-    selected.forEach((s) => {
-      console.log("sel=>", s);
-    });
-  }, [selected]);
 
   return (
     <div className={styles.wrapper}>
-      <button className={styles.arrow} onClick={() => scroll("left")}>
+      <button className={styles.arrow} onClick={() => scroll("left")} type="button">
         <ArrowLeft size={12} />
       </button>
 
       <div className={styles.datesRow} ref={rowRef}>
-        {dates.map((d) => {
-          const isSelected = selected.includes(d.id);
+        {dates.map((item) => {
+          const isSelected = selectedKey === item.dateKey;
 
           return (
             <button
-              key={d.id}
-              className={`${styles.dateCard} ${
-                isSelected ? styles.selected : ""
-              }`}
-              onClick={() => toggleSelect(d.id)}
+              key={item.id}
+              className={`${styles.dateCard} ${isSelected ? styles.selected : ""}`}
+              onClick={() => handleSelect(item.dateKey)}
               type="button"
             >
-              <div className={styles.day}>
-                {mounted
-                  ? d.date.toLocaleDateString("en-GB", {
-                      weekday: "short",
-                      day: "2-digit",
-                      month: "short",
-                    })
-                  : ""}
-              </div>
-
-              <div
-                className={`${styles.price} ${
-                  d.priceType === "high"
-                    ? styles.high
-                    : d.priceType === "low"
-                    ? styles.low
-                    : ""
-                }`}
-              >
-                ₹{d.price.toLocaleString()}
-              </div>
+              <div className={styles.day}>{item.label}</div>
+              {item.price !== null ? (
+                <div
+                  className={`${styles.price} ${
+                    item.priceType === "high"
+                      ? styles.high
+                      : item.priceType === "low"
+                        ? styles.low
+                        : ""
+                  }`}
+                >
+                  ₹{item.price.toLocaleString()}
+                </div>
+              ) : (
+                <div className={styles.pricePlaceholder} />
+              )}
             </button>
           );
         })}
       </div>
 
-      <button className={styles.arrow} onClick={() => scroll("right")}>
+      <button className={styles.arrow} onClick={() => scroll("right")} type="button">
         <ArrowRight size={12} />
       </button>
     </div>

@@ -1,9 +1,74 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./MobileFareComparisonModalRoundTrip.module.css";
-import TripDetailsHeader from "@/app/components/tripDetailsHeader/TripDetailsHeader";
+import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { getFlightPrice } from "@/features/flights/services/flightBooking";
+import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+
+const parseCityLabel = (value = "") => {
+  const text = String(value || "").trim();
+  const match = text.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return {
+    city: match?.[1]?.trim() || text || "N/A",
+    code: match?.[2]?.trim() || "",
+  };
+};
+
+const compactAirportName = (value = "", fallback = "N/A") => {
+  const text = String(value || "").trim();
+  if (!text) return fallback;
+  return (
+    text
+      .split("|")[0]
+      ?.trim()
+      .split(",")
+      .map((part) => part.trim())
+      .find(Boolean) || fallback
+  );
+};
+
+const buildMobileSegment = (flight, dateLabel) => {
+  const departure = parseCityLabel(flight?.departure?.city);
+  const arrival = parseCityLabel(flight?.arrival?.city);
+  const details = flight?.details || {};
+  const departureTerminal = String(details?.departureTerminal || "").trim();
+  const arrivalTerminal = String(details?.arrivalTerminal || "").trim();
+  return {
+    route: {
+      fromName: departure.city || "N/A",
+      fromCode: departure.code || "",
+      toName: arrival.city || "N/A",
+      toCode: arrival.code || "",
+    },
+    airline: {
+      name: flight?.airlines?.[0]?.name || "N/A",
+      code: flight?.airlines?.[0]?.code || "N/A",
+      logo: flight?.airlines?.[0]?.logo || "/images/Flight.png",
+      aircraft: "N/A",
+      cabinClass: flight?.fare?.cabinClass || "N/A",
+    },
+    departure: {
+      date: dateLabel || "N/A",
+      time: flight?.departure?.time || "N/A",
+      airport: `${departure.code || "N/A"} - ${(departure.city || "N/A").toUpperCase()}`,
+      terminal: departureTerminal ? `Terminal ${departureTerminal}` : "Terminal N/A",
+      city: compactAirportName(details?.fromName, departure.city || "N/A"),
+    },
+    arrival: {
+      date: dateLabel || "N/A",
+      time: flight?.arrival?.time || "N/A",
+      airport: `${arrival.code || "N/A"} - ${(arrival.city || "N/A").toUpperCase()}`,
+      terminal: arrivalTerminal ? `Terminal ${arrivalTerminal}` : "Terminal N/A",
+      city: compactAirportName(details?.toName, arrival.city || "N/A"),
+    },
+    duration: flight?.duration || { hours: 0, minutes: 0 },
+    stops: flight?.stops?.type || "N/A",
+    mobileDate: dateLabel || "N/A",
+  };
+};
 
 const MobileFareComparisonModalRoundTrip = ({
   isOpen,
@@ -12,9 +77,36 @@ const MobileFareComparisonModalRoundTrip = ({
 }) => {
   if (!isOpen) return null;
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBookNow = () => {
-    router.push("/flight-booking-details");
+  const handleBookNow = async (selectedFare) => {
+    const priceRequest = flightData?.booking?.priceRequest;
+    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+      toast.error("Missing booking payload for the selected flight.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const priceResponse = await getFlightPrice(priceRequest);
+      writeFlightBookingSession({
+        selectedFlight: flightData,
+        selectedFare,
+        priceRequest,
+        priceResponse,
+        ssrRequest: null,
+        ssrResponse: null,
+      });
+      router.push("/flight-booking-details");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to continue with this flight right now."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const [activeTab, setActibeTab] = useState("onward");
   const fareOptions = [
@@ -77,27 +169,9 @@ const MobileFareComparisonModalRoundTrip = ({
     },
   ];
 
-  const flight = {
-    departure: {
-      date: "THU, 18 DEC 2025",
-      time: "06:45",
-      airport: "DEL - DELHI",
-      terminal: "Terminal T2",
-      city: "Indira Gandhi International",
-    },
-    arrival: {
-      date: "THU, 18 DEC 2025",
-      time: "08:00",
-      airport: "HKT - PHUKET CITY",
-      terminal: "Terminal T3",
-      city: "Phuket International",
-    },
-    duration: {
-      hours: 1,
-      minutes: 50,
-    },
-    stops: "Non-Stop",
-  };
+  const flight = activeTab === "onward"
+    ? buildMobileSegment(flightData?.outbound, flightData?.outbound?.dateLabel)
+    : buildMobileSegment(flightData?.inbound, flightData?.inbound?.dateLabel);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -120,52 +194,52 @@ const MobileFareComparisonModalRoundTrip = ({
           {/* Header Section: Dark blue background with Route and Date */}
           <div className={styles.TripCardHeader}>
             <div className={styles.TripCardHeaderDetails}>
-              <p className={styles.TripCardHeaderDetailsItemText}>NEW DELHI</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{flight.route.fromName.toUpperCase()}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({flight.route.fromCode})
               </span>
 
               <img src="/icons/right-arrow.svg" alt="arrow" />
 
               <p className={styles.TripCardHeaderDetailsItemText}>
-                PHUKET CITY
+                {flight.route.toName.toUpperCase()}
               </p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (CGK)
+                ({flight.route.toCode})
               </span>
             </div>
-            <div className={styles.TripCardHeaderDate}>Wed-11 Feb 2026</div>
+            <div className={styles.TripCardHeaderDate}>{flight.mobileDate}</div>
           </div>
 
           {/* Content Section: White background with Airline, Timeline, and Links */}
           <div className={styles.TripFlightDetailsCard}>
             <div className={styles.TripFlightDetailsCardCont}>
               <div className={styles.TripFlightDetailsCardImage}>
-                <img src="/images/Flight.png" alt="" />
+                <img src={flight.airline.logo} alt="" />
               </div>
               <div className={styles.AirLineDetails}>
                 <div className={styles.AirLineDetailsItem}>
                   <span className={styles.AirLineDetailsItemText}>
-                    Air India
+                    {flight.airline.name}
                   </span>
                   <div className={styles.dot}></div>
-                  <span className={styles.AirLineCode}>AI2380</span>
+                  <span className={styles.AirLineCode}>{flight.airline.code}</span>
                 </div>
                 <div className={styles.AirLineDetailsItem}>
                   <span className={styles.AirLineBoeing}>
-                    Boeing 787-9 Dreamliner
+                    {flight.airline.aircraft}
                   </span>
                   <div className={styles.dot}></div>
                   <span className={styles.AirLineDetailsItemCode}>
-                    Economy Class
+                    {flight.airline.cabinClass}
                   </span>
                 </div>
               </div>
             </div>
             <FlightTimeline flight={flight} />
             <div className={styles.Airportname}>
-              <span>Indira Gandhi Internation</span>
-              <span>Phuket International</span>
+              <span>{flight.departure.city}</span>
+              <span>{flight.arrival.city}</span>
             </div>
           </div>
         </div>
@@ -183,7 +257,7 @@ const MobileFareComparisonModalRoundTrip = ({
               activeTab === "onward" ? styles.activeTab : ""
             }`}
           >
-            ONWARD FLIGHT (DEL-CGK)
+            ONWARD FLIGHT ({parseCityLabel(flightData?.outbound?.departure?.city).code || "N/A"}-{parseCityLabel(flightData?.outbound?.arrival?.city).code || "N/A"})
           </div>
           <div
             onClick={() => setActibeTab("return")}
@@ -191,7 +265,7 @@ const MobileFareComparisonModalRoundTrip = ({
               activeTab === "return" ? styles.activeTab : ""
             }`}
           >
-            return FLIGHT (cgk-del)
+            RETURN FLIGHT ({parseCityLabel(flightData?.inbound?.departure?.city).code || "N/A"}-{parseCityLabel(flightData?.inbound?.arrival?.city).code || "N/A"})
           </div>
         </div>
         <div className={styles.fareCards}>
@@ -282,8 +356,8 @@ const MobileFareComparisonModalRoundTrip = ({
               {/* Action Buttons */}
               <div className={styles.fareActions}>
                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                <button onClick={handleBookNow} className={styles.bookNowBtn}>
-                  BOOK NOW
+                <button onClick={() => handleBookNow(fare)} className={styles.bookNowBtn}>
+                  {isSubmitting ? "LOADING..." : "BOOK NOW"}
                 </button>
               </div>
             </div>
