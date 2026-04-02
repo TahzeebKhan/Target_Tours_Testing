@@ -30,7 +30,6 @@ const AirportSuggestionBox = ({
   boxRef,
   query,
   onSelect,
-  fallbackSuggestions = [],
   minChars = 1,
   recentType = "flight",
 }) => {
@@ -56,11 +55,7 @@ const AirportSuggestionBox = ({
     refetchOnWindowFocus: false,
   });
 
-  const suggestions = shouldFetch
-    ? data
-    : recentSuggestions.length
-      ? recentSuggestions
-      : fallbackSuggestions;
+  const suggestions = shouldFetch ? data : recentSuggestions;
   const heading = shouldFetch ? "SUGGESTIONS" : "RECENT SEARCH";
 
   if (!suggestions?.length) return null;

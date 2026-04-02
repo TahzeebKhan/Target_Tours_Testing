@@ -14,6 +14,7 @@ import OnewaySkeleton from "./OnewaySkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
+import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
 
 const OnewayFlightBooking = ({
   flightData = [],
@@ -40,6 +41,20 @@ const OnewayFlightBooking = ({
   const [isMobile, setIsMobile] = useState(false);
 
   const [mounted, setMounted] = useState(false);
+
+  const openFareModal = async (flight) => {
+    const searchTui = flight?.booking?.tui;
+
+    if (searchTui) {
+      try {
+        await getFlightWebSettings({ TUI: searchTui });
+      } catch (error) {
+        console.error("Failed to fetch flight web settings", error);
+      }
+    }
+
+    setFareModalOpen(flight?.id ?? null);
+  };
 
   useEffect(() => {
     const checkScreen = () => {
@@ -728,7 +743,7 @@ const OnewayFlightBooking = ({
                     </span>
                     <button
                       className={styles.viewBtn}
-                      onClick={() => setFareModalOpen(flight.id)}
+                      onClick={() => openFareModal(flight)}
                     >
                       VIEW FARES
                     </button>
@@ -878,7 +893,7 @@ const OnewayFlightBooking = ({
         ) : (
           visibleFlights.map((flight, index) => (
             <FlightDetailsCard
-              setFareModalOpen={() => setFareModalOpen(flight.id)}
+              setFareModalOpen={() => openFareModal(flight)}
               key={flight.id + index}
               flight={flight}
             />

@@ -3,26 +3,46 @@ import React, { useEffect, useState } from "react";
 import styles from "./PassengersPopup.module.css";
 
 const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
+  const childCount = Number(passengers?.child ?? passengers?.children) || 0;
+
   const updateCount = (type, delta) => {
     setPassengers((prev) => {
-      const currentValue = Number(prev[type]) || 0;
+      const normalizedType =
+        type === "children" && !Object.prototype.hasOwnProperty.call(prev, "children")
+          ? "child"
+          : type;
+      const currentValue = Number(prev[normalizedType]) || 0;
       const newValue = Math.max(0, currentValue + delta);
 
       // Adult must be at least 1
-      if (type === "adult" && newValue < 1) {
+      if (normalizedType === "adult" && newValue < 1) {
         return prev;
       }
 
-      return {
+      const next = {
         ...prev,
-        [type]: newValue,
+        [normalizedType]: newValue,
       };
+
+      if (Object.prototype.hasOwnProperty.call(next, "child")) {
+        next.child = Number(next.child) || 0;
+      }
+      if (Object.prototype.hasOwnProperty.call(next, "children")) {
+        next.children = Number(next.children) || 0;
+      }
+
+      return next;
     });
   };
   useEffect(() => {
     setPassengers((prev) => ({
       adult: Number(prev.adult) || 1,
-      children: Number(prev.children) || 0,
+      ...(Object.prototype.hasOwnProperty.call(prev, "child")
+        ? { child: Number(prev.child) || 0 }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(prev, "children")
+        ? { children: Number(prev.children) || 0 }
+        : {}),
       infant: Number(prev.infant) || 0,
     }));
   }, []);
@@ -39,10 +59,10 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
         {/* HEADER */}
         <div className={styles.header}>
           <span className={styles.label}>{inputType}</span>
-          <div className={styles.inputRow}>
-            <div className={styles.selectedDate}>
-              {passengers.adult} Adult, {passengers.children} Children, {passengers.infant} Infant
-            </div>
+            <div className={styles.inputRow}>
+              <div className={styles.selectedDate}>
+                {passengers.adult} Adult, {childCount} Children, {passengers.infant} Infant
+              </div>
             <img src="/icons/Close.svg" alt="close" onClick={onClose} />
           </div>
         </div>
@@ -102,7 +122,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
             </div>
             <div className={styles.counter}>
               <button
-                disabled={passengers.children === 0}
+                disabled={childCount === 0}
                 className={styles.counterBtn}
                 onClick={() => updateCount("children", -1)}
               >
@@ -119,7 +139,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
                   />
                 </svg>
               </button>
-              <span className={styles.counterText}>{passengers.children}</span>
+              <span className={styles.counterText}>{childCount}</span>
               <button
                 className={styles.counterBtn}
                 onClick={() => updateCount("children", 1)}

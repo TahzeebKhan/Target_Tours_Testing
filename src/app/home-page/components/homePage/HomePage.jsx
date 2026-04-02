@@ -228,11 +228,40 @@ const HomePage = ({
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
+  const getSuggestionDisplayValue = (suggestion) => {
+    if (!suggestion) return "";
+    if (typeof suggestion === "string") return suggestion;
+
+    const directValue =
+      typeof suggestion?.value === "string"
+        ? suggestion.value
+        : "";
+    if (directValue.trim()) return directValue.trim();
+
+    const city =
+      typeof suggestion?.city === "string"
+        ? suggestion.city.trim()
+        : typeof suggestion?.label === "string"
+          ? suggestion.label.split(",")[0]?.trim()
+          : "";
+    const code = String(
+      suggestion?.iataCode || suggestion?.code || ""
+    )
+      .trim()
+      .toUpperCase();
+
+    if (city && code) return `${city} (${code})`;
+    if (city) return city;
+    if (code) return code;
+    return "";
+  };
+
   const selectSuggestion = (sugg, field = "from", index = null) => {
+    const displayValue = getSuggestionDisplayValue(sugg);
     const iataCode = sugg?.iataCode || sugg?.code || "";
 
     if (tripType === "multi" && typeof index === "number") {
-      updateMultiLeg(index, field, sugg.value);
+      updateMultiLeg(index, field, displayValue);
       if (index === 0) {
         if (field === "from") setFromCode(iataCode);
         if (field === "to") setToCode(iataCode);
@@ -242,12 +271,12 @@ const HomePage = ({
     }
 
     if (field === "from") {
-      setFrom(sugg.value);
+      setFrom(displayValue);
       setFromCode(iataCode);
       setFromSuggestionsOpen(false);
       if (fromInputRef.current) fromInputRef.current.focus();
     } else {
-      setTo(sugg.value);
+      setTo(displayValue);
       setToCode(iataCode);
       setToSuggestionsOpen(false);
       if (toInputRef.current) toInputRef.current.focus();
@@ -716,6 +745,12 @@ const HomePage = ({
 
   const handleSearch = async ({ tripType: incomingTripType, multiFlights } = {}) => {
     const finalTripType = incomingTripType || tripType;
+    const normalizedPassengers = {
+      adult: Number(passengers?.adult || 1),
+      child: Number(passengers?.child || passengers?.children || 0),
+      infant: Number(passengers?.infant || 0),
+    };
+    const normalizedTravelClass = String(travelClass || "Economy").toUpperCase();
 
     if (bookingType === "flight") {
       // MULTI CITY
@@ -733,14 +768,20 @@ const HomePage = ({
           }
         }
 
-        const params = multiFlights
-          .map(
-            (leg, i) =>
-              `from${i}=${leg.from}&to${i}=${leg.to}&date${i}=${leg.departureDate}`,
-          )
-          .join("&");
+        const params = new URLSearchParams({
+          tripType: "multi",
+          adults: String(normalizedPassengers.adult),
+          children: String(normalizedPassengers.child),
+          infants: String(normalizedPassengers.infant),
+          travelClass: normalizedTravelClass,
+        });
+        multiFlights.forEach((leg, i) => {
+          params.set(`from${i}`, leg.from || "");
+          params.set(`to${i}`, leg.to || "");
+          params.set(`date${i}`, leg.departureDate || "");
+        });
 
-        router.push(`/flights?tripType=multi&${params}`);
+        router.push(`/flights?${params.toString()}`);
         return;
       }
 
@@ -769,6 +810,10 @@ const HomePage = ({
         tripType: finalTripType,
         start: startDate || "",
         end: endDate || "",
+        adults: String(normalizedPassengers.adult),
+        children: String(normalizedPassengers.child),
+        infants: String(normalizedPassengers.infant),
+        travelClass: normalizedTravelClass,
       });
       if (fromCode) params.set("origin", fromCode);
       if (toCode) params.set("destination", toCode);

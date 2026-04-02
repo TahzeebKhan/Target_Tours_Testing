@@ -10,6 +10,26 @@ export const getFlightPrice = async (payload) => {
   return response?.data;
 };
 
+export const getFlightWebSettings = async (payload) => {
+  const response = await api.post("/api/flights/web-settings", payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
+export const getFlightTravelChecklist = async (payload) => {
+  const response = await api.post("/api/flights/travel-check-list", payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
 export const getFlightSsr = async (payload) => {
   const response = await api.post("/api/flights/ssr", payload, {
     headers: {

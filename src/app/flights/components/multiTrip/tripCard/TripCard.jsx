@@ -5,6 +5,7 @@ import FlightTimingDetail from "../FlightTimingDetail";
 import ExpandableTabs from "@/app/flights/components/onewayTrip/expendableTabs/ExpandableTabs";
 import RoundTripExpendable from "../multiTripExpendable/MultiTripExpendable";
 import MultiTripExpendable from "../multiTripExpendable/MultiTripExpendable";
+import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
 const TripCard = ({ setFareModalOpen, cardData }) => {
   const [openId, setOpenId] = useState(null);
 
@@ -81,6 +82,20 @@ const TripCard = ({ setFareModalOpen, cardData }) => {
       pricePerAdult: item.fare.pricePerAdult,
       cabinClass: item.fare.cabinClass,
     },
+  };
+
+  const openFareModal = async () => {
+    const searchTui = item?.booking?.tui || item?.tripCard?.booking?.tui;
+
+    if (searchTui) {
+      try {
+        await getFlightWebSettings({ TUI: searchTui });
+      } catch (error) {
+        console.error("Failed to fetch flight web settings", error);
+      }
+    }
+
+    setFareModalOpen(item.id);
   };
 
   return (
@@ -176,7 +191,7 @@ const TripCard = ({ setFareModalOpen, cardData }) => {
               <div className={styles.totalFare}>
                 <span className={styles.fareText}>{flight.fare.totalFare}</span>
                 <button
-                  onClick={() => setFareModalOpen(item.id)}
+                  onClick={openFareModal}
                   className={styles.viewBtn}
                 >
                   VIEW FARES
