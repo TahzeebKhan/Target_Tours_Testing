@@ -460,7 +460,10 @@ export const buildCreateItineraryPayload = (session, prices) => {
       };
     })
     .filter(Boolean);
-  const ssrAmount = Number((prices?.baggage || 0) + (prices?.meals || 0));
+  const ssrAmount = ssrSelections.reduce((sum, item) => {
+    const value = readNumber(item?.price, item?.Price, item?.amount, item?.Amount);
+    return sum + (value ?? 0);
+  }, 0);
 
   return {
     TUI: pickFirst(

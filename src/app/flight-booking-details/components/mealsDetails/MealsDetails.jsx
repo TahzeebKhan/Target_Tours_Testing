@@ -28,6 +28,11 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
       id: item?.id ?? index + 1,
       ssid: item?.ssid ?? item?.id ?? index + 1,
       fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+      selectionKey: [
+        item?.id ?? index + 1,
+        item?.ssid ?? item?.id ?? index + 1,
+        item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+      ].join("::"),
       image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
       title,
       price: Number(item?.price || 0),
@@ -77,10 +82,10 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
   return fallback;
 };
 
-const getMealInfo = (routeCards, routeKey, mealId) => {
+const getMealInfo = (routeCards, routeKey, selectionKey) => {
   const route = routeCards.find((item) => item.key === routeKey);
   return [...(route?.meals || []), ...(route?.beverages || [])].find(
-    (item) => Number(item.id) === Number(mealId)
+    (item) => item.selectionKey === selectionKey
   );
 };
 
@@ -110,9 +115,9 @@ const MealsDetails = () => {
     const selectedMeals = [];
     Object.entries(mealQuantities).forEach(([key, qty]) => {
       if (qty > 0) {
-        const [segment, mealIdStr] = key.split("::");
-        const mealId = parseInt(mealIdStr, 10);
-        const info = getMealInfo(routeCards, segment, mealId);
+        const [segment, ...selectionParts] = key.split("::");
+        const selectionKey = selectionParts.join("::");
+        const info = getMealInfo(routeCards, segment, selectionKey);
 
         if (info) {
           for (let i = 0; i < qty; i++) {
@@ -129,8 +134,8 @@ const MealsDetails = () => {
     setMeals((current) => (areEqual(current, selectedMeals) ? current : selectedMeals));
   }, [mealQuantities, routeCards, setMeals]);
 
-  const handleUpdateQuantity = useCallback((segment, mealId, newQty) => {
-    const key = `${segment}::${mealId}`;
+  const handleUpdateQuantity = useCallback((segment, selectionKey, newQty) => {
+    const key = `${segment}::${selectionKey}`;
     setMealQuantities((prev) => ({
       ...prev,
       [key]: Math.max(0, newQty),
@@ -143,8 +148,8 @@ const MealsDetails = () => {
     const segmentQty = {};
     Object.entries(mealQuantities).forEach(([key, val]) => {
       if (key.startsWith(`${segment}::`)) {
-        const mealId = parseInt(key.split("::")[1], 10);
-        segmentQty[mealId] = val;
+        const mealKey = key.split("::").slice(1).join("::");
+        segmentQty[mealKey] = val;
       }
     });
     return segmentQty;
