@@ -11,14 +11,20 @@ const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }
                 <div className={styles.mealGrid}>
                     {meals.map((meal) => (
                         <MealItem
-                            key={meal.id}
+                            key={meal.selectionKey || meal.id}
                             {...meal}
-                            quantity={quantities[meal.id] || 0}
+                            quantity={quantities[meal.selectionKey || meal.id] || 0}
                             onIncrease={() =>
-                                onUpdateQuantity(meal.id, (quantities[meal.id] || 0) + 1)
+                                onUpdateQuantity(
+                                    meal.selectionKey || meal.id,
+                                    (quantities[meal.selectionKey || meal.id] || 0) + 1
+                                )
                             }
                             onDecrease={() =>
-                                onUpdateQuantity(meal.id, (quantities[meal.id] || 0) - 1)
+                                onUpdateQuantity(
+                                    meal.selectionKey || meal.id,
+                                    (quantities[meal.selectionKey || meal.id] || 0) - 1
+                                )
                             }
                         />
                     ))}
@@ -29,14 +35,20 @@ const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }
                 <div className={styles.mealGrid}>
                     {beverages.map((drink) => (
                         <MealItem
-                            key={drink.id}
+                            key={drink.selectionKey || drink.id}
                             {...drink}
-                            quantity={quantities[drink.id] || 0}
+                            quantity={quantities[drink.selectionKey || drink.id] || 0}
                             onIncrease={() =>
-                                onUpdateQuantity(drink.id, (quantities[drink.id] || 0) + 1)
+                                onUpdateQuantity(
+                                    drink.selectionKey || drink.id,
+                                    (quantities[drink.selectionKey || drink.id] || 0) + 1
+                                )
                             }
                             onDecrease={() =>
-                                onUpdateQuantity(drink.id, (quantities[drink.id] || 0) - 1)
+                                onUpdateQuantity(
+                                    drink.selectionKey || drink.id,
+                                    (quantities[drink.selectionKey || drink.id] || 0) - 1
+                                )
                             }
                         />
                     ))}

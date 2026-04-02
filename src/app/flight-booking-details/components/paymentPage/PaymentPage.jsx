@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useFlightBooking } from "../../FlightBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
@@ -70,6 +71,7 @@ const PaymentPage = () => {
     baggage,
     meals,
   } = useFlightBooking();
+  const router = useRouter();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [paymentMethod, setPaymentMethod] = useState("credit");
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
@@ -90,7 +92,10 @@ const PaymentPage = () => {
     <>
       <BookingSuccessModal
         isOpen={Boolean(paymentSuccessData)}
-        onClose={() => setPaymentSuccessData(null)}
+        onClose={() => {
+          setPaymentSuccessData(null);
+          router.push("/");
+        }}
         bookingView={bookingView}
         paymentSuccessData={paymentSuccessData}
         prices={prices}

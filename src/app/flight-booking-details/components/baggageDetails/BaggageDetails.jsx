@@ -33,6 +33,11 @@ const buildExtraBaggageData = (routeBaggage = []) => {
       ssid: item?.ssid ?? item?.id ?? `${bucket}-${index}`,
       fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
       code: item?.code || `${bucket}-${index}`,
+      selectionKey: [
+        item?.code || `${bucket}-${index}`,
+        item?.ssid ?? item?.id ?? `${bucket}-${index}`,
+        item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+      ].join("::"),
       image: imagePool[index % imagePool.length],
       weight: weightLabel,
       price: Number(item?.price || 0),
@@ -148,7 +153,7 @@ const FlightExpandableCard = ({
         {flightCard.baggageRows.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.flightExpandableRows}>
             {row.map((item) => {
-              const key = `${flightCard.key}::${item.code}`;
+              const key = `${flightCard.key}::${item.selectionKey}`;
               return (
                 <ExtraBaggageItem
                   key={key}
@@ -193,7 +198,7 @@ const MobileFlightCard = ({
         {flightCard.baggageRows.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.flightExpandableRows}>
             {row.map((item) => {
-              const key = `${flightCard.key}::${item.code}`;
+              const key = `${flightCard.key}::${item.selectionKey}`;
 
               return (
                 <ExtraBaggageItem
@@ -234,10 +239,10 @@ const BaggageDetails = () => {
     const newBaggageList = [];
     Object.entries(quantities).forEach(([key, qty]) => {
       if (qty > 0) {
-        const baggageCode = key.split("::")[1];
+        const selectionKey = key.split("::").slice(1).join("::");
         const matchedItem = routeCards
           .flatMap((card) => card.baggageRows.flat())
-          .find((item) => `${item.code}` === baggageCode);
+          .find((item) => item.selectionKey === selectionKey);
 
         const info = matchedItem || null;
         if (info) {

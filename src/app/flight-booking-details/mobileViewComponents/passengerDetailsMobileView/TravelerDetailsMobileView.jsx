@@ -221,10 +221,12 @@ const TravelerDetailsMobileView = ({ onClose }) => {
   };
 
   const updateTravelerField = (index, field, value) => {
+    const normalizedValue =
+      field === "Age" ? String(value).replace(/[^\d]/g, "").slice(0, 2) : value;
     setTravelers((prev) => {
       const next = prev.map((traveler, travelerIndex) =>
         travelerIndex === index
-          ? { ...traveler, [field]: value }
+          ? { ...traveler, [field]: normalizedValue }
           : traveler
       );
       const serializedNext = serializeTravelers(next);
@@ -432,7 +434,9 @@ const TravelerDetailsMobileView = ({ onClose }) => {
                   <label className={styles.label}>Age</label>
                   <input
                     className={`${styles.input} ${getTravelerFieldError(traveler.id, "Age") ? styles.fieldError : ""}`}
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Enter Age"
                     value={traveler.Age}
                     onChange={(event) =>
