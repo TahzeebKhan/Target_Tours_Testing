@@ -1,11 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./FareComparisonModalRoundTrip.module.css";
 import { useRouter } from "next/navigation";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { toast } from "react-toastify";
 import { getFlightPrice } from "@/features/flights/services/flightBooking";
 import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 
 const parseCityLabel = (value = "") => {
   const text = String(value || "").trim();
@@ -66,11 +68,14 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
 };
 
 const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
-  if (!isOpen) return null;
   const router = useRouter();
+  const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [pendingFare, setPendingFare] = useState(null);
+  if (!isOpen) return null;
 
-  const handleBookNow = async (selectedFare) => {
+  const performBookNow = useCallback(async (selectedFare) => {
     const priceRequest = flightData?.booking?.priceRequest;
     if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
       toast.error("Missing booking payload for the selected flight.");
@@ -98,6 +103,24 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
     } finally {
       setIsSubmitting(false);
     }
+  }, [flightData, router]);
+
+  useEffect(() => {
+    if (!pendingFare || !isLoggedIn) return;
+    const selectedFare = pendingFare;
+    setPendingFare(null);
+    setShowLogin(false);
+    performBookNow(selectedFare);
+  }, [isLoggedIn, pendingFare, performBookNow]);
+
+  const handleBookNow = async (selectedFare) => {
+    if (loading) return;
+    if (!isLoggedIn) {
+      setPendingFare(selectedFare);
+      setShowLogin(true);
+      return;
+    }
+    performBookNow(selectedFare);
   };
 
   const flightSegments = {
@@ -426,6 +449,15 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
             ))}
           </div>
         </div>
+        {showLogin && (
+          <LoginPopup
+            onClose={() => {
+              setShowLogin(false);
+              setPendingFare(null);
+            }}
+            onNavigate={() => {}}
+          />
+        )}
       </div>
     </div>
   );

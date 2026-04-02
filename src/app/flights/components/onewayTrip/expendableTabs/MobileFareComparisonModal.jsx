@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./MobileFareComparisonModal.module.css";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,14 +7,18 @@ import { getSelectedFlightSummary } from "../fareComparisonUtils";
 import { toast } from "react-toastify";
 import { getFlightPrice } from "@/features/flights/services/flightBooking";
 import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  if (!isOpen) return null;
+  const [showLogin, setShowLogin] = useState(false);
+  const [pendingFare, setPendingFare] = useState(null);
 
-  const handleBookNow = async (selectedFare) => {
+  const performBookNow = useCallback(async (selectedFare) => {
     const priceRequest = flightData?.booking?.priceRequest;
     const routeContext = {
       fromName: String(searchParams?.get("from") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
@@ -49,7 +53,28 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
     } finally {
       setIsSubmitting(false);
     }
+  }, [flightData, router, searchParams]);
+
+  useEffect(() => {
+    if (!pendingFare || !isLoggedIn) return;
+    const selectedFare = pendingFare;
+    setPendingFare(null);
+    setShowLogin(false);
+    performBookNow(selectedFare);
+  }, [isLoggedIn, pendingFare, performBookNow]);
+
+  const handleBookNow = async (selectedFare) => {
+    if (loading) return;
+    if (!isLoggedIn) {
+      setPendingFare(selectedFare);
+      setShowLogin(true);
+      return;
+    }
+    performBookNow(selectedFare);
   };
+
+  if (!isOpen) return null;
+
   const fareOptions = [
     {
       id: "saver",
@@ -284,6 +309,15 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
             </div>
           ))}
         </div>
+        {showLogin && (
+          <LoginPopup
+            onClose={() => {
+              setShowLogin(false);
+              setPendingFare(null);
+            }}
+            onNavigate={() => {}}
+          />
+        )}
       </div>
     </div>
   );

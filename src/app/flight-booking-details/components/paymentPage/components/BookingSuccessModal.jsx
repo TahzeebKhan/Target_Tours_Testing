@@ -68,22 +68,51 @@ export default function BookingSuccessModal({
     const createData = paymentSuccessData?.createItinerary || {};
     const startData = paymentSuccessData?.startPayment || {};
     const retrieveData = paymentSuccessData?.retrieveBooking || {};
+    const retrieveBookingData =
+      retrieveData?.data && typeof retrieveData.data === "object"
+        ? retrieveData.data
+        : retrieveData;
+    const retrieveBookingRaw =
+      retrieveData?.raw && typeof retrieveData.raw === "object"
+        ? retrieveData.raw
+        : {};
+    const retrieveSsr = Array.isArray(retrieveBookingData?.SSR)
+      ? retrieveBookingData.SSR
+      : Array.isArray(retrieveBookingRaw?.SSR)
+        ? retrieveBookingRaw.SSR
+      : [];
+    const baggageSsr = retrieveSsr.filter(
+      (item) =>
+        String(item?.Type || "").trim() === "2" &&
+        String(item?.Code || "").trim().toUpperCase() !== "BAG"
+    );
+    const mealSsr = retrieveSsr.filter(
+      (item) => String(item?.Type || "").trim() === "1"
+    );
     const routeFrom = pickFirst(
+      retrieveBookingData?.from,
+      retrieveBookingData?.origin,
       retrieveData?.from,
       retrieveData?.origin,
       bookingView?.header?.fromCode
     );
     const routeTo = pickFirst(
+      retrieveBookingData?.to,
+      retrieveBookingData?.destination,
       retrieveData?.to,
       retrieveData?.destination,
       bookingView?.header?.toCode
     );
     const routeFromName = pickFirst(
+      retrieveBookingData?.from_name,
+      retrieveBookingData?.fromName,
       retrieveData?.from_name,
       retrieveData?.fromName,
       bookingView?.header?.fromName
     );
     const routeToName = pickFirst(
+      retrieveBookingData?.to_name,
+      retrieveBookingData?.toName,
       retrieveData?.to_name,
       retrieveData?.toName,
       bookingView?.header?.toName
@@ -97,6 +126,8 @@ export default function BookingSuccessModal({
         "Payment session started successfully"
       ),
       status: pickFirst(
+        retrieveBookingData?.status,
+        retrieveBookingData?.payment_status,
         retrieveData?.status,
         retrieveData?.payment_status,
         startData?.message,
@@ -122,40 +153,68 @@ export default function BookingSuccessModal({
         startData?.redirectUrl,
         startData?.url
       ),
-      passengers: Array.isArray(retrieveData?.passengers) ? retrieveData.passengers : [],
-      baggage: pickFirst(retrieveData?.baggage, ""),
-      meals: pickFirst(retrieveData?.meals, ""),
+      passengers: Array.isArray(retrieveBookingData?.passengers)
+        ? retrieveBookingData.passengers
+        : Array.isArray(retrieveData?.passengers)
+          ? retrieveData.passengers
+          : [],
+      ssrItems: retrieveSsr,
+      baggageItems: baggageSsr,
+      mealItems: mealSsr,
+      baggage: pickFirst(
+        retrieveBookingData?.baggage,
+        retrieveData?.baggage,
+        ""
+      ),
+      meals: pickFirst(
+        retrieveBookingData?.meals,
+        retrieveData?.meals,
+        ""
+      ),
       route: {
         from: formatAirportLabel(routeFrom, routeFromName),
         to: formatAirportLabel(routeTo, routeToName),
       },
       meta: {
         date: pickFirst(
+          formatDate(retrieveBookingData?.departure),
           formatDate(retrieveData?.departure),
           bookingView?.header?.date,
           "N/A"
         ),
         airline: pickFirst(
+          retrieveBookingData?.airline,
           retrieveData?.airline,
           bookingView?.departureFlight?.airline?.name,
           "N/A"
         ),
         time: `${formatTime(
-          pickFirst(retrieveData?.departure, bookingView?.departureFlight?.departure?.time)
+          pickFirst(
+            retrieveBookingData?.departure,
+            retrieveData?.departure,
+            bookingView?.departureFlight?.departure?.time
+          )
         )}-${formatTime(
-          pickFirst(retrieveData?.arrival, bookingView?.departureFlight?.arrival?.time)
+          pickFirst(
+            retrieveBookingData?.arrival,
+            retrieveData?.arrival,
+            bookingView?.departureFlight?.arrival?.time
+          )
         )}`,
         cabin: pickFirst(
+          retrieveBookingData?.cabin,
           retrieveData?.cabin,
           bookingView?.header?.cabinClass,
           "N/A"
         ),
         stops: pickFirst(
+          retrieveBookingData?.stops,
           retrieveData?.stops,
           bookingView?.header?.stops,
           "N/A"
         ),
         duration: pickFirst(
+          retrieveBookingData?.duration,
           retrieveData?.duration,
           formatSummaryDuration(bookingView?.departureFlight?.duration),
           "N/A"
@@ -216,15 +275,28 @@ export default function BookingSuccessModal({
           contact: traveler?.MobileNumber || bookingContactDetails?.MobileNumber || "N/A",
         }));
   const baggageText =
+    (Array.isArray(details.baggageItems) && details.baggageItems.length > 0
+      ? details.baggageItems
+          .map((item) => item?.Description || item?.description || item?.Code)
+          .filter(Boolean)
+          .join(", ")
+      : "") ||
     details.baggage ||
     (Array.isArray(baggage) && baggage.length > 0
       ? baggage.map((item) => item?.weight || item?.name).filter(Boolean).join(", ")
       : "Included");
   const mealsText =
+    (Array.isArray(details.mealItems) && details.mealItems.length > 0
+      ? details.mealItems
+          .map((item) => item?.Description || item?.description || item?.Code)
+          .filter(Boolean)
+          .join(", ")
+      : "") ||
     details.meals ||
     (Array.isArray(meals) && meals.length > 0
       ? meals.map((item) => item?.name || item?.mealName).filter(Boolean).join(", ")
       : "Included");
+  const ssrItems = Array.isArray(details.ssrItems) ? details.ssrItems : [];
 
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
@@ -324,6 +396,28 @@ export default function BookingSuccessModal({
             <div className={styles.detailRow}>
               <span className={styles.detailPrimary}>{mealsText}</span>
             </div>
+          </div>
+        </div>
+
+        <div className={styles.detailSection}>
+          <h3 className={styles.sectionTitle}>SSR Details</h3>
+          <div className={styles.detailList}>
+            {ssrItems.length > 0 ? (
+              ssrItems.map((item, index) => (
+                <div key={`${item?.FUID || "na"}-${item?.PaxId || "na"}-${item?.Code || "na"}-${index}`} className={styles.detailRow}>
+                  <span className={styles.detailPrimary}>
+                    {item?.Description || item?.Code || "N/A"}
+                  </span>
+                  <span className={styles.detailSecondary}>
+                    Code: {item?.Code || "N/A"} | Type: {item?.Type || "N/A"} | Passenger ID: {item?.PaxId || "N/A"} | Charge: ₹{Number(item?.Charge || 0).toLocaleString()}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className={styles.detailRow}>
+                <span className={styles.detailPrimary}>No SSR details</span>
+              </div>
+            )}
           </div>
         </div>
 

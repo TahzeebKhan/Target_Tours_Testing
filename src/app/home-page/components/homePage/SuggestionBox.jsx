@@ -14,9 +14,9 @@ const SuggestionBox = ({
     <div ref={boxRef} className={styles.suggestionBox}>
       <div className={styles.recentSearchHeading}>{heading}</div>
 
-      {suggestions.map((s) => (
+      {suggestions.map((s, index) => (
         <button
-          key={s.code}
+          key={`${s.code || "na"}-${s.label || "na"}-${s.detail || "na"}-${index}`}
           className={styles.suggestionItem}
           onMouseDown={(e) => { e.preventDefault(); onSelect(s); }}
         >

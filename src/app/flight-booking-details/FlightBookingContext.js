@@ -217,7 +217,7 @@ export function FlightBookingProvider({ children }) {
       setPaymentSuccessData({
         createItinerary: createItineraryResponse?.data || null,
         startPayment: startPaymentResponse?.data || null,
-        retrieveBooking: retrieveBookingResponse?.data || null,
+        retrieveBooking: retrieveBookingResponse || null,
       });
       toast.success("Payment session started successfully");
       return true;
