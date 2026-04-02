@@ -9,7 +9,7 @@ import SortBySheet from "../SortBySheet";
 import RoundTripSkeleton from "../roundTrip/RoundTripSkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
-import FlightDetailsCard from "../phoneViewComponents/multiTripPhoneView/FlightDetailsCard";
+import FlightDetailsCard from "../PhoneViewComponents/multiTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";

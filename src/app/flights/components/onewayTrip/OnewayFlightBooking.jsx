@@ -7,7 +7,7 @@ import OfferBanner from "../offerComponent/OfferBanner";
 import FareComparisonModal from "./FareComparisonModal";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
-import FlightDetailsCard from "../phoneViewComponents/oneWayPhoneView/FlightDetailsCard";
+import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import SortBySheet from "../SortBySheet";
 import OnewaySkeleton from "./OnewaySkeleton";

@@ -6,7 +6,7 @@ import OfferBanner from "../offerComponent/OfferBanner";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import SortBySheet from "../SortBySheet";
-import FlightDetailsCard from "../phoneViewComponents/roundTripPhoneView/FlightDetailsCard";
+import FlightDetailsCard from "../PhoneViewComponents/roundTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
