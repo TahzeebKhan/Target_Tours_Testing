@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
+import { useRouter } from "next/navigation";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -13,6 +14,7 @@ const LimitedTimeOffer = () => {
     const swiperRef = useRef(null);
     const [isBeginning, setIsBeginning] = useState(true);
     const [isEnd, setIsEnd] = useState(false);
+    const router = useRouter();
 
     // JSON DATA
     const sliderData = [
@@ -156,8 +158,10 @@ const LimitedTimeOffer = () => {
                                 > */}
                                     {sliderData.map((item, index) => (
                                         <SwiperSlide key={index} className={styles.swapperslider}>
-                                            <div className={styles.items}>
-                                                <img src={item.img} alt="" />
+                                            <div className={styles.items}
+                                            onClick={()=> router.push(`/tour-details?id=${item.id}`)}
+                                            >
+                                                <img src={item.img} alt="packageImg" />
 
                                                 <div className={styles.imgMainContainer}>
                                                     <div className={styles.imgBottom}>

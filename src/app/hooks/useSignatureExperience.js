@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchSignatureExperiences } from "../service/signatureExperience.api";
+import { fetchSignatureExperiences } from "@/shared/services/signatureExperience.api";
 
 export const useSignatureExperience = (region) => {
   return useQuery({

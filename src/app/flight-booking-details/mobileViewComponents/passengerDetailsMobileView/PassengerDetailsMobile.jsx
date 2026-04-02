@@ -10,7 +10,7 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import FareDetailsPop from "../components/fareDetailsPop/FareDetailsPop";
 import BaggageRules from "../components/baggageRules/BaggageRules";
 import { useRouter } from "next/navigation";
-import PriceSummary from "@/app/profile_components/PriceSummary";
+import PriceSummary from "@/features/profile/components/PriceSummary";
 import TravelerDetailsMobileView from "./TravelerDetailsMobileView";
 const PassengerDetailsMobile = ({ fromBaggage }) => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
@@ -192,12 +192,14 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
 
             <div className={styles.TripCardHeaderBookingDate}>
               <p>Wed, 03 Dec</p>
-              <p>
-                <div className={styles.navDot}></div>1 Traveller
-              </p>
-              <p>
-                <div className={styles.navDot}></div>Economy
-              </p>
+              <div className={styles.PassengerDetailsMobile_navDot_M_nar}>
+                <span className={styles.navDot}></span>
+                <p>1 Traveller</p>
+              </div>
+              <div className={styles.PassengerDetailsMobile_navDot_M_nar}>
+                <span className={styles.navDot}></span>
+                <p>Economy</p>
+              </div>
             </div>
           </div>
         </div>

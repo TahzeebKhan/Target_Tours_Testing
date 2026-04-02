@@ -37,93 +37,7 @@ function LayoutContent({ children }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [stickyTop, setStickyTop] = useState(0);
 
-  // const [scrolled, setScrolled] = useState(false);
-
-  // useEffect(() => {
-  //   const onScroll = () => {
-  //     setScrolled(window.scrollY > 40); // 🔥 threshold
-  //   };
-  //   window.addEventListener("scroll", onScroll);
-  //   return () => window.removeEventListener("scroll", onScroll);
-  // }, []);
-
-  // Scroll detection for gap reduction
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     setIsScrolled(window.scrollY >= 100);
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   handleScroll();
-
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
-
-  //   useEffect(() => {
-  //   let ticking = false;
-
-  //   const updateOffsets = () => {
-  //     if (!ticking) {
-  //       window.requestAnimationFrame(() => {
-  //         const scrolled = window.scrollY > 100;
-  //         setIsScrolled(scrolled);
-
-  //         const navRect = navbarRef.current?.getBoundingClientRect();
-  //         // if navbar is visible (bottom > 0) keep its bottom as offset, otherwise stick to top
-  //         const topOffset = navRect ? Math.max(0, Math.ceil(Math.min(navRect.bottom, navRect.height))) : 0;
-  //         setStickyTop(scrolled ? topOffset : 0);
-
-  //         ticking = false;
-  //       });
-  //       ticking = true;
-  //     }
-  //   };
-
-  //   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
-
-  //   window.addEventListener("scroll", updateOffsets, { passive: true });
-  //   window.addEventListener("resize", updateOffsets);
-
-  //   // smooth shrink calculation: 0 -> not shrunk, 1 -> fully shrunk
-  //   const setShrink = () => {
-  //     const hero = heroRef.current;
-  //     if (!hero) return;
-  //     const maxH = 290; // match CSS default
-  //     const minH = 147; // desired compact height
-  //     const threshold = 220; // px over which shrink happens
-  //     const progress = clamp(window.scrollY / threshold, 0, 1);
-  //     // write as unitless 0..1
-  //     hero.style.setProperty("--shrink", String(progress));
-
-  //     // if using spacer keep it in sync (only if spacer present)
-  //     // const spacer = document.querySelector(`.${styles.imageSpacer}`);
-  //     // if (spacer) spacer.style.height = `calc(${maxH}px - (${maxH} - ${minH}) * ${progress})`;
-  //   };
-
-  //   // attach RAF-wrapped shrink updater
-  //   let shrinkTicking = false;
-  //   const rafShrink = () => {
-  //     if (!shrinkTicking) {
-  //       window.requestAnimationFrame(() => {
-  //         setShrink();
-  //         shrinkTicking = false;
-  //       });
-  //       shrinkTicking = true;
-  //     }
-  //   };
-
-  //   window.addEventListener("scroll", rafShrink, { passive: true });
-  //   window.addEventListener("resize", rafShrink);
-  //   // initial set
-  //   setShrink();
-
-  //   return () => {
-  //     window.removeEventListener("scroll", updateOffsets);
-  //     window.removeEventListener("resize", updateOffsets);
-  //     window.removeEventListener("scroll", rafShrink);
-  //     window.removeEventListener("resize", rafShrink);
-  //   };
-  // }, []);
+ 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isOpecEditFields, setIsOpecEditFields] = useState(false);
 
@@ -248,8 +162,8 @@ function LayoutContent({ children }) {
 }
 
 import { Suspense } from "react";
-import CustomLoaderHomePage from "../components/CustomLoaderHomePage";
-import FlightEditFieldPopup from "../components/FlightPhoneViewPopup/FlightEditFieldPopup";
+import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
+import FlightEditFieldPopup from "@/shared/components/FlightPhoneViewPopup/FlightEditFieldPopup";
 
 export default function FlightsLayout({ children }) {
   return (

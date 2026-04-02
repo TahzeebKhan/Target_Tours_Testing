@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import styles from "./newPage.module.css";
 import { AnimatePresence, motion } from "framer-motion";
-
+import { useRouter } from "next/navigation";
 // const cards = [
 //   { id: 1, title: "Holiday", img: "/images/img1.jpg" },
 //   { id: 2, title: "Insurance", img: "/images/img2.jpg" },
@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   const [startIndex, setStartIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-
+  const router = useRouter();
   // SSR safety: if no cards provided, render nothing
   if (!cards.length) return null;
 
@@ -83,7 +83,9 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
                     <span>/Adult</span>
                   </div>
 
-                  <button className={styles.arrowBtn}>
+                  <button className={styles.arrowBtn}
+                     onClick={()=> router.push(`/tour-details?id=${card.id}`)}
+                  >
                     <svg
                       width="30"
                       height="30"

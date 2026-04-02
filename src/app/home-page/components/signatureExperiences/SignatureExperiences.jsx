@@ -411,9 +411,13 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
         if (token) {
           headers.Authorization = `Bearer ${token}`;
         }
+       
+        const query = new URLSearchParams({
+          domain: process.env.NEXT_PUBLIC_DOMAIN,
+        }).toString();
 
         const res = await fetch(
-          `${API_BASE}/api/signature-experience/company`,
+          `${API_BASE}/api/signature-experience/company?${query}`,
           { headers }
         );
 
@@ -445,7 +449,10 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
       const media = pkg.media?.[0]?.package_media?.[0];
 
       return {
-        id: index + 1, // 🔥 carousel MUST be sequential
+        id: pkg.id,
+        carouselId: index + 1, // Keep carousel position sequential for slider math
+        apiId: pkg.id,
+        packageId: pkg.id,
         image: media ? `${API_BASE}${media.url}` : "/images/img1.jpg",
         title: pkg.description?.toUpperCase(),
         description: pkg.title,

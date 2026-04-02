@@ -177,6 +177,17 @@
     outline: none;
 }
 
+.fieldError {
+    border-color: #E24C4B !important;
+}
+
+.errorText {
+    font-family: var(--font-inter);
+    font-size: 12px;
+    line-height: 1.2;
+    color: #E24C4B;
+}
+
 .input::placeholder {
     color: #8b93a7;
 }

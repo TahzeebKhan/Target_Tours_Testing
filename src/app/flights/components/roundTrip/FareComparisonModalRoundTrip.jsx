@@ -3,36 +3,106 @@ import React, { useState } from "react";
 import styles from "./FareComparisonModalRoundTrip.module.css";
 import { useRouter } from "next/navigation";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+import { toast } from "react-toastify";
+import { getFlightPrice } from "@/features/flights/services/flightBooking";
+import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+
+const parseCityLabel = (value = "") => {
+  const text = String(value || "").trim();
+  const match = text.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return {
+    city: match?.[1]?.trim() || text || "N/A",
+    code: match?.[2]?.trim() || "",
+  };
+};
+
+const compactAirportName = (value = "", fallback = "N/A") => {
+  const text = String(value || "").trim();
+  if (!text) return fallback;
+  return (
+    text
+      .split("|")[0]
+      ?.trim()
+      .split(",")
+      .map((part) => part.trim())
+      .find(Boolean) || fallback
+  );
+};
+
+const buildSegmentLabel = (prefix, flight) => {
+  const from = parseCityLabel(flight?.departure?.city);
+  const to = parseCityLabel(flight?.arrival?.city);
+  return `${prefix} (${from.code || "N/A"}-${to.code || "N/A"})`;
+};
+
+const buildModalSegment = (item, labelPrefix, fallbackDate) => {
+  const departure = parseCityLabel(item?.flight?.departure?.city);
+  const arrival = parseCityLabel(item?.flight?.arrival?.city);
+  const details = item?.flight?.details || {};
+  const departureTerminal = String(details?.departureTerminal || "").trim();
+  const arrivalTerminal = String(details?.arrivalTerminal || "").trim();
+
+  return {
+    label: buildSegmentLabel(labelPrefix, item?.flight),
+    flight: {
+      departure: {
+        date: item?.date || fallbackDate,
+        time: item?.flight?.departure?.time || "N/A",
+        airport: `${departure.code || "N/A"} - ${(departure.city || "N/A").toUpperCase()}`,
+        terminal: departureTerminal ? `Terminal ${departureTerminal}` : "Terminal N/A",
+        city: compactAirportName(details?.fromName, departure.city || "N/A"),
+      },
+      arrival: {
+        date: item?.date || fallbackDate,
+        time: item?.flight?.arrival?.time || "N/A",
+        airport: `${arrival.code || "N/A"} - ${(arrival.city || "N/A").toUpperCase()}`,
+        terminal: arrivalTerminal ? `Terminal ${arrivalTerminal}` : "Terminal N/A",
+        city: compactAirportName(details?.toName, arrival.city || "N/A"),
+      },
+      duration: item?.flight?.duration || { hours: 0, minutes: 0 },
+      stops: item?.flight?.stops?.type || "N/A",
+    },
+  };
+};
 
 const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
   if (!isOpen) return null;
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBookNow = () => {
-    router.push("/flight-booking-details");
+  const handleBookNow = async (selectedFare) => {
+    const priceRequest = flightData?.booking?.priceRequest;
+    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+      toast.error("Missing booking payload for the selected flight.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const priceResponse = await getFlightPrice(priceRequest);
+      writeFlightBookingSession({
+        selectedFlight: flightData,
+        selectedFare,
+        priceRequest,
+        priceResponse,
+        ssrRequest: null,
+        ssrResponse: null,
+      });
+      router.push("/flight-booking-details");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to continue with this flight right now."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const flightSegments = {
     onward: {
-      label: "ONWARD FLIGHT (DEL-CGK)",
-      flight: {
-        departure: {
-          date: "THU, 18 DEC 2025",
-          time: "06:45",
-          airport: "DEL - DELHI",
-          terminal: "Terminal T2",
-          city: "Indira Gandhi International",
-        },
-        arrival: {
-          date: "THU, 18 DEC 2025",
-          time: "08:00",
-          airport: "CGK - JAKARTA",
-          terminal: "Terminal T3",
-          city: "Soekarno–Hatta International",
-        },
-        duration: { hours: 7, minutes: 50 },
-        stops: "Non-Stop",
-      },
+      ...buildModalSegment(flightData?.depart, "ONWARD FLIGHT", "N/A"),
       fares: [
         {
           id: "saver",
@@ -83,25 +153,7 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
     },
 
     return: {
-      label: "RETURN FLIGHT (CGK-DEL)",
-      flight: {
-        departure: {
-          date: "SAT, 27 DEC 2025",
-          time: "22:10",
-          airport: "CGK - JAKARTA",
-          terminal: "Terminal T3",
-          city: "Soekarno–Hatta International",
-        },
-        arrival: {
-          date: "SUN, 28 DEC 2025",
-          time: "05:30",
-          airport: "DEL - DELHI",
-          terminal: "Terminal T2",
-          city: "Indira Gandhi International",
-        },
-        duration: { hours: 7, minutes: 20 },
-        stops: "Non-Stop",
-      },
+      ...buildModalSegment(flightData?.return, "RETURN FLIGHT", "N/A"),
       fares: [
         {
           id: "saver",
@@ -190,20 +242,20 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
             <div className={styles.flightInfoStatus}>
               <img
                 className={styles.flightIconStatus}
-                src="/images/Flight.png"
+                src={selected === "onward" ? flightData?.depart?.airline?.logo || "/images/Flight.png" : flightData?.return?.airline?.logo || "/images/Flight.png"}
                 alt=""
               />
               <div className={styles.flightInfoNameDatesContainer}>
-                <span className={styles.flightInfoNameDates}>Air India</span>
+                <span className={styles.flightInfoNameDates}>{selected === "onward" ? flightData?.depart?.airline?.name || "N/A" : flightData?.return?.airline?.name || "N/A"}</span>
                 <div className={styles.smallestDot}></div>
-                <span className={styles.flightInfoNameDates}>AI2380</span>
+                <span className={styles.flightInfoNameDates}>{selected === "onward" ? flightData?.depart?.airline?.code || "N/A" : flightData?.return?.airline?.code || "N/A"}</span>
                 <div className={styles.smallestDot}></div>
                 <span className={styles.flightInfoNameDates}>
-                  Boeing 787-9 Dreamliner
+                  N/A
                 </span>
                 <div className={styles.smallestDot}></div>
                 <span className={styles.flightInfoNameDates}>
-                  Economy Class
+                  {flightData?.fare?.cabinClass || "N/A"}
                 </span>
               </div>
             </div>
@@ -366,8 +418,8 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
                 {/* Action Buttons */}
                 <div className={styles.fareActions}>
                   <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                  <button className={styles.bookNowBtn} onClick={handleBookNow}>
-                    BOOK NOW
+                  <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>
+                    {isSubmitting ? "LOADING..." : "BOOK NOW"}
                   </button>
                 </div>
               </div>

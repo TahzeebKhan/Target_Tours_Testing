@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import styles from "./Reservations.module.css";
-import ActiveReservations from "@/app/profile_components/ActiveReservations";
+import ActiveReservations from "@/features/profile/components/ActiveReservations";
 import CorporateReservationCard from "./CorporateReservationCard";
 
 const reservationData = [

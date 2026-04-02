@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import styles from "./BarcelonaSection.module.css";
 import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
-import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
-import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 
 const BarcelonaSection = () => {
   const [activeTab, setActiveTab] = useState("All");

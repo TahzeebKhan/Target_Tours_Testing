@@ -94,7 +94,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
           body: JSON.stringify({
             email: email,
             password: password,
-            domain: "localhost:1337", // ❗ as required
+            domain: process.env.NEXT_PUBLIC_DOMAIN, // ❗ as required
           }),
         },
       );

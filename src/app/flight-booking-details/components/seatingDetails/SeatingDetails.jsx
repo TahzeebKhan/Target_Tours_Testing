@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
-import Plane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/plane";
-import BelowPlane from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/below_plane";
-import Mobile_footer from "@/app/flightBookingDetails/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
-import PriceSummary from "@/app/profile_components/PriceSummary";
+import Plane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/plane";
+import BelowPlane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/below_plane";
+import Mobile_footer from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
+import PriceSummary from "@/features/profile/components/PriceSummary";
 const rowData = [
   { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
   { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./IndividualProperty.module.css";
-import BookingDetails from "@/app/profile_components/BookingDetails";
+import BookingDetails from "@/features/profile/components/BookingDetails";
 import { useProfile } from "../../context/ProfileContext";
 import FlightBookingDetails from "./FlightBookingDetails";
 import PackageDetails from "./PackageDetails";

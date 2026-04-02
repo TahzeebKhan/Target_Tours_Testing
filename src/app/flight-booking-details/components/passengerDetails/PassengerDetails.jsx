@@ -6,16 +6,47 @@ import TravelInsuranceOption from "./fareDetailsExpandable/component/travelInsur
 import CancellationPenalty from "./fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import TravelerDetails from "./fareDetailsExpandable/component/travelerDetails/TravelerDetails";
 import { useFlightBooking } from "../../FlightBookingContext";
-import { useRouter } from "next/navigation";
 import PassengerDetailsMobile from "../../mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { validateTravelerForm } from "@/app/flight-booking-details/utils/travelerValidation";
+import { toast } from "react-toastify";
 
 const PassengerDetails = () => {
   // 👇 default open = flight
-  const { setCurrentStep } = useFlightBooking();
+  const {
+    setCurrentStep,
+    bookingSession,
+    loadSsrForBooking,
+    ssrLoading,
+    travelerDetails,
+    bookingContactDetails,
+    setTravelerFormErrors,
+  } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
+  const bookingView = getBookingDetailsView(bookingSession);
+  const header = bookingView?.header || {};
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
+  };
+
+  const handleContinue = async () => {
+    const validation = validateTravelerForm({
+      travelerDetails,
+      bookingContactDetails,
+    });
+
+    setTravelerFormErrors(validation.errors);
+    if (!validation.isValid) {
+      setOpenTab("travelerDetails");
+      toast.error(validation.message || "Please complete traveler details.");
+      return;
+    }
+
+    const loaded = await loadSsrForBooking();
+    if (loaded) {
+      setCurrentStep(3);
+    }
   };
 
   return (
@@ -25,22 +56,22 @@ const PassengerDetails = () => {
         <div className={styles.passengerDetailsHeader}>
           <div className={styles.fromToContainer}>
             <h2 className={styles.from}>
-              Mumbai <span className={styles.cityCode}>(BOM)</span>
+              {header.fromName || "N/A"} <span className={styles.cityCode}>({header.fromCode || "N/A"})</span>
             </h2>
             <span className={styles.to}>To</span>
             <h2 className={styles.to}>
-              Singapore <span className={styles.cityCode}>(SIN)</span>
+              {header.toName || "N/A"} <span className={styles.cityCode}>({header.toCode || "N/A"})</span>
             </h2>
           </div>
 
           <div className={styles.aboutFlightContainerRight}>
-            <span className={styles.subInfoText}>Wed, 03 Dec</span>
+            <span className={styles.subInfoText}>{header.date || "N/A"}</span>
             <div className={styles.dot}></div>
-            <span className={styles.subInfoText}>Non-stop</span>
+            <span className={styles.subInfoText}>{header.stops || "N/A"}</span>
             <div className={styles.dot}></div>
-            <span className={styles.subInfoText}>01 h 50 m</span>
+            <span className={styles.subInfoText}>{header.duration || "N/A"}</span>
             <div className={styles.dot}></div>
-            <span className={styles.subInfoText}>Economy</span>
+            <span className={styles.subInfoText}>{header.cabinClass || "N/A"}</span>
           </div>
         </div>
 
@@ -163,10 +194,12 @@ const PassengerDetails = () => {
         </div>
 
         <div
-          onClick={() => setCurrentStep(3)}
+          onClick={handleContinue}
           className={styles.continueButtonContainer}
         >
-          <button className={styles.continueButton}>CONTINUE</button>
+          <button className={styles.continueButton} disabled={ssrLoading}>
+            {ssrLoading ? "LOADING..." : "CONTINUE"}
+          </button>
         </div>
       </div>
       <div className={styles.mobileView}>

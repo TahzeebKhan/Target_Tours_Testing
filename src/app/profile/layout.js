@@ -7,6 +7,7 @@ import { ProfileProvider, useProfile } from "./context/ProfileContext";
 import Cookies from "js-cookie";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
+import RequireAuth from "@/shared/components/auth/RequireAuth";
 
 export const MobileFooter = () => (
   <footer className={styles.mobileFooter}>
@@ -119,7 +120,7 @@ const ProfileLayout = ({ children }) => {
   const isTabletOrMobile = useMediaQuery("(max-width: 895px)");
 
   return (
-    <>
+    <RequireAuth>
       <ProfileProvider>
         {!isTabletOrMobile && (
           <div className={styles.profileLayout}>
@@ -134,12 +135,11 @@ const ProfileLayout = ({ children }) => {
 
         {isTabletOrMobile && (
           <>
-            {" "}
             <MobileView>{children}</MobileView>
           </>
         )}
       </ProfileProvider>
-    </>
+    </RequireAuth>
   );
 };
 

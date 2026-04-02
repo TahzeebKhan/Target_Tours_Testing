@@ -265,6 +265,37 @@ const returnFlightData = {
     "Power & USB Port",
   ],
 };
+
+const toMobileFlight = (card, type) => {
+  if (!card) return null;
+
+  return {
+    type,
+    airline: {
+      name: card.airline?.name || "N/A",
+      code: card.airline?.code || "N/A",
+      logo: card.airline?.logo || "/images/Flight.png",
+    },
+    aircraft: card.airline?.aircraft || "N/A",
+    cabinClass: card.cabin || "N/A",
+    fareType: card.fareType || "N/A",
+    date: card.segments?.[0]?.date || "N/A",
+    departure: {
+      time: card.segments?.[0]?.time || "N/A",
+      city: card.segments?.[0]?.city || "N/A",
+    },
+    arrival: {
+      time: card.segments?.[2]?.time || "N/A",
+      city: card.segments?.[2]?.city || "N/A",
+    },
+    duration: {
+      hours: card.segments?.[1]?.duration?.hours || "00",
+      minutes: card.segments?.[1]?.duration?.mins || "00",
+    },
+    stops: card.segments?.[1]?.nonStop ? "Non-Stop" : "Stop",
+    facilities: card.facilities || [],
+  };
+};
 const FlightBlock = ({ data, showReturnLabel = false }) => {
   const {
     airline,
@@ -393,17 +424,40 @@ const FlightBlock = ({ data, showReturnLabel = false }) => {
 };
 
 const TripSummaryExpandable = ({ data }) => {
+  const onwardCards = Array.isArray(data?.onwardCards)
+    ? data.onwardCards.filter(Boolean)
+    : [data?.onward, data?.onwardBusinessClass].filter(Boolean);
+  const returnCards = Array.isArray(data?.returnCards)
+    ? data.returnCards.filter(Boolean)
+    : [data?.return].filter(Boolean);
+  const mobileOnwardFlight = toMobileFlight(onwardCards[0], "DEPARTURE");
+  const mobileReturnFlight = toMobileFlight(returnCards[0], "RETURN");
+
   return (
     <>
       <div className={styles.wrapper}>
         <div className={styles.cardsContainer}>
-          <FlightBlock data={data.onward} />
-          <FlightBlock data={data.onwardBusinessClass} />
+          {onwardCards.map((item, index) => (
+            <FlightBlock
+              key={`onward-${index}`}
+              data={item}
+            />
+          ))}
         </div>
-        <div className={styles.returnLabel}>RETURN</div>
-        <div className={styles.cardsContainer}>
-          <FlightBlock data={data.return} showReturnLabel />
-        </div>
+        {returnCards.length > 0 && (
+          <>
+            <div className={styles.returnLabel}>RETURN</div>
+            <div className={styles.cardsContainer}>
+              {returnCards.map((item, index) => (
+                <FlightBlock
+                  key={`return-${index}`}
+                  data={item}
+                  showReturnLabel
+                />
+              ))}
+            </div>
+          </>
+        )}
         <div className={styles.bottomRulesContainer}>
           <span>Fare Rules</span>
 
@@ -414,10 +468,13 @@ const TripSummaryExpandable = ({ data }) => {
       <div className={styles.wrapperMobile}>
         <div className={styles.flightDepartureReturenDetailsContianerWrapper}>
           <div className={styles.flightDepartureReturenDetailsContianer}>
-            <FlightSection />
-            <div className={styles.dashedBorder}></div>
-
-            <FlightSection flight={returnFlightData} />
+            {mobileOnwardFlight && <FlightSection flight={mobileOnwardFlight} />}
+            {mobileReturnFlight && (
+              <>
+                <div className={styles.dashedBorder}></div>
+                <FlightSection flight={mobileReturnFlight} />
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -187,8 +187,8 @@ const CarouselMobile = ({
         onMouseLeave={handleMouseLeave}
       >
         {/* Slides */}
-        {slideData.map((slide) => {
-          const slideNumber = slide.id;
+        {slideData.map((slide, index) => {
+          const slideNumber = slide.carouselId ?? index + 1;
           const isActive = currentSlide === slideNumber;
           const slideStyle = getSlideStyle(slideNumber);
 

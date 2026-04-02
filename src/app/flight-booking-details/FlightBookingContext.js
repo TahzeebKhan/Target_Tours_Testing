@@ -1,17 +1,140 @@
 "use client";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createFlightItinerary, getFlightSsr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
+import { toast } from "react-toastify";
+import {
+  buildCreateItineraryPayload,
+  buildRetrieveBookingPayload,
+  buildStartPaymentPayload,
+  buildSsrPayload,
+  extractBaseFareAmount,
+  readFlightBookingSession,
+  writeFlightBookingSession,
+} from "@/features/flights/utils/flightBookingSession";
 
 const FlightBookingContext = createContext(null);
 
+const getApiMessage = (payload, fallback) => {
+  return (
+    payload?.data?.message ||
+    payload?.message ||
+    fallback
+  );
+};
+
 export function FlightBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
+  const skipNextHistoryPushRef = useRef(false);
+  const ssrRequestInFlightRef = useRef(false);
 
   const [baggage, setBaggage] = useState([]);
   const [meals, setMeals] = useState([]);
   const [seats, setSeats] = useState([]);
+  const [bookingSession, setBookingSession] = useState(null);
+  const [bookingSessionReady, setBookingSessionReady] = useState(false);
+  const [travelerDetails, setTravelerDetails] = useState([]);
+  const [bookingContactDetails, setBookingContactDetails] = useState({});
+  const [travelerFormErrors, setTravelerFormErrors] = useState({
+    travelers: {},
+    bookingContact: {},
+  });
+  const [bookingError, setBookingError] = useState("");
+  const [ssrLoading, setSsrLoading] = useState(false);
+  const [itineraryLoading, setItineraryLoading] = useState(false);
+  const [paymentSuccessData, setPaymentSuccessData] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const historyState = window.history.state || {};
+    window.history.replaceState(
+      {
+        ...historyState,
+        flightBookingStep: 2,
+      },
+      ""
+    );
+
+    const handlePopState = (event) => {
+      const nextStep = Number(event.state?.flightBookingStep);
+      if (!Number.isFinite(nextStep) || nextStep < 2 || nextStep > 6) {
+        return;
+      }
+
+      skipNextHistoryPushRef.current = true;
+      setCurrentStep(nextStep);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (skipNextHistoryPushRef.current) {
+      skipNextHistoryPushRef.current = false;
+      return;
+    }
+
+    const existingStep = Number(window.history.state?.flightBookingStep);
+    if (existingStep === currentStep) return;
+
+    window.history.pushState(
+      {
+        ...(window.history.state || {}),
+        flightBookingStep: currentStep,
+      },
+      ""
+    );
+  }, [currentStep]);
+
+  useEffect(() => {
+    setBookingSession(readFlightBookingSession() || null);
+    setBookingSessionReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!bookingSessionReady) return;
+    writeFlightBookingSession(bookingSession);
+  }, [bookingSession, bookingSessionReady]);
+
+  const loadSsrForBooking = async () => {
+    if (!bookingSession?.priceResponse) return false;
+    if (bookingSession?.ssrResponse) return true;
+    if (ssrRequestInFlightRef.current) return false;
+
+    const ssrPayload = buildSsrPayload(bookingSession);
+    if (!ssrPayload?.search_key || !ssrPayload?.Trips?.[0]?.TUI) {
+      setBookingError("SSR payload is incomplete for this booking.");
+      return false;
+    }
+
+    ssrRequestInFlightRef.current = true;
+    setSsrLoading(true);
+    setBookingError("");
+    try {
+      const ssrResponse = await getFlightSsr(ssrPayload);
+      setBookingSession((prev) => ({
+        ...(prev || {}),
+        ssrRequest: ssrPayload,
+        ssrResponse,
+      }));
+      return true;
+    } catch (error) {
+      setBookingError(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to load baggage and SSR details."
+      );
+      return false;
+    } finally {
+      ssrRequestInFlightRef.current = false;
+      setSsrLoading(false);
+    }
+  };
 
   const prices = useMemo(() => {
-    const baseFare = 5200;
+    const baseFare = extractBaseFareAmount(bookingSession);
     const baggagePrice = baggage.reduce((s, b) => s + b.price, 0);
     const mealsPrice = meals.reduce((s, m) => s + m.price, 0);
     const seatsPrice = seats.reduce((s, s1) => s + s1.price, 0);
@@ -23,7 +146,96 @@ export function FlightBookingProvider({ children }) {
       seats: seatsPrice,
       total: baseFare + baggagePrice + mealsPrice + seatsPrice,
     };
-  }, [baggage, meals, seats]);
+  }, [baggage, bookingSession, meals, seats]);
+
+  const submitItinerary = async () => {
+    if (itineraryLoading) return false;
+
+    const payload = buildCreateItineraryPayload(
+      {
+        ...(bookingSession || {}),
+        travelerDetails,
+        bookingContactDetails,
+        baggage,
+        meals,
+      },
+      prices
+    );
+    if (!payload?.TUI || !payload?.Travellers?.length) {
+      setBookingError("Passenger or booking data is incomplete.");
+      return false;
+    }
+
+    setBookingError("");
+    setPaymentSuccessData(null);
+    setItineraryLoading(true);
+    try {
+      const createItineraryResponse = await createFlightItinerary(payload);
+      if (
+        createItineraryResponse?.success === false ||
+        createItineraryResponse?.data?.success === false
+      ) {
+        throw new Error(
+          getApiMessage(createItineraryResponse, "Unable to create itinerary.")
+        );
+      }
+
+      const nextSession = {
+        ...(bookingSession || {}),
+        createItineraryRequest: payload,
+        createItineraryResponse,
+      };
+      const startPaymentPayload = buildStartPaymentPayload(nextSession);
+      if (!startPaymentPayload?.TUI) {
+        throw new Error("TUI missing in create-itinerary response.");
+      }
+      setBookingSession((prev) => ({
+        ...(prev || {}),
+        createItineraryRequest: payload,
+        createItineraryResponse,
+        startPaymentRequest: startPaymentPayload,
+      }));
+      const startPaymentResponse = await startFlightPayment(startPaymentPayload);
+      const retrieveBookingPayload = buildRetrieveBookingPayload({
+        ...(bookingSession || {}),
+        createItineraryRequest: payload,
+        createItineraryResponse,
+        startPaymentRequest: startPaymentPayload,
+        startPaymentResponse,
+      });
+      const retrieveBookingResponse = await retrieveFlightBooking(retrieveBookingPayload);
+
+      setBookingSession((prev) => ({
+        ...(prev || {}),
+        createItineraryRequest: payload,
+        createItineraryResponse,
+        startPaymentRequest: startPaymentPayload,
+        startPaymentResponse,
+        retrieveBookingRequest: retrieveBookingPayload,
+        retrieveBookingResponse,
+      }));
+      setPaymentSuccessData({
+        createItinerary: createItineraryResponse?.data || null,
+        startPayment: startPaymentResponse?.data || null,
+        retrieveBooking: retrieveBookingResponse?.data || null,
+      });
+      toast.success("Payment session started successfully");
+      return true;
+    } catch (error) {
+      const message =
+        error?.response?.data?.data?.message ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unable to create itinerary.";
+      toast.error(
+        message
+      );
+      setBookingError(message);
+      return false;
+    } finally {
+      setItineraryLoading(false);
+    }
+  };
 
   return (
     <FlightBookingContext.Provider
@@ -37,6 +249,21 @@ export function FlightBookingProvider({ children }) {
         setMeals,
         seats,
         setSeats,
+        bookingSession,
+        setBookingSession,
+        travelerDetails,
+        setTravelerDetails,
+        bookingContactDetails,
+        setBookingContactDetails,
+        travelerFormErrors,
+        setTravelerFormErrors,
+        bookingError,
+        ssrLoading,
+        loadSsrForBooking,
+        itineraryLoading,
+        submitItinerary,
+        paymentSuccessData,
+        setPaymentSuccessData,
 
         prices,
       }}

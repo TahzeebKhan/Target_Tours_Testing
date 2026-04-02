@@ -8,10 +8,10 @@ import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import HotelDateCalendarModal from "@/app/components/hotelCalendar/HotelDateCalendarModal";
-import HotelCalendarMonths from "@/app/components/hotelCalendar/HotelCalendarMonths";
+import HotelDateCalendarModal from "@/shared/components/hotelCalendar/HotelDateCalendarModal";
+import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
-import RecentSearch from "@/app/components/recentSearch/RecentSearch";
+import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 
 const TourHeroSection = () => {
   const searchParams = useSearchParams();

@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Providers from "./utils/Provider";
+import QueryProvider from "@/shared/providers/QueryProvider";
 const inter = Inter({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -47,7 +47,7 @@ export default function RootLayout({ children }) {
         className={`${anticDidone.variable} ${jost.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-inter)" }}
       >
-        <Providers>
+        <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
 
           <ToastContainer
@@ -62,7 +62,7 @@ export default function RootLayout({ children }) {
               borderRadius: "0px",
             }}
           />
-        </Providers>
+        </QueryProvider>
       </body>
     </html>
   );

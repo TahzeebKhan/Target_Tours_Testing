@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query"
-import { fetchHomePageOffer } from "../service/homePageOffer"
+import { fetchHomePageOffer } from "@/shared/services/homePageOffer"
 const BASE_MEDIA_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 export const useHomePageOffer = () => {
   return useQuery({

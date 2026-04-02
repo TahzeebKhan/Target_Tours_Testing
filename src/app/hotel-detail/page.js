@@ -1,16 +1,16 @@
 "use client";
 import React, { useRef, useState } from "react";
 import styles from "./HotelDetailLayout.module.css";
-import DescriptionComponent from "./Components/descriptionComponent/DescriptionComponent";
-import Amenities from "./Components/amenities/Amenities";
-import AvailabilityComponent from "./Components/availabilityComponent/AvailabilityComponent";
-import HotelPolicies from "./Components/hotelPolicies/HotelPolicies";
-import RoomSelectionCard from "./Components/roomSelectionCard/RoomSelectionCard";
-import CustomerReviews from "./Components/customerReviews/CustomerReviews";
-import BarcelonaSection from "./Components/BarcelonaSection/BarcelonaSection";
+import DescriptionComponent from "./components/descriptionComponent/DescriptionComponent";
+import Amenities from "./components/amenities/Amenities";
+import AvailabilityComponent from "./components/availabilityComponent/AvailabilityComponent";
+import HotelPolicies from "./components/hotelPolicies/HotelPolicies";
+import RoomSelectionCard from "./components/roomSelectionCard/RoomSelectionCard";
+import CustomerReviews from "./components/customerReviews/CustomerReviews";
+import BarcelonaSection from "./components/BarcelonaSection/BarcelonaSection";
 import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
-import BookingSummary from "./Components/bookingSummary/BookingSummary";
-import Tabs from "./Components/tabs/Tabs";
+import BookingSummary from "./components/bookingSummary/BookingSummary";
+import Tabs from "./components/tabs/Tabs";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("Description");

@@ -4,8 +4,8 @@ import styles from "./TourListing.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import SearchResults from "../searchResult/SearchResults";
-import CreateWishlistModal from "@/app/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/app/components/wishlistModals/SaveToWishlistModal";
+import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
 const TourListing = () => {
   const [likedTours, setLikedTours] = useState([]);

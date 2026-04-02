@@ -277,9 +277,14 @@ const TargetTours = () => {
   // 🔹 Fetch once
   useEffect(() => {
     const fetchTours = async () => {
+      const query = new URLSearchParams({
+        originalRegion: "AMERICA",
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+      }).toString();
+  
       try {
         const res = await fetch(
-          `${API_BASE}/api/explore-more/company?originalRegion=AMERICA`,
+          `${API_BASE}/api/explore-more/company?${query}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

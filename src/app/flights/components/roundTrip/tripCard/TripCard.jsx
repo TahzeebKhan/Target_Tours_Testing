@@ -241,8 +241,8 @@ const TripCard = ({
                     </span>
                     <button
                       onClick={() => {
-                        setSelectedFlightId("AI2380-DEL-HKT");
-                        setFareModalOpen(true);
+                        setSelectedFlightId(item.id);
+                        setFareModalOpen(item.id);
                       }}
                       className={styles.viewBtn}
                     >
@@ -285,6 +285,7 @@ const TripCard = ({
         <FareComparisonModalRoundTrip
           isOpen={fareModalOpen}
           onClose={() => setFareModalOpen(false)}
+          flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
         />
       }
     </>

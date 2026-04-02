@@ -1,14 +1,53 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import styles from "./FareComparisonModal.module.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getSelectedFlightSummary } from "./fareComparisonUtils";
+import { toast } from "react-toastify";
+import { getFlightPrice } from "@/features/flights/services/flightBooking";
+import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
 
 const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
-    if (!isOpen) return null;
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    if (!isOpen) return null;
     
-    const handleBookNow = () => {
-        router.push("/flight-booking-details");
+    const handleBookNow = async (selectedFare) => {
+        const priceRequest = flightData?.booking?.priceRequest;
+        const routeContext = {
+            fromName: String(searchParams?.get("from") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
+            fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
+            toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
+            toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+        };
+        if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+            toast.error("Missing booking payload for the selected flight.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const priceResponse = await getFlightPrice(priceRequest);
+            writeFlightBookingSession({
+                selectedFlight: flightData,
+                selectedFare,
+                routeContext,
+                priceRequest,
+                priceResponse,
+                ssrRequest: null,
+                ssrResponse: null,
+            });
+            router.push("/flight-booking-details");
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Unable to continue with this flight right now."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const fareOptions = [
@@ -71,27 +110,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
         },
     ];
 
-    const flight = {
-        departure: {
-            date: "THU, 18 DEC 2025",
-            time: "06:45",
-            airport: "DEL - DELHI",
-            terminal: "Terminal T2",
-            city: "Indira Gandhi International",
-        },
-        arrival: {
-            date: "THU, 18 DEC 2025",
-            time: "08:00",
-            airport: "HKT - PHUKET CITY",
-            terminal: "Terminal T3",
-            city: "Phuket International",
-        },
-        duration: {
-            hours: 1,
-            minutes: 50,
-        },
-        stops: "Non-Stop",
-    };
+    const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
@@ -108,21 +127,21 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                 {/* Flight Info */}
                 <div className={styles.flightInfo}>
                     <div className={styles.fromToSection}>
-                        <span>New Delhi </span>
+                        <span>{flight.route.fromName} </span>
                         <img src="/icons/rightArrow1.svg" alt="" />
-                        <span>Phuket City</span>
+                        <span>{flight.route.toName}</span>
                     </div>
                     <div className={styles.flightDuration}>
                         <div className={styles.flightInfoStatus}>
-                            <img className={styles.flightIconStatus} src="/images/Flight.png" alt="" />
+                            <img className={styles.flightIconStatus} src={flight.airline.logo} alt="" />
                             <div className={styles.flightInfoNameDatesContainer}>
-                                <span className={styles.flightInfoNameDates}>Air India</span>
+                                <span className={styles.flightInfoNameDates}>{flight.airline.name}</span>
                                 <div className={styles.smallestDot}></div>
-                                <span className={styles.flightInfoNameDates}>AI2380</span>
+                                <span className={styles.flightInfoNameDates}>{flight.airline.code}</span>
                                 <div className={styles.smallestDot}></div>
-                                <span className={styles.flightInfoNameDates}>Boeing 787-9 Dreamliner</span>
+                                <span className={styles.flightInfoNameDates}>{flight.airline.aircraft}</span>
                                 <div className={styles.smallestDot}></div>
-                                <span className={styles.flightInfoNameDates}>Economy Class</span>
+                                <span className={styles.flightInfoNameDates}>{flight.airline.cabinClass}</span>
                             </div>
                         </div>
                         <div className={styles.timelineContainer}>
@@ -260,7 +279,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                             {/* Action Buttons */}
                             <div className={styles.fareActions}>
                                 <button className={styles.lockPriceBtn}>LOCK PRICE</button>
-                                <button className={styles.bookNowBtn} onClick={handleBookNow}>BOOK NOW</button>
+                                <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isSubmitting ? "LOADING..." : "BOOK NOW"}</button>
                             </div>
                         </div>
                     ))}
