@@ -26,6 +26,10 @@ const FlightSearchMobile = ({
   setReturenDate,
   travellerOpen,
   setTravellerOpen,
+  passengers,
+  setPassengers,
+  travelClass,
+  setTravelClass,
   truncate,
 }) => {
   const [multiFlights, setMultiFlights] = useState([
@@ -37,14 +41,7 @@ const FlightSearchMobile = ({
 
   const [openCalendar, setOpenCalendar] = useState(false);
   const [calendarType, setCalendarType] = useState("departure"); // "departure" | "return"
-  const [travelClass, setTravelClass] = useState("Premium Economy");
-
   const [openPassengers, setOpenPassengers] = useState(false);
-  const [passengers, setPassengers] = useState({
-    adult: 1,
-    children: 0,
-    infant: 0,
-  });
   const [openSeatClass, setOpenSeatClass] = useState(false);
   const [openTo, setOpenTo] = useState(false);
   const [openFrom, setOpenFrom] = useState(false);
@@ -64,11 +61,13 @@ const FlightSearchMobile = ({
       : "";
 
   const totalPassengers =
-    passengers.adult + passengers.children + passengers.infant;
+    (passengers?.adult ?? 0) +
+    (passengers?.child ?? 0) +
+    (passengers?.infant ?? 0);
 
   const passengerText = `${passengers.adult} Adult${
     passengers.adult > 1 ? "s" : ""
-  }, ${passengers.children} Child${passengers.children > 1 ? "ren" : ""}`;
+  }, ${passengers.child} Child${passengers.child > 1 ? "ren" : ""}`;
   useEffect(() => {
     setIsMultiTripMobile(tripType === "multi");
   }, [tripType]);

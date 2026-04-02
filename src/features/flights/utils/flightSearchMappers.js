@@ -566,6 +566,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
       ),
     },
     booking: {
+      tui: responseBookingMeta.tui,
       searchKey: responseBookingMeta.searchKey,
       clientId: responseBookingMeta.clientId,
       source: responseBookingMeta.source,
@@ -1078,6 +1079,7 @@ const buildRoundCard = (flight, index, options = {}) => {
       },
       fare,
       booking: {
+        tui: responseBookingMeta.tui,
         searchKey: responseBookingMeta.searchKey,
         clientId: responseBookingMeta.clientId,
         source: responseBookingMeta.source,

@@ -14,6 +14,7 @@ import { SidebarContext } from "../../SidebarContext";
 import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
 import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
+import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
 const MultiCityTrip = ({
   flightData = [],
   tripCards = [],
@@ -43,6 +44,22 @@ const MultiCityTrip = ({
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const [fareModalOpen, setFareModalOpen] = useState(null);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
+
+  const openFareModal = async (flight) => {
+    const searchTui =
+      flight?.tripCard?.booking?.tui || flight?.booking?.tui;
+
+    if (searchTui) {
+      try {
+        await getFlightWebSettings({ TUI: searchTui });
+      } catch (error) {
+        console.error("Failed to fetch flight web settings", error);
+      }
+    }
+
+    setSelectedFlightId(flight?.id ?? null);
+    setFareModalOpen(flight?.id ?? null);
+  };
   const flightResults = [
     {
       id: 1,
@@ -639,7 +656,7 @@ const MultiCityTrip = ({
         ) : (
           visibleFlights.map((flight, index) => (
             <FlightDetailsCard
-              setFareModalOpen={setFareModalOpen}
+              setFareModalOpen={() => openFareModal(flight)}
               key={flight.id + index}
               flight={flight}
             />

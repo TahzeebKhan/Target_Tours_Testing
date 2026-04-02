@@ -9,6 +9,7 @@ import MobileFareComparisonModal from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModal from "../FareComparisonModalRoundTrip";
 import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
+import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
 
 const TripCard = ({
   tripCardsData,
@@ -117,6 +118,23 @@ const TripCard = ({
     },
   ];
   const [isMobile, setIsMobile] = useState(false);
+
+  const openFareModal = async (flight) => {
+    const searchTui =
+      flight?.tripCard?.booking?.tui || flight?.booking?.tui;
+
+    if (searchTui) {
+      try {
+        await getFlightWebSettings({ TUI: searchTui });
+      } catch (error) {
+        console.error("Failed to fetch flight web settings", error);
+      }
+    }
+
+    setSelectedFlightId(flight?.id ?? null);
+    setFareModalOpen(flight?.id ?? null);
+  };
+
   useEffect(() => {
     const checkScreen = () => {
       setIsMobile(window.innerWidth <= 430);
@@ -241,8 +259,7 @@ const TripCard = ({
                     </span>
                     <button
                       onClick={() => {
-                        setSelectedFlightId(item.id);
-                        setFareModalOpen(item.id);
+                        openFareModal(item);
                       }}
                       className={styles.viewBtn}
                     >

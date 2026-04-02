@@ -5,7 +5,10 @@ import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetails
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
-import { getFlightPrice } from "@/features/flights/services/flightBooking";
+import {
+  getFlightPrice,
+  getFlightTravelChecklist,
+} from "@/features/flights/services/flightBooking";
 import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
@@ -105,6 +108,23 @@ const MobileFareComparisonModalRoundTrip = ({
     setIsSubmitting(true);
     try {
       const priceResponse = await getFlightPrice(priceRequest);
+      const checklistTui =
+        priceResponse?.data?.raw?.TUI ||
+        priceResponse?.raw?.TUI ||
+        priceResponse?.data?.tui ||
+        priceResponse?.data?.TUI ||
+        priceResponse?.tui ||
+        priceResponse?.TUI;
+
+      if (checklistTui) {
+        await getFlightTravelChecklist({
+          TUI: checklistTui,
+          ClientID:
+            flightData?.booking?.clientId ||
+            priceRequest?.ClientID ||
+            "FVI6V120g22Ei5ztGK0FIQ==",
+        });
+      }
       writeFlightBookingSession({
         selectedFlight: flightData,
         selectedFare,
