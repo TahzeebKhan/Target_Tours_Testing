@@ -16,6 +16,12 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
   const handleBookNow = async (selectedFare) => {
     const priceRequest = flightData?.booking?.priceRequest;
+    const routeContext = {
+      fromName: String(searchParams?.get("from") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
+      fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
+      toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
+      toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+    };
     if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
       toast.error("Missing booking payload for the selected flight.");
       return;
@@ -27,6 +33,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
       writeFlightBookingSession({
         selectedFlight: flightData,
         selectedFare,
+        routeContext,
         priceRequest,
         priceResponse,
         ssrRequest: null,

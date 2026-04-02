@@ -39,3 +39,13 @@ export const startFlightPayment = async (payload) => {
 
   return response?.data;
 };
+
+export const retrieveFlightBooking = async (payload) => {
+  const response = await api.post("/api/flights/retrieve-booking", payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};

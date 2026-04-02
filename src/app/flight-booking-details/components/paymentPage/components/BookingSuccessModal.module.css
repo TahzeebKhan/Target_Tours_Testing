@@ -1,0 +1,276 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.45);
+  backdrop-filter: blur(8px);
+  padding: 24px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border: 1px solid #e6e8ec;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.16);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid #e6e8ec;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-size: 32px;
+  line-height: 1.1;
+  color: #070773;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-family: Inter;
+  font-size: 14px;
+  color: #4a5565;
+}
+
+.status {
+  margin-top: 8px;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4e8729;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  line-height: 1;
+  color: #070773;
+  cursor: pointer;
+}
+
+.card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin: 24px 28px 0;
+  padding: 20px;
+  border: 1px solid #e6e8ec;
+}
+
+.logoWrap {
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route {
+  font-family: Inter;
+  font-size: 20px;
+  font-weight: 500;
+  color: #0a0a0a;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: Inter;
+  font-size: 14px;
+  color: #434343;
+}
+
+.dot {
+  color: #7b8799;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px 28px 0;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #fafbfc;
+  border: 1px solid #e6e8ec;
+}
+
+.infoLabel {
+  font-family: Inter;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #7b8799;
+}
+
+.infoValue {
+  font-family: Inter;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0a0a0a;
+  word-break: break-word;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 28px 28px;
+}
+
+.detailSection {
+  padding: 24px 28px 0;
+}
+
+.sectionTitle {
+  font-family: Antic Didone;
+  font-size: 20px;
+  color: #070773;
+  text-transform: uppercase;
+}
+
+.detailList {
+  margin-top: 12px;
+  border: 1px solid #e6e8ec;
+  background: #ffffff;
+}
+
+.table {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid #e4e6e8;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 2fr 1.1fr 2.4fr 2.2fr;
+  padding: 8px 13px;
+  column-gap: 28px;
+  align-items: center;
+  min-height: 40px;
+  font-family: Inter;
+  font-size: 13px;
+  color: #000000;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableHeader {
+  background: linear-gradient(180deg, #00003f 0%, #00001f 100%);
+  color: #ffffff;
+  font-weight: 400;
+  min-height: 38px;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e6e8ec;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailPrimary {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0a0a0a;
+}
+
+.detailSecondary {
+  font-family: Inter;
+  font-size: 13px;
+  color: #4a5565;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  height: 44px;
+  padding: 0 24px;
+  background: #000033;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-family: Inter;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 16px;
+  }
+
+  .modal {
+    max-width: 100%;
+  }
+
+  .header,
+  .infoGrid,
+  .footer,
+  .detailSection {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .card {
+    margin-left: 20px;
+    margin-right: 20px;
+    align-items: flex-start;
+  }
+
+  .route {
+    font-size: 18px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tableRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .primaryButton {
+    width: 100%;
+  }
+}

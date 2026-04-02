@@ -134,6 +134,15 @@ const normalizeTravelClass = (value, selectedFare) => {
   return "Economy";
 };
 
+const parseRouteLabel = (value) => {
+  const text = String(value || "").trim();
+  const match = text.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return {
+    city: match?.[1]?.trim() || text || "N/A",
+    code: match?.[2]?.trim() || "",
+  };
+};
+
 const buildFlightCard = (source, selectedFare) => {
   if (!source || typeof source !== "object") return null;
 
@@ -185,6 +194,44 @@ const buildFlightCard = (source, selectedFare) => {
     },
     duration: parseDuration(source?.duration),
     stops: Number.isFinite(stopCount) ? (stopCount === 0 ? "Non Stop" : `${stopCount} Stop`) : "Non Stop",
+  };
+};
+
+const buildSelectedFlightCard = (selectedFlight, selectedFare) => {
+  if (!selectedFlight || typeof selectedFlight !== "object") return null;
+
+  const departureRoute = parseRouteLabel(selectedFlight?.departure?.city);
+  const arrivalRoute = parseRouteLabel(selectedFlight?.arrival?.city);
+  const details = selectedFlight?.details || {};
+
+  return {
+    airline: {
+      name: selectedFlight?.airlines?.[0]?.name || details?.airline || "N/A",
+      code: selectedFlight?.airlines?.[0]?.code || "N/A",
+      logo: selectedFlight?.airlines?.[0]?.logo || "/images/Flight.png",
+    },
+    aircraft: details?.aircraft || "N/A",
+    flexiPlusFare: selectedFare?.name || "",
+    travelClass: normalizeTravelClass(selectedFlight?.fare?.cabinClass, selectedFare),
+    departure: {
+      date: formatDateLabel(details?.departureDateTime),
+      time: selectedFlight?.departure?.time || "N/A",
+      airport: `${departureRoute.code || "N/A"} - ${(departureRoute.city || "N/A").toUpperCase()}`,
+      terminal: normalizeTerminal(details?.departureTerminal),
+      city: compactAirportName(details?.fromName, departureRoute.city || "N/A"),
+    },
+    arrival: {
+      date: formatDateLabel(details?.arrivalDateTime),
+      time: selectedFlight?.arrival?.time || "N/A",
+      airport: `${arrivalRoute.code || "N/A"} - ${(arrivalRoute.city || "N/A").toUpperCase()}`,
+      terminal: normalizeTerminal(details?.arrivalTerminal),
+      city: compactAirportName(details?.toName, arrivalRoute.city || "N/A"),
+    },
+    duration: {
+      hours: selectedFlight?.duration?.hours || "00",
+      minutes: selectedFlight?.duration?.minutes || "00",
+    },
+    stops: selectedFlight?.stops?.type || "Non Stop",
   };
 };
 
@@ -246,15 +293,8 @@ export const buildSsrPayload = (session) => {
     ),
     Trips: (requestTrips.length > 0 ? requestTrips : [extractPrimaryTrip(priceRequest) || {}]).map(
       (requestTrip, index) => ({
-        Amount: readNumber(
-          requestTrip?.Amount,
-          requestTrip?.amount,
-          0
-        ) || 0,
-        Index: pickFirst(
-          requestTrip?.Index,
-          requestTrip?.index
-        ),
+        Amount: 0,
+        Index: "",
         OrderID: pickFirst(
           requestTrip?.OrderID,
           requestTrip?.orderId,
@@ -293,6 +333,8 @@ export const extractBaseFareAmount = (session) => {
 export const getBookingDetailsView = (session) => {
   const payload = unwrapPayload(session?.priceResponse);
   const selectedFare = session?.selectedFare || null;
+  const selectedFlight = session?.selectedFlight || null;
+  const routeContext = session?.routeContext || {};
   const journeys = getFormattedJourneys(payload);
   const departureJourney =
     journeys.find((journey) => String(journey?.journey_type || "").toUpperCase() === "ONWARD") ||
@@ -307,12 +349,23 @@ export const getBookingDetailsView = (session) => {
   const returnSource =
     returnJourney?.flight_details || payload?.return || payload?.return_details || null;
 
-  const departureFlight = buildFlightCard(departureSource, selectedFare);
+  const selectedDepartureFlight = buildSelectedFlightCard(selectedFlight, selectedFare);
+  const departureFlight = selectedDepartureFlight || buildFlightCard(departureSource, selectedFare);
   const returnFlight = buildFlightCard(returnSource, selectedFare);
+  const selectedDepartureRoute = parseRouteLabel(selectedFlight?.departure?.city);
+  const selectedArrivalRoute = parseRouteLabel(selectedFlight?.arrival?.city);
   const routeFrom =
-    String(departureSource?.origin || departureSource?.from || "").trim().toUpperCase();
+    String(
+      routeContext?.fromCode ||
+      selectedDepartureRoute.code ||
+      departureSource?.origin ||
+      departureSource?.from ||
+      ""
+    ).trim().toUpperCase();
   const routeTo =
     String(
+      routeContext?.toCode ||
+      selectedArrivalRoute.code ||
       (returnSource?.to || returnSource?.destination || "") ||
         departureSource?.destination ||
         departureSource?.to ||
@@ -321,11 +374,17 @@ export const getBookingDetailsView = (session) => {
       .trim()
       .toUpperCase();
   const headerFrom = splitAirportMeta(
-    departureSource?.dep_airport_name || departureSource?.fromName || departureSource?.FromName,
+    routeContext?.fromName ||
+      selectedFlight?.details?.fromName ||
+      departureSource?.dep_airport_name ||
+      departureSource?.fromName ||
+      departureSource?.FromName,
     routeFrom || "N/A"
   ).cityName;
   const headerTo = splitAirportMeta(
-    (returnSource?.arr_airport_name || returnSource?.toName || returnSource?.ToName) ||
+    routeContext?.toName ||
+      selectedFlight?.details?.toName ||
+      (returnSource?.arr_airport_name || returnSource?.toName || returnSource?.ToName) ||
       departureSource?.arr_airport_name ||
       departureSource?.toName ||
       departureSource?.ToName,
@@ -340,7 +399,9 @@ export const getBookingDetailsView = (session) => {
       fromCode: routeFrom,
       toName: headerTo,
       toCode: routeTo,
-      date: formatHeaderDate(departureSource?.departure),
+      date: formatHeaderDate(
+        selectedFlight?.details?.departureDateTime || departureSource?.departure
+      ),
       stops: departureFlight?.stops || "N/A",
       duration: `${summaryDuration.hours} h ${summaryDuration.minutes} m`,
       cabinClass: departureFlight?.travelClass || "Economy",
@@ -371,6 +432,8 @@ export const buildCreateItineraryPayload = (session, prices) => {
   const travelers = Array.isArray(session?.travelerDetails)
     ? session.travelerDetails
     : [];
+  const baggageSelections = Array.isArray(session?.baggage) ? session.baggage : [];
+  const mealSelections = Array.isArray(session?.meals) ? session.meals : [];
   const primaryTraveler = travelers[0] || {};
   const contactMobile = pickFirst(contact.MobileNumber, primaryTraveler.MobileNumber, "");
   const contactCountryCode = pickFirst(
@@ -378,6 +441,26 @@ export const buildCreateItineraryPayload = (session, prices) => {
     primaryTraveler.CountryCode,
     ""
   );
+  const totalPassengers = Math.max(travelers.length, 1);
+  const ssrSelections = [...baggageSelections, ...mealSelections];
+  const ssrPayload = ssrSelections
+    .map((item, index) => {
+      const paxId = (index % totalPassengers) + 1;
+      const fuid = readNumber(item?.fuid, item?.FUID);
+      const ssid = readNumber(item?.ssid, item?.SSID, item?.id);
+
+      if (!Number.isFinite(fuid) || !Number.isFinite(ssid)) {
+        return null;
+      }
+
+      return {
+        FUID: fuid,
+        PaxID: paxId,
+        SSID: ssid,
+      };
+    })
+    .filter(Boolean);
+  const ssrAmount = Number((prices?.baggage || 0) + (prices?.meals || 0));
 
   return {
     TUI: pickFirst(
@@ -424,10 +507,10 @@ export const buildCreateItineraryPayload = (session, prices) => {
       VisaType: traveler.VisaType || "",
     })),
     PLP: [],
-    SSR: [],
+    SSR: ssrPayload,
     CrossSell: [],
     NetAmount: Number(finalPrice ?? prices?.total ?? 0),
-    SSRAmount: 0,
+    SSRAmount: ssrAmount,
     ClientID: "",
     DeviceID: "",
     AppVersion: "",
@@ -490,5 +573,38 @@ export const buildStartPaymentPayload = (session) => {
       LName: "",
       EMIMonths: "0",
     },
+  };
+};
+
+export const buildRetrieveBookingPayload = (session) => {
+  const startPaymentResponse = session?.startPaymentResponse || {};
+  const startPaymentData = startPaymentResponse?.data || {};
+  const createItineraryResponse = session?.createItineraryResponse || {};
+  const createRaw =
+    createItineraryResponse?.data?.raw ||
+    createItineraryResponse?.raw ||
+    {};
+
+  return {
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "",
+    ReferenceNumber: pickFirst(
+      startPaymentData?.transactionId,
+      startPaymentData?.TransactionID,
+      startPaymentData?.BookingID,
+      startPaymentData?.bookingId,
+      startPaymentData?.ReferenceNumber,
+      startPaymentData?.referenceNumber,
+      ""
+    ),
+    ReferenceType: "T",
+    ClientID: process.env.NEXT_PUBLIC_ClientID?.replace(/^"|"$/g, "") || "",
+    TUI: String(
+      pickFirst(
+        startPaymentData?.TUI,
+        startPaymentData?.tui,
+        createRaw?.TUI,
+        ""
+      )
+    ).trim(),
   };
 };

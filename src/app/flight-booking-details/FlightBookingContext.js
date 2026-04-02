@@ -1,9 +1,10 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createFlightItinerary, getFlightSsr, startFlightPayment } from "@/features/flights/services/flightBooking";
+import { createFlightItinerary, getFlightSsr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
 import { toast } from "react-toastify";
 import {
   buildCreateItineraryPayload,
+  buildRetrieveBookingPayload,
   buildStartPaymentPayload,
   buildSsrPayload,
   extractBaseFareAmount,
@@ -33,9 +34,14 @@ export function FlightBookingProvider({ children }) {
   const [bookingSessionReady, setBookingSessionReady] = useState(false);
   const [travelerDetails, setTravelerDetails] = useState([]);
   const [bookingContactDetails, setBookingContactDetails] = useState({});
+  const [travelerFormErrors, setTravelerFormErrors] = useState({
+    travelers: {},
+    bookingContact: {},
+  });
   const [bookingError, setBookingError] = useState("");
   const [ssrLoading, setSsrLoading] = useState(false);
   const [itineraryLoading, setItineraryLoading] = useState(false);
+  const [paymentSuccessData, setPaymentSuccessData] = useState(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -150,6 +156,8 @@ export function FlightBookingProvider({ children }) {
         ...(bookingSession || {}),
         travelerDetails,
         bookingContactDetails,
+        baggage,
+        meals,
       },
       prices
     );
@@ -159,6 +167,7 @@ export function FlightBookingProvider({ children }) {
     }
 
     setBookingError("");
+    setPaymentSuccessData(null);
     setItineraryLoading(true);
     try {
       const createItineraryResponse = await createFlightItinerary(payload);
@@ -187,6 +196,14 @@ export function FlightBookingProvider({ children }) {
         startPaymentRequest: startPaymentPayload,
       }));
       const startPaymentResponse = await startFlightPayment(startPaymentPayload);
+      const retrieveBookingPayload = buildRetrieveBookingPayload({
+        ...(bookingSession || {}),
+        createItineraryRequest: payload,
+        createItineraryResponse,
+        startPaymentRequest: startPaymentPayload,
+        startPaymentResponse,
+      });
+      const retrieveBookingResponse = await retrieveFlightBooking(retrieveBookingPayload);
 
       setBookingSession((prev) => ({
         ...(prev || {}),
@@ -194,7 +211,14 @@ export function FlightBookingProvider({ children }) {
         createItineraryResponse,
         startPaymentRequest: startPaymentPayload,
         startPaymentResponse,
+        retrieveBookingRequest: retrieveBookingPayload,
+        retrieveBookingResponse,
       }));
+      setPaymentSuccessData({
+        createItinerary: createItineraryResponse?.data || null,
+        startPayment: startPaymentResponse?.data || null,
+        retrieveBooking: retrieveBookingResponse?.data || null,
+      });
       toast.success("Payment session started successfully");
       return true;
     } catch (error) {
@@ -231,11 +255,15 @@ export function FlightBookingProvider({ children }) {
         setTravelerDetails,
         bookingContactDetails,
         setBookingContactDetails,
+        travelerFormErrors,
+        setTravelerFormErrors,
         bookingError,
         ssrLoading,
         loadSsrForBooking,
         itineraryLoading,
         submitItinerary,
+        paymentSuccessData,
+        setPaymentSuccessData,
 
         prices,
       }}

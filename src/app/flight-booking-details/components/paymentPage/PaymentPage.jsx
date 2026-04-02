@@ -6,6 +6,7 @@ import TripSummaryExpandable from "./components/TripSummaryExpandable";
 import PassengerInfo from "./components/PassengerInfo";
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
+import BookingSuccessModal from "./components/BookingSuccessModal";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 
@@ -56,7 +57,19 @@ const buildTripCardData = (flight, selectedFare) => {
 };
 
 const PaymentPage = () => {
-  const { setCurrentStep, submitItinerary, itineraryLoading, bookingSession } = useFlightBooking();
+  const {
+    setCurrentStep,
+    submitItinerary,
+    itineraryLoading,
+    bookingSession,
+    paymentSuccessData,
+    setPaymentSuccessData,
+    prices,
+    travelerDetails,
+    bookingContactDetails,
+    baggage,
+    meals,
+  } = useFlightBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [paymentMethod, setPaymentMethod] = useState("credit");
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
@@ -75,6 +88,17 @@ const PaymentPage = () => {
 
   return (
     <>
+      <BookingSuccessModal
+        isOpen={Boolean(paymentSuccessData)}
+        onClose={() => setPaymentSuccessData(null)}
+        bookingView={bookingView}
+        paymentSuccessData={paymentSuccessData}
+        prices={prices}
+        travelerDetails={travelerDetails}
+        bookingContactDetails={bookingContactDetails}
+        baggage={baggage}
+        meals={meals}
+      />
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
           <img

@@ -30,6 +30,8 @@ const buildExtraBaggageData = (routeBaggage = []) => {
 
     return {
       id: item?.id || `${bucket}-${index}`,
+      ssid: item?.ssid ?? item?.id ?? `${bucket}-${index}`,
+      fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
       code: item?.code || `${bucket}-${index}`,
       image: imagePool[index % imagePool.length],
       weight: weightLabel,

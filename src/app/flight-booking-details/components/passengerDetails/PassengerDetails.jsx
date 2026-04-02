@@ -6,13 +6,22 @@ import TravelInsuranceOption from "./fareDetailsExpandable/component/travelInsur
 import CancellationPenalty from "./fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import TravelerDetails from "./fareDetailsExpandable/component/travelerDetails/TravelerDetails";
 import { useFlightBooking } from "../../FlightBookingContext";
-import { useRouter } from "next/navigation";
 import PassengerDetailsMobile from "../../mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { validateTravelerForm } from "@/app/flight-booking-details/utils/travelerValidation";
+import { toast } from "react-toastify";
 
 const PassengerDetails = () => {
   // 👇 default open = flight
-  const { setCurrentStep, bookingSession, loadSsrForBooking, ssrLoading } = useFlightBooking();
+  const {
+    setCurrentStep,
+    bookingSession,
+    loadSsrForBooking,
+    ssrLoading,
+    travelerDetails,
+    bookingContactDetails,
+    setTravelerFormErrors,
+  } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
   const bookingView = getBookingDetailsView(bookingSession);
   const header = bookingView?.header || {};
@@ -22,6 +31,18 @@ const PassengerDetails = () => {
   };
 
   const handleContinue = async () => {
+    const validation = validateTravelerForm({
+      travelerDetails,
+      bookingContactDetails,
+    });
+
+    setTravelerFormErrors(validation.errors);
+    if (!validation.isValid) {
+      setOpenTab("travelerDetails");
+      toast.error(validation.message || "Please complete traveler details.");
+      return;
+    }
+
     const loaded = await loadSsrForBooking();
     if (loaded) {
       setCurrentStep(3);

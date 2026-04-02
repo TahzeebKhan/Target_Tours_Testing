@@ -1,10 +1,66 @@
 "use client"
 import { useFlightBooking } from "./FlightBookingContext";
-import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
+const readNumber = (...values) => {
+  for (const value of values) {
+    const normalized =
+      typeof value === "string"
+        ? Number(value.replace(/[^\d.]/g, ""))
+        : Number(value);
+    if (Number.isFinite(normalized)) return normalized;
+  }
+  return 0;
+};
+
+const getPassengerCounts = (travelerDetails = [], bookingSession = null) => {
+  if (Array.isArray(travelerDetails) && travelerDetails.length > 0) {
+    return travelerDetails.reduce(
+      (acc, traveler) => {
+        const ptc = String(traveler?.PTC || "").toUpperCase();
+        if (ptc === "CHD") acc.child += 1;
+        else if (ptc === "INF") acc.infant += 1;
+        else acc.adult += 1;
+        return acc;
+      },
+      { adult: 0, child: 0, infant: 0 }
+    );
+  }
+
+  const raw =
+    bookingSession?.createItineraryResponse?.data?.raw ||
+    bookingSession?.startPaymentResponse?.data?.raw ||
+    bookingSession?.priceResponse?.data?.raw ||
+    bookingSession?.priceResponse?.raw ||
+    {};
+
+  return {
+    adult: readNumber(raw?.ADT, raw?.adult, 0),
+    child: readNumber(raw?.CHD, raw?.child, 0),
+    infant: readNumber(raw?.INF, raw?.infant, 0),
+  };
+};
+
+const formatPassengerLabel = (counts) => {
+  const parts = [];
+  if (counts.adult > 0) parts.push(`${counts.adult}x Adult`);
+  if (counts.child > 0) parts.push(`${counts.child}x Child`);
+  if (counts.infant > 0) parts.push(`${counts.infant}x Infant`);
+  return parts.join(", ") || "1x Adult";
+};
+
 export default function SidebarPriceSummaryCard() {
-  const { prices,currentStep, submitItinerary, itineraryLoading  } = useFlightBooking();
+  const {
+    prices,
+    currentStep,
+    submitItinerary,
+    itineraryLoading,
+    travelerDetails,
+    bookingSession,
+  } = useFlightBooking();
+  const passengerCounts = getPassengerCounts(travelerDetails, bookingSession);
+  const totalPassengers =
+    passengerCounts.adult + passengerCounts.child + passengerCounts.infant || 1;
 
   return (
     <div className={styles.card}>
@@ -12,17 +68,17 @@ export default function SidebarPriceSummaryCard() {
 
       <div className={styles.rowWraper}>
         <div className={styles.row}>
-          <span>1x Adult</span>
+          <span>{formatPassengerLabel(passengerCounts)}</span>
           <span className={styles.price}>₹ {prices.baseFare.toLocaleString()}</span>
         </div>
 
         <div className={styles.row}>
-          <span>1x Cabin baggage</span>
+          <span>{totalPassengers}x Cabin baggage</span>
           <span className={styles.success}>Included</span>
         </div>
 
         <div className={styles.row}>
-          <span>1x Checked baggage 15kg</span>
+          <span>{totalPassengers}x Checked baggage 15kg</span>
           <span className={styles.success}>Included</span>
         </div>
 

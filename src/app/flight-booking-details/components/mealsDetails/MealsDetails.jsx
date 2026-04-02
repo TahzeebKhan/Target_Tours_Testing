@@ -26,6 +26,8 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
 
     return {
       id: item?.id ?? index + 1,
+      ssid: item?.ssid ?? item?.id ?? index + 1,
+      fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
       image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
       title,
       price: Number(item?.price || 0),
