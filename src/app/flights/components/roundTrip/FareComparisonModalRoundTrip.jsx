@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./FareComparisonModalRoundTrip.module.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { toast } from "react-toastify";
 import { getFlightPrice } from "@/features/flights/services/flightBooking";
@@ -69,14 +69,25 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
 
 const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pendingFare, setPendingFare] = useState(null);
-  if (!isOpen) return null;
+  const [selected, setSelected] = useState("onward");
 
   const performBookNow = useCallback(async (selectedFare) => {
     const priceRequest = flightData?.booking?.priceRequest;
+    const routeContext = {
+      fromName: String(searchParams?.get("from") || "")
+        .replace(/\s*\([^)]+\)\s*$/, "")
+        .trim(),
+      fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
+      toName: String(searchParams?.get("to") || "")
+        .replace(/\s*\([^)]+\)\s*$/, "")
+        .trim(),
+      toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+    };
     if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
       toast.error("Missing booking payload for the selected flight.");
       return;
@@ -88,6 +99,7 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
       writeFlightBookingSession({
         selectedFlight: flightData,
         selectedFare,
+        routeContext,
         priceRequest,
         priceResponse,
         ssrRequest: null,
@@ -103,7 +115,7 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [flightData, router]);
+  }, [flightData, router, searchParams]);
 
   useEffect(() => {
     if (!pendingFare || !isLoggedIn) return;
@@ -227,10 +239,10 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
     },
   };
 
-  const [selected, setSelected] = useState("onward");
   const activeSegment = flightSegments[selected];
   const { flight, fares } = activeSegment;
   useLockBodyScroll();
+  if (!isOpen) return null;
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
