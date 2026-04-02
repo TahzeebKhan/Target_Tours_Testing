@@ -46,6 +46,25 @@ const formatAirportLabel = (code, city) => {
   return `${normalizedCity} (${normalizedCode})`;
 };
 
+const buildFlightMeta = (flight, header, fallback = {}) => ({
+  date: pickFirst(header?.date, fallback?.date, "N/A"),
+  airline: pickFirst(flight?.airline?.name, fallback?.airline, "N/A"),
+  time: `${pickFirst(flight?.departure?.time, fallback?.departureTime, "N/A")}-${pickFirst(
+    flight?.arrival?.time,
+    fallback?.arrivalTime,
+    "N/A"
+  )}`,
+  cabin: pickFirst(header?.cabinClass, flight?.travelClass, fallback?.cabin, "N/A"),
+  stops: pickFirst(header?.stops, flight?.stops, fallback?.stops, "N/A"),
+  duration: pickFirst(
+    flight?.duration
+      ? formatSummaryDuration(flight?.duration)
+      : undefined,
+    fallback?.duration,
+    "N/A"
+  ),
+});
+
 export default function BookingSuccessModal({
   isOpen,
   onClose,
@@ -68,6 +87,7 @@ export default function BookingSuccessModal({
     const createData = paymentSuccessData?.createItinerary || {};
     const startData = paymentSuccessData?.startPayment || {};
     const retrieveData = paymentSuccessData?.retrieveBooking || {};
+    const preferBookingViewRoute = Boolean(bookingView?.isRoundTrip);
     const retrieveBookingData =
       retrieveData?.data && typeof retrieveData.data === "object"
         ? retrieveData.data
@@ -90,32 +110,36 @@ export default function BookingSuccessModal({
       (item) => String(item?.Type || "").trim() === "1"
     );
     const routeFrom = pickFirst(
+      preferBookingViewRoute ? bookingView?.header?.fromCode : undefined,
       retrieveBookingData?.from,
       retrieveBookingData?.origin,
       retrieveData?.from,
       retrieveData?.origin,
-      bookingView?.header?.fromCode
+      bookingView?.departureFlight?.departure?.airport
     );
     const routeTo = pickFirst(
+      preferBookingViewRoute ? bookingView?.header?.toCode : undefined,
       retrieveBookingData?.to,
       retrieveBookingData?.destination,
       retrieveData?.to,
       retrieveData?.destination,
-      bookingView?.header?.toCode
+      bookingView?.departureFlight?.arrival?.airport
     );
     const routeFromName = pickFirst(
+      preferBookingViewRoute ? bookingView?.header?.fromName : undefined,
       retrieveBookingData?.from_name,
       retrieveBookingData?.fromName,
       retrieveData?.from_name,
       retrieveData?.fromName,
-      bookingView?.header?.fromName
+      bookingView?.departureFlight?.departure?.city
     );
     const routeToName = pickFirst(
+      preferBookingViewRoute ? bookingView?.header?.toName : undefined,
       retrieveBookingData?.to_name,
       retrieveBookingData?.toName,
       retrieveData?.to_name,
       retrieveData?.toName,
-      bookingView?.header?.toName
+      bookingView?.departureFlight?.arrival?.city
     );
 
     return {
@@ -175,57 +199,94 @@ export default function BookingSuccessModal({
         from: formatAirportLabel(routeFrom, routeFromName),
         to: formatAirportLabel(routeTo, routeToName),
       },
+      returnRoute: bookingView?.returnFlight
+        ? {
+            from: formatAirportLabel(
+              parseInt(String(bookingView?.returnFlight?.departure?.airport || "").split("-")[0], 10)
+                ? undefined
+                : String(bookingView?.returnFlight?.departure?.airport || "")
+                    .split("-")[0]
+                    ?.trim(),
+              bookingView?.returnFlight?.departure?.city
+            ),
+            to: formatAirportLabel(
+              parseInt(String(bookingView?.returnFlight?.arrival?.airport || "").split("-")[0], 10)
+                ? undefined
+                : String(bookingView?.returnFlight?.arrival?.airport || "")
+                    .split("-")[0]
+                    ?.trim(),
+              bookingView?.returnFlight?.arrival?.city
+            ),
+          }
+        : null,
       meta: {
         date: pickFirst(
+          preferBookingViewRoute ? bookingView?.header?.date : undefined,
           formatDate(retrieveBookingData?.departure),
           formatDate(retrieveData?.departure),
-          bookingView?.header?.date,
           "N/A"
         ),
         airline: pickFirst(
+          preferBookingViewRoute
+            ? bookingView?.departureFlight?.airline?.name
+            : undefined,
           retrieveBookingData?.airline,
           retrieveData?.airline,
-          bookingView?.departureFlight?.airline?.name,
           "N/A"
         ),
         time: `${formatTime(
           pickFirst(
+            preferBookingViewRoute
+              ? bookingView?.departureFlight?.departure?.time
+              : undefined,
             retrieveBookingData?.departure,
             retrieveData?.departure,
-            bookingView?.departureFlight?.departure?.time
           )
         )}-${formatTime(
           pickFirst(
+            preferBookingViewRoute
+              ? bookingView?.departureFlight?.arrival?.time
+              : undefined,
             retrieveBookingData?.arrival,
             retrieveData?.arrival,
-            bookingView?.departureFlight?.arrival?.time
           )
         )}`,
         cabin: pickFirst(
+          preferBookingViewRoute ? bookingView?.header?.cabinClass : undefined,
           retrieveBookingData?.cabin,
           retrieveData?.cabin,
-          bookingView?.header?.cabinClass,
           "N/A"
         ),
         stops: pickFirst(
+          preferBookingViewRoute ? bookingView?.header?.stops : undefined,
           retrieveBookingData?.stops,
           retrieveData?.stops,
-          bookingView?.header?.stops,
           "N/A"
         ),
         duration: pickFirst(
+          preferBookingViewRoute
+            ? formatSummaryDuration(bookingView?.departureFlight?.duration)
+            : undefined,
           retrieveBookingData?.duration,
           retrieveData?.duration,
-          formatSummaryDuration(bookingView?.departureFlight?.duration),
           "N/A"
         ),
       },
+      returnMeta: bookingView?.returnFlight
+        ? buildFlightMeta(bookingView?.returnFlight, {
+            date: bookingView?.returnFlight?.departure?.date,
+            cabinClass: bookingView?.returnFlight?.travelClass,
+            stops: bookingView?.returnFlight?.stops,
+          })
+        : null,
     };
   }, [paymentSuccessData, bookingView]);
 
   if (!mounted || !isOpen) return null;
 
   const summaryFlight = bookingView?.departureFlight || null;
+  const returnFlight = bookingView?.returnFlight || null;
+  const showReturnCard = Boolean(bookingView?.isRoundTrip && returnFlight);
   const travelerFallbacks = Array.isArray(travelerDetails) ? travelerDetails : [];
   const passengerList =
     details.passengers.length > 0
@@ -340,6 +401,45 @@ export default function BookingSuccessModal({
             </div>
           </div>
         </div>
+
+        {showReturnCard ? (
+          <div className={styles.card}>
+            <div className={styles.logoWrap}>
+              <img
+                src={returnFlight?.airline?.logo || "/images/Flight.png"}
+                alt=""
+                className={styles.logo}
+              />
+            </div>
+
+            <div className={styles.content}>
+              <div className={styles.route}>
+                {formatAirportLabel(
+                  String(returnFlight?.departure?.airport || "").split("-")[0]?.trim(),
+                  returnFlight?.departure?.city
+                )}{" "}
+                →{" "}
+                {formatAirportLabel(
+                  String(returnFlight?.arrival?.airport || "").split("-")[0]?.trim(),
+                  returnFlight?.arrival?.city
+                )}
+              </div>
+              <div className={styles.meta}>
+                <span>{details.returnMeta?.date || "N/A"}</span>
+                <span className={styles.dot}>•</span>
+                <span>{details.returnMeta?.airline || "N/A"}</span>
+                <span className={styles.dot}>•</span>
+                <span>{details.returnMeta?.time || "N/A"}</span>
+                <span className={styles.dot}>•</span>
+                <span>{details.returnMeta?.cabin || "N/A"}</span>
+                <span className={styles.dot}>•</span>
+                <span>{details.returnMeta?.stops || "N/A"}</span>
+                <span className={styles.dot}>•</span>
+                <span>{details.returnMeta?.duration || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className={styles.infoGrid}>
           <div className={styles.infoItem}>

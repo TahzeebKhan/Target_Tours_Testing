@@ -235,6 +235,86 @@ const buildSelectedFlightCard = (selectedFlight, selectedFare) => {
   };
 };
 
+const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
+  const segmentWrapper =
+    legKey === "return"
+      ? selectedFlight?.return || selectedFlight?.tripCard?.return
+      : selectedFlight?.depart || selectedFlight?.tripCard?.depart;
+  const leg =
+    legKey === "return"
+      ? selectedFlight?.inbound ||
+        selectedFlight?.return?.flight ||
+        selectedFlight?.tripCard?.return?.flight
+      : selectedFlight?.outbound ||
+        selectedFlight?.depart?.flight ||
+        selectedFlight?.tripCard?.depart?.flight;
+
+  if (!leg || typeof leg !== "object") return null;
+
+  const departureLabel = String(leg?.departure?.city || "").trim();
+  const arrivalLabel = String(leg?.arrival?.city || "").trim();
+  const departureRoute = parseRouteLabel(departureLabel);
+  const arrivalRoute = parseRouteLabel(arrivalLabel);
+  const details = leg?.details || {};
+  const airlineSource =
+    segmentWrapper?.airline ||
+    selectedFlight?.airline ||
+    {};
+  const departureAirportCode =
+    departureRoute.code ||
+    String(departureLabel.split("-")[0] || "")
+      .trim()
+      .toUpperCase();
+  const arrivalAirportCode =
+    arrivalRoute.code ||
+    String(arrivalLabel.split("-")[0] || "")
+      .trim()
+      .toUpperCase();
+  const departureCityLabel = departureRoute.city || departureLabel || "N/A";
+  const arrivalCityLabel = arrivalRoute.city || arrivalLabel || "N/A";
+
+  return {
+    airline: {
+      name: airlineSource?.name || "N/A",
+      code: airlineSource?.code || "N/A",
+      logo: airlineSource?.logo || "/images/Flight.png",
+    },
+    aircraft: details?.aircraft || leg?.aircraft || "N/A",
+    flexiPlusFare: selectedFare?.name || "",
+    travelClass: normalizeTravelClass(
+      selectedFlight?.fare?.cabinClass || leg?.fare?.cabinClass || leg?.travelClass,
+      selectedFare
+    ),
+    departure: {
+      date:
+        segmentWrapper?.date ||
+        leg?.dateLabel ||
+        leg?.date ||
+        formatDateLabel(details?.departureDateTime),
+      time: leg?.departure?.time || "N/A",
+      airport: `${departureAirportCode || "N/A"} - ${departureCityLabel.toUpperCase()}`,
+      terminal: normalizeTerminal(details?.departureTerminal),
+      city: compactAirportName(details?.fromName, departureCityLabel),
+    },
+    arrival: {
+      date:
+        segmentWrapper?.date ||
+        leg?.dateLabel ||
+        leg?.date ||
+        formatDateLabel(details?.arrivalDateTime),
+      time: leg?.arrival?.time || "N/A",
+      airport: `${arrivalAirportCode || "N/A"} - ${arrivalCityLabel.toUpperCase()}`,
+      terminal: normalizeTerminal(details?.arrivalTerminal),
+      city: compactAirportName(details?.toName, arrivalCityLabel),
+    },
+    duration: {
+      hours: leg?.duration?.hours || "00",
+      minutes: leg?.duration?.minutes || "00",
+    },
+    stops: leg?.stops?.type || "Non Stop",
+  };
+};
+
 export const readFlightBookingSession = () => {
   return inMemoryFlightBookingSession;
 };
@@ -349,15 +429,41 @@ export const getBookingDetailsView = (session) => {
   const returnSource =
     returnJourney?.flight_details || payload?.return || payload?.return_details || null;
 
-  const selectedDepartureFlight = buildSelectedFlightCard(selectedFlight, selectedFare);
+  const isSelectedRoundTrip = Boolean(
+    selectedFlight?.outbound ||
+      selectedFlight?.inbound ||
+      selectedFlight?.depart?.flight ||
+      selectedFlight?.return?.flight ||
+      selectedFlight?.tripCard?.depart?.flight ||
+      selectedFlight?.tripCard?.return?.flight
+  );
+  const selectedDepartureFlight = isSelectedRoundTrip
+    ? buildRoundSelectedFlightCard(selectedFlight, selectedFare, "depart")
+    : buildSelectedFlightCard(selectedFlight, selectedFare);
+  const selectedReturnFlight = isSelectedRoundTrip
+    ? buildRoundSelectedFlightCard(selectedFlight, selectedFare, "return")
+    : null;
   const departureFlight = selectedDepartureFlight || buildFlightCard(departureSource, selectedFare);
-  const returnFlight = buildFlightCard(returnSource, selectedFare);
-  const selectedDepartureRoute = parseRouteLabel(selectedFlight?.departure?.city);
-  const selectedArrivalRoute = parseRouteLabel(selectedFlight?.arrival?.city);
+  const returnFlight = selectedReturnFlight || buildFlightCard(returnSource, selectedFare);
+  const selectedDepartureRoute = isSelectedRoundTrip
+    ? parseRouteLabel(
+        selectedFlight?.outbound?.departure?.city ||
+          selectedFlight?.depart?.flight?.departure?.city ||
+          selectedFlight?.tripCard?.depart?.flight?.departure?.city
+      )
+    : parseRouteLabel(selectedFlight?.departure?.city);
+  const selectedArrivalRoute = isSelectedRoundTrip
+    ? parseRouteLabel(
+        selectedFlight?.outbound?.arrival?.city ||
+          selectedFlight?.depart?.flight?.arrival?.city ||
+          selectedFlight?.tripCard?.depart?.flight?.arrival?.city
+      )
+    : parseRouteLabel(selectedFlight?.arrival?.city);
   const routeFrom =
     String(
       routeContext?.fromCode ||
       selectedDepartureRoute.code ||
+      departureFlight?.departure?.airport?.split("-")[0] ||
       departureSource?.origin ||
       departureSource?.from ||
       ""
@@ -366,6 +472,7 @@ export const getBookingDetailsView = (session) => {
     String(
       routeContext?.toCode ||
       selectedArrivalRoute.code ||
+      departureFlight?.arrival?.airport?.split("-")[0] ||
       (returnSource?.to || returnSource?.destination || "") ||
         departureSource?.destination ||
         departureSource?.to ||
@@ -376,6 +483,7 @@ export const getBookingDetailsView = (session) => {
   const headerFrom = splitAirportMeta(
     routeContext?.fromName ||
       selectedFlight?.details?.fromName ||
+      selectedDepartureFlight?.departure?.city ||
       departureSource?.dep_airport_name ||
       departureSource?.fromName ||
       departureSource?.FromName,
@@ -384,6 +492,7 @@ export const getBookingDetailsView = (session) => {
   const headerTo = splitAirportMeta(
     routeContext?.toName ||
       selectedFlight?.details?.toName ||
+      selectedDepartureFlight?.arrival?.city ||
       (returnSource?.arr_airport_name || returnSource?.toName || returnSource?.ToName) ||
       departureSource?.arr_airport_name ||
       departureSource?.toName ||
@@ -400,7 +509,9 @@ export const getBookingDetailsView = (session) => {
       toName: headerTo,
       toCode: routeTo,
       date: formatHeaderDate(
-        selectedFlight?.details?.departureDateTime || departureSource?.departure
+        selectedFlight?.details?.departureDateTime ||
+          selectedDepartureFlight?.departure?.date ||
+          departureSource?.departure
       ),
       stops: departureFlight?.stops || "N/A",
       duration: `${summaryDuration.hours} h ${summaryDuration.minutes} m`,

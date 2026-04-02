@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import styles from "./MobileFareComparisonModalRoundTrip.module.css";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { getFlightPrice } from "@/features/flights/services/flightBooking";
 import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
@@ -78,14 +78,25 @@ const MobileFareComparisonModalRoundTrip = ({
   flightData,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pendingFare, setPendingFare] = useState(null);
-  if (!isOpen) return null;
+  const [activeTab, setActibeTab] = useState("onward");
 
   const performBookNow = useCallback(async (selectedFare) => {
     const priceRequest = flightData?.booking?.priceRequest;
+    const routeContext = {
+      fromName: String(searchParams?.get("from") || "")
+        .replace(/\s*\([^)]+\)\s*$/, "")
+        .trim(),
+      fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
+      toName: String(searchParams?.get("to") || "")
+        .replace(/\s*\([^)]+\)\s*$/, "")
+        .trim(),
+      toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+    };
     if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
       toast.error("Missing booking payload for the selected flight.");
       return;
@@ -97,6 +108,7 @@ const MobileFareComparisonModalRoundTrip = ({
       writeFlightBookingSession({
         selectedFlight: flightData,
         selectedFare,
+        routeContext,
         priceRequest,
         priceResponse,
         ssrRequest: null,
@@ -112,7 +124,7 @@ const MobileFareComparisonModalRoundTrip = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [flightData, router]);
+  }, [flightData, router, searchParams]);
 
   useEffect(() => {
     if (!pendingFare || !isLoggedIn) return;
@@ -131,7 +143,7 @@ const MobileFareComparisonModalRoundTrip = ({
     }
     performBookNow(selectedFare);
   };
-  const [activeTab, setActibeTab] = useState("onward");
+  if (!isOpen) return null;
   const fareOptions = [
     {
       id: "saver",
