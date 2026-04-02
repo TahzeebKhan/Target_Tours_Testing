@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./MealsDetails.module.css";
-import Expandable from "./components/Expandable";
-import MealGuidelineExpandable from "./components/mealGuidelineExpandable/MealGuidelineExpandable";
-import MobileFlightMeals from "./components/MobileFlightMeals";
+import Expandable from "./Components/Expandable";
+import MealGuidelineExpandable from "./Components/mealGuidelineExpandable/MealGuidelineExpandable";
+import MobileFlightMeals from "./Components/MobileFlightMeals";
 import { useFlightBooking } from "../../FlightBookingContext";
 import { meals, beverages } from "./mealsData";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";

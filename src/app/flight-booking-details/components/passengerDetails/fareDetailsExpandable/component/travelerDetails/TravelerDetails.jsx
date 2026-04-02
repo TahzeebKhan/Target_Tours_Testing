@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TravelerDetails.module.css";
 import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
-import { EMPTY_TRAVELER_FORM_ERRORS } from "@/app/flight-booking-details/utils/travelerValidation";
+import {
+    EMPTY_TRAVELER_FORM_ERRORS,
+    validateTravelerForm,
+} from "@/app/flight-booking-details/utils/travelerValidation";
 
 const buildPassengerSlots = (bookingSession) => {
     const priceRequest = bookingSession?.priceRequest || {};
@@ -145,6 +148,22 @@ const TravelerDetails = () => {
         lastSyncedBookingContactRef.current = nextSerialized;
         setBookingContactDetails(bookingContact);
     }, [bookingContact, bookingContactDetails, setBookingContactDetails]);
+
+    useEffect(() => {
+        const currentErrors = JSON.stringify(travelerFormErrors || EMPTY_TRAVELER_FORM_ERRORS);
+        if (currentErrors === JSON.stringify(EMPTY_TRAVELER_FORM_ERRORS)) {
+            return;
+        }
+
+        const validation = validateTravelerForm({
+            travelerDetails: serializeTravelers(travelers),
+            bookingContactDetails: bookingContact,
+        });
+        const nextErrors = JSON.stringify(validation.errors || EMPTY_TRAVELER_FORM_ERRORS);
+        if (currentErrors !== nextErrors) {
+            setTravelerFormErrors(validation.errors);
+        }
+    }, [bookingContact, setTravelerFormErrors, travelerFormErrors, travelers]);
 
     const clearTravelerFieldError = (travelerId, field) => {
         setTravelerFormErrors((prev) => {

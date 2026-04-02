@@ -3,8 +3,8 @@ import React, { useState, useCallback, useMemo } from "react";
 import styles from "./BaggageDetails.module.css";
 import { useRouter } from "next/navigation";
 
-import CabinBaggageInfo from "./components/cabinBaggageInfo/CabinBaggageInfo";
-import ExtraBaggageItem from "./components/extraBaggageItem/ExtraBaggageItem";
+import CabinBaggageInfo from "./Components/cabinBaggageInfo/CabinBaggageInfo";
+import ExtraBaggageItem from "./Components/extraBaggageItem/ExtraBaggageItem";
 
 import { useFlightBooking } from "../../FlightBookingContext";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
