@@ -35,13 +35,13 @@ const buildTravelerPayload = (slot, isOpen = true) => ({
     Title: "Mr",
     FName: "",
     LName: "",
-    Age: "",
+    Age: "26",
     DOB: "2000-01-01",
-    Gender: "",
+    Gender: "Male",
     PTC: slot?.type === "CHILD" ? "CHD" : slot?.type === "INFANT" ? "INF" : "ADT",
     Nationality: "IN",
     PassportNo: "1234567",
-    PLI: "",
+    PLI: "NOIDA",
     PDOE: "2026-04-28",
     VisaType: "Business",
     CountryCode: "IN",
@@ -51,14 +51,14 @@ const buildTravelerPayload = (slot, isOpen = true) => ({
 
 const hydrateTravelers = (savedTravelers = [], passengerSlots = []) => {
     if (!Array.isArray(savedTravelers) || savedTravelers.length === 0) {
-        return [buildTravelerPayload(passengerSlots[0], true)];
+        return passengerSlots.map((slot) => buildTravelerPayload(slot, true));
     }
 
-    return savedTravelers.map((traveler, index) => {
-        const slot = passengerSlots[index] || {
-            id: traveler?.id || `traveler-${index + 1}`,
-            type: traveler?.type || "ADULT",
-        };
+    return passengerSlots.map((slot, index) => {
+        const traveler = savedTravelers[index];
+        if (!traveler) {
+            return buildTravelerPayload(slot, true);
+        }
 
         return {
             ...buildTravelerPayload(slot, true),

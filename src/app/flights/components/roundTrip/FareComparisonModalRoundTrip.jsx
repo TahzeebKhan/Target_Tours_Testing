@@ -8,7 +8,10 @@ import {
   getFlightPrice,
   getFlightTravelChecklist,
 } from "@/features/flights/services/flightBooking";
-import { writeFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+import {
+  buildBookingFallbackQuery,
+  writeFlightBookingSession,
+} from "@/features/flights/utils/flightBookingSession";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 
@@ -116,7 +119,7 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
             "FVI6V120g22Ei5ztGK0FIQ==",
         });
       }
-      writeFlightBookingSession({
+      const nextSession = {
         selectedFlight: flightData,
         selectedFare,
         routeContext,
@@ -124,8 +127,14 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
         priceResponse,
         ssrRequest: null,
         ssrResponse: null,
-      });
-      router.push("/flight-booking-details");
+      };
+      writeFlightBookingSession(nextSession);
+      const fallbackQuery = buildBookingFallbackQuery(nextSession);
+      router.push(
+        fallbackQuery
+          ? `/flight-booking-details?${fallbackQuery}`
+          : "/flight-booking-details"
+      );
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||

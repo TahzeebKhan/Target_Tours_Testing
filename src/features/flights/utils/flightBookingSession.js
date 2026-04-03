@@ -20,6 +20,29 @@ const pickFirst = (...values) => {
   return undefined;
 };
 
+const normalizeGenderCode = (value) => {
+  const text = String(value || "").trim().toUpperCase();
+  if (text === "MALE" || text === "M") return "M";
+  if (text === "FEMALE" || text === "F") return "F";
+  return text;
+};
+
+const safeEncodePayload = (value) => {
+  try {
+    return encodeURIComponent(JSON.stringify(value));
+  } catch {
+    return "";
+  }
+};
+
+const safeDecodePayload = (value) => {
+  try {
+    return JSON.parse(decodeURIComponent(String(value || "")));
+  } catch {
+    return null;
+  }
+};
+
 const extractTrips = (payload) => {
   if (Array.isArray(payload?.Trips)) return payload.Trips;
   if (Array.isArray(payload?.trips)) return payload.trips;
@@ -323,6 +346,16 @@ export const writeFlightBookingSession = (value) => {
   inMemoryFlightBookingSession = value || null;
 };
 
+export const readBookingFallbackFromSearch = (search) => {
+  const params =
+    search instanceof URLSearchParams
+      ? search
+      : new URLSearchParams(String(search || "").replace(/^\?/, ""));
+  const raw = params.get("bookingFallback");
+  const parsed = safeDecodePayload(raw);
+  return parsed && typeof parsed === "object" ? parsed : null;
+};
+
 export const mergeFlightBookingSession = (patch) => {
   const current = readFlightBookingSession() || {};
   const next = {
@@ -411,6 +444,7 @@ export const extractBaseFareAmount = (session) => {
 };
 
 export const getBookingDetailsView = (session) => {
+  const fallbackView = session?.urlFallback || null;
   const payload = unwrapPayload(session?.priceResponse);
   const selectedFare = session?.selectedFare || null;
   const selectedFlight = session?.selectedFlight || null;
@@ -443,8 +477,14 @@ export const getBookingDetailsView = (session) => {
   const selectedReturnFlight = isSelectedRoundTrip
     ? buildRoundSelectedFlightCard(selectedFlight, selectedFare, "return")
     : null;
-  const departureFlight = selectedDepartureFlight || buildFlightCard(departureSource, selectedFare);
-  const returnFlight = selectedReturnFlight || buildFlightCard(returnSource, selectedFare);
+  const departureFlight =
+    selectedDepartureFlight ||
+    fallbackView?.departureFlight ||
+    buildFlightCard(departureSource, selectedFare);
+  const returnFlight =
+    selectedReturnFlight ||
+    fallbackView?.returnFlight ||
+    buildFlightCard(returnSource, selectedFare);
   const selectedDepartureRoute = isSelectedRoundTrip
     ? parseRouteLabel(
         selectedFlight?.outbound?.departure?.city ||
@@ -462,6 +502,7 @@ export const getBookingDetailsView = (session) => {
   const routeFrom =
     String(
       routeContext?.fromCode ||
+      fallbackView?.header?.fromCode ||
       selectedDepartureRoute.code ||
       departureFlight?.departure?.airport?.split("-")[0] ||
       departureSource?.origin ||
@@ -471,6 +512,7 @@ export const getBookingDetailsView = (session) => {
   const routeTo =
     String(
       routeContext?.toCode ||
+      fallbackView?.header?.toCode ||
       selectedArrivalRoute.code ||
       departureFlight?.arrival?.airport?.split("-")[0] ||
       (returnSource?.to || returnSource?.destination || "") ||
@@ -482,6 +524,7 @@ export const getBookingDetailsView = (session) => {
       .toUpperCase();
   const headerFrom = splitAirportMeta(
     routeContext?.fromName ||
+      fallbackView?.header?.fromName ||
       selectedFlight?.details?.fromName ||
       selectedDepartureFlight?.departure?.city ||
       departureSource?.dep_airport_name ||
@@ -491,6 +534,7 @@ export const getBookingDetailsView = (session) => {
   ).cityName;
   const headerTo = splitAirportMeta(
     routeContext?.toName ||
+      fallbackView?.header?.toName ||
       selectedFlight?.details?.toName ||
       selectedDepartureFlight?.arrival?.city ||
       (returnSource?.arr_airport_name || returnSource?.toName || returnSource?.ToName) ||
@@ -510,6 +554,7 @@ export const getBookingDetailsView = (session) => {
       toCode: routeTo,
       date: formatHeaderDate(
         selectedFlight?.details?.departureDateTime ||
+          fallbackView?.header?.date ||
           selectedDepartureFlight?.departure?.date ||
           departureSource?.departure
       ),
@@ -520,6 +565,17 @@ export const getBookingDetailsView = (session) => {
     departureFlight,
     returnFlight,
   };
+};
+
+export const buildBookingFallbackQuery = (session) => {
+  const view = getBookingDetailsView(session);
+  const payload = {
+    header: view?.header || null,
+    departureFlight: view?.departureFlight || null,
+    returnFlight: view?.returnFlight || null,
+  };
+  const encoded = safeEncodePayload(payload);
+  return encoded ? `bookingFallback=${encoded}` : "";
 };
 
 export const buildCreateItineraryPayload = (session, prices) => {
@@ -612,7 +668,7 @@ export const buildCreateItineraryPayload = (session, prices) => {
       LName: traveler.LName || "",
       Age: traveler.Age ? Number(traveler.Age) : "",
       DOB: traveler.DOB || "",
-      Gender: traveler.Gender || "",
+      Gender: normalizeGenderCode(traveler.Gender),
       PTC: traveler.PTC || "",
       Nationality: traveler.Nationality || "",
       PassportNo: traveler.PassportNo || "",

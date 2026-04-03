@@ -8,6 +8,7 @@ import {
   buildStartPaymentPayload,
   buildSsrPayload,
   extractBaseFareAmount,
+  readBookingFallbackFromSearch,
   readFlightBookingSession,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
@@ -89,7 +90,19 @@ export function FlightBookingProvider({ children }) {
   }, [currentStep]);
 
   useEffect(() => {
-    setBookingSession(readFlightBookingSession() || null);
+    const savedSession = readFlightBookingSession() || null;
+    const fallbackView =
+      typeof window !== "undefined"
+        ? readBookingFallbackFromSearch(window.location.search)
+        : null;
+    setBookingSession(
+      savedSession || fallbackView
+        ? {
+            ...(savedSession || {}),
+            ...(fallbackView ? { urlFallback: fallbackView } : {}),
+          }
+        : null
+    );
     setBookingSessionReady(true);
   }, []);
 
