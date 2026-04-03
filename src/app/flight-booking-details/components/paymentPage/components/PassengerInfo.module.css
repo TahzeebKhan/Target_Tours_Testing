@@ -14,7 +14,8 @@
 
 .row {
   display: grid;
-  grid-template-columns: 2.2fr 1.2fr 2fr 2fr;
+  grid-template-columns: 2.1fr 1fr 2.2fr 1.7fr;
+  column-gap: 24px;
   padding: 8px 13px;
   align-items: center;
   height: 40px;
@@ -23,6 +24,10 @@
   color: #000000;
   text-transform: uppercase;
   border-bottom: 1px solid #e4e6e8;
+}
+
+.row span {
+  min-width: 0;
 }
 
 .row:last-child {
@@ -44,8 +49,8 @@
 /* FOOTER */
 .footer {
   display: grid;
-
-  grid-template-columns: 2.2fr 1.2fr 2fr 2fr;
+  grid-template-columns: 2.1fr 1fr 2.2fr 1.7fr;
+  column-gap: 24px;
   align-items: flex-start;
   padding: 16px 0px;
   font-family: var(--font-inter);
