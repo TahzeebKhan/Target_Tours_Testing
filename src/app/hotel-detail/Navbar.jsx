@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { useEffect, useState } from "react";
+import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
   const router = useRouter();
   const [isMounted, setisMounted] = useState(false);
@@ -14,11 +15,11 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
-          <img
+          <BrandLogo
             style={{ cursor: "pointer" }}
             onClick={() => router.push("/")}
-            src="./Logo.svg"
-            alt=""
+            fallbackSrc="/Logo.svg"
+            alt="Target Tours Logo"
           />
           <div className={`${styles.navRight} flex gap-3`}>
             {/* <div className={styles.sessionExpires}>

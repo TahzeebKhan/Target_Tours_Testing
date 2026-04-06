@@ -34,6 +34,8 @@ import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
 import CustomItinerary from "./customIternaryComponents/CustomItinerary";
 import MobileItinerary from "./customIternaryComponents/MobileItinerary";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
+import { toast } from "react-toastify";
+import BrandLogo from "@/shared/components/BrandLogo";
 const sampleHotel = {
   title: "SERENE HAVEN INN, TORONTO",
   images: ["/images/hotel-placeholder.jpg"],
@@ -743,6 +745,27 @@ const HomePage = ({
     return `${day}-${month}-${year}`;
   };
 
+  const normalizePlaceValue = (value = "") =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s*\([^)]+\)\s*$/, "");
+
+  const isSamePlace = (leftLabel, rightLabel, leftCode = "", rightCode = "") => {
+    const normalizedLeftCode = String(leftCode || "").trim().toUpperCase();
+    const normalizedRightCode = String(rightCode || "").trim().toUpperCase();
+
+    if (
+      normalizedLeftCode &&
+      normalizedRightCode &&
+      normalizedLeftCode === normalizedRightCode
+    ) {
+      return true;
+    }
+
+    return normalizePlaceValue(leftLabel) === normalizePlaceValue(rightLabel);
+  };
+
   const handleSearch = async ({ tripType: incomingTripType, multiFlights } = {}) => {
     const finalTripType = incomingTripType || tripType;
     const normalizedPassengers = {
@@ -755,6 +778,17 @@ const HomePage = ({
     if (bookingType === "flight") {
       // MULTI CITY
       if (finalTripType === "multi") {
+        const hasInvalidLeg = (multiFlights || []).some((leg) =>
+          leg?.from &&
+          leg?.to &&
+          isSamePlace(leg.from, leg.to)
+        );
+
+        if (hasInvalidLeg) {
+          toast.error("Departure and destination cannot be the same.");
+          return;
+        }
+
         const firstLeg = multiFlights?.[0];
         if (firstLeg?.from && firstLeg?.to && firstLeg?.departureDate) {
           try {
@@ -792,6 +826,11 @@ const HomePage = ({
           : flightDates.round.start;
 
       const endDate = finalTripType === "round" ? flightDates.round.end : "";
+
+      if (from && to && isSamePlace(from, to, fromCode, toCode)) {
+        toast.error("Departure and destination cannot be the same.");
+        return;
+      }
 
       try {
         await saveRecentFlightSearch({
@@ -884,6 +923,11 @@ const HomePage = ({
     }
   };
 
+  const openLoginModal = () => {
+    setAuthView("login");
+    setShowLogin(true);
+  };
+
   return (
     <>
       <div
@@ -904,7 +948,7 @@ const HomePage = ({
             <div
               className={`${styles.navbar}  w-full flex  justify-between items-center`}
             >
-              <img src="./Logo.svg" alt="" />
+              <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
               <div className={`${styles.navRight} flex gap-3`}>
                 <button
                   className={`${styles.glass_button} ${styles.downloadBtn}`}
@@ -914,7 +958,7 @@ const HomePage = ({
                 {!isLoggedIn ? (
                   <button
                     className={`${styles.signInBtn} ${styles.downloadBtnMobile}`}
-                    onClick={() => setShowLogin(true)}
+                    onClick={openLoginModal}
                   >
                     Sign In
                   </button>
@@ -973,7 +1017,7 @@ const HomePage = ({
             <div className={styles.menuBottom}>
               {!isLoggedIn && (
                 <button
-                  onClick={() => router.push("./?openLogin=true")}
+                  onClick={openLoginModal}
                   className={styles.accountBtn}
                 >
                   ACCOUNT LOGIN
@@ -1008,11 +1052,11 @@ const HomePage = ({
           <img className={styles.gradient} src="/images/gradient.png" />
         </header>
         <div className={`${styles.overlay} absolute inset-0`}></div>
-        <div className={`${styles.navContainer} absolute top-0 z-20`}>
+        <div className={`${styles.navContainer} absolute top-0 z-[1002]`}>
           <div
             className={`${styles.navbar}  w-full flex  justify-between items-center`}
           >
-            <img src="./Logo.svg" alt="" />
+            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
             <div className={`${styles.navRight} flex gap-3`}>
               <button
                 className={`${styles.glass_button} ${styles.downloadBtn}`}
@@ -1022,7 +1066,7 @@ const HomePage = ({
               {!isLoggedIn ? (
                 <button
                   className={styles.signInBtn}
-                  onClick={() => setShowLogin(true)}
+                  onClick={openLoginModal}
                 >
                   Sign In
                 </button>

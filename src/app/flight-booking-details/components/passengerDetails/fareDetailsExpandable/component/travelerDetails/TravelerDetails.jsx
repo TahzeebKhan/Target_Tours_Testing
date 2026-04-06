@@ -90,6 +90,14 @@ const DEFAULT_BOOKING_CONTACT = {
 const getBookingContactState = (value) =>
     value && Object.keys(value).length > 0 ? value : DEFAULT_BOOKING_CONTACT;
 
+const openNativeDatePicker = (event) => {
+    try {
+        event.currentTarget.showPicker?.();
+    } catch {
+        // Ignore browsers that reject programmatic picker opening.
+    }
+};
+
 const TravelerDetails = () => {
     const {
         bookingSession,
@@ -202,35 +210,33 @@ const TravelerDetails = () => {
     const updateTravelerField = (index, field, value) => {
         const normalizedValue =
             field === "Age" ? String(value).replace(/[^\d]/g, "").slice(0, 2) : value;
-        setTravelers((prev) => {
-            const next = prev.map((traveler, travelerIndex) =>
-                travelerIndex === index
-                    ? { ...traveler, [field]: normalizedValue }
-                    : traveler
-            );
-            const serializedNext = serializeTravelers(next);
-            lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
-            setTravelerDetails(serializedNext);
-            return next;
-        });
-        clearTravelerFieldError(travelers[index]?.id, field);
+        const nextTravelers = travelers.map((traveler, travelerIndex) =>
+            travelerIndex === index
+                ? { ...traveler, [field]: normalizedValue }
+                : traveler
+        );
+        const serializedNext = serializeTravelers(nextTravelers);
+
+        lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
+        setTravelers(nextTravelers);
+        setTravelerDetails(serializedNext);
+        clearTravelerFieldError(nextTravelers[index]?.id, field);
     };
 
     const addTraveler = () => {
-        setTravelers((prev) => {
-            if (prev.length >= passengerSlots.length) return prev;
-            const nextSlot = passengerSlots[prev.length];
-            if (!nextSlot) return prev;
+        if (travelers.length >= passengerSlots.length) return;
+        const nextSlot = passengerSlots[travelers.length];
+        if (!nextSlot) return;
 
-            const next = [
-                ...prev,
-                buildTravelerPayload(nextSlot, true)
-            ];
-            const serializedNext = serializeTravelers(next);
-            lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
-            setTravelerDetails(serializedNext);
-            return next;
-        });
+        const nextTravelers = [
+            ...travelers,
+            buildTravelerPayload(nextSlot, true)
+        ];
+        const serializedNext = serializeTravelers(nextTravelers);
+
+        lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
+        setTravelers(nextTravelers);
+        setTravelerDetails(serializedNext);
     };
 
 
@@ -245,15 +251,14 @@ const TravelerDetails = () => {
     };
 
     const updateBookingContactField = (field, value) => {
-        setBookingContact((prev) => {
-            const next = {
-                ...prev,
-                [field]: value,
-            };
-            lastSyncedBookingContactRef.current = JSON.stringify(next);
-            setBookingContactDetails(next);
-            return next;
-        });
+        const nextBookingContact = {
+            ...bookingContact,
+            [field]: value,
+        };
+
+        lastSyncedBookingContactRef.current = JSON.stringify(nextBookingContact);
+        setBookingContact(nextBookingContact);
+        setBookingContactDetails(nextBookingContact);
         clearBookingFieldError(field);
     };
 
@@ -424,8 +429,7 @@ const TravelerDetails = () => {
                                     type="date"
                                     value={traveler.DOB}
                                     onChange={(event) => updateTravelerField(index, "DOB", event.target.value)}
-                                    onFocus={(event) => event.target.showPicker?.()}
-                                    onClick={(event) => event.target.showPicker?.()}
+                                    onClick={openNativeDatePicker}
                                 />
                                 {getTravelerFieldError(traveler.id, "DOB") && (
                                     <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "DOB")}</span>
@@ -485,8 +489,7 @@ const TravelerDetails = () => {
                                     type="date"
                                     value={traveler.PDOE}
                                     onChange={(event) => updateTravelerField(index, "PDOE", event.target.value)}
-                                    onFocus={(event) => event.target.showPicker?.()}
-                                    onClick={(event) => event.target.showPicker?.()}
+                                    onClick={openNativeDatePicker}
                                 />
                                 {getTravelerFieldError(traveler.id, "PDOE") && (
                                     <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "PDOE")}</span>

@@ -7,6 +7,7 @@ import {
   RECENT_SEARCHES_QUERY_KEY,
   saveRecentFlightSearch,
 } from "@/shared/services/recentSearch";
+import { toast } from "react-toastify";
 
 const TripTypeContext = createContext(null);
 
@@ -50,6 +51,27 @@ const getSyncedRoute = ({ from = "", to = "", fromCode = "", toCode = "" }) => (
   fromCode: String(fromCode || "").trim().toUpperCase(),
   toCode: String(toCode || "").trim().toUpperCase(),
 });
+
+const normalizePlaceValue = (value = "") =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s*\([^)]+\)\s*$/, "");
+
+const isSamePlace = (leftLabel, rightLabel, leftCode = "", rightCode = "") => {
+  const normalizedLeftCode = String(leftCode || "").trim().toUpperCase();
+  const normalizedRightCode = String(rightCode || "").trim().toUpperCase();
+
+  if (
+    normalizedLeftCode &&
+    normalizedRightCode &&
+    normalizedLeftCode === normalizedRightCode
+  ) {
+    return true;
+  }
+
+  return normalizePlaceValue(leftLabel) === normalizePlaceValue(rightLabel);
+};
 
 /**
  * Provider
@@ -179,6 +201,11 @@ export function TripTypeProvider({ children }) {
     const fallbackTo = syncedRoute.to || "Singapore (SIN)";
     const normalizedFromCode = syncedRoute.fromCode;
     const normalizedToCode = syncedRoute.toCode;
+
+    if (isSamePlace(fallbackFrom, fallbackTo, normalizedFromCode, normalizedToCode)) {
+      toast.error("Departure and destination cannot be the same.");
+      return;
+    }
 
     try {
       await saveRecentFlightSearch({

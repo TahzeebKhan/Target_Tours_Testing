@@ -9,7 +9,12 @@ import MobileFareComparisonModal from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModal from "../FareComparisonModalRoundTrip";
 import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
-import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
+import {
+  getFlightPrice,
+  getFlightTravelChecklist,
+  getFlightWebSettings,
+} from "@/features/flights/services/flightBooking";
+import { toast } from "react-toastify";
 
 const TripCard = ({
   tripCardsData,
@@ -19,6 +24,8 @@ const TripCard = ({
   setSelectedFlightId,
 }) => {
   const [openId, setOpenId] = useState(null);
+  const [prefetchedFareData, setPrefetchedFareData] = useState({});
+  const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
 
   const flightResults = [
     {
@@ -120,19 +127,57 @@ const TripCard = ({
   const [isMobile, setIsMobile] = useState(false);
 
   const openFareModal = async (flight) => {
-    const searchTui =
-      flight?.tripCard?.booking?.tui || flight?.booking?.tui;
+    const searchTui = flight?.booking?.tui;
+    const priceRequest = flight?.booking?.priceRequest;
 
-    if (searchTui) {
-      try {
-        await getFlightWebSettings({ TUI: searchTui });
-      } catch (error) {
-        console.error("Failed to fetch flight web settings", error);
-      }
+    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+      toast.error("Missing booking payload for the selected flight.");
+      return;
     }
 
-    setSelectedFlightId(flight?.id ?? null);
-    setFareModalOpen(flight?.id ?? null);
+    setPrefetchingFlightId(flight?.id ?? null);
+
+    try {
+      const webSettingsResponse = searchTui
+        ? await getFlightWebSettings({ TUI: searchTui })
+        : null;
+      const priceResponse = await getFlightPrice(priceRequest);
+      const checklistTui =
+        priceResponse?.data?.raw?.TUI ||
+        priceResponse?.raw?.TUI ||
+        priceResponse?.data?.tui ||
+        priceResponse?.data?.TUI ||
+        priceResponse?.tui ||
+        priceResponse?.TUI;
+      const checklistResponse = checklistTui
+        ? await getFlightTravelChecklist({
+            TUI: checklistTui,
+            ClientID:
+              flight?.booking?.clientId ||
+              priceRequest?.ClientID ||
+              "FVI6V120g22Ei5ztGK0FIQ==",
+          })
+        : null;
+
+      setPrefetchedFareData((prev) => ({
+        ...prev,
+        [flight.id]: {
+          webSettingsResponse,
+          priceResponse,
+          checklistResponse,
+        },
+      }));
+      setSelectedFlightId(flight?.id ?? null);
+      setFareModalOpen(flight?.id ?? null);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to load fare details right now."
+      );
+    } finally {
+      setPrefetchingFlightId(null);
+    }
   };
 
   useEffect(() => {
@@ -258,12 +303,13 @@ const TripCard = ({
                       {item.fare.totalFare}
                     </span>
                     <button
+                      disabled={prefetchingFlightId === item.id}
                       onClick={() => {
                         openFareModal(item);
                       }}
                       className={styles.viewBtn}
                     >
-                      VIEW FARES
+                      {prefetchingFlightId === item.id ? "LOADING..." : "VIEW FARES"}
                     </button>
                   </div>
                   <div className={styles.fareAmount}>
@@ -303,6 +349,7 @@ const TripCard = ({
           isOpen={fareModalOpen}
           onClose={() => setFareModalOpen(false)}
           flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
+          prefetchedData={prefetchedFareData[fareModalOpen] || null}
         />
       }
     </>

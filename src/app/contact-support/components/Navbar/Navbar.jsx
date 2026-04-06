@@ -6,6 +6,7 @@ import styles from "./Navbar.module.css";
 import ProfileModal from "@/app/home-page/components/homePage/modals/ProfileModal";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import BrandLogo from "@/shared/components/BrandLogo";
 const HELP_POPULAR_TOPICS = [
   "Cancel booking",
   "Refund status",
@@ -47,11 +48,11 @@ const Navbar = () => {
         {/* NAVBAR */}
         <div className={styles.navContainer}>
           <div className={styles.navbar}>
-            <img
+            <BrandLogo
               style={{ cursor: "pointer" }}
               onClick={() => router.push("/")}
-              src="/Logo.svg"
-              alt="Logo"
+              fallbackSrc="/Logo.svg"
+              alt="Target Tours Logo"
             />
 
             <div className={styles.navRight}>

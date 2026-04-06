@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import styles from "./Reservations.module.css";
 import ActiveReservations from "@/features/profile/components/ActiveReservations";
 import CorporateReservationCard from "./CorporateReservationCard";
+import api from "@/shared/services/axios";
 
 const reservationData = [
   {
@@ -55,29 +56,6 @@ const corporateReservationData = [
     image: "/images/hotel-thumbnail.jpg",
   },
 ];
-const flightReservationData = [
-  {
-    id: "173826",
-    hotel: "IndiGo (6E- 541)",
-    fromTo: "DEL - BLR",
-    checkIn: "7 Apr 2026, 06:00",
-    checkOut: "7 Apr 2026, 08:40",
-    guests: "4 Adults",
-    status: "CONFIRMED",
-    image: "/images/flightsReservations.png",
-  },
-  {
-    id: "173826",
-    hotel: "IndiGo (6E- 541)",
-    fromTo: "DEL - BLR",
-    checkIn: "17 Apr 2026, 06:00",
-    checkOut: "7 Apr 2026, 08:40",
-    guests: "4 Adults",
-    status: "PENDING",
-    image: "/images/flightsReservations.png",
-  },
-];
-
 const packageData = [
   {
     id: "173826",
@@ -133,13 +111,150 @@ const tabs = [
 ];
 
 const isCorporate = false;
+
+const extractBookingRows = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.bookings)) return payload.bookings;
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.bookings)) return payload.data.bookings;
+  if (Array.isArray(payload?.data?.results)) return payload.data.results;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+  return [];
+};
+
+const formatDateTime = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const dateLabel = date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const timeLabel = date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return `${dateLabel}, ${timeLabel}`;
+};
+
+const getPassengerSummary = (item) => {
+  const passengers =
+    item?.passengers ||
+    item?.data?.passengers ||
+    item?.raw?.Pax ||
+    [];
+
+  if (Array.isArray(passengers) && passengers.length > 0) {
+    const counts = passengers.reduce((acc, passenger) => {
+      const type = String(
+        passenger?.type || passenger?.PTC || passenger?.pax_type || "ADT"
+      ).toUpperCase();
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(counts)
+      .map(([type, count]) => {
+        const label =
+          type === "ADT" ? "Adult" : type === "CHD" ? "Child" : type === "INF" ? "Infant" : type;
+        return `${count} ${label}${count > 1 ? "s" : ""}`;
+      })
+      .join(", ");
+  }
+
+  const adults = Number(item?.adults || item?.ADT || item?.raw?.ADT || 0);
+  const children = Number(item?.children || item?.CHD || item?.raw?.CHD || 0);
+  const infants = Number(item?.infants || item?.INF || item?.raw?.INF || 0);
+  const labels = [
+    adults ? `${adults} Adult${adults > 1 ? "s" : ""}` : "",
+    children ? `${children} Child${children > 1 ? "ren" : ""}` : "",
+    infants ? `${infants} Infant${infants > 1 ? "s" : ""}` : "",
+  ].filter(Boolean);
+  return labels.join(", ") || "N/A";
+};
+
+const mapFlightReservation = (item, index) => {
+  const airline = item?.airline || item?.flight?.airline || item?.carrier || "Flight";
+  const flightNo = String(
+    item?.flight_no || item?.flightNo || item?.flight_number || item?.raw?.FlightNo || ""
+  ).trim();
+  const fromCode = String(item?.from || item?.origin || item?.from_code || item?.raw?.From || "").toUpperCase();
+  const toCode = String(item?.to || item?.destination || item?.to_code || item?.raw?.To || "").toUpperCase();
+  const rawStatus = String(
+    item?.status || item?.booking_status || item?.payment_status || "PENDING"
+  ).toUpperCase();
+  const status =
+    rawStatus === "TO0" || rawStatus === "CONFIRMED" || rawStatus === "T00"
+      ? "CONFIRMED"
+      : rawStatus === "I8" || rawStatus === "INITIATED"
+        ? "PENDING"
+        : rawStatus;
+
+  return {
+    id: String(item?.booking_id || item?.id || item?.reference_id || index + 1),
+    hotel: flightNo ? `${airline} (${flightNo})` : airline,
+    fromTo: `${fromCode || "N/A"} - ${toCode || "N/A"}`,
+    checkIn: formatDateTime(item?.departure || item?.depart_at || item?.onward_date),
+    checkOut: formatDateTime(item?.arrival || item?.arrive_at || item?.return_date),
+    guests: getPassengerSummary(item),
+    status,
+    image: "/images/flightsReservations.png",
+  };
+};
+
 export default function Reservations({
   onCheckDetails,
   activeTab,
   setActiveTab,
 }) {
-  // const [activeTab, setActiveTab] = useState("HOTEL BOOKING");
-  // const { setMobileTitle, mobileTile } = useProfile();
+  const [flightReservationData, setFlightReservationData] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadFlightBookings = async () => {
+      try {
+        const response = await api.get("/bookings", {
+          params: {
+            type: "flight,package",
+            domain: "localhost:1337",
+            page: 1,
+            per_page: 1,
+          },
+        });
+
+        if (ignore) return;
+
+        const rows = extractBookingRows(response?.data)
+          .filter((item) => {
+            const type = String(
+              item?.type || item?.booking_type || item?.service_type || ""
+            ).toLowerCase();
+            return !type || type.includes("flight") || type === "flt";
+          })
+          .map(mapFlightReservation);
+
+        setFlightReservationData(rows);
+      } catch (error) {
+        if (!ignore) {
+          setFlightReservationData([]);
+        }
+      }
+    };
+
+    loadFlightBookings();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const allTabFlightData = useMemo(() => flightReservationData, [flightReservationData]);
+
   return (
     <>
       <section className={styles.container}>
@@ -280,7 +395,7 @@ export default function Reservations({
                   </div>
                 </article>
               ))}{" "}
-              {flightReservationData.map((item, index) => (
+              {allTabFlightData.map((item, index) => (
                 <article key={index} className={styles.card}>
                   <div className={styles.cardMain}>
                     <div className={styles.imageWrapper}>

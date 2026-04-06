@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
+import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = () => {
   const { isLoggedIn, profile: userProfile } = useAuth();
 
@@ -25,11 +26,11 @@ const Navbar = () => {
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
-          <img
+          <BrandLogo
             onClick={() => router.push("/")}
             style={{ cursor: "pointer" }}
-            src="./Logo.svg"
-            alt=""
+            fallbackSrc="/Logo.svg"
+            alt="Target Tours Logo"
           />
           <div className={`${styles.navRight} flex gap-3`}>
             {isMounted && (

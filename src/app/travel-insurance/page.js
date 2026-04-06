@@ -11,6 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
+import BrandLogo from "@/shared/components/BrandLogo";
 const page = () => {
   const { isLoggedIn, profile: userProfile } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,7 +29,7 @@ const page = () => {
           <div
             className={`${styles.navbar}  w-full flex  justify-between items-center`}
           >
-            <img src="./Logo.svg" alt="" />
+            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
             <div className={`${styles.navRight} flex gap-3`}>
               <button
                 className={`${styles.glass_button} ${styles.downloadBtn}`}
