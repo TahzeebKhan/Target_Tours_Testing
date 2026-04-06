@@ -20,7 +20,10 @@ const HotelGridView = ({
       transition={{ duration: 0.55, ease: "easeInOut" }}
     >
       {tourData.map((item, index) => (
-        <div className={styles.gridCard}>
+        <div
+          key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}
+          className={styles.gridCard}
+        >
           <div className={styles.gridCardImage}>
             <img className={styles.ListViewCardImage} src="/hotelList/hotelCardImg.png" alt="" />
             <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
@@ -89,7 +92,7 @@ const HotelGridView = ({
                     <span>•</span>
                   </div>
                   <div className={styles.featureItem}>
-                    <img src="" alt="" />
+                    <img src="/icons/Mixer.svg" alt="mixer" />
                     <p>Mixer</p>
                   </div>
                 </div>

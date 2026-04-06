@@ -73,7 +73,12 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
   };
 };
 
-const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
+const FareComparisonModalRoundTrip = ({
+  isOpen,
+  onClose,
+  flightData,
+  prefetchedData = null,
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();
@@ -101,23 +106,28 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
 
     setIsSubmitting(true);
     try {
-      const priceResponse = await getFlightPrice(priceRequest);
-      const checklistTui =
-        priceResponse?.data?.raw?.TUI ||
-        priceResponse?.raw?.TUI ||
-        priceResponse?.data?.tui ||
-        priceResponse?.data?.TUI ||
-        priceResponse?.tui ||
-        priceResponse?.TUI;
+      const priceResponse =
+        prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
+      const checklistResponse = prefetchedData?.checklistResponse || null;
 
-      if (checklistTui) {
-        await getFlightTravelChecklist({
-          TUI: checklistTui,
-          ClientID:
-            flightData?.booking?.clientId ||
-            priceRequest?.ClientID ||
-            "FVI6V120g22Ei5ztGK0FIQ==",
-        });
+      if (!checklistResponse) {
+        const checklistTui =
+          priceResponse?.data?.raw?.TUI ||
+          priceResponse?.raw?.TUI ||
+          priceResponse?.data?.tui ||
+          priceResponse?.data?.TUI ||
+          priceResponse?.tui ||
+          priceResponse?.TUI;
+
+        if (checklistTui) {
+          await getFlightTravelChecklist({
+            TUI: checklistTui,
+            ClientID:
+              flightData?.booking?.clientId ||
+              priceRequest?.ClientID ||
+              "FVI6V120g22Ei5ztGK0FIQ==",
+          });
+        }
       }
       const nextSession = {
         selectedFlight: flightData,
@@ -144,7 +154,7 @@ const FareComparisonModalRoundTrip = ({ isOpen, onClose, flightData }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [flightData, router, searchParams]);
+  }, [flightData, prefetchedData, router, searchParams]);
 
   useEffect(() => {
     if (!pendingFare || !isLoggedIn) return;

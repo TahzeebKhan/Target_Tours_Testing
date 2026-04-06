@@ -1,38 +1,90 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import styles from "./SignupPopup.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
+import { toast } from "react-toastify";
+import BrandLogo from "@/shared/components/BrandLogo";
 
 import "swiper/css";
 import "swiper/css/pagination";
 
 export default function SignupPopup({ onNavigate, onClose }) {
+  const OTP_RESEND_SECONDS = 30;
+  const [isPortalReady, setIsPortalReady] = useState(false);
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [otpVerifyLoading, setOtpVerifyLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    setIsPortalReady(true);
     return () => {
       document.body.style.overflow = "";
     };
   }, []);
 
+  useEffect(() => {
+    if (!otpSent || resendCountdown <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setResendCountdown((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          return 0;
+        }
+
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [otpSent, resendCountdown]);
+
   const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const isPhoneValid = (value) => /^[6-9]\d{9}$/.test(value); // Indian 10-digit phone
 
+  const validateEmailOrPhone = () => {
+    if (!email.trim()) {
+      setEmailError("Email or phone number is required");
+      return false;
+    }
+
+    const isNumeric = /^\d+$/.test(email);
+
+    if (isNumeric) {
+      if (!isPhoneValid(email)) {
+        setEmailError("Enter a valid 10-digit phone number");
+        return false;
+      }
+    } else if (!isEmailValid(email)) {
+      setEmailError("Enter a valid email address");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
@@ -40,26 +92,10 @@ export default function SignupPopup({ onNavigate, onClose }) {
     let hasError = false;
 
     // 🔹 Email / Phone validation
-    if (!email.trim()) {
-      setEmailError("Email or phone number is required");
+    if (!validateEmailOrPhone()) {
       hasError = true;
-    } else {
-      const isNumeric = /^\d+$/.test(email);
-
-      if (isNumeric) {
-        if (!isPhoneValid(email)) {
-          setEmailError("Enter a valid 10-digit phone number");
-          hasError = true;
-        }
-      } else {
-        if (!isEmailValid(email)) {
-          setEmailError("Enter a valid email address");
-          hasError = true;
-        }
-      }
     }
 
-    // 🔹 Password validation
     if (!password.trim()) {
       setPasswordError("Password is required");
       hasError = true;
@@ -82,7 +118,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
     }
 
     try {
-      setLoading(true);
+      setRegisterLoading(true);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/register`,
@@ -105,18 +141,120 @@ export default function SignupPopup({ onNavigate, onClose }) {
         throw new Error(data?.error?.message || "Signup failed");
       }
 
-      // ✅ SUCCESS
-      console.log("Signup success:", data);
-      onNavigate("login"); // move to login screen
+      setOtpSent(true);
+      setOtp("");
+      setResendCountdown(OTP_RESEND_SECONDS);
+      setSuccessMessage(data?.message || "OTP sent successfully.");
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setRegisterLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setError("");
+    setSuccessMessage("");
+    setEmailError("");
+    setOtpError("");
+
+    let hasError = false;
+
+    if (!validateEmailOrPhone()) {
+      hasError = true;
+    }
+
+    if (!otp.trim()) {
+      setOtpError("OTP is required");
+      hasError = true;
+    } else if (!/^\d{4,6}$/.test(otp.trim())) {
+      setOtpError("Enter a valid OTP");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+      setOtpVerifyLoading(true);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            otp: otp.trim(),
+            password: password,
+            domain: process.env.NEXT_PUBLIC_DOMAIN,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || data?.message || "OTP verification failed");
+      }
+
+      setSuccessMessage(data?.message || "OTP verified successfully.");
+      toast.success(data?.message || "Successfully registered.");
+      onNavigate("login");
+    } catch (err) {
+      setOtpError(err.message);
+    } finally {
+      setOtpVerifyLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError("");
+    setSuccessMessage("");
+    setEmailError("");
+    setOtpError("");
+
+    if (!validateEmailOrPhone()) {
+      return;
+    }
+
+    try {
+      setResendLoading(true);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            domain: process.env.NEXT_PUBLIC_DOMAIN,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || data?.message || "Unable to resend OTP");
+      }
+
+      setOtp("");
+      setResendCountdown(OTP_RESEND_SECONDS);
+      setSuccessMessage(data?.message || "OTP resent successfully.");
+    } catch (err) {
+      setOtpError(err.message);
+    } finally {
+      setResendLoading(false);
     }
   };
 
   const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
-  return (
+  const signupModal = (
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.mainContainer}
@@ -159,8 +297,8 @@ export default function SignupPopup({ onNavigate, onClose }) {
           <div className={styles.formContent}>
             <header className={styles.header}>
               <div className={styles.logoContainer}>
-                <Image
-                  src="/images/tour-logo.svg"
+                <BrandLogo
+                  fallbackSrc="/images/tour-logo.svg"
                   alt="Target Tours Logo"
                   width={87}
                   height={73}
@@ -193,7 +331,13 @@ export default function SignupPopup({ onNavigate, onClose }) {
                     emailError ? styles.error : ""
                   }`}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setOtpSent(false);
+                    setOtp("");
+                    setOtpError("");
+                    setSuccessMessage("");
+                  }}
                 />
                 {emailError && (
                   <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
@@ -240,6 +384,46 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
               )}
 
+              {successMessage && (
+                <p className={styles.successText}>{successMessage}</p>
+              )}
+
+              {otpSent && (
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>OTP verification</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="Enter OTP"
+                    className={`${styles.input} ${
+                      otpError ? styles.error : ""
+                    }`}
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/[^\d]/g, "").slice(0, 6))
+                    }
+                  />
+                  <div className={styles.otpMetaRow}>
+                    <button
+                      type="button"
+                      className={styles.resendOtpButton}
+                      disabled={resendCountdown > 0 || resendLoading}
+                      onClick={handleResendOtp}
+                    >
+                      {resendLoading
+                        ? "Sending..."
+                        : resendCountdown > 0
+                          ? `Resend OTP in ${resendCountdown}s`
+                          : "Resend OTP"}
+                    </button>
+                  </div>
+                  {otpError && (
+                    <p style={{ color: "red", fontSize: "12px" }}>{otpError}</p>
+                  )}
+                </div>
+              )}
+
               <div className={styles.formOptions}>
                 <label className={styles.checkboxContainer}>
                   <input type="checkbox" className={styles.checkboxInput} />
@@ -250,13 +434,24 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 </label>
               </div>
 
-              <button
-                type="submit"
-                className={styles.signupButton}
-                disabled={loading}
-              >
-                {loading ? "SIGNING UP..." : "SIGN UP"}
-              </button>
+              {otpSent ? (
+                <button
+                  type="button"
+                  className={styles.signupButton}
+                  disabled={!email.trim() || otpVerifyLoading}
+                  onClick={handleVerifyOtp}
+                >
+                  {otpVerifyLoading ? "VERIFYING..." : "VERIFY OTP"}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className={styles.signupButton}
+                  disabled={registerLoading}
+                >
+                  {registerLoading ? "SENDING OTP..." : "SIGN UP"}
+                </button>
+              )}
             </form>
 
             <div className={styles.divider}>
@@ -295,4 +490,8 @@ export default function SignupPopup({ onNavigate, onClose }) {
       </div>
     </div>
   );
+
+  if (!isPortalReady) return null;
+
+  return createPortal(signupModal, document.body);
 }

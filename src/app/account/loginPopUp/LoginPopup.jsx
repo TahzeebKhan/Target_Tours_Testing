@@ -191,9 +191,11 @@
 import Image from "next/image";
 import styles from "./LoginPopup.module.css";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
+import BrandLogo from "@/shared/components/BrandLogo";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 
@@ -203,6 +205,7 @@ import "swiper/css/pagination";
 export default function LoginPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isPortalReady, setIsPortalReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -213,8 +216,8 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const { login } = useAuth();
 
   useEffect(() => {
-  
     document.body.style.overflow = "hidden";
+    setIsPortalReady(true);
     return () => {
       document.body.style.overflow = "";
     };
@@ -316,8 +319,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
     }
   };
 
-  if (corporateLogin)
-    return (
+  const corporateLoginModal = (
       <div className={styles.overlay} onClick={onClose}>
         <div
           className={styles.mainContainer}
@@ -360,8 +362,8 @@ export default function LoginPopup({ onNavigate, onClose }) {
             <div className={styles.formContent}>
               <header className={styles.header}>
                 <div className={styles.logoContainer}>
-                  <Image
-                    src="/images/tour-logo.svg"
+                  <BrandLogo
+                    fallbackSrc="/images/tour-logo.svg"
                     alt="Target Tours Logo"
                     width={87}
                     height={73}
@@ -493,7 +495,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
       </div>
     );
 
-  return (
+  const defaultLoginModal = (
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.mainContainer}
@@ -536,8 +538,8 @@ export default function LoginPopup({ onNavigate, onClose }) {
           <div className={styles.formContent}>
             <header className={styles.header}>
               <div className={styles.logoContainer}>
-                <Image
-                  src="/images/tour-logo.svg"
+                <BrandLogo
+                  fallbackSrc="/images/tour-logo.svg"
                   alt="Target Tours Logo"
                   width={87}
                   height={73}
@@ -662,5 +664,12 @@ export default function LoginPopup({ onNavigate, onClose }) {
         </section>
       </div>
     </div>
+  );
+
+  if (!isPortalReady) return null;
+
+  return createPortal(
+    corporateLogin ? corporateLoginModal : defaultLoginModal,
+    document.body
   );
 }

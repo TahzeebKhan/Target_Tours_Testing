@@ -706,12 +706,12 @@ const RoundTrip = ({
   const visibleFlights = resolvedFlightResults;
   const visibleTripCards = resolvedTripCards;
   const cheapestMeta = {
-    price: sortHighlights?.cheapest?.priceLabel || "₹ 8500",
-    duration: sortHighlights?.cheapest?.durationLabel || "01h 50m",
+    price: sortHighlights?.cheapest?.priceLabel || "N/A",
+    duration: sortHighlights?.cheapest?.durationLabel || "N/A",
   };
   const fastestMeta = {
-    price: sortHighlights?.fastest?.priceLabel || "₹ 8500",
-    duration: sortHighlights?.fastest?.durationLabel || "01h 50m",
+    price: sortHighlights?.fastest?.priceLabel || "N/A",
+    duration: sortHighlights?.fastest?.durationLabel || "N/A",
   };
   const resultsText = pagination
     ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`

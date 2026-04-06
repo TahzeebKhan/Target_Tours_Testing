@@ -432,12 +432,10 @@ const OnewayFlightBooking = ({
     price:
       sortHighlights?.cheapest?.priceLabel ||
       cheapestFlight?.fare?.pricePerAdult ||
-      "₹ 8500",
+      "N/A",
     duration:
       formatDurationText(sortHighlights?.cheapest?.durationLabel) ||
-      `${String(cheapestFlight?.duration?.hours ?? 0).padStart(2, "0")}h ${String(
-        cheapestFlight?.duration?.minutes ?? 0
-      ).padStart(2, "0")}m`,
+      renderDurationParts(cheapestFlight),
   };
 
   const fastestMeta = {
@@ -447,12 +445,10 @@ const OnewayFlightBooking = ({
     price:
       sortHighlights?.fastest?.priceLabel ||
       fastestFlight?.fare?.pricePerAdult ||
-      "₹ 8500",
+      "N/A",
     duration:
       formatDurationText(sortHighlights?.fastest?.durationLabel) ||
-      `${String(fastestFlight?.duration?.hours ?? 0).padStart(2, "0")}h ${String(
-        fastestFlight?.duration?.minutes ?? 0
-      ).padStart(2, "0")}m`,
+      renderDurationParts(fastestFlight),
   };
 
   const visibleFlights = resolvedFlightResults;

@@ -1,5 +1,6 @@
 "use client";
 import styles from "./Navbar.module.css";
+import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = () => {
   return (
     <>
@@ -8,7 +9,7 @@ const Navbar = () => {
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
-          <img src="./Logo.svg" alt="" />
+          <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
           <div className={`${styles.navRight} flex gap-3`}>
             <div className={styles.sessionExpires}>
               <img src="/icons/watchIcon.svg" alt="" />
