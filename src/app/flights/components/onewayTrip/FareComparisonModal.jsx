@@ -15,7 +15,158 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 
-const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
+const readNumber = (...values) => {
+    for (const value of values) {
+        const normalized =
+            typeof value === "string"
+                ? Number(value.replace(/[^\d.]/g, ""))
+                : Number(value);
+        if (Number.isFinite(normalized)) return normalized;
+    }
+    return null;
+};
+
+const pickValue = (...values) =>
+    values.find((value) => value !== undefined && value !== null && value !== "");
+
+const formatCurrency = (value) => {
+    const amount = readNumber(value);
+    if (amount === null) return "";
+    return `₹ ${amount.toLocaleString("en-IN")}`;
+};
+
+const getNestedArray = (payload, paths) => {
+    for (const path of paths) {
+        let current = payload;
+        for (const key of path) {
+            current = current?.[key];
+        }
+        if (Array.isArray(current) && current.length > 0) return current;
+    }
+    return [];
+};
+
+const DEFAULT_FARE_TEMPLATES = [
+    {
+        id: "saver",
+        name: "SAVER FARE",
+        price: "₹ 760,000",
+        pricePerAdult: "₹ 6,083",
+        isPremium: false,
+        baggage: {
+            cabin: "7 Kg Cabin Bag Allowance",
+            checkin: "15 Kg Check-in Bag Allowance",
+        },
+        changes: {
+            charges: "Change Charges Upto INR 2999",
+            cancellation: "Cancellation Charges Upto INR 4999",
+        },
+        addons: {
+            seats: "Chargeable Seats",
+            meals: "Chargeable Meals",
+        },
+    },
+    {
+        id: "flexi",
+        name: "FLEXI PLUS FARE",
+        price: "₹ 760,000",
+        pricePerAdult: "₹ 6,083",
+        isPremium: true,
+        baggage: {
+            cabin: "7 Kg Cabin Bag Allowance",
+            checkin: "15 Kg Check-in Bag Allowance",
+        },
+        changes: {
+            charges: "Change Charges Upto INR 3499",
+            cancellation: "Cancellation Charges Upto INR 3499",
+        },
+        addons: {
+            seats: "Complimentary XL Bomb Legroom Seat",
+            meals: "Complimentary Standard Seat",
+        },
+    },
+    {
+        id: "premium",
+        name: "PREMIUM FARE",
+        price: "₹ 760,000",
+        pricePerAdult: "₹ 6,083",
+        isPremium: false,
+        baggage: {
+            cabin: "7 Kg Cabin Bag Allowance",
+            checkin: "15 Kg Check-in Bag Allowance",
+        },
+        changes: {
+            charges: "Change Charges Upto INR 2999",
+            cancellation: "Cancellation Charges Upto INR 4999",
+        },
+        addons: {
+            seats: "Complimentary XL Bomb Legroom Seat",
+            meals: "Chargeable Meals",
+        },
+    },
+];
+
+export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
+    const resolvedPrefetchedData = prefetchedData || flightData?.prefetchedFareData || {};
+    const priceResponse = resolvedPrefetchedData?.priceResponse || {};
+    const pricePayload = priceResponse?.data || priceResponse || {};
+    const fareBreakdown = getNestedArray(pricePayload, [
+        ["fare_breakdown"],
+    ]);
+    const onwardFareBreakdown =
+        fareBreakdown.find(
+            (item) => String(item?.journey_type || "").toUpperCase() === "ONWARD"
+        ) ||
+        fareBreakdown[0] ||
+        {};
+    const firstJourneyPrice = readNumber(
+        onwardFareBreakdown?.total_journey_price,
+        onwardFareBreakdown?.totalJourneyPrice
+    );
+    const rootTotal = readNumber(firstJourneyPrice);
+    const rootPerAdult = readNumber(
+        onwardFareBreakdown?.ADT?.per_person,
+        onwardFareBreakdown?.ADT?.perPerson
+    );
+    const safeAdults = Math.max(Number(adults || 1), 1);
+    const sourceItems = DEFAULT_FARE_TEMPLATES;
+
+    return sourceItems.map((item, index) => {
+        const template = DEFAULT_FARE_TEMPLATES[index] || DEFAULT_FARE_TEMPLATES[0];
+        const shouldUseDynamicPrice = index === 0;
+        const total = shouldUseDynamicPrice ? readNumber(rootTotal) : null;
+        const perAdult = shouldUseDynamicPrice
+            ? readNumber(rootPerAdult, total !== null ? Math.round(total / safeAdults) : null)
+            : null;
+
+        return {
+            ...template,
+            id: String(pickValue(item?.id, item?.ID, item?.fare_id, item?.FareID, template.id, index)),
+            name: String(
+                pickValue(
+                    item?.name,
+                    item?.Name,
+                    item?.fare_name,
+                    item?.FareName,
+                    item?.fareType,
+                    item?.FareType,
+                    template.name
+                )
+            ).toUpperCase(),
+            price: shouldUseDynamicPrice
+                ? formatCurrency(total) || template.price || flightData?.fare?.totalFare || "N/A"
+                : template.price,
+            pricePerAdult: shouldUseDynamicPrice
+                ? formatCurrency(perAdult) ||
+                template.pricePerAdult ||
+                flightData?.fare?.pricePerAdult ||
+                "N/A"
+                : template.pricePerAdult,
+        };
+    });
+};
+
+const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = null }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { isLoggedIn, loading } = useAuth();
@@ -38,7 +189,8 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
         setIsSubmitting(true);
         try {
-            const priceResponse = await getFlightPrice(priceRequest);
+            const priceResponse =
+                prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
             const checklistTui =
                 priceResponse?.data?.raw?.TUI ||
                 priceResponse?.raw?.TUI ||
@@ -47,21 +199,21 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
                 priceResponse?.tui ||
                 priceResponse?.TUI;
 
-            if (checklistTui) {
-                await getFlightTravelChecklist({
+            const checklistResponse = prefetchedData?.checklistResponse ||
+                (checklistTui ? await getFlightTravelChecklist({
                     TUI: checklistTui,
                     ClientID:
                         flightData?.booking?.clientId ||
                         priceRequest?.ClientID ||
                         "FVI6V120g22Ei5ztGK0FIQ==",
-                });
-            }
+                }) : null);
             const nextSession = {
                 selectedFlight: flightData,
                 selectedFare,
                 routeContext,
                 priceRequest,
                 priceResponse,
+                checklistResponse,
                 ssrRequest: null,
                 ssrResponse: null,
             };
@@ -81,7 +233,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [flightData, router, searchParams]);
+    }, [flightData, prefetchedData, router, searchParams]);
 
     useEffect(() => {
         if (!pendingFare || !isLoggedIn) return;
@@ -103,65 +255,11 @@ const FareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
     if (!isOpen) return null;
 
-    const fareOptions = [
-        {
-            id: "saver",
-            name: "SAVER FARE",
-            price: "₹ 760,000",
-            pricePerAdult: "₹ 6,083",
-            isPremium: false,
-            baggage: {
-                cabin: "7 Kg Cabin Bag Allowance",
-                checkin: "15 Kg Check-in Bag Allowance",
-            },
-            changes: {
-                charges: "Change Charges Upto INR 2999",
-                cancellation: "Cancellation Charges Upto INR 4999",
-            },
-            addons: {
-                seats: "Chargeable Seats",
-                meals: "Chargeable Meals",
-            },
-        },
-        {
-            id: "flexi",
-            name: "FLEXI PLUS FARE",
-            price: "₹ 760,000",
-            pricePerAdult: "₹ 6,083",
-            isPremium: true,
-            baggage: {
-                cabin: "7 Kg Cabin Bag Allowance",
-                checkin: "15 Kg Check-in Bag Allowance",
-            },
-            changes: {
-                charges: "Change Charges Upto INR 3499",
-                cancellation: "Cancellation Charges Upto INR 3499",
-            },
-            addons: {
-                seats: "Complimentary XL Bomb Legroom Seat",
-                meals: "Complimentary Standard Seat",
-            },
-        },
-        {
-            id: "premium",
-            name: "PREMIUM FARE",
-            price: "₹ 760,000",
-            pricePerAdult: "₹ 6,083",
-            isPremium: false,
-            baggage: {
-                cabin: "7 Kg Cabin Bag Allowance",
-                checkin: "15 Kg Check-in Bag Allowance",
-            },
-            changes: {
-                charges: "Change Charges Upto INR 2999",
-                cancellation: "Cancellation Charges Upto INR 4999",
-            },
-            addons: {
-                seats: "Complimentary XL Bomb Legroom Seat",
-                meals: "Chargeable Meals",
-            },
-        },
-    ];
+    const fareOptions = buildFareOptions({
+        flightData,
+        prefetchedData,
+        adults: searchParams?.get("adults") || 1,
+    });
 
     const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 
