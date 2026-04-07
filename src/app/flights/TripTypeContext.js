@@ -16,18 +16,6 @@ const parseCodeFromLabel = (label = "") => {
   return match ? match[1].trim().toUpperCase() : "";
 };
 
-const CITY_BY_CODE = {
-  BLR: "Bengaluru",
-  BOM: "Mumbai",
-  CCU: "Kolkata",
-  CGK: "Jakarta",
-  DEL: "New Delhi",
-  HKT: "Phuket City",
-  MAA: "Chennai",
-  PNQ: "Pune",
-  SIN: "Singapore",
-};
-
 const getRouteLabel = (label = "", code = "") => {
   const normalizedCode = String(code || "").trim().toUpperCase();
   const currentLabel = String(label || "").trim();
@@ -39,10 +27,7 @@ const getRouteLabel = (label = "", code = "") => {
     return currentLabel;
   }
 
-  const city = CITY_BY_CODE[normalizedCode];
-  if (city) return `${city} (${normalizedCode})`;
-
-  return currentLabel || normalizedCode;
+  return currentLabel ? `${currentLabel} (${normalizedCode})` : normalizedCode;
 };
 
 const getSyncedRoute = ({ from = "", to = "", fromCode = "", toCode = "" }) => ({

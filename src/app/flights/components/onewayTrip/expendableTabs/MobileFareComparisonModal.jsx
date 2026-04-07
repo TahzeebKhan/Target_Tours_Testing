@@ -4,6 +4,7 @@ import styles from "./MobileFareComparisonModal.module.css";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSelectedFlightSummary } from "../fareComparisonUtils";
+import { buildFareOptions } from "../FareComparisonModal";
 import { toast } from "react-toastify";
 import {
   getFlightPrice,
@@ -16,7 +17,7 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 
-const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
+const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = null }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();
@@ -39,7 +40,8 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
     setIsSubmitting(true);
     try {
-      const priceResponse = await getFlightPrice(priceRequest);
+      const priceResponse =
+        prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
       const checklistTui =
         priceResponse?.data?.raw?.TUI ||
         priceResponse?.raw?.TUI ||
@@ -48,21 +50,21 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
         priceResponse?.tui ||
         priceResponse?.TUI;
 
-      if (checklistTui) {
-        await getFlightTravelChecklist({
+      const checklistResponse = prefetchedData?.checklistResponse ||
+        (checklistTui ? await getFlightTravelChecklist({
           TUI: checklistTui,
           ClientID:
             flightData?.booking?.clientId ||
             priceRequest?.ClientID ||
             "FVI6V120g22Ei5ztGK0FIQ==",
-        });
-      }
+        }) : null);
       const nextSession = {
         selectedFlight: flightData,
         selectedFare,
         routeContext,
         priceRequest,
         priceResponse,
+        checklistResponse,
         ssrRequest: null,
         ssrResponse: null,
       };
@@ -104,65 +106,11 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData }) => {
 
   if (!isOpen) return null;
 
-  const fareOptions = [
-    {
-      id: "saver",
-      name: "SAVER FARE",
-      price: "₹ 760,000",
-      pricePerAdult: "₹ 6,083",
-      isPremium: false,
-      baggage: {
-        cabin: "7 Kg Cabin Bag Allowance",
-        checkin: "15 Kg Check-in Bag Allowance",
-      },
-      changes: {
-        charges: "Change Charges Upto INR 2999",
-        cancellation: "Cancellation Charges Upto INR 4999",
-      },
-      addons: {
-        seats: "Chargeable Seats",
-        meals: "Chargeable Meals",
-      },
-    },
-    {
-      id: "flexi",
-      name: "FLEXI PLUS FARE",
-      price: "₹ 760,000",
-      pricePerAdult: "₹ 6,083",
-      isPremium: true,
-      baggage: {
-        cabin: "7 Kg Cabin Bag Allowance",
-        checkin: "15 Kg Check-in Bag Allowance",
-      },
-      changes: {
-        charges: "Change Charges Upto INR 3499",
-        cancellation: "Cancellation Charges Upto INR 3499",
-      },
-      addons: {
-        seats: "Complimentary XL Bomb Legroom Seat",
-        meals: "Complimentary Standard Seat",
-      },
-    },
-    {
-      id: "premium",
-      name: "PREMIUM FARE",
-      price: "₹ 760,000",
-      pricePerAdult: "₹ 6,083",
-      isPremium: false,
-      baggage: {
-        cabin: "7 Kg Cabin Bag Allowance",
-        checkin: "15 Kg Check-in Bag Allowance",
-      },
-      changes: {
-        charges: "Change Charges Upto INR 2999",
-        cancellation: "Cancellation Charges Upto INR 4999",
-      },
-      addons: {
-        seats: "Complimentary XL Bomb Legroom Seat",
-        meals: "Chargeable Meals",
-      },
-    },
-  ];
+  const fareOptions = buildFareOptions({
+    flightData,
+    prefetchedData,
+    adults: searchParams?.get("adults") || 1,
+  });
 
   const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 

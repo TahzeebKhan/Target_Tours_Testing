@@ -21,6 +21,10 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
   const handleLogoClick = () => {
     router.push("/");
   };
+  const openLoginModal = () => {
+    setAuthView("login");
+    setShowLogin(true);
+  };
   useEffect(() => {
     setIsmounted(true);
   }, []);
@@ -52,7 +56,8 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
                 {!isLoggedIn ? (
                   <button
                     className={styles.signInBtn}
-                    onClick={() => router.push("/?openLogin=true")}
+                    type="button"
+                    onClick={openLoginModal}
                   >
                     Sign In
                   </button>
