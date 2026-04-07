@@ -20,6 +20,7 @@ const FlightSearchMobile = ({
   to,
   setTo,
   setToCode,
+  isSearchLoading = false,
   departureDate,
   setDepartureDate,
   returnDate,
@@ -266,8 +267,12 @@ const FlightSearchMobile = ({
               )}
             </div>
 
-            <button onClick={handleSearch} className={styles.searchBtna}>
-              SEARCH
+            <button
+              onClick={handleSearch}
+              className={styles.searchBtna}
+              disabled={isSearchLoading}
+            >
+              {isSearchLoading ? "SEARCHING..." : "SEARCH"}
             </button>
           </>
         )}
@@ -408,8 +413,12 @@ const FlightSearchMobile = ({
               )}
             </div>
 
-            <button onClick={handleSearch} className={styles.searchBtna}>
-              SEARCH
+            <button
+              onClick={handleSearch}
+              className={styles.searchBtna}
+              disabled={isSearchLoading}
+            >
+              {isSearchLoading ? "SEARCHING..." : "SEARCH"}
             </button>
           </>
         )}
@@ -446,6 +455,7 @@ const FlightSearchMobile = ({
                 multiFlights,
               })
             }
+            isSearchLoading={isSearchLoading}
             formatDate={formatDate}
           />
         )}

@@ -14,6 +14,7 @@ import {
 } from "@/features/flights/utils/flightBookingSession";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const readNumber = (...values) => {
     for (const value of values) {
@@ -172,6 +173,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
     const { isLoggedIn, loading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
+    const [authView, setAuthView] = useState("login");
     const [pendingFare, setPendingFare] = useState(null);
     
     const performBookNow = useCallback(async (selectedFare) => {
@@ -247,6 +249,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
         if (loading) return;
         if (!isLoggedIn) {
             setPendingFare(selectedFare);
+            setAuthView("login");
             setShowLogin(true);
             return;
         }
@@ -436,13 +439,22 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                     ))}
                 </div>
             </div>
-            {showLogin && (
+            {showLogin && authView === "login" && (
                 <LoginPopup
                     onClose={() => {
                         setShowLogin(false);
                         setPendingFare(null);
                     }}
-                    onNavigate={() => {}}
+                    onNavigate={setAuthView}
+                />
+            )}
+            {showLogin && authView === "signup" && (
+                <SignupPopup
+                    onClose={() => {
+                        setShowLogin(false);
+                        setPendingFare(null);
+                    }}
+                    onNavigate={setAuthView}
                 />
             )}
         </div>

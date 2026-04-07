@@ -190,7 +190,7 @@
 "use client";
 import Image from "next/image";
 import styles from "./LoginPopup.module.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -201,6 +201,9 @@ import { Pagination, Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
+
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export default function LoginPopup({ onNavigate, onClose }) {
   const [email, setEmail] = useState("");
@@ -215,7 +218,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
 
   const { login } = useAuth();
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     document.body.style.overflow = "hidden";
     setIsPortalReady(true);
     return () => {

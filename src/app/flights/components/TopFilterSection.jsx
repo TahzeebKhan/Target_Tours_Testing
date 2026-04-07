@@ -101,6 +101,7 @@ const TopFilterSection = ({
     endDate,
     setEndDate,
     handleSearch,
+    isSearchSubmitting,
   } = useTripType();
   const [openCalendarFor, setOpenCalendarFor] = useState(null);
   const [directOnly, setDirectOnly] = useState(true);
@@ -113,6 +114,23 @@ const TopFilterSection = ({
 
   // Direction for flight trip-type animation (round / oneway / multi)
   const [flightDirection, setFlightDirection] = useState("right");
+  const renderSearchButtonContent = () =>
+    isSearchSubmitting ? (
+      <span className={styles.searchSpinner}></span>
+    ) : (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
+          fill="#000033"
+        />
+      </svg>
+    );
 
   const [bookingType, setBookingType] = useState("flight");
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -872,19 +890,14 @@ const TopFilterSection = ({
                     </div>
 
                     {tripType !== "multi" && (
-                      <div className={styles.searchBtn} onClick={handleSearch}>
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
-                            fill="#000033"
-                          />
-                        </svg>
+                      <div
+                        className={`${styles.searchBtn} ${
+                          isSearchSubmitting ? styles.searchBtnLoading : ""
+                        }`}
+                        onClick={handleSearch}
+                        aria-disabled={isSearchSubmitting}
+                      >
+                        {renderSearchButtonContent()}
                       </div>
                     )}
                   </div>
@@ -1050,21 +1063,13 @@ const TopFilterSection = ({
                           </div>
                         </div>
                         <div
-                          className={styles.searchBtn}
+                          className={`${styles.searchBtn} ${
+                            isSearchSubmitting ? styles.searchBtnLoading : ""
+                          }`}
                           onClick={handleSearch}
+                          aria-disabled={isSearchSubmitting}
                         >
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M16.9994 16.2923L20.8536 20.1464C21.0488 20.3417 21.0488 20.6583 20.8536 20.8536C20.6583 21.0488 20.3417 21.0488 20.1464 20.8536L16.2923 16.9994C14.882 18.2445 13.0292 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 13.0292 18.2445 14.882 16.9994 16.2923ZM11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z"
-                              fill="#000033"
-                            />
-                          </svg>
+                          {renderSearchButtonContent()}
                         </div>
                       </div>
                     </div>

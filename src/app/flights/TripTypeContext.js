@@ -108,6 +108,7 @@ export function TripTypeProvider({ children }) {
     },
     travelClass: getParam("travelClass") || "ECONOMY",
   });
+  const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
 
   // Effect to update state when URL params change (e.g. on navigation)
   useEffect(() => {
@@ -176,6 +177,10 @@ export function TripTypeProvider({ children }) {
 
 
   const handleSearch = async () => {
+    if (isSearchSubmitting) return;
+
+    setIsSearchSubmitting(true);
+
     const syncedRoute = getSyncedRoute({
       from: from || committedSearches?.[tripType]?.from || "Jakarta (CGK)",
       to: to || committedSearches?.[tripType]?.to || "Singapore (SIN)",
@@ -188,6 +193,7 @@ export function TripTypeProvider({ children }) {
     const normalizedToCode = syncedRoute.toCode;
 
     if (isSamePlace(fallbackFrom, fallbackTo, normalizedFromCode, normalizedToCode)) {
+      setIsSearchSubmitting(false);
       toast.error("Departure and destination cannot be the same.");
       return;
     }
@@ -264,6 +270,10 @@ export function TripTypeProvider({ children }) {
       queryKey: ["search-flights"],
       refetchType: "active",
     });
+
+    window.setTimeout(() => {
+      setIsSearchSubmitting(false);
+    }, 1200);
   };
 
   return (
@@ -290,6 +300,7 @@ export function TripTypeProvider({ children }) {
         committedSearches,
         committedRequest,
         handleSearch,
+        isSearchSubmitting,
       }}
     >
       {children}

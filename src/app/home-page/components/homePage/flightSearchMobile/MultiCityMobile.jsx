@@ -20,6 +20,7 @@ const MultiCityMobile = ({
   passengerText,
   travelClass,
   onSearch,
+  isSearchLoading = false,
   formatDate,
 }) => {
   // ✅ LOCAL swap function (does NOT touch parent)
@@ -123,9 +124,13 @@ const MultiCityMobile = ({
       </div>
 
       {/* SEARCH */}
-      <button className={styles.searchButton} onClick={onSearch}>
+      <button
+        className={styles.searchButton}
+        onClick={onSearch}
+        disabled={isSearchLoading}
+      >
         <Search size={20} className={styles.searchIcon} />
-        SEARCH FLIGHT
+        {isSearchLoading ? "SEARCHING..." : "SEARCH FLIGHT"}
       </button>
     </div>
   );

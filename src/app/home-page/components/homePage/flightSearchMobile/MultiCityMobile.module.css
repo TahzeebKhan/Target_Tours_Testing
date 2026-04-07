@@ -122,6 +122,11 @@
     height: 48px;
 }
 
+.searchButton:disabled {
+    cursor: wait;
+    opacity: 0.8;
+}
+
 @media(max-width: 600px) {
     .swapCircle {
         left: 48%;
