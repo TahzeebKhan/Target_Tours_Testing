@@ -16,6 +16,7 @@ import {
 } from "@/features/flights/utils/flightBookingSession";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = null }) => {
   const router = useRouter();
@@ -23,6 +24,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
   const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const [pendingFare, setPendingFare] = useState(null);
 
   const performBookNow = useCallback(async (selectedFare) => {
@@ -98,6 +100,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
     if (loading) return;
     if (!isLoggedIn) {
       setPendingFare(selectedFare);
+      setAuthView("login");
       setShowLogin(true);
       return;
     }
@@ -286,13 +289,22 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
             </div>
           ))}
         </div>
-        {showLogin && (
+        {showLogin && authView === "login" && (
           <LoginPopup
             onClose={() => {
               setShowLogin(false);
               setPendingFare(null);
             }}
-            onNavigate={() => {}}
+            onNavigate={setAuthView}
+          />
+        )}
+        {showLogin && authView === "signup" && (
+          <SignupPopup
+            onClose={() => {
+              setShowLogin(false);
+              setPendingFare(null);
+            }}
+            onNavigate={setAuthView}
           />
         )}
       </div>

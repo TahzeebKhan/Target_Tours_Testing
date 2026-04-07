@@ -5,13 +5,13 @@ import Navbar from "@/app/flights/Navbar";
 import DateField from "@/app/home-page/components/homePage/DateField";
 import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
-import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import HotelDateCalendarModal from "@/shared/components/hotelCalendar/HotelDateCalendarModal";
 import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
 import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
+import HotelDropDown from "@/shared/components/hotelDropDown/HotelDropDown";
 
 const TourHeroSection = () => {
   const searchParams = useSearchParams();
@@ -35,17 +35,19 @@ const TourHeroSection = () => {
 
   // Ye lines add karein:
   const [travellerOpen, setTravellerOpen] = useState(false);
-  const [passengers, setPassengers] = useState({
-    adult: 1,
-    child: 0,
-    infant: 0,
+  const [hotelGuestOpen, setHotelGuestOpen] = useState({
+    room: 1,
+    adults: 1,
+    children: 0,
+    pets: 0,
   });
 
   const [travelClass, setTravelClass] = useState("Economy");
 
   // Ye line bhi add karein:
-  const totalPassengers =
-    passengers.adult + passengers.child + passengers.infant;
+  const totalHotelGuests =
+    hotelGuestOpen.adults + hotelGuestOpen.children + hotelGuestOpen.pets;
+  const totalHotelRooms = hotelGuestOpen.room;
 
   // Truncate function:
   const truncate = (str, maxLength) => {
@@ -311,7 +313,7 @@ const TourHeroSection = () => {
               <div className={styles.iconCont}>
                 <div className={styles.contant}>
                   {truncate(
-                    `${totalPassengers} Adult${totalPassengers > 1 ? "s" : ""}, ${totalPassengers} Room${totalPassengers > 1 ? "s" : ""}`,
+                    `${totalHotelGuests} Guest${totalHotelGuests === 1 ? "" : "s"}, ${totalHotelRooms} Room${totalHotelRooms === 1 ? "" : "s"}`,
                     20,
                   )}
                 </div>
@@ -323,11 +325,11 @@ const TourHeroSection = () => {
                 />
               </div>
 
-              <PassengerClassSelector
+              <HotelDropDown
                 open={travellerOpen}
                 setOpen={setTravellerOpen}
-                passengers={passengers}
-                setPassengers={setPassengers}
+                passengers={hotelGuestOpen}
+                setPassengers={setHotelGuestOpen}
                 travelClass={travelClass}
                 setTravelClass={setTravelClass}
               />

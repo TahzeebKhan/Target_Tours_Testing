@@ -1,13 +1,206 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styles from './Footer.module.css'
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { fetchFooterPublic } from '@/shared/services/footerPublic';
+
+const fallbackFooter = {
+    logo: "/images/footerIcon.png",
+    description: "N/A",
+    copyright: "N/A",
+};
+
+const fallbackSections = [
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#" }],
+    },
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#" }],
+    },
+];
+
+const fallbackLinkSections = [
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#" }],
+    },
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#" }],
+    },
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#" }],
+    },
+    {
+        title: "N/A",
+        links: [{ label: "N/A", url: "#", icon: "/icons/address.svg" }],
+    },
+];
+
+const toAbsoluteUrl = (value) => {
+    const url = String(value || "").trim();
+    if (!url) return "";
+    if (/^(https?:)?\/\//i.test(url) || url.startsWith("/images/") || url.startsWith("/icons/")) return url;
+
+    const backendUrl = String(process.env.NEXT_PUBLIC_BACKEND_URL || "").trim();
+    return backendUrl ? `${backendUrl}${url.startsWith("/") ? "" : "/"}${url}` : url;
+};
+
+const normalizeLink = (link) => {
+    if (typeof link === "string") return { label: link, url: "" };
+
+    return {
+        label: link?.label || link?.title || link?.text || link?.name || "",
+        url: link?.url || link?.href || link?.link || (link?.id ? `/tour-details?id=${link.id}` : ""),
+        icon: toAbsoluteUrl(link?.icon?.url || link?.icon),
+    };
+};
+
+const getSectionLinks = (section) => {
+    const links =
+    section?.links ||
+    section?.items ||
+    section?.children ||
+    section?.holiday_packages ||
+    section?.packages ||
+    section?.destinations ||
+    section?.experiences ||
+    [];
+
+    return Array.isArray(links) ? links : [];
+};
+
+const normalizeSections = (sections) => {
+    if (!Array.isArray(sections)) return [];
+
+    return sections
+        .map((section) => ({
+            title: section?.title || section?.heading || section?.name || "",
+            links: getSectionLinks(section)
+                .map(normalizeLink)
+                .filter((link) => link.label),
+        }))
+        .filter((section) => section.title && section.links.length);
+};
+
+const getFooterFromResponse = (response) => response?.footer || response?.data?.footer || response?.data || response || {};
+
+const getFooterStorageKey = (domain) => `footer-public:${domain || "default"}`;
+
+const readFooterCache = (domain) => {
+    if (typeof window === "undefined") return null;
+
+    try {
+        const cachedValue = window.localStorage.getItem(getFooterStorageKey(domain));
+        return cachedValue ? JSON.parse(cachedValue) : null;
+    } catch (error) {
+        console.warn("Failed to read footer cache", error);
+        return null;
+    }
+};
+
+const writeFooterCache = (domain, data) => {
+    if (typeof window === "undefined" || !data) return;
+
+    try {
+        window.localStorage.setItem(
+            getFooterStorageKey(domain),
+            JSON.stringify({
+                data,
+                updatedAt: Date.now(),
+            }),
+        );
+    } catch (error) {
+        console.warn("Failed to write footer cache", error);
+    }
+};
+
+const getStaticFooterIcon = (sectionIndex, linkIndex, label = "") => {
+    if (sectionIndex !== 3) return "";
+
+    const normalizedLabel = String(label || "").toLowerCase();
+    if (normalizedLabel.includes("@")) return "/icons/email.svg";
+    if (normalizedLabel.includes("hour") || normalizedLabel.includes("mon") || normalizedLabel.includes("sat")) return "/icons/clock.svg";
+    if (normalizedLabel.includes("+") || normalizedLabel.includes("phone")) return "/icons/phone.svg";
+
+    return ["/icons/address.svg", "/icons/phone.svg", "/icons/clock.svg", "/icons/email.svg"]?.[linkIndex] || "/icons/address.svg";
+};
+
+const splitLinks = (links) => [
+    links.slice(0, 6),
+    links.slice(6, 12),
+    links.slice(12, 18),
+    links.slice(18, 24),
+];
 
 const Footer = () => {
     const [openState, setOpenState] = useState({
   first: false,
   second: false,
 });
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+    const cachedFooter = useMemo(() => readFooterCache(domain), [domain]);
+
+    const { data, isError } = useQuery({
+        queryKey: ["footer-public", domain],
+        queryFn: fetchFooterPublic,
+        initialData: cachedFooter?.data,
+        initialDataUpdatedAt: cachedFooter?.updatedAt,
+        staleTime: 10 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        retry: 1,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+    });
+
+    useEffect(() => {
+        if (data) {
+            writeFooterCache(domain, data);
+        }
+    }, [data, domain]);
+
+    if (isError) {
+        console.warn("Failed to load footer CMS");
+    }
+
+    const footerData = useMemo(() => {
+        const footer = getFooterFromResponse(data);
+        const allLinkSections = normalizeSections(footer?.link_sections );
+        const contentSections = [
+            ...normalizeSections(
+                footer?.package_sections  )
+        
+        ];
+        const contentFromLinks = allLinkSections.filter((section) => {
+            const title = section.title.toLowerCase();
+            return title.includes("popular") || title.includes("themed") || title.includes("holiday");
+        });
+        const footerLinkSections = allLinkSections.filter((section) => !contentFromLinks.includes(section));
+        const sections = contentSections.length || contentFromLinks.length ? [...contentSections, ...contentFromLinks] : fallbackSections;
+        const linkSections = footerLinkSections.length ? footerLinkSections : fallbackLinkSections;
+
+        return {
+            logo: toAbsoluteUrl(footer?.logo?.url || footer?.footer_logo?.url || footer?.logo || footer?.footer_logo) || fallbackFooter.logo,
+            description: footer?.description || footer?.footer_description || fallbackFooter.description,
+            copyright: footer?.copyright_text || footer?.copyright || footer?.copyrightText || fallbackFooter.copyright,
+            sections,
+            linkSections,
+        };
+    }, [data]);
+
+    const firstSection = footerData?.sections?.[0] || fallbackSections?.[0] || { title: "", links: [] };
+    const secondSection = footerData?.sections?.[1] || fallbackSections?.[1] || { title: "", links: [] };
+    const firstSectionLinks = Array.isArray(firstSection?.links) ? firstSection.links : [];
+    const secondSectionLinks = Array.isArray(secondSection?.links) ? secondSection.links : [];
+    const firstColumns = splitLinks(firstSectionLinks);
+    const secondColumns = splitLinks(secondSectionLinks);
+    const footerLinkSections = fallbackLinkSections.map(
+        (fallbackSection, index) => footerData?.linkSections?.[index] || fallbackSection,
+    );
 
     return (
         <section className={styles.footer}>
@@ -19,8 +212,8 @@ const Footer = () => {
             <div className={styles.container}>
                 <div className={styles.footerTop}>
 
-                    <img src="/images/footerIcon.png" alt="" />
-                    <p>Travel isn’t just about reaching a destination — it’s about discovering new worlds, new perspectives, and new parts of yourself. At Zenith Holidays, we don’t just plan trips; we craft unforgettable journeys designed to match your dreams. Whether you're chasing the romance of a Paris honeymoon, the serenity of Maldives overwater villas, or the adrenaline of an adventure holiday, Zenith is your trusted companion. As one of India’s top travel companies, we specialize in luxury holiday packages, custom honeymoon experiences, curated international tours, and niche escapes like women-only trips and spiritual holidays. </p>
+                    <img src={footerData?.logo || fallbackFooter.logo} alt="" />
+                    <p>{footerData?.description || 'N/A'}</p>
                 </div>
 
                 <div className={styles.footerBoder}></div>
@@ -37,7 +230,7 @@ const Footer = () => {
                                 }))
                             }
                         >
-                            <span className={styles.blockHead} >Popular International Holiday Destinations</span>
+                            <span className={styles.blockHead} >{firstSection?.title || ""}</span>
                             <span className={`${styles.arrow} ${openState.first ? styles.rotate : ''}`}>
                                 <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clipPath="url(#clip0_1042_7175)">
@@ -55,103 +248,14 @@ const Footer = () => {
 
                         <div className={styles.accordionContainer}>
                             <div className={`${styles.accordionBody} ${openState.first ? styles.show : ''}`}>
-                                <Link href="/packages/dubai" className={styles.linkText}>
-                                    Dubai Tour Packages | Luxury & Culture
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/switzerland" className={styles.linkText}>
-                                    Switzerland Holiday Packages | Alpine Escapes
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/maldives" className={styles.linkText}>
-                                    Maldives Packages | Overwater Bliss
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/bali" className={styles.linkText}>
-                                    Bali Holiday Packages | Tropical Paradise
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/thailand" className={styles.linkText}>
-                                    Thailand Tour Packages | Beach & Adventure
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/singapore" className={styles.linkText}>
-                                    Singapore Holiday Packages | Family Fun
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/packages/paris" className={styles.linkText}>
-                                    Paris Tour Packages | Romance Redefined
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/japan" className={styles.linkText}>
-                                    Japan Tour Packages | Tech & Tradition
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/australia" className={styles.linkText}>
-                                    Australia Holiday Packages | Urban To Outback
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/usa" className={styles.linkText}>
-                                    USA Tour Packages | Coast To Coast
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/italy" className={styles.linkText}>
-                                    Italy Holiday Packages | Art, Pasta & Passion
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/turkey" className={styles.linkText}>
-                                    Turkey Tour Packages | East Meets West
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/south-africa" className={styles.linkText}>
-                                    South Africa Packages | Safari & Seascapes
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/greece" className={styles.linkText}>
-                                    Greece Holiday Packages | Islands & History
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/new-zealand" className={styles.linkText}>
-                                    New Zealand Tours | Nature’s Playground
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/uk" className={styles.linkText}>
-                                    UK Holiday Packages | Royals & Rolling Hills
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/spain" className={styles.linkText}>
-                                    Spain Tour Packages | Flamenco & Festivals
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/vietnam" className={styles.linkText}>
-                                    Vietnam Holiday Packages | Culture & Coastlines
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/south-africa" className={styles.linkText}>
-                                    South Africa Packages | Safari & Seascapes
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/greece" className={styles.linkText}>
-                                    Greece Holiday Packages | Islands & History
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/new-zealand" className={styles.linkText}>
-                                    New Zealand Tours | Nature’s Playground
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/uk" className={styles.linkText}>
-                                    UK Holiday Packages | Royals & Rolling Hills
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/spain" className={styles.linkText}>
-                                    Spain Tour Packages | Flamenco & Festivals
-                                </Link>
-                                <span className={styles.dot}>.</span>
-                                <Link href="/packages/vietnam" className={styles.linkText}>
-                                    Vietnam Holiday Packages | Culture & Coastlines
-                                </Link>
-                                <span className={styles.dot}>.</span>
+                                {firstSectionLinks.map((link, index) => (
+                                    <React.Fragment key={`${link?.label || "footer-link"}-${index}`}>
+                                        <Link href={link?.url || "#"} className={styles.linkText}>
+                                            {link?.label || ""}
+                                        </Link>
+                                        {index < firstSectionLinks.length - 1 ? <span className={styles.dot}>.</span> : null}
+                                    </React.Fragment>
+                                ))}
 
                             </div>
                         </div>
@@ -167,7 +271,7 @@ const Footer = () => {
                             }
                         >
                             <span className={styles.blockHead}>
-                                Top Themed Holiday Experiences
+                                {secondSection?.title || ""}
                             </span>
 
                             <span className={`${styles.arrow} ${openState.second ? styles.rotate : ""}`}>
@@ -186,64 +290,14 @@ const Footer = () => {
                         <div className={styles.accordionContainer}>
                             <div className={`${styles.accordionBody} ${openState.second ? styles.show : ""}`}>
 
-                                <Link href="/themes/honeymoon" className={styles.linkText}>
-                                    Honeymoon Packages | Romance, Redefined
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/adventure" className={styles.linkText}>
-                                    Adventure Holidays | Thrills Beyond Borders
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/solo-travel" className={styles.linkText}>
-                                    Solo Travel Escapes | Find Yourself Anywhere
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/luxury" className={styles.linkText}>
-                                    Luxury Travel Experiences
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/spiritual" className={styles.linkText}>
-                                    Spiritual Pilgrimages | Journey Within & Beyond
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/women-only" className={styles.linkText}>
-                                    Women-Only Trips (Wander Womaniya)
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/northern-lights" className={styles.linkText}>
-                                    Northern Lights Packages
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/beach-island" className={styles.linkText}>
-                                    Beach & Island Getaways
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/family" className={styles.linkText}>
-                                    Family-Friendly Holidays | Fun Across All Ages
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/cultural" className={styles.linkText}>
-                                    Cultural & Heritage Tours
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/cruise" className={styles.linkText}>
-                                    Cruise Holidays | Sail In Style With Zenith
-                                </Link>
-                                <span className={styles.dot}>.</span>
-
-                                <Link href="/themes/wellness" className={styles.linkText}>
-                                    Wellness Retreats
-                                </Link>
+                                {secondSectionLinks.map((link, index) => (
+                                    <React.Fragment key={`${link?.label || "footer-link"}-${index}`}>
+                                        <Link href={link?.url || "#"} className={styles.linkText}>
+                                            {link?.label || ""}
+                                        </Link>
+                                        {index < secondSectionLinks.length - 1 ? <span className={styles.dot}>.</span> : null}
+                                    </React.Fragment>
+                                ))}
 
                             </div>
                         </div>
@@ -265,45 +319,17 @@ const Footer = () => {
                 <div className={styles.footerBlockWrapper}>
                     <div className={styles.footerBlock}>
                         <div className={styles.blockHead}>
-                            Popular International Holiday Destinations
+                            {firstSection?.title || ""}
                         </div>
 
                         <div className={styles.blockItems}>
-                            <ul>
-                                <li><span className={styles.linkText}>Dubai Tour Packages | Luxury & Culture</span></li>
-                                <li><span className={styles.linkText}>Switzerland Holiday Packages | Alpine Escapes</span></li>
-                                <li><span className={styles.linkText}>Maldives Packages | Overwater Bliss</span></li>
-                                <li><span className={styles.linkText}>Bali Holiday Packages | Tropical Paradise</span></li>
-                                <li><span className={styles.linkText}>Thailand Tour Packages | Beach & Adventure</span></li>
-                                <li><span className={styles.linkText}>Singapore Holiday Packages | Family Fun</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>Paris Tour Packages | Romance Redefined</span></li>
-                                <li><span className={styles.linkText}>Japan Tour Packages | Tech & Tradition</span></li>
-                                <li><span className={styles.linkText}>Australia Holiday Packages | Urban To Outback</span></li>
-                                <li><span className={styles.linkText}>USA Tour Packages | Coast To Coast</span></li>
-                                <li><span className={styles.linkText}>Italy Holiday Packages | Art, Pasta & Passion</span></li>
-                                <li><span className={styles.linkText}>Turkey Tour Packages | East Meets West</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>South Africa Packages | Safari & Seascapes</span></li>
-                                <li><span className={styles.linkText}>Greece Holiday Packages | Islands & History</span></li>
-                                <li><span className={styles.linkText}>New Zealand Tours | Nature’s Playground</span></li>
-                                <li><span className={styles.linkText}>UK Holiday Packages | Royals & Rolling Hills</span></li>
-                                <li><span className={styles.linkText}>Spain Tour Packages | Flamenco & Festivals</span></li>
-                                <li><span className={styles.linkText}>Vietnam Holiday Packages | Culture & Coastlines</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>South Africa Packages | Safari & Seascapes</span></li>
-                                <li><span className={styles.linkText}>Greece Holiday Packages | Islands & History</span></li>
-                                <li><span className={styles.linkText}>New Zealand Tours | Nature’s Playground</span></li>
-                                <li><span className={styles.linkText}>UK Holiday Packages | Royals & Rolling Hills</span></li>
-                                <li><span className={styles.linkText}>Spain Tour Packages | Flamenco & Festivals</span></li>
-                                <li><span className={styles.linkText}>Vietnam Holiday Packages | Culture & Coastlines</span></li>
-                            </ul>
+                            {firstColumns.map((column, columnIndex) => (
+                                <ul key={`${firstSection?.title || "footer-section"}-${columnIndex}`}>
+                                    {(column || []).map((link, linkIndex) => (
+                                        <li key={`${link?.label || "footer-link"}-${linkIndex}`}><Link href={link?.url || "#"}><span className={styles.linkText}>{link?.label || ""}</span></Link></li>
+                                    ))}
+                                </ul>
+                            ))}
                         </div>
                     </div>
 
@@ -312,111 +338,43 @@ const Footer = () => {
 
                     <div className={styles.footerBlock}>
                         <div className={styles.blockHead}>
-                            Top Themed Holiday Experiences
+                            {secondSection?.title || ""}
                         </div>
 
                         <div className={styles.blockItems}>
-                            <ul>
-                                <li><span className={styles.linkText}>Honeymoon Packages | Romance, Redefined</span></li>
-                                <li><span className={styles.linkText}>Adventure Holidays | Thrills Beyond Borders</span></li>
-                                <li><span className={styles.linkText}>Solo Travel Escapes | Find Yourself Anywhere</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>Luxury Travel Experiences</span></li>
-                                <li><span className={styles.linkText}>Spiritual Pilgrimages | Journey Within & Beyond</span></li>
-                                <li><span className={styles.linkText}>Women-Only Trips (Wander Womaniya)</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>Northern Lights Packages</span></li>
-                                <li><span className={styles.linkText}>Beach & Island Getaways</span></li>
-                                <li><span className={styles.linkText}>Family-Friendly Holidays | Fun Across All Ages</span></li>
-                            </ul>
-
-                            <ul>
-                                <li><span className={styles.linkText}>Cultural & Heritage Tours</span></li>
-                                <li><span className={styles.linkText}>Cruise Holidays | Sail In Style With Zenith</span></li>
-                                <li><span className={styles.linkText}>Wellness Retreats</span></li>
-                            </ul>
+                            {secondColumns.map((column, columnIndex) => (
+                                <ul key={`${secondSection?.title || "footer-section"}-${columnIndex}`}>
+                                    {(column || []).map((link, linkIndex) => (
+                                        <li key={`${link?.label || "footer-link"}-${linkIndex}`}><Link href={link?.url || "#"}><span className={styles.linkText}>{link?.label || ""}</span></Link></li>
+                                    ))}
+                                </ul>
+                            ))}
                         </div>
                     </div>
                     <div className={styles.footerBoder}></div>
                     <div className={styles.footerLinkBlock}>
-                        <div className={styles.footerLinkCont}>
-                            <h3 className={styles.linkHead}>Quick links</h3>
-                            <ul>
-                                <li><a href="/about"><span className={styles.linkText}>About Target Tours</span></a></li>
-                                <li><a href="/blog"><span className={styles.linkText}>Blog & Travel Tips</span></a></li>
-                                <li><a href="/careers"><span className={styles.linkText}>Careers</span></a></li>
-                                <li><a href="/testimonials"><span className={styles.linkText}>Testimonials</span></a></li>
-                                <li><a href="/contact"><span className={styles.linkText}>Contact Us</span></a></li>
-                                <li><a href="/faqs"><span className={styles.linkText}>FAQs</span></a></li>
-                            </ul>
-                        </div>
-
-                        <div className={styles.footerLinkCont}>
-                            <h3 className={styles.linkHead}>Policy</h3>
-                            <ul>
-                                <li><a href="/about"><span className={styles.linkText}>Terms & Conditions</span></a></li>
-                                <li><a href="/blog"><span className={styles.linkText}>Privacy Policy</span></a></li>
-                                <li><a href="/careers"><span className={styles.linkText}>Cancellation & Refund Policy</span></a></li>
-                                <li><a href="/testimonials"><span className={styles.linkText}>Travel Disclaimer</span></a></li>
-                                <li><a href="/contact"><span className={styles.linkText}>Cookie Policy</span></a></li>
-                            </ul>
-                        </div>
-
-                        <div className={styles.footerLinkCont}>
-                            <h3 className={styles.linkHead}>Socials</h3>
-                            <ul>
-                                <li><a href="/about"><span className={styles.linkText}>Facebook</span></a></li>
-                                <li><a href="/blog"><span className={styles.linkText}>Instagram</span></a></li>
-                                <li><a href="/careers"><span className={styles.linkText}>Pinterest</span></a></li>
-                                <li><a href="/testimonials"><span className={styles.linkText}>Twitter (X)</span></a></li>
-                                <li><a href="/contact"><span className={styles.linkText}>LinkedIn</span></a></li>
-                                <li><a href="/faqs"><span className={styles.linkText}>Youtube</span></a></li>
-                            </ul>
-                        </div>
-
-                        <div className={styles.footerLinkCont}>
-                            <h3 className={styles.linkHead}>Contact</h3>
-                            <ul>
-                                <li>
-                                    <a href="/about">
-                                        <span className={styles.linkText}>
-                                            <img src="/icons/address.svg" alt="" /> Target Tours Pvt. Ltd. 123 Travel Heights, New Delhi, India
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/blog">
-                                        <span className={styles.linkText}>
-                                            <img src="/icons/phone.svg" alt="" /> +91-9876543210
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/careers">
-                                        <span className={styles.linkText}>
-                                            <img src="/icons/clock.svg" alt="" /> Hours: 8:00 - 17:00, Mon - Sat
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/testimonials">
-                                        <span className={styles.linkText}>
-                                            <img src="/icons/email.svg" alt="" /> support@Targettours.com
-                                        </span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        {footerLinkSections.map((section, sectionIndex) => (
+                            <div className={styles.footerLinkCont} key={`${section?.title || "footer-section"}-${sectionIndex}`}>
+                                <h3 className={styles.linkHead}>{section?.title || ""}</h3>
+                                <ul>
+                                    {(section?.links || []).map((link, linkIndex) => (
+                                        <li key={`${link?.label || "N/A"}`}>
+                                            <a href={link?.url || "#"}>
+                                                <span className={styles.linkText}>
+                                                    {sectionIndex === 3 ? <img src={link?.icon || getStaticFooterIcon(sectionIndex, linkIndex, link?.label)} alt="" /> : null}{link?.label || "N/A"}
+                                                </span>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
                     </div>
 
                     <div className={styles.footerBoder}></div>
                 </div>
                 <div className={styles.copywrite}>
-                    © 2025 Target Tours Holidays Private Ltd. | Powered by Passion, Driven by Discovery.
+                    {footerData?.copyright || fallbackFooter.copyright}
                 </div>
             </div>
         </section>

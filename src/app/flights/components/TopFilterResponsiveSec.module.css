@@ -796,6 +796,28 @@
   fill: #ffffff !important;
 }
 
+.searchBtnLoading,
+.searchBtnLoading:hover {
+  background-color: #000033;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.searchSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: searchSpin 0.8s linear infinite;
+}
+
+@keyframes searchSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .calendarAnchor {
   position: relative;
 }

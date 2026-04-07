@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import styles from "./SignupPopup.module.css";
@@ -11,6 +11,9 @@ import BrandLogo from "@/shared/components/BrandLogo";
 
 import "swiper/css";
 import "swiper/css/pagination";
+
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export default function SignupPopup({ onNavigate, onClose }) {
   const OTP_RESEND_SECONDS = 30;
@@ -31,7 +34,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     document.body.style.overflow = "hidden";
     setIsPortalReady(true);
     return () => {

@@ -58,6 +58,7 @@ const HomePage = ({
   const [checkOut, setCheckOut] = useState("");
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const [searchSubmitting, setSearchSubmitting] = useState(false);
   const [heroData, setHeroData] = useState({
     heading: "",
     description: "",
@@ -767,6 +768,10 @@ const HomePage = ({
   };
 
   const handleSearch = async ({ tripType: incomingTripType, multiFlights } = {}) => {
+    if (searchSubmitting) return;
+
+    setSearchSubmitting(true);
+
     const finalTripType = incomingTripType || tripType;
     const normalizedPassengers = {
       adult: Number(passengers?.adult || 1),
@@ -778,18 +783,20 @@ const HomePage = ({
     if (bookingType === "flight") {
       // MULTI CITY
       if (finalTripType === "multi") {
-        const hasInvalidLeg = (multiFlights || []).some((leg) =>
+        const searchLegs = multiFlights || multiCity;
+        const hasInvalidLeg = searchLegs.some((leg) =>
           leg?.from &&
           leg?.to &&
           isSamePlace(leg.from, leg.to)
         );
 
         if (hasInvalidLeg) {
+          setSearchSubmitting(false);
           toast.error("Departure and destination cannot be the same.");
           return;
         }
 
-        const firstLeg = multiFlights?.[0];
+        const firstLeg = searchLegs?.[0];
         if (firstLeg?.from && firstLeg?.to && firstLeg?.departureDate) {
           try {
             await saveRecentFlightSearch({
@@ -809,7 +816,7 @@ const HomePage = ({
           infants: String(normalizedPassengers.infant),
           travelClass: normalizedTravelClass,
         });
-        multiFlights.forEach((leg, i) => {
+        searchLegs.forEach((leg, i) => {
           params.set(`from${i}`, leg.from || "");
           params.set(`to${i}`, leg.to || "");
           params.set(`date${i}`, leg.departureDate || "");
@@ -828,6 +835,7 @@ const HomePage = ({
       const endDate = finalTripType === "round" ? flightDates.round.end : "";
 
       if (from && to && isSamePlace(from, to, fromCode, toCode)) {
+        setSearchSubmitting(false);
         toast.error("Departure and destination cannot be the same.");
         return;
       }
@@ -1448,10 +1456,15 @@ const HomePage = ({
                         <div
                           className={`${styles.searchBtn} ${
                             tripType === "multi" ? styles.hiddenField : ""
-                          }`}
+                          } ${searchSubmitting ? styles.searchBtnLoading : ""}`}
                           onClick={handleSearch}
+                          aria-disabled={searchSubmitting}
                         >
-                          <img src="/images/searchIcon.svg" alt="" />
+                          {searchSubmitting ? (
+                            <span className={styles.searchSpinner}></span>
+                          ) : (
+                            <img src="/images/searchIcon.svg" alt="" />
+                          )}
                         </div>
                       </div>
                     )}
@@ -1662,10 +1675,13 @@ const HomePage = ({
 
                               {actualIndex === multiCity.length - 1 ? (
                                 <div
-                                  className={styles.multisearchBtn}
+                                  className={`${styles.multisearchBtn} ${
+                                    searchSubmitting ? styles.searchBtnLoading : ""
+                                  }`}
                                   onClick={handleSearch}
+                                  aria-disabled={searchSubmitting}
                                 >
-                                  Search
+                                  {searchSubmitting ? "Searching..." : "Search"}
                                 </div>
                               ) : (
                                 <div
@@ -2106,10 +2122,17 @@ const HomePage = ({
                     </div>
 
                     <div
-                      className={`${styles.searchBtn} ${styles.pos5}`}
+                      className={`${styles.searchBtn} ${styles.pos5} ${
+                        searchSubmitting ? styles.searchBtnLoading : ""
+                      }`}
                       onClick={handleSearch}
+                      aria-disabled={searchSubmitting}
                     >
-                      <img src="/images/searchIcon.svg" alt="" />
+                      {searchSubmitting ? (
+                        <span className={styles.searchSpinner}></span>
+                      ) : (
+                        <img src="/images/searchIcon.svg" alt="" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2161,6 +2184,7 @@ const HomePage = ({
             setTo={setTo}
             setToCode={setToCode}
             handleSearch={handleSearch}
+            isSearchLoading={searchSubmitting}
             departureDate={departureDate}
             setDepartureDate={setDepartureDate}
             returnDate={returnDate}
