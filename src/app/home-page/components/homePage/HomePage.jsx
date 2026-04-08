@@ -770,8 +770,6 @@ const HomePage = ({
   const handleSearch = async ({ tripType: incomingTripType, multiFlights } = {}) => {
     if (searchSubmitting) return;
 
-    setSearchSubmitting(true);
-
     const finalTripType = incomingTripType || tripType;
     const normalizedPassengers = {
       adult: Number(passengers?.adult || 1),
@@ -779,6 +777,94 @@ const HomePage = ({
       infant: Number(passengers?.infant || 0),
     };
     const normalizedTravelClass = String(travelClass || "Economy").toUpperCase();
+
+    const getFirstMissingFieldMessage = (fields) => {
+      const firstMissingField = fields.find(Boolean);
+      return firstMissingField ? `Please fill: ${firstMissingField}.` : "";
+    };
+
+    if (bookingType === "flight") {
+      if (finalTripType === "multi") {
+        const searchLegs = multiFlights || multiCity;
+        const incompleteLegIndex = searchLegs?.findIndex(
+          (leg) => !leg?.from || !leg?.to || !leg?.departureDate,
+        );
+
+        if (incompleteLegIndex >= 0) {
+          const leg = searchLegs?.[incompleteLegIndex];
+          const missingFields = [
+            !leg?.from ? `From in leg ${incompleteLegIndex + 1}` : "",
+            !leg?.to ? `To in leg ${incompleteLegIndex + 1}` : "",
+            !leg?.departureDate ? `Departure date in leg ${incompleteLegIndex + 1}` : "",
+          ];
+          toast.error(getFirstMissingFieldMessage(missingFields));
+          return;
+        }
+      } else {
+        const startDate =
+          finalTripType === "oneway"
+            ? flightDates?.oneway?.start
+            : flightDates?.round?.start;
+        const endDate = finalTripType === "round" ? flightDates?.round?.end : "";
+
+        const missingFields = [
+          !from ? "From" : "",
+          !to ? "To" : "",
+          !startDate ? "Departure date" : "",
+          finalTripType === "round" && !endDate ? "Return date" : "",
+        ];
+
+        if (missingFields.some(Boolean)) {
+          toast.error(getFirstMissingFieldMessage(missingFields));
+          return;
+        }
+      }
+    }
+
+    if (bookingType === "hotel" && (!to || !hotelStartDate || !hotelEndDate)) {
+      toast.error(
+        getFirstMissingFieldMessage([
+          !to ? "Destination" : "",
+          !hotelStartDate ? "Check in" : "",
+          !hotelEndDate ? "Check out" : "",
+        ]),
+      );
+      return;
+    }
+
+    if (bookingType === "holiday" && (!from || !to || !holidayStartDate)) {
+      toast.error(
+        getFirstMissingFieldMessage([
+          !from ? "From city" : "",
+          !to ? "To city/country/category" : "",
+          !holidayStartDate ? "Departure date" : "",
+        ]),
+      );
+      return;
+    }
+
+    if (
+      bookingType === "insurance" &&
+      (
+        !travellerDestination ||
+        travellerDestination === "SELECT DESTINATION" ||
+        !insuranceStartDate ||
+        !insuranceEndDate
+      )
+    ) {
+      toast.error(
+        getFirstMissingFieldMessage([
+          !travellerDestination || travellerDestination === "SELECT DESTINATION"
+            ? "Travel destination"
+            : "",
+          !insuranceStartDate ? "Travel date" : "",
+          !insuranceEndDate ? "Return date" : "",
+        ]),
+      );
+      return;
+    }
+
+    setSearchSubmitting(true);
 
     if (bookingType === "flight") {
       // MULTI CITY

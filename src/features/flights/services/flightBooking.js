@@ -1,7 +1,6 @@
 import api from "@/lib/axios";
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
 const shouldRetryRequest = (error) => {
   const status = error?.response?.status;
@@ -40,7 +39,10 @@ const postWithRetry = async (
 };
 
 export const getFlightPrice = async (payload) => {
-  const response = await api.post("/api/flights/price", payload, {
+  const response = await api.post("/api/flights/price", {
+    ...payload,
+    domain: "localhost:1337",
+  }, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -52,7 +54,7 @@ export const getFlightPrice = async (payload) => {
 export const getFlightWebSettings = async (payload) => {
   const response = await api.post("/api/flights/web-settings", {
     ...payload,
-    domain: payload?.domain || domain,
+    domain: "localhost:1337",
   }, {
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +69,7 @@ export const getFlightTravelChecklist = async (payload) => {
     "/api/flights/travel-check-list",
     {
       ...payload,
-      domain: payload?.domain || domain,
+      domain: "localhost:1337",
     },
     {
       headers: {
@@ -96,7 +98,7 @@ export const getFlightSsr = async (payload) => {
 export const createFlightItinerary = async (payload) => {
   const response = await api.post("/api/flights/create-itinerary", {
     ...payload,
-    domain: payload?.domain || domain,
+    domain: "localhost:1337",
   }, {
     headers: {
       "Content-Type": "application/json",
@@ -109,7 +111,7 @@ export const createFlightItinerary = async (payload) => {
 export const startFlightPayment = async (payload) => {
   const response = await api.post("/api/flights/start-pay", {
     ...payload,
-    domain: payload?.domain || domain,
+    domain: "localhost:1337",
   }, {
     headers: {
       "Content-Type": "application/json",
@@ -122,7 +124,7 @@ export const startFlightPayment = async (payload) => {
 export const retrieveFlightBooking = async (payload) => {
   const response = await api.post("/api/flights/retrieve-booking", {
     ...payload,
-    domain: payload?.domain || domain,
+    domain: "localhost:1337",
   }, {
     headers: {
       "Content-Type": "application/json",
