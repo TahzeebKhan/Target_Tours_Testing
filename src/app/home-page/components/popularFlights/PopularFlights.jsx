@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import styles from "./PopularFlights.module.css";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -8,6 +9,36 @@ import { motion, AnimatePresence } from "framer-motion";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
+
+const CITY_IATA_MAP = {
+  Delhi: "DEL",
+  Mumbai: "BOM",
+  Bangalore: "BLR",
+  Bengaluru: "BLR",
+  Chennai: "MAA",
+  Kolkata: "CCU",
+};
+
+const TAB_TYPE_MAP = {
+  Domestic: "domestic",
+  International: "international",
+};
+
+const formatPrice = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "N/A";
+  return `₹${amount.toLocaleString("en-IN")}`;
+};
+
+const pickValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const toAbsoluteImageUrl = (value) => {
+  const url = String(value || "").trim();
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+};
 
 const PopularFlights = () => {
   const [swiperRef, setSwiperRef] = useState(null);
@@ -131,8 +162,6 @@ const PopularFlights = () => {
     },
   ];
 
-  const cardData = activeTab === "Domestic" ? domesticData : internationalData;
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     // Reset swiper to first slide when tab changes
@@ -160,6 +189,71 @@ const PopularFlights = () => {
   const cityRef = useRef(null);
 
   const metroCities = ["Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata"];
+  const selectedIataCode = CITY_IATA_MAP?.[selectedCity] || "DEL";
+
+  const { data: apiPopularFlights } = useQuery({
+    queryKey: ["destination-flights-public", process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337", selectedCity, activeTab],
+    queryFn: async () => {
+      const query = new URLSearchParams({
+        domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+        type: TAB_TYPE_MAP?.[activeTab] || "domestic",
+        from_iata_code: selectedIataCode,
+      }).toString();
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/destination-flights/public?${query}`
+      );
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          json?.error?.message ||
+            json?.message ||
+            "Failed to fetch destination flights"
+        );
+      }
+
+      const flights = Array.isArray(json?.destination_flights)
+        ? json.destination_flights
+        : [];
+
+      return flights.map((item, index) => ({
+        id: pickValue(item?.id, `destination-flight-${index}`),
+        img:
+          toAbsoluteImageUrl(
+            pickValue(
+              item?.thumbnail?.url,
+              item?.destination_image?.url,
+              item?.image?.url
+            )
+          ) || (activeTab === "Domestic"
+            ? domesticData?.[index % domesticData.length]?.img
+            : internationalData?.[index % internationalData.length]?.img),
+        city:
+          pickValue(
+            item?.city,
+            item?.destination_city,
+            item?.to_city,
+            item?.to,
+            item?.to_iata_code
+          ) || "N/A",
+        date:
+          pickValue(
+            item?.travel_date_range,
+            item?.date_range,
+            item?.validity,
+            item?.travel_dates
+          ) || "N/A",
+        price: formatPrice(
+          pickValue(item?.economy_start_from, item?.price, item?.amount)
+        ),
+      }));
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    placeholderData: (previousData) => previousData,
+  });
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -171,6 +265,13 @@ const PopularFlights = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const cardData =
+    apiPopularFlights?.length > 0
+      ? apiPopularFlights
+      : activeTab === "Domestic"
+      ? domesticData
+      : internationalData;
 
   return (
     <section className={styles.section}>
