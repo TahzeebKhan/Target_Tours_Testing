@@ -1,17 +1,7 @@
 "use client"
 import { useFlightBooking } from "./FlightBookingContext";
+import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import styles from "./SidebarPriceSummaryCard.module.css";
-
-const readNumber = (...values) => {
-  for (const value of values) {
-    const normalized =
-      typeof value === "string"
-        ? Number(value.replace(/[^\d.]/g, ""))
-        : Number(value);
-    if (Number.isFinite(normalized)) return normalized;
-  }
-  return 0;
-};
 
 const getPassengerCounts = (travelerDetails = [], bookingSession = null) => {
   if (Array.isArray(travelerDetails) && travelerDetails.length > 0) {
@@ -27,18 +17,7 @@ const getPassengerCounts = (travelerDetails = [], bookingSession = null) => {
     );
   }
 
-  const raw =
-    bookingSession?.createItineraryResponse?.data?.raw ||
-    bookingSession?.startPaymentResponse?.data?.raw ||
-    bookingSession?.priceResponse?.data?.raw ||
-    bookingSession?.priceResponse?.raw ||
-    {};
-
-  return {
-    adult: readNumber(raw?.ADT, raw?.adult, 0),
-    child: readNumber(raw?.CHD, raw?.child, 0),
-    infant: readNumber(raw?.INF, raw?.infant, 0),
-  };
+  return getBookingPassengerCounts(bookingSession);
 };
 
 const formatPassengerLabel = (counts) => {

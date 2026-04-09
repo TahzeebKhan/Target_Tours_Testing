@@ -443,6 +443,47 @@ export const extractBaseFareAmount = (session) => {
   );
 };
 
+const readPassengerCountsFromSearchKey = (searchKey) => {
+  const parts = String(searchKey || "").trim().split("_");
+  return {
+    adult: Math.max(Number(parts[4] || 1), 1),
+    child: Math.max(Number(parts[5] || 0), 0),
+    infant: Math.max(Number(parts[6] || 0), 0),
+  };
+};
+
+export const getBookingPassengerCounts = (session) => {
+  const raw =
+    session?.createItineraryResponse?.data?.raw ||
+    session?.startPaymentResponse?.data?.raw ||
+    session?.priceResponse?.data?.raw ||
+    session?.priceResponse?.raw ||
+    {};
+
+  const countsFromRaw = {
+    adult: readNumber(raw?.ADT, raw?.adult),
+    child: readNumber(raw?.CHD, raw?.child),
+    infant: readNumber(raw?.INF, raw?.infant),
+  };
+
+  if (
+    countsFromRaw.adult !== null ||
+    countsFromRaw.child !== null ||
+    countsFromRaw.infant !== null
+  ) {
+    return {
+      adult: Math.max(countsFromRaw.adult ?? 1, 1),
+      child: Math.max(countsFromRaw.child ?? 0, 0),
+      infant: Math.max(countsFromRaw.infant ?? 0, 0),
+    };
+  }
+
+  const priceRequest = session?.priceRequest || {};
+  return readPassengerCountsFromSearchKey(
+    priceRequest?.search_key || session?.selectedFlight?.booking?.searchKey
+  );
+};
+
 export const getBookingDetailsView = (session) => {
   const fallbackView = session?.urlFallback || null;
   const payload = unwrapPayload(session?.priceResponse);

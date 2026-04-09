@@ -1,18 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TravelerDetails.module.css";
 import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
+import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import {
     EMPTY_TRAVELER_FORM_ERRORS,
     validateTravelerForm,
 } from "@/app/flight-booking-details/utils/travelerValidation";
 
 const buildPassengerSlots = (bookingSession) => {
-    const priceRequest = bookingSession?.priceRequest || {};
-    const searchKey = String(priceRequest?.search_key || bookingSession?.selectedFlight?.booking?.searchKey || "").trim();
-    const parts = searchKey.split("_");
-    const adults = Math.max(Number(parts[4] || 1), 1);
-    const children = Math.max(Number(parts[5] || 0), 0);
-    const infants = Math.max(Number(parts[6] || 0), 0);
+    const { adult: adults, child: children, infant: infants } =
+        getBookingPassengerCounts(bookingSession);
     const slots = [];
 
     for (let index = 0; index < adults; index += 1) {

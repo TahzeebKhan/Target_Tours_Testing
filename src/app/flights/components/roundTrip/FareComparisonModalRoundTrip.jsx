@@ -16,6 +16,173 @@ import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
+const readNumber = (...values) => {
+  for (const value of values) {
+    const normalized =
+      typeof value === "string"
+        ? Number(value.replace(/[^\d.]/g, ""))
+        : Number(value);
+    if (Number.isFinite(normalized)) return normalized;
+  }
+  return null;
+};
+
+const formatCurrency = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "₹ 0";
+  return `₹ ${new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 0,
+  }).format(amount)}`;
+};
+
+const normalizeFareType = (value = "") => String(value || "").trim().toUpperCase();
+
+const getAdultCount = (flightData) => {
+  const searchKey = String(flightData?.booking?.priceRequest?.search_key || "").trim();
+  const parts = searchKey.split("_");
+  return Math.max(Number(parts[4] || 1), 1);
+};
+
+const getFareTemplate = (fareType) => {
+  const normalized = normalizeFareType(fareType);
+
+  if (normalized.includes("FLEXI")) {
+    return {
+      id: "flexi",
+      name: "FLEXI PLUS FARE",
+      isPremium: true,
+      baggage: { cabin: "7 Kg", checkin: "15 Kg" },
+      changes: {
+        charges: "Change up to ₹3,499",
+        cancellation: "Cancel up to ₹3,499",
+      },
+      addons: {
+        seats: "Complimentary meal",
+        meals: "Complimentary standard seat",
+      },
+    };
+  }
+
+  if (normalized.includes("PREMIUM")) {
+    return {
+      id: "premium",
+      name: "PREMIUM FARE",
+      isPremium: false,
+      baggage: { cabin: "7 Kg", checkin: "15 Kg" },
+      changes: {
+        charges: "Change up to ₹3,499",
+        cancellation: "Cancel up to ₹3,499",
+      },
+      addons: {
+        seats: "Chargeable Meals",
+        meals: "Complimentary XL (Extra legroom) Seat",
+      },
+    };
+  }
+
+  return {
+    id: "saver",
+    name: "SAVER FARE",
+    isPremium: false,
+    baggage: { cabin: "7 Kg", checkin: "15 Kg" },
+    changes: {
+      charges: "Change up to ₹2,999",
+      cancellation: "Cancel up to ₹4,999",
+    },
+    addons: { seats: "Chargeable Seats", meals: "Chargeable Meals" },
+  };
+};
+
+const STATIC_ROUND_TRIP_FARE_OPTIONS = [
+  {
+    ...getFareTemplate("FLEXI PLUS FARE"),
+    price: "₹ 78,000",
+    pricePerAdult: "₹ 6,200",
+  },
+  {
+    ...getFareTemplate("PREMIUM FARE"),
+    price: "₹ 78,000",
+    pricePerAdult: "₹ 6,200",
+  },
+];
+
+const readRoundTripAdultFareBreakdown = (priceResponse) => {
+  const breakdown =
+    priceResponse?.data?.raw?.fare_breakdown ||
+    priceResponse?.raw?.fare_breakdown ||
+    priceResponse?.data?.fare_breakdown ||
+    priceResponse?.fare_breakdown ||
+    priceResponse?.data?.formatted?.fare_breakdown ||
+    priceResponse?.formatted?.fare_breakdown ||
+    [];
+
+  if (!Array.isArray(breakdown) || breakdown.length === 0) {
+    return null;
+  }
+
+  let totalPerAdult = 0;
+  let foundAdultFare = false;
+
+  breakdown.forEach((item) => {
+    const adultFare = item?.ADT;
+    const perPerson = readNumber(
+      adultFare?.per_person,
+      adultFare?.perPerson,
+      adultFare?.total,
+      adultFare?.fare
+    );
+
+    if (!Number.isFinite(perPerson)) return;
+    totalPerAdult += perPerson;
+    foundAdultFare = true;
+  });
+
+  return foundAdultFare ? totalPerAdult : null;
+};
+
+const buildRoundTripSaverFare = (priceResponse, flightData) => {
+  const trips =
+    priceResponse?.data?.raw?.Trips ||
+    priceResponse?.raw?.Trips ||
+    priceResponse?.data?.Trips ||
+    priceResponse?.Trips ||
+    [];
+
+  let totalNetFare = 0;
+
+  trips.forEach((trip) => {
+    const journeys = Array.isArray(trip?.Journey) ? trip.Journey : [];
+    journeys.forEach((journey) => {
+      const netFare = readNumber(
+        journey?.NetFare,
+        journey?.netfare,
+        journey?.netFare,
+        journey?.GrossFare,
+        journey?.grossFare
+      );
+
+      if (!Number.isFinite(netFare)) return;
+      totalNetFare += netFare;
+    });
+  });
+
+  if (!Number.isFinite(totalNetFare) || totalNetFare <= 0) {
+    return null;
+  }
+
+  const adults = getAdultCount(flightData);
+  const adultFareBreakdown = readRoundTripAdultFareBreakdown(priceResponse);
+  return {
+    ...getFareTemplate("SAVER"),
+    price: formatCurrency(totalNetFare),
+    pricePerAdult: formatCurrency(
+      Number.isFinite(adultFareBreakdown)
+        ? adultFareBreakdown
+        : Math.round(totalNetFare / adults)
+    ),
+  };
+};
+
 const parseCityLabel = (value = "") => {
   const text = String(value || "").trim();
   const match = text.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
@@ -180,109 +347,27 @@ const FareComparisonModalRoundTrip = ({
   const flightSegments = {
     onward: {
       ...buildModalSegment(flightData?.depart, "ONWARD FLIGHT", "N/A"),
-      fares: [
-        {
-          id: "saver",
-          name: "SAVER FARE",
-          price: "₹ 76,000",
-          pricePerAdult: "₹ 6,083",
-          isPremium: false,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹2,999",
-            cancellation: "Cancel up to ₹4,999",
-          },
-          addons: { seats: "Chargeable Seats", meals: "Chargeable Meals" },
-        },
-        {
-          id: "flexi",
-          name: "FLEXI PLUS fare",
-          price: "₹ 78,000",
-          pricePerAdult: "₹ 6,200",
-          isPremium: true,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹3,499",
-            cancellation: "Cancel up to ₹3,499",
-          },
-          addons: {
-            seats: "Complimentary meal",
-            meals: "Complimentary standard seat",
-          },
-        },
-        {
-          id: "Premium fare",
-          name: "Premium fare",
-          price: "₹ 78,000",
-          pricePerAdult: "₹ 6,200",
-          isPremium: false,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹3,499",
-            cancellation: "Cancel up to ₹3,499",
-          },
-          addons: {
-            seats: "Chargeable Meals",
-            meals: " Complimentary XL (Extra legroom) Seat",
-          },
-        },
-      ],
+      fares: [],
     },
 
     return: {
       ...buildModalSegment(flightData?.return, "RETURN FLIGHT", "N/A"),
-      fares: [
-        {
-          id: "saver",
-          name: "SAVER FARE",
-          price: "₹ 72,000",
-          pricePerAdult: "₹ 5,800",
-          isPremium: false,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹2,999",
-            cancellation: "Cancel up to ₹4,999",
-          },
-          addons: { seats: "Chargeable Seats", meals: "Chargeable Meals" },
-        },
-        {
-          id: "flexi",
-          name: "FLEXI PLUS Fare",
-          price: "₹ 78,000",
-          pricePerAdult: "₹ 6,200",
-          isPremium: true,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹3,499",
-            cancellation: "Cancel up to ₹3,499",
-          },
-          addons: {
-            seats: "Complimentary meal",
-            meals: "Complimentary standard seat",
-          },
-        },
-        {
-          id: "Premium fare",
-          name: "Premium fare",
-          price: "₹ 78,000",
-          pricePerAdult: "₹ 6,200",
-          isPremium: false,
-          baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-          changes: {
-            charges: "Change up to ₹3,499",
-            cancellation: "Cancel up to ₹3,499",
-          },
-          addons: {
-            seats: "Chargeable Meals",
-            meals: " Complimentary XL (Extra legroom) Seat",
-          },
-        },
-      ],
+      fares: [],
     },
   };
 
+  const saverFare =
+    buildRoundTripSaverFare(prefetchedData?.priceResponse, flightData) || {
+      ...getFareTemplate("SAVER"),
+      price: flightData?.fare?.totalFare || "₹ 0",
+      pricePerAdult:
+        flightData?.fare?.pricePerAdult || flightData?.fare?.totalFare || "₹ 0",
+    };
+  const combinedFareOptions = [saverFare, ...STATIC_ROUND_TRIP_FARE_OPTIONS];
+
   const activeSegment = flightSegments[selected];
-  const { flight, fares } = activeSegment;
+  const { flight } = activeSegment;
+  const fares = combinedFareOptions;
   useLockBodyScroll();
   if (!isOpen) return null;
   return (
