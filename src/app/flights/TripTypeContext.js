@@ -11,6 +11,35 @@ import { toast } from "react-toastify";
 
 const TripTypeContext = createContext(null);
 
+const formatLocalDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getTomorrowDate = () => {
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + 1);
+  return formatLocalDate(nextDate);
+};
+
+const DEFAULT_FLIGHT_SEARCH = {
+  tripType: "oneway",
+  from: "Delhi (DEL)",
+  to: "Bangalore (BLR)",
+  fromCode: "DEL",
+  toCode: "BLR",
+  startDate: getTomorrowDate(),
+  endDate: null,
+  passengers: {
+    adult: 1,
+    child: 0,
+    infant: 0,
+  },
+  travelClass: "ECONOMY",
+};
+
 const parseCodeFromLabel = (label = "") => {
   const match = String(label || "").match(/\(([^)]+)\)/);
   return match ? match[1].trim().toUpperCase() : "";
@@ -69,44 +98,59 @@ export function TripTypeProvider({ children }) {
   // Helper to safely get params
   const getParam = (key) => searchParams?.get(key) || "";
 
-  const [tripType, setTripType] = useState(getParam("tripType") || "oneway");
+  const [tripType, setTripType] = useState(
+    getParam("tripType") || DEFAULT_FLIGHT_SEARCH.tripType
+  );
   const initialRoute = getSyncedRoute({
-    from: getParam("from") || "",
-    to: getParam("to") || "",
-    fromCode: getParam("origin") || "",
-    toCode: getParam("destination") || "",
+    from: getParam("from") || DEFAULT_FLIGHT_SEARCH.from,
+    to: getParam("to") || DEFAULT_FLIGHT_SEARCH.to,
+    fromCode: getParam("origin") || DEFAULT_FLIGHT_SEARCH.fromCode,
+    toCode: getParam("destination") || DEFAULT_FLIGHT_SEARCH.toCode,
   });
   const [from, setFrom] = useState(initialRoute.from);
   const [to, setTo] = useState(initialRoute.to);
   const [fromCode, setFromCode] = useState(initialRoute.fromCode);
   const [toCode, setToCode] = useState(initialRoute.toCode);
-  const [startDate, setStartDate] = useState(getParam("start") || null);
+  const [startDate, setStartDate] = useState(
+    getParam("start") || DEFAULT_FLIGHT_SEARCH.startDate
+  );
   const [endDate, setEndDate] = useState(getParam("end") || null);
   const [passengers, setPassengers] = useState({
-    adult: Number(getParam("adults") || 1),
+    adult: Number(getParam("adults") || DEFAULT_FLIGHT_SEARCH.passengers.adult),
     child: Number(getParam("children") || 0),
     infant: Number(getParam("infants") || 0),
   });
-  const [travelClass, setTravelClass] = useState(getParam("travelClass") || "ECONOMY");
+  const [travelClass, setTravelClass] = useState(
+    getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass
+  );
   const [committedSearches, setCommittedSearches] = useState({
-    oneway: { from: initialRoute.from || "Jakarta (CGK)", to: initialRoute.to || "Singapore (SIN)" },
-    round: { from: initialRoute.from || "Jakarta (CGK)", to: initialRoute.to || "Singapore (SIN)" },
-    multi: { from: initialRoute.from || "Jakarta (CGK)", to: initialRoute.to || "Singapore (SIN)" },
+    oneway: {
+      from: initialRoute.from || DEFAULT_FLIGHT_SEARCH.from,
+      to: initialRoute.to || DEFAULT_FLIGHT_SEARCH.to,
+    },
+    round: {
+      from: initialRoute.from || DEFAULT_FLIGHT_SEARCH.from,
+      to: initialRoute.to || DEFAULT_FLIGHT_SEARCH.to,
+    },
+    multi: {
+      from: initialRoute.from || DEFAULT_FLIGHT_SEARCH.from,
+      to: initialRoute.to || DEFAULT_FLIGHT_SEARCH.to,
+    },
   });
   const [committedRequest, setCommittedRequest] = useState({
-    tripType: getParam("tripType") || "oneway",
-    from: initialRoute.from || "Jakarta (CGK)",
-    to: initialRoute.to || "Singapore (SIN)",
-    fromCode: initialRoute.fromCode,
-    toCode: initialRoute.toCode,
-    startDate: getParam("start") || null,
+    tripType: getParam("tripType") || DEFAULT_FLIGHT_SEARCH.tripType,
+    from: initialRoute.from || DEFAULT_FLIGHT_SEARCH.from,
+    to: initialRoute.to || DEFAULT_FLIGHT_SEARCH.to,
+    fromCode: initialRoute.fromCode || DEFAULT_FLIGHT_SEARCH.fromCode,
+    toCode: initialRoute.toCode || DEFAULT_FLIGHT_SEARCH.toCode,
+    startDate: getParam("start") || DEFAULT_FLIGHT_SEARCH.startDate,
     endDate: getParam("end") || null,
     passengers: {
-      adult: Number(getParam("adults") || 1),
+      adult: Number(getParam("adults") || DEFAULT_FLIGHT_SEARCH.passengers.adult),
       child: Number(getParam("children") || 0),
       infant: Number(getParam("infants") || 0),
     },
-    travelClass: getParam("travelClass") || "ECONOMY",
+    travelClass: getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass,
   });
   const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
 
@@ -119,24 +163,32 @@ export function TripTypeProvider({ children }) {
     const pDestination = getParam("destination");
     const pStart = getParam("start");
     const pEnd = getParam("end");
-    const pAdults = Number(getParam("adults") || 1);
+    const pAdults = Number(
+      getParam("adults") || DEFAULT_FLIGHT_SEARCH.passengers.adult
+    );
     const pChildren = Number(getParam("children") || 0);
     const pInfants = Number(getParam("infants") || 0);
-    const pTravelClass = getParam("travelClass") || "ECONOMY";
+    const pTravelClass =
+      getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass;
+    const hasSearchDetails = Boolean(
+      (pFrom || pOrigin) &&
+      (pTo || pDestination)
+    );
     const syncedRoute = getSyncedRoute({
-      from: pFrom,
-      to: pTo,
-      fromCode: pOrigin,
-      toCode: pDestination,
+      from: pFrom || DEFAULT_FLIGHT_SEARCH.from,
+      to: pTo || DEFAULT_FLIGHT_SEARCH.to,
+      fromCode: pOrigin || DEFAULT_FLIGHT_SEARCH.fromCode,
+      toCode: pDestination || DEFAULT_FLIGHT_SEARCH.toCode,
     });
 
-    if (pTripType) setTripType(pTripType);
-    if (pFrom || pOrigin) setFrom(syncedRoute.from);
-    if (pTo || pDestination) setTo(syncedRoute.to);
-    if (pOrigin) setFromCode(syncedRoute.fromCode);
-    if (pDestination) setToCode(syncedRoute.toCode);
-    if (pStart) setStartDate(pStart);
+    setTripType(pTripType || DEFAULT_FLIGHT_SEARCH.tripType);
+    setFrom(syncedRoute.from || DEFAULT_FLIGHT_SEARCH.from);
+    setTo(syncedRoute.to || DEFAULT_FLIGHT_SEARCH.to);
+    setFromCode(syncedRoute.fromCode || DEFAULT_FLIGHT_SEARCH.fromCode);
+    setToCode(syncedRoute.toCode || DEFAULT_FLIGHT_SEARCH.toCode);
+    setStartDate(pStart || DEFAULT_FLIGHT_SEARCH.startDate);
     if (pEnd) setEndDate(pEnd);
+    if (!pEnd) setEndDate(null);
     setPassengers({
       adult: pAdults,
       child: pChildren,
@@ -144,25 +196,25 @@ export function TripTypeProvider({ children }) {
     });
     setTravelClass(pTravelClass);
 
-    if (pFrom || pTo || pOrigin || pDestination) {
-      setCommittedSearches(prev => ({
+    setCommittedSearches(prev => ({
         ...prev,
-        [pTripType || "oneway"]: {
-          from: syncedRoute.from || prev[pTripType || "oneway"].from,
-          to: syncedRoute.to || prev[pTripType || "oneway"].to,
+        [pTripType || DEFAULT_FLIGHT_SEARCH.tripType]: {
+          from:
+            syncedRoute.from ||
+            prev[pTripType || DEFAULT_FLIGHT_SEARCH.tripType].from,
+          to:
+            syncedRoute.to ||
+            prev[pTripType || DEFAULT_FLIGHT_SEARCH.tripType].to,
         }
       }));
-    }
 
-    // Auto-trigger initial search when arriving from Home with URL params.
-    if (pFrom && pTo) {
-      setCommittedRequest({
-        tripType: pTripType || "oneway",
+    setCommittedRequest({
+        tripType: pTripType || DEFAULT_FLIGHT_SEARCH.tripType,
         from: syncedRoute.from,
         to: syncedRoute.to,
-        fromCode: syncedRoute.fromCode,
-        toCode: syncedRoute.toCode,
-        startDate: pStart || null,
+        fromCode: syncedRoute.fromCode || DEFAULT_FLIGHT_SEARCH.fromCode,
+        toCode: syncedRoute.toCode || DEFAULT_FLIGHT_SEARCH.toCode,
+        startDate: pStart || DEFAULT_FLIGHT_SEARCH.startDate,
         endDate: pEnd || null,
         passengers: {
           adult: pAdults,
@@ -171,9 +223,26 @@ export function TripTypeProvider({ children }) {
         },
         travelClass: pTravelClass,
       });
+
+    if (!hasSearchDetails) {
+      const nextParams = new URLSearchParams(searchParams?.toString() || "");
+      nextParams.set("tripType", pTripType || DEFAULT_FLIGHT_SEARCH.tripType);
+      nextParams.set("from", DEFAULT_FLIGHT_SEARCH.from);
+      nextParams.set("to", DEFAULT_FLIGHT_SEARCH.to);
+      nextParams.set("origin", DEFAULT_FLIGHT_SEARCH.fromCode);
+      nextParams.set("destination", DEFAULT_FLIGHT_SEARCH.toCode);
+      nextParams.set("start", pStart || DEFAULT_FLIGHT_SEARCH.startDate);
+      nextParams.set("adults", String(DEFAULT_FLIGHT_SEARCH.passengers.adult));
+      nextParams.set("children", "0");
+      nextParams.set("infants", "0");
+      nextParams.set("travelClass", DEFAULT_FLIGHT_SEARCH.travelClass);
+      nextParams.delete("end");
+      nextParams.delete("page");
+
+      router.replace(`/flights?${nextParams.toString()}`);
     }
 
-  }, [searchParams]);
+  }, [searchParams, router]);
 
 
   const handleSearch = async () => {
@@ -182,13 +251,13 @@ export function TripTypeProvider({ children }) {
     setIsSearchSubmitting(true);
 
     const syncedRoute = getSyncedRoute({
-      from: from || committedSearches?.[tripType]?.from || "Jakarta (CGK)",
-      to: to || committedSearches?.[tripType]?.to || "Singapore (SIN)",
+      from: from || committedSearches?.[tripType]?.from || DEFAULT_FLIGHT_SEARCH.from,
+      to: to || committedSearches?.[tripType]?.to || DEFAULT_FLIGHT_SEARCH.to,
       fromCode,
       toCode,
     });
-    const fallbackFrom = syncedRoute.from || "Jakarta (CGK)";
-    const fallbackTo = syncedRoute.to || "Singapore (SIN)";
+    const fallbackFrom = syncedRoute.from || DEFAULT_FLIGHT_SEARCH.from;
+    const fallbackTo = syncedRoute.to || DEFAULT_FLIGHT_SEARCH.to;
     const normalizedFromCode = syncedRoute.fromCode;
     const normalizedToCode = syncedRoute.toCode;
 

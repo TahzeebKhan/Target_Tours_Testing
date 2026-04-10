@@ -10,10 +10,52 @@ import { TripTypeProvider } from "@/app/flights/TripTypeContext";
 import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import DateField from "../dateField/DateField";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicBanner } from "@/shared/services/heroApi";
+
+const DEFAULT_HERO = {
+  image: "/images/tourHeroImage.png",
+  heading: "N/A",
+  subHeading: "Discover the destination",
+};
+
+const getBannerRecord = (response) => {
+  const payload = response?.data ?? response;
+  if (Array.isArray(payload)) return payload[0] || {};
+  if (Array.isArray(payload?.data)) return payload.data[0] || {};
+  return payload || {};
+};
+
+const getLocationNameFromSearchValue = (value = "") =>
+  String(value || "")
+    .split(",")[0]
+    ?.trim() || "";
+
+const resolveBannerImage = (record) => {
+  const candidate =
+    record?.location?.banner_image?.url ||
+    record?.location?.image?.url ||
+    record?.media?.url ||
+    record?.image?.url ||
+    record?.banner_image?.url ||
+    record?.background_image?.url ||
+    record?.url ||
+    record?.location?.banner_image ||
+    record?.location?.image ||
+    record?.image ||
+    record?.banner_image ||
+    record?.background_image ||
+    "";
+
+  if (!candidate) return DEFAULT_HERO.image;
+  if (/^https?:\/\//i.test(candidate)) return candidate;
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${candidate}`;
+};
 
 const TourHeroSection = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("from") || "");
   const [to, setTo] = useState(searchParams.get("to") || "");
@@ -36,9 +78,52 @@ const TourHeroSection = () => {
   });
 
   const [travelClass, setTravelClass] = useState("Economy");
+  const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
+  const [heroBackgroundImage, setHeroBackgroundImage] = useState(
+    DEFAULT_HERO.image
+  );
+  const bannerLocationName =
+    getLocationNameFromSearchValue(searchParams.get("to")) || "Ottawa";
 
   const totalPassengers =
     passengers.adult + passengers.child + passengers.infant;
+
+  const { data: publicBannerResponse } = useQuery({
+    queryKey: ["tour-public-banner", bannerLocationName],
+    queryFn: () => getPublicBanner(bannerLocationName),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  useEffect(() => {
+    if (!publicBannerResponse) return;
+
+    const banner = getBannerRecord(publicBannerResponse);
+    setHeroContent({
+      image: resolveBannerImage(banner),
+      heading:
+        banner?.location?.name ||
+        banner?.heading ||
+        banner?.title ||
+        banner?.name ||
+        banner?.location_name ||
+        DEFAULT_HERO.heading,
+      subHeading: DEFAULT_HERO.subHeading,
+    });
+  }, [publicBannerResponse]);
+
+  useEffect(() => {
+    const imageUrl = heroContent?.image || DEFAULT_HERO.image;
+
+    if (imageUrl === DEFAULT_HERO.image) {
+      setHeroBackgroundImage(DEFAULT_HERO.image);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => setHeroBackgroundImage(imageUrl);
+    img.onerror = () => setHeroBackgroundImage(DEFAULT_HERO.image);
+    img.src = imageUrl;
+  }, [heroContent?.image]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -158,10 +243,38 @@ const TourHeroSection = () => {
   }, []);
 
   const [activeTab, setActiveTab] = useState("");
+  const tabContainerRef = useRef(null);
   const travellerOptions = [
     { value: "1_room_2_adult", label: "1 Room, 2 Adults" },
     { value: "2_room_4_adult", label: "2 Rooms, 4 Adults" },
   ];
+
+  useEffect(() => {
+    if (!activeTab) return;
+
+    const handleClickOutside = (e) => {
+      if (
+        tabContainerRef.current &&
+        !tabContainerRef.current.contains(e.target)
+      ) {
+        setActiveTab("");
+      }
+    };
+
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setActiveTab("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [activeTab]);
 
   const openDeparturePicker = () => {
     const input = departureRef.current;
@@ -189,8 +302,52 @@ const TourHeroSection = () => {
       input.focus();
     }
   };
+
+  const handleSearch = () => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+
+    if (from) {
+      nextParams.set("from", from);
+    } else {
+      nextParams.delete("from");
+    }
+
+    if (to) {
+      nextParams.set("to", to);
+    } else {
+      nextParams.delete("to");
+    }
+
+    if (departureDate) {
+      nextParams.set("date", departureDate);
+    } else {
+      nextParams.delete("date");
+    }
+
+    router.push(`/tour-list?${nextParams.toString()}`);
+  };
+
+  const handleDestinationApply = ({ countries = [] } = {}) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    const selectedCountry = Array.isArray(countries)
+      ? countries.filter(Boolean).join(",")
+      : "";
+
+    if (selectedCountry) {
+      nextParams.set("country", selectedCountry);
+    } else {
+      nextParams.delete("country");
+    }
+
+    setActiveTab("");
+    router.push(`/tour-list?${nextParams.toString()}`);
+  };
+
   return (
-    <section className={styles.tourHeroSection}>
+    <section
+      className={styles.tourHeroSection}
+      style={{ backgroundImage: `url("${heroBackgroundImage}")` }}
+    >
       <div className={styles.overlay}></div>
       <div>
         <Navbar scrollProgress={scrollProgress} />
@@ -317,24 +474,28 @@ const TourHeroSection = () => {
                     setPassengers={setPassengers}
                     travelClass={travelClass}
                     setTravelClass={setTravelClass}
+                    showPreferredClass={false}
                   />
                 </TripTypeProvider>
               </div>
             </div>
 
             {/* Search Button */}
-            <div className={`${styles.searchBtn} ${styles.pos5}`}>
+            <div
+              className={`${styles.searchBtn} ${styles.pos5}`}
+              onClick={handleSearch}
+            >
               <img src="/icons/blueSearchIcon.svg" alt="" />
             </div>
           </div>
         </div>
         <div className={styles.textcontainer}>
-          <p className={styles.para}>Discover the destination</p>
-          <h2 className={styles.heading}>CANADA</h2>
+          <p className={styles.para}>{heroContent.subHeading}</p>
+          <h2 className={styles.heading}>{heroContent.heading}</h2>
         </div>
       </div>
 
-      <div className={styles.tabContainer}>
+      <div className={styles.tabContainer} ref={tabContainerRef}>
         <button
           type="button"
           className={`${styles.tab} ${
@@ -360,7 +521,9 @@ const TourHeroSection = () => {
             activeTab === "destination" ? styles.openFilter : styles.closeFilter
           }`}
         >
-          {activeTab === "destination" && <DestinationFilter />}
+          {activeTab === "destination" && (
+            <DestinationFilter onApply={handleDestinationApply} />
+          )}
         </div>
 
         <button

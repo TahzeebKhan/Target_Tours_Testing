@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./DestinationFilter.module.css";
 import CustomCheckbox from "@/shared/components/CustomCheckbox";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 
 const REGIONS = [
   { id: "africa", label: "Africa", imageUrl: "/images/africa.png" },
@@ -20,32 +22,73 @@ const REGIONS = [
   { id: "antarctica", label: "Antarctica", imageUrl: "/images/antarctica.png" },
 ];
 
-const COUNTRIES = [
-  "Zambia",
-  "Kenya",
-  "Ghana",
-  "Tanzania",
-  "Senegal",
-  "Namibia",
-  "Botswana",
-  "Uganda",
-  "Zimbabwe",
-  "Burkina Faso",
-  "Rwanda",
-  "Ethiopia",
-  "Togo",
-  "Malawi",
-  "Angola",
-  "Mali",
-  "Swaziland",
-  "Lesotho",
-  "Sierra Leone",
-  "Côte d'Ivoire",
-];
-
 const DestinationFilter = ({ onApply }) => {
+  const searchParams = useSearchParams();
+  const initialCountries = useMemo(
+    () =>
+      String(searchParams.get("country") || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    [searchParams]
+  );
   const [selectedRegions, setSelectedRegions] = useState([]);
-  const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedCountries, setSelectedCountries] = useState(initialCountries);
+
+  useEffect(() => {
+    setSelectedCountries(initialCountries);
+  }, [initialCountries]);
+
+  const continentsParam = useMemo(() => {
+    const selectedLabels = REGIONS.filter((region) =>
+      selectedRegions.includes(region.id)
+    ).map((region) => region.label.toLowerCase());
+
+    return selectedLabels.join(",");
+  }, [selectedRegions]);
+
+  const { data: availableLocationsResponse } = useQuery({
+    queryKey: ["holiday-available-locations", continentsParam],
+    queryFn: async () => {
+      const query = new URLSearchParams({
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+      });
+
+      if (continentsParam) {
+        query.set("continents", continentsParam);
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-package-filters/available-locations?${query.toString()}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch available locations");
+      }
+
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const availableCountries = useMemo(() => {
+    const countries = availableLocationsResponse?.data?.countries;
+
+    if (!Array.isArray(countries) || countries.length === 0) {
+      return [];
+    }
+
+    return countries
+      .map((country) => country?.label || country?.value || "")
+      .filter(Boolean);
+  }, [availableLocationsResponse]);
 
   const toggleCountry = (country) => {
     setSelectedCountries((prev) =>
@@ -65,6 +108,10 @@ const DestinationFilter = ({ onApply }) => {
   const resetFilters = () => {
     setSelectedRegions([]);
     setSelectedCountries([]);
+    onApply?.({
+      continents: [],
+      countries: [],
+    });
   };
 
   return (
@@ -106,14 +153,15 @@ const DestinationFilter = ({ onApply }) => {
         <div className={styles.rightPart}>
           <h3 className={styles.heading}>Select Country</h3>
 
-          <div className={styles.countryGrid}>
-            {COUNTRIES.map((country) => (
+            <div className={styles.countryGrid}>
+            {availableCountries.map((country) => (
               <button
                 key={country}
                 className={`${styles.countryBtn} ${selectedCountries.includes(country)
                     ? styles.activeCountry
                     : ""
                   }`}
+                type="button"
                 onClick={() => toggleCountry(country)}
               >
                 {country}
@@ -127,7 +175,12 @@ const DestinationFilter = ({ onApply }) => {
             </button>
             <button
               className={styles.applyBtn}
-              onClick={() => onApply?.({ selectedRegion, selectedCountries })}
+              onClick={() =>
+                onApply?.({
+                  continents: selectedRegions,
+                  countries: selectedCountries,
+                })
+              }
             >
               Apply Filters
             </button>

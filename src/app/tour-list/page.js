@@ -6,9 +6,11 @@ import FlightFilters from "./components/flightFilter/FlightsFilters";
 import TourListing from "./components/tourListing/TourListing";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { SidebarContext } from "./SidebarContext";
+import { useSearchParams } from "next/navigation";
 
 const ToursPage = () => {
   const isTablet = useMediaQuery("(max-width: 1156px)");
+  const searchParams = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // const [filters, setFilters] = useState({})
@@ -23,6 +25,7 @@ const ToursPage = () => {
   // const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
   const [filterData, setFilterData] = useState(null); // 🔥 Store dynamic filter options from API
+  const selectedCountry = searchParams.get("country") || "";
 
   const handleDataLoaded = (meta) => {
     if (meta?.counts) {
@@ -121,7 +124,10 @@ const ToursPage = () => {
             {/* RESULTS */}
             <div className={styles.tourResults}>
               <TourListing
-                filters={filters}
+                filters={{
+                  ...filters,
+                  country: selectedCountry,
+                }}
                 page={page}
                 setPage={setPage}
                 onDataLoaded={handleDataLoaded} // 🔥 Receive data

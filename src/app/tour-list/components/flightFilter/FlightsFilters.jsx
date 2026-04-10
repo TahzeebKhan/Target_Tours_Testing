@@ -49,7 +49,14 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
       api.max_nights = filters.nights[1];
     }
 
-    if (Array.isArray(filters.price)) {
+    const hasCustomPrice =
+      Array.isArray(filters.price) &&
+      (
+        filters.price[0] !== DEFAULT_PRICE[0] ||
+        filters.price[1] !== DEFAULT_PRICE[1]
+      );
+
+    if (hasCustomPrice) {
       api.min_price = filters.price[0];
       api.max_price = filters.price[1];
     }
