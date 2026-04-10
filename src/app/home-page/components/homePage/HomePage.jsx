@@ -778,9 +778,24 @@ const HomePage = ({
     };
     const normalizedTravelClass = String(travelClass || "Economy").toUpperCase();
 
-    const getFirstMissingFieldMessage = (fields) => {
-      const firstMissingField = fields.find(Boolean);
-      return firstMissingField ? `Please fill: ${firstMissingField}.` : "";
+    const getValidationMessage = (fieldKey) => {
+      const messages = {
+        flightFrom: "Select where you're flying from.",
+        flightTo: "Select where you want to fly.",
+        flightDepartureDate: "Choose your departure date.",
+        flightReturnDate: "Choose your return date to search round-trip flights.",
+        hotelDestination: "Choose the city or hotel destination.",
+        hotelCheckIn: "Select your check-in date.",
+        hotelCheckOut: "Select your check-out date.",
+        holidayFrom: "Select your departure city for this holiday.",
+        holidayTo: "Choose a destination, country, or category.",
+        holidayDepartureDate: "Choose your holiday departure date.",
+        insuranceDestination: "Choose where you are travelling.",
+        insuranceStartDate: "Select your travel start date.",
+        insuranceEndDate: "Select your return date.",
+      };
+
+      return messages[fieldKey] || "Please complete the required field.";
     };
 
     if (bookingType === "flight") {
@@ -792,12 +807,21 @@ const HomePage = ({
 
         if (incompleteLegIndex >= 0) {
           const leg = searchLegs?.[incompleteLegIndex];
-          const missingFields = [
-            !leg?.from ? `From in leg ${incompleteLegIndex + 1}` : "",
-            !leg?.to ? `To in leg ${incompleteLegIndex + 1}` : "",
-            !leg?.departureDate ? `Departure date in leg ${incompleteLegIndex + 1}` : "",
-          ];
-          toast.error(getFirstMissingFieldMessage(missingFields));
+          if (!leg?.from) {
+            toast.error(`Select where you're flying from in trip ${incompleteLegIndex + 1}.`);
+            return;
+          }
+
+          if (!leg?.to) {
+            toast.error(`Select where you want to fly in trip ${incompleteLegIndex + 1}.`);
+            return;
+          }
+
+          if (!leg?.departureDate) {
+            toast.error(`Choose a departure date for trip ${incompleteLegIndex + 1}.`);
+            return;
+          }
+
           return;
         }
       } else {
@@ -807,39 +831,47 @@ const HomePage = ({
             : flightDates?.round?.start;
         const endDate = finalTripType === "round" ? flightDates?.round?.end : "";
 
-        const missingFields = [
-          !from ? "From" : "",
-          !to ? "To" : "",
-          !startDate ? "Departure date" : "",
-          finalTripType === "round" && !endDate ? "Return date" : "",
-        ];
+        if (!from) {
+          toast.error(getValidationMessage("flightFrom"));
+          return;
+        }
 
-        if (missingFields.some(Boolean)) {
-          toast.error(getFirstMissingFieldMessage(missingFields));
+        if (!to) {
+          toast.error(getValidationMessage("flightTo"));
+          return;
+        }
+
+        if (!startDate) {
+          toast.error(getValidationMessage("flightDepartureDate"));
+          return;
+        }
+
+        if (finalTripType === "round" && !endDate) {
+          toast.error(getValidationMessage("flightReturnDate"));
           return;
         }
       }
     }
 
     if (bookingType === "hotel" && (!to || !hotelStartDate || !hotelEndDate)) {
-      toast.error(
-        getFirstMissingFieldMessage([
-          !to ? "Destination" : "",
-          !hotelStartDate ? "Check in" : "",
-          !hotelEndDate ? "Check out" : "",
-        ]),
-      );
+      if (!to) {
+        toast.error(getValidationMessage("hotelDestination"));
+      } else if (!hotelStartDate) {
+        toast.error(getValidationMessage("hotelCheckIn"));
+      } else {
+        toast.error(getValidationMessage("hotelCheckOut"));
+      }
       return;
     }
 
     if (bookingType === "holiday" && (!from || !to || !holidayStartDate)) {
-      toast.error(
-        getFirstMissingFieldMessage([
-          !from ? "From city" : "",
-          !to ? "To city/country/category" : "",
-          !holidayStartDate ? "Departure date" : "",
-        ]),
-      );
+      if (!from) {
+        toast.error(getValidationMessage("holidayFrom"));
+      } else if (!to) {
+        toast.error(getValidationMessage("holidayTo"));
+      } else {
+        toast.error(getValidationMessage("holidayDepartureDate"));
+      }
       return;
     }
 
@@ -852,15 +884,16 @@ const HomePage = ({
         !insuranceEndDate
       )
     ) {
-      toast.error(
-        getFirstMissingFieldMessage([
-          !travellerDestination || travellerDestination === "SELECT DESTINATION"
-            ? "Travel destination"
-            : "",
-          !insuranceStartDate ? "Travel date" : "",
-          !insuranceEndDate ? "Return date" : "",
-        ]),
-      );
+      if (
+        !travellerDestination ||
+        travellerDestination === "SELECT DESTINATION"
+      ) {
+        toast.error(getValidationMessage("insuranceDestination"));
+      } else if (!insuranceStartDate) {
+        toast.error(getValidationMessage("insuranceStartDate"));
+      } else {
+        toast.error(getValidationMessage("insuranceEndDate"));
+      }
       return;
     }
 
@@ -2193,6 +2226,7 @@ const HomePage = ({
                           setPassengers={setPassengers}
                           travelClass={travelClass}
                           setTravelClass={setTravelClass}
+                          showPreferredClass={false}
                         />
                       )}
                       {bookingType === "insurance" && (

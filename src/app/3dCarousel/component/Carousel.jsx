@@ -148,7 +148,7 @@ const Carousel = ({ slideData = [] }) => {
       >
         {/* Slides */}
         {slideData.map((slide, index) => {
-           console.log("slide6",slide)
+          //  console.log("slide6",slide)
           const slideNumber = slide.carouselId ?? index + 1;
           const isActive = currentSlide === slideNumber;
           const slideStyle = getSlideStyle(slideNumber);

@@ -10,6 +10,22 @@
   gap: 24px;
 }
 
+.emptyState {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  border: 1px solid #e6e6e6;
+  background: #ffffff;
+  color: #1a1f36;
+  font-family: Antic Didone;
+  font-size: 28px;
+  line-height: 1.2;
+  text-align: center;
+}
+
 /* COMMON animation
 @keyframes slideUpFade {
   from {

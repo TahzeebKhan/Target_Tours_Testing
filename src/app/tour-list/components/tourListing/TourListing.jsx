@@ -101,6 +101,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     data,
     tourDataFallback,
   });
+  const hasNoResults = !isLoading && !isFetching && tourData.length === 0;
   const totalResults = Number(meta?.pagination?.total ?? tourData.length) || 0;
   const loadedCount = tourData.length;
   const startResult = loadedCount > 0 ? 1 : 0;
@@ -161,7 +162,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {tourData.map((item, index) => (
+              {hasNoResults ? (
+                <div className={styles.emptyState}>No package found</div>
+              ) : (
+                tourData.map((item, index) => (
                 <motion.div
                   className={styles.card}
                   onClick={() => handleBookNow(item.id)}
@@ -321,7 +325,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                     )}
                   </AnimatePresence>
                 </motion.div>
-              ))}
+                ))
+              )}
             </motion.div>
           )}
 
@@ -334,7 +339,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {tourData.map((item, index) => (
+              {hasNoResults ? (
+                <div className={styles.emptyState}>No package found</div>
+              ) : (
+                tourData.map((item, index) => (
                 <motion.div
                   className={styles.ListViewCardContainer}
                   key={item.id}
@@ -469,7 +477,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                     </div>
                   </motion.div>
                 </motion.div>
-              ))}
+                ))
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -555,7 +564,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
           <div
             className={`${styles.ListViewWrapper} ${styles.ListViewWrapperMobile}`}
           >
-            {tourData.map((item, index) => (
+            {hasNoResults ? (
+              <div className={styles.emptyState}>No package found</div>
+            ) : (
+              tourData.map((item, index) => (
               <div
                 className={`${styles.ListViewCardContainer} ${styles.ListViewCardContainerMobile}`}
                 key={item.id}
@@ -691,7 +703,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                   </div>
                 </motion.div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

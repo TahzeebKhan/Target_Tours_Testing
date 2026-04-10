@@ -12,6 +12,7 @@ const PassengerClassSelector = ({
   setPassengers,
   travelClass,
   setTravelClass,
+  showPreferredClass = true,
 }) => {
   const ref = useRef(null);
 
@@ -86,20 +87,24 @@ const PassengerClassSelector = ({
         ))}
       </div>
 
-      <h4 className={styles.heading}>Preferred Class</h4>
+      {showPreferredClass && (
+        <>
+          <h4 className={styles.heading}>Preferred Class</h4>
 
-      <div className={styles.classGrid}>
-        {CLASSES.map((cls) => (
-          <button
-            key={cls}
-            className={`${styles.classBtn} ${travelClass === cls ? styles.active : ""
-              }`}
-            onClick={() => setTravelClass(cls)}
-          >
-            {cls}
-          </button>
-        ))}
-      </div>
+          <div className={styles.classGrid}>
+            {CLASSES.map((cls) => (
+              <button
+                key={cls}
+                className={`${styles.classBtn} ${travelClass === cls ? styles.active : ""
+                  }`}
+                onClick={() => setTravelClass(cls)}
+              >
+                {cls}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className={styles.applyBtnContainer}>
         <button className={styles.applyBtn} onClick={() => setOpen(false)} >apply</button>
