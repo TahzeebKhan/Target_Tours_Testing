@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import styles from "./HotelDetailLayout.module.css";
 import Footer from "../home-page/components/footer/Footer";
-import HeroSection from "./Components/heroSection/HeroSection";
-import RoomSelectionCard from "./Components/roomSelectionCard/RoomSelectionCard";
-import Tabs from "./Components/tabs/Tabs";
+import HeroSection from "./components/heroSection/HeroSection";
+import RoomSelectionCard from "./components/roomSelectionCard/RoomSelectionCard";
+import Tabs from "./components/tabs/Tabs";
 import Navbar from "./Navbar";
-import HotelDetaislMobileView from "./Components/hotelDetailsMobileView/HotelDetaislMobileView";
+import HotelDetaislMobileView from "./components/hotelDetailsMobileView/HotelDetaislMobileView";
 import FeatureSection from "../home-page/components/featureSection/FeatureSection";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
