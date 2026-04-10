@@ -9,6 +9,14 @@ import { SidebarContext } from "./SidebarContext";
 import { useSearchParams } from "next/navigation";
 
 const ToursPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ToursPageContent />
+    </Suspense>
+  );
+};
+
+const ToursPageContent = () => {
   const isTablet = useMediaQuery("(max-width: 1156px)");
   const searchParams = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
