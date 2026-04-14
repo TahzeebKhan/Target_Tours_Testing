@@ -249,6 +249,7 @@ const TravelerDetailsMobileView = ({ onClose }) => {
     const validation = validateTravelerForm({
       travelerDetails: serializeTravelers(travelers),
       bookingContactDetails: bookingContact,
+      checklistResponse: bookingSession?.checklistResponse,
     });
 
     setTravelerFormErrors(validation.errors);

@@ -34,6 +34,7 @@ const PassengerDetails = () => {
     const validation = validateTravelerForm({
       travelerDetails,
       bookingContactDetails,
+      checklistResponse: bookingSession?.checklistResponse,
     });
 
     setTravelerFormErrors(validation.errors);

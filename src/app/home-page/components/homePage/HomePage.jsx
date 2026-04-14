@@ -15,6 +15,7 @@ import HotelDropDown from "@/shared/components/hotelDropDown/HotelDropDown";
 import HotelDateCalendarModal from "@/shared/components/hotelCalendar/HotelDateCalendarModal";
 import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
 import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
+import HolidayGuestSelector from "./HolidayGuestSelector";
 
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -369,6 +370,7 @@ const HomePage = ({
     const handleClickOutside = (e) => {
       if (travellerRef.current && !travellerRef.current.contains(e.target)) {
         setTravellerOpen(false);
+        setTravellerOpend(false);
       }
 
       if (
@@ -408,6 +410,7 @@ const HomePage = ({
     const handleEsc = (e) => {
       if (e.key === "Escape") {
         setTravellerOpen(false);
+        setTravellerOpend(false);
         setFromSuggestionsOpen(false);
         setToSuggestionsOpen(false);
         setActiveSuggestion(null);
@@ -421,7 +424,7 @@ const HomePage = ({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEsc);
     };
-  }, [activeSuggestion, travellerOpen]);
+  }, [activeSuggestion, travellerOpen, travellerOpend]);
 
   const truncate = (str, max = 10) => {
     if (!str) return "";
@@ -2219,14 +2222,11 @@ const HomePage = ({
                         />
                       )}
                       {bookingType === "holiday" && (
-                        <PassengerClassSelector
+                        <HolidayGuestSelector
                           open={travellerOpend}
                           setOpen={setTravellerOpend}
                           passengers={passengers}
                           setPassengers={setPassengers}
-                          travelClass={travelClass}
-                          setTravelClass={setTravelClass}
-                          showPreferredClass={false}
                         />
                       )}
                       {bookingType === "insurance" && (

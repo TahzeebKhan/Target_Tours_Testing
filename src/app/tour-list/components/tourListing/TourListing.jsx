@@ -509,10 +509,10 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               <div className={styles.TripCardHeaderBookingDate}>
                 <p>Wed, 03 Dec</p>
                 <p>
-                  <div className={styles.navDot}></div>1 Traveller
+                  <span className={styles.navDot}></span>1 Traveller
                 </p>
                 <p>
-                  <div className={styles.navDot}></div>Economy
+                  <span className={styles.navDot}></span>Economy
                 </p>
               </div>
             </div>
