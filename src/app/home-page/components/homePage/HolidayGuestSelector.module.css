@@ -1,0 +1,98 @@
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 388px;
+  max-width: 388px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #171717;
+  border: 0.5px solid #ffffff;
+  box-shadow: 0 4px 35px 0 #0000000d;
+  font-family: var(--font-inter);
+  z-index: 999;
+}
+
+.heading {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #ffffff;
+}
+
+.counterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.counterButton {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #c7c9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.counterButton:hover {
+  background-color: #ffffff;
+  color: #000033;
+}
+
+.counterButton:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.counter span {
+  min-width: 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.applyButtonWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.applyButton {
+  max-width: 170px;
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #fcc800;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+}

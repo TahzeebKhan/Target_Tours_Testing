@@ -4,6 +4,11 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const shouldRetryRequest = (error) => {
   const status = error?.response?.status;
+  const isInvalidTravellerChecklist = error?.code === "INVALID_TRAVELLER_CHECKLIST";
+
+  if (isInvalidTravellerChecklist) {
+    return true;
+  }
 
   if (!status) {
     return true;
@@ -38,6 +43,18 @@ const postWithRetry = async (
   throw lastError;
 };
 
+const hasValidTravellerChecklist = (responseData) =>
+  Array.isArray(responseData?.data?.raw?.TravellerCheckList);
+
+const createInvalidTravellerChecklistError = (responseData) => {
+  const error = new Error("TravellerCheckList is not an array");
+
+  error.code = "INVALID_TRAVELLER_CHECKLIST";
+  error.response = { data: responseData };
+
+  return error;
+};
+
 export const getFlightPrice = async (payload) => {
   const response = await api.post("/api/flights/price", {
     ...payload,
@@ -65,24 +82,47 @@ export const getFlightWebSettings = async (payload) => {
 };
 
 export const getFlightTravelChecklist = async (payload) => {
-  const response = await postWithRetry(
-    "/api/flights/travel-check-list",
-    {
-      ...payload,
-      domain: "localhost:1337",
+  const requestPayload = {
+    ...payload,
+    domain: "localhost:1337",
+  };
+  const requestOptions = {
+    headers: {
+      "Content-Type": "application/json",
     },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-    {
-      retries: 2,
-      retryDelayMs: 1000,
-    }
-  );
+  };
+  let lastError;
 
-  return response?.data;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await postWithRetry(
+        "/api/flights/travel-check-list",
+        requestPayload,
+        requestOptions,
+        {
+          retries: 2,
+          retryDelayMs: 1000,
+        }
+      );
+
+      if (hasValidTravellerChecklist(response?.data)) {
+        return response?.data;
+      }
+
+      lastError = createInvalidTravellerChecklistError(response?.data);
+    } catch (error) {
+      lastError = error;
+    }
+
+    const isLastAttempt = attempt === 2;
+    if (isLastAttempt || !shouldRetryRequest(lastError)) {
+      throw lastError;
+    }
+
+    await wait(1000 * (attempt + 1));
+  }
+
+  throw lastError;
 };
 
 export const getFlightSsr = async (payload) => {

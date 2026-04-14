@@ -382,6 +382,14 @@
   transition: transform 0.3s ease;
 }
 
+.openChevron {
+  transform: rotate(180deg);
+}
+
+.closeChevron {
+  transform: rotate(0);
+}
+
 @media (max-width: 1200px) {
   .tabContainer {
     padding: 0 20px;

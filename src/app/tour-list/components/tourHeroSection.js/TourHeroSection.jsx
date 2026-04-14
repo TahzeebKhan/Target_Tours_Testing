@@ -6,14 +6,13 @@ import DestinationFilter from "../tabsFilters/DestinationFilter";
 import TravellerFilter from "../tabsFilters/TravellerFilter";
 import PreferencesFilter from "../tabsFilters/PreferencesFilter";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
-import { TripTypeProvider } from "@/app/flights/TripTypeContext";
-import PassengerClassSelector from "@/app/home-page/components/homePage/PassengerClassSelector";
 import { ChevronDown } from "lucide-react";
 import DateField from "../dateField/DateField";
 import { useRouter, useSearchParams } from "next/navigation";
 import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicBanner } from "@/shared/services/heroApi";
+import TourGuestSelector from "./TourGuestSelector";
 
 const DEFAULT_HERO = {
   image: "/images/tourHeroImage.png",
@@ -68,16 +67,13 @@ const TourHeroSection = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const [travellerOpend, setTravellerOpend] = useState(false);
-
   const travellerRef = useRef(null);
-
   const [passengers, setPassengers] = useState({
     adult: 1,
     child: 0,
     infant: 0,
   });
 
-  const [travelClass, setTravelClass] = useState("Economy");
   const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
   const [heroBackgroundImage, setHeroBackgroundImage] = useState(
     DEFAULT_HERO.image
@@ -126,14 +122,16 @@ const TourHeroSection = () => {
   }, [heroContent?.image]);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (travellerRef.current && !travellerRef.current.contains(e.target)) {
+    if (!travellerOpend) return;
+
+    const handleClickOutside = (event) => {
+      if (travellerRef.current && !travellerRef.current.contains(event.target)) {
         setTravellerOpend(false);
       }
     };
 
-    const handleEsc = (e) => {
-      if (e.key === "Escape") {
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
         setTravellerOpend(false);
       }
     };
@@ -145,7 +143,7 @@ const TourHeroSection = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEsc);
     };
-  }, []);
+  }, [travellerOpend]);
 
   const recentSearches = [
     {
@@ -440,9 +438,9 @@ const TourHeroSection = () => {
             <div
               ref={travellerRef}
               className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setTravellerOpend((prev) => !prev);
+              onClick={(event) => {
+                event.stopPropagation();
+                setTravellerOpend((current) => !current);
               }}
             >
               <div className={styles.lable}>ROOMS & GUESTS</div>
@@ -451,7 +449,6 @@ const TourHeroSection = () => {
                 <span className={styles.guestCount}>
                   {`${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""}`}
                 </span>
-
                 <ChevronDown
                   className={`${styles.guestChevron} ${
                     travellerOpend ? styles.openChevron : styles.closeChevron
@@ -461,23 +458,12 @@ const TourHeroSection = () => {
                 />
               </div>
 
-              <div
-                style={{
-                  display: travellerOpend ? "block" : "none",
-                }}
-              >
-                <TripTypeProvider>
-                  <PassengerClassSelector
-                    open={true}
-                    setOpen={setTravellerOpend}
-                    passengers={passengers}
-                    setPassengers={setPassengers}
-                    travelClass={travelClass}
-                    setTravelClass={setTravelClass}
-                    showPreferredClass={false}
-                  />
-                </TripTypeProvider>
-              </div>
+              <TourGuestSelector
+                open={travellerOpend}
+                setOpen={setTravellerOpend}
+                passengers={passengers}
+                setPassengers={setPassengers}
+              />
             </div>
 
             {/* Search Button */}

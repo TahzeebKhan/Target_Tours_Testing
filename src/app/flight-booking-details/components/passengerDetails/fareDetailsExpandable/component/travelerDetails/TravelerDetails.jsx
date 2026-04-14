@@ -163,6 +163,7 @@ const TravelerDetails = () => {
         const validation = validateTravelerForm({
             travelerDetails: serializeTravelers(travelers),
             bookingContactDetails: bookingContact,
+            checklistResponse: bookingSession?.checklistResponse,
         });
         const nextErrors = JSON.stringify(validation.errors || EMPTY_TRAVELER_FORM_ERRORS);
         if (currentErrors !== nextErrors) {

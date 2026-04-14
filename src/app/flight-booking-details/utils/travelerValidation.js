@@ -12,6 +12,21 @@ const getDigitCount = (value = "") => String(value).match(DIGITS_PATTERN)?.lengt
 
 const isBlank = (value) => String(value ?? "").trim() === "";
 
+const getTravelerChecklistRules = (checklistResponse = {}) => {
+  const rawChecklist =
+    checklistResponse?.data?.raw?.TravellerCheckList ||
+    checklistResponse?.raw?.TravellerCheckList ||
+    [];
+
+  if (!Array.isArray(rawChecklist) || rawChecklist.length === 0) {
+    return {};
+  }
+
+  return rawChecklist[0] || {};
+};
+
+const isChecklistFieldRequired = (rules, field) => Number(rules?.[field]) === 1;
+
 const getTravelerAgeError = (traveler) => {
   const ageValue = Number(traveler?.Age);
   if (!Number.isFinite(ageValue)) {
@@ -32,7 +47,7 @@ const getTravelerAgeError = (traveler) => {
   return "";
 };
 
-const validateTraveler = (traveler = {}, index = 0) => {
+const validateTraveler = (traveler = {}, index = 0, checklistRules = {}) => {
   const errors = {};
 
   if (isBlank(traveler.Title)) errors.Title = "Title is required.";
@@ -44,7 +59,7 @@ const validateTraveler = (traveler = {}, index = 0) => {
   const ageError = getTravelerAgeError(traveler);
   if (ageError) errors.Age = ageError;
 
-  if (isBlank(traveler.DOB)) {
+  if (isChecklistFieldRequired(checklistRules, "DOB") && isBlank(traveler.DOB)) {
     errors.DOB = "DOB is required.";
   }
 
@@ -60,21 +75,33 @@ const validateTraveler = (traveler = {}, index = 0) => {
     errors.Email = "Enter a valid Email.";
   }
 
-  if (isBlank(traveler.Nationality)) errors.Nationality = "Nationality is required.";
+  if (
+    isChecklistFieldRequired(checklistRules, "Nationality") &&
+    isBlank(traveler.Nationality)
+  ) {
+    errors.Nationality = "Nationality is required.";
+  }
 
-  if (isBlank(traveler.PassportNo)) {
+  if (isChecklistFieldRequired(checklistRules, "PassportNo") && isBlank(traveler.PassportNo)) {
     errors.PassportNo = "Passport No is required.";
-  } else if (!PASSPORT_PATTERN.test(String(traveler.PassportNo).trim())) {
+  } else if (
+    !isBlank(traveler.PassportNo) &&
+    !PASSPORT_PATTERN.test(String(traveler.PassportNo).trim())
+  ) {
     errors.PassportNo = "Enter a valid Passport No.";
   }
 
-  if (isBlank(traveler.PLI)) errors.PLI = "Passport Issue Place is required.";
+  if (isChecklistFieldRequired(checklistRules, "PLI") && isBlank(traveler.PLI)) {
+    errors.PLI = "Passport Issue Place is required.";
+  }
 
-  if (isBlank(traveler.PDOE)) {
+  if (isChecklistFieldRequired(checklistRules, "PDOE") && isBlank(traveler.PDOE)) {
     errors.PDOE = "Passport Expiry is required.";
   }
 
-  if (isBlank(traveler.VisaType)) errors.VisaType = "Visa Type is required.";
+  if (isChecklistFieldRequired(checklistRules, "VisaType") && isBlank(traveler.VisaType)) {
+    errors.VisaType = "Visa Type is required.";
+  }
 
   const entries = Object.values(errors);
   return {
@@ -119,11 +146,13 @@ const validateBookingContact = (bookingContact = {}) => {
 export const validateTravelerForm = ({
   travelerDetails = [],
   bookingContactDetails = {},
+  checklistResponse = null,
 }) => {
   const nextErrors = {
     travelers: {},
     bookingContact: {},
   };
+  const checklistRules = getTravelerChecklistRules(checklistResponse);
 
   if (!Array.isArray(travelerDetails) || travelerDetails.length === 0) {
     return {
@@ -135,7 +164,7 @@ export const validateTravelerForm = ({
 
   let firstMessage = "";
   travelerDetails.forEach((traveler, index) => {
-    const travelerValidation = validateTraveler(traveler, index);
+    const travelerValidation = validateTraveler(traveler, index, checklistRules);
     if (Object.keys(travelerValidation.errors).length > 0) {
       nextErrors.travelers[traveler.id || `traveler-${index + 1}`] = travelerValidation.errors;
       if (!firstMessage) firstMessage = travelerValidation.message;
