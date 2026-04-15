@@ -66,73 +66,6 @@ const ArrivalToronto = ({ data }) => {
     "TOUR POLICY",
   ];
 
-  const activitiesData = [
-    {
-      id: 1,
-      image: "/images/yourAtivityImage2.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 2,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 3,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 4,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-  ];
-
   const tabVariants = {
     initial: {
       opacity: 0,
@@ -209,14 +142,90 @@ const ArrivalToronto = ({ data }) => {
     },
   ];
 
-  const nextDayIndex =
-    (activeDayIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length;
+  const itineraryDays = Array.isArray(data?.package_itinerarie)
+    ? [...data.package_itinerarie].sort(
+        (a, b) => (a?.day_number ?? 0) - (b?.day_number ?? 0),
+      )
+    : [];
+
+  const currentDayData = itineraryDays[activeDayIndex] || itineraryDays[0] || null;
+  const activeDayNumber = currentDayData?.day_number || 1;
+  const currentDayTitle = currentDayData?.title
+    ? `Day ${activeDayNumber} – ${currentDayData.title}`
+    : "Day 1 – Arrival in Toronto";
+  const currentDayDescription =
+    currentDayData?.description ||
+    "Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure";
+  const getMediaUrl = (url) =>
+    url ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}` : "";
+  const currentDayActivitiesSource = Array.isArray(currentDayData?.package_activities)
+    && currentDayData.package_activities.length
+      ? currentDayData.package_activities
+      : Array.isArray(currentDayData?.builder_data?.activities)
+        ? currentDayData.builder_data.activities
+        : [];
+  const mappedActivities = currentDayActivitiesSource
+    .filter((item) => item?.enabled !== false)
+    .map((item) => ({
+      id: item?.id,
+      image:
+        getMediaUrl(item?.images?.[0]?.url) || "/images/yourAtivityImage3.png",
+      category: item?.time_slot
+        ? `${item.time_slot} activity`
+        : "Activity",
+      title: item?.description || item?.name || "Activity",
+      popupTitle: item?.name || "Activity",
+      description: item?.description || currentDayDescription,
+      startTime: item?.start_time || "",
+      endTime: item?.end_time || "",
+      images: (item?.images || []).map((image) => getMediaUrl(image?.url)).filter(Boolean),
+      actions: [
+        {
+          label: "view",
+          type: "view",
+        },
+        {
+          label: "add +",
+          type: "add",
+        },
+      ],
+    }));
+  const activitiesData = mappedActivities.length
+    ? mappedActivities
+    : [
+        {
+          id: `activity-empty-${activeDayNumber}`,
+          image: "/images/yourAtivityImage3.png",
+          category: "N/A",
+          title: "N/A",
+          popupTitle: "N/A",
+          description: "N/A",
+          startTime: "",
+          endTime: "",
+          images: ["/images/yourAtivityImage3.png"],
+          actions: [],
+        },
+      ];
+
+  const safeImageIndex = dayImgeFilter.length
+    ? activeDayIndex % dayImgeFilter.length
+    : 0;
+  const nextDayIndex = dayImgeFilter.length
+    ? (safeImageIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length
+    : 0;
 
   const handleNextDayImage = () => {
     setActiveDayIndex((prev) =>
-      prev === dayImgeFilter.length - 1 ? 0 : prev + 1,
+      itineraryDays.length ? (prev === itineraryDays.length - 1 ? 0 : prev + 1) : 0,
     );
   };
+
+  useEffect(() => {
+    if (!itineraryDays.length) return;
+    if (activeDayIndex > itineraryDays.length - 1) {
+      setActiveDayIndex(0);
+    }
+  }, [activeDayIndex, itineraryDays.length]);
 
   const [activeTab, setActiveTab] = useState("DAY Itinerary");
 
@@ -260,7 +269,18 @@ const ArrivalToronto = ({ data }) => {
       <div className={styles.container}>
         <div className={styles.leftContainer}>
           {activeTab !== "INCLUSION & EXCLUSION" &&
-            activeTab !== "TOUR POLICY" && <DaySlider />}
+            activeTab !== "TOUR POLICY" && (
+              <DaySlider
+                days={itineraryDays.map((item) => item?.day_number)}
+                activeDay={activeDayNumber}
+                onDaySelect={(dayNumber) => {
+                  const nextIndex = itineraryDays.findIndex(
+                    (item) => item?.day_number === dayNumber,
+                  );
+                  if (nextIndex !== -1) setActiveDayIndex(nextIndex);
+                }}
+              />
+            )}
 
           <AnimatePresence mode="wait">
             {activeTab === "DAY Itinerary" && (
@@ -269,7 +289,7 @@ const ArrivalToronto = ({ data }) => {
                   className={`${styles.ArrivalContainer} ${styles.ArrivalContainerDayIn}`}
                 >
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
                     1 flight, 1 hotel, 1 meal, 1 Transfer
@@ -284,14 +304,7 @@ const ArrivalToronto = ({ data }) => {
                   className={styles.leftBottomCont}
                 >
                   <div className={styles.paraCoontainer}>
-                    <p>
-                      Our journey begins with a scenic arrival in Toronto, where
-                      vibrant city energy meets the calm of waterfront views.
-                      After a smooth airport welcome, settle into your hotel and
-                      enjoy time to unwind from your flight. In the evening,
-                      explore the city at a relaxed pace or enjoy a curated din
-                      odern Canadian cuisine, setting the tone for the adventure
-                    </p>
+                    <p>{currentDayDescription}</p>
                     {/* <HotelRoom/> */}
                   </div>
 
@@ -304,7 +317,7 @@ const ArrivalToronto = ({ data }) => {
                     >
                       <div className={`${styles.ArrivalContainerMobile}`}>
                         <div className={styles.ArrivalRight}>
-                          <h2>Day 1 – Arrival in Toronto</h2>
+                          <h2>{currentDayTitle}</h2>
                         </div>
                         <div className={styles.ArrivalLeft}>
                           1 flight, 1 hotel, 1 meal, 1 Transfer
@@ -327,15 +340,7 @@ const ArrivalToronto = ({ data }) => {
                         <div
                           className={`${styles.paraCoontainer} ${styles.paraCoontainerMobile}`}
                         >
-                          <p>
-                            Our journey begins with a scenic arrival in Toronto,
-                            where vibrant city energy meets the calm of
-                            waterfront views. After a smooth airport welcome,
-                            settle into your hotel and enjoy time to unwind from
-                            your flight. In the evening, explore the city at a
-                            relaxed pace or enjoy a curated din odern Canadian
-                            cuisine, setting the tone for the adventure
-                          </p>
+                          <p>{currentDayDescription}</p>
                           {/* <HotelRoom/> */}
                         </div>
                       </div>
@@ -697,7 +702,7 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
                     1 flight, 1 hotel, 1 meal, 1 Transfer
@@ -722,7 +727,7 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
                     1 flight, 1 hotel, 1 meal, 1 Transfer
@@ -844,7 +849,7 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
                     1 flight, 1 hotel, 1 meal, 1 Transfer
@@ -1097,7 +1102,7 @@ const ArrivalToronto = ({ data }) => {
             {activeTab === "INCLUSION & EXCLUSION" && (
               <InclusionExclusion data={data} />
             )}
-            {activeTab === "TOUR POLICY" && <TourPolicy />}
+            {activeTab === "TOUR POLICY" && <TourPolicy data={data} />}
           </AnimatePresence>
         </div>
         <div className={styles.rightContainer}>
@@ -1105,7 +1110,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`bg-${activeDayIndex}`}
-                src={dayImgeFilter[nextDayIndex].image}
+                src={dayImgeFilter[nextDayIndex]?.image}
                 alt=""
                 className={styles.bgImage}
                 initial={{ opacity: 0 }}
@@ -1120,7 +1125,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`carousel-${activeDayIndex}`}
-                src={dayImgeFilter[activeDayIndex].image}
+                src={dayImgeFilter[safeImageIndex]?.image}
                 alt=""
                 className={styles.carouselImage}
                 initial={{ opacity: 0.5 }}
@@ -1132,8 +1137,8 @@ const ArrivalToronto = ({ data }) => {
 
             <div className={styles.DayImageTextCont}>
               <div className={styles.textCont}>
-                <h4>{dayImgeFilter[activeDayIndex].day}</h4>
-                <h4>{dayImgeFilter[activeDayIndex].desc}</h4>
+                <h4>{`Day ${String(activeDayNumber).padStart(2, "0")}`}</h4>
+                <h4>{currentDayData?.location?.city || dayImgeFilter[safeImageIndex]?.desc}</h4>
               </div>
 
               <div className={styles.leftRightBtn} onClick={handleNextDayImage}>
@@ -1161,16 +1166,21 @@ export default ArrivalToronto;
 
 const InclusionExclusion = ({ data }) => {
   const parseListFromDescription = (arr) => {
-    if (!Array.isArray(arr) || !arr[0]?.description) return [];
+    if (!Array.isArray(arr) || arr.length === 0) return [];
 
-    return arr[0].description
-      .split(/\n+/) // handles \n and \n\n
-      .map((item) => item.trim())
-      .filter(Boolean); // removes empty lines
+    return [...arr]
+      .sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
+      .flatMap((item) =>
+        String(item?.description || "")
+          .split(/\n+/)
+          .map((line) => line.trim())
+          .filter(Boolean),
+      );
   };
 
-  const inclusions = parseListFromDescription(data?.package_inclusion);
-  const exclusions = parseListFromDescription(data?.package_exclusion);
+  const inclusions = parseListFromDescription(data?.inclusions);
+  const exclusions = parseListFromDescription(data?.exclusions);
+  
 
   return (
     <section className={styles.inclusionWrapper}>
@@ -1180,7 +1190,7 @@ const InclusionExclusion = ({ data }) => {
       <div className={styles.block}>
         <h3 className={styles.inclusionSubHeading}>INCLUSION</h3>
 
-        {inclusions.length === 0 ? (
+        {data?.inclusions.length === 0 ? (
           <p className={styles.emptyText}>No inclusions available.</p>
         ) : (
           <ul className={styles.inclusionList}>
@@ -1219,78 +1229,37 @@ const InclusionExclusion = ({ data }) => {
   );
 };
 
-const TourPolicy = () => {
-  const tourPolicyList = [];
+const TourPolicy = ({ data }) => {
+  const tripPolicies = Array.isArray(data?.trip_policies)
+    ? [...data.trip_policies]
+        .filter((policy) => policy?.enabled !== false)
+        .sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
+    : [];
 
   return (
     <section className={styles.tourPolicyWrapper}>
       <h2 className={styles.inclusionHeading}>TOUR POLICY</h2>
-      {/* <div className={styles.divider} /> */}
 
-      {/* INCLUSION */}
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Confirmation Policy:</h3>
-        <div className={styles.tourPolicyPara}>
-          <p>
-            The customer receives a confirmation voucher via email within 24
-            hours of successful booking. In case the preferred slots are
-            unavailable, an alternate schedule of the customer’s preference will
-            be arranged and a new confirmation voucher will be sent via email.
-          </p>
-          <p>
-            Alternatively, the customer may choose to cancel their booking
-            before confirmation and a full refund will be processed.
-          </p>
-        </div>
-      </div>
-
-      {/* EXCLUSION */}
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Cancellation Policy:</h3>
-        <div className={styles.tourPolicyList}>
-          <ul className={styles.list}>
-            <li>
-              <strong>10 days:</strong> 100%
-            </li>
-            <li>
-              <strong>10 to 15 days:</strong> 75% + Non Refundable Component
-            </li>
-            <li>
-              <strong>15 to 30 days:</strong> 30% + Non Refundable Component
-            </li>
-            <li>
-              <strong>Hotel / Air:</strong> 100% in case of non-refundable
-              ticket / Hotel Room
-            </li>
-            <li>
-              <strong>Cruise / Visa:</strong> On Actuals
-            </li>
-          </ul>
-          <p>
-            All Prices are in Indian Rupees and subject to change without prior
-            notice.
-          </p>
-          <p>
-            In the case FIT flight inclusive package, the full amount of the
-            flight will be payable at the time of booking.
-          </p>
-        </div>
-      </div>
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Refund Policy:</h3>
-        <div className={styles.tourPolicyList}>
-          <ul className={styles.list}>
-            <li>
-              The applicable refund amount will be processed within 10 business
-              days.
-            </li>
-            <li>
-              All applicable refunds will be done in the traveler's
-              Thrillophilia wallet as Thrillcash.
-            </li>
-          </ul>
-        </div>
-      </div>
+      {tripPolicies.length === 0 ? (
+        <p className={styles.emptyText}>No tour policies available.</p>
+      ) : (
+        tripPolicies.map((policy) => (
+          <div
+            key={policy?.id ?? `${policy?.title}-${policy?.sort_order}`}
+            className={styles.tourBlock}
+          >
+            <h3 className={styles.inclusionSubHeading}>
+              {policy?.title || "Policy"}
+            </h3>
+            <div
+              className={styles.tourPolicyPara}
+              dangerouslySetInnerHTML={{
+                __html: policy?.description || "<p>No description available.</p>",
+              }}
+            />
+          </div>
+        ))
+      )}
     </section>
   );
 };

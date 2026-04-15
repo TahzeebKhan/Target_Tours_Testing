@@ -34,7 +34,7 @@ const BetweenMajesticPeaks = ({ data }) => {
   ];
 
   const renderExtraInfo = (blocks) => {
-    if (!Array.isArray(blocks) || blocks.length === 0) return null;
+    // if (!Array.isArray(blocks) || blocks.length === 0) return null;
 
     return blocks.map((block, index) => {
       switch (block.type) {
@@ -107,7 +107,7 @@ const BetweenMajesticPeaks = ({ data }) => {
     );
   };
   const galleryImages =
-    data?.package_media
+    data?.package_media_entries
       ?.flatMap((item) => item.package_media || [])
       ?.sort((a, b) => (b.width || 0) - (a.width || 0)) // 🔥 biggest first
       ?.slice(0, 5) || [];
@@ -119,7 +119,22 @@ const BetweenMajesticPeaks = ({ data }) => {
       <div className={styles.container}>
         <div className={styles.topContainer}>
           <div className={styles.paraContainer}>
-            {renderExtraInfo(data?.extra_info)}
+            {/* {renderExtraInfo(data?.extra_info)} */}
+          
+            <h2  className={styles.heading}>
+              {/* {block.children?.map((child) => child.text).join("")} */}
+              {data?.extra_info_heading}
+            </h2>
+       
+
+      
+            {/* <p > */}
+              {/* {block.children?.map((child) => child.text).join("")} */}
+              {/* {data?.extra_info} */}
+            {/* </p> */}
+            <p
+  dangerouslySetInnerHTML={{ __html: data?.extra_info }}
+/>
           </div>
         </div>
 

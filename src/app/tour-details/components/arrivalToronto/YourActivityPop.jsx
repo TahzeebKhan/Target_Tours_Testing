@@ -5,7 +5,10 @@ import styles from "./YourActivityPop.module.css";
 
 const YourActivityPop = ({ isOpen, hotel, onClose }) => {
     const [selected, setSelected] = useState([]);
-
+    const timeText =
+        hotel?.startTime && hotel?.endTime
+            ? `${hotel.startTime} - ${hotel.endTime}`
+            : hotel?.startTime || hotel?.endTime || "";
 
     return (
         <AnimatePresence>
@@ -27,7 +30,7 @@ const YourActivityPop = ({ isOpen, hotel, onClose }) => {
                     >
                         {/* HEADER */}
                         <div className={styles.popupHeader}>
-                            <h4>{hotel?.title ? hotel.title : hotel?.category ? hotel.category : 'Details'}</h4>
+                            <h4>{hotel?.popupTitle ? hotel.popupTitle : hotel?.title ? hotel.title : hotel?.category ? hotel.category : 'Details'}</h4>
                             <button onClick={onClose} className={styles.closeBtn}>✕</button>
                         </div>
 
@@ -36,15 +39,15 @@ const YourActivityPop = ({ isOpen, hotel, onClose }) => {
                             <div className={styles.popupRight}>
                                 <div className={styles.cardContent}>
                                     <div className={styles.cardTop}>
-                                        <h4 className={styles.eveningActivity}>EVENING ACTIVITY</h4>
-                                        <h3 className={styles.hotelTitle}>{hotel?.title}</h3>
+                                        <h4 className={styles.eveningActivity}>{hotel?.category || "ACTIVITY"}</h4>
+                                        <h3 className={styles.hotelTitle}>{hotel?.popupTitle || hotel?.title}</h3>
                                         <div className={styles.schaduleTime}>
                                             <img src="/icons/watchBlack.svg" alt="" />
-                                            <span>6:00 PM - 7:30 PM</span>
+                                            <span>{timeText || "Schedule unavailable"}</span>
 
                                         </div>
                                     </div>
-                                    <p className={styles.hotelDec}>The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb.</p>
+                                    <p className={styles.hotelDec}>{hotel?.description || "No details available."}</p>
 
                                 </div>
                                 <div className={styles.popupRight}>

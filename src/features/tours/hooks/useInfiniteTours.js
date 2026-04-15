@@ -8,7 +8,7 @@ export const useInfiniteTours = ({ filters = {} }) => {
     queryKey: ["tours", { filters }],
     queryFn: fetchTours,
     keepPreviousData: true,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 0,
     getNextPageParam: (lastPage) => {
       const pagination = lastPage.meta?.pagination;
       if (!pagination) return undefined;

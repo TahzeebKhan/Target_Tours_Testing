@@ -20,6 +20,11 @@ const ToursPageContent = () => {
   const isTablet = useMediaQuery("(max-width: 1156px)");
   const searchParams = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const selectedCountry = searchParams.get("country") || "";
+  const selectedFrom = searchParams.get("from") || "";
+  const selectedTo = searchParams.get("to") || "";
+  const selectedThemes = searchParams.get("themes") || "";
+  const selectedPackageType = searchParams.get("package_type") || "";
 
   // const [filters, setFilters] = useState({})
   const [filters, setFilters] = useState({
@@ -33,8 +38,6 @@ const ToursPageContent = () => {
   // const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
   const [filterData, setFilterData] = useState(null); // 🔥 Store dynamic filter options from API
-  const selectedCountry = searchParams.get("country") || "";
-
   const handleDataLoaded = (meta) => {
     if (meta?.counts) {
       setFilterData(meta.counts);
@@ -135,6 +138,10 @@ const ToursPageContent = () => {
                 filters={{
                   ...filters,
                   country: selectedCountry,
+                  from: selectedFrom,
+                  to: selectedTo,
+                  themes: selectedThemes,
+                  package_type: selectedPackageType,
                 }}
                 page={page}
                 setPage={setPage}

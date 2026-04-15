@@ -1,5 +1,5 @@
 .section {
-    background-image: url("/images/tripGighlights.jpg");
+    background-image: var(--bg-image, url("/images/tripGighlights.jpg"));
     height: 754px;
     background-size: cover;
     background-position: center;
@@ -14,6 +14,9 @@
     margin: 0 auto;
 }
 .containerMobile{
+    background-image: var(--bg-image, url("/images/tripGighlights.jpg"));
+    background-size: cover;
+    background-position: center;
     display: none !important;
     width: 100%;
     height: 100%;

@@ -1,11 +1,12 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import styles from "./RoundTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import SortBySheet from "../SortBySheet";
+import SortByDropdown from "../SortByDropdown";
 import FlightDetailsCard from "../PhoneViewComponents/roundTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
@@ -613,6 +614,7 @@ const RoundTrip = ({
   sortHighlights = null,
   hasSearched = false,
   isLoading = false,
+  isRefreshing = false,
 }) => {
   const { committedSearches, handleSearch } = useTripType();
   const [openSort, setOpenSort] = useState(false);
@@ -620,6 +622,8 @@ const RoundTrip = ({
   const [fareModalOpen, setFareModalOpen] = useState(null);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
   const { setIsSidebarOpen } = useContext(SidebarContext);
+  const sortTriggerRef = useRef(null);
+  const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
   const {
     filters,
     filterChips,
@@ -725,6 +729,7 @@ const RoundTrip = ({
     !isLoading &&
     visibleFlights.length === 0 &&
     visibleTripCards.length === 0;
+  const showLoadingState = isLoading || isRefreshing;
 
   return (
     <>
@@ -787,6 +792,7 @@ const RoundTrip = ({
               </div>
             </div>
             <div
+              ref={sortTriggerRef}
               onClick={() => setOpenSort(true)}
               className={styles.sortByContainer}
             >
@@ -796,7 +802,7 @@ const RoundTrip = ({
           </div>
         </div>
         <div>
-          {isLoading ? (
+          {showLoadingState ? (
             <RoundTripSkeleton />
           ) : hasNoData ? (
             <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -918,7 +924,7 @@ const RoundTrip = ({
             </div>
           </div>
         </div>
-        {isLoading ? (
+        {showLoadingState ? (
           <RoundTripSkeleton />
         ) : hasNoData ? (
           <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -938,14 +944,26 @@ const RoundTrip = ({
           />
         )}
       </section>
-      <SortBySheet
-        open={openSort}
-        onClose={() => setOpenSort(false)}
-        selectedValue={filters.sortBy}
-        onApply={(value) => {
-          setSortBy(value);
-        }}
-      />
+      {isSortSheetMobile ? (
+        <SortBySheet
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      ) : (
+        <SortByDropdown
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          anchorRef={sortTriggerRef}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      )}
     </>
   );
 };

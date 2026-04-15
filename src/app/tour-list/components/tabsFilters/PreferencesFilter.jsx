@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./PreferencesFilter.module.css";
 import CustomCheckbox from "@/shared/components/CustomCheckbox";
 
@@ -30,7 +31,17 @@ const PREFERENCES = [
 const MAX_SELECTION = 5;
 
 const PreferencesFilter = ({ onApply }) => {
-  const [selectedPrefs, setSelectedPrefs] = useState([]);
+  const searchParams = useSearchParams();
+  const [selectedPrefs, setSelectedPrefs] = useState(() => {
+    const selectedThemes = (searchParams.get("themes") || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return selectedThemes.filter((id) =>
+      PREFERENCES.some((preference) => preference.id === id),
+    );
+  });
 
   const togglePreference = (id) => {
     setSelectedPrefs((prev) => {

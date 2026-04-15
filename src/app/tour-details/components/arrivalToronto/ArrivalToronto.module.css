@@ -259,7 +259,7 @@
 .ArrivalContainer {
     display: flex;
     justify-content: space-between;
-    height: 41px;
+    /* height: 41px; */
     border-bottom: 1px solid #E4E6E8;
 }
 

@@ -2,32 +2,23 @@ import React from "react";
 import styles from "./TripHighlights.module.css";
 
 const TripHighlights = ({ data }) => {
-  const highlightBlock = data?.package_highlights?.[0];
+  const highlightBlock = Array.isArray(data?.trip_highlights)
+    ? [...data.trip_highlights].sort(
+        (a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0),
+      )[0]
+    : null;
 
-  const highlights = Array.isArray(highlightBlock?.highlights)
-    ? highlightBlock.highlights
-    : [];
+  const heading = highlightBlock?.title || "Trip Highlights";
 
-  // Heading
-  const heading =
-    highlights.find((item) => item.type === "heading")?.children?.[0]?.text ||
-    "Trip Highlights";
-
-  // List items
-  const items = highlights
-    .filter((item) => item.type === "paragraph")
-    .map((item, index) => ({
+  const items = String(highlightBlock?.body || "")
+    .match(/<li>(.*?)<\/li>/g)?.map((item, index) => ({
       id: index,
-      text: item?.children?.[0]?.text?.trim(),
-    }))
-    .filter((item) => item.text);
+      text: item.replace(/<\/?li>/g, "").trim(),
+    })) || [];
 
-  // ✅ Background image (safe)
   const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
   const bgImagePath =
-    highlightBlock?.background_media?.formats?.large?.url ||
-    highlightBlock?.background_media?.url ||
+    highlightBlock?.background_image?.url ||
     "";
 
   const bgImage = BASE_URL && bgImagePath ? `${BASE_URL}${bgImagePath}` : null;

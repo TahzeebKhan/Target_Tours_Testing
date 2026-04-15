@@ -341,6 +341,38 @@ const TourHeroSection = () => {
     router.push(`/tour-list?${nextParams.toString()}`);
   };
 
+  const handlePreferencesApply = (selectedPrefs = []) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    const selectedThemes = Array.isArray(selectedPrefs)
+      ? selectedPrefs.filter(Boolean).join(",")
+      : "";
+
+    if (selectedThemes) {
+      nextParams.set("themes", selectedThemes);
+    } else {
+      nextParams.delete("themes");
+    }
+
+    setActiveTab("");
+    router.push(`/tour-list?${nextParams.toString()}`);
+  };
+
+  const handleTravellerApply = (selectedProfiles = []) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    const selectedPackageTypes = Array.isArray(selectedProfiles)
+      ? selectedProfiles.filter(Boolean).join(",")
+      : "";
+
+    if (selectedPackageTypes) {
+      nextParams.set("package_type", selectedPackageTypes);
+    } else {
+      nextParams.delete("package_type");
+    }
+
+    setActiveTab("");
+    router.push(`/tour-list?${nextParams.toString()}`);
+  };
+
   return (
     <section
       className={styles.tourHeroSection}
@@ -537,7 +569,9 @@ const TourHeroSection = () => {
             activeTab === "traveler" ? styles.openFilter : styles.closeFilter
           }`}
         >
-          {activeTab === "traveler" && <TravellerFilter />}
+          {activeTab === "traveler" && (
+            <TravellerFilter onApply={handleTravellerApply} />
+          )}
         </div>
 
         <button
@@ -565,7 +599,9 @@ const TourHeroSection = () => {
             activeTab === "preferences" ? styles.openFilter : styles.closeFilter
           }`}
         >
-          {activeTab === "preferences" && <PreferencesFilter />}
+          {activeTab === "preferences" && (
+            <PreferencesFilter onApply={handlePreferencesApply} />
+          )}
         </div>
       </div>
     </section>
