@@ -122,6 +122,11 @@
     cursor: pointer;
 }
 
+.monthHeader button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
 /* WEEK DAYS */
 .weekDays {
     display: grid;
@@ -193,6 +198,15 @@
     color: #0F172A;
     opacity: 0.5;
     cursor: default;
+}
+
+.disabledDate {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.disabledDate .priceText {
+    color: #94A3B8;
 }
 
 .selected {

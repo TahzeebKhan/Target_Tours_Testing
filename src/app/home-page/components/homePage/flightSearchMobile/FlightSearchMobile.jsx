@@ -12,6 +12,8 @@ import MultiCityMobile from "./MultiCityMobile";
 const FlightSearchMobile = ({
   handleSearch,
   styles,
+  tripType,
+  setTripType,
   setIsMultiTripMobile,
   swapLocations,
   from,
@@ -31,6 +33,7 @@ const FlightSearchMobile = ({
   setPassengers,
   travelClass,
   setTravelClass,
+  faresByDate,
   truncate,
 }) => {
   const [multiFlights, setMultiFlights] = useState([
@@ -47,7 +50,6 @@ const FlightSearchMobile = ({
   const [openTo, setOpenTo] = useState(false);
   const [openFrom, setOpenFrom] = useState(false);
   const travellerRef = useRef(null);
-  const [tripType, setTripType] = useState("round");
   const handleTripTypeChange = (type) => {
     setTripType(type);
   };
@@ -268,7 +270,7 @@ const FlightSearchMobile = ({
             </div>
 
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch({ tripType })}
               className={styles.searchBtna}
               disabled={isSearchLoading}
             >
@@ -414,7 +416,7 @@ const FlightSearchMobile = ({
             </div>
 
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch({ tripType })}
               className={styles.searchBtna}
               disabled={isSearchLoading}
             >
@@ -428,6 +430,7 @@ const FlightSearchMobile = ({
             inputType={tripType === "oneway" ? "oneway" : "roundtrip"}
             selectedDeparture={departureDate}
             selectedReturn={returnDate}
+            faresByDate={faresByDate}
             onSelectDate={({ departure, returnDate }) => {
               if (departure) setDepartureDate(departure);
               if (returnDate !== undefined) setReturenDate(returnDate);

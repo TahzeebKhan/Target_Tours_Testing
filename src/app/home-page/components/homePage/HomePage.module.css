@@ -231,7 +231,7 @@
   width: 100%;
   display: flex;
   position: absolute;
-  top: 45.5%;
+  bottom: 2.5%;
   justify-content: center;
 }
 
@@ -878,7 +878,7 @@
 
   left: 50%;
   /* transform: translate(-50%); */
-  padding-top: 21px;
+  /* padding-top: 21px; */
 }
 
 .featureRow {
@@ -1500,6 +1500,9 @@
   .glass_panel {
     display: none;
   }
+  .searchSec{
+    display: none;
+  }
 
   .flightSectionMain {
     display: block;
@@ -1577,6 +1580,7 @@
 
   .navContainer {
     border-bottom: 1px solid rgba(227, 227, 227, 0.5);
+    z-index: 2;
   }
 
   .serarchingContTop_left {

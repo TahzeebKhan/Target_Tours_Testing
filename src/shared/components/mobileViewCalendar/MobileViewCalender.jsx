@@ -8,10 +8,29 @@ export default function MobileViewCalender({ onClose,
     inputType,
     onSelectDate,
     selectedDeparture,
-    selectedReturn, }) {
-    const [currentDate, setCurrentDate] = useState(new Date(2025, 1)); // Feb 2025
+    selectedReturn,
+    faresByDate = {}, }) {
+    const getToday = () => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    };
+
+    const getInitialCalendarMonth = () => {
+        const sourceDate = selectedDeparture || new Date();
+        const parsedDate =
+            sourceDate instanceof Date ? sourceDate : new Date(sourceDate);
+
+        if (isNaN(parsedDate.getTime())) {
+            return new Date();
+        }
+
+        return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1);
+    };
+
+    const [currentDate, setCurrentDate] = useState(getInitialCalendarMonth);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [today] = useState(getToday);
 
 
 
@@ -22,6 +41,10 @@ export default function MobileViewCalender({ onClose,
             inputType === "roundtrip" ? selectedReturn || null : null
         );
     }, [selectedDeparture, selectedReturn, inputType]);
+
+    useEffect(() => {
+        setCurrentDate(getInitialCalendarMonth());
+    }, [selectedDeparture]);
 
 
     useEffect(() => {
@@ -35,6 +58,11 @@ export default function MobileViewCalender({ onClose,
 
     const isSameDay = (d1, d2) =>
         d1 && d2 && d1.toDateString() === d2.toDateString();
+
+    const isBeforeToday = (date) => {
+        if (!date) return false;
+        return date < today;
+    };
 
     const isInRange = (item) => {
         if (
@@ -59,9 +87,13 @@ export default function MobileViewCalender({ onClose,
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevMonthDays = new Date(year, month, 0).getDate();
 
-    const getPriceForDate = (day, muted) => {
-        if (muted) return null; // previous month → no price
-        return 2500 + (day % 5) * 400; // demo dynamic price
+    const getPriceForDate = (dateKey, muted) => {
+        if (muted || !dateKey) return null;
+
+        const rawFare = faresByDate?.[dateKey];
+        const parsedFare = Number(rawFare);
+
+        return Number.isFinite(parsedFare) && parsedFare > 0 ? parsedFare : null;
     };
     const getPriceTrend = (currentPrice, prevPrice) => {
         if (!prevPrice) return "normal";
@@ -86,7 +118,8 @@ export default function MobileViewCalender({ onClose,
     let lastPrice = null;
 
     for (let d = 1; d <= daysInMonth; d++) {
-        const price = getPriceForDate(d, false);
+        const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const price = getPriceForDate(dateKey, false);
         const trend = getPriceTrend(price, lastPrice);
 
         dates.push({
@@ -94,6 +127,7 @@ export default function MobileViewCalender({ onClose,
             muted: false,
             price,
             trend,
+            dateKey,
             monthOffset: 0, // 🔥 IMPORTANT
         });
 
@@ -103,6 +137,13 @@ export default function MobileViewCalender({ onClose,
         return new Date(year, month + item.monthOffset, item.day);
     };
 
+    const isCurrentMonthBeforeToday = (item) =>
+        item.monthOffset === 0 && isBeforeToday(buildDate(item));
+
+    const canGoToPreviousMonth =
+        year > today.getFullYear() ||
+        (year === today.getFullYear() && month > today.getMonth());
+
     const totalDays =
         startDate && endDate
             ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
@@ -111,7 +152,7 @@ export default function MobileViewCalender({ onClose,
                 : 0;
 
     const handleDateClick = (item) => {
-        if (item.muted) return;
+        if (item.muted || isCurrentMonthBeforeToday(item)) return;
 
         const clickedDate = buildDate(item);
 
@@ -198,9 +239,11 @@ export default function MobileViewCalender({ onClose,
                     <div className={styles.monthHeader}>
                         <button
                             className={styles.leftBtn}
-                            onClick={() =>
-                                setCurrentDate(new Date(year, month - 1))
-                            }
+                            onClick={() => {
+                                if (!canGoToPreviousMonth) return;
+                                setCurrentDate(new Date(year, month - 1));
+                            }}
+                            disabled={!canGoToPreviousMonth}
                         >
                             <img src="/icons/Chevron.svg" alt="" />
                         </button>
@@ -234,6 +277,7 @@ export default function MobileViewCalender({ onClose,
                                 className={`
         ${styles.dateCell}
         ${item.muted ? styles.muted : ""}
+        ${isCurrentMonthBeforeToday(item) ? styles.disabledDate : ""}
         ${inputType === "oneway" && isSameDay(buildDate(item), startDate) ? styles.selected : ""}
         ${inputType === "roundtrip" && isSameDay(buildDate(item), startDate)
                                         ? styles.rangeStart
@@ -247,7 +291,11 @@ ${inputType === "roundtrip" && isInRange(item)
                                         ? styles.inRange
                                         : ""}
     `}
-                                onClick={() => !item.muted && handleDateClick(item)}
+                                onClick={() =>
+                                    !item.muted &&
+                                    !isCurrentMonthBeforeToday(item) &&
+                                    handleDateClick(item)
+                                }
                             >
                                 <span className={styles.dayText}>{item.day}</span>
 

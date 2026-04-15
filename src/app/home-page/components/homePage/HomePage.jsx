@@ -304,6 +304,15 @@ const HomePage = ({
 
   const [direction, setDirection] = useState("right");
   const [flightDirection, setFlightDirection] = useState("right");
+  const getQueryDateValue = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+    }
+    return "";
+  };
+  const todayQueryDate = getQueryDateValue(new Date());
   const activeLegIndex = activeMultiIndex ?? 0;
   const datewiseFrom =
     tripType === "multi"
@@ -315,12 +324,19 @@ const HomePage = ({
       : to;
   const datewiseDepartureDate =
     tripType === "round"
-      ? flightDates.round.start
+      ? flightDates.round.start ||
+        getQueryDateValue(departureDate) ||
+        todayQueryDate
       : tripType === "oneway"
-        ? flightDates.oneway.start
+        ? flightDates.oneway.start ||
+          getQueryDateValue(departureDate) ||
+          todayQueryDate
         : flightDates.multi?.[activeLegIndex]?.date;
   const datewiseReturnDate =
-    tripType === "round" ? flightDates.round.end : "";
+    tripType === "round"
+      ? flightDates.round.end ||
+        getQueryDateValue(returnDate)
+      : "";
   const { data: datewiseFareData } = useDatewiseFare({
     tripType,
     from: datewiseFrom,
@@ -749,6 +765,20 @@ const HomePage = ({
     return `${day}-${month}-${year}`;
   };
 
+  const normalizeSearchDate = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+
+    const parsedDate = new Date(value);
+    if (isNaN(parsedDate.getTime())) return "";
+
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const normalizePlaceValue = (value = "") =>
     String(value || "")
       .trim()
@@ -830,9 +860,12 @@ const HomePage = ({
       } else {
         const startDate =
           finalTripType === "oneway"
-            ? flightDates?.oneway?.start
-            : flightDates?.round?.start;
-        const endDate = finalTripType === "round" ? flightDates?.round?.end : "";
+            ? flightDates?.oneway?.start || normalizeSearchDate(departureDate)
+            : flightDates?.round?.start || normalizeSearchDate(departureDate);
+        const endDate =
+          finalTripType === "round"
+            ? flightDates?.round?.end || normalizeSearchDate(returnDate)
+            : "";
 
         if (!from) {
           toast.error(getValidationMessage("flightFrom"));
@@ -951,10 +984,13 @@ const HomePage = ({
       // ROUND / ONEWAY
       const startDate =
         finalTripType === "oneway"
-          ? flightDates.oneway.start
-          : flightDates.round.start;
+          ? flightDates.oneway.start || normalizeSearchDate(departureDate)
+          : flightDates.round.start || normalizeSearchDate(departureDate);
 
-      const endDate = finalTripType === "round" ? flightDates.round.end : "";
+      const endDate =
+        finalTripType === "round"
+          ? flightDates.round.end || normalizeSearchDate(returnDate)
+          : "";
 
       if (from && to && isSamePlace(from, to, fromCode, toCode)) {
         setSearchSubmitting(false);
@@ -1078,7 +1114,13 @@ const HomePage = ({
             <div
               className={`${styles.navbar}  w-full flex  justify-between items-center`}
             >
-              <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+              <Link
+                href="/"
+                className="cursor-pointer"
+                onClick={() => setMenuOpen(false)}
+              >
+                <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+              </Link>
               <div className={`${styles.navRight} flex gap-3`}>
                 <button
                   className={`${styles.glass_button} ${styles.downloadBtn}`}
@@ -1182,11 +1224,17 @@ const HomePage = ({
           <img className={styles.gradient} src="/images/gradient.png" />
         </header>
         <div className={`${styles.overlay} absolute inset-0`}></div>
-        <div className={`${styles.navContainer} absolute top-0 z-[1002]`}>
+        <div
+          className={`${styles.navContainer} absolute top-0 z-[1002] ${
+            menuOpen ? "hidden" : ""
+          }`}
+        >
           <div
             className={`${styles.navbar}  w-full flex  justify-between items-center`}
           >
-            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            <Link href="/" className="cursor-pointer">
+              <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            </Link>
             <div className={`${styles.navRight} flex gap-3`}>
               <button
                 className={`${styles.glass_button} ${styles.downloadBtn}`}
@@ -1236,6 +1284,41 @@ const HomePage = ({
             <h1>{heroData.heading}</h1>
             <p>{heroData.description}</p>
           </div>
+
+     
+
+          <div className={styles.featureStrip}>
+            <div
+              className={styles.progress}
+              ref={progressRef}
+              style={{
+                "--active-index": String(activeFeature),
+                "--count": String(features.length),
+              }}
+            >
+              <div className={styles.progressActive}></div>
+            </div>
+
+            <div className={styles.featureRow} ref={featureRowRef}>
+              {features.map((f) => (
+                <button
+                  key={f.id}
+                  className={`${styles.feature} ${
+                    activeFeature === f.id ? styles.featureActive : ""
+                  }`}
+                  onClick={() => handleFeatureClick(f)}
+                  type="button"
+                >
+                  <img src={f.icon} className={styles.icon} alt="" />
+                  <div className={styles.featurelabel}>{f.label}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+
+
+          {/* =======================================below search filed============================================ */}
 
           <div
             className={`${styles.searchSec} flex flex-col gap-[127px] items-center`}
@@ -2259,41 +2342,14 @@ const HomePage = ({
               )}
             </div>
           </div>
-
-          <div className={styles.featureStrip}>
-            <div
-              className={styles.progress}
-              ref={progressRef}
-              style={{
-                "--active-index": String(activeFeature),
-                "--count": String(features.length),
-              }}
-            >
-              <div className={styles.progressActive}></div>
-            </div>
-
-            <div className={styles.featureRow} ref={featureRowRef}>
-              {features.map((f) => (
-                <button
-                  key={f.id}
-                  className={`${styles.feature} ${
-                    activeFeature === f.id ? styles.featureActive : ""
-                  }`}
-                  onClick={() => handleFeatureClick(f)}
-                  type="button"
-                >
-                  <img src={f.icon} className={styles.icon} alt="" />
-                  <div className={styles.featurelabel}>{f.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Mobile sections remain same as original with DateField */}
         {/* Mobile sections remain same as original with DateField */}
         {bookingType === "flight" && (
           <FlightSearchMobile
+            tripType={tripType}
+            setTripType={setTripType}
             setIsMultiTripMobile={setIsMultiTripMobile}
             styles={styles}
             swapLocations={swapLocations}
@@ -2316,6 +2372,7 @@ const HomePage = ({
             setTravelClass={setTravelClass}
             passengers={passengers}
             setPassengers={setPassengers}
+            faresByDate={datewiseFaresByDate}
             truncate={truncate}
           />
         )}
