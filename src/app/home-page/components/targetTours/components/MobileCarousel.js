@@ -6,10 +6,12 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
+import { useRouter } from "next/navigation";
 
 const MobileCarousel = ({ cards = [], activeTab }) => {
   const [swiperRef, setSwiperRef] = useState(null)
   const [startIndex, setStartIndex] = useState(0);
+  const router = useRouter();
 
   if (!cards.length) return null;
 
@@ -90,6 +92,8 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
                       key={card.id}
                       className={`${styles.card} ${idx === 1 ? styles.active : styles.side
                         }`}
+                      onClick={() => router.push(`/tour-details?id=${card.id}`)}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className={styles.imageWrap}>
                         <Image src={card.img} alt={card.title} fill />

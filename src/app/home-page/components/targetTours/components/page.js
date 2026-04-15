@@ -57,6 +57,8 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
                   idx == 2 ? styles.rightCard : ""
                 }`}
                 key={card.id}
+                onClick={() => router.push(`/tour-details?id=${card.id}`)}
+                style={{ cursor: "pointer" }}
               >
                 <img
                   className={`${idx == 0 ? styles.leftImg : ""} ${
@@ -84,7 +86,10 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
                   </div>
 
                   <button className={styles.arrowBtn}
-                     onClick={()=> router.push(`/tour-details?id=${card.id}`)}
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       router.push(`/tour-details?id=${card.id}`);
+                     }}
                   >
                     <svg
                       width="30"

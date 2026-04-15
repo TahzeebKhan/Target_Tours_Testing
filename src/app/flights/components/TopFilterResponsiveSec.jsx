@@ -11,6 +11,7 @@ import { useTripType } from "../TripTypeContext";
 import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
 import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
+import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
 // import calendarSVG from "/icons/calendar.svg";
 
 const travellerOptions = [
@@ -32,6 +33,7 @@ const passengerTypes = [
 
 const TopFilterResponsiveSec = () => {
     const calendarRef = useRef(null);
+    const [isMobileCalendarView, setIsMobileCalendarView] = useState(false);
 
     const {
         tripType,
@@ -121,6 +123,31 @@ const TopFilterResponsiveSec = () => {
 
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    useEffect(() => {
+        const syncCalendarViewport = () => {
+            setIsMobileCalendarView(window.innerWidth <= 895);
+        };
+
+        syncCalendarViewport();
+        window.addEventListener("resize", syncCalendarViewport);
+
+        return () => window.removeEventListener("resize", syncCalendarViewport);
+    }, []);
+
+    const normalizeCalendarSelection = (value) => {
+        if (!value) return null;
+        if (typeof value === "string") return value;
+
+        const parsedDate = new Date(value);
+        if (isNaN(parsedDate.getTime())) return null;
+
+        const year = parsedDate.getFullYear();
+        const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+        const day = String(parsedDate.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    };
 
     const handleDateClick = (date) => {
         if (tripType === "multi" && activeMultiIndex !== null) {
@@ -435,28 +462,52 @@ const TopFilterResponsiveSec = () => {
                                         >
                                             <div className={styles.lable}>Departure Date</div>
                                             {showCalendar && (
-                                                <DateCalendarModal
-                                                    mode={
-                                                        calendarTripType === "round"
-                                                            ? "roundtrip"
-                                                            : "oneway"
-                                                    }
-                                                    onModeChange={handleCalendarModeChange}
-                                                    onClose={() => {
-                                                        setShowCalendar(false);
-                                                        setActiveMultiIndex(null);
-                                                    }}
-                                                >
-                                                    <div ref={calendarRef}>
-                                                        <CalendarMonths
-                                                            startDate={startDate}
-                                                            endDate={endDate}
-                                                            onDateClick={handleDateClick}
-                                                            price={true}
-                                                            faresByDate={datewiseFaresByDate}
-                                                        />
-                                                    </div>
-                                                </DateCalendarModal>
+                                                isMobileCalendarView ? (
+                                                    <MobileViewCalender
+                                                        onClose={() => {
+                                                            setShowCalendar(false);
+                                                            setActiveMultiIndex(null);
+                                                        }}
+                                                        inputType={
+                                                            calendarTripType === "round"
+                                                                ? "roundtrip"
+                                                                : "oneway"
+                                                        }
+                                                        selectedDeparture={startDate}
+                                                        selectedReturn={endDate}
+                                                        faresByDate={datewiseFaresByDate}
+                                                        onSelectDate={({ departure, returnDate }) => {
+                                                            const nextDeparture = normalizeCalendarSelection(departure);
+                                                            const nextReturn = normalizeCalendarSelection(returnDate);
+
+                                                            if (nextDeparture) setStartDate(nextDeparture);
+                                                            setEndDate(nextReturn);
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <DateCalendarModal
+                                                        mode={
+                                                            calendarTripType === "round"
+                                                                ? "roundtrip"
+                                                                : "oneway"
+                                                        }
+                                                        onModeChange={handleCalendarModeChange}
+                                                        onClose={() => {
+                                                            setShowCalendar(false);
+                                                            setActiveMultiIndex(null);
+                                                        }}
+                                                    >
+                                                        <div ref={calendarRef}>
+                                                            <CalendarMonths
+                                                                startDate={startDate}
+                                                                endDate={endDate}
+                                                                onDateClick={handleDateClick}
+                                                                price={true}
+                                                                faresByDate={datewiseFaresByDate}
+                                                            />
+                                                        </div>
+                                                    </DateCalendarModal>
+                                                )
                                             )}
                                             <div
                                                 className={styles.dateInputWrapper}
@@ -628,23 +679,46 @@ const TopFilterResponsiveSec = () => {
                                                 <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
                                                     <div className={styles.lable}>Departure Date</div>
                                                     {showCalendar && (
-                                                        <DateCalendarModal
-                                                            mode="oneway"
-                                                            onClose={() => {
-                                                                setShowCalendar(false);
-                                                                setActiveMultiIndex(null);
-                                                            }}
-                                                        >
-                                                            <div ref={calendarRef}>
-                                                                <CalendarMonths
-                                                                    startDate={null}
-                                                                    endDate={null}
-                                                                    onDateClick={handleDateClick}
-                                                                    price={true}
-                                                                    faresByDate={datewiseFaresByDate}
-                                                                />
-                                                            </div>
-                                                        </DateCalendarModal>
+                                                        isMobileCalendarView ? (
+                                                            <MobileViewCalender
+                                                                onClose={() => {
+                                                                    setShowCalendar(false);
+                                                                    setActiveMultiIndex(null);
+                                                                }}
+                                                                inputType="oneway"
+                                                                selectedDeparture={multiSegments[1].date}
+                                                                selectedReturn={null}
+                                                                faresByDate={datewiseFaresByDate}
+                                                                onSelectDate={({ departure }) => {
+                                                                    const nextDeparture = normalizeCalendarSelection(departure);
+                                                                    if (!nextDeparture) return;
+
+                                                                    setMultiSegments((prev) =>
+                                                                        prev.map((seg, i) =>
+                                                                            i === 1 ? { ...seg, date: nextDeparture } : seg
+                                                                        )
+                                                                    );
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <DateCalendarModal
+                                                                mode="oneway"
+                                                                onClose={() => {
+                                                                    setShowCalendar(false);
+                                                                    setActiveMultiIndex(null);
+                                                                }}
+                                                            >
+                                                                <div ref={calendarRef}>
+                                                                    <CalendarMonths
+                                                                        startDate={null}
+                                                                        endDate={null}
+                                                                        onDateClick={handleDateClick}
+                                                                        price={true}
+                                                                        faresByDate={datewiseFaresByDate}
+                                                                    />
+                                                                </div>
+                                                            </DateCalendarModal>
+                                                        )
                                                     )}
                                                     <div
                                                         className={styles.dateInputWrapper}

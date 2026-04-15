@@ -562,28 +562,27 @@ const CustomItinerary = ({ type, isOpen, hotel, onClose }) => {
                           <h4 className={styles.TravelPreferencesSubHeading}>
                             INTERNATIONAL FLIGHTS INCLUDED IN BUDGET?
                           </h4>
-                          <select
-                            className={styles.inputField}
-                            value={
-                              formData.internationalFlight === null
-                                ? ""
-                                : formData.internationalFlight
-                                  ? "Yes"
-                                  : "No"
-                            }
-                            onChange={(e) =>
-                              setFormData((p) => ({
-                                ...p,
-                                internationalFlight: e.target.value === "Yes",
-                              }))
-                            }
-                          >
-                            <option value="" disabled>
-                              Select
-                            </option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
+                          <div className={styles.checkboxRow}>
+                            {["Yes", "No"].map((option) => (
+                              <label key={option} className={styles.checkboxItem}>
+                                <CustomCheckbox
+                                  checked={
+                                    formData.internationalFlight ===
+                                    (option === "Yes")
+                                  }
+                                  onChange={() =>
+                                    setFormData((p) => ({
+                                      ...p,
+                                      internationalFlight: option === "Yes",
+                                    }))
+                                  }
+                                  labelColor="#4A5565"
+                                  gap={6}
+                                  label={option}
+                                />
+                              </label>
+                            ))}
+                          </div>
                         </div>
 
                         {/* BUDGET FLEXIBLE */}
@@ -591,28 +590,26 @@ const CustomItinerary = ({ type, isOpen, hotel, onClose }) => {
                           <h4 className={styles.TravelPreferencesSubHeading}>
                             IS BUDGET FLEXIBLE?
                           </h4>
-                          <select
-                            className={styles.inputField}
-                            value={
-                              formData.flexibleBudget === null
-                                ? ""
-                                : formData.flexibleBudget
-                                  ? "Yes"
-                                  : "No"
-                            }
-                            onChange={(e) =>
-                              setFormData((p) => ({
-                                ...p,
-                                flexibleBudget: e.target.value === "Yes",
-                              }))
-                            }
-                          >
-                            <option value="" disabled>
-                              Select
-                            </option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
+                          <div className={styles.checkboxRow}>
+                            {["Yes", "No"].map((option) => (
+                              <label key={option} className={styles.checkboxItem}>
+                                <CustomCheckbox
+                                  checked={
+                                    formData.flexibleBudget === (option === "Yes")
+                                  }
+                                  onChange={() =>
+                                    setFormData((p) => ({
+                                      ...p,
+                                      flexibleBudget: option === "Yes",
+                                    }))
+                                  }
+                                  labelColor="#4A5565"
+                                  gap={6}
+                                  label={option}
+                                />
+                              </label>
+                            ))}
+                          </div>
                         </div>
 
                         {/* STAGE IN PLANNING */}
@@ -1097,28 +1094,30 @@ const CustomItinerary = ({ type, isOpen, hotel, onClose }) => {
                             <h4 className={styles.TravelPreferencesSubHeading}>
                               INTERNATIONAL FLIGHTS INCLUDED IN BUDGET?
                             </h4>
-                            <select
-                              className={styles.inputField}
-                              value={
-                                formData.internationalFlight === null
-                                  ? ""
-                                  : formData.internationalFlight
-                                    ? "Yes"
-                                    : "No"
-                              }
-                              onChange={(e) =>
-                                setFormData((p) => ({
-                                  ...p,
-                                  internationalFlight: e.target.value === "Yes",
-                                }))
-                              }
-                            >
-                              <option value="" disabled>
-                                Select
-                              </option>
-                              <option value="Yes">Yes</option>
-                              <option value="No">No</option>
-                            </select>
+                            <div className={styles.checkboxRow}>
+                              {["Yes", "No"].map((option) => (
+                                <label
+                                  key={option}
+                                  className={styles.checkboxItem}
+                                >
+                                  <CustomCheckbox
+                                    checked={
+                                      formData.internationalFlight ===
+                                      (option === "Yes")
+                                    }
+                                    onChange={() =>
+                                      setFormData((p) => ({
+                                        ...p,
+                                        internationalFlight: option === "Yes",
+                                      }))
+                                    }
+                                    labelColor="#4A5565"
+                                    gap={6}
+                                    label={option}
+                                  />
+                                </label>
+                              ))}
+                            </div>
                           </div>
 
                           {/* BUDGET FLEXIBLE */}
@@ -1126,28 +1125,30 @@ const CustomItinerary = ({ type, isOpen, hotel, onClose }) => {
                             <h4 className={styles.TravelPreferencesSubHeading}>
                               IS BUDGET FLEXIBLE?
                             </h4>
-                            <select
-                              className={styles.inputField}
-                              value={
-                                formData.flexibleBudget === null
-                                  ? ""
-                                  : formData.flexibleBudget
-                                    ? "Yes"
-                                    : "No"
-                              }
-                              onChange={(e) =>
-                                setFormData((p) => ({
-                                  ...p,
-                                  flexibleBudget: e.target.value === "Yes",
-                                }))
-                              }
-                            >
-                              <option value="" disabled>
-                                Select
-                              </option>
-                              <option value="Yes">Yes</option>
-                              <option value="No">No</option>
-                            </select>
+                            <div className={styles.checkboxRow}>
+                              {["Yes", "No"].map((option) => (
+                                <label
+                                  key={option}
+                                  className={styles.checkboxItem}
+                                >
+                                  <CustomCheckbox
+                                    checked={
+                                      formData.flexibleBudget ===
+                                      (option === "Yes")
+                                    }
+                                    onChange={() =>
+                                      setFormData((p) => ({
+                                        ...p,
+                                        flexibleBudget: option === "Yes",
+                                      }))
+                                    }
+                                    labelColor="#4A5565"
+                                    gap={6}
+                                    label={option}
+                                  />
+                                </label>
+                              ))}
+                            </div>
                           </div>
 
                           {/* STAGE IN PLANNING */}
