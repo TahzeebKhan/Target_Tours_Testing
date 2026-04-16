@@ -12,10 +12,7 @@ import SelectDestination from "@/features/profile/components/selectDestination";
 import SelectTravellerProfile from "@/features/profile/components/selectTravellerProfile";
 import SelectPreferences from "@/features/profile/components/selectPreferences";
 import { useInfiniteTours } from "@/features/tours/hooks/useInfiniteTours";
-import {
-  useToursData,
-  tourDataFallback,
-} from "@/features/tours/hooks/useToursData";
+import { useToursData } from "@/features/tours/hooks/useToursData";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
@@ -97,10 +94,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     );
   };
 
-  const { tourData, meta } = useToursData({
-    data,
-    tourDataFallback,
-  });
+  const { tourData, meta } = useToursData({ data });
   const hasNoResults = !isLoading && !isFetching && tourData.length === 0;
   const totalResults = Number(meta?.pagination?.total ?? tourData.length) || 0;
   const loadedCount = tourData.length;

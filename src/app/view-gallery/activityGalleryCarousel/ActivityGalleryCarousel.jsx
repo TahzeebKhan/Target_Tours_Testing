@@ -24,7 +24,7 @@ const useIsMobile = (breakpoint = 600) => {
   return isMobile;
 };
 
-const ActivityGalleryCarousel = () => {
+const ActivityGalleryCarousel = ({ images = [] }) => {
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -40,53 +40,6 @@ const ActivityGalleryCarousel = () => {
     swiperRef?.slideNext();
   };
 
-  const images = [
-    {
-      id: 1,
-      title: "Alpine Hiking Trail",
-      image: "/gallery/item1.png",
-    },
-    {
-      id: 2,
-      title: "Glacier Walk Experience",
-      image: "/gallery/item2.png",
-    },
-    {
-      id: 3,
-      title: "Old Town Walking Tour",
-      image: "/gallery/item3.png",
-    },
-    {
-      id: 4,
-      title: "Wildlife Safari Experience",
-      image: "/gallery/item4.png",
-    },
-    {
-      id: 5,
-      title: "Botanical Garden Visit",
-      image: "/gallery/item5.png",
-    },
-    {
-      id: 6,
-      title: "Luxury Yacht Experience",
-      image: "/gallery/item6.png",
-    },
-    {
-      id: 7,
-      title: "Luxury Yacht Experience",
-      image: "/gallery/item6.png",
-    },
-    {
-      id: 8,
-      title: "Luxury Yacht Experience",
-      image: "/gallery/item6.png",
-    },
-    {
-      id: 9,
-      title: "Luxury Yacht Experience",
-      image: "/gallery/item6.png",
-    },
-  ];
   const isMobile = useIsMobile(600);
   const router = useRouter();
   const toSlug = (text) => text.toLowerCase().replace(/\s+/g, "-");
