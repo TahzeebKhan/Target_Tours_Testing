@@ -114,7 +114,7 @@ const TourDetailsClient = () => {
       <InfoStrip data={tourDetails} />
       <WhereWillYouStay data={tourDetails} />
 
-      <Testimonial />
+      <Testimonial data={tourDetails} />
       <TravelInspiration />
       <FeatureSection />
       <Footer />

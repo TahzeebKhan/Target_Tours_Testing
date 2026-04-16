@@ -13,7 +13,8 @@ import YourActivityPop from "./YourActivityPop";
 const ArrivalToronto = ({ data }) => {
   const tabsRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [swiperRef, setSwiperRef] = useState(null);
+  const [activitySwiperRef, setActivitySwiperRef] = useState(null);
+  const [mobileActivitySwiperRef, setMobileActivitySwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isHotelPopupOpen, setIsHotelPopupOpen] = useState(false);
@@ -45,12 +46,20 @@ const ArrivalToronto = ({ data }) => {
     setActiveIndex(swiper.activeIndex);
   };
 
-  const handlePrev = () => {
-    swiperRef?.slidePrev();
+  const handleActivityPrev = () => {
+    activitySwiperRef?.slidePrev();
   };
 
-  const handleNext = () => {
-    swiperRef?.slideNext();
+  const handleActivityNext = () => {
+    activitySwiperRef?.slideNext();
+  };
+
+  const handleMobileActivityPrev = () => {
+    mobileActivitySwiperRef?.slidePrev();
+  };
+
+  const handleMobileActivityNext = () => {
+    mobileActivitySwiperRef?.slideNext();
   };
 
   const toggleExpand = (key) => {
@@ -109,21 +118,6 @@ const ArrivalToronto = ({ data }) => {
     },
   };
 
-  const hotelData = {
-    title: "Fairmont Royal York",
-    location: "Downtown Toronto • 0.5 km from CN Tower",
-    desc: "Historic luxury hotel in the heart of downtown Toronto, offering timeless elegance and world-class amenities.",
-    images: ["/images/hotel1.png"],
-  };
-
-  // A different hotel used by the small cards (so popup shows the right data)
-  const sereneHotel = {
-    title: "Serene Haven Inn",
-    location: "Toronto, Canada",
-    desc: "Cozy boutique hotel with comfortable rooms and easy access to local attractions.",
-    images: ["/images/yourAtivityImage1.png"],
-  };
-
   const dayImgeFilter = [
     {
       image: "/images/day0.webp",
@@ -158,6 +152,78 @@ const ArrivalToronto = ({ data }) => {
     "Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure";
   const getMediaUrl = (url) =>
     url ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}` : "";
+  const getHotelImage = (hotel) => {
+    const image = Array.isArray(hotel?.main_image)
+      ? hotel.main_image[0]
+      : hotel?.main_image;
+    const url =
+      image?.formats?.large?.url ||
+      image?.formats?.small?.url ||
+      image?.formats?.thumbnail?.url ||
+      image?.url;
+
+    return getMediaUrl(url) || "/images/yourAtivityImage1.png";
+  };
+  const currentHotel = currentDayData?.hotel || currentDayData?.available_hotels?.[0] || null;
+  const currentHotelData = {
+    title: currentHotel?.name || "N/A",
+    location: [currentHotel?.city, currentHotel?.country].filter(Boolean).join(", ") || "N/A",
+    desc:
+      currentHotel?.description ||
+      currentHotel?.hotel_category ||
+      currentDayData?.builder_data?.hotel?.notes ||
+      "N/A",
+    images: [getHotelImage(currentHotel)],
+    rating: Number(currentHotel?.star_rating || 0),
+    options: (Array.isArray(currentDayData?.available_hotels)
+      ? currentDayData.available_hotels
+      : currentHotel
+        ? [currentHotel]
+        : []
+    ).map((item) => ({
+      title: [item?.name, item?.city].filter(Boolean).join(", ") || "N/A",
+      description: item?.description || item?.hotel_category || "N/A",
+      images: [getHotelImage(item)],
+    })),
+    availableHotels: Array.isArray(currentDayData?.available_hotels)
+      ? currentDayData.available_hotels
+      : [],
+  };
+  const currentBuilderData = currentDayData?.builder_data || {};
+  const hasHotelId = (hotel) =>
+    hotel?.hotel_id !== undefined &&
+    hotel?.hotel_id !== null &&
+    String(hotel.hotel_id).trim() !== "";
+  const hotelCount = Array.isArray(currentBuilderData?.hotels)
+    ? currentBuilderData.hotels.filter(hasHotelId).length
+    : hasHotelId(currentBuilderData?.hotel)
+      ? 1
+      : 0;
+  const mealCount = Array.isArray(currentBuilderData?.meals?.selected)
+    ? currentBuilderData.meals.selected.filter(Boolean).length
+    : Array.isArray(currentDayData?.package_itinerarie_meals)
+      ? currentDayData.package_itinerarie_meals.filter(Boolean).length
+      : 0;
+  const transportCount = Array.isArray(currentBuilderData?.transports)
+    ? currentBuilderData.transports.filter(
+        (transport) =>
+          transport?.enabled !== false &&
+          (transport?.mode ||
+            transport?.vehicle_type ||
+            transport?.pickup_location ||
+            transport?.drop_location),
+      ).length
+    : 0;
+  const countLabel = (count, label) =>
+    count > 0 ? `${count} ${label}${count > 1 ? "s" : ""}` : null;
+  const currentDaySummary =
+    [
+      countLabel(hotelCount, "Hotel"),
+      countLabel(mealCount, "Meal"),
+      countLabel(transportCount, "Transfer"),
+    ]
+      .filter(Boolean)
+      .join(", ") || "N/A";
   const currentDayActivitiesSource = Array.isArray(currentDayData?.package_activities)
     && currentDayData.package_activities.length
       ? currentDayData.package_activities
@@ -292,7 +358,7 @@ const ArrivalToronto = ({ data }) => {
                     <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -320,7 +386,7 @@ const ArrivalToronto = ({ data }) => {
                           <h2>{currentDayTitle}</h2>
                         </div>
                         <div className={styles.ArrivalLeft}>
-                          1 flight, 1 hotel, 1 meal, 1 Transfer
+                          {currentDaySummary}
                         </div>
                       </div>
                       <img
@@ -474,19 +540,19 @@ const ArrivalToronto = ({ data }) => {
                           <div className={styles.card}>
                             <img
                               className={styles.cardImage}
-                              src="/images/yourAtivityImage1.png"
+                              src={currentHotelData.images[0]}
                               alt=""
                             />
                             <div className={styles.cardTextContainer}>
                               <span className={styles.cardTextAddress}>
-                                Toronto, canada
+                                {currentHotelData.location}
                               </span>
                               <h3 className={styles.cardTextTitle}>
-                                Serene Haven Inn
+                                {currentHotelData.title}
                               </h3>
                               <button
                                 className={styles.cardTextButton}
-                                onClick={() => openHotelPopup(sereneHotel)}
+                                onClick={() => openHotelPopup(currentHotelData)}
                               >
                                 view hotel options
                               </button>
@@ -524,7 +590,7 @@ const ArrivalToronto = ({ data }) => {
                           >
                             <Swiper
                               modules={[Navigation]}
-                              onSwiper={setSwiperRef}
+                              onSwiper={setMobileActivitySwiperRef}
                               onSlideChange={handleSlideChange}
                               slidesPerView={"auto"}
                               spaceBetween={12}
@@ -588,10 +654,10 @@ const ArrivalToronto = ({ data }) => {
                     <div
                       className={`${styles.btnContainer} ${styles.btnContainerMobileView}`}
                     >
-                      <div className={styles.btn} onClick={handlePrev}>
+                      <div className={styles.btn} onClick={handleMobileActivityPrev}>
                         <img src="/icons/left.svg" alt="Previous" />
                       </div>
-                      <div className={styles.btn} onClick={handleNext}>
+                      <div className={styles.btn} onClick={handleMobileActivityNext}>
                         <img src="/icons/right.svg" alt="Next" />
                       </div>
                     </div>
@@ -605,10 +671,10 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
                         <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handlePrev}>
+                          <div className={styles.btn} onClick={handleActivityPrev}>
                             <img src="/icons/left.svg" alt="Previous" />
                           </div>
-                          <div className={styles.btn} onClick={handleNext}>
+                          <div className={styles.btn} onClick={handleActivityNext}>
                             <img src="/icons/right.svg" alt="Next" />
                           </div>
                         </div>
@@ -619,19 +685,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -641,7 +707,7 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerBottomRight}>
                         <Swiper
                           modules={[Navigation]}
-                          onSwiper={setSwiperRef}
+                          onSwiper={setActivitySwiperRef}
                           onSlideChange={handleSlideChange}
                           slidesPerView={"auto"}
                           spaceBetween={12}
@@ -705,7 +771,7 @@ const ArrivalToronto = ({ data }) => {
                     <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -717,7 +783,7 @@ const ArrivalToronto = ({ data }) => {
                   className={styles.leftBottomCont}
                 >
                   {/* <div className={styles.paraCoontainer}> */}
-                  <HotelRoom hotel={hotelData} onViewHotel={openHotelPopup} />
+                  <HotelRoom hotel={currentHotelData} onViewHotel={openHotelPopup} />
                   {/* </div> */}
                 </motion.div>
               </div>
@@ -730,7 +796,7 @@ const ArrivalToronto = ({ data }) => {
                     <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -852,7 +918,7 @@ const ArrivalToronto = ({ data }) => {
                     <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -871,10 +937,10 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
                         <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handlePrev}>
+                          <div className={styles.btn} onClick={handleActivityPrev}>
                             <img src="/icons/left.svg" alt="Previous" />
                           </div>
-                          <div className={styles.btn} onClick={handleNext}>
+                          <div className={styles.btn} onClick={handleActivityNext}>
                             <img src="/icons/right.svg" alt="Next" />
                           </div>
                         </div>
@@ -885,19 +951,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -908,7 +974,7 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerBottomRight}>
                         <Swiper
                           modules={[Navigation]}
-                          onSwiper={setSwiperRef}
+                          onSwiper={setActivitySwiperRef}
                           onSlideChange={handleSlideChange}
                           slidesPerView={"auto"}
                           spaceBetween={12}
@@ -987,19 +1053,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -1036,7 +1102,7 @@ const ArrivalToronto = ({ data }) => {
                         >
                           <Swiper
                             modules={[Navigation]}
-                            onSwiper={setSwiperRef}
+                            onSwiper={setMobileActivitySwiperRef}
                             onSlideChange={handleSlideChange}
                             slidesPerView={"auto"}
                             spaceBetween={12}

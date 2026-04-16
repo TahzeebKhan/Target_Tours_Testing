@@ -133,14 +133,15 @@ const normalizeTour = (item) => ({
         item.duration_days && item.duration_nights
             ? `${item.duration_days} DAYS & ${item.duration_nights} NIGHTS`
             : "CUSTOM DURATION",
-    meals: "SELECTED MEALS",
-    hotel: item.is_premium_package ? "PREMIUM HOTEL" : "HOTEL INCLUDED",
-    activities: `${item.package_itinerarie?.length || 0} ACTIVITIES`,
+    meals: item?.selected_meals_count > 0 ? "SELECTED MEALS" : "MEALS NOT INCLUDE",
+    hotel: item?.highest_starred_hotel ?  `${item?.highest_starred_hotel} `  : "HOTEL NOT INCLUDED" ,
+    activities: `${item?.activities_count || 0} ACTIVITIES`,
     price: item.started_price
         ? `₹ ${item.started_price.toLocaleString()}`
         : "ON REQUEST",
     raw: item,
     package_inclusion: item.package_inclusion,
+    package_inclusion_tags:item?.package_inclusion_tags
 });
 
 export const fetchTours = async ({ pageParam = 1, queryKey }) => {
