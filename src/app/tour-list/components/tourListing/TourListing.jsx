@@ -113,7 +113,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     }
   }, [meta, onDataLoaded]);
 
-  console.log("First tour inclusions:", tourData?.[0]?.package_inclusion);
+  console.log("First tour inclusions:", tourData?.[0]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -270,10 +270,15 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                                 Package Inclusions
                               </h3>
                               <ul className={styles.list}>
-                                <li>Round Trip Flights</li>
+                                  {item?.package_inclusion_tags?.map((val, index) => (
+                                    <div key={index} className={styles.tag}>
+                                      {val}
+                                    </div>
+                                  ))}
+                                {/* <li>Round Trip Flights</li>
                                 <li>4 Star Hotels</li>
                                 <li>Airport Transfers</li>
-                                <li>Intercity Car Transfers</li>
+                                <li>Intercity Car Transfers</li> */}
                               </ul>
                             </div>
                             <div className={styles.expandableCenter}>
@@ -414,12 +419,17 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         </div>
 
                         <div className={styles.tagsContainer}>
-                          <div className={styles.tag}>Round Trip Flights</div>
-                          <div className={styles.tag}>4 Star Hotels</div>
-                          <div className={styles.tag}>Airport Transfers</div>
-                          <div className={styles.tag}>
+                            {item?.package_inclusion_tags?.map((val, index) => (
+                              <div key={index} className={styles.tag}>
+                                {val}
+                              </div>
+                            ))}
+                     
+                          {/* <div className={styles.tag}>4 Star Hotels</div> */}
+                          {/* <div className={styles.tag}>Airport Transfers</div> */}
+                          {/* <div className={styles.tag}>
                             Intercity Car Transfers
-                          </div>
+                          </div> */}
                         </div>
 
                         <div className={styles.ListViewCardTextTopBottom}>
@@ -631,12 +641,18 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       </div>
 
                       <div className={styles.tagsContainerMobile}>
-                        <div className={styles.tag}>Round Trip Flights</div>
+                      {item?.package_inclusion_tags?.map((val, index) => (
+  <div key={index} className={styles.tag}>
+    {val}
+  </div>
+))}
+     
+                        {/* <div className={styles.tag}>Round Trip Flights</div>
                         <div className={styles.tag}>4 Star Hotels</div>
                         <div className={styles.tag}>Airport Transfers</div>
                         <div className={styles.tag}>
                           Intercity Car Transfers
-                        </div>
+                        </div> */}
                       </div>
 
                       <div className={styles.ListViewCardTextTopBottomMobile}>

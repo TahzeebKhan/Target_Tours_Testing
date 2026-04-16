@@ -19,9 +19,15 @@ const TourBookingHeroSection = ({ data }) => {
   const price = data?.started_price
     ? `₹ ${Number(data.started_price).toLocaleString("en-IN")}`
     : "";
-  const backgroundImage = data?.main_image?.formats?.large?.url
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${data.main_image.formats.large.url}`
+  const imageUrl =
+    data?.main_image?.formats?.large?.url ||
+    data?.main_image?.formats?.small?.url ||
+    data?.main_image?.formats?.thumbnail?.url;
+
+  const backgroundImage = imageUrl
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`
     : "/tourList/cardItem1.jpg";
+     console.log("backgroundImage",data?.main_image?.formats)
   return (
     <section
       style={{
@@ -90,9 +96,15 @@ const TourBookingHeroSection = ({ data }) => {
 
                 {/* Static tags for now */}
                 <div className={styles.tagsCont}>
-                  <div className={styles.tags}>Nature</div>
-                  <div className={styles.tags}>Adventure</div>
-                  <div className={styles.tags}>Scenic Road Trips</div>
+               
+                  {data?.package_type?.map((item, index) => (
+                    <div key={index} className={styles.tags}>
+                      {item}
+                    </div>
+                  ))}
+                 
+                  {/* <div className={styles.tags}>Adventure</div>
+                  <div className={styles.tags}>Scenic Road Trips</div> */}
                 </div>
 
                 <div className={styles.tailor_made}>Tailor-made</div>

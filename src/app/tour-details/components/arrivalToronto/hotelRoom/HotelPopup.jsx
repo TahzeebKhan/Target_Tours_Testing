@@ -1,24 +1,47 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import styles from "./HotelRoom.module.css";
 
 const HotelPopup = ({ isOpen, hotel, onClose }) => {
     const [selected, setSelected] = useState([]);
 
-    const hotels = [
-        {
-            title: "SERENE HAVEN INN, TORONTO",
-            description:
-                "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po",
-        },
-        {
-            title: "CALM WATERS LODGE, TORONTO",
-            description:
-                "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po",
-        },
-        
-    ];
+    const getImageUrl = (url) => {
+        if (!url) return "";
+        if (url.startsWith("http")) return url;
+        return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+    };
+
+    const getHotelImage = (item) => {
+        const image = Array.isArray(item?.main_image)
+            ? item.main_image[0]
+            : item?.main_image;
+        const url =
+            image?.formats?.large?.url ||
+            image?.formats?.small?.url ||
+            image?.formats?.thumbnail?.url ||
+            image?.url;
+
+        return getImageUrl(url);
+    };
+
+    const hotels = hotel?.availableHotels?.length
+        ? hotel.availableHotels.map((item) => ({
+            title: [item?.name, item?.city].filter(Boolean).join(", ") || "N/A",
+            description: item?.description || item?.hotel_category || "N/A",
+            images: [getHotelImage(item) || hotel?.images?.[0]],
+        }))
+        : hotel?.options?.length
+            ? hotel.options
+            : [hotel];
+    const selectedIndex = selected[selected.length - 1] ?? 0;
+    const selectedHotel = hotels[selectedIndex] || hotel;
+
+    useEffect(() => {
+        if (isOpen) {
+            setSelected([]);
+        }
+    }, [isOpen, hotel]);
 
     return (
         <AnimatePresence>
@@ -42,7 +65,7 @@ const HotelPopup = ({ isOpen, hotel, onClose }) => {
                         <div className={styles.popupHeader}>
                             {/* <h4>Your Hotel Options{hotel?.title ? ` — ${hotel.title}` : ' Toronto, Canada'}</h4> */}
                             <h4>Your Hotel Options
-Toronto, Canada</h4>
+{hotel?.location || ""}</h4>
                             <button onClick={onClose} className={styles.closeBtn}>✕</button>
                         </div>
 
@@ -93,7 +116,7 @@ Toronto, Canada</h4>
 
                             {/* LEFT IMAGE */}
                             <div className={styles.popupLeft}>
-                                <img src={hotel.images?.[0]} alt={hotel.title} />
+                                <img src={selectedHotel.images?.[0] ?? hotel.images?.[0]} alt={selectedHotel.title ?? hotel.title} />
                             </div>
                         </div>
                     </motion.div>

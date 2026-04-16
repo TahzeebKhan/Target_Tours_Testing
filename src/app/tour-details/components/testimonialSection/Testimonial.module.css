@@ -97,6 +97,11 @@
     gap: 7px;
 }
 
+.ratingStart img {
+    width: 15px;
+    height: 15px;
+}
+
 .testimonialPara p {
     font-family: var(--font-inter);
     font-weight: 300;

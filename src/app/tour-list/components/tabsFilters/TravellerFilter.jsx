@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./TravellerFilter.module.css";
 import CustomCheckbox from "@/shared/components/CustomCheckbox";
 
@@ -28,7 +29,17 @@ const TRAVELLER_PROFILES = [
 ];
 
 const TravellerFilter = ({ onApply }) => {
-  const [selectedProfiles, setSelectedProfiles] = useState([]);
+  const searchParams = useSearchParams();
+  const [selectedProfiles, setSelectedProfiles] = useState(() => {
+    const selectedPackageTypes = (searchParams.get("package_type") || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return selectedPackageTypes.filter((id) =>
+      TRAVELLER_PROFILES.some((profile) => profile.id === id),
+    );
+  });
 
   const toggleProfile = (id) => {
     setSelectedProfiles((prev) =>
@@ -48,7 +59,12 @@ const TravellerFilter = ({ onApply }) => {
               for years.
             </p>
 
-            <button className={styles.searchBtn}>Search</button>
+            <button
+              className={styles.searchBtn}
+              onClick={() => onApply?.(selectedProfiles)}
+            >
+              Search
+            </button>
           </div>
 
           {/* RIGHT CARDS */}

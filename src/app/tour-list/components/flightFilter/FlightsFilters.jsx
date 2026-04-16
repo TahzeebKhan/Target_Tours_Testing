@@ -7,7 +7,7 @@ import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "@/app/flights/compone
 
 export default function FlightFilters({ onClose, onReset, onApply, filterData }) {
   const DEFAULT_NIGHTS = [1, 10];
-  const DEFAULT_PRICE = [11307, 57295];
+  const DEFAULT_PRICE = [0, 100000];
   const isResettingRef = useRef(false);
   const [filters, setFilters] = useState({
     nights: DEFAULT_NIGHTS,
@@ -49,16 +49,9 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
       api.max_nights = filters.nights[1];
     }
 
-    const hasCustomPrice =
-      Array.isArray(filters.price) &&
-      (
-        filters.price[0] !== DEFAULT_PRICE[0] ||
-        filters.price[1] !== DEFAULT_PRICE[1]
-      );
-
-    if (hasCustomPrice) {
+    if (Array.isArray(filters.price)) {
       api.min_price = filters.price[0];
-      api.max_price = filters.price[1];
+      api.max_price = 1000000;
     }
 
     if (filters.flightType === "with") api.with_flight = true;
@@ -84,7 +77,7 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
     const themes = Object.keys(filters.themes || {}).filter(
       (t) => filters.themes[t]
     );
-    if (themes.length) api.theme = themes.join(",");
+    if (themes.length) api.themes = themes.join(",");
 
     return api;
   };

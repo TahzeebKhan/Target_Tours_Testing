@@ -3,7 +3,7 @@ import styles from './HotelRoom.module.css'
 
 const HotelRoom = ({ hotel = {}, onViewHotel }) => {
 
-    const rating = 4;
+    const rating = Number(hotel.rating || 0);
     return (
         <section className={styles.section}>
             <div className={styles.leftSection}>

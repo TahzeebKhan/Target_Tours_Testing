@@ -1,11 +1,12 @@
 "use client";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import styles from "./MultiCityTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import SortBySheet from "../SortBySheet";
+import SortByDropdown from "../SortByDropdown";
 import RoundTripSkeleton from "../roundTrip/RoundTripSkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
@@ -15,6 +16,7 @@ import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
 import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
 import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
+import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 const MultiCityTrip = ({
   flightData = [],
   tripCards = [],
@@ -23,9 +25,12 @@ const MultiCityTrip = ({
   sortHighlights = null,
   hasSearched = false,
   isLoading = false,
+  isRefreshing = false,
 }) => {
   const { committedSearches, handleSearch } = useTripType();
   const [openSort, setOpenSort] = useState(false);
+  const sortTriggerRef = useRef(null);
+  const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
   const { from, to } = committedSearches.multi;
   const {
     filters,
@@ -448,6 +453,7 @@ const MultiCityTrip = ({
     !isLoading &&
     visibleFlights.length === 0 &&
     visibleTripCards.length === 0;
+  const showLoadingState = isLoading || isRefreshing;
 
   return (
     <>
@@ -511,6 +517,7 @@ const MultiCityTrip = ({
               </div>
             </div>
             <div
+              ref={sortTriggerRef}
               onClick={() => setOpenSort(true)}
               className={styles.sortByContainer}
             >
@@ -520,7 +527,7 @@ const MultiCityTrip = ({
           </div>
         </div>
         <div className={styles.tripCardsContainer}>
-          {isLoading ? (
+          {showLoadingState ? (
             <RoundTripSkeleton />
           ) : hasNoData ? (
             <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -649,7 +656,7 @@ const MultiCityTrip = ({
             </div>
           </div>
         </div>
-        {isLoading ? (
+        {showLoadingState ? (
           <RoundTripSkeleton />
         ) : hasNoData ? (
           <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -674,14 +681,26 @@ const MultiCityTrip = ({
           />
         )}
       </section>
-      <SortBySheet
-        open={openSort}
-        onClose={() => setOpenSort(false)}
-        selectedValue={filters.sortBy}
-        onApply={(value) => {
-          setSortBy(value);
-        }}
-      />
+      {isSortSheetMobile ? (
+        <SortBySheet
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      ) : (
+        <SortByDropdown
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          anchorRef={sortTriggerRef}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      )}
     </>
   );
 };

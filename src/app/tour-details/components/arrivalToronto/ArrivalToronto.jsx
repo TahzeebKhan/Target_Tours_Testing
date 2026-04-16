@@ -13,7 +13,8 @@ import YourActivityPop from "./YourActivityPop";
 const ArrivalToronto = ({ data }) => {
   const tabsRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [swiperRef, setSwiperRef] = useState(null);
+  const [activitySwiperRef, setActivitySwiperRef] = useState(null);
+  const [mobileActivitySwiperRef, setMobileActivitySwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isHotelPopupOpen, setIsHotelPopupOpen] = useState(false);
@@ -45,12 +46,20 @@ const ArrivalToronto = ({ data }) => {
     setActiveIndex(swiper.activeIndex);
   };
 
-  const handlePrev = () => {
-    swiperRef?.slidePrev();
+  const handleActivityPrev = () => {
+    activitySwiperRef?.slidePrev();
   };
 
-  const handleNext = () => {
-    swiperRef?.slideNext();
+  const handleActivityNext = () => {
+    activitySwiperRef?.slideNext();
+  };
+
+  const handleMobileActivityPrev = () => {
+    mobileActivitySwiperRef?.slidePrev();
+  };
+
+  const handleMobileActivityNext = () => {
+    mobileActivitySwiperRef?.slideNext();
   };
 
   const toggleExpand = (key) => {
@@ -64,73 +73,6 @@ const ArrivalToronto = ({ data }) => {
     "ACTIVITIES",
     "INCLUSION & EXCLUSION",
     "TOUR POLICY",
-  ];
-
-  const activitiesData = [
-    {
-      id: 1,
-      image: "/images/yourAtivityImage2.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 2,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 3,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
-    {
-      id: 4,
-      image: "/images/yourAtivityImage3.png",
-      category: "Rest & Relaxation",
-      title: "An evening of culture in the heart of Toronton",
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: "add +",
-          type: "add",
-        },
-      ],
-    },
   ];
 
   const tabVariants = {
@@ -176,21 +118,6 @@ const ArrivalToronto = ({ data }) => {
     },
   };
 
-  const hotelData = {
-    title: "Fairmont Royal York",
-    location: "Downtown Toronto • 0.5 km from CN Tower",
-    desc: "Historic luxury hotel in the heart of downtown Toronto, offering timeless elegance and world-class amenities.",
-    images: ["/images/hotel1.png"],
-  };
-
-  // A different hotel used by the small cards (so popup shows the right data)
-  const sereneHotel = {
-    title: "Serene Haven Inn",
-    location: "Toronto, Canada",
-    desc: "Cozy boutique hotel with comfortable rooms and easy access to local attractions.",
-    images: ["/images/yourAtivityImage1.png"],
-  };
-
   const dayImgeFilter = [
     {
       image: "/images/day0.webp",
@@ -209,14 +136,162 @@ const ArrivalToronto = ({ data }) => {
     },
   ];
 
-  const nextDayIndex =
-    (activeDayIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length;
+  const itineraryDays = Array.isArray(data?.package_itinerarie)
+    ? [...data.package_itinerarie].sort(
+        (a, b) => (a?.day_number ?? 0) - (b?.day_number ?? 0),
+      )
+    : [];
+
+  const currentDayData = itineraryDays[activeDayIndex] || itineraryDays[0] || null;
+  const activeDayNumber = currentDayData?.day_number || 1;
+  const currentDayTitle = currentDayData?.title
+    ? `Day ${activeDayNumber} – ${currentDayData.title}`
+    : "Day 1 – Arrival in Toronto";
+  const currentDayDescription =
+    currentDayData?.description ||
+    "Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure";
+  const getMediaUrl = (url) =>
+    url ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}` : "";
+  const getHotelImage = (hotel) => {
+    const image = Array.isArray(hotel?.main_image)
+      ? hotel.main_image[0]
+      : hotel?.main_image;
+    const url =
+      image?.formats?.large?.url ||
+      image?.formats?.small?.url ||
+      image?.formats?.thumbnail?.url ||
+      image?.url;
+
+    return getMediaUrl(url) || "/images/yourAtivityImage1.png";
+  };
+  const currentHotel = currentDayData?.hotel || currentDayData?.available_hotels?.[0] || null;
+  const currentHotelData = {
+    title: currentHotel?.name || "N/A",
+    location: [currentHotel?.city, currentHotel?.country].filter(Boolean).join(", ") || "N/A",
+    desc:
+      currentHotel?.description ||
+      currentHotel?.hotel_category ||
+      currentDayData?.builder_data?.hotel?.notes ||
+      "N/A",
+    images: [getHotelImage(currentHotel)],
+    rating: Number(currentHotel?.star_rating || 0),
+    options: (Array.isArray(currentDayData?.available_hotels)
+      ? currentDayData.available_hotels
+      : currentHotel
+        ? [currentHotel]
+        : []
+    ).map((item) => ({
+      title: [item?.name, item?.city].filter(Boolean).join(", ") || "N/A",
+      description: item?.description || item?.hotel_category || "N/A",
+      images: [getHotelImage(item)],
+    })),
+    availableHotels: Array.isArray(currentDayData?.available_hotels)
+      ? currentDayData.available_hotels
+      : [],
+  };
+  const currentBuilderData = currentDayData?.builder_data || {};
+  const hasHotelId = (hotel) =>
+    hotel?.hotel_id !== undefined &&
+    hotel?.hotel_id !== null &&
+    String(hotel.hotel_id).trim() !== "";
+  const hotelCount = Array.isArray(currentBuilderData?.hotels)
+    ? currentBuilderData.hotels.filter(hasHotelId).length
+    : hasHotelId(currentBuilderData?.hotel)
+      ? 1
+      : 0;
+  const mealCount = Array.isArray(currentBuilderData?.meals?.selected)
+    ? currentBuilderData.meals.selected.filter(Boolean).length
+    : Array.isArray(currentDayData?.package_itinerarie_meals)
+      ? currentDayData.package_itinerarie_meals.filter(Boolean).length
+      : 0;
+  const transportCount = Array.isArray(currentBuilderData?.transports)
+    ? currentBuilderData.transports.filter(
+        (transport) =>
+          transport?.enabled !== false &&
+          (transport?.mode ||
+            transport?.vehicle_type ||
+            transport?.pickup_location ||
+            transport?.drop_location),
+      ).length
+    : 0;
+  const countLabel = (count, label) =>
+    count > 0 ? `${count} ${label}${count > 1 ? "s" : ""}` : null;
+  const currentDaySummary =
+    [
+      countLabel(hotelCount, "Hotel"),
+      countLabel(mealCount, "Meal"),
+      countLabel(transportCount, "Transfer"),
+    ]
+      .filter(Boolean)
+      .join(", ") || "N/A";
+  const currentDayActivitiesSource = Array.isArray(currentDayData?.package_activities)
+    && currentDayData.package_activities.length
+      ? currentDayData.package_activities
+      : Array.isArray(currentDayData?.builder_data?.activities)
+        ? currentDayData.builder_data.activities
+        : [];
+  const mappedActivities = currentDayActivitiesSource
+    .filter((item) => item?.enabled !== false)
+    .map((item) => ({
+      id: item?.id,
+      image:
+        getMediaUrl(item?.images?.[0]?.url) || "/images/yourAtivityImage3.png",
+      category: item?.time_slot
+        ? `${item.time_slot} activity`
+        : "Activity",
+      title: item?.description || item?.name || "Activity",
+      popupTitle: item?.name || "Activity",
+      description: item?.description || currentDayDescription,
+      startTime: item?.start_time || "",
+      endTime: item?.end_time || "",
+      images: (item?.images || []).map((image) => getMediaUrl(image?.url)).filter(Boolean),
+      actions: [
+        {
+          label: "view",
+          type: "view",
+        },
+        {
+          label: "add +",
+          type: "add",
+        },
+      ],
+    }));
+  const activitiesData = mappedActivities.length
+    ? mappedActivities
+    : [
+        {
+          id: `activity-empty-${activeDayNumber}`,
+          image: "/images/yourAtivityImage3.png",
+          category: "N/A",
+          title: "N/A",
+          popupTitle: "N/A",
+          description: "N/A",
+          startTime: "",
+          endTime: "",
+          images: ["/images/yourAtivityImage3.png"],
+          actions: [],
+        },
+      ];
+
+  const safeImageIndex = dayImgeFilter.length
+    ? activeDayIndex % dayImgeFilter.length
+    : 0;
+  const nextDayIndex = dayImgeFilter.length
+    ? (safeImageIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length
+    : 0;
 
   const handleNextDayImage = () => {
     setActiveDayIndex((prev) =>
-      prev === dayImgeFilter.length - 1 ? 0 : prev + 1,
+      itineraryDays.length ? (prev === itineraryDays.length - 1 ? 0 : prev + 1) : 0,
     );
   };
+
+  useEffect(() => {
+    if (!itineraryDays.length) return;
+    if (activeDayIndex > itineraryDays.length - 1) {
+      setActiveDayIndex(0);
+    }
+  }, [activeDayIndex, itineraryDays.length]);
 
   const [activeTab, setActiveTab] = useState("DAY Itinerary");
 
@@ -260,7 +335,18 @@ const ArrivalToronto = ({ data }) => {
       <div className={styles.container}>
         <div className={styles.leftContainer}>
           {activeTab !== "INCLUSION & EXCLUSION" &&
-            activeTab !== "TOUR POLICY" && <DaySlider />}
+            activeTab !== "TOUR POLICY" && (
+              <DaySlider
+                days={itineraryDays.map((item) => item?.day_number)}
+                activeDay={activeDayNumber}
+                onDaySelect={(dayNumber) => {
+                  const nextIndex = itineraryDays.findIndex(
+                    (item) => item?.day_number === dayNumber,
+                  );
+                  if (nextIndex !== -1) setActiveDayIndex(nextIndex);
+                }}
+              />
+            )}
 
           <AnimatePresence mode="wait">
             {activeTab === "DAY Itinerary" && (
@@ -269,10 +355,10 @@ const ArrivalToronto = ({ data }) => {
                   className={`${styles.ArrivalContainer} ${styles.ArrivalContainerDayIn}`}
                 >
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -284,14 +370,7 @@ const ArrivalToronto = ({ data }) => {
                   className={styles.leftBottomCont}
                 >
                   <div className={styles.paraCoontainer}>
-                    <p>
-                      Our journey begins with a scenic arrival in Toronto, where
-                      vibrant city energy meets the calm of waterfront views.
-                      After a smooth airport welcome, settle into your hotel and
-                      enjoy time to unwind from your flight. In the evening,
-                      explore the city at a relaxed pace or enjoy a curated din
-                      odern Canadian cuisine, setting the tone for the adventure
-                    </p>
+                    <p>{currentDayDescription}</p>
                     {/* <HotelRoom/> */}
                   </div>
 
@@ -304,10 +383,10 @@ const ArrivalToronto = ({ data }) => {
                     >
                       <div className={`${styles.ArrivalContainerMobile}`}>
                         <div className={styles.ArrivalRight}>
-                          <h2>Day 1 – Arrival in Toronto</h2>
+                          <h2>{currentDayTitle}</h2>
                         </div>
                         <div className={styles.ArrivalLeft}>
-                          1 flight, 1 hotel, 1 meal, 1 Transfer
+                          {currentDaySummary}
                         </div>
                       </div>
                       <img
@@ -327,15 +406,7 @@ const ArrivalToronto = ({ data }) => {
                         <div
                           className={`${styles.paraCoontainer} ${styles.paraCoontainerMobile}`}
                         >
-                          <p>
-                            Our journey begins with a scenic arrival in Toronto,
-                            where vibrant city energy meets the calm of
-                            waterfront views. After a smooth airport welcome,
-                            settle into your hotel and enjoy time to unwind from
-                            your flight. In the evening, explore the city at a
-                            relaxed pace or enjoy a curated din odern Canadian
-                            cuisine, setting the tone for the adventure
-                          </p>
+                          <p>{currentDayDescription}</p>
                           {/* <HotelRoom/> */}
                         </div>
                       </div>
@@ -469,19 +540,19 @@ const ArrivalToronto = ({ data }) => {
                           <div className={styles.card}>
                             <img
                               className={styles.cardImage}
-                              src="/images/yourAtivityImage1.png"
+                              src={currentHotelData.images[0]}
                               alt=""
                             />
                             <div className={styles.cardTextContainer}>
                               <span className={styles.cardTextAddress}>
-                                Toronto, canada
+                                {currentHotelData.location}
                               </span>
                               <h3 className={styles.cardTextTitle}>
-                                Serene Haven Inn
+                                {currentHotelData.title}
                               </h3>
                               <button
                                 className={styles.cardTextButton}
-                                onClick={() => openHotelPopup(sereneHotel)}
+                                onClick={() => openHotelPopup(currentHotelData)}
                               >
                                 view hotel options
                               </button>
@@ -519,7 +590,7 @@ const ArrivalToronto = ({ data }) => {
                           >
                             <Swiper
                               modules={[Navigation]}
-                              onSwiper={setSwiperRef}
+                              onSwiper={setMobileActivitySwiperRef}
                               onSlideChange={handleSlideChange}
                               slidesPerView={"auto"}
                               spaceBetween={12}
@@ -583,10 +654,10 @@ const ArrivalToronto = ({ data }) => {
                     <div
                       className={`${styles.btnContainer} ${styles.btnContainerMobileView}`}
                     >
-                      <div className={styles.btn} onClick={handlePrev}>
+                      <div className={styles.btn} onClick={handleMobileActivityPrev}>
                         <img src="/icons/left.svg" alt="Previous" />
                       </div>
-                      <div className={styles.btn} onClick={handleNext}>
+                      <div className={styles.btn} onClick={handleMobileActivityNext}>
                         <img src="/icons/right.svg" alt="Next" />
                       </div>
                     </div>
@@ -600,10 +671,10 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
                         <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handlePrev}>
+                          <div className={styles.btn} onClick={handleActivityPrev}>
                             <img src="/icons/left.svg" alt="Previous" />
                           </div>
-                          <div className={styles.btn} onClick={handleNext}>
+                          <div className={styles.btn} onClick={handleActivityNext}>
                             <img src="/icons/right.svg" alt="Next" />
                           </div>
                         </div>
@@ -614,19 +685,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -636,7 +707,7 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerBottomRight}>
                         <Swiper
                           modules={[Navigation]}
-                          onSwiper={setSwiperRef}
+                          onSwiper={setActivitySwiperRef}
                           onSlideChange={handleSlideChange}
                           slidesPerView={"auto"}
                           spaceBetween={12}
@@ -697,10 +768,10 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -712,7 +783,7 @@ const ArrivalToronto = ({ data }) => {
                   className={styles.leftBottomCont}
                 >
                   {/* <div className={styles.paraCoontainer}> */}
-                  <HotelRoom hotel={hotelData} onViewHotel={openHotelPopup} />
+                  <HotelRoom hotel={currentHotelData} onViewHotel={openHotelPopup} />
                   {/* </div> */}
                 </motion.div>
               </div>
@@ -722,10 +793,10 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -844,10 +915,10 @@ const ArrivalToronto = ({ data }) => {
               <div className={styles.leftBottomCont}>
                 <div className={styles.ArrivalContainer}>
                   <div className={styles.ArrivalRight}>
-                    <h2>Day 1 – Arrival in Toronto</h2>
+                    <h2>{currentDayTitle}</h2>
                   </div>
                   <div className={styles.ArrivalLeft}>
-                    1 flight, 1 hotel, 1 meal, 1 Transfer
+                    {currentDaySummary}
                   </div>
                 </div>
                 <motion.div
@@ -866,10 +937,10 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
                         <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handlePrev}>
+                          <div className={styles.btn} onClick={handleActivityPrev}>
                             <img src="/icons/left.svg" alt="Previous" />
                           </div>
-                          <div className={styles.btn} onClick={handleNext}>
+                          <div className={styles.btn} onClick={handleActivityNext}>
                             <img src="/icons/right.svg" alt="Next" />
                           </div>
                         </div>
@@ -880,19 +951,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -903,7 +974,7 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.yourActivityContainerBottomRight}>
                         <Swiper
                           modules={[Navigation]}
-                          onSwiper={setSwiperRef}
+                          onSwiper={setActivitySwiperRef}
                           onSlideChange={handleSlideChange}
                           slidesPerView={"auto"}
                           spaceBetween={12}
@@ -982,19 +1053,19 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.card}>
                           <img
                             className={styles.cardImage}
-                            src="/images/yourAtivityImage1.png"
+                            src={currentHotelData.images[0]}
                             alt=""
                           />
                           <div className={styles.cardTextContainer}>
                             <span className={styles.cardTextAddress}>
-                              Toronto, canada
+                              {currentHotelData.location}
                             </span>
                             <h3 className={styles.cardTextTitle}>
-                              Serene Haven Inn
+                              {currentHotelData.title}
                             </h3>
                             <button
                               className={styles.cardTextButton}
-                              onClick={() => openHotelPopup(sereneHotel)}
+                              onClick={() => openHotelPopup(currentHotelData)}
                             >
                               view hotel options
                             </button>
@@ -1031,7 +1102,7 @@ const ArrivalToronto = ({ data }) => {
                         >
                           <Swiper
                             modules={[Navigation]}
-                            onSwiper={setSwiperRef}
+                            onSwiper={setMobileActivitySwiperRef}
                             onSlideChange={handleSlideChange}
                             slidesPerView={"auto"}
                             spaceBetween={12}
@@ -1097,7 +1168,7 @@ const ArrivalToronto = ({ data }) => {
             {activeTab === "INCLUSION & EXCLUSION" && (
               <InclusionExclusion data={data} />
             )}
-            {activeTab === "TOUR POLICY" && <TourPolicy />}
+            {activeTab === "TOUR POLICY" && <TourPolicy data={data} />}
           </AnimatePresence>
         </div>
         <div className={styles.rightContainer}>
@@ -1105,7 +1176,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`bg-${activeDayIndex}`}
-                src={dayImgeFilter[nextDayIndex].image}
+                src={dayImgeFilter[nextDayIndex]?.image}
                 alt=""
                 className={styles.bgImage}
                 initial={{ opacity: 0 }}
@@ -1120,7 +1191,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`carousel-${activeDayIndex}`}
-                src={dayImgeFilter[activeDayIndex].image}
+                src={dayImgeFilter[safeImageIndex]?.image}
                 alt=""
                 className={styles.carouselImage}
                 initial={{ opacity: 0.5 }}
@@ -1132,8 +1203,8 @@ const ArrivalToronto = ({ data }) => {
 
             <div className={styles.DayImageTextCont}>
               <div className={styles.textCont}>
-                <h4>{dayImgeFilter[activeDayIndex].day}</h4>
-                <h4>{dayImgeFilter[activeDayIndex].desc}</h4>
+                <h4>{`Day ${String(activeDayNumber).padStart(2, "0")}`}</h4>
+                <h4>{currentDayData?.location?.city || dayImgeFilter[safeImageIndex]?.desc}</h4>
               </div>
 
               <div className={styles.leftRightBtn} onClick={handleNextDayImage}>
@@ -1161,16 +1232,21 @@ export default ArrivalToronto;
 
 const InclusionExclusion = ({ data }) => {
   const parseListFromDescription = (arr) => {
-    if (!Array.isArray(arr) || !arr[0]?.description) return [];
+    if (!Array.isArray(arr) || arr.length === 0) return [];
 
-    return arr[0].description
-      .split(/\n+/) // handles \n and \n\n
-      .map((item) => item.trim())
-      .filter(Boolean); // removes empty lines
+    return [...arr]
+      .sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
+      .flatMap((item) =>
+        String(item?.description || "")
+          .split(/\n+/)
+          .map((line) => line.trim())
+          .filter(Boolean),
+      );
   };
 
-  const inclusions = parseListFromDescription(data?.package_inclusion);
-  const exclusions = parseListFromDescription(data?.package_exclusion);
+  const inclusions = parseListFromDescription(data?.inclusions);
+  const exclusions = parseListFromDescription(data?.exclusions);
+  
 
   return (
     <section className={styles.inclusionWrapper}>
@@ -1180,7 +1256,7 @@ const InclusionExclusion = ({ data }) => {
       <div className={styles.block}>
         <h3 className={styles.inclusionSubHeading}>INCLUSION</h3>
 
-        {inclusions.length === 0 ? (
+        {data?.inclusions.length === 0 ? (
           <p className={styles.emptyText}>No inclusions available.</p>
         ) : (
           <ul className={styles.inclusionList}>
@@ -1219,78 +1295,37 @@ const InclusionExclusion = ({ data }) => {
   );
 };
 
-const TourPolicy = () => {
-  const tourPolicyList = [];
+const TourPolicy = ({ data }) => {
+  const tripPolicies = Array.isArray(data?.trip_policies)
+    ? [...data.trip_policies]
+        .filter((policy) => policy?.enabled !== false)
+        .sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
+    : [];
 
   return (
     <section className={styles.tourPolicyWrapper}>
       <h2 className={styles.inclusionHeading}>TOUR POLICY</h2>
-      {/* <div className={styles.divider} /> */}
 
-      {/* INCLUSION */}
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Confirmation Policy:</h3>
-        <div className={styles.tourPolicyPara}>
-          <p>
-            The customer receives a confirmation voucher via email within 24
-            hours of successful booking. In case the preferred slots are
-            unavailable, an alternate schedule of the customer’s preference will
-            be arranged and a new confirmation voucher will be sent via email.
-          </p>
-          <p>
-            Alternatively, the customer may choose to cancel their booking
-            before confirmation and a full refund will be processed.
-          </p>
-        </div>
-      </div>
-
-      {/* EXCLUSION */}
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Cancellation Policy:</h3>
-        <div className={styles.tourPolicyList}>
-          <ul className={styles.list}>
-            <li>
-              <strong>10 days:</strong> 100%
-            </li>
-            <li>
-              <strong>10 to 15 days:</strong> 75% + Non Refundable Component
-            </li>
-            <li>
-              <strong>15 to 30 days:</strong> 30% + Non Refundable Component
-            </li>
-            <li>
-              <strong>Hotel / Air:</strong> 100% in case of non-refundable
-              ticket / Hotel Room
-            </li>
-            <li>
-              <strong>Cruise / Visa:</strong> On Actuals
-            </li>
-          </ul>
-          <p>
-            All Prices are in Indian Rupees and subject to change without prior
-            notice.
-          </p>
-          <p>
-            In the case FIT flight inclusive package, the full amount of the
-            flight will be payable at the time of booking.
-          </p>
-        </div>
-      </div>
-      <div className={styles.tourBlock}>
-        <h3 className={styles.inclusionSubHeading}>Refund Policy:</h3>
-        <div className={styles.tourPolicyList}>
-          <ul className={styles.list}>
-            <li>
-              The applicable refund amount will be processed within 10 business
-              days.
-            </li>
-            <li>
-              All applicable refunds will be done in the traveler's
-              Thrillophilia wallet as Thrillcash.
-            </li>
-          </ul>
-        </div>
-      </div>
+      {tripPolicies.length === 0 ? (
+        <p className={styles.emptyText}>No tour policies available.</p>
+      ) : (
+        tripPolicies.map((policy) => (
+          <div
+            key={policy?.id ?? `${policy?.title}-${policy?.sort_order}`}
+            className={styles.tourBlock}
+          >
+            <h3 className={styles.inclusionSubHeading}>
+              {policy?.title || "Policy"}
+            </h3>
+            <div
+              className={styles.tourPolicyPara}
+              dangerouslySetInnerHTML={{
+                __html: policy?.description || "<p>No description available.</p>",
+              }}
+            />
+          </div>
+        ))
+      )}
     </section>
   );
 };

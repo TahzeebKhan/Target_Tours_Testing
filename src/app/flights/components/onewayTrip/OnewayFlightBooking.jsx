@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
@@ -10,10 +10,12 @@ import { useTripType } from "../../TripTypeContext";
 import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
 import SortBySheet from "../SortBySheet";
+import SortByDropdown from "../SortByDropdown";
 import OnewaySkeleton from "./OnewaySkeleton";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
+import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import {
   getFlightPrice,
   getFlightTravelChecklist,
@@ -29,6 +31,7 @@ const OnewayFlightBooking = ({
   sortHighlights = null,
   hasSearched = false,
   isLoading = false,
+  isRefreshing = false,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,6 +47,8 @@ const OnewayFlightBooking = ({
   const OFFER_INDEX = 3;
   const [openSort, setOpenSort] = useState(false);
   const { setIsSidebarOpen } = useContext(SidebarContext);
+  const sortTriggerRef = useRef(null);
+  const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -512,6 +517,7 @@ const OnewayFlightBooking = ({
 
   const visibleFlights = resolvedFlightResults;
   const hasNoData = hasSearched && !isLoading && visibleFlights.length === 0;
+  const showLoadingState = isLoading || isRefreshing;
 
   const resultsText = pagination
     ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
@@ -615,6 +621,7 @@ const OnewayFlightBooking = ({
               </div>
             </div>
             <div
+              ref={sortTriggerRef}
               onClick={() => setOpenSort(true)}
               className={styles.sortByContainer}
             >
@@ -623,7 +630,7 @@ const OnewayFlightBooking = ({
             </div>
           </div>
         </div>
-        {isLoading ? (
+        {showLoadingState ? (
           <OnewaySkeleton />
         ) : hasNoData ? (
           <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -950,7 +957,7 @@ const OnewayFlightBooking = ({
           flightData={selectedFareFlight || resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           prefetchedData={selectedFareFlight?.prefetchedFareData || prefetchedFareData[fareModalOpen] || null}
         />
-        {isLoading ? (
+        {showLoadingState ? (
           <OnewaySkeleton />
         ) : hasNoData ? (
           <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
@@ -964,14 +971,26 @@ const OnewayFlightBooking = ({
           ))
         )}
       </section>
-      <SortBySheet
-        open={openSort}
-        onClose={() => setOpenSort(false)}
-        selectedValue={filters.sortBy}
-        onApply={(value) => {
-          setSortBy(value);
-        }}
-      />
+      {isSortSheetMobile ? (
+        <SortBySheet
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      ) : (
+        <SortByDropdown
+          open={openSort}
+          onClose={() => setOpenSort(false)}
+          selectedValue={filters.sortBy}
+          anchorRef={sortTriggerRef}
+          onApply={(value) => {
+            setSortBy(value);
+          }}
+        />
+      )}
     </>
   );
 };

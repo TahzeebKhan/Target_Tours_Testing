@@ -25,6 +25,16 @@ const joinValues = (value) => {
     return "";
 };
 
+const normalizeHotelCategory = (value) => {
+    const category = String(value || "").trim();
+
+    if (!category) return "";
+    if (category === "<3") return "less_than_3_star";
+    if (["3", "4", "5"].includes(category)) return `${category}_star`;
+
+    return category;
+};
+
 const buildTourParams = (filters = {}) => {
     const params = {
         page: filters.page,
@@ -38,6 +48,8 @@ const buildTourParams = (filters = {}) => {
     const country =
         joinValues(filters.country) || pickSelectedKeys(filters.countries).join(",");
     const state = joinValues(filters.state) || pickSelectedKeys(filters.states).join(",");
+    const from = joinValues(filters.from);
+    const to = joinValues(filters.to);
 
     const minPrice =
         filters.min_price ??
@@ -45,6 +57,12 @@ const buildTourParams = (filters = {}) => {
     const maxPrice =
         filters.max_price ??
         (Array.isArray(filters.price) ? filters.price[1] : undefined);
+    const minNights =
+        filters.min_nights ??
+        (Array.isArray(filters.nights) ? filters.nights[0] : undefined);
+    const maxNights =
+        filters.max_nights ??
+        (Array.isArray(filters.nights) ? filters.nights[1] : undefined);
     const packageType = filters.package_type ?? filters.packageType;
     const isPremiumPackage =
         filters.is_premium_package ??
@@ -54,6 +72,8 @@ const buildTourParams = (filters = {}) => {
     if (country) params.country = country;
     if (state) params.state = state;
     if (city) params.city = city;
+    if (from) params.from = from;
+    if (to) params.to = to;
     if (packageType) params.package_type = packageType;
     if (typeof isPremiumPackage === "boolean") {
         params.is_premium_package = isPremiumPackage;
@@ -64,15 +84,11 @@ const buildTourParams = (filters = {}) => {
     if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") {
         params.max_price = maxPrice;
     }
-
-    if (Array.isArray(filters.nights)) {
-        params.filters = {
-            nights: filters.nights,
-        };
-    } else if (filters.filters?.nights) {
-        params.filters = {
-            nights: filters.filters.nights,
-        };
+    if (minNights !== undefined && minNights !== null && minNights !== "") {
+        params.min_nights = minNights;
+    }
+    if (maxNights !== undefined && maxNights !== null && maxNights !== "") {
+        params.max_nights = maxNights;
     }
 
     if (filters.with_flight !== undefined) {
@@ -84,16 +100,14 @@ const buildTourParams = (filters = {}) => {
     }
 
     if (filters.hotel_category) {
-        params.hotel_category = filters.hotel_category;
+        params.hotel_category = normalizeHotelCategory(filters.hotel_category);
     } else if (filters.hotelCategory) {
-        params.hotel_category = filters.hotelCategory;
+        params.hotel_category = normalizeHotelCategory(filters.hotelCategory);
     }
 
-    if (filters.theme) {
-        params.theme = filters.theme;
-    } else {
-        const theme = pickSelectedKeys(filters.themes).join(",");
-        if (theme) params.theme = theme;
+    const themes = joinValues(filters.themes) || pickSelectedKeys(filters.themes).join(",");
+    if (themes) {
+        params.themes = themes;
     }
 
     return params;
@@ -119,14 +133,15 @@ const normalizeTour = (item) => ({
         item.duration_days && item.duration_nights
             ? `${item.duration_days} DAYS & ${item.duration_nights} NIGHTS`
             : "CUSTOM DURATION",
-    meals: "SELECTED MEALS",
-    hotel: item.is_premium_package ? "PREMIUM HOTEL" : "HOTEL INCLUDED",
-    activities: `${item.package_itinerarie?.length || 0} ACTIVITIES`,
+    meals: item?.selected_meals_count > 0 ? "SELECTED MEALS" : "MEALS NOT INCLUDE",
+    hotel: item?.highest_starred_hotel ?  `${item?.highest_starred_hotel} `  : "HOTEL NOT INCLUDED" ,
+    activities: `${item?.activities_count || 0} ACTIVITIES`,
     price: item.started_price
         ? `₹ ${item.started_price.toLocaleString()}`
         : "ON REQUEST",
     raw: item,
     package_inclusion: item.package_inclusion,
+    package_inclusion_tags:item?.package_inclusion_tags
 });
 
 export const fetchTours = async ({ pageParam = 1, queryKey }) => {

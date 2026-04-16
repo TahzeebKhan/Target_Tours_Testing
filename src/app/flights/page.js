@@ -290,6 +290,7 @@ const page = () => {
     selectedDateTilePrice,
   ]);
   const isInitialLoad = !aggregatedMappedData && !data && (isLoading || isFetching);
+  const isRefreshingResults = currentPage === 1 && !isInitialLoad && isFetching;
 
   useEffect(() => {
     const resolvedFilters =
@@ -387,6 +388,7 @@ const page = () => {
           sortHighlights={mappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
+          isRefreshing={isRefreshingResults}
           queryError={error}
         />
       )}
@@ -401,6 +403,7 @@ const page = () => {
           sortHighlights={mappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
+          isRefreshing={isRefreshingResults}
           queryError={error}
         />
       )}
@@ -415,6 +418,7 @@ const page = () => {
           sortHighlights={mappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
+          isRefreshing={isRefreshingResults}
           queryError={error}
         />
       )}
