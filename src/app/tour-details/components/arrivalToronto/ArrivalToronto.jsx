@@ -21,6 +21,7 @@ const ArrivalToronto = ({ data }) => {
   const [isYourActivityPopupOpen, setIsYourActivityPopupOpen] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [expandedActivityText, setExpandedActivityText] = useState([]);
 
   const openHotelPopup = (hotel) => {
     setSelectedHotel(hotel);
@@ -64,6 +65,34 @@ const ArrivalToronto = ({ data }) => {
 
   const toggleExpand = (key) => {
     setOpenAccordion((prev) => (prev === key ? null : key));
+  };
+
+  const toggleActivityText = (id) => {
+    setExpandedActivityText((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const renderActivityText = (item) => {
+    const words = String(item?.title || "").trim().split(/\s+/).filter(Boolean);
+    const isLongText = words.length > 30;
+    const isExpandedText = expandedActivityText.includes(item?.id);
+
+    if (!isLongText || isExpandedText) return item?.title;
+
+    return (
+      <>
+        {words.slice(0, 30).join(" ")}...{" "}
+        <span
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleActivityText(item?.id);
+          }}
+        >
+          more
+        </span>
+      </>
+    );
   };
 
   const items = [
@@ -151,7 +180,11 @@ const ArrivalToronto = ({ data }) => {
     currentDayData?.description ||
     "Our journey begins with a scenic arrival in Toronto, where vibrant city energy meets the calm of waterfront views. After a smooth airport welcome, settle into your hotel and enjoy time to unwind from your flight. In the evening, explore the city at a relaxed pace or enjoy a curated din odern Canadian cuisine, setting the tone for the adventure";
   const getMediaUrl = (url) =>
-    url ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}` : "";
+    url
+      ? url.startsWith("http")
+        ? url
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`
+      : "";
   const getHotelImage = (hotel) => {
     const image = Array.isArray(hotel?.main_image)
       ? hotel.main_image[0]
@@ -190,6 +223,66 @@ const ArrivalToronto = ({ data }) => {
       : [],
   };
   const currentBuilderData = currentDayData?.builder_data || {};
+  const currentTransports = Array.isArray(currentBuilderData?.transports)
+    ? currentBuilderData.transports.filter((transport) => transport?.enabled !== false)
+    : [];
+  const currentFlightTransport = currentTransports.find(
+    (transport) => transport?.mode === "flight",
+  );
+  const currentPrivateTransfer = currentTransports.find(
+    (transport) => transport?.mode === "private_transfer",
+  );
+  const formatTransportTime = (value) => {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+  const getTransportDuration = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return { hours: 0, minutes: 0 };
+    }
+
+    const diffMinutes = Math.max(0, Math.round((endDate - startDate) / 60000));
+
+    return {
+      hours: Math.floor(diffMinutes / 60),
+      minutes: diffMinutes % 60,
+    };
+  };
+  const currentFlight = currentFlightTransport
+    ? {
+        departure: {
+          time: formatTransportTime(currentFlightTransport?.departure_datetime),
+          city: currentFlightTransport?.departure_airport || "N/A",
+        },
+        arrival: {
+          time: formatTransportTime(currentFlightTransport?.arrival_datetime),
+          city: currentFlightTransport?.arrival_airport || "N/A",
+        },
+        duration: {
+          ...getTransportDuration(
+            currentFlightTransport?.departure_datetime,
+            currentFlightTransport?.arrival_datetime,
+          ),
+        },
+        stops: {
+          type: currentFlightTransport?.stops || "Non Stop",
+        },
+        fare: {
+          totalFare: currentFlightTransport?.flight_base_price || "",
+          pricePerAdult: currentFlightTransport?.flight_base_price || "",
+          cabinClass: currentFlightTransport?.cabin_class || "",
+        },
+      }
+    : flight;
   const hasHotelId = (hotel) =>
     hotel?.hotel_id !== undefined &&
     hotel?.hotel_id !== null &&
@@ -262,10 +355,10 @@ const ArrivalToronto = ({ data }) => {
         {
           id: `activity-empty-${activeDayNumber}`,
           image: "/images/yourAtivityImage3.png",
-          category: "N/A",
-          title: "N/A",
-          popupTitle: "N/A",
-          description: "N/A",
+          category: "No activity found",
+          title: "No activity found",
+          popupTitle: "No activity found",
+          description: "No activity found",
           startTime: "",
           endTime: "",
           images: ["/images/yourAtivityImage3.png"],
@@ -276,9 +369,13 @@ const ArrivalToronto = ({ data }) => {
   const safeImageIndex = dayImgeFilter.length
     ? activeDayIndex % dayImgeFilter.length
     : 0;
-  const nextDayIndex = dayImgeFilter.length
-    ? (safeImageIndex - 1 + dayImgeFilter.length) % dayImgeFilter.length
-    : 0;
+  const currentDayImageUrl =
+    currentDayData?.day_image?.formats?.large?.url ||
+    currentDayData?.day_image?.formats?.small?.url ||
+    currentDayData?.day_image?.formats?.thumbnail?.url ||
+    currentDayData?.day_image?.url;
+  const currentDayImage =
+    getMediaUrl(currentDayImageUrl) || dayImgeFilter[safeImageIndex]?.image;
 
   const handleNextDayImage = () => {
     setActiveDayIndex((prev) =>
@@ -414,12 +511,13 @@ const ArrivalToronto = ({ data }) => {
                   </div>
 
                   <div className={styles.expandableMainContainerMobileWrapper}>
+                    {currentFlightTransport && (
                     <div className={styles.expandableMainContainer}>
                       <div
                         className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`}
                         onClick={() => toggleExpand("flight")}
                       >
-                        <h2>International Flight</h2>
+                        <h2> Flight</h2>
                         <img
                           className={`${styles.arrow} ${
                             openAccordion === "flight" ? styles.rotate : ""
@@ -436,9 +534,9 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.expandableContentWrapper}>
                           <div className={styles.expandableTop}>
                             <div className={styles.fromToContainer}>
-                              <span>New Delhi (DEL) </span>
+                              <span>{currentFlightTransport?.departure_airport || "N/A"} </span>
                               <img src="/icons/rightArrow1.svg" alt="" />
-                              <span>Toronto (NMI)</span>
+                              <span>{currentFlightTransport?.arrival_airport || "N/A"}</span>
                             </div>
                             <div>
                               <button className={styles.viewDetails}>
@@ -451,30 +549,32 @@ const ArrivalToronto = ({ data }) => {
                               <div className={styles.flightDetails}>
                                 <img src="/images/Flight.png" alt="" />
                                 <div className={styles.flightNameContainer}>
-                                  <h2>IndiGo</h2>
-                                  <span>6E-541</span>
+                                  <h2>{currentFlightTransport?.airline_name || "N/A"}</h2>
+                                  <span>{currentFlightTransport?.flight_number || "N/A"}</span>
                                 </div>
                               </div>
                               <div className={styles.flightTimingContainer}>
-                                <FlightTimingDetail flight={flight} />
+                                <FlightTimingDetail flight={currentFlight} />
                               </div>
                             </div>
                             <div className={styles.br}></div>
                             <div className={styles.cabinCont}>
                               <div className={styles.cabinRow}>
                                 <img src="/icons/cabinSvg.svg" alt="" />
-                                <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                <span>Cabin: {currentFlightTransport?.cabin_weight || "N/A"}</span>
                               </div>
                               <div className={styles.cabinRow}>
                                 <img src="/icons/checkSvg.svg" alt="" />
-                                <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                                <span>{currentFlightTransport?.baggage_info || "N/A"}</span>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                    )}
 
+                    {currentPrivateTransfer && (
                     <div className={styles.expandableMainContainer}>
                       <div
                         className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`}
@@ -498,22 +598,21 @@ const ArrivalToronto = ({ data }) => {
                           <div className={styles.PremiumContainer}>
                             <img src="/images/cardImg.png" alt="" />
                             <div className={styles.PremiumTextContainer}>
-                              <h3>Premium Airport Transfer</h3>
+                              <h3>{currentPrivateTransfer?.vehicle_type || "Private Transfer"}</h3>
                               <p>
-                                Enjoy a seamless arrival with our luxury private
-                                transfer service. Your personal chauffeur will
-                                meet you at arrivals with a nameplate and escort
-                                you to your premium vehicle.
+                                {currentPrivateTransfer?.notes ||
+                                  `${currentPrivateTransfer?.pickup_location || "N/A"} to ${currentPrivateTransfer?.drop_location || "N/A"}`}
                               </p>
                               <div className={styles.ApproximatelyTime}>
                                 <img src="/icons/watchBlack.svg" alt="" />
-                                <span>Approximately 45 minutes</span>
+                                <span>{currentPrivateTransfer?.pickup_time ? `Pickup: ${formatTransportTime(currentPrivateTransfer.pickup_time)}` : "N/A"}</span>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                    )}
 
                     <div
                       className={`${styles.expandableMainContainer} ${styles.expandableMainContainerMobile}`}
@@ -618,7 +717,7 @@ const ArrivalToronto = ({ data }) => {
                                         {item.category}
                                       </span>
                                       <h3 className={styles.TextTitle}>
-                                        {item.title}
+                                        {renderActivityText(item)}
                                       </h3>
 
                                       <div className={styles.btnsCon}>
@@ -732,7 +831,7 @@ const ArrivalToronto = ({ data }) => {
                                     {item.category}
                                   </span>
                                   <h3 className={styles.TextTitle}>
-                                    {item.title}
+                                    {renderActivityText(item)}
                                   </h3>
 
                                   <div className={styles.btnsCon}>
@@ -807,6 +906,7 @@ const ArrivalToronto = ({ data }) => {
                   exit="exit"
                   className={styles.leftBottomCont}
                 >
+                  {currentFlightTransport && (
                   <div className={styles.expandableMainContainer}>
                     <div
                       className={`${styles.expandableTab} ${openAccordion === "flight" ? styles.activeTabs : ""}`}
@@ -829,9 +929,9 @@ const ArrivalToronto = ({ data }) => {
                       <div className={styles.expandableContentWrapper}>
                         <div className={styles.expandableTop}>
                           <div className={styles.fromToContainer}>
-                            <span>New Delhi (DEL) </span>
+                            <span>{currentFlightTransport?.departure_airport || "N/A"} </span>
                             <img src="/icons/rightArrow1.svg" alt="" />
-                            <span>Toronto (NMI)</span>
+                            <span>{currentFlightTransport?.arrival_airport || "N/A"}</span>
                           </div>
                           <div>
                             <button className={styles.viewDetails}>
@@ -844,30 +944,32 @@ const ArrivalToronto = ({ data }) => {
                             <div className={styles.flightDetails}>
                               <img src="/images/Flight.png" alt="" />
                               <div className={styles.flightNameContainer}>
-                                <h2>IndiGo</h2>
-                                <span>6E-541</span>
+                                <h2>{currentFlightTransport?.airline_name || "N/A"}</h2>
+                                <span>{currentFlightTransport?.flight_number || "N/A"}</span>
                               </div>
                             </div>
                             <div className={styles.flightTimingContainer}>
-                              <FlightTimingDetail flight={flight} />
+                              <FlightTimingDetail flight={currentFlight} />
                             </div>
                           </div>
                           <div className={styles.br}></div>
                           <div className={styles.cabinCont}>
                             <div className={styles.cabinRow}>
                               <img src="/icons/cabinSvg.svg" alt="" />
-                              <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                              <span>Cabin: {currentFlightTransport?.cabin_weight || "N/A"}</span>
                             </div>
                             <div className={styles.cabinRow}>
                               <img src="/icons/checkSvg.svg" alt="" />
-                              <span>Cabin: 7 Kgs (1 Piece Only)</span>
+                              <span>{currentFlightTransport?.baggage_info || "N/A"}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  )}
 
+                  {currentPrivateTransfer && (
                   <div className={styles.expandableMainContainer}>
                     <div
                       className={`${styles.expandableTab} ${openAccordion === "transfer" ? styles.activeTabs : ""}`}
@@ -891,22 +993,21 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.PremiumContainer}>
                           <img src="/images/cardImg.png" alt="" />
                           <div className={styles.PremiumTextContainer}>
-                            <h3>Premium Airport Transfer</h3>
+                            <h3>{currentPrivateTransfer?.vehicle_type || "Private Transfer"}</h3>
                             <p>
-                              Enjoy a seamless arrival with our luxury private
-                              transfer service. Your personal chauffeur will
-                              meet you at arrivals with a nameplate and escort
-                              you to your premium vehicle.
+                              {currentPrivateTransfer?.notes ||
+                                `${currentPrivateTransfer?.pickup_location || "N/A"} to ${currentPrivateTransfer?.drop_location || "N/A"}`}
                             </p>
                             <div className={styles.ApproximatelyTime}>
                               <img src="/icons/watchBlack.svg" alt="" />
-                              <span>Approximately 45 minutes</span>
+                              <span>{currentPrivateTransfer?.pickup_time ? `Pickup: ${formatTransportTime(currentPrivateTransfer.pickup_time)}` : "N/A"}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  )}
                 </motion.div>
               </div>
             )}
@@ -999,7 +1100,7 @@ const ArrivalToronto = ({ data }) => {
                                     {item.category}
                                   </span>
                                   <h3 className={styles.TextTitle}>
-                                    {item.title}
+                                    {renderActivityText(item)}
                                   </h3>
 
                                   <div className={styles.btnsCon}>
@@ -1130,7 +1231,7 @@ const ArrivalToronto = ({ data }) => {
                                       {item.category}
                                     </span>
                                     <h3 className={styles.TextTitle}>
-                                      {item.title}
+                                      {renderActivityText(item)}
                                     </h3>
 
                                     <div className={styles.btnsCon}>
@@ -1176,7 +1277,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`bg-${activeDayIndex}`}
-                src={dayImgeFilter[nextDayIndex]?.image}
+                src={currentDayImage}
                 alt=""
                 className={styles.bgImage}
                 initial={{ opacity: 0 }}
@@ -1191,7 +1292,7 @@ const ArrivalToronto = ({ data }) => {
             <AnimatePresence>
               <motion.img
                 key={`carousel-${activeDayIndex}`}
-                src={dayImgeFilter[safeImageIndex]?.image}
+                src={currentDayImage}
                 alt=""
                 className={styles.carouselImage}
                 initial={{ opacity: 0.5 }}

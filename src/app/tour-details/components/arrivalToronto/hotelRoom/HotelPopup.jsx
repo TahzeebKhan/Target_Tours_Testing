@@ -34,7 +34,7 @@ const HotelPopup = ({ isOpen, hotel, onClose }) => {
         : hotel?.options?.length
             ? hotel.options
             : [hotel];
-    const selectedIndex = selected[selected.length - 1] ?? 0;
+    const selectedIndex = selected[0] ?? 0;
     const selectedHotel = hotels[selectedIndex] || hotel;
 
     useEffect(() => {
@@ -82,8 +82,8 @@ const HotelPopup = ({ isOpen, hotel, onClose }) => {
                                             onClick={() =>
                                                 setSelected((prev) =>
                                                     prev.includes(index)
-                                                        ? prev.filter((i) => i !== index) // close
-                                                        : [...prev, index]                // open
+                                                        ? []
+                                                        : [index]
                                                 )
                                             }
                                         >
