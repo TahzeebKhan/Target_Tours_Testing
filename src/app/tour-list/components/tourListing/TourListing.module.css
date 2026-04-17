@@ -26,6 +26,98 @@
   text-align: center;
 }
 
+.skeletonCard,
+.skeletonListCard {
+  width: 100%;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.skeletonCard {
+  max-width: 518px;
+  min-height: 350px;
+  position: relative;
+}
+
+.skeletonListCard {
+  min-height: 322px;
+  display: flex;
+  gap: 24px;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 350px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.25s ease-in-out infinite;
+}
+
+.skeletonListCard .skeletonImage {
+  max-width: 420px;
+  height: auto;
+  min-height: 322px;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.skeletonCard .skeletonContent {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 20px;
+  background: linear-gradient(to top, #ffffff 0%, rgba(255, 255, 255, 0.88) 72%, rgba(255, 255, 255, 0) 100%);
+}
+
+.skeletonListCard .skeletonContent {
+  flex: 1;
+  justify-content: center;
+}
+
+.skeletonLine,
+.skeletonButton {
+  display: block;
+  height: 14px;
+  max-width: 180px;
+  width: 58%;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.25s ease-in-out infinite;
+}
+
+.skeletonLineWide {
+  max-width: 320px;
+  width: 88%;
+  height: 28px;
+}
+
+.skeletonFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.skeletonButton {
+  max-width: 110px;
+  width: 34%;
+  height: 36px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
 /* COMMON animation
 @keyframes slideUpFade {
   from {
@@ -968,6 +1060,16 @@
     }
     .ListViewCardImageContainerMobile{
         height: 280px;
+    }
+    .skeletonListCard {
+        min-height: auto;
+        flex-direction: column;
+        gap: 0;
+    }
+    .skeletonListCard .skeletonImage {
+        max-width: unset;
+        height: 280px;
+        min-height: 280px;
     }
 }
 @media (max-width: 670px){

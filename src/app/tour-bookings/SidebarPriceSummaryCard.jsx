@@ -1,10 +1,26 @@
 "use client"
-import { useFlightBooking } from "./FlightBookingContext";
+import { useTourBooking } from "./TourBookingContext";
 import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
 export default function SidebarPriceSummaryCard() {
-  const { prices,currentStep  } = useFlightBooking();
+  const {
+    completeBooking,
+    packageDetails,
+    packageBookingLoading,
+    prices,
+    currentStep,
+    submitPackageBooking,
+  } = useTourBooking();
+  const travelerCount = prices.travelerCount || 1;
+
+  const handleContinuePayment = async () => {
+    if (packageBookingLoading) return;
+    const booked = await submitPackageBooking();
+    if (booked) {
+      completeBooking();
+    }
+  };
 
   return (
     <div className={styles.card}>
@@ -12,17 +28,17 @@ export default function SidebarPriceSummaryCard() {
 
       <div className={styles.rowWraper}>
         <div className={styles.row}>
-          <span>1x Adult</span>
+          <span>{travelerCount}x Adult</span>
           <span className={styles.price}>₹ {prices.baseFare.toLocaleString()}</span>
         </div>
 
         <div className={styles.row}>
-          <span>1x Cabin baggage</span>
+          <span>{travelerCount}x Cabin baggage</span>
           <span className={styles.success}>Included</span>
         </div>
 
         <div className={styles.row}>
-          <span>1x Checked baggage 15kg</span>
+          <span>{travelerCount}x Checked baggage 15kg</span>
           <span className={styles.success}>Included</span>
         </div>
 
@@ -49,7 +65,7 @@ export default function SidebarPriceSummaryCard() {
 
         <div className={styles.row}>
           <span>Taxes & Fees</span>
-          <span className={styles.price}>₹2,819</span>
+          <span className={styles.price}>₹{Number(packageDetails?.price?.taxes || 0).toLocaleString("en-IN")}</span>
         </div>
       </div>
 
@@ -63,7 +79,13 @@ export default function SidebarPriceSummaryCard() {
       </div>
       {currentStep === 3 && (
         <>
-          <button className={styles.bookNowBtn}>Continue Payment</button>
+          <button
+            className={styles.bookNowBtn}
+            disabled={packageBookingLoading}
+            onClick={handleContinuePayment}
+          >
+            {packageBookingLoading ? "Processing..." : "Continue Payment"}
+          </button>
           <div className={styles.safeBadge}>
             <img src="/images/secure.png" />
             <div className={styles.text}>

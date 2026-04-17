@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Suspense, useEffect } from "react";
+import React, { useState, Suspense } from "react";
 import styles from "./layout.module.css";
 import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
 import FlightFilters from "./components/flightFilter/FlightsFilters";
@@ -26,16 +26,7 @@ const ToursPageContent = () => {
   const selectedThemes = searchParams.get("themes") || "";
   const selectedPackageType = searchParams.get("package_type") || "";
 
-  // const [filters, setFilters] = useState({})
-  const [filters, setFilters] = useState({
-    nights: [1, 10],
-    price: [11307, 57295],
-    flightType: null,
-    packageType: null,
-    premiumPackages: {},
-    cities: {},
-  });
-  // const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
   const [filterData, setFilterData] = useState(null); // 🔥 Store dynamic filter options from API
   const handleDataLoaded = (meta) => {
@@ -43,48 +34,6 @@ const ToursPageContent = () => {
       setFilterData(meta.counts);
     }
   };
-
-  const handleApplyFilters = (apiFilters) => {
-    setPage(1);                // 🔥 pagination reset
-    setFilters(apiFilters);    // 🔥 single source
-  };
-
-
-  useEffect(() => {
-    const apiFilters = {};
-
-    if (Array.isArray(filters.nights)) {
-      apiFilters.min_nights = filters.nights[0];
-      apiFilters.max_nights = filters.nights[1];
-    }
-
-    if (Array.isArray(filters.price)) {
-      apiFilters.min_price = filters.price[0];
-      apiFilters.max_price = filters.price[1];
-    }
-
-    if (filters.flightType === "with") apiFilters.with_flight = true;
-    if (filters.flightType === "without") apiFilters.with_flight = false;
-
-    if (filters.packageType) {
-      apiFilters.package_type = filters.packageType;
-    }
-
-    if (filters.premiumPackages?.Premium) {
-      apiFilters.is_premium_package = true;
-    }
-
-    const cities = Object.keys(filters.cities || {}).filter(
-      (c) => filters.cities[c]
-    );
-    if (cities.length) {
-      apiFilters.city = cities.join(",");
-    }
-
-    // ❌ NO onApply here
-  }, [filters]);
-
-
 
   return (
     <>

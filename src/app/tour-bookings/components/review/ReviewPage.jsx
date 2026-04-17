@@ -2,12 +2,11 @@
 import React, { useState } from "react";
 import styles from "./ReviewPage.module.css";
 
-import { useFlightBooking } from "../../FlightBookingContext";
+import { useTourBooking } from "../../TourBookingContext";
 import { useRouter } from "next/navigation";
 import DayByDayItinerary from "./components/dayByDayItinerary/DayByDayItinerary";
-import TravelInsuranceOption from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
-import CancellationPenalty from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
-import CancellationPolicy from "@/app/hotel-booking/components/review/components/cancellationPolicy/CancellationPolicy";
+import TravelInsuranceOption from "./components/travelInsuranceOption/TravelInsuranceOption";
+import CancellationPolicy from "./components/cancellationPolicy/CancellationPolicy";
 import TravelerDetails from "./components/travelerDetails/TravelerDetails";
 import BookingFooter from "./components/bookingFooter/BookingFooter";
 import PriceSummary from "./components/priceSummary/PriceSummary";
@@ -15,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 
 const ReviewPage = () => {
     // 👇 default open = flight
-    const { setCurrentStep } = useFlightBooking();
+    const { packageDetails, prices, setCurrentStep, submitPassengers, passengerLoading } = useTourBooking();
     const [openTab, setOpenTab] = useState("dayByDayItinerary");
     const [showPriceSummary, setShowPriceSummary] = useState(false);
        const router = useRouter();
@@ -23,6 +22,17 @@ const ReviewPage = () => {
     const toggleTab = (tabName) => {
         setOpenTab((prev) => (prev === tabName ? null : tabName));
     };
+
+    const handleContinue = async () => {
+        if (passengerLoading) return;
+        const created = await submitPassengers();
+        if (created) {
+            setCurrentStep(3);
+            return;
+        }
+        setOpenTab("travelerDetails");
+    };
+    const amount = `₹ ${Number(prices?.total || 0).toLocaleString("en-IN")}`;
  
 
     return (
@@ -43,33 +53,28 @@ const ReviewPage = () => {
 
                 <div className={styles.headerBannerContainer}>
                     <div className={styles.BannerContainer}>
-                        <img src="/images/splendorsImg.png" alt="" />
+                        <img src={packageDetails?.image || "/images/splendorsImg.png"} alt="" />
                         <div className={styles.priceContainer}>
-                            <span className={styles.price}>From <strong>₹ 66,945 </strong></span>
+                            <span className={styles.price}>From <strong>{amount} </strong></span>
                             <span className={styles.person}>/ PERSON</span>
                         </div>
                     </div>
                     <div className={styles.bannerTextContainer}>
-                        <h2 className={styles.bannerHeading}>Splendors of the Canadian West</h2>
+                        <h2 className={styles.bannerHeading}>{packageDetails?.title}</h2>
                         <div className={styles.subTextContainer}>
                             <div className={styles.dateLocationContainer}>
-                                <span className={styles.dateLocation}>Sun, Jan 11, 2026</span>
+                                <span className={styles.dateLocation}>{packageDetails?.startDate}</span>
                                 <div className={styles.dayNightContainer}>
                                     <div className={styles.dash}></div>
-                                    <span className={styles.dayNightChip}>7D/6N</span>
+                                    <span className={styles.dayNightChip}>{packageDetails?.durationLabel}</span>
                                     <div className={styles.dash}></div>
                                 </div>
-                                <span className={styles.dateLocation}>Sat, Jan 17, 2026 / From New Delhi</span>
+                                <span className={styles.dateLocation}>
+                                    {packageDetails?.endDate} / From {packageDetails?.fromCity}
+                                </span>
                             </div>
                             <div className={styles.itineraryContainer}>
-                                <span className={styles.boldSpan}>2N</span>
-                                <span className={styles.ubudText}>Ubud</span>
-                                <span>•</span>
-                                <span className={styles.boldSpan}>1N</span>
-                                <span className={styles.ubudText}>Toronto</span>
-                                <span>•</span>
-                                <span className={styles.boldSpan}>3N</span>
-                                <span className={styles.ubudText}>Oikawa</span>
+                                <span className={styles.ubudText}>{packageDetails?.routeLabel}</span>
                             </div>
                         </div>
                     </div>
@@ -96,7 +101,7 @@ const ReviewPage = () => {
                         className={`${styles.expandWrap} ${openTab === "dayByDayItinerary" ? styles.expandOpen : ""
                             }`}
                     >
-                        <DayByDayItinerary />
+                        <DayByDayItinerary itinerary={packageDetails?.itinerary} />
 
                     </div>
                 </div>
@@ -176,10 +181,12 @@ const ReviewPage = () => {
                 </div>
 
                 <div
-                    onClick={() => setCurrentStep(3)}
+                    onClick={handleContinue}
                     className={styles.continueButtonContainer}
                 >
-                    <button className={styles.continueButton}>CONTINUE</button>
+                    <button className={styles.continueButton} disabled={passengerLoading}>
+                        {passengerLoading ? "LOADING..." : "CONTINUE"}
+                    </button>
                 </div>
 
 
@@ -189,9 +196,9 @@ const ReviewPage = () => {
             <div className={styles.footerContainer}>
                 <BookingFooter
                     title="Starting From"
-                    amount="₹ 66,945"
+                    amount={amount}
                     onInfoClick={() => setShowPriceSummary(true)}
-                    onContinue={() => setCurrentStep(3)}
+                    onContinue={handleContinue}
                 />;
 
 

@@ -37,9 +37,54 @@ import MobileItinerary from "./customIternaryComponents/MobileItinerary";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
+import SuggestionBox from "./SuggestionBox";
+import { fetchHolidayPackageSuggestions } from "@/shared/services/tourPackage";
 const sampleHotel = {
   title: "SERENE HAVEN INN, TORONTO",
   images: ["/images/hotel-placeholder.jpg"],
+};
+
+const normalizeHolidaySuggestions = (payload) => {
+  const source =
+    payload?.data?.suggestions ||
+    payload?.data ||
+    payload?.suggestions ||
+    payload ||
+    [];
+
+  if (!Array.isArray(source)) return [];
+
+  return source.map((item, index) => {
+    const label =
+      item?.label ||
+      item?.name ||
+      item?.city ||
+      item?.country ||
+      item?.title ||
+      item?.value ||
+      "";
+    const detail =
+      item?.detail ||
+      item?.description ||
+      item?.country ||
+      item?.category ||
+      "";
+    const code =
+      item?.code ||
+      item?.iata_code ||
+      item?.iataCode ||
+      item?.type ||
+      "";
+
+    return {
+      id: item?.id || item?.documentId || `${label}-${index}`,
+      label,
+      detail,
+      code,
+      value: item?.value || label,
+      raw: item,
+    };
+  }).filter((item) => item.label || item.value);
 };
 const HomePage = ({
   itineraryType,
@@ -350,6 +395,46 @@ const HomePage = ({
     enabled: bookingType === "flight",
   });
   const datewiseFaresByDate = datewiseFareData?.faresByDate || {};
+  const {
+    data: holidayFromSuggestionResponse,
+  } = useQuery({
+    queryKey: [
+      "holiday-package-suggestions",
+      "from",
+      from,
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () =>
+      fetchHolidayPackageSuggestions({
+        term: from,
+        type: "from",
+      }),
+    enabled: bookingType === "holiday" && fromSuggestionsOpen && from.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+  const {
+    data: holidayToSuggestionResponse,
+  } = useQuery({
+    queryKey: [
+      "holiday-package-suggestions",
+      "to",
+      to,
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () =>
+      fetchHolidayPackageSuggestions({
+        term: to,
+        type: "to",
+      }),
+    enabled: bookingType === "holiday" && toSuggestionsOpen && to.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+  const holidayFromSuggestions = normalizeHolidaySuggestions(
+    holidayFromSuggestionResponse,
+  );
+  const holidayToSuggestions = normalizeHolidaySuggestions(
+    holidayToSuggestionResponse,
+  );
 
   const swapLocations = (index) => {
     if (typeof index === "number" && tripType === "multi") {
@@ -2049,21 +2134,12 @@ const HomePage = ({
                         )}
                         {bookingType === "holiday" && fromSuggestionsOpen && (
                           <>
-                            {" "}
-                            {/* <SuggestionBox
+                            <SuggestionBox
                               boxRef={fromSuggestionRef}
-                              heading="RECENT SEARCH"
-                              suggestions={getFilteredSuggestions(from)}
+                              heading="PACKAGE SUGGESTIONS"
+                              suggestions={holidayFromSuggestions}
                               onSelect={(s) => selectSuggestion(s, "from")}
-                            /> */}
-                            <div ref={fromSuggestionRef}>
-                              <RecentSearch
-                                onSelect={(city) => {
-                                  setFrom(city); // ✅ input value set
-                                  setToSuggestionsOpen(false); // ✅ dropdown close
-                                }}
-                              />
-                            </div>
+                            />
                           </>
                         )}
                       </div>
@@ -2198,21 +2274,12 @@ const HomePage = ({
                           />
 
                           {toSuggestionsOpen && (
-
-                             <div ref={toSuggestionRef}>
-                              <RecentSearch
-                                onSelect={(city) => {
-                                  setTo(city); // ✅ input value set
-                                  setToSuggestionsOpen(false); // ✅ dropdown close
-                                }}
-                              />
-                            </div>
-                            // <SuggestionBox
-                            //   boxRef={toSuggestionRef}
-                            //   heading="RECENT SEARCH"
-                            //   suggestions={getFilteredSuggestions(to)}
-                            //   onSelect={(s) => selectSuggestion(s, "to")}
-                            // />
+                            <SuggestionBox
+                              boxRef={toSuggestionRef}
+                              heading="PACKAGE SUGGESTIONS"
+                              suggestions={holidayToSuggestions}
+                              onSelect={(s) => selectSuggestion(s, "to")}
+                            />
                           )}
                         </>
                       ) : (

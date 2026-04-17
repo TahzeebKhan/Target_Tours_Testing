@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import { useFlightBooking } from "./FlightBookingContext";
+import { useTourBooking } from "./TourBookingContext";
 import styles from "./page.module.css";
 import PaymentPage from "./components/paymentPage/PaymentPage";
 import ReviewPage from "./components/review/ReviewPage";
 
-const FlightBookingDetailsPage = () => {
-  const { currentStep, setCurrentStep } = useFlightBooking();
+const TourBookingPage = () => {
+  const { currentStep } = useTourBooking();
   return (
     <div className="w-full">
       {currentStep === 2 && (
@@ -24,4 +24,4 @@ const FlightBookingDetailsPage = () => {
   );
 };
 
-export default FlightBookingDetailsPage;
+export default TourBookingPage;

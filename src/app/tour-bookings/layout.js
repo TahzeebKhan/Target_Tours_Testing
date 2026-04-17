@@ -1,14 +1,14 @@
 import React from "react";
-import styles from "./FlightBookingDetailsLayout.module.css";
+import styles from "./TourBookingLayout.module.css";
 
 import BookingStepper from "./components/BookingStepper";
 import SidebarPriceSummaryCard from "./SidebarPriceSummaryCard";
-import { FlightBookingProvider } from "./FlightBookingContext";
-import Navbar from "../flight-booking-details/Navbar";
+import { TourBookingProvider } from "./TourBookingContext";
+import Navbar from "./Navbar";
 
-export default function FlightBookingDetailsLayout({ children }) {
+export default function TourBookingLayout({ children }) {
   return (
-    <FlightBookingProvider>
+    <TourBookingProvider>
       <div className={styles.layoutWrapper}>
         <div className={styles.navbar}>
           <Navbar />
@@ -26,6 +26,6 @@ export default function FlightBookingDetailsLayout({ children }) {
           </aside>
         </main>
       </div>
-    </FlightBookingProvider>
+    </TourBookingProvider>
   );
 }

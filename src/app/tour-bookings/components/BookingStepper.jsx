@@ -3,7 +3,7 @@
 import React from "react";
 import styles from "./BookingStepper.module.css";
 import { Check } from "lucide-react";
-import { useFlightBooking } from "../FlightBookingContext";
+import { useTourBooking } from "../TourBookingContext";
 // import { useSearchParams } from "next/navigation";
 
 const steps = [
@@ -13,7 +13,7 @@ const steps = [
 ];
 
 export default function BookingStepper() {
-  const { currentStep } = useFlightBooking();
+  const { currentStep } = useTourBooking();
   // Calculate progress line percentage based on currentStep
   // If currentStep is 3, line goes from 1 to 3.
   const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;

@@ -4,6 +4,7 @@ import styles from "./PriceBar.module.css";
 import CustomItinerary from "./CustomItinerary";
 import MobileItinerary from "./MobileItinerary";
 import { useRouter } from "next/navigation";
+import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSession";
 
 const PriceBar = ({
   onCall,
@@ -54,6 +55,7 @@ const PriceBar = ({
   };
 
   const handleBookNow = () => {
+    saveTourBookingPackage(data);
     router.push("/tour-bookings");
   };
 

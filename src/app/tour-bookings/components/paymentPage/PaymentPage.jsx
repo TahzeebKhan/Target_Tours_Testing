@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useFlightBooking } from "../../FlightBookingContext";
+import { useTourBooking } from "../../TourBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
 import { tripSummaryData } from "./components/dummyData";
@@ -12,12 +12,28 @@ import BookingFooter from "../review/components/bookingFooter/BookingFooter";
 import { AnimatePresence } from "framer-motion";
 import PriceSummary from "../review/components/priceSummary/PriceSummary";
 const PaymentPage = () => {
-  const { setCurrentStep } = useFlightBooking();
+  const {
+    completeBooking,
+    packageDetails,
+    packageBookingLoading,
+    prices,
+    setCurrentStep,
+    submitPackageBooking,
+  } = useTourBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [showPriceSummary, setShowPriceSummary] = useState(false);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
+  };
+  const amount = `₹ ${Number(prices?.total || 0).toLocaleString("en-IN")}`;
+
+  const handleContinuePayment = async () => {
+    if (packageBookingLoading) return;
+    const booked = await submitPackageBooking();
+    if (booked) {
+      completeBooking();
+    }
   };
 
   return (
@@ -137,29 +153,24 @@ const PaymentPage = () => {
           <h3 className={styles.flightExpandableHeader}>trip summary</h3>
           <div className={styles.tripSummaryContent}>
             <div className={styles.imgContainer}>
-              <img src="/images/splendorsImg.png" alt="" />
+              <img src={packageDetails?.image || "/images/splendorsImg.png"} alt="" />
             </div>
             <div className={styles.textContainer}>
-              <h3 className={styles.tourName}>Splendors of the Canadian West</h3>
+              <h3 className={styles.tourName}>{packageDetails?.title}</h3>
               <div className={styles.subTextContainer}>
                 <div className={styles.dateLocationContainer}>
-                  <span className={styles.dateLocation}>Sun, Jan 11, 2026</span>
+                  <span className={styles.dateLocation}>{packageDetails?.startDate}</span>
                   <div className={styles.dayNightContainer}>
                     <div className={styles.dash}></div>
-                    <span className={styles.dayNightChip}>7D/6N</span>
+                    <span className={styles.dayNightChip}>{packageDetails?.durationLabel}</span>
                     <div className={styles.dash}></div>
                   </div>
-                  <span className={styles.dateLocation}>Sat, Jan 17, 2026 / From New Delhi</span>
+                  <span className={styles.dateLocation}>
+                    {packageDetails?.endDate} / From {packageDetails?.fromCity}
+                  </span>
                 </div>
                 <div className={styles.itineraryContainer}>
-                  <span className={styles.boldSpan}>2N</span>
-                  <span className={styles.ubudText}>Ubud</span>
-                  <span>•</span>
-                  <span className={styles.boldSpan}>1N</span>
-                  <span className={styles.ubudText}>Toronto</span>
-                  <span>•</span>
-                  <span className={styles.boldSpan}>3N</span>
-                  <span className={styles.ubudText}>Oikawa</span>
+                  <span className={styles.ubudText}>{packageDetails?.routeLabel}</span>
                 </div>
               </div>
             </div>
@@ -236,9 +247,9 @@ const PaymentPage = () => {
       <div className={styles.footerContainer}>
         <BookingFooter
           title="Starting From"
-          amount="₹ 66,945"
+          amount={amount}
           onInfoClick={() => setShowPriceSummary(true)}
-          onContinue={() => setCurrentStep(3)}
+          onContinue={handleContinuePayment}
         />;
 
 

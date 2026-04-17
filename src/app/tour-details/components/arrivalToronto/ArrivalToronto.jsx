@@ -9,6 +9,10 @@ import HotelRoom from "./hotelRoom/HotelRoom";
 import { motion, AnimatePresence } from "framer-motion";
 import HotelPopup from "./hotelRoom/HotelPopup";
 import YourActivityPop from "./YourActivityPop";
+import {
+  readTourBookingPackage,
+  writeTourBookingPackage,
+} from "@/app/tour-bookings/utils/tourBookingSession";
 
 const ArrivalToronto = ({ data }) => {
   const tabsRef = useRef(null);
@@ -22,6 +26,7 @@ const ArrivalToronto = ({ data }) => {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [expandedActivityText, setExpandedActivityText] = useState([]);
+  const [selectedActivityIds, setSelectedActivityIds] = useState([]);
 
   const openHotelPopup = (hotel) => {
     setSelectedHotel(hotel);
@@ -71,6 +76,26 @@ const ArrivalToronto = ({ data }) => {
     setExpandedActivityText((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const toggleSelectedActivity = (activity) => {
+    if (!activity?.id || String(activity.id).startsWith("activity-empty")) return;
+
+    setSelectedActivityIds((prev) => {
+      const activityId = activity.id;
+      const nextIds = prev.includes(activityId)
+        ? prev.filter((id) => id !== activityId)
+        : [...prev, activityId];
+      const currentPackage = readTourBookingPackage();
+
+      writeTourBookingPackage({
+        ...currentPackage,
+        id: data?.id ?? currentPackage?.id,
+        selectedActivities: nextIds.map((id) => ({ id })),
+      });
+
+      return nextIds;
+    });
   };
 
   const renderActivityText = (item) => {
@@ -344,7 +369,7 @@ const ArrivalToronto = ({ data }) => {
           type: "view",
         },
         {
-          label: "add +",
+          label: selectedActivityIds.includes(item?.id) ? "remove" : "add +",
           type: "add",
         },
       ],
@@ -389,6 +414,22 @@ const ArrivalToronto = ({ data }) => {
       setActiveDayIndex(0);
     }
   }, [activeDayIndex, itineraryDays.length]);
+
+  useEffect(() => {
+    const currentPackage = readTourBookingPackage();
+    if (currentPackage?.id !== data?.id) {
+      setSelectedActivityIds([]);
+      return;
+    }
+
+    setSelectedActivityIds(
+      Array.isArray(currentPackage?.selectedActivities)
+        ? currentPackage.selectedActivities
+            .map((activity) => activity?.id)
+            .filter(Boolean)
+        : [],
+    );
+  }, [data?.id]);
 
   const [activeTab, setActiveTab] = useState("DAY Itinerary");
 
@@ -729,10 +770,7 @@ const ArrivalToronto = ({ data }) => {
                                               if (btn.type === "view")
                                                 openYourActivityPopup(item);
                                               else if (btn.type === "add") {
-                                                console.log(
-                                                  "add action for",
-                                                  item,
-                                                );
+                                                toggleSelectedActivity(item);
                                               }
                                             }}
                                           >
@@ -843,7 +881,7 @@ const ArrivalToronto = ({ data }) => {
                                           if (btn.type === "view")
                                             openYourActivityPopup(item);
                                           else if (btn.type === "add") {
-                                            console.log("add action for", item);
+                                            toggleSelectedActivity(item);
                                           }
                                         }}
                                       >
@@ -1112,7 +1150,7 @@ const ArrivalToronto = ({ data }) => {
                                           if (btn.type === "view")
                                             openYourActivityPopup(item);
                                           else if (btn.type === "add") {
-                                            console.log("add action for", item);
+                                            toggleSelectedActivity(item);
                                           }
                                         }}
                                       >
@@ -1243,10 +1281,7 @@ const ArrivalToronto = ({ data }) => {
                                             if (btn.type === "view")
                                               openYourActivityPopup(item);
                                             else if (btn.type === "add") {
-                                              console.log(
-                                                "add action for",
-                                                item,
-                                              );
+                                              toggleSelectedActivity(item);
                                             }
                                           }}
                                         >
