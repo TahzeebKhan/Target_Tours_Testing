@@ -9,9 +9,9 @@ import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import { ChevronDown } from "lucide-react";
 import DateField from "../dateField/DateField";
 import { useRouter, useSearchParams } from "next/navigation";
-import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicBanner } from "@/shared/services/heroApi";
+import { fetchHolidayPackageSuggestions } from "@/shared/services/tourPackage";
 import TourGuestSelector from "./TourGuestSelector";
 
 const DEFAULT_HERO = {
@@ -31,6 +31,50 @@ const getLocationNameFromSearchValue = (value = "") =>
   String(value || "")
     .split(",")[0]
     ?.trim() || "";
+
+const normalizeHolidaySuggestions = (payload) => {
+  const source =
+    payload?.data?.suggestions ||
+    payload?.data ||
+    payload?.suggestions ||
+    payload ||
+    [];
+
+  if (!Array.isArray(source)) return [];
+
+  return source
+    .map((item, index) => {
+      const label =
+        item?.label ||
+        item?.name ||
+        item?.city ||
+        item?.country ||
+        item?.title ||
+        item?.value ||
+        "";
+      const detail =
+        item?.detail ||
+        item?.description ||
+        item?.country ||
+        item?.category ||
+        "";
+      const code =
+        item?.code || item?.iata_code || item?.iataCode || item?.type || "";
+
+      return {
+        id: item?.id || item?.documentId || `${label}-${index}`,
+        label,
+        detail,
+        code,
+        value: item?.value || label,
+        raw: item,
+      };
+    })
+    .filter((item) => item.label || item.value);
+};
+
+const getSuggestionValue = (suggestion) =>
+  suggestion?.value || suggestion?.label || "";
 
 const resolveBannerImage = (record) => {
   const candidate =
@@ -145,44 +189,6 @@ const TourHeroSection = () => {
     };
   }, [travellerOpend]);
 
-  const recentSearches = [
-    {
-      label: "CHENNAI, INDIA",
-      detail: "Chennai International Airport, India",
-      code: "CEN",
-      value: "Chennai, India",
-    },
-    {
-      label: "MUMBAI, INDIA",
-      detail: "Mumbai Chhatrapati Shivaji Maharaj International Airport, India",
-      code: "BOM",
-      value: "Mumbai, India",
-    },
-    {
-      label: "KOLKATA, INDIA",
-      detail: "Kolkata Netaji Subhas Chandra Bose International Airport, India",
-      code: "KLG",
-      value: "Kolkata, India",
-    },
-    {
-      label: "BENGALURU, INDIA",
-      detail: "Bengaluru Kempegowda International Airport, India",
-      code: "BLR",
-      value: "Bengaluru, India",
-    },
-  ];
-
-  const getFilteredSuggestions = (query) => {
-    if (!query) return recentSearches;
-    const q = query.toLowerCase();
-    return recentSearches.filter(
-      (s) =>
-        s.label.toLowerCase().includes(q) ||
-        s.detail.toLowerCase().includes(q) ||
-        s.code.toLowerCase().includes(q),
-    );
-  };
-
   const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
   const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
 
@@ -191,14 +197,49 @@ const TourHeroSection = () => {
   const fromSuggestionRef = useRef(null);
   const toSuggestionRef = useRef(null);
 
-  const handleFromSelect = (city) => {
-    setFrom(city); // city is already a string
+  const { data: fromSuggestionResponse } = useQuery({
+    queryKey: [
+      "tour-list-package-suggestions",
+      "from",
+      from,
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () =>
+      fetchHolidayPackageSuggestions({
+        term: from,
+        type: "from",
+      }),
+    enabled: fromSuggestionsOpen && from.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: toSuggestionResponse } = useQuery({
+    queryKey: [
+      "tour-list-package-suggestions",
+      "to",
+      to,
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () =>
+      fetchHolidayPackageSuggestions({
+        term: to,
+        type: "to",
+      }),
+    enabled: toSuggestionsOpen && to.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const fromSuggestions = normalizeHolidaySuggestions(fromSuggestionResponse);
+  const toSuggestions = normalizeHolidaySuggestions(toSuggestionResponse);
+
+  const handleFromSelect = (suggestion) => {
+    setFrom(getSuggestionValue(suggestion));
     setFromSuggestionsOpen(false);
     fromInputRef.current?.focus();
   };
 
-  const handleToSelect = (city) => {
-    setTo(city);
+  const handleToSelect = (suggestion) => {
+    setTo(getSuggestionValue(suggestion));
     setToSuggestionsOpen(false);
     toInputRef.current?.focus();
   };
@@ -412,9 +453,12 @@ const TourHeroSection = () => {
               />
 
               {fromSuggestionsOpen && (
-                <div ref={fromSuggestionRef}>
-                  <RecentSearch onSelect={handleFromSelect} />
-                </div>
+                <SuggestionBox
+                  boxRef={fromSuggestionRef}
+                  heading="PACKAGE SUGGESTIONS"
+                  suggestions={fromSuggestions}
+                  onSelect={handleFromSelect}
+                />
               )}
             </div>
 
@@ -460,9 +504,12 @@ const TourHeroSection = () => {
               />
 
               {toSuggestionsOpen && (
-                <div ref={toSuggestionRef}>
-                  <RecentSearch onSelect={handleToSelect} />
-                </div>
+                <SuggestionBox
+                  boxRef={toSuggestionRef}
+                  heading="PACKAGE SUGGESTIONS"
+                  suggestions={toSuggestions}
+                  onSelect={handleToSelect}
+                />
               )}
             </div>
 

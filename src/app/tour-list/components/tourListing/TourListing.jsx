@@ -16,6 +16,29 @@ import { useToursData } from "@/features/tours/hooks/useToursData";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
+const LoadingCards = ({ viewType = "grid", count = 4 }) =>
+  Array.from({ length: count }).map((_, index) => (
+    <div
+      className={
+        viewType === "grid"
+          ? styles.skeletonCard
+          : styles.skeletonListCard
+      }
+      key={`tour-loading-${viewType}-${index}`}
+    >
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonContent}>
+        <span className={styles.skeletonLine} />
+        <span className={`${styles.skeletonLine} ${styles.skeletonLineWide}`} />
+        <span className={styles.skeletonLine} />
+        <div className={styles.skeletonFooter}>
+          <span className={styles.skeletonLine} />
+          <span className={styles.skeletonButton} />
+        </div>
+      </div>
+    </div>
+  ));
+
 const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
@@ -95,7 +118,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   };
 
   const { tourData, meta } = useToursData({ data });
-  const hasNoResults = !isLoading && !isFetching && tourData.length === 0;
+  const showLoadingCards = isLoading || (isFetching && !isFetchingNextPage);
+  const hasNoResults = !showLoadingCards && tourData.length === 0;
   const totalResults = Number(meta?.pagination?.total ?? tourData.length) || 0;
   const loadedCount = tourData.length;
   const startResult = loadedCount > 0 ? 1 : 0;
@@ -106,8 +130,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
       onDataLoaded(meta);
     }
   }, [meta, onDataLoaded]);
-
-  console.log("First tour inclusions:", tourData?.[0]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -156,7 +178,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {hasNoResults ? (
+              {showLoadingCards ? (
+                <LoadingCards viewType="grid" count={4} />
+              ) : hasNoResults ? (
                 <div className={styles.emptyState}>No package found</div>
               ) : (
                 tourData.map((item, index) => (
@@ -338,7 +362,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {hasNoResults ? (
+              {showLoadingCards ? (
+                <LoadingCards viewType="list" count={3} />
+              ) : hasNoResults ? (
                 <div className={styles.emptyState}>No package found</div>
               ) : (
                 tourData.map((item, index) => (
@@ -568,7 +594,9 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
           <div
             className={`${styles.ListViewWrapper} ${styles.ListViewWrapperMobile}`}
           >
-            {hasNoResults ? (
+            {showLoadingCards ? (
+              <LoadingCards viewType="list" count={3} />
+            ) : hasNoResults ? (
               <div className={styles.emptyState}>No package found</div>
             ) : (
               tourData.map((item, index) => (

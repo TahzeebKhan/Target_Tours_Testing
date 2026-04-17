@@ -1,17 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import styles from "./PriceSummary.module.css";
+import { useTourBooking } from "@/app/tour-bookings/TourBookingContext";
 
 export default function PriceSummary({ onClose }) {
+  const { packageDetails, prices } = useTourBooking();
+  const travelerCount = prices.travelerCount || 1;
   const lineItems = [
-    { label: "1x Adult", value: "₹ 64,126" },
-    { label: "1x Cabin baggage", value: "Included", isGreen: true },
-    { label: "1x Checked baggage 15kg", value: "Included", isGreen: true },
+    { label: `${travelerCount}x Adult`, value: `₹ ${Number(prices.baseFare || 0).toLocaleString("en-IN")}` },
+    { label: `${travelerCount}x Cabin baggage`, value: "Included", isGreen: true },
+    { label: `${travelerCount}x Checked baggage 15kg`, value: "Included", isGreen: true },
     { label: "Seat Selection", value: "Free", isGreen: true },
     { label: "Meals", value: "Included", isGreen: true },
-    { label: "Taxes & Fees", value: "₹ 2,819" },
+    { label: "Taxes & Fees", value: `₹ ${Number(packageDetails?.price?.taxes || 0).toLocaleString("en-IN")}` },
   ];
 
   return (
@@ -79,7 +82,9 @@ export default function PriceSummary({ onClose }) {
                 Includes taxes and service fees
               </p>
             </div>
-            <div className={styles.totalPrice}>₹ 66,945</div>
+            <div className={styles.totalPrice}>
+              ₹ {Number(prices.total || 0).toLocaleString("en-IN")}
+            </div>
           </div>
         </div>
       </motion.div>

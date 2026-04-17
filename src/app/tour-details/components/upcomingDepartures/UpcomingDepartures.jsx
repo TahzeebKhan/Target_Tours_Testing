@@ -5,6 +5,7 @@ import "swiper/css";
 import styles from "./UpcomingDepartures.module.css";
 import { Navigation } from "swiper/modules";
 import { useRouter } from "next/navigation";
+import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSession";
 const safeDate = (value) => {
   const d = new Date(value);
   return isNaN(d) ? null : d;
@@ -42,6 +43,7 @@ const UpcomingDepartures = ({ data }) => {
     departureDate: formatDate(d.departure_date),
     returnDate: formatDate(d.return_date),
     pricePerPerson: d.base_price ?? 0,
+    raw: d,
     singleOccupantCharge:
       typeof d.base_price === "number" ? Math.round(d.base_price * 0.1) : 0,
     availability:
@@ -140,6 +142,11 @@ const UpcomingDepartures = ({ data }) => {
 
   const handleNext = () => {
     swiperRef?.slideNext();
+  };
+
+  const handleBookNow = (departure) => {
+    saveTourBookingPackage(data, departure?.raw || departure);
+    router.push("/tour-bookings");
   };
 
   return (
@@ -244,7 +251,7 @@ const UpcomingDepartures = ({ data }) => {
                         {/* CTA */}
                         <div className={styles.col}>
                           <button
-                            onClick={() => router.push("/tour-bookings")}
+                            onClick={() => handleBookNow(item)}
                             className={styles.bookBtn}
                           >
                             BOOK NOW
@@ -288,7 +295,7 @@ const UpcomingDepartures = ({ data }) => {
                         {/* CTA */}
                         <div className={styles.colmobile}>
                           <button
-                            onClick={() => router.push("/tour-bookings")}
+                            onClick={() => handleBookNow(item)}
                             className={styles.bookBtn}
                           >
                             BOOK NOW

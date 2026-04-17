@@ -138,7 +138,7 @@ const normalizeTour = (item) => ({
     activities: `${item?.activities_count || 0} ACTIVITIES`,
     price: item.started_price
         ? `₹ ${item.started_price.toLocaleString()}`
-        : "ON REQUEST",
+        : "N/A",
     raw: item,
     package_inclusion: item.package_inclusion,
     package_inclusion_tags:item?.package_inclusion_tags
@@ -163,4 +163,16 @@ export const fetchTours = async ({ pageParam = 1, queryKey }) => {
         data: (res.data?.data || []).map(normalizeTour),
         meta: res.data?.meta || null,
     };
+};
+
+export const fetchHolidayPackageSuggestions = async ({ term = "", type = "" }) => {
+    const response = await api.get("/api/holiday-packages/suggestions", {
+        params: {
+            domain: process.env.NEXT_PUBLIC_DOMAIN,
+            term,
+            type,
+        },
+    });
+
+    return response?.data;
 };

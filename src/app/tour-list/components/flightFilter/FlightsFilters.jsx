@@ -6,9 +6,16 @@ import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "@/app/flights/components/SVGFile";
 
 export default function FlightFilters({ onClose, onReset, onApply, filterData }) {
-  const DEFAULT_NIGHTS = [1, 10];
-  const DEFAULT_PRICE = [0, 100000];
+  const NIGHTS_MIN = 1;
+  const NIGHTS_MAX = 20;
+  const NIGHTS_STEP = 1;
+  const DEFAULT_NIGHTS = [NIGHTS_MIN, NIGHTS_MAX];
+  const PRICE_MIN = 0;
+  const PRICE_MAX = 1000000;
+  const PRICE_STEP = 1000;
+  const DEFAULT_PRICE = [PRICE_MIN, PRICE_MAX];
   const isResettingRef = useRef(false);
+  const didMountRef = useRef(false);
   const [filters, setFilters] = useState({
     nights: DEFAULT_NIGHTS,
     flightType: null,
@@ -41,17 +48,28 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
 
 
 
+  const isDefaultRange = (range, defaultRange) =>
+    Array.isArray(range) &&
+    range[0] === defaultRange[0] &&
+    range[1] === defaultRange[1];
+
   const buildApiFilters = (filters) => {
     const api = {};
 
-    if (Array.isArray(filters.nights)) {
+    if (
+      Array.isArray(filters.nights) &&
+      !isDefaultRange(filters.nights, DEFAULT_NIGHTS)
+    ) {
       api.min_nights = filters.nights[0];
       api.max_nights = filters.nights[1];
     }
 
-    if (Array.isArray(filters.price)) {
+    if (
+      Array.isArray(filters.price) &&
+      !isDefaultRange(filters.price, DEFAULT_PRICE)
+    ) {
       api.min_price = filters.price[0];
-      api.max_price = 1000000;
+      api.max_price = filters.price[1];
     }
 
     if (filters.flightType === "with") api.with_flight = true;
@@ -86,6 +104,11 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
   // onApply(apiFilters);
 
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
     if (isResettingRef.current) {
       isResettingRef.current = false; // reset flag
       return; // ❌ skip auto apply
@@ -310,21 +333,22 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
           <div
             className={styles.sliderRange}
             style={{
-              left: `${((nights[0] - 1) / 9) * 100}%`,
-              right: `${100 - ((nights[1] - 1) / 9) * 100}%`,
+              left: `${((nights[0] - NIGHTS_MIN) / (NIGHTS_MAX - NIGHTS_MIN)) * 100}%`,
+              right: `${100 - ((nights[1] - NIGHTS_MIN) / (NIGHTS_MAX - NIGHTS_MIN)) * 100}%`,
             }}
           />
 
           <input
             type="range"
-            min={1}
-            max={10}
+            min={NIGHTS_MIN}
+            max={NIGHTS_MAX}
+            step={NIGHTS_STEP}
             value={nights[0]}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
                 nights: [
-                  Math.min(+e.target.value, prev.nights[1] - 1),
+                  Math.min(+e.target.value, prev.nights[1] - NIGHTS_STEP),
                   prev.nights[1],
                 ],
               }))
@@ -334,15 +358,16 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
 
           <input
             type="range"
-            min={1}
-            max={10}
+            min={NIGHTS_MIN}
+            max={NIGHTS_MAX}
+            step={NIGHTS_STEP}
             value={nights[1]}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
                 nights: [
                   prev.nights[0],
-                  Math.max(+e.target.value, prev.nights[0] + 1),
+                  Math.max(+e.target.value, prev.nights[0] + NIGHTS_STEP),
                 ],
               }))
             }
@@ -397,22 +422,23 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
           <div
             className={styles.sliderRange}
             style={{
-              left: `${((price[0] - 11307) / (57295 - 11307)) * 100}%`,
-              right: `${100 - ((price[1] - 11307) / (57295 - 11307)) * 100}%`,
+              left: `${((price[0] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100}%`,
+              right: `${100 - ((price[1] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100}%`,
             }}
           />
 
           {/* Min thumb */}
           <input
             type="range"
-            min={11307}
-            max={57295}
+            min={PRICE_MIN}
+            max={PRICE_MAX}
+            step={PRICE_STEP}
             value={price[0]}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
                 price: [
-                  Math.min(+e.target.value, prev.price[1] - 1000),
+                  Math.min(+e.target.value, prev.price[1] - PRICE_STEP),
                   prev.price[1],
                 ],
               }))
@@ -423,15 +449,16 @@ export default function FlightFilters({ onClose, onReset, onApply, filterData })
           {/* Max thumb */}
           <input
             type="range"
-            min={11307}
-            max={57295}
+            min={PRICE_MIN}
+            max={PRICE_MAX}
+            step={PRICE_STEP}
             value={price[1]}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
                 price: [
                   prev.price[0],
-                  Math.max(+e.target.value, prev.price[0] + 1000),
+                  Math.max(+e.target.value, prev.price[0] + PRICE_STEP),
                 ],
               }))
             }
