@@ -121,7 +121,17 @@ const TravelerDetails = () => {
     };
 
     const addPassengerAsTraveler = (passenger) => {
+        if (!passenger?.id) return;
+
         setTravelers(prev => {
+            if (
+                prev.some(
+                    (traveler) => String(traveler.savedPassengerId) === String(passenger.id)
+                )
+            ) {
+                return prev;
+            }
+
             const emptyOpenIndex = prev.findIndex(
                 (traveler) => traveler.isOpen && isTravelerEmpty(traveler)
             );
@@ -169,6 +179,7 @@ const TravelerDetails = () => {
                 travelers
                     .map((traveler) => traveler.savedPassengerId)
                     .filter(Boolean)
+                    .map(String)
             ),
         [travelers]
     );
@@ -236,10 +247,11 @@ const TravelerDetails = () => {
                                 type="button"
                                 key={passenger.id || `${passenger.email}-${passenger.phone_no}`}
                                 className={`${styles.savedPassenger} ${
-                                    selectedPassengerIds.has(passenger.id)
+                                    selectedPassengerIds.has(String(passenger.id))
                                         ? styles.savedPassengerSelected
                                         : ""
                                 }`}
+                                disabled={selectedPassengerIds.has(String(passenger.id))}
                                 onClick={() => addPassengerAsTraveler(passenger)}
                             >
                                 <span>{getPassengerName(passenger)}</span>

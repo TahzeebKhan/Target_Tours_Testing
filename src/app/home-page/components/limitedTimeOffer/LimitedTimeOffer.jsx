@@ -48,21 +48,34 @@ const FALLBACK_DATA = {
   ],
 };
 
+const getSafeOfferData = (data) => {
+  const startPrice = Number(data?.startPrice);
+  const sliderData = Array.isArray(data?.sliderData) && data.sliderData.length > 0
+    ? data.sliderData
+    : FALLBACK_DATA.sliderData;
+
+  return {
+    ...FALLBACK_DATA,
+    ...data,
+    startPrice: Number.isFinite(startPrice) ? startPrice : FALLBACK_DATA.startPrice,
+    backgroundVideo: data?.backgroundVideo || FALLBACK_DATA.backgroundVideo,
+    sliderData,
+  };
+};
+
 const LimitedTimeOffer = () => {
   const swiperRef = useRef(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
-  const { data, isLoading, isError } = useHomePageOffer();
+  const { data } = useHomePageOffer();
   const [isVideoReady, setIsVideoReady] = useState(false);
    const router = useRouter();
 
 
-  const finalData = !isError && data ? data : FALLBACK_DATA;
+  const finalData = getSafeOfferData(data);
   const videoSrc = isVideoReady
     ? finalData.backgroundVideo
     : FALLBACK_DATA.backgroundVideo;
-
-  console.log(videoSrc);
 
   return (
     <section className="relative w-full h-[689px]">

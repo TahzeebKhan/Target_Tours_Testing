@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -62,6 +62,22 @@ const fetchTourDetails = async ({ queryKey }) => {
 const TourDetailsClient = () => {
   const searchParams = useSearchParams();
   const tourId = searchParams.get("id");
+  const itineraryRef = useRef(null);
+
+  const scrollToItinerary = () => {
+    itineraryRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const resetScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  };
 
   const {
     data: tourDetails,
@@ -74,6 +90,41 @@ const TourDetailsClient = () => {
     staleTime: 1000 * 60 * 5,     // 5 min cache
     retry: 1,
   });
+
+  useLayoutEffect(() => {
+    if (!tourId) return;
+    resetScrollToTop();
+  }, [tourId]);
+
+  useEffect(() => {
+    if (!tourId) return;
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, [tourId]);
+
+  useEffect(() => {
+    if (!tourId || !tourDetails) return;
+
+    resetScrollToTop();
+
+    let secondFrameId;
+    const firstFrameId = window.requestAnimationFrame(() => {
+      resetScrollToTop();
+      secondFrameId = window.requestAnimationFrame(resetScrollToTop);
+    });
+    const timeoutId = window.setTimeout(resetScrollToTop, 150);
+
+    return () => {
+      window.cancelAnimationFrame(firstFrameId);
+      if (secondFrameId) window.cancelAnimationFrame(secondFrameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [tourId, tourDetails]);
 
   /* ---------- Guards ---------- */
   if (!tourId) {
@@ -101,7 +152,10 @@ const TourDetailsClient = () => {
   /* ---------- UI ---------- */
   return (
     <div>
-      <TourBookingHeroSection data={tourDetails} />
+      <TourBookingHeroSection
+        data={tourDetails}
+        onViewItinerary={scrollToItinerary}
+      />
       <BetweenMajesticPeaks data={tourDetails} />
       <UpcomingDepartures data={tourDetails} />
       <TripHighlights data={tourDetails} />
@@ -110,12 +164,16 @@ const TourDetailsClient = () => {
         <PriceBar data={tourDetails} />
       </div>
 
-      <ArrivalToronto data={tourDetails} />
+      <div ref={itineraryRef}>
+        <ArrivalToronto data={tourDetails} />
+      </div>
       <InfoStrip data={tourDetails} />
       <WhereWillYouStay data={tourDetails} />
 
       <Testimonial data={tourDetails} />
-      <TravelInspiration />
+
+      {/* <TravelInspiration /> */}
+
       <FeatureSection />
       <Footer />
     </div>

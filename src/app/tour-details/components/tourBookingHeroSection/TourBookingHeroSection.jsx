@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import styles from "./TourBookingHeroSection.module.css";
 import Navbar from "@/app/flights/Navbar";
 
-const TourBookingHeroSection = ({ data }) => {
+const TourBookingHeroSection = ({ data, onViewItinerary }) => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // 🔹 Safe mapped values (fallback = empty string)
@@ -117,8 +117,12 @@ const TourBookingHeroSection = ({ data }) => {
                 <span className={styles.person}>/ PERSON</span>
               </div>
 
-              <button className={styles.bottomRight}>
-                VIEW DAY-BY-DAY ITINARY
+              <button
+                className={styles.bottomRight}
+                type="button"
+                onClick={onViewItinerary}
+              >
+                VIEW DAY-BY-DAY ITINERARY
                 <img src="/icons/whiteArroa.svg" alt="" />
               </button>
             </div>

@@ -47,6 +47,18 @@
     filter: invert(1);
 }
 
+.disabledBtn,
+.disabledBtn:hover {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+.disabledBtn img,
+.disabledBtn:hover img {
+    filter: invert(0);
+}
+
 /* DAY LIST */
 .dayList {
     display: flex;
