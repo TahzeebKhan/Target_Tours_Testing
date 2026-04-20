@@ -1,0 +1,188 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 10, 10, 0.48);
+  backdrop-filter: blur(8px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 720px;
+  max-height: 84vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px 28px 22px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.status {
+  margin-bottom: 8px;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4e8729;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-size: 32px;
+  line-height: 1.1;
+  color: #070773;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-family: Inter;
+  font-size: 14px;
+  color: #4a5565;
+}
+
+.closeButton {
+  border: 0;
+  background: transparent;
+  color: #070773;
+  cursor: pointer;
+  font-family: Inter;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.tripCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 28px 0;
+  padding: 18px;
+  border: 1px solid #e4e6e8;
+  background: #fafbfc;
+}
+
+.tripImage {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  flex: 0 0 72px;
+}
+
+.tripContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tripContent h3 {
+  font-family: Inter;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+
+.tripContent p {
+  font-family: Inter;
+  font-size: 13px;
+  color: #4a5565;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 24px 28px 0;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+}
+
+.infoItem span,
+.detailList span {
+  font-family: Inter;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7b8799;
+}
+
+.infoItem strong,
+.detailList strong {
+  font-family: Inter;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0a0a0a;
+  word-break: break-word;
+}
+
+.detailSection {
+  padding: 24px 28px 0;
+}
+
+.detailSection h3 {
+  font-family: Antic Didone;
+  font-size: 20px;
+  color: #070773;
+  text-transform: uppercase;
+}
+
+.detailList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.detailList div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #e4e6e8;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 28px 28px;
+}
+
+.footer button {
+  min-width: 140px;
+  height: 42px;
+  border: 0;
+  background: #000033;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: Inter;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .infoGrid,
+  .detailList {
+    grid-template-columns: 1fr;
+  }
+
+  .tripCard {
+    align-items: flex-start;
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import styles from "./PopularFlights.module.css";
 import { Navigation } from "swiper/modules";
@@ -11,12 +12,23 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 const CITY_IATA_MAP = {
-  Delhi: "DEL",
-  Mumbai: "BOM",
+  Ahmedabad: "AMD",
+  Bangkok: "BKK",
   Bangalore: "BLR",
   Bengaluru: "BLR",
+  Delhi: "DEL",
+  Dubai: "DXB",
+  Hyderabad: "HYD",
   Chennai: "MAA",
   Kolkata: "CCU",
+  London: "LHR",
+  Mumbai: "BOM",
+  "New York": "JFK",
+  Paris: "CDG",
+  Pune: "PNQ",
+  Singapore: "SIN",
+  Sydney: "SYD",
+  Tokyo: "HND",
 };
 
 const TAB_TYPE_MAP = {
@@ -40,7 +52,38 @@ const toAbsoluteImageUrl = (value) => {
   return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
 };
 
+const formatLocalDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getTomorrowDateParam = () => {
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + 1);
+  return formatLocalDate(nextDate);
+};
+
+const getCodeFromValue = (value = "") => {
+  const trimmed = String(value || "").trim();
+  if (/^[A-Za-z]{3}$/.test(trimmed)) return trimmed.toUpperCase();
+  return "";
+};
+
+const getRouteLabel = (city = "", code = "") => {
+  const trimmedCity = String(city || "").trim();
+  const normalizedCode = String(code || "").trim().toUpperCase();
+
+  if (!trimmedCity) return normalizedCode;
+  if (!normalizedCode) return trimmedCity;
+  if (trimmedCity.includes(`(${normalizedCode})`)) return trimmedCity;
+
+  return `${trimmedCity} (${normalizedCode})`;
+};
+
 const PopularFlights = () => {
+  const router = useRouter();
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeTab, setActiveTab] = useState("Domestic");
 
@@ -237,6 +280,9 @@ const PopularFlights = () => {
             item?.to,
             item?.to_iata_code
           ) || "N/A",
+        toCode: getCodeFromValue(
+          pickValue(item?.to_iata_code, item?.destination_iata_code)
+        ),
         date:
           pickValue(
             item?.travel_date_range,
@@ -272,6 +318,29 @@ const PopularFlights = () => {
       : activeTab === "Domestic"
       ? domesticData
       : internationalData;
+
+  const handleFlightCardClick = (item) => {
+    const origin = CITY_IATA_MAP?.[selectedCity] || selectedIataCode;
+    const destination =
+      getCodeFromValue(item?.toCode) ||
+      CITY_IATA_MAP?.[item?.city] ||
+      getCodeFromValue(item?.city);
+    const params = new URLSearchParams({
+      from: getRouteLabel(selectedCity, origin),
+      to: getRouteLabel(item?.city, destination),
+      tripType: "oneway",
+      start: getTomorrowDateParam(),
+      adults: "1",
+      children: "0",
+      infants: "0",
+      travelClass: "ECONOMY",
+    });
+
+    if (origin) params.set("origin", origin);
+    if (destination) params.set("destination", destination);
+
+    router.push(`/flights?${params.toString()}`);
+  };
 
   return (
     <section className={styles.section}>
@@ -387,7 +456,18 @@ const PopularFlights = () => {
               >
                 {cardData.map((item, index) => (
                   <SwiperSlide key={item.id}>
-                    <div className={styles.carouselContainer}>
+                    <div
+                      className={styles.carouselContainer}
+                      onClick={() => handleFlightCardClick(item)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleFlightCardClick(item);
+                        }
+                      }}
+                    >
                       <div className={styles.itemsCard}>
                         <img src={item.img} alt="" />
 

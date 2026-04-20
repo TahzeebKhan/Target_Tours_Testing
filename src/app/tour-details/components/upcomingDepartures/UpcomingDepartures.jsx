@@ -6,6 +6,9 @@ import styles from "./UpcomingDepartures.module.css";
 import { Navigation } from "swiper/modules";
 import { useRouter } from "next/navigation";
 import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSession";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 const safeDate = (value) => {
   const d = new Date(value);
   return isNaN(d) ? null : d;
@@ -32,6 +35,10 @@ const formatMonth = (isoDate) => {
 
 const UpcomingDepartures = ({ data }) => {
   const router = useRouter();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState("login");
+  const [pendingDeparture, setPendingDeparture] = useState(null);
 
   const departures = Array.isArray(data?.package_departures)
     ? data.package_departures
@@ -144,16 +151,38 @@ const UpcomingDepartures = ({ data }) => {
     swiperRef?.slideNext();
   };
 
-  const handleBookNow = (departure) => {
+  const continueBooking = (departure) => {
     saveTourBookingPackage(data, departure?.raw || departure);
     router.push("/tour-bookings");
   };
 
+  const handleBookNow = (departure) => {
+    if (authLoading) return;
+
+    if (!isLoggedIn) {
+      setPendingDeparture(departure);
+      setAuthView("login");
+      setShowLogin(true);
+      return;
+    }
+
+    continueBooking(departure);
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn || !pendingDeparture) return;
+
+    setShowLogin(false);
+    continueBooking(pendingDeparture);
+    setPendingDeparture(null);
+  }, [isLoggedIn, pendingDeparture]);
+
   return (
-    <section
-      className={styles.section}
-      style={{ "--slide-width": `${slideWidth}px` }}
-    >
+    <>
+      <section
+        className={styles.section}
+        style={{ "--slide-width": `${slideWidth}px` }}
+      >
       <h3 className={styles.heading}>Upcoming Departures</h3>
 
       {/* MONTH TABS */}
@@ -318,7 +347,28 @@ const UpcomingDepartures = ({ data }) => {
           <img src="/icons/right.svg" alt="Next" />
         </div>
       </div>
-    </section>
+      </section>
+
+      {showLogin && authView === "login" && (
+        <LoginPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingDeparture(null);
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+
+      {showLogin && authView === "signup" && (
+        <SignupPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingDeparture(null);
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+    </>
   );
 };
 

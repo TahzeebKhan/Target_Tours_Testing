@@ -215,7 +215,7 @@ export function TourBookingProvider({ children }) {
     try {
       const bookingResponse = await createPackageBooking(bookingPayload);
       setPackageBooking(bookingResponse);
-      return true;
+      return bookingResponse;
     } catch (error) {
       const message = getApiErrorMessage(error, "Unable to create package booking.");
       setPackageBookingError(message);
