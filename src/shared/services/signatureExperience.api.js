@@ -4,7 +4,10 @@ export const fetchSignatureExperiences = async (region) => {
   const res = await api.get(
     "/signature-experience/company",
     {
-      params: { originalRegion: region, domain: process.env.NEXT_PUBLIC_DOMAIN },
+      params: {
+        region,
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+      },
       
     }
   );

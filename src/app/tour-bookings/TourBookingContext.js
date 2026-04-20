@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { createPassenger } from "@/shared/services/passenger";
 import { createPackageBooking } from "./services/packageBooking";
 import { getTourBookingPackage } from "./services/tourBookingPackage";
@@ -19,6 +20,25 @@ const extractEntityId = (response) =>
   response?.data?.passenger?.id ??
   response?.passenger?.id ??
   null;
+
+const buildPassengerPayload = (traveler) => ({
+  first_name: traveler.first_name || "",
+  last_name: traveler.last_name || "",
+  email: traveler.email || "",
+  phone_no: String(traveler.phone_no || "").replace(/[^\d]/g, ""),
+  gender: traveler.gender || "",
+  title: traveler.title || "",
+  country_code: traveler.country_code || "+91",
+  dob: traveler.dob || "",
+  primary_contact: false,
+});
+
+const getApiErrorMessage = (error, fallback) =>
+  error?.response?.data?.message ||
+  error?.response?.data?.error?.message ||
+  error?.response?.data?.error?.name ||
+  error?.message ||
+  fallback;
 
 export function TourBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
@@ -122,37 +142,40 @@ export function TourBookingProvider({ children }) {
   const submitPassengers = async () => {
     if (passengerLoading) return false;
 
-    const payloads = travelerDetails.map((traveler) => ({
-      first_name: traveler.first_name || "",
-      last_name: traveler.last_name || "",
-      email: traveler.email || "",
-      phone_no: String(traveler.phone_no || "").replace(/[^\d]/g, ""),
-      gender: traveler.gender || "",
-      title: traveler.title || "",
-      country_code: traveler.country_code || "+91",
-      dob: traveler.dob || "",
-      primary_contact: false,
-    }));
+    const savedPassengerRecords = travelerDetails
+      .map((traveler) => traveler.savedPassengerId)
+      .filter(Boolean)
+      .map((id) => ({ id }));
+
+    const customTravelerPayloads = travelerDetails
+      .filter((traveler) => !traveler.savedPassengerId)
+      .map(buildPassengerPayload);
 
     setPassengerLoading(true);
     setPassengerError("");
     setPackageBookingError("");
     try {
-      const responses = await Promise.all(
-        payloads.map((payload) => createPassenger(payload))
-      );
-      setCreatedPassengers(responses);
-      const passengerIds = responses.map(extractEntityId).filter(Boolean);
-      if (!passengerIds.length) {
-        throw new Error("Passenger created, but passenger id was not returned.");
+      const createdPassengerResponses = customTravelerPayloads.length
+        ? await Promise.all(
+            customTravelerPayloads.map((payload) => createPassenger(payload))
+          )
+        : [];
+      const passengerRecords = [
+        ...savedPassengerRecords,
+        ...createdPassengerResponses,
+      ];
+      const passengerIds = passengerRecords.map(extractEntityId).filter(Boolean);
+
+      if (passengerIds.length !== travelerDetails.length) {
+        throw new Error("Passenger ids are missing. Please check traveler details.");
       }
+
+      setCreatedPassengers(passengerRecords);
       return true;
     } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to create passengers.";
+      const message = getApiErrorMessage(error, "Unable to create passengers.");
       setPassengerError(message);
+      toast.error(message);
       return false;
     } finally {
       setPassengerLoading(false);
@@ -194,11 +217,9 @@ export function TourBookingProvider({ children }) {
       setPackageBooking(bookingResponse);
       return true;
     } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to create package booking.";
+      const message = getApiErrorMessage(error, "Unable to create package booking.");
       setPackageBookingError(message);
+      toast.error(message);
       return false;
     } finally {
       setPackageBookingLoading(false);

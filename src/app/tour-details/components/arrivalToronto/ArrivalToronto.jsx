@@ -14,6 +14,9 @@ import {
   writeTourBookingPackage,
 } from "@/app/tour-bookings/utils/tourBookingSession";
 
+const ACTIVITY_FALLBACK_IMAGE = "/fallback.jpg";
+const NO_ACTIVITY_TEXT = "No activity on this day";
+
 const ArrivalToronto = ({ data }) => {
   const tabsRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -27,6 +30,14 @@ const ArrivalToronto = ({ data }) => {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [expandedActivityText, setExpandedActivityText] = useState([]);
   const [selectedActivityIds, setSelectedActivityIds] = useState([]);
+  const [activityNavState, setActivityNavState] = useState({
+    isBeginning: true,
+    isEnd: true,
+  });
+  const [mobileActivityNavState, setMobileActivityNavState] = useState({
+    isBeginning: true,
+    isEnd: true,
+  });
 
   const openHotelPopup = (hotel) => {
     setSelectedHotel(hotel);
@@ -48,23 +59,41 @@ const ArrivalToronto = ({ data }) => {
     setIsYourActivityPopupOpen(true);
   };
 
-  const handleSlideChange = (swiper) => {
-    setActiveIndex(swiper.activeIndex);
+  const updateActivityNavState = (swiper, setNavState = setActivityNavState) => {
+    setActiveIndex(swiper?.activeIndex || 0);
+    setNavState({
+      isBeginning: swiper?.isBeginning ?? true,
+      isEnd: swiper?.isEnd ?? true,
+    });
+  };
+
+  const handleActivitySwiper = (swiper) => {
+    setActivitySwiperRef(swiper);
+    updateActivityNavState(swiper);
+  };
+
+  const handleMobileActivitySwiper = (swiper) => {
+    setMobileActivitySwiperRef(swiper);
+    updateActivityNavState(swiper, setMobileActivityNavState);
   };
 
   const handleActivityPrev = () => {
+    if (!hasMultipleActivities || activityNavState.isBeginning) return;
     activitySwiperRef?.slidePrev();
   };
 
   const handleActivityNext = () => {
+    if (!hasMultipleActivities || activityNavState.isEnd) return;
     activitySwiperRef?.slideNext();
   };
 
   const handleMobileActivityPrev = () => {
+    if (!hasMultipleActivities || mobileActivityNavState.isBeginning) return;
     mobileActivitySwiperRef?.slidePrev();
   };
 
   const handleMobileActivityNext = () => {
+    if (!hasMultipleActivities || mobileActivityNavState.isEnd) return;
     mobileActivitySwiperRef?.slideNext();
   };
 
@@ -100,14 +129,14 @@ const ArrivalToronto = ({ data }) => {
 
   const renderActivityText = (item) => {
     const words = String(item?.title || "").trim().split(/\s+/).filter(Boolean);
-    const isLongText = words.length > 30;
+    const isLongText = words.length > 40;
     const isExpandedText = expandedActivityText.includes(item?.id);
 
     if (!isLongText || isExpandedText) return item?.title;
 
     return (
       <>
-        {words.slice(0, 30).join(" ")}...{" "}
+        {words.slice(0, 10).join(" ")}...{" "}
         <span
           onClick={(event) => {
             event.stopPropagation();
@@ -350,46 +379,71 @@ const ArrivalToronto = ({ data }) => {
         : [];
   const mappedActivities = currentDayActivitiesSource
     .filter((item) => item?.enabled !== false)
-    .map((item) => ({
-      id: item?.id,
-      image:
-        getMediaUrl(item?.images?.[0]?.url) || "/images/yourAtivityImage3.png",
-      category: item?.time_slot
-        ? `${item.time_slot} activity`
-        : "Activity",
-      title: item?.description || item?.name || "Activity",
-      popupTitle: item?.name || "Activity",
-      description: item?.description || currentDayDescription,
-      startTime: item?.start_time || "",
-      endTime: item?.end_time || "",
-      images: (item?.images || []).map((image) => getMediaUrl(image?.url)).filter(Boolean),
-      actions: [
-        {
-          label: "view",
-          type: "view",
-        },
-        {
-          label: selectedActivityIds.includes(item?.id) ? "remove" : "add +",
-          type: "add",
-        },
-      ],
-    }));
+    .map((item) => {
+      const activityImages =
+        (item?.images || []).map((image) => getMediaUrl(image?.url)).filter(Boolean);
+
+      return {
+        id: item?.id,
+        isEmpty: false,
+        image: activityImages[0] || ACTIVITY_FALLBACK_IMAGE,
+        category: item?.time_slot
+          ? `${item.time_slot} activity`
+          : "Activity",
+        title: item?.description || item?.name || "Activity",
+        popupTitle: item?.name || "Activity",
+        description: item?.description || currentDayDescription,
+        startTime: item?.start_time || "",
+        endTime: item?.end_time || "",
+        images: activityImages.length ? activityImages : [ACTIVITY_FALLBACK_IMAGE],
+        actions: [
+          {
+            label: "view",
+            type: "view",
+          },
+          {
+            label: selectedActivityIds.includes(item?.id) ? "remove" : "add +",
+            type: "add",
+          },
+        ],
+      };
+    });
+  const hasMultipleActivities = mappedActivities.length > 1;
   const activitiesData = mappedActivities.length
     ? mappedActivities
     : [
         {
           id: `activity-empty-${activeDayNumber}`,
-          image: "/images/yourAtivityImage3.png",
-          category: "No activity found",
-          title: "No activity found",
-          popupTitle: "No activity found",
-          description: "No activity found",
+          isEmpty: true,
+          image: ACTIVITY_FALLBACK_IMAGE,
+          category: "Activity",
+          title: NO_ACTIVITY_TEXT,
+          popupTitle: NO_ACTIVITY_TEXT,
+          description: NO_ACTIVITY_TEXT,
           startTime: "",
           endTime: "",
-          images: ["/images/yourAtivityImage3.png"],
+          images: [ACTIVITY_FALLBACK_IMAGE],
           actions: [],
         },
       ];
+
+  useEffect(() => {
+    if (!hasMultipleActivities) {
+      setActivityNavState({ isBeginning: true, isEnd: true });
+      setMobileActivityNavState({ isBeginning: true, isEnd: true });
+      return;
+    }
+
+    activitySwiperRef?.slideTo(0, 0);
+    mobileActivitySwiperRef?.slideTo(0, 0);
+    updateActivityNavState(activitySwiperRef);
+    updateActivityNavState(mobileActivitySwiperRef, setMobileActivityNavState);
+  }, [
+    activeDayNumber,
+    hasMultipleActivities,
+    activitySwiperRef,
+    mobileActivitySwiperRef,
+  ]);
 
   const safeImageIndex = dayImgeFilter.length
     ? activeDayIndex % dayImgeFilter.length
@@ -728,10 +782,15 @@ const ArrivalToronto = ({ data }) => {
                           <div
                             className={styles.yourActivityContainerBottomRight}
                           >
-                            <Swiper
-                              modules={[Navigation]}
-                              onSwiper={setMobileActivitySwiperRef}
-                              onSlideChange={handleSlideChange}
+	                            <Swiper
+	                              modules={[Navigation]}
+	                              onSwiper={handleMobileActivitySwiper}
+	                              onSlideChange={(swiper) =>
+	                                updateActivityNavState(
+	                                  swiper,
+	                                  setMobileActivityNavState,
+	                                )
+	                              }
                               slidesPerView={"auto"}
                               spaceBetween={12}
                               className={styles.carousel}
@@ -743,21 +802,35 @@ const ArrivalToronto = ({ data }) => {
                                 >
                                   <div
                                     key={item.id}
-                                    className={styles.cardCarousell}
+                                    className={`${styles.cardCarousell} ${
+                                      item.isEmpty ? styles.emptyActivityCard : ""
+                                    }`}
                                   >
                                     <img
-                                      className={styles.cardImage}
+                                      className={`${styles.cardImage} ${
+                                        item.isEmpty ? styles.emptyActivityImage : ""
+                                      }`}
                                       src={item.image}
-                                      alt=""
+                                      alt={item.title}
                                     />
 
                                     <div
-                                      className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}
+                                      className={`${styles.cardTextContainer} ${styles.cardTextContainer2} ${
+                                        item.isEmpty ? styles.emptyActivityTextContainer : ""
+                                      }`}
                                     >
-                                      <span className={styles.cardTextAddress}>
+                                      <span
+                                        className={`${styles.cardTextAddress} ${
+                                          item.isEmpty ? styles.emptyActivityLabel : ""
+                                        }`}
+                                      >
                                         {item.category}
                                       </span>
-                                      <h3 className={styles.TextTitle}>
+                                      <h3
+                                        className={`${styles.TextTitle} ${
+                                          item.isEmpty ? styles.emptyActivityTitle : ""
+                                        }`}
+                                      >
                                         {renderActivityText(item)}
                                       </h3>
 
@@ -788,16 +861,34 @@ const ArrivalToronto = ({ data }) => {
                       </div>
                     </div>
 
-                    <div
-                      className={`${styles.btnContainer} ${styles.btnContainerMobileView}`}
-                    >
-                      <div className={styles.btn} onClick={handleMobileActivityPrev}>
-                        <img src="/icons/left.svg" alt="Previous" />
-                      </div>
-                      <div className={styles.btn} onClick={handleMobileActivityNext}>
-                        <img src="/icons/right.svg" alt="Next" />
-                      </div>
-                    </div>
+	                    {hasMultipleActivities && (
+	                      <div
+	                        className={`${styles.btnContainer} ${styles.btnContainerMobileView}`}
+	                      >
+	                        <div
+	                          className={`${styles.btn} ${
+	                            mobileActivityNavState.isBeginning
+	                              ? styles.disabledBtn
+	                              : ""
+	                          }`}
+	                          onClick={handleMobileActivityPrev}
+	                          aria-disabled={mobileActivityNavState.isBeginning}
+	                        >
+	                          <img src="/icons/left.svg" alt="Previous" />
+	                        </div>
+	                        <div
+	                          className={`${styles.btn} ${
+	                            mobileActivityNavState.isEnd
+	                              ? styles.disabledBtn
+	                              : ""
+	                          }`}
+	                          onClick={handleMobileActivityNext}
+	                          aria-disabled={mobileActivityNavState.isEnd}
+	                        >
+	                          <img src="/icons/right.svg" alt="Next" />
+	                        </div>
+	                      </div>
+	                    )}
                   </div>
 
                   <div className={styles.yourActivityContainer}>
@@ -807,14 +898,32 @@ const ArrivalToronto = ({ data }) => {
                       </div>
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
-                        <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handleActivityPrev}>
-                            <img src="/icons/left.svg" alt="Previous" />
-                          </div>
-                          <div className={styles.btn} onClick={handleActivityNext}>
-                            <img src="/icons/right.svg" alt="Next" />
-                          </div>
-                        </div>
+	                        {hasMultipleActivities && (
+	                          <div className={styles.btnContainer}>
+	                            <div
+	                              className={`${styles.btn} ${
+	                                activityNavState.isBeginning
+	                                  ? styles.disabledBtn
+	                                  : ""
+	                              }`}
+	                              onClick={handleActivityPrev}
+	                              aria-disabled={activityNavState.isBeginning}
+	                            >
+	                              <img src="/icons/left.svg" alt="Previous" />
+	                            </div>
+	                            <div
+	                              className={`${styles.btn} ${
+	                                activityNavState.isEnd
+	                                  ? styles.disabledBtn
+	                                  : ""
+	                              }`}
+	                              onClick={handleActivityNext}
+	                              aria-disabled={activityNavState.isEnd}
+	                            >
+	                              <img src="/icons/right.svg" alt="Next" />
+	                            </div>
+	                          </div>
+	                        )}
                       </div>
                     </div>
                     <div className={styles.yourActivityContainerBottom}>
@@ -842,10 +951,10 @@ const ArrivalToronto = ({ data }) => {
                         </div>
                       </div>
                       <div className={styles.yourActivityContainerBottomRight}>
-                        <Swiper
-                          modules={[Navigation]}
-                          onSwiper={setActivitySwiperRef}
-                          onSlideChange={handleSlideChange}
+	                        <Swiper
+	                          modules={[Navigation]}
+	                          onSwiper={handleActivitySwiper}
+	                          onSlideChange={updateActivityNavState}
                           slidesPerView={"auto"}
                           spaceBetween={12}
                           className={styles.carousel}
@@ -854,21 +963,35 @@ const ArrivalToronto = ({ data }) => {
                             <SwiperSlide key={item.id} className={styles.slide}>
                               <div
                                 key={item.id}
-                                className={styles.cardCarousell}
+                                className={`${styles.cardCarousell} ${
+                                  item.isEmpty ? styles.emptyActivityCard : ""
+                                }`}
                               >
                                 <img
-                                  className={styles.cardImage}
+                                  className={`${styles.cardImage} ${
+                                    item.isEmpty ? styles.emptyActivityImage : ""
+                                  }`}
                                   src={item.image}
-                                  alt=""
+                                  alt={item.title}
                                 />
 
                                 <div
-                                  className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}
+                                  className={`${styles.cardTextContainer} ${styles.cardTextContainer2} ${
+                                    item.isEmpty ? styles.emptyActivityTextContainer : ""
+                                  }`}
                                 >
-                                  <span className={styles.cardTextAddress}>
+                                  <span
+                                    className={`${styles.cardTextAddress} ${
+                                      item.isEmpty ? styles.emptyActivityLabel : ""
+                                    }`}
+                                  >
                                     {item.category}
                                   </span>
-                                  <h3 className={styles.TextTitle}>
+                                  <h3
+                                    className={`${styles.TextTitle} ${
+                                      item.isEmpty ? styles.emptyActivityTitle : ""
+                                    }`}
+                                  >
                                     {renderActivityText(item)}
                                   </h3>
 
@@ -1075,14 +1198,32 @@ const ArrivalToronto = ({ data }) => {
                       </div>
                       <div className={styles.yourActivityContainerTopRight}>
                         <h2 className={styles.youHeading}>your ACTIVITY</h2>
-                        <div className={styles.btnContainer}>
-                          <div className={styles.btn} onClick={handleActivityPrev}>
-                            <img src="/icons/left.svg" alt="Previous" />
-                          </div>
-                          <div className={styles.btn} onClick={handleActivityNext}>
-                            <img src="/icons/right.svg" alt="Next" />
-                          </div>
-                        </div>
+	                        {hasMultipleActivities && (
+	                          <div className={styles.btnContainer}>
+	                            <div
+	                              className={`${styles.btn} ${
+	                                activityNavState.isBeginning
+	                                  ? styles.disabledBtn
+	                                  : ""
+	                              }`}
+	                              onClick={handleActivityPrev}
+	                              aria-disabled={activityNavState.isBeginning}
+	                            >
+	                              <img src="/icons/left.svg" alt="Previous" />
+	                            </div>
+	                            <div
+	                              className={`${styles.btn} ${
+	                                activityNavState.isEnd
+	                                  ? styles.disabledBtn
+	                                  : ""
+	                              }`}
+	                              onClick={handleActivityNext}
+	                              aria-disabled={activityNavState.isEnd}
+	                            >
+	                              <img src="/icons/right.svg" alt="Next" />
+	                            </div>
+	                          </div>
+	                        )}
                       </div>
                     </div>
                     <div className={styles.yourActivityContainerBottom}>
@@ -1111,10 +1252,10 @@ const ArrivalToronto = ({ data }) => {
                       </div>
 
                       <div className={styles.yourActivityContainerBottomRight}>
-                        <Swiper
-                          modules={[Navigation]}
-                          onSwiper={setActivitySwiperRef}
-                          onSlideChange={handleSlideChange}
+	                        <Swiper
+	                          modules={[Navigation]}
+	                          onSwiper={handleActivitySwiper}
+	                          onSlideChange={updateActivityNavState}
                           slidesPerView={"auto"}
                           spaceBetween={12}
                           className={styles.carousel}
@@ -1123,21 +1264,35 @@ const ArrivalToronto = ({ data }) => {
                             <SwiperSlide key={item.id} className={styles.slide}>
                               <div
                                 key={item.id}
-                                className={styles.cardCarousell}
+                                className={`${styles.cardCarousell} ${
+                                  item.isEmpty ? styles.emptyActivityCard : ""
+                                }`}
                               >
                                 <img
-                                  className={styles.cardImage}
+                                  className={`${styles.cardImage} ${
+                                    item.isEmpty ? styles.emptyActivityImage : ""
+                                  }`}
                                   src={item.image}
-                                  alt=""
+                                  alt={item.title}
                                 />
 
                                 <div
-                                  className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}
+                                  className={`${styles.cardTextContainer} ${styles.cardTextContainer2} ${
+                                    item.isEmpty ? styles.emptyActivityTextContainer : ""
+                                  }`}
                                 >
-                                  <span className={styles.cardTextAddress}>
+                                  <span
+                                    className={`${styles.cardTextAddress} ${
+                                      item.isEmpty ? styles.emptyActivityLabel : ""
+                                    }`}
+                                  >
                                     {item.category}
                                   </span>
-                                  <h3 className={styles.TextTitle}>
+                                  <h3
+                                    className={`${styles.TextTitle} ${
+                                      item.isEmpty ? styles.emptyActivityTitle : ""
+                                    }`}
+                                  >
                                     {renderActivityText(item)}
                                   </h3>
 
@@ -1239,10 +1394,15 @@ const ArrivalToronto = ({ data }) => {
                         <div
                           className={styles.yourActivityContainerBottomRight}
                         >
-                          <Swiper
-                            modules={[Navigation]}
-                            onSwiper={setMobileActivitySwiperRef}
-                            onSlideChange={handleSlideChange}
+	                          <Swiper
+	                            modules={[Navigation]}
+	                            onSwiper={handleMobileActivitySwiper}
+	                            onSlideChange={(swiper) =>
+	                              updateActivityNavState(
+	                                swiper,
+	                                setMobileActivityNavState,
+	                              )
+	                            }
                             slidesPerView={"auto"}
                             spaceBetween={12}
                             className={styles.carousel}
@@ -1254,21 +1414,35 @@ const ArrivalToronto = ({ data }) => {
                               >
                                 <div
                                   key={item.id}
-                                  className={styles.cardCarousell}
+                                  className={`${styles.cardCarousell} ${
+                                    item.isEmpty ? styles.emptyActivityCard : ""
+                                  }`}
                                 >
                                   <img
-                                    className={styles.cardImage}
+                                    className={`${styles.cardImage} ${
+                                      item.isEmpty ? styles.emptyActivityImage : ""
+                                    }`}
                                     src={item.image}
-                                    alt=""
+                                    alt={item.title}
                                   />
 
                                   <div
-                                    className={`${styles.cardTextContainer} ${styles.cardTextContainer2}`}
+                                    className={`${styles.cardTextContainer} ${styles.cardTextContainer2} ${
+                                      item.isEmpty ? styles.emptyActivityTextContainer : ""
+                                    }`}
                                   >
-                                    <span className={styles.cardTextAddress}>
+                                    <span
+                                      className={`${styles.cardTextAddress} ${
+                                        item.isEmpty ? styles.emptyActivityLabel : ""
+                                      }`}
+                                    >
                                       {item.category}
                                     </span>
-                                    <h3 className={styles.TextTitle}>
+                                    <h3
+                                      className={`${styles.TextTitle} ${
+                                        item.isEmpty ? styles.emptyActivityTitle : ""
+                                      }`}
+                                    >
                                       {renderActivityText(item)}
                                     </h3>
 
