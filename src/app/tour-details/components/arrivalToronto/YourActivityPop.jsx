@@ -1,14 +1,20 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import styles from "./YourActivityPop.module.css";
 
-const YourActivityPop = ({ isOpen, hotel, onClose }) => {
-    const [selected, setSelected] = useState([]);
+const YourActivityPop = ({
+    isOpen,
+    hotel,
+    isSelected = false,
+    onToggleActivity,
+    onClose,
+}) => {
     const timeText =
         hotel?.startTime && hotel?.endTime
             ? `${hotel.startTime} - ${hotel.endTime}`
             : hotel?.startTime || hotel?.endTime || "";
+    const actionLabel = isSelected ? "Remove" : "Add +";
 
     return (
         <AnimatePresence>
@@ -51,7 +57,12 @@ const YourActivityPop = ({ isOpen, hotel, onClose }) => {
 
                                 </div>
                                 <div className={styles.popupRight}>
-                                    <button className={styles.confirmBtn}>Add +</button>
+                                    <button
+                                        className={styles.confirmBtn}
+                                        onClick={() => onToggleActivity?.(hotel)}
+                                    >
+                                        {actionLabel}
+                                    </button>
                                 </div>
                             </div>
 

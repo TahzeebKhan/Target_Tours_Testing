@@ -1562,6 +1562,8 @@ const ArrivalToronto = ({ data }) => {
       <YourActivityPop
         isOpen={isYourActivityPopupOpen}
         hotel={selectedHotel}
+        isSelected={hasActivityId(selectedActivityIds, selectedHotel?.id)}
+        onToggleActivity={toggleSelectedActivity}
         onClose={closeYourActivityPopup}
       />
     </section>
