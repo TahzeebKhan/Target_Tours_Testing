@@ -113,6 +113,56 @@ const validateTourTravelerForm = ({ travelerDetails = [], bookingContactInfo = {
   };
 };
 
+const getActivityId = (activity) =>
+  activity?.id ??
+  activity?.activity_id ??
+  activity?.package_activity_id ??
+  activity?.activity?.id ??
+  null;
+
+const getAllPackageActivities = (...packages) => {
+  const activitiesById = new Map();
+
+  packages.forEach((packageDetail) => {
+    const itinerary = Array.isArray(packageDetail?.itinerary)
+      ? packageDetail.itinerary
+      : [];
+
+    itinerary.forEach((day) => {
+      const dayActivities =
+        Array.isArray(day?.package_activities) && day.package_activities.length
+          ? day.package_activities
+          : Array.isArray(day?.builder_data?.activities)
+            ? day.builder_data.activities
+            : [];
+
+      dayActivities
+        .filter((activity) => activity?.enabled !== false)
+        .forEach((activity) => {
+          const id = getActivityId(activity);
+          if (id) activitiesById.set(String(id), { id });
+        });
+    });
+  });
+
+  return Array.from(activitiesById.values());
+};
+
+const getSelectedPackageActivities = (currentPackageDetails, packageDetails) => {
+  const selectedActivities = Array.isArray(currentPackageDetails?.selectedActivities)
+    ? currentPackageDetails.selectedActivities
+    : [];
+  const selectedPayload = selectedActivities
+    .map((activity) => ({ id: getActivityId(activity) }))
+    .filter((activity) => activity.id);
+
+  return currentPackageDetails?.activitySelectionMode === "custom"
+    ? selectedPayload
+    : selectedPayload.length
+    ? selectedPayload
+    : getAllPackageActivities(currentPackageDetails, packageDetails);
+};
+
 const getApiErrorMessage = (error, fallback) =>
   error?.response?.data?.message ||
   error?.response?.data?.error?.message ||
@@ -212,6 +262,7 @@ export function TourBookingProvider({ children }) {
             startDate: prev?.startDate || nextPackageDetails.startDate,
             endDate: prev?.endDate || nextPackageDetails.endDate,
             selectedActivities: prev?.selectedActivities || [],
+            activitySelectionMode: prev?.activitySelectionMode || null,
             packageDepartureId:
               prev?.packageDepartureId || nextPackageDetails.packageDepartureId,
           };
@@ -294,6 +345,10 @@ export function TourBookingProvider({ children }) {
     }
 
     const currentPackageDetails = readTourBookingPackage();
+    const selectedActivities = getSelectedPackageActivities(
+      currentPackageDetails,
+      packageDetails
+    );
     const bookingPayload = {
       packageId: currentPackageDetails?.id || packageDetails?.id,
       domain: process.env.NEXT_PUBLIC_DOMAIN,
@@ -304,9 +359,7 @@ export function TourBookingProvider({ children }) {
       amount: prices.total,
       payment_status: "success",
       booking_contact_info: normalizeContactInfo(bookingContactInfo),
-      selected_activities: (currentPackageDetails?.selectedActivities || [])
-        .map((activity) => ({ id: activity?.id }))
-        .filter((activity) => activity.id),
+      selected_activities: selectedActivities,
       selected_hotel: [{ id: 1 }],
       passengers: passengerIds.map((id) => ({ id })),
     };
