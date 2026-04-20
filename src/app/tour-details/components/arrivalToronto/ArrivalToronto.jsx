@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ArrivalToronto.module.css";
 import DaySlider from "./DaySlider";
 import FlightTimingDetail from "./flightTimingDetails/FlightTimingDetail";
@@ -16,6 +16,29 @@ import {
 
 const ACTIVITY_FALLBACK_IMAGE = "/fallback.jpg";
 const NO_ACTIVITY_TEXT = "No activity on this day";
+
+const getActivityId = (activity) => activity?.id ?? activity?.activity_id ?? null;
+
+const getDayActivities = (day = {}) =>
+  Array.isArray(day?.package_activities) && day.package_activities.length
+    ? day.package_activities
+    : Array.isArray(day?.builder_data?.activities)
+      ? day.builder_data.activities
+      : [];
+
+const getAllActivityIds = (days = []) =>
+  Array.from(
+    new Set(
+      days
+        .flatMap((day) => getDayActivities(day))
+        .filter((activity) => activity?.enabled !== false)
+        .map(getActivityId)
+        .filter(Boolean)
+    )
+  );
+
+const hasActivityId = (activityIds, activityId) =>
+  activityIds.some((id) => String(id) === String(activityId));
 
 const ArrivalToronto = ({ data }) => {
   const tabsRef = useRef(null);
@@ -112,14 +135,15 @@ const ArrivalToronto = ({ data }) => {
 
     setSelectedActivityIds((prev) => {
       const activityId = activity.id;
-      const nextIds = prev.includes(activityId)
-        ? prev.filter((id) => id !== activityId)
+      const nextIds = hasActivityId(prev, activityId)
+        ? prev.filter((id) => String(id) !== String(activityId))
         : [...prev, activityId];
       const currentPackage = readTourBookingPackage();
 
       writeTourBookingPackage({
         ...currentPackage,
         id: data?.id ?? currentPackage?.id,
+        activitySelectionMode: "custom",
         selectedActivities: nextIds.map((id) => ({ id })),
       });
 
@@ -219,11 +243,15 @@ const ArrivalToronto = ({ data }) => {
     },
   ];
 
-  const itineraryDays = Array.isArray(data?.package_itinerarie)
-    ? [...data.package_itinerarie].sort(
-        (a, b) => (a?.day_number ?? 0) - (b?.day_number ?? 0),
-      )
-    : [];
+  const itineraryDays = useMemo(
+    () =>
+      Array.isArray(data?.package_itinerarie)
+        ? [...data.package_itinerarie].sort(
+            (a, b) => (a?.day_number ?? 0) - (b?.day_number ?? 0),
+          )
+        : [],
+    [data?.package_itinerarie]
+  );
 
   const currentDayData = itineraryDays[activeDayIndex] || itineraryDays[0] || null;
   const activeDayNumber = currentDayData?.day_number || 1;
@@ -371,12 +399,7 @@ const ArrivalToronto = ({ data }) => {
     ]
       .filter(Boolean)
       .join(", ") || "N/A";
-  const currentDayActivitiesSource = Array.isArray(currentDayData?.package_activities)
-    && currentDayData.package_activities.length
-      ? currentDayData.package_activities
-      : Array.isArray(currentDayData?.builder_data?.activities)
-        ? currentDayData.builder_data.activities
-        : [];
+  const currentDayActivitiesSource = getDayActivities(currentDayData);
   const mappedActivities = currentDayActivitiesSource
     .filter((item) => item?.enabled !== false)
     .map((item) => {
@@ -402,7 +425,7 @@ const ArrivalToronto = ({ data }) => {
             type: "view",
           },
           {
-            label: selectedActivityIds.includes(item?.id) ? "remove" : "add +",
+            label: hasActivityId(selectedActivityIds, item?.id) ? "remove" : "add +",
             type: "add",
           },
         ],
@@ -471,19 +494,26 @@ const ArrivalToronto = ({ data }) => {
 
   useEffect(() => {
     const currentPackage = readTourBookingPackage();
+    const allActivityIds = getAllActivityIds(itineraryDays);
+
     if (currentPackage?.id !== data?.id) {
-      setSelectedActivityIds([]);
+      setSelectedActivityIds(allActivityIds);
       return;
     }
 
-    setSelectedActivityIds(
-      Array.isArray(currentPackage?.selectedActivities)
-        ? currentPackage.selectedActivities
-            .map((activity) => activity?.id)
-            .filter(Boolean)
-        : [],
-    );
-  }, [data?.id]);
+    if (currentPackage?.activitySelectionMode === "custom") {
+      setSelectedActivityIds(
+        Array.isArray(currentPackage?.selectedActivities)
+          ? currentPackage.selectedActivities
+              .map((activity) => activity?.id)
+              .filter(Boolean)
+          : [],
+      );
+      return;
+    }
+
+    setSelectedActivityIds(allActivityIds);
+  }, [data?.id, itineraryDays]);
 
   const [activeTab, setActiveTab] = useState("DAY Itinerary");
 

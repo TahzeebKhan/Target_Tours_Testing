@@ -18,6 +18,7 @@ const FALLBACK_PACKAGE = {
   },
   itinerary: [],
   selectedActivities: [],
+  activitySelectionMode: null,
   packageDepartureId: null,
   with_flight: false,
 };
@@ -144,6 +145,7 @@ export const normalizeTourBookingPackage = (data = {}, selectedDeparture = null)
     selectedActivities: Array.isArray(data?.selectedActivities)
       ? data.selectedActivities
       : FALLBACK_PACKAGE.selectedActivities,
+    activitySelectionMode: data?.activitySelectionMode || FALLBACK_PACKAGE.activitySelectionMode,
     packageDepartureId:
       departure?.id ??
       data?.packageDepartureId ??
@@ -164,6 +166,10 @@ export const saveTourBookingPackage = (data, selectedDeparture = null) => {
       previousPackageDetails?.id === nextPackageDetails.id
         ? previousPackageDetails.selectedActivities || []
         : nextPackageDetails.selectedActivities,
+    activitySelectionMode:
+      previousPackageDetails?.id === nextPackageDetails.id
+        ? previousPackageDetails.activitySelectionMode || null
+        : nextPackageDetails.activitySelectionMode,
   };
   window.sessionStorage.removeItem(TOUR_BOOKING_PACKAGE_KEY);
   window.sessionStorage.setItem(TOUR_BOOKING_PACKAGE_KEY, JSON.stringify(packageDetails));
