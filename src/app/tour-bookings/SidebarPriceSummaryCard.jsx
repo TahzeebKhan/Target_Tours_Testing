@@ -1,11 +1,9 @@
 "use client"
 import { useTourBooking } from "./TourBookingContext";
-import Image from "next/image";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
 export default function SidebarPriceSummaryCard() {
   const {
-    completeBooking,
     packageDetails,
     packageBookingLoading,
     prices,
@@ -16,10 +14,7 @@ export default function SidebarPriceSummaryCard() {
 
   const handleContinuePayment = async () => {
     if (packageBookingLoading) return;
-    const booked = await submitPackageBooking();
-    if (booked) {
-      completeBooking();
-    }
+    await submitPackageBooking();
   };
 
   return (
@@ -32,16 +27,6 @@ export default function SidebarPriceSummaryCard() {
           <span className={styles.price}>₹ {prices.baseFare.toLocaleString()}</span>
         </div>
 
-        <div className={styles.row}>
-          <span>{travelerCount}x Cabin baggage</span>
-          <span className={styles.success}>Included</span>
-        </div>
-
-        <div className={styles.row}>
-          <span>{travelerCount}x Checked baggage 15kg</span>
-          <span className={styles.success}>Included</span>
-        </div>
-
         {prices.baggage > 0 && (
           <div className={styles.row}>
             <span>Extra Baggage</span>
@@ -49,19 +34,19 @@ export default function SidebarPriceSummaryCard() {
           </div>
         )}
 
-        <div className={styles.row}>
-          <span>Seat Selection</span>
-          <span className={styles.success}>Free</span>
-        </div>
+        {prices.seats > 0 && (
+          <div className={styles.row}>
+            <span>Seat Selection</span>
+            <span className={styles.price}>₹ {prices.seats.toLocaleString()}</span>
+          </div>
+        )}
 
-        <div className={styles.row}>
-          <span>Meals</span>
-          {prices.meals > 0 ? (
+        {prices.meals > 0 && (
+          <div className={styles.row}>
+            <span>Meals</span>
             <span className={styles.price}>₹ {prices.meals.toLocaleString()}</span>
-          ) : (
-            <span className={styles.success}>Included</span>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className={styles.row}>
           <span>Taxes & Fees</span>

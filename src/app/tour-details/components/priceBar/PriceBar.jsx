@@ -5,6 +5,9 @@ import CustomItinerary from "./CustomItinerary";
 import MobileItinerary from "./MobileItinerary";
 import { useRouter } from "next/navigation";
 import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSession";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const PriceBar = ({
   onCall,
@@ -16,7 +19,11 @@ const PriceBar = ({
   const [itineraryOpen, setItineraryOpen] = useState(false);
   const [mobileItineraryOpen, setMobileItineraryOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState("login");
+  const [pendingBookNow, setPendingBookNow] = useState(false);
   const router = useRouter();
+  const { isLoggedIn, loading: authLoading } = useAuth();
 
   // 🔹 API → UI mapping (safe)
   const daysText =
@@ -54,10 +61,31 @@ const PriceBar = ({
     }
   };
 
-  const handleBookNow = () => {
+  const continueBooking = () => {
     saveTourBookingPackage(data);
     router.push("/tour-bookings");
   };
+
+  const handleBookNow = () => {
+    if (authLoading) return;
+
+    if (!isLoggedIn) {
+      setPendingBookNow(true);
+      setAuthView("login");
+      setShowLogin(true);
+      return;
+    }
+
+    continueBooking();
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn || !pendingBookNow) return;
+
+    setShowLogin(false);
+    setPendingBookNow(false);
+    continueBooking();
+  }, [isLoggedIn, pendingBookNow]);
 
   return (
     <div className={styles.priceBar}>
@@ -116,6 +144,26 @@ const PriceBar = ({
         hotel={sampleHotel}
         onClose={() => setMobileItineraryOpen(false)}
       />
+
+      {showLogin && authView === "login" && (
+        <LoginPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingBookNow(false);
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+
+      {showLogin && authView === "signup" && (
+        <SignupPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingBookNow(false);
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
     </div>
   );
 };

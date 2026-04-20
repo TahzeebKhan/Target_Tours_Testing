@@ -258,6 +258,9 @@ const HomePage = ({
   const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
   const fromInputRef = useRef(null);
   const toInputRef = useRef(null);
+  const nonFlightStartDateRef = useRef(null);
+  const nonFlightEndDateRef = useRef(null);
+  const nonFlightSearchRef = useRef(null);
   const fromSuggestionRef = useRef(null);
   const toSuggestionRef = useRef(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -730,6 +733,26 @@ const HomePage = ({
       input.showPicker();
     } else {
       input.focus();
+    }
+  };
+
+  const focusRefOnTab = (event, nextRef, previousRef = null) => {
+    if (event.key !== "Tab") return;
+
+    const targetRef = event.shiftKey ? previousRef : nextRef;
+    if (!targetRef?.current) return;
+
+    event.preventDefault();
+    targetRef.current.focus();
+  };
+
+  const openNonFlightDatePicker = () => {
+    if (bookingType === "hotel") {
+      setShowHotelCalendar(true);
+    } else if (bookingType === "holiday") {
+      setShowHolidayCalendar(true);
+    } else if (bookingType === "insurance") {
+      setShowInsuranceCalendar(true);
     }
   };
 
@@ -2036,9 +2059,20 @@ const HomePage = ({
                       // </div>
                       <div
                         className={`${styles.fromBtn} ${styles.pos1}`}
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowDestinationSearch((prev) => !prev);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setShowDestinationSearch((prev) => !prev);
+                            return;
+                          }
+
+                          focusRefOnTab(event, nonFlightStartDateRef);
                         }}
                       >
                         <div className={`${styles.lable} ${styles.labelFade}`}>
@@ -2119,6 +2153,14 @@ const HomePage = ({
                             } else {
                               setFromSuggestionsOpen(true);
                             }
+                          }}
+                          onKeyDown={(event) => {
+                            if (bookingType === "hotel") {
+                              focusRefOnTab(event, nonFlightStartDateRef);
+                              return;
+                            }
+
+                            focusRefOnTab(event, toInputRef);
                           }}
                         />
 
@@ -2214,16 +2256,26 @@ const HomePage = ({
                         className={`${styles.dateInputWrapper} ${styles.contentFade}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (bookingType === "hotel") {
-                            setShowHotelCalendar(true);
-                          } else if (bookingType === "holiday") {
-                            setShowHolidayCalendar(true);
-                          } else if (bookingType === "insurance") {
-                            setShowInsuranceCalendar(true);
+                          openNonFlightDatePicker();
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            openNonFlightDatePicker();
+                            return;
                           }
+
+                          focusRefOnTab(
+                            event,
+                            bookingType === "hotel"
+                              ? nonFlightEndDateRef
+                              : travellerRef,
+                            bookingType === "holiday" ? toInputRef : toInputRef,
+                          );
                         }}
                       >
                         <input
+                          ref={nonFlightStartDateRef}
                           type="text"
                           readOnly
                           className={styles.contant}
@@ -2271,6 +2323,9 @@ const HomePage = ({
                               setToSuggestionsOpen(true);
                             }}
                             onFocus={() => setToSuggestionsOpen(true)}
+                            onKeyDown={(event) => {
+                              focusRefOnTab(event, nonFlightStartDateRef, fromInputRef);
+                            }}
                           />
 
                           {toSuggestionsOpen && (
@@ -2293,8 +2348,22 @@ const HomePage = ({
                               setShowInsuranceCalendar(true);
                             }
                           }}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              if (bookingType === "hotel") {
+                                setShowHotelCalendar(true);
+                              } else if (bookingType === "insurance") {
+                                setShowInsuranceCalendar(true);
+                              }
+                              return;
+                            }
+
+                            focusRefOnTab(event, travellerRef, nonFlightStartDateRef);
+                          }}
                         >
                           <input
+                            ref={nonFlightEndDateRef}
                             type="text"
                             readOnly
                             className={styles.contant}
@@ -2315,9 +2384,26 @@ const HomePage = ({
                     <div
                       ref={travellerRef}
                       className={`${styles.fromBtn} ${styles.pos4} ${styles.fromBtn2}`}
+                      role="button"
+                      tabIndex={0}
                       onClick={(e) => {
                         e.stopPropagation();
                         setTravellerOpend((prev) => !prev);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setTravellerOpend((prev) => !prev);
+                          return;
+                        }
+
+                        focusRefOnTab(
+                          event,
+                          nonFlightSearchRef,
+                          bookingType === "hotel"
+                            ? nonFlightEndDateRef
+                            : nonFlightStartDateRef,
+                        );
                       }}
                     >
                       <div className={styles.lable}>
@@ -2392,10 +2478,22 @@ const HomePage = ({
                     </div>
 
                     <div
+                      ref={nonFlightSearchRef}
                       className={`${styles.searchBtn} ${styles.pos5} ${
                         searchSubmitting ? styles.searchBtnLoading : ""
                       }`}
+                      role="button"
+                      tabIndex={0}
                       onClick={handleSearch}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleSearch();
+                          return;
+                        }
+
+                        focusRefOnTab(event, null, travellerRef);
+                      }}
                       aria-disabled={searchSubmitting}
                     >
                       {searchSubmitting ? (

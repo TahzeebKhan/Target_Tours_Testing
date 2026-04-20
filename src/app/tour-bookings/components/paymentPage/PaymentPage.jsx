@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTourBooking } from "../../TourBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
@@ -8,20 +8,24 @@ import { tripSummaryData } from "./components/dummyData";
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
 import PassengerInfo from "./components/passengerInfo/PassengerInfo";
+import PackageSuccessModal from "./components/PackageSuccessModal";
 import BookingFooter from "../review/components/bookingFooter/BookingFooter";
 import { AnimatePresence } from "framer-motion";
 import PriceSummary from "../review/components/priceSummary/PriceSummary";
 const PaymentPage = () => {
   const {
     completeBooking,
+    packageBooking,
     packageDetails,
     packageBookingLoading,
     prices,
     setCurrentStep,
     submitPackageBooking,
+    travelerDetails,
   } = useTourBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [showPriceSummary, setShowPriceSummary] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -32,9 +36,15 @@ const PaymentPage = () => {
     if (packageBookingLoading) return;
     const booked = await submitPackageBooking();
     if (booked) {
-      completeBooking();
+      setSuccessModalOpen(true);
     }
   };
+
+  useEffect(() => {
+    if (packageBooking) {
+      setSuccessModalOpen(true);
+    }
+  }, [packageBooking]);
 
   return (
     <>
@@ -259,6 +269,17 @@ const PaymentPage = () => {
           )}
         </AnimatePresence>
       </div>
+      <PackageSuccessModal
+        isOpen={successModalOpen}
+        booking={packageBooking}
+        packageDetails={packageDetails}
+        prices={prices}
+        travelerDetails={travelerDetails}
+        onClose={() => {
+          setSuccessModalOpen(false);
+          completeBooking();
+        }}
+      />
     </>
   );
 };
