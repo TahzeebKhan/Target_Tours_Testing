@@ -17,10 +17,16 @@ const formatName = (traveler, index) => {
 const formatContact = (traveler) =>
   [traveler?.country_code, traveler?.phone_no].filter(Boolean).join(" ");
 
+const formatBookingContact = (contactInfo) =>
+  [contactInfo?.country_code, contactInfo?.mobile_number]
+    .filter(Boolean)
+    .join(" ");
+
 const PassengerInfo = () => {
-  const { travelerDetails: travelers } = useTourBooking();
+  const { travelerDetails: travelers, bookingContactInfo } = useTourBooking();
   const primaryTraveler = travelers?.[0] || {};
   const companionCount = Math.max((travelers?.length || 1) - 1, 0);
+  const bookingContact = formatBookingContact(bookingContactInfo);
 
   return (
     <>
@@ -54,7 +60,7 @@ const PassengerInfo = () => {
               {companionCount > 0 ? ` (primary), +${companionCount} Traveller` : " (primary)"}
             </span>
             <span className={styles.secondary}>
-              {[primaryTraveler.email, formatContact(primaryTraveler)]
+              {[bookingContactInfo.email, bookingContact]
                 .filter(Boolean)
                 .join(", ") || "-"}
             </span>

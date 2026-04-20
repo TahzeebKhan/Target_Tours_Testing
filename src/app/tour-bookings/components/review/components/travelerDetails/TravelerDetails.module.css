@@ -292,13 +292,14 @@
 /* Grid */
 .grid {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
 }
 
 /* Field */
 .field {
     width: 100%;
+    min-height: 68px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -317,6 +318,20 @@
     line-height: 1.18;
     letter-spacing: 0%;
     outline: none;
+}
+
+.field input.inputError,
+.field select.inputError {
+    border-color: #b42318;
+    background: #fff8f7;
+}
+
+.fieldError {
+    margin: 0;
+    font-family: var(--font-inter);
+    font-size: 11px;
+    line-height: 1.2;
+    color: #b42318;
 }
 
 .field input:disabled,
@@ -356,7 +371,7 @@
     content: "";
     position: absolute;
     right: 12px;
-    top: 73%;
+    top: 39px;
     transform: translateY(-50%);
 
     background-image: url("/icons/DownArrows.svg");

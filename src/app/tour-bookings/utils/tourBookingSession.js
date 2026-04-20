@@ -13,12 +13,13 @@ const FALLBACK_PACKAGE = {
   routeLabel: "2N Ubud • 1N Toronto • 3N Oikawa",
   price: {
     adult: 5200,
-    taxes: 2819,
+    taxes: 0,
     total: 5200,
   },
   itinerary: [],
   selectedActivities: [],
   packageDepartureId: null,
+  with_flight: false,
 };
 
 const safeNumber = (...values) => {
@@ -79,6 +80,17 @@ const getItinerary = (data = {}) => {
     : [];
 };
 
+const hasFlightTransport = (itinerary = []) =>
+  itinerary.some((day) => {
+    const transports = day?.builder_data?.transports;
+    return Array.isArray(transports)
+      ? transports.some(
+          (transport) =>
+            transport?.enabled !== false && transport?.mode === "flight"
+        )
+      : false;
+  });
+
 export const normalizeTourBookingPackage = (data = {}, selectedDeparture = null) => {
   const departure = selectedDeparture || getFirstDeparture(data) || {};
   const adultPrice = safeNumber(
@@ -90,6 +102,13 @@ export const normalizeTourBookingPackage = (data = {}, selectedDeparture = null)
   );
   const days = safeNumber(data?.duration_days);
   const nights = safeNumber(data?.duration_nights);
+  const itinerary = getItinerary(data);
+  const withFlight =
+    typeof data?.with_flight === "boolean"
+      ? data.with_flight
+      : typeof data?.withFlight === "boolean"
+        ? data.withFlight
+        : hasFlightTransport(itinerary);
 
   return {
     ...FALLBACK_PACKAGE,
@@ -121,7 +140,7 @@ export const normalizeTourBookingPackage = (data = {}, selectedDeparture = null)
       taxes: safeNumber(data?.taxes, FALLBACK_PACKAGE.price.taxes),
       total: adultPrice,
     },
-    itinerary: getItinerary(data),
+    itinerary,
     selectedActivities: Array.isArray(data?.selectedActivities)
       ? data.selectedActivities
       : FALLBACK_PACKAGE.selectedActivities,
@@ -130,6 +149,7 @@ export const normalizeTourBookingPackage = (data = {}, selectedDeparture = null)
       data?.packageDepartureId ??
       data?.package_departure_id ??
       FALLBACK_PACKAGE.packageDepartureId,
+    with_flight: withFlight,
   };
 };
 

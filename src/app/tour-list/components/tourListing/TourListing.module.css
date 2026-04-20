@@ -961,6 +961,158 @@
   padding: 0 16px;
 }
 
+.optionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.optionSheet {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden auto;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+}
+
+.optionMedia {
+  width: 100%;
+  height: 250px;
+  position: relative;
+  background: #eef2f5;
+}
+
+.optionMedia::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.24);
+  pointer-events: none;
+}
+
+.optionMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.optionHeader {
+  min-height: 72px;
+  padding: 20px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #eff7ff;
+}
+
+.optionHeader h3 {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.25;
+  color: #4b5563;
+}
+
+.optionClose {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #4b5563;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.optionList {
+  padding: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.optionCard {
+  width: 100%;
+  min-height: 86px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  align-items: center;
+  gap: 18px;
+  background: #ffffff;
+  border: 1px solid #eef0f4;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.16);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.optionCard:hover {
+  transform: translateY(-1px);
+  border-color: #b8d3ff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.optionText,
+.optionPrice {
+  display: flex;
+  flex-direction: column;
+}
+
+.optionText {
+  gap: 4px;
+}
+
+.optionText span,
+.optionPrice span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #969ba3;
+}
+
+.optionText strong {
+  font-family: var(--font-inter);
+  font-weight: 800;
+  font-size: 23px;
+  line-height: 1.15;
+  color: #4b5563;
+}
+
+.optionPrice {
+  align-items: flex-end;
+}
+
+.optionPrice strong {
+  font-family: var(--font-inter);
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 1.1;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.optionPrice span {
+  font-size: 14px;
+}
+
+.optionArrow {
+  color: #4f9dfc;
+}
+
 @media (max-width: 1440px) {
     .ListViewCardTextTopBottom {
         gap: 5px;
@@ -1039,6 +1191,54 @@
     display: none;
   }
 
+  .optionOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .optionSheet {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .optionMedia {
+    height: 300px;
+  }
+
+  .optionHeader {
+    min-height: 72px;
+    padding: 18px 20px;
+  }
+
+  .optionHeader h3 {
+    font-size: 24px;
+  }
+
+  .optionList {
+    padding: 34px 30px 40px;
+    gap: 14px;
+  }
+
+  .optionCard {
+    min-height: 84px;
+    padding: 15px 16px;
+    grid-template-columns: minmax(0, 1fr) auto 24px;
+    gap: 10px;
+  }
+
+  .optionText span {
+    font-size: 14px;
+  }
+
+  .optionText strong {
+    font-size: 21px;
+  }
+
+  .optionPrice strong {
+    font-size: 22px;
+  }
+
     .tourListMobileSection {
         display: block;
     }
@@ -1099,6 +1299,34 @@
 }
 
 @media (max-width: 430px) {
+  .optionMedia {
+    height: 250px;
+  }
+
+  .optionHeader h3 {
+    font-size: 20px;
+  }
+
+  .optionList {
+    padding: 28px 20px 34px;
+  }
+
+  .optionCard {
+    min-height: 78px;
+  }
+
+  .optionText strong {
+    font-size: 19px;
+  }
+
+  .optionPrice strong {
+    font-size: 20px;
+  }
+
+  .optionPrice span {
+    font-size: 12px;
+  }
+
   .bookNowBtn {
     max-width: unset;
   }

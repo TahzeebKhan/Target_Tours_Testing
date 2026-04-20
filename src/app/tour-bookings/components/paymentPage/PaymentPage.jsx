@@ -12,6 +12,7 @@ import PackageSuccessModal from "./components/PackageSuccessModal";
 import BookingFooter from "../review/components/bookingFooter/BookingFooter";
 import { AnimatePresence } from "framer-motion";
 import PriceSummary from "../review/components/priceSummary/PriceSummary";
+import { useRouter } from "next/navigation";
 const PaymentPage = () => {
   const {
     completeBooking,
@@ -26,6 +27,7 @@ const PaymentPage = () => {
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [showPriceSummary, setShowPriceSummary] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const router = useRouter();
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -275,9 +277,11 @@ const PaymentPage = () => {
         packageDetails={packageDetails}
         prices={prices}
         travelerDetails={travelerDetails}
-        onClose={() => {
+        onClose={() => setSuccessModalOpen(false)}
+        onDone={() => {
           setSuccessModalOpen(false);
           completeBooking();
+          router.push("/tour-list");
         }}
       />
     </>
