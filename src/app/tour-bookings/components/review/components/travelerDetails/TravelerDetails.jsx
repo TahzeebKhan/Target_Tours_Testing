@@ -66,7 +66,14 @@ const buildTravelerFromPassenger = (passenger, id) => ({
 });
 
 const TravelerDetails = () => {
-    const { travelerDetails: travelers, setTravelerDetails: setTravelers } = useTourBooking();
+    const {
+        travelerDetails: travelers,
+        setTravelerDetails: setTravelers,
+        bookingContactInfo,
+        setBookingContactInfo,
+        travelerFormErrors,
+        setTravelerFormErrors,
+    } = useTourBooking();
     const { isLoggedIn, loading: authLoading } = useAuth();
     const [savedPassengers, setSavedPassengers] = useState([]);
     const [passengerSearch, setPassengerSearch] = useState("");
@@ -101,14 +108,71 @@ const TravelerDetails = () => {
         );
     };
 
+    const clearTravelerFieldError = (travelerId, field) => {
+        setTravelerFormErrors((prev) => {
+            const currentTravelerErrors = prev?.travelers?.[travelerId];
+            if (!currentTravelerErrors?.[field]) return prev;
+
+            const nextTravelers = { ...(prev?.travelers || {}) };
+            const nextFieldErrors = { ...currentTravelerErrors };
+            delete nextFieldErrors[field];
+
+            if (Object.keys(nextFieldErrors).length === 0) {
+                delete nextTravelers[travelerId];
+            } else {
+                nextTravelers[travelerId] = nextFieldErrors;
+            }
+
+            return {
+                ...(prev || {}),
+                travelers: nextTravelers,
+                bookingContact: prev?.bookingContact || {},
+            };
+        });
+    };
+
+    const clearBookingContactFieldError = (field) => {
+        setTravelerFormErrors((prev) => {
+            if (!prev?.bookingContact?.[field]) return prev;
+            const nextBookingContact = { ...(prev?.bookingContact || {}) };
+            delete nextBookingContact[field];
+            return {
+                ...(prev || {}),
+                travelers: prev?.travelers || {},
+                bookingContact: nextBookingContact,
+            };
+        });
+    };
+
+    const getTravelerFieldError = (traveler, field) =>
+        travelerFormErrors?.travelers?.[traveler.id]?.[field] || "";
+
+    const getBookingContactFieldError = (field) =>
+        travelerFormErrors?.bookingContact?.[field] || "";
+
+    const getFieldClassName = (error) =>
+        `${styles.input} ${error ? styles.inputError : ""}`;
+
+    const getSelectClassName = (error) =>
+        `${styles.select} ${error ? styles.inputError : ""}`;
+
     const updateTravelerField = (index, field, value) => {
         setTravelers(prev =>
             prev.map((traveler, travelerIndex) =>
                 travelerIndex === index
                     ? { ...traveler, [field]: value }
                     : traveler
-            )
+                )
         );
+        clearTravelerFieldError(travelers[index]?.id, field);
+    };
+
+    const updateBookingContactField = (field, value) => {
+        setBookingContactInfo((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+        clearBookingContactFieldError(field);
     };
 
 
@@ -309,7 +373,7 @@ const TravelerDetails = () => {
                             <div className={`${styles.field} ${styles.selectField}`}>
                                 <label className={styles.label}>Title</label>
                                 <select
-                                    className={styles.select}
+                                    className={getSelectClassName(getTravelerFieldError(traveler, "title"))}
                                     value={traveler.title}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "title", event.target.value)}
@@ -318,36 +382,45 @@ const TravelerDetails = () => {
                                     <option value="Mrs">Mrs</option>
                                     <option value="Ms">Ms</option>
                                 </select>
+                                {getTravelerFieldError(traveler, "title") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "title")}</p>
+                                )}
                             </div>
 
                             <div className={styles.field}>
                                 <label className={styles.label}>First Name</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "first_name"))}
                                     type="text"
                                     placeholder="Enter First Name"
                                     value={traveler.first_name}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "first_name", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "first_name") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "first_name")}</p>
+                                )}
                             </div>
 
                             <div className={styles.field}>
                                 <label className={styles.label}>Last Name</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "last_name"))}
                                     type="text"
                                     placeholder="Enter Last Name"
                                     value={traveler.last_name}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "last_name", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "last_name") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "last_name")}</p>
+                                )}
                             </div>
 
                             <div className={`${styles.field} ${styles.selectField}`}>
                                 <label className={styles.label}>Gender</label>
                                 <select
-                                    className={styles.select}
+                                    className={getSelectClassName(getTravelerFieldError(traveler, "gender"))}
                                     value={traveler.gender}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "gender", event.target.value)}
@@ -356,6 +429,9 @@ const TravelerDetails = () => {
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                 </select>
+                                {getTravelerFieldError(traveler, "gender") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "gender")}</p>
+                                )}
                             </div>
                         </div>
 
@@ -363,48 +439,60 @@ const TravelerDetails = () => {
                             <div className={styles.field}>
                                 <label className={styles.label}>Country Code</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "country_code"))}
                                     type="text"
                                     placeholder="Country Code (optional)"
                                     value={traveler.country_code}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "country_code", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "country_code") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "country_code")}</p>
+                                )}
                             </div>
 
                             <div className={styles.field}>
                                 <label className={styles.label}>Mobile Number</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "phone_no"))}
                                     type="text"
                                     placeholder="Mobile number (optional)"
                                     value={traveler.phone_no}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "phone_no", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "phone_no") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "phone_no")}</p>
+                                )}
                             </div>
 
                             <div className={styles.field}>
                                 <label className={styles.label}>Email</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "email"))}
                                     type="email"
                                     placeholder="Email (Optional)"
                                     value={traveler.email}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "email", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "email") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "email")}</p>
+                                )}
                             </div>
 
                             <div className={styles.field}>
                                 <label className={styles.label}>DOB</label>
                                 <input
-                                    className={styles.input}
+                                    className={getFieldClassName(getTravelerFieldError(traveler, "dob"))}
                                     type="date"
                                     value={traveler.dob}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "dob", event.target.value)}
                                 />
+                                {getTravelerFieldError(traveler, "dob") && (
+                                    <p className={styles.fieldError}>{getTravelerFieldError(traveler, "dob")}</p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -422,25 +510,46 @@ const TravelerDetails = () => {
                     <div className={styles.field}>
                         <label className={styles.label}>Country Code</label>
                         <input
-                            className={`${styles.input} ${styles.bookingInput}`}
+                            className={`${getFieldClassName(getBookingContactFieldError("country_code"))} ${styles.bookingInput}`}
                             placeholder="Country Code (optional)"
+                            value={bookingContactInfo.country_code}
+                            onChange={(event) =>
+                                updateBookingContactField("country_code", event.target.value)
+                            }
                         />
+                        {getBookingContactFieldError("country_code") && (
+                            <p className={styles.fieldError}>{getBookingContactFieldError("country_code")}</p>
+                        )}
                     </div>
 
                     <div className={styles.field}>
                         <label className={styles.label}>Mobile Number</label>
                         <input
-                            className={`${styles.input} ${styles.bookingInput}`}
+                            className={`${getFieldClassName(getBookingContactFieldError("mobile_number"))} ${styles.bookingInput}`}
                             placeholder="Mobile number (optional)"
+                            value={bookingContactInfo.mobile_number}
+                            onChange={(event) =>
+                                updateBookingContactField("mobile_number", event.target.value)
+                            }
                         />
+                        {getBookingContactFieldError("mobile_number") && (
+                            <p className={styles.fieldError}>{getBookingContactFieldError("mobile_number")}</p>
+                        )}
                     </div>
 
                     <div className={styles.field}>
                         <label className={styles.label}>Email</label>
                         <input
-                            className={`${styles.input} ${styles.bookingInput}`}
+                            className={`${getFieldClassName(getBookingContactFieldError("email"))} ${styles.bookingInput}`}
                             placeholder="Email (Optional)"
+                            value={bookingContactInfo.email}
+                            onChange={(event) =>
+                                updateBookingContactField("email", event.target.value)
+                            }
                         />
+                        {getBookingContactFieldError("email") && (
+                            <p className={styles.fieldError}>{getBookingContactFieldError("email")}</p>
+                        )}
                     </div>
                 </div>
             </div>

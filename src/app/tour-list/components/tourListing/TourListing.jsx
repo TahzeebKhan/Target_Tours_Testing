@@ -4,7 +4,7 @@ import styles from "./TourListing.module.css";
 import SearchResults from "../searchResult/SearchResults";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Pencil, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, Pencil, X } from "lucide-react";
 import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
 import SortBySheet from "../sortBySheet/SortBySheet";
 import PreferencesSection from "../preferencesSection/PreferencesSection";
@@ -54,6 +54,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
   const [wishlists, setWishlists] = useState([]); // fetch later from backend
   const [selectedTourId, setSelectedTourId] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   const handleHeartClick = (tourId) => {
     setSelectedTourId(tourId);
@@ -101,7 +102,35 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const normalizePackageKey = (item) =>
+    [item?.title, item?.route, item?.days]
+      .filter(Boolean)
+      .join("|")
+      .toLowerCase();
+
+  const getPackageOptions = (item) => {
+    const selectedKey = normalizePackageKey(item);
+    const matchedOptions = tourData.filter(
+      (tour) => normalizePackageKey(tour) === selectedKey
+    );
+    const options = matchedOptions.length ? matchedOptions : [item];
+
+    return [...options].sort((a, b) => {
+      if (a.with_flight === b.with_flight) return a.startedPrice - b.startedPrice;
+      return a.with_flight ? 1 : -1;
+    });
+  };
+
+  const openPackageOptions = (item) => {
+    setSelectedPackage(item);
+  };
+
+  const closePackageOptions = () => {
+    setSelectedPackage(null);
+  };
+
   const handleBookNow = (id) => {
+    closePackageOptions();
     router.push(`/tour-details?id=${id}`);
   };
 
@@ -130,6 +159,17 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
       onDataLoaded(meta);
     }
   }, [meta, onDataLoaded]);
+
+  useEffect(() => {
+    if (!selectedPackage) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedPackage]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -186,7 +226,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                 tourData.map((item, index) => (
                 <motion.div
                   className={styles.card}
-                  onClick={() => handleBookNow(item.id)}
+                  onClick={() => openPackageOptions(item)}
                   key={item.id}
                   layoutId={index < 2 ? `card-${item.id}` : undefined}
                 >
@@ -337,7 +377,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                               className={styles.bookNow}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleBookNow(item.id);
+                                openPackageOptions(item);
                               }}
                             >
                               BOOK NOW
@@ -371,6 +411,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                 <motion.div
                   className={styles.ListViewCardContainer}
                   key={item.id}
+                  onClick={() => openPackageOptions(item)}
                   layoutId={index < 2 ? `card-${item.id}` : undefined}
                 >
                   <div className={styles.ListViewCardImageContainer}>
@@ -499,7 +540,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         className={styles.bookNowBtn}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleBookNow(item.id);
+                          openPackageOptions(item);
                         }}
                       >
                         BOOK NOW
@@ -603,6 +644,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
               <div
                 className={`${styles.ListViewCardContainer} ${styles.ListViewCardContainerMobile}`}
                 key={item.id}
+                onClick={() => openPackageOptions(item)}
               >
                 <div
                   className={`${styles.ListViewCardImageContainer}  ${styles.ListViewCardImageContainerMobile}`}
@@ -733,7 +775,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       className={styles.bookNowBtn}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleBookNow(item.id);
+                        openPackageOptions(item);
                       }}
                     >
                       BOOK NOW
@@ -775,6 +817,71 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
         wishlists={wishlists}
         onClose={() => setIsSaveWishlistOpen(false)}
       />
+
+      <AnimatePresence>
+        {selectedPackage && (
+          <motion.div
+            className={styles.optionOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closePackageOptions}
+          >
+            <motion.div
+              className={styles.optionSheet}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className={styles.optionMedia}>
+                <img src={selectedPackage.image} alt={selectedPackage.title} />
+              </div>
+
+              <div className={styles.optionHeader}>
+                <h3>{selectedPackage.title}</h3>
+                <button
+                  type="button"
+                  className={styles.optionClose}
+                  onClick={closePackageOptions}
+                  aria-label="Close package options"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div className={styles.optionList}>
+                {getPackageOptions(selectedPackage).map((option) => (
+                  <button
+                    type="button"
+                    className={styles.optionCard}
+                    key={option.id}
+                    onClick={() => handleBookNow(option.id)}
+                  >
+                    <div className={styles.optionText}>
+                      <span>
+                        Starting from
+                        {option.fromCity ? ` - ${option.fromCity}` : ""}
+                      </span>
+                      <strong>
+                        {option.with_flight ? "With Flight" : "Without Flight"}
+                      </strong>
+                    </div>
+
+                    <div className={styles.optionPrice}>
+                      <strong>{option.price}</strong>
+                      <span>per person</span>
+                    </div>
+
+                    <ChevronRight className={styles.optionArrow} size={26} />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

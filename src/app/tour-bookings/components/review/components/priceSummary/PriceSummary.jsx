@@ -14,7 +14,7 @@ export default function PriceSummary({ onClose }) {
     { label: `${travelerCount}x Checked baggage 15kg`, value: "Included", isGreen: true },
     { label: "Seat Selection", value: "Free", isGreen: true },
     { label: "Meals", value: "Included", isGreen: true },
-    { label: "Taxes & Fees", value: `₹ ${Number(packageDetails?.price?.taxes || 0).toLocaleString("en-IN")}` },
+    { label: "Taxes & Fees", value: `₹ ${Number(prices.taxes || 0).toLocaleString("en-IN")}` },
   ];
 
   return (

@@ -33,6 +33,86 @@ const buildPassengerPayload = (traveler) => ({
   primary_contact: false,
 });
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const getDigitCount = (value = "") => String(value).match(/\d/g)?.length || 0;
+const isBlank = (value) => String(value ?? "").trim() === "";
+
+const normalizeContactInfo = (contactInfo = {}) => ({
+  country_code: contactInfo.country_code || "+91",
+  mobile_number: String(contactInfo.mobile_number || "").replace(/[^\d]/g, ""),
+  email: contactInfo.email || "",
+});
+
+const validateTourTravelerForm = ({ travelerDetails = [], bookingContactInfo = {} }) => {
+  const errors = {
+    travelers: {},
+    bookingContact: {},
+  };
+  let firstMessage = "";
+
+  if (!Array.isArray(travelerDetails) || travelerDetails.length === 0) {
+    return {
+      isValid: false,
+      errors,
+      message: "Traveler details are required.",
+    };
+  }
+
+  travelerDetails.forEach((traveler, index) => {
+    const travelerErrors = {};
+
+    if (isBlank(traveler.title)) travelerErrors.title = "Title is required.";
+    if (isBlank(traveler.first_name)) travelerErrors.first_name = "First Name is required.";
+    if (isBlank(traveler.last_name)) travelerErrors.last_name = "Last Name is required.";
+    if (isBlank(traveler.gender)) travelerErrors.gender = "Gender is required.";
+    if (isBlank(traveler.country_code)) travelerErrors.country_code = "Country Code is required.";
+    if (isBlank(traveler.phone_no)) {
+      travelerErrors.phone_no = "Mobile Number is required.";
+    } else if (getDigitCount(traveler.phone_no) < 10) {
+      travelerErrors.phone_no = "Enter a valid Mobile Number.";
+    }
+    if (isBlank(traveler.email)) {
+      travelerErrors.email = "Email is required.";
+    } else if (!EMAIL_PATTERN.test(String(traveler.email).trim())) {
+      travelerErrors.email = "Enter a valid Email.";
+    }
+    if (isBlank(traveler.dob)) travelerErrors.dob = "DOB is required.";
+
+    if (Object.keys(travelerErrors).length > 0) {
+      errors.travelers[traveler.id || `traveler-${index + 1}`] = travelerErrors;
+      if (!firstMessage) {
+        firstMessage = `Traveler ${index + 1}: ${Object.values(travelerErrors)[0]}`;
+      }
+    }
+  });
+
+  if (isBlank(bookingContactInfo.country_code)) {
+    errors.bookingContact.country_code = "Country Code is required.";
+  }
+  if (isBlank(bookingContactInfo.mobile_number)) {
+    errors.bookingContact.mobile_number = "Mobile Number is required.";
+  } else if (getDigitCount(bookingContactInfo.mobile_number) < 10) {
+    errors.bookingContact.mobile_number = "Enter a valid Mobile Number.";
+  }
+  if (isBlank(bookingContactInfo.email)) {
+    errors.bookingContact.email = "Email is required.";
+  } else if (!EMAIL_PATTERN.test(String(bookingContactInfo.email).trim())) {
+    errors.bookingContact.email = "Enter a valid Email.";
+  }
+
+  if (!firstMessage && Object.keys(errors.bookingContact).length > 0) {
+    firstMessage = Object.values(errors.bookingContact)[0];
+  }
+
+  return {
+    isValid:
+      Object.keys(errors.travelers).length === 0 &&
+      Object.keys(errors.bookingContact).length === 0,
+    errors,
+    message: firstMessage,
+  };
+};
+
 const getApiErrorMessage = (error, fallback) =>
   error?.response?.data?.message ||
   error?.response?.data?.error?.message ||
@@ -64,6 +144,15 @@ export function TourBookingProvider({ children }) {
       dob: "",
     },
   ]);
+  const [bookingContactInfo, setBookingContactInfo] = useState({
+    country_code: "+91",
+    mobile_number: "",
+    email: "",
+  });
+  const [travelerFormErrors, setTravelerFormErrors] = useState({
+    travelers: {},
+    bookingContact: {},
+  });
   const [passengerLoading, setPassengerLoading] = useState(false);
   const [passengerError, setPassengerError] = useState("");
   const [createdPassengers, setCreatedPassengers] = useState([]);
@@ -75,6 +164,7 @@ export function TourBookingProvider({ children }) {
     const travelerCount = Math.max(travelerDetails.length, 1);
     const adultFare = Number(packageDetails?.price?.adult || 5200);
     const baseFare = adultFare * travelerCount;
+    const taxes = Number(packageDetails?.price?.taxes || 0);
     const baggagePrice = baggage.reduce((s, b) => s + b.price, 0);
     const mealsPrice = meals.reduce((s, m) => s + m.price, 0);
     const seatsPrice = seats.reduce((s, s1) => s + s1.price, 0);
@@ -83,6 +173,7 @@ export function TourBookingProvider({ children }) {
       travelerCount,
       adultFare,
       baseFare,
+      taxes,
       baggage: baggagePrice,
       meals: mealsPrice,
       seats: seatsPrice,
@@ -142,6 +233,17 @@ export function TourBookingProvider({ children }) {
   const submitPassengers = async () => {
     if (passengerLoading) return false;
 
+    const validation = validateTourTravelerForm({
+      travelerDetails,
+      bookingContactInfo,
+    });
+
+    setTravelerFormErrors(validation.errors);
+    if (!validation.isValid) {
+      toast.error(validation.message || "Please complete traveler details.");
+      return false;
+    }
+
     const savedPassengerRecords = travelerDetails
       .map((traveler) => traveler.savedPassengerId)
       .filter(Boolean)
@@ -195,9 +297,13 @@ export function TourBookingProvider({ children }) {
     const bookingPayload = {
       packageId: currentPackageDetails?.id || packageDetails?.id,
       domain: process.env.NEXT_PUBLIC_DOMAIN,
+      with_flight: Boolean(
+        currentPackageDetails?.with_flight ?? packageDetails?.with_flight ?? false
+      ),
       payment_mode: "stripe",
       amount: prices.total,
       payment_status: "success",
+      booking_contact_info: normalizeContactInfo(bookingContactInfo),
       selected_activities: (currentPackageDetails?.selectedActivities || [])
         .map((activity) => ({ id: activity?.id }))
         .filter((activity) => activity.id),
@@ -247,6 +353,10 @@ export function TourBookingProvider({ children }) {
         setPackageDetails,
         travelerDetails,
         setTravelerDetails,
+        bookingContactInfo,
+        setBookingContactInfo,
+        travelerFormErrors,
+        setTravelerFormErrors,
         passengerLoading,
         passengerError,
         createdPassengers,

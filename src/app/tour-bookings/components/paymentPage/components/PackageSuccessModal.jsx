@@ -41,6 +41,7 @@ const getBookingData = (booking) =>
 export default function PackageSuccessModal({
   isOpen,
   onClose,
+  onDone,
   booking,
   packageDetails,
   prices,
@@ -175,7 +176,7 @@ export default function PackageSuccessModal({
         </div>
 
         <div className={styles.footer}>
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={onDone || onClose}>
             Done
           </button>
         </div>

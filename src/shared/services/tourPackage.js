@@ -139,6 +139,9 @@ const normalizeTour = (item) => ({
     price: item.started_price
         ? `₹ ${item.started_price.toLocaleString()}`
         : "N/A",
+    startedPrice: item.started_price || 0,
+    fromCity: item.start_location?.city || item.start_location?.name || "",
+    with_flight: Boolean(item.with_flight),
     raw: item,
     package_inclusion: item.package_inclusion,
     package_inclusion_tags:item?.package_inclusion_tags

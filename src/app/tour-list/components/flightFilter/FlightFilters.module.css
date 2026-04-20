@@ -87,6 +87,7 @@
   cursor: pointer;
   user-select: none;
   position: relative;
+  text-transform: capitalize;
 }
 
 /* hide native checkbox */
@@ -166,6 +167,7 @@
   cursor: pointer;
   user-select: none;
   position: relative;
+  text-transform: capitalize;
 }
 
 /* hide native checkbox */
@@ -468,6 +470,7 @@
 
 .chipName {
   padding: 3px 8px;
+  text-transform: capitalize;
 }
 
 .headerMobileFilter {
