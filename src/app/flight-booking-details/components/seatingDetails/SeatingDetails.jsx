@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/plane";
 import BelowPlane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/below_plane";
 import Mobile_footer from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
 import PriceSummary from "@/features/profile/components/PriceSummary";
+import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 const rowData = [
   { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
   { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
@@ -47,7 +48,11 @@ const SeatingDetails = () => {
   const toggleTab = (tab) => {
     if (openTab !== tab) setOpenTab(tab);
   };
-  const { setCurrentStep, currentStep } = useFlightBooking();
+  const { setCurrentStep, currentStep, prices, bookingSession, travelerDetails } = useFlightBooking();
+  const priceSummary = useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
+  );
 
   const toggleSeat = (rowId, colLabel, type) => {
     if (type === "taken") return;
@@ -254,9 +259,16 @@ const SeatingDetails = () => {
           setShowPriceSummaryPopup={setShowPriceSummaryPopup}
           setCurrentStep={setCurrentStep}
           currentStep={currentStep}
+          totalAmount={priceSummary.totalAmount}
         />
 
-        {showPriceSummaryPopup && <PriceSummary onClose={()=>setShowPriceSummaryPopup(false)} />}
+        {showPriceSummaryPopup && (
+          <PriceSummary
+            onClose={() => setShowPriceSummaryPopup(false)}
+            lineItems={priceSummary.lineItems}
+            totalAmount={priceSummary.totalAmount}
+          />
+        )}
       </div>
     </>
   );

@@ -6,29 +6,26 @@ import styles from "./PopularFlights.module.css";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { motion, AnimatePresence } from "framer-motion";
+import CurrentCityDetector, {
+  CITY_IATA_MAP,
+  DEFAULT_CITY,
+  cacheLocation,
+  getCityIataCode,
+  getCodeFromValue,
+  normalizeCityName,
+} from "./CurrentCityDetector";
 
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
 
-const CITY_IATA_MAP = {
-  Ahmedabad: "AMD",
-  Bangkok: "BKK",
-  Bangalore: "BLR",
-  Bengaluru: "BLR",
-  Delhi: "DEL",
-  Dubai: "DXB",
-  Hyderabad: "HYD",
-  Chennai: "MAA",
-  Kolkata: "CCU",
-  London: "LHR",
-  Mumbai: "BOM",
-  "New York": "JFK",
-  Paris: "CDG",
-  Pune: "PNQ",
-  Singapore: "SIN",
-  Sydney: "SYD",
-  Tokyo: "HND",
+const EMPTY_FLIGHT_CARD = {
+  id: "no-popular-flights",
+  img: "",
+  city: "N/A",
+  toCode: "",
+  date: "N/A",
+  price: "N/A",
 };
 
 const TAB_TYPE_MAP = {
@@ -65,12 +62,6 @@ const getTomorrowDateParam = () => {
   return formatLocalDate(nextDate);
 };
 
-const getCodeFromValue = (value = "") => {
-  const trimmed = String(value || "").trim();
-  if (/^[A-Za-z]{3}$/.test(trimmed)) return trimmed.toUpperCase();
-  return "";
-};
-
 const getRouteLabel = (city = "", code = "") => {
   const trimmedCity = String(city || "").trim();
   const normalizedCode = String(code || "").trim().toUpperCase();
@@ -86,124 +77,6 @@ const PopularFlights = () => {
   const router = useRouter();
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeTab, setActiveTab] = useState("Domestic");
-
-  const domesticData = [
-    {
-      id: 1,
-      img: "/images/hyderabad.png",
-      city: "Hyderabad",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 2,
-      img: "/images/chennai2.png",
-      city: "Chennai",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 3,
-      img: "/images/pune2.png",
-      city: "Pune",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 4,
-      img: "/images/ahamdabad2.png",
-      city: "Ahmedabad",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 5,
-      img: "/images/hyderabad.png",
-      city: "Mumbai",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 6,
-      img: "/images/pune2.png",
-      city: "Bangalore",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 7,
-      img: "/images/hyderabad.png",
-      city: "Kolkata",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-    {
-      id: 8,
-      img: "/images/hyderabad.png",
-      city: "Delhi",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹20,000",
-    },
-  ];
-
-  const internationalData = [
-    {
-      id: 1,
-      img: "/images/ahamdabad2.png",
-      city: "Dubai",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹45,000",
-    },
-    {
-      id: 2,
-      img: "/images/hyderabad.png",
-      city: "Singapore",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹35,000",
-    },
-    {
-      id: 3,
-      img: "/images/chennai2.png",
-      city: "Bangkok",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹28,000",
-    },
-    {
-      id: 4,
-      img: "/images/hyderabad.png",
-      city: "London",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹85,000",
-    },
-    {
-      id: 5,
-      img: "/images/hyderabad.png",
-      city: "New York",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹95,000",
-    },
-    {
-      id: 6,
-      img: "/images/pune2.png",
-      city: "Paris",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹80,000",
-    },
-    {
-      id: 7,
-      img: "/images/hyderabad.png",
-      city: "Tokyo",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹75,000",
-    },
-    {
-      id: 8,
-      img: "/images/pune2.png",
-      city: "Sydney",
-      date: "24 Mar 2026 - 14 Apr 2026",
-      price: "₹90,000",
-    },
-  ];
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -227,12 +100,19 @@ const PopularFlights = () => {
     tabs.style.setProperty("--indicator-left", `${activeTabEl.offsetLeft}px`);
   }, [activeTab]);
 
-  const [selectedCity, setSelectedCity] = useState("Delhi");
+  const [selectedCity, setSelectedCity] = useState(DEFAULT_CITY);
+  const [selectedCityCode, setSelectedCityCode] = useState(
+    CITY_IATA_MAP[DEFAULT_CITY]
+  );
   const [isCityOpen, setIsCityOpen] = useState(false);
   const cityRef = useRef(null);
 
-  const metroCities = ["Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata"];
-  const selectedIataCode = CITY_IATA_MAP?.[selectedCity] || "DEL";
+  const metroCities = [ "Mumbai"];
+  const selectedIataCode =
+    selectedCityCode || getCityIataCode(selectedCity) || CITY_IATA_MAP[DEFAULT_CITY];
+  const cityOptions = metroCities.includes(selectedCity)
+    ? metroCities
+    : [selectedCity, ...metroCities];
 
   const { data: apiPopularFlights } = useQuery({
     queryKey: ["destination-flights-public", process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337", selectedCity, activeTab],
@@ -262,16 +142,13 @@ const PopularFlights = () => {
 
       return flights.map((item, index) => ({
         id: pickValue(item?.id, `destination-flight-${index}`),
-        img:
-          toAbsoluteImageUrl(
-            pickValue(
-              item?.thumbnail?.url,
-              item?.destination_image?.url,
-              item?.image?.url
-            )
-          ) || (activeTab === "Domestic"
-            ? domesticData?.[index % domesticData.length]?.img
-            : internationalData?.[index % internationalData.length]?.img),
+        img: toAbsoluteImageUrl(
+          pickValue(
+            item?.thumbnail?.url,
+            item?.destination_image?.url,
+            item?.image?.url
+          )
+        ),
         city:
           pickValue(
             item?.city,
@@ -313,11 +190,7 @@ const PopularFlights = () => {
   }, []);
 
   const cardData =
-    apiPopularFlights?.length > 0
-      ? apiPopularFlights
-      : activeTab === "Domestic"
-      ? domesticData
-      : internationalData;
+    apiPopularFlights?.length > 0 ? apiPopularFlights : [EMPTY_FLIGHT_CARD];
 
   const handleFlightCardClick = (item) => {
     const origin = CITY_IATA_MAP?.[selectedCity] || selectedIataCode;
@@ -325,6 +198,9 @@ const PopularFlights = () => {
       getCodeFromValue(item?.toCode) ||
       CITY_IATA_MAP?.[item?.city] ||
       getCodeFromValue(item?.city);
+
+    if (!destination) return;
+
     const params = new URLSearchParams({
       from: getRouteLabel(selectedCity, origin),
       to: getRouteLabel(item?.city, destination),
@@ -344,6 +220,18 @@ const PopularFlights = () => {
 
   return (
     <section className={styles.section}>
+      <CurrentCityDetector
+        onLocationResolved={({ city, iataCode }) => {
+          const normalizedCity = normalizeCityName(city);
+          const normalizedIataCode =
+            getCodeFromValue(iataCode) || getCityIataCode(normalizedCity);
+
+          if (!normalizedCity || !normalizedIataCode) return;
+
+          setSelectedCity(normalizedCity);
+          setSelectedCityCode(normalizedIataCode);
+        }}
+      />
       <div className={styles.container}>
         <div className={styles.heading}>
           Popular Flights to Destination From
@@ -362,11 +250,13 @@ const PopularFlights = () => {
 
             {isCityOpen && (
               <ul className={styles.cityDropdown}>
-                {metroCities.map((city) => (
+                {cityOptions.map((city) => (
                   <li
                     key={city}
                     onClick={() => {
                       setSelectedCity(city);
+                      setSelectedCityCode(getCityIataCode(city));
+                      cacheLocation(city, getCityIataCode(city));
                       setIsCityOpen(false);
                     }}
                   >
@@ -469,7 +359,11 @@ const PopularFlights = () => {
                       }}
                     >
                       <div className={styles.itemsCard}>
-                        <img src={item.img} alt="" />
+                        {item.img ? (
+                          <img src={item.img} alt="" />
+                        ) : (
+                          <div className={styles.noImage}>N/A</div>
+                        )}
 
                         {/* Show text overlay on all cards */}
                         {item.city && (

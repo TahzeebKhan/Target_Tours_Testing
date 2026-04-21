@@ -10,6 +10,7 @@ import PayWithOptions from "./components/PayWithOptions";
 import BookingSuccessModal from "./components/BookingSuccessModal";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
 const formatSummaryDuration = (duration = {}) =>
   `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
@@ -81,6 +82,10 @@ const PaymentPage = () => {
     onwardCards: [buildTripCardData(bookingView?.departureFlight, selectedFare)].filter(Boolean),
     returnCards: [buildTripCardData(bookingView?.returnFlight, selectedFare)].filter(Boolean),
   }), [bookingView, selectedFare]);
+  const priceSummary = useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
+  );
   const summaryFlight = bookingView?.departureFlight;
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
@@ -300,7 +305,11 @@ const PaymentPage = () => {
       </div>
       <div className={styles.mobileView}>
         {showPriceSummaryPopup && (
-          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+          <PriceSummary
+            onClose={() => setShowPriceSummaryPopup(false)}
+            lineItems={priceSummary.lineItems}
+            totalAmount={priceSummary.totalAmount}
+          />
         )}
         <div className={styles.footer}>
           {/* LEFT */}
@@ -315,7 +324,7 @@ const PaymentPage = () => {
                   !
                 </span>
               </div>
-              <div className={styles.amount}>₹ 66,945</div>
+              <div className={styles.amount}>{priceSummary.totalAmount}</div>
             </div>
 
             {/* RIGHT */}

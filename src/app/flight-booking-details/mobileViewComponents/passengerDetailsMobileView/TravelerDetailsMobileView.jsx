@@ -10,6 +10,7 @@ import {
   validateTravelerForm,
 } from "@/app/flight-booking-details/utils/travelerValidation";
 import { toast } from "react-toastify";
+import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
 const buildPassengerSlots = (bookingSession) => {
   const { adult: adults, child: children, infant: infants } =
@@ -101,6 +102,7 @@ const TravelerDetailsMobileView = ({ onClose }) => {
     setBookingContactDetails,
     travelerFormErrors,
     setTravelerFormErrors,
+    prices,
   } = useFlightBooking();
   const passengerSlots = useMemo(
     () => buildPassengerSlots(bookingSession),
@@ -158,6 +160,10 @@ const TravelerDetailsMobileView = ({ onClose }) => {
   }, [bookingContact, bookingContactDetails, setBookingContactDetails]);
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
+  const priceSummary = useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
+  );
   const addTraveler = () => {
     setTravelers((prev) => {
       if (prev.length >= passengerSlots.length) return prev;
@@ -255,6 +261,11 @@ const TravelerDetailsMobileView = ({ onClose }) => {
     setTravelerFormErrors(validation.errors);
     if (!validation.isValid) {
       toast.error(validation.message || "Please complete traveler details.");
+      return;
+    }
+
+    if (!bookingSession?.priceResponse) {
+      setCurrentStep(3);
       return;
     }
 
@@ -692,7 +703,11 @@ const TravelerDetailsMobileView = ({ onClose }) => {
         </div>
       </div>
       {showPriceSummaryPopup && (
-        <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+        <PriceSummary
+          onClose={() => setShowPriceSummaryPopup(false)}
+          lineItems={priceSummary.lineItems}
+          totalAmount={priceSummary.totalAmount}
+        />
       )}
       <div className={styles.footer}>
         {/* LEFT */}
@@ -707,7 +722,7 @@ const TravelerDetailsMobileView = ({ onClose }) => {
                 !
               </span>
             </div>
-            <div className={styles.amount}>₹ 66,945</div>
+            <div className={styles.amount}>{priceSummary.totalAmount}</div>
           </div>
 
           {/* RIGHT */}

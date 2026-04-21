@@ -281,24 +281,25 @@ const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
  * (MOST IMPORTANT PART)
  */
 const REGION_MAP = {
-  Africa: "WEST_AFRICA",
   Asia: "ASIA",
+  Africa: "WEST_AFRICA",
+
   "Central America": "CENTRAL_AMERICA",
   Europe: "EUROPE",
-  "Indian Ocean": "INDIAN_OCEAN",
+  // "Indian Ocean": "INDIAN_OCEAN",
   "Middle East": "MIDDLE_EAST",
-  Oceania: "OCEANIA",
+  // Oceania: "OCEANIA",
   "South America": "SOUTH_AMERICA",
 };
 
 const TABS_DATA = [
-  { title: "Africa" },
   { title: "Asia" },
+  { title: "Africa" },
   { title: "Central America" },
   { title: "Europe" },
-  { title: "Indian Ocean" },
+  // { title: "Indian Ocean" },
   { title: "Middle East" },
-  { title: "Oceania" },
+  // { title: "Oceania" },
   { title: "South America" },
 ];
 

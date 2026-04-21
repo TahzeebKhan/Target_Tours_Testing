@@ -10,15 +10,132 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
 const CABIN_IMAGES = ["/bags/redBag.png", "/bags/pinkBag.svg"];
 const CHECKED_IMAGES = ["/bags/boxBag.png", "/bags/trolly.svg"];
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
+const pickFirst = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
+};
+
 const parseWeightValue = (value) => {
   const match = String(value || "").match(/(\d+(?:\.\d+)?)/);
   return match ? Number(match[1]) : 0;
+};
+
+const formatWeight = (value, fallback) => {
+  const text = String(value || "").trim();
+  const match = text.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilogram|kilograms)\b/i);
+  if (!match) return fallback;
+  return `${match[1]} kg`;
+};
+
+const findBaggageText = (source, type, depth = 0, seen = new Set()) => {
+  if (!source || depth > 6 || seen.has(source)) return "";
+  if (typeof source === "object") seen.add(source);
+
+  if (typeof source === "string") {
+    const text = source.trim();
+    const normalized = text.toLowerCase();
+    const hasWeight = /\d+(?:\.\d+)?\s*(kg|kgs|kilogram|kilograms)\b/i.test(text);
+    if (!hasWeight) return "";
+    if (type === "cabin" && /(cabin|hand|carry)/i.test(normalized)) return text;
+    if (type === "checked" && /(check|checked|check-in|checkin)/i.test(normalized)) return text;
+    return "";
+  }
+
+  if (!Array.isArray(source) && typeof source !== "object") return "";
+
+  if (Array.isArray(source)) {
+    for (const item of source) {
+      const found = findBaggageText(item, type, depth + 1, seen);
+      if (found) return found;
+    }
+    return "";
+  }
+
+  for (const [key, value] of Object.entries(source)) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      type === "cabin" &&
+      /(cabin|hand|carry).*bag|bag.*(cabin|hand|carry)|cabin_baggage|cabinbaggage/.test(normalizedKey)
+    ) {
+      const text = typeof value === "string" ? value : findBaggageText(value, type, depth + 1, seen);
+      if (text) return text;
+    }
+    if (
+      type === "checked" &&
+      /(check|checked|check-in|checkin).*bag|bag.*(check|checked|check-in|checkin)|checkin_baggage|checked_baggage/.test(normalizedKey)
+    ) {
+      const text = typeof value === "string" ? value : findBaggageText(value, type, depth + 1, seen);
+      if (text) return text;
+    }
+  }
+
+  for (const value of Object.values(source)) {
+    const found = findBaggageText(value, type, depth + 1, seen);
+    if (found) return found;
+  }
+  return "";
+};
+
+const buildIncludedBaggage = (routeSsr = {}, bookingSession = {}) => {
+  const selectedFareBaggage = bookingSession?.selectedFare?.baggage || {};
+  const sources = [
+    routeSsr,
+    bookingSession?.ssrResponse?.data?.raw,
+    bookingSession?.ssrResponse?.raw,
+    bookingSession?.priceResponse?.data?.raw,
+    bookingSession?.priceResponse?.raw,
+    selectedFareBaggage,
+  ];
+  const cabinText =
+    pickFirst(
+      routeSsr?.cabin_baggage,
+      routeSsr?.cabinBaggage,
+      routeSsr?.cabin,
+      selectedFareBaggage?.cabin,
+      ...sources.map((source) => findBaggageText(source, "cabin"))
+    ) || "";
+  const checkedText =
+    pickFirst(
+      routeSsr?.checked_baggage,
+      routeSsr?.checkin_baggage,
+      routeSsr?.checkedBaggage,
+      routeSsr?.checkinBaggage,
+      routeSsr?.checkin,
+      selectedFareBaggage?.checkin,
+      ...sources.map((source) => findBaggageText(source, "checked"))
+    ) || "";
+  const cabinWeight = formatWeight(cabinText, "7 kg");
+  const checkedWeight = formatWeight(checkedText, "15 kg");
+
+  return {
+    cabin: {
+      ...cabinBagData,
+      title: "1× Cabin Bag",
+      points: [
+        { label: "Stored in the overhead compartment" },
+        { label: "Max weight", value: cabinWeight },
+        { label: "Max size", value: "25 × 35 × 55 cm" },
+      ],
+    },
+    checked: {
+      ...checkedBagData,
+      title: "1× Checked Bag",
+      points: [
+        { label: "Checked in at the airport counter before security" },
+        { label: "Weight allowance", value: checkedWeight },
+        { label: "Max size", value: "28 × 52 × 78 cm" },
+      ],
+    },
+  };
 };
 
 const buildExtraBaggageData = (routeBaggage = []) => {
@@ -73,6 +190,7 @@ const buildRouteCards = (bookingSession, bookingView) => {
       routeLabel: routeKey.replace(/-/g, "–"),
       date: departureFlight?.departure?.date || "N/A",
       time: `${departureFlight?.departure?.time || "N/A"} - ${departureFlight?.arrival?.time || "N/A"}`,
+      includedBaggage: buildIncludedBaggage(value, bookingSession),
       baggageRows: buildExtraBaggageData(value?.baggage || []),
     };
   });
@@ -86,6 +204,7 @@ const buildRouteCards = (bookingSession, bookingView) => {
       routeLabel: `${bookingView.header?.fromCode || "N/A"}–${bookingView.header?.toCode || "N/A"}`,
       date: bookingView.departureFlight.departure.date,
       time: `${bookingView.departureFlight.departure.time} - ${bookingView.departureFlight.arrival.time}`,
+      includedBaggage: buildIncludedBaggage({}, bookingSession),
       baggageRows: [],
     });
   }
@@ -95,6 +214,7 @@ const buildRouteCards = (bookingSession, bookingView) => {
       routeLabel: `${bookingView.header?.toCode || "N/A"}–${bookingView.header?.fromCode || "N/A"}`,
       date: bookingView.returnFlight.departure.date,
       time: `${bookingView.returnFlight.departure.time} - ${bookingView.returnFlight.arrival.time}`,
+      includedBaggage: buildIncludedBaggage({}, bookingSession),
       baggageRows: [],
     });
   }
@@ -145,8 +265,8 @@ const FlightExpandableCard = ({
       <div className={styles.flightExpandableBottom}>
         {/* Cabin baggage */}
         <div className={styles.flightExpandableRows}>
-          <CabinBaggageInfo data={cabinBagData} />
-          <CabinBaggageInfo data={checkedBagData} />
+          <CabinBaggageInfo data={flightCard.includedBaggage?.cabin || cabinBagData} />
+          <CabinBaggageInfo data={flightCard.includedBaggage?.checked || checkedBagData} />
         </div>
 
         {/* Extra baggage */}
@@ -192,8 +312,8 @@ const MobileFlightCard = ({
       <div className={styles.br}></div>
       <div className={styles.baggageMobileItems}>
         <div className={styles.baggageMobileItem}>
-          <CabinBaggageInfo data={cabinBagData} />
-          <CabinBaggageInfo data={checkedBagData} />
+          <CabinBaggageInfo data={flightCard.includedBaggage?.cabin || cabinBagData} />
+          <CabinBaggageInfo data={flightCard.includedBaggage?.checked || checkedBagData} />
         </div>
         {flightCard.baggageRows.map((row, rowIndex) => (
           <div key={rowIndex} className={styles.flightExpandableRows}>
@@ -223,11 +343,15 @@ const MobileFlightCard = ({
 
 const BaggageDetails = () => {
   const router = useRouter();
-  const { setBaggage, setCurrentStep, currentStep, bookingSession } = useFlightBooking();
+  const { setBaggage, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const routeCards = useMemo(
     () => buildRouteCards(bookingSession, bookingView),
     [bookingSession, bookingView]
+  );
+  const priceSummary = useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
   );
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
@@ -423,7 +547,11 @@ const BaggageDetails = () => {
           </div>
         </div>
         {showPriceSummaryPopup && (
-          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+          <PriceSummary
+            onClose={() => setShowPriceSummaryPopup(false)}
+            lineItems={priceSummary.lineItems}
+            totalAmount={priceSummary.totalAmount}
+          />
         )}
 
         <div className={styles.footer}>
@@ -439,7 +567,7 @@ const BaggageDetails = () => {
                   !
                 </span>
               </div>
-              <div className={styles.amount}>₹ 66,945</div>
+              <div className={styles.amount}>{priceSummary.totalAmount}</div>
             </div>
 
             {/* RIGHT */}

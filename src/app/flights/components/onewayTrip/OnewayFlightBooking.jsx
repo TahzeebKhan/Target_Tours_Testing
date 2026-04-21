@@ -58,14 +58,20 @@ const OnewayFlightBooking = ({
     const flightId = flight?.id ?? null;
     const priceRequest = flight?.booking?.priceRequest;
     const searchTui = flight?.booking?.tui;
+    const hasPricePayload =
+      Boolean(priceRequest?.search_key) &&
+      priceRequest?.Trips?.[0]?.Index !== undefined &&
+      priceRequest?.Trips?.[0]?.Index !== null;
 
     if (!flightId) return;
 
+    setSelectedFareFlight(flight);
+    setFareModalOpen(flightId);
     setPrefetchingFlightId(flightId);
     try {
       const [webSettingsResponse, priceResponse] = await Promise.all([
         searchTui ? getFlightWebSettings({ TUI: searchTui }) : Promise.resolve(null),
-        priceRequest?.search_key && priceRequest?.Trips?.[0]?.Index
+        hasPricePayload
           ? getFlightPrice(priceRequest)
           : Promise.resolve(null),
       ]);
@@ -113,10 +119,8 @@ const OnewayFlightBooking = ({
           console.error("Failed to fetch flight web settings", settingsError);
         }
       }
-      setSelectedFareFlight(flight);
     } finally {
       setPrefetchingFlightId(null);
-      setFareModalOpen(flightId);
     }
   };
 

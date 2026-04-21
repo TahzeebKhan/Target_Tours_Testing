@@ -212,80 +212,44 @@ import Cookies from "js-cookie";
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = Cookies.get("auth_token");
 
-const TAB_REGION_MAP = {
-  Explore: null,
-  Europe: "EUROPE",
-  Dubai: "MIDDLE_EAST",
-  Rajasthan: "INDIA",
-  Japan: "JAPAN",
-  Thailand: "SOUTHEAST_ASIA",
-  "North East India": "INDIA",
-  Spiti: "INDIA",
-  Bali: "SOUTHEAST_ASIA",
-  Maldives: "SOUTH_ASIA",
-};
-
 const tabs = [
+  "Asia",
   "Explore",
   "Europe",
-  "Dubai",
   "Rajasthan",
-  "Japan",
-  "Thailand",
+  "Gir",
+  "Delhi",
   "North East India",
   "Spiti",
   "Bali",
   "Maldives",
 ];
 
-const STATIC_CARDS = [
-  {
-    id: 1,
-    img: "/images/tour.webp",
-    badge: "17 Days & 16 Nights",
-    title: "Best Of India Tour",
-    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-    price: "INR 2,30,000",
-  },
-  {
-    id: 2,
-    img: "/images/tour2.webp",
-    badge: "6 Days & 5 Nights",
-    title: "Golden Triangle Tour",
-    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-    price: "INR 1,20,000",
-    centerImage: true,
-  },
-  {
-    id: 3,
-    img: "/images/tour3.webp",
-    badge: "8 Days & 7 Nights",
-    title: "Rajasthan In Depth",
-    cities: "Cities Covered: Delhi, Agra, Jaipur, Jodhpur, Ranakpur, Udaipur, Mumbai, Munnar, Alleppey, Cochin",
-    price: "INR 1,80,000",
-  },
-];
-
-
 const TargetTours = () => {
-  const [activeTab, setActiveTab] = useState("Explore");
+  const [activeTab, setActiveTab] = useState("Asia");
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const tabsRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🔹 Fetch once
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchTours = async () => {
       const query = new URLSearchParams({
-        originalRegion: "AMERICA",
         domain: process.env.NEXT_PUBLIC_DOMAIN,
-      }).toString();
+      });
+
+      query.set("region", activeTab);
   
       try {
+        setLoading(true);
+        setPackages([]);
+
         const res = await fetch(
-          `${API_BASE}/api/explore-more/company?${query}`,
+          `${API_BASE}/api/explore-more/company?${query.toString()}`,
           {
+            signal: controller.signal,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -294,40 +258,37 @@ const TargetTours = () => {
         const json = await res.json();
         setPackages(json?.data?.holiday_packages || []);
       } catch (err) {
+        if (err?.name === "AbortError") return;
         console.error("Failed to fetch tours", err);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchTours();
-  }, []);
+    return () => controller.abort();
+  }, [activeTab]);
 
   // 🔹 Filter + Transform (BEST PRACTICE)
   const cardsForTab = useMemo(() => {
-    const region = TAB_REGION_MAP[activeTab];
-
-    const filtered = region
-      ? packages.filter((p) => p.region === region)
-      : packages;
-
-    return filtered.map((pkg) => ({
+    return packages.map((pkg) => ({
       id: pkg.id,
       title: `${pkg.duration_days} Days - ${pkg.title}`,
       cities: pkg.description,
       badge: `${pkg.duration_days} Days & ${pkg.duration_nights} Nights`,
       price: "INR 2,30,000", // 🔁 replace when backend sends price
       img:
-        pkg.media?.[0]?.package_media?.[0]?.url
+        pkg.main_image?.url
+          ? `${API_BASE}${pkg.main_image.url}`
+          : pkg.media?.[0]?.package_media?.[0]?.url
           ? `${API_BASE}${pkg.media[0].package_media[0].url}`
           : "/images/fallback.webp",
     }));
   }, [packages, activeTab]);
 
-  const finalCards =
-    cardsForTab && cardsForTab.length > 0
-      ? cardsForTab
-      : STATIC_CARDS;
+  const finalCards = loading ? [] : cardsForTab;
 
   // 🔹 Animated tab indicator
   // useEffect(() => {

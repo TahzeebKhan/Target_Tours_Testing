@@ -4,8 +4,8 @@ import Image from "next/image";
 import styles from "./PriceSummary.module.css";
 import { useState } from "react";
 
-export default function PriceSummary({ onClose }) {
-  const lineItems = [
+export default function PriceSummary({ onClose, lineItems, totalAmount }) {
+  const resolvedLineItems = lineItems || [
     { label: "1x Adult", value: "₹ 64,126" },
     { label: "1x Cabin baggage", value: "Included", isGreen: true },
     { label: "1x Checked baggage 15kg", value: "Included", isGreen: true },
@@ -13,6 +13,7 @@ export default function PriceSummary({ onClose }) {
     { label: "Meals", value: "Included", isGreen: true },
     { label: "Taxes & Fees", value: "₹ 2,819" },
   ];
+  const resolvedTotalAmount = totalAmount || "₹ 66,945";
 
   const [isClosing, setIsClosing] = useState(false);
 
@@ -49,7 +50,7 @@ export default function PriceSummary({ onClose }) {
           </header>
 
           <div className={styles.content}>
-            {lineItems.map((item, index) => (
+            {resolvedLineItems.map((item, index) => (
               <div key={index} className={styles.row}>
                 <span className={styles.label}>{item.label}</span>
                 <span
@@ -73,7 +74,7 @@ export default function PriceSummary({ onClose }) {
                 Includes taxes and service fees
               </p>
             </div>
-            <div className={styles.totalPrice}>₹ 66,945</div>
+            <div className={styles.totalPrice}>{resolvedTotalAmount}</div>
           </div>
         </div>
       </div>

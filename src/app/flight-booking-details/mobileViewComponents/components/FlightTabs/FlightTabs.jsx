@@ -4,6 +4,7 @@ import styles from "./FlightTabs.module.css";
 
 const tabs = [
   "FLIGHT DETAILS",
+  "TRAVELLER DETAILS",
   "TRAVEL INSURANCE",
   "CANCELLATION & DATE CHANGE",
 ];
@@ -12,11 +13,11 @@ export default function FlightTabs({
   activeTab,
   setActiveTab,
   onFlightDetailsClick,
+  onTravelerDetailsClick,
 }) {
   const tabsRef = useRef([]);
   const containerRef = useRef(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-  useEffect(() => console.log("activetab, ", activeTab), [activeTab]);
   useEffect(() => {
     if (tabsRef.current[activeTab] && containerRef.current) {
       const activeElement = tabsRef.current[activeTab];
@@ -53,8 +54,9 @@ export default function FlightTabs({
             }`}
             onClick={() => {
               setActiveTab(index);
-
-              
+              if (index === 1) {
+                onTravelerDetailsClick?.();
+              }
             }}
           >
             {tab}

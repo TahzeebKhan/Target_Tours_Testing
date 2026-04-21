@@ -178,13 +178,17 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
     
     const performBookNow = useCallback(async (selectedFare) => {
         const priceRequest = flightData?.booking?.priceRequest;
+        const hasPricePayload =
+            Boolean(priceRequest?.search_key) &&
+            priceRequest?.Trips?.[0]?.Index !== undefined &&
+            priceRequest?.Trips?.[0]?.Index !== null;
         const routeContext = {
             fromName: String(searchParams?.get("from") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
             fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
             toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
             toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
         };
-        if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+        if (!hasPricePayload) {
             toast.error("Missing booking payload for the selected flight.");
             return;
         }

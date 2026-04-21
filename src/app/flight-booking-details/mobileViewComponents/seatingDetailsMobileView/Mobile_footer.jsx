@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import styles from "./Mobile_footer.module.css";
-import { useFlightBooking } from "@/app/travel-insurance-booking/FlightBookingContext";
 
 export default function Mobile_footer({
   setShowPriceSummaryPopup,
   setCurrentStep,
   currentStep,
+  totalAmount,
 }) {
   const [isActive, setIsActive] = useState(false);
 
@@ -35,7 +34,7 @@ export default function Mobile_footer({
               </span>
             </div>
 
-            <div className={styles.footerPrice}>₹ 66,945</div>
+            <div className={styles.footerPrice}>{totalAmount}</div>
           </div>
 
           <button

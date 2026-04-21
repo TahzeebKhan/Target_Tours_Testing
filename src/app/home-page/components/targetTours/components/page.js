@@ -15,7 +15,6 @@ import { useRouter } from "next/navigation";
 
 const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   const [startIndex, setStartIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
   const router = useRouter();
   // SSR safety: if no cards provided, render nothing
   if (!cards.length) return null;
@@ -32,7 +31,6 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   const handlePrev = () => {
     setStartIndex((prev) => (prev - 1 + cards.length) % cards.length);
   };
-  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   return (
     <section className={styles.carouselSection}>

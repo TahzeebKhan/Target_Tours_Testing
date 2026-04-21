@@ -64,9 +64,9 @@ const TargetTours = () => {
   const tabs = [
     "Explore",
     "Europe",
-    "Dubai",
+    "Asia",
     "Rajasthan",
-    "Japan",
+    "Gir",
     "Thailand",
     "North East India",
     "Spiti",

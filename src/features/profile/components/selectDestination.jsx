@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./selectDestination.module.css";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // const REGIONS = [
 //   { id: "africa", name: "Africa", image: "/images/africa-map.svg" },
@@ -26,30 +28,57 @@ const REGIONS = [
   { id: "australia", name: "Australia", image: "/images/australia.png" },
   { id: "antarctica", name: "Antarctica", image: "/images/antarctica.png" },
 ];
-const COUNTRIES = [
-  "Zambia",
-  "Kenya",
-  "Ghana",
-  "Tanzania",
-  "Senegal",
-  "Namibia",
-  "Botswana",
-  "Zimbabwe",
-  "Burkina Faso",
-  "Rwanda",
-  "Togo",
-  "Malawi",
-  "Angola",
-  "Mali",
-  "Swaziland",
-  "Lesotho",
-  "Sierra Leone",
-];
 
 export default function SelectDestination({ onClose }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(true);
   const [activeRegion, setActiveRegion] = useState("africa");
-  const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedCountries, setSelectedCountries] = useState(() =>
+    String(searchParams.get("country") || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  );
+
+  const activeRegionLabel =
+    REGIONS.find((region) => region.id === activeRegion)?.name || "";
+
+  const { data: availableLocationsResponse } = useQuery({
+    queryKey: ["holiday-available-locations", activeRegionLabel],
+    queryFn: async () => {
+      const query = new URLSearchParams({
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+      });
+
+      if (activeRegionLabel) {
+        query.set("continents", activeRegionLabel.toLowerCase());
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-package-filters/available-locations?${query.toString()}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch available locations");
+      }
+
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const countries =
+    availableLocationsResponse?.data?.countries
+      ?.map((country) => country?.label || country?.value || "")
+      .filter(Boolean) || [];
 
   useEffect(() => {
     if (open) {
@@ -78,6 +107,20 @@ export default function SelectDestination({ onClose }) {
     setActiveRegion("africa");
   };
 
+  const handleApply = () => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    const selectedCountry = selectedCountries.filter(Boolean).join(",");
+
+    if (selectedCountry) {
+      nextParams.set("country", selectedCountry);
+    } else {
+      nextParams.delete("country");
+    }
+
+    router.push(`/tour-list?${nextParams.toString()}`);
+    closeModal();
+  };
+
   if (!open) return null;
 
   return (
@@ -91,7 +134,7 @@ export default function SelectDestination({ onClose }) {
           <div className={styles.headerTop}>
             <div className={styles.titleStack}>
               <span className={styles.labelSmall}>DESTINATIONS</span>
-              <h1 className={styles.titleLarge}>Africa</h1>
+              <h1 className={styles.titleLarge}>{activeRegionLabel}</h1>
             </div>
 
             <button className={styles.closeButton} onClick={closeModal}>
@@ -157,7 +200,7 @@ export default function SelectDestination({ onClose }) {
             <h2 className={styles.sectionHeading}>SELECT COUNTRY</h2>
 
             <div className={styles.countryGrid}>
-              {COUNTRIES.map((country) => (
+              {countries.map((country) => (
                 <button
                   key={country}
                   className={`${styles.countryTag} ${
@@ -179,7 +222,7 @@ export default function SelectDestination({ onClose }) {
           <button className={styles.resetBtn} onClick={handleReset}>
             RESET
           </button>
-          <button className={styles.applyBtn} onClick={closeModal}>
+          <button className={styles.applyBtn} onClick={handleApply}>
             APPLY FILTERS
           </button>
         </footer>
