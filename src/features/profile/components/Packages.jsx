@@ -1,49 +1,24 @@
 import Image from "next/image";
 import styles from "./Packages.module.css";
 
-const RESERVATIONS = [
-  {
-    id: "173826",
-    flightName: "Maldives Magic",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    // fromTo: "DEL - BLR",
-    image: "/images/packages.png",
-  },
-  {
-    id: "173826",
-    // fromTo: "DEL - BLR",
-    flightName: "Maldives Magic",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    image: "/images/packages.png",
-  },
-];
-
-const Packages = ({ setMobileTitle, onCheckDetails }) => {
+const Packages = ({ setMobileTitle, onCheckDetails, reservations = [] }) => {
   return (
     <div>
       <div className={styles.cardList}>
-        {RESERVATIONS.map((res, index) => (
+        {reservations.map((res, index) => (
           <section key={index} className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.imageWrapper}>
                 <Image
                   src={res.image}
-                  alt={res.flightName}
+                  alt={res.hotel}
                   fill
                   style={{ objectFit: "cover" }}
                 />
               </div>
               <div className={styles.hotelInfo}>
                 <div className={styles.h2Container}>
-                  <h2 className={styles.hotelName}>{res.flightName}</h2>
-
-                  {/* <h2 className={styles.hotelName}>{res.fromTo}</h2> */}
+                  <h2 className={styles.hotelName}>{res.hotel}</h2>
                 </div>
 
                 <span className={styles.statusBadge}>{res.status}</span>

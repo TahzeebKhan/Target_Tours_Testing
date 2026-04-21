@@ -22,7 +22,8 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
   const imageUrl =
     data?.main_image?.formats?.large?.url ||
     data?.main_image?.formats?.small?.url ||
-    data?.main_image?.formats?.thumbnail?.url;
+    data?.main_image?.formats?.thumbnail?.url ||
+    data?.main_image?.url;
 
   const backgroundImage = imageUrl
     ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`

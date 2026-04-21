@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./PassengerDetailsMobile.module.css";
 import FlightTimeline from "../components/flightTimeline/FlightTimeline";
 import FlightTabs from "../components/FlightTabs/FlightTabs";
@@ -12,6 +12,10 @@ import BaggageRules from "../components/baggageRules/BaggageRules";
 import { useRouter } from "next/navigation";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import TravelerDetailsMobileView from "./TravelerDetailsMobileView";
+import {
+  buildMobileFareDetails,
+  buildMobilePriceSummary,
+} from "../../utils/mobilePriceSummary";
 const PassengerDetailsMobile = ({ fromBaggage }) => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
@@ -22,7 +26,15 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState(0);
-  const { setCurrentStep } = useFlightBooking();
+  const { setCurrentStep, prices, bookingSession, travelerDetails } = useFlightBooking();
+  const priceSummary = useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
+  );
+  const fareDetails = useMemo(
+    () => buildMobileFareDetails({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
+  );
   const flightDetailsRef = useRef(null);
   const travelInsuranceRef = useRef(null);
   const cancellationRef = useRef(null);
@@ -49,11 +61,11 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
       scrollWithStickyOffset(flightDetailsRef.current);
     }
 
-    if (activeTab === 1 && travelInsuranceRef.current) {
+    if (activeTab === 2 && travelInsuranceRef.current) {
       scrollWithStickyOffset(travelInsuranceRef.current);
     }
 
-    if (activeTab === 2 && cancellationRef.current) {
+    if (activeTab === 3 && cancellationRef.current) {
       scrollWithStickyOffset(cancellationRef.current);
     }
   }, [activeTab]);
@@ -268,11 +280,15 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onFlightDetailsClick={() => setShowFareDetailsPopup(true)}
+            onTravelerDetailsClick={() => setShowPassengerInfo(true)}
           />
         </div>
 
         {showFareDetailsPopup && (
-          <FareDetailsPop onClose={() => setShowFareDetailsPopup(false)} />
+          <FareDetailsPop
+            onClose={() => setShowFareDetailsPopup(false)}
+            fareDetails={fareDetails}
+          />
         )}
         {showBaggageRulesPopup && (
           <BaggageRules onClose={() => setShowaggageRulesPopup(false)} />
@@ -316,7 +332,11 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
         </div>
       </div>
       {showPriceSummaryPopup && (
-        <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+        <PriceSummary
+          onClose={() => setShowPriceSummaryPopup(false)}
+          lineItems={priceSummary.lineItems}
+          totalAmount={priceSummary.totalAmount}
+        />
       )}
       <div className={styles.footer}>
         {/* LEFT */}
@@ -331,7 +351,7 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
                 !
               </span>
             </div>
-            <div className={styles.amount}>₹ 66,945</div>
+            <div className={styles.amount}>{priceSummary.totalAmount}</div>
           </div>
 
           {/* RIGHT */}

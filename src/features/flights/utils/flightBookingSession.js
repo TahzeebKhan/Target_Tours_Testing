@@ -1,6 +1,7 @@
 "use client";
 
 let inMemoryFlightBookingSession = null;
+const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
 
 const readNumber = (...values) => {
   for (const value of values) {
@@ -339,11 +340,50 @@ const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
 };
 
 export const readFlightBookingSession = () => {
-  return inMemoryFlightBookingSession;
+  if (inMemoryFlightBookingSession) return inMemoryFlightBookingSession;
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(FLIGHT_BOOKING_SESSION_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    inMemoryFlightBookingSession = parsed || null;
+    return inMemoryFlightBookingSession;
+  } catch {
+    return null;
+  }
+};
+
+const removeStoredFlightBookingSession = () => {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(FLIGHT_BOOKING_SESSION_KEY);
+  } catch {
+  }
+};
+
+export const clearFlightBookingSession = () => {
+  inMemoryFlightBookingSession = null;
+  removeStoredFlightBookingSession();
+};
+
+const storeFlightBookingSession = (value) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(FLIGHT_BOOKING_SESSION_KEY, JSON.stringify(value));
+  } catch {
+  }
 };
 
 export const writeFlightBookingSession = (value) => {
-  inMemoryFlightBookingSession = value || null;
+  if (!value) {
+    clearFlightBookingSession();
+    return;
+  }
+  inMemoryFlightBookingSession = value;
+  storeFlightBookingSession(value);
+};
+
+export const readFlightBookingSessionLegacy = () => {
+  return inMemoryFlightBookingSession;
 };
 
 export const readBookingFallbackFromSearch = (search) => {
@@ -427,10 +467,24 @@ export const buildSsrPayload = (session) => {
 export const extractBaseFareAmount = (session) => {
   const priceResponse = session?.priceResponse || {};
   const priceRequest = session?.priceRequest || {};
+  const payload = unwrapPayload(priceResponse);
+  const fareBreakdown = Array.isArray(payload?.fare_breakdown)
+    ? payload.fare_breakdown
+    : Array.isArray(payload?.formatted?.fare_breakdown)
+      ? payload.formatted.fare_breakdown
+      : [];
+  const fareBreakdownTotal = fareBreakdown.reduce((sum, item) => {
+    const value = readNumber(item?.total_journey_price, item?.totalJourneyPrice);
+    return sum + (value ?? 0);
+  }, 0);
   const primaryTrip = extractPrimaryTrip(priceResponse) || extractPrimaryTrip(priceRequest) || {};
 
   return (
     readNumber(
+      fareBreakdownTotal > 0 ? fareBreakdownTotal : null,
+      payload?.formatted?.final_price,
+      payload?.final_price,
+      payload?.formatted?.finalPrice,
       priceResponse?.BaseFare,
       priceResponse?.baseFare,
       priceResponse?.data?.BaseFare,
@@ -440,6 +494,39 @@ export const extractBaseFareAmount = (session) => {
       session?.selectedFlight?.fare?.pricePerAdult,
       session?.selectedFlight?.fare?.totalFare
     ) || 5200
+  );
+};
+
+export const extractTaxAmount = (session) => {
+  const priceResponse = session?.priceResponse || {};
+  const payload = unwrapPayload(priceResponse);
+  const fareBreakdown = Array.isArray(payload?.fare_breakdown)
+    ? payload.fare_breakdown
+    : Array.isArray(payload?.formatted?.fare_breakdown)
+      ? payload.formatted.fare_breakdown
+      : [];
+  const fareBreakdownTax = fareBreakdown.reduce((sum, item) => {
+    const value = readNumber(
+      item?.total_tax,
+      item?.totalTax,
+      item?.total_journey_tax,
+      item?.totalJourneyTax,
+      item?.tax
+    );
+    return sum + (value ?? 0);
+  }, 0);
+
+  return (
+    readNumber(
+      fareBreakdownTax > 0 ? fareBreakdownTax : null,
+      payload?.formatted?.total_tax,
+      payload?.formatted?.totalTax,
+      payload?.total_tax,
+      payload?.totalTax,
+      payload?.Tax,
+      payload?.tax,
+      session?.selectedFlight?.fare?.tax
+    ) || 0
   );
 };
 

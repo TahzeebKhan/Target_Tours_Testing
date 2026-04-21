@@ -9,11 +9,11 @@ import Packages from "./Packages";
 import TravelInsurence from "./TravelInsurence";
 
 const TABS = [
-  "ALL",
-  "Hotel Booking",
-  "Flight Booking",
-  "Packages",
-  "Travel Insurance",
+  { label: "ALL", value: "ALL" },
+  { label: "Hotel Booking", value: "HOTEL BOOKING" },
+  { label: "Flight Booking", value: "FLIGHT BOOKING" },
+  { label: "Packages", value: "PACKAGES" },
+  { label: "Travel Insurance", value: "TRAVEL INSURANCE" },
 ];
 
 const RESERVATIONS = [
@@ -41,6 +41,7 @@ export default function ActiveReservations({
   activeTab,
   setActiveTab,
   onCheckDetails,
+  packageReservations = [],
 }) {
   const { setMobileTitle } = useProfile();
   useEffect(() => {
@@ -53,18 +54,18 @@ export default function ActiveReservations({
       <nav className={styles.tabNav}>
         {TABS.map((tab) => (
           <button
-            key={tab}
-            className={`${styles.tabItem} ${activeTab === tab ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab(tab)}
+            key={tab.value}
+            className={`${styles.tabItem} ${activeTab === tab.value ? styles.tabActive : ""}`}
+            onClick={() => setActiveTab(tab.value)}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </nav>
 
       {/* Content Area */}
       <main className={styles.mainContent}>
-        {activeTab === "Hotel Booking" ? (
+        {activeTab === "HOTEL BOOKING" ? (
           <>
             <div className={styles.cardList}>
               {RESERVATIONS.map((res, index) => (
@@ -123,21 +124,22 @@ export default function ActiveReservations({
               ))}
             </div>
           </>
-        ) : activeTab === "Flight Booking" ? (
+        ) : activeTab === "FLIGHT BOOKING" ? (
           <>
             <FlightBooking
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
             />{" "}
           </>
-        ) : activeTab === "Packages" ? (
+        ) : activeTab === "PACKAGES" ? (
           <>
             <Packages
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
+              reservations={packageReservations}
             />
           </>
-        ) : activeTab === "Travel Insurance" ? (
+        ) : activeTab === "TRAVEL INSURANCE" ? (
           <>
             <TravelInsurence
               setMobileTitle={setMobileTitle}

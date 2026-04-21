@@ -2,9 +2,9 @@
 import React, { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
-import FromLocationSheet from "@/shared/components/fromLocationSheet/FromLocationSheet";
 import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
 import PassengersPopup from "@/shared/components/passengersPopUp/PassengersPopup";
+import HolidayLocationSheet from "./HolidayLocationSheet";
 
 const HolidaySearchMobile = ({
   styles,
@@ -71,9 +71,10 @@ const HolidaySearchMobile = ({
             />
           </div>
           {openFrom && (
-            <FromLocationSheet
+            <HolidayLocationSheet
               onClose={() => setOpenFrom(false)}
               inputType="From CITY"
+              suggestionType="from"
               onSelectCity={(value) => setFrom(value)}
             />
           )}
@@ -92,9 +93,10 @@ const HolidaySearchMobile = ({
             />
           </div>
           {openTo && (
-            <FromLocationSheet
+            <HolidayLocationSheet
               onClose={() => setOpenTo(false)}
               inputType="To CITY/COUNTRY,CATEGORY"
+              suggestionType="to"
               onSelectCity={(value) => setTo(value)}
             />
           )}

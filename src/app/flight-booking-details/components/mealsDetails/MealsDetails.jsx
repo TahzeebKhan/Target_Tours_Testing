@@ -9,6 +9,7 @@ import { meals, beverages } from "./mealsData";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
@@ -90,7 +91,7 @@ const getMealInfo = (routeCards, routeKey, selectionKey) => {
 };
 
 const MealsDetails = () => {
-  const { setMeals, setCurrentStep, currentStep, bookingSession } = useFlightBooking();
+  const { setMeals, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
   const bookingView = React.useMemo(
     () => getBookingDetailsView(bookingSession),
@@ -99,6 +100,10 @@ const MealsDetails = () => {
   const routeCards = React.useMemo(
     () => buildMealRouteCards(bookingSession, bookingView),
     [bookingSession, bookingView]
+  );
+  const priceSummary = React.useMemo(
+    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
+    [bookingSession, prices, travelerDetails]
   );
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
@@ -313,7 +318,11 @@ const MealsDetails = () => {
         </div>
 
         {showPriceSummaryPopup && (
-          <PriceSummary onClose={() => setShowPriceSummaryPopup(false)} />
+          <PriceSummary
+            onClose={() => setShowPriceSummaryPopup(false)}
+            lineItems={priceSummary.lineItems}
+            totalAmount={priceSummary.totalAmount}
+          />
         )}
         <div className={styles.footer}>
           {/* LEFT */}
@@ -328,7 +337,7 @@ const MealsDetails = () => {
                   !
                 </span>
               </div>
-              <div className={styles.amount}>₹ 66,945</div>
+              <div className={styles.amount}>{priceSummary.totalAmount}</div>
             </div>
 
             {/* RIGHT */}

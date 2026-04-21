@@ -30,10 +30,6 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
     setStartIndex((prev) => (prev - 1 + cards.length) % cards.length);
   };
 
-  const handleSlideChange = (swiper) => {
-    setActiveIndex(swiper.activeIndex)
-  }
-
    const handlePrev = () => {
         swiperRef?.slidePrev()
     }
@@ -58,10 +54,9 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
           {" "}
           <div className={styles.viewport}>
             <div className={styles.slider}>
-              <Swiper
+                <Swiper
                 modules={[Navigation]}
                 onSwiper={setSwiperRef}
-                onSlideChange={handleSlideChange}
                  slidesPerView={1.1} // ✅ peek effect
                 spaceBetween={12}
                 className={styles.carousel}
@@ -87,7 +82,7 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
               }}
               >
                 {visibleCards.map((card, idx) => (
-                  <SwiperSlide key={idx.id} className={styles.sliderSlide}>
+                  <SwiperSlide key={card.id} className={styles.sliderSlide}>
                     <div
                       key={card.id}
                       className={`${styles.card} ${idx === 1 ? styles.active : styles.side
