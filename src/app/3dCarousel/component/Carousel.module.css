@@ -24,7 +24,7 @@
 
 /* Left side: card sits at left edge inside the slide */
 .imageContainer > .bottomText.leftAlign {
-  left: 20px; /* distance from left edge */
+  left: 50px;
   right: auto;
   text-align: left;
   transform: translateX(0);
@@ -33,7 +33,7 @@
 
 /* Right side: card sits at right edge inside the slide */
 .imageContainer > .bottomText.rightAlign {
-  right: 20px; /* distance from right edge */
+  right: 50px; /* distance from right edge */
   left: auto;
   /* text-align: right; */
   transform: translateX(0);
@@ -244,7 +244,8 @@
   max-width: 210px;
   width: 100%;
   position: relative;
-  padding: 11px 0;
+  padding: 11px 14px;
+  box-sizing: border-box;
   background: white;
   border-radius: 8px;
   color: #333;
@@ -263,6 +264,7 @@
 }
 
 .bottomTitle {
+  width: 100%;
   font-weight: 300;
   font-style: Light;
   font-size: 14px;
@@ -271,9 +273,11 @@
   vertical-align: middle;
   text-transform: uppercase;
   color: #000000;
+  font-family: Inter;
 }
 
 .bottomDescription {
+  width: 100%;
   font-family: Antic Didone;
   font-weight: 400;
   font-style: Regular;
@@ -284,6 +288,7 @@
   vertical-align: middle;
   text-transform: capitalize;
   color: #000000;
+  overflow-wrap: break-word;
 }
 .leftAlign {
   text-align: left;
@@ -296,13 +301,13 @@
 .rightAlign {
   position: absolute;
   right: 0;
-  bottom: -109px;
+  bottom: -160px;
   z-index: 999;
   opacity: 0;
   transition: all 0.5s ease;
+  text-align: right;
+  align-items: flex-end;
   /* transition-delay: 0.9s; */
-  /* text-align: right; */
-  /* align-items: flex-end; */
   /* width: 100% !important; */
   /* max-width: 100% !important; */
 }
@@ -327,21 +332,32 @@
 }
 
 .farLeftText {
-  transform: scale(1.8) translateY(25px);
+  transform: scale(1.8) translateY(25px, 20px);
   max-width: 210px !important;
   transform-origin: left center;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .farRightText {
-  transform: scale(1.8) translate(30px, 24px) !important;
+  transform: scale(1.8) translate(30px, -120px) !important;
+ 
   transform-origin: right center;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
+.imageContainer > .bottomText.rightAlign.fadeIn {
+  right: -44px;
+  transform: scale(1.6) translate(0, 21px);
+}
+
+.imageContainer > .bottomText.rightAlign.farRightText {
+  right: -58px;
+  transform: scale(1.8) translate(0, 24px) !important;
+}
+
 .rightAlign.smallContent {
   transform: scale(1.654) translate(-38px,-10px) !important;
-  max-width: fit-content;
+  max-width: 210px;
 }
 .rightAlign.fadeIn {
   transform: scale(1.6) translate(-36px, 21px);
@@ -349,9 +365,8 @@
 
 .farRightText.smallContent {
   transition: all 0.4s ease;
-  transform: scale(1.8) translateY(-5px) !important;
-
-  max-width: fit-content;
+  transform: scale(1.8) translateY(-5px,20px) !important;
+  max-width: 210px;
 }
 /* Navigation */
 .navigation {
@@ -464,8 +479,8 @@
     min-height: unset;
   }
   .rightAlign {
-    background-color: transparent;
-    bottom: -21%;
+    background-color: white;
+    bottom: -30%;
     right: -16px;
 
     max-width: 170px;
