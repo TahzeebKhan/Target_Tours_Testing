@@ -325,6 +325,9 @@ const trimText = (text = "", maxLength = 40) => {
   return `${text.slice(0, maxLength).trim()}...`;
 };
 
+const trimToFirstWords = (text = "", wordCount = 2) =>
+  text.trim().split(/\s+/).filter(Boolean).slice(0, wordCount).join(" ");
+
 const PLACEHOLDER_CAROUSEL_DATA = Array.from({ length: 5 }, (_, index) => ({
   id: `placeholder-${index + 1}`,
   carouselId: index + 1,
@@ -383,7 +386,7 @@ const fetchSignatureExperiences = async ({ queryKey, signal }) => {
       description: trimText(description, 40),
       price: formatPackagePrice(pkg.started_price ?? pkg.starting_from),
       hasNewTag: true,
-      bottomTitle: trimText(title, 40),
+      bottomTitle: trimToFirstWords(title),
       bottomDescription: trimText(description, 40),
       smallContent: title.length < 30,
     };

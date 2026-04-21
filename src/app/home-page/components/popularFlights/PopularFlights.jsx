@@ -107,7 +107,7 @@ const PopularFlights = () => {
   const [isCityOpen, setIsCityOpen] = useState(false);
   const cityRef = useRef(null);
 
-  const metroCities = [ "Mumbai"];
+  const metroCities = [ ""];
   const selectedIataCode =
     selectedCityCode || getCityIataCode(selectedCity) || CITY_IATA_MAP[DEFAULT_CITY];
   const cityOptions = metroCities.includes(selectedCity)

@@ -99,10 +99,10 @@ export default function TravelCarousel() {
                     modifier: 1,
                     slideShadows: false,
                 }}
-                autoplay={{
-                    delay: 3000,
-                    disableOnInteraction: false,
-                }}
+                // autoplay={{
+                //     delay: 3000,
+                //     disableOnInteraction: false,
+                // }}
                 speed={1200}
                 className={styles.swiper}
             >
