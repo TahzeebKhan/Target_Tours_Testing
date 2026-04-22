@@ -10,57 +10,10 @@ import "swiper/css/navigation";
 import styles from "./LimitedTimeOffer.module.css";
 import { useHomePageOffer } from "@/app/hooks/useHomePageOffer";
 
-
-const FALLBACK_DATA = {
-  startPrice: 230000,
-  backgroundVideo: "/videos/Desert_Camels.mp4",
-  sliderData: [
-    {
-      id: 1,
-      image: "/images/exp3.png",
-      title: "Shoja",
-      subtitle: "Himachal Pradesh",
-    },
-    {
-      id: 2,
-      image: "/images/exp2.png",
-      title: "Jaisalmer",
-      subtitle: "Rajasthan",
-    },
-    {
-      id: 3,
-      image: "/images/exp1.png",
-      title: "Coorg",
-      subtitle: "Karnataka",
-    },
-    {
-      id: 4,
-      image: "/images/exp3.png",
-      title: "Coorg",
-      subtitle: "Karnataka",
-    },
-    {
-      id: 5,
-      image: "/images/exp2.png",
-      title: "Coorg",
-      subtitle: "Karnataka",
-    },
-  ],
-};
-
-const getSafeOfferData = (data) => {
-  const startPrice = Number(data?.startPrice);
-  const sliderData = Array.isArray(data?.sliderData) && data.sliderData.length > 0
-    ? data.sliderData
-    : FALLBACK_DATA.sliderData;
-
-  return {
-    ...FALLBACK_DATA,
-    ...data,
-    startPrice: Number.isFinite(startPrice) ? startPrice : FALLBACK_DATA.startPrice,
-    backgroundVideo: data?.backgroundVideo || FALLBACK_DATA.backgroundVideo,
-    sliderData,
-  };
+const formatPrice = (price) => {
+  const numericPrice = Number(price);
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) return "N/A";
+  return numericPrice.toLocaleString("en-IN");
 };
 
 const LimitedTimeOffer = () => {
@@ -71,11 +24,9 @@ const LimitedTimeOffer = () => {
   const [isVideoReady, setIsVideoReady] = useState(false);
    const router = useRouter();
 
-
-  const finalData = getSafeOfferData(data);
-  const videoSrc = isVideoReady
-    ? finalData.backgroundVideo
-    : FALLBACK_DATA.backgroundVideo;
+  const sliderData = Array.isArray(data?.sliderData) ? data.sliderData : [];
+  const formattedPrice = formatPrice(data?.startPrice);
+  const videoSrc = isVideoReady ? data?.backgroundVideo : null;
 
   return (
     <section className="relative w-full h-[689px]">
@@ -92,15 +43,17 @@ const LimitedTimeOffer = () => {
             style={{ display: "none" }}
           />
         )}
-        <video
-          key={videoSrc}
-          className="absolute inset-0 w-full h-full object-cover"
-          src={videoSrc}
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
+        {videoSrc && (
+          <video
+            key={videoSrc}
+            className="absolute inset-0 w-full h-full object-cover"
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        )}
 
         <div className={styles.section}>
           <div className={styles.container}>
@@ -113,8 +66,10 @@ const LimitedTimeOffer = () => {
               <div className={styles.textContainer}>
                 <span className={styles.offer}>Offer Starting from</span>
                 <p className={styles.price}>
-                  INR {finalData.startPrice.toLocaleString()}/
-                  <span className={styles.adult}>Adult</span>
+                  {formattedPrice === "N/A" ? "N/A" : `INR ${formattedPrice}/`}
+                  {formattedPrice !== "N/A" && (
+                    <span className={styles.adult}>Adult</span>
+                  )}
                 </p>
 
                 <button className={styles.exploreBtn}>
@@ -213,17 +168,17 @@ const LimitedTimeOffer = () => {
                   }}
 
                 >
-                  {finalData.sliderData.map((item, index) => (
+                  {sliderData.map((item, index) => (
                     <SwiperSlide key={index} className={styles.swapperslider}>
                       <div className={styles.items}
                       onClick={()=> router.push(`/tour-details?id=${item.id}`)}
                       >
-                        <img src={item.image} alt={item.title} />
+                        <img src={item.image || "/fallback.jpg"} alt={item.title || "N/A"} />
 
                         <div className={styles.imgMainContainer}>
                           <div className={styles.imgBottom}>
-                            <p className={styles.imgHead}>{item.title}</p>
-                            <p className={styles.imgSubHead}>{item.subtitle}</p>
+                            <p className={styles.imgHead}>{item.title || "N/A"}</p>
+                            <p className={styles.imgSubHead}>{item.subtitle || "N/A"}</p>
                           </div>
                         </div>
                       </div>

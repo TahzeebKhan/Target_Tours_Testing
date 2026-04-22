@@ -4,41 +4,91 @@ import Switch from "../Switch";
 import { useState, useRef, useEffect } from "react";
 import TravellerSelector from "./TravellerSelector";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowLeftRight, ChevronDown } from "lucide-react";
 import PassengerClassSelector from "./PassengerClassSelector";
-import AirportSuggestionBox from "@/shared/components/airport/AirportSuggestionBox";
 import { saveRecentFlightSearch } from "@/shared/services/recentSearch";
 import { CalendarSVG } from "@/app/flights/components/SVGFile";
-import DateCalendarModal from "@/shared/components/calendar/DateCalendarModal";
-import CalendarMonths from "@/shared/components/calendar/CalendarMonths";
 import HotelDropDown from "@/shared/components/hotelDropDown/HotelDropDown";
-import HotelDateCalendarModal from "@/shared/components/hotelCalendar/HotelDateCalendarModal";
-import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
-import RecentSearch from "@/shared/components/recentSearch/RecentSearch";
 import HolidayGuestSelector from "./HolidayGuestSelector";
 
-import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
-import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { useQuery } from "@tanstack/react-query";
 import { getHeroSection } from "@/shared/services/heroApi";
 
-import FlightSearchMobile from "./flightSearchMobile/FlightSearchMobile";
-import HotelSearchMobile from "./hotelSearchMobile/HotelSearchMobile";
-import HolidaySearchMobile from "./holidaySearchMobile/HolidaySearchMobile";
-import InsuranceSearchMobile from "./insuranceSearchMobile/InsuranceSearchMobile";
 // import Cookies from "js-cookie";
-import ProfileModal from "./modals/ProfileModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
-import CustomItinerary from "./customIternaryComponents/CustomItinerary";
-import MobileItinerary from "./customIternaryComponents/MobileItinerary";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
-import SuggestionBox from "./SuggestionBox";
 import { fetchHolidayPackageSuggestions } from "@/shared/services/tourPackage";
+
+const AirportSuggestionBox = dynamic(
+  () => import("@/shared/components/airport/AirportSuggestionBox"),
+  { loading: () => null, ssr: false },
+);
+const DateCalendarModal = dynamic(
+  () => import("@/shared/components/calendar/DateCalendarModal"),
+  { loading: () => null, ssr: false },
+);
+const CalendarMonths = dynamic(
+  () => import("@/shared/components/calendar/CalendarMonths"),
+  { loading: () => null, ssr: false },
+);
+const HotelDateCalendarModal = dynamic(
+  () => import("@/shared/components/hotelCalendar/HotelDateCalendarModal"),
+  { loading: () => null, ssr: false },
+);
+const HotelCalendarMonths = dynamic(
+  () => import("@/shared/components/hotelCalendar/HotelCalendarMonths"),
+  { loading: () => null, ssr: false },
+);
+const RecentSearch = dynamic(
+  () => import("@/shared/components/recentSearch/RecentSearch"),
+  { loading: () => null, ssr: false },
+);
+const LoginPopup = dynamic(
+  () => import("@/app/account/loginPopUp/LoginPopup"),
+  { loading: () => null, ssr: false },
+);
+const SignupPopup = dynamic(
+  () => import("@/app/account/signUpPopUp/SignupPopup"),
+  { loading: () => null, ssr: false },
+);
+const FlightSearchMobile = dynamic(
+  () => import("./flightSearchMobile/FlightSearchMobile"),
+  { loading: () => null, ssr: false },
+);
+const HotelSearchMobile = dynamic(
+  () => import("./hotelSearchMobile/HotelSearchMobile"),
+  { loading: () => null, ssr: false },
+);
+const HolidaySearchMobile = dynamic(
+  () => import("./holidaySearchMobile/HolidaySearchMobile"),
+  { loading: () => null, ssr: false },
+);
+const InsuranceSearchMobile = dynamic(
+  () => import("./insuranceSearchMobile/InsuranceSearchMobile"),
+  { loading: () => null, ssr: false },
+);
+const ProfileModal = dynamic(
+  () => import("./modals/ProfileModal"),
+  { loading: () => null, ssr: false },
+);
+const CustomItinerary = dynamic(
+  () => import("./customIternaryComponents/CustomItinerary"),
+  { loading: () => null, ssr: false },
+);
+const MobileItinerary = dynamic(
+  () => import("./customIternaryComponents/MobileItinerary"),
+  { loading: () => null, ssr: false },
+);
+const SuggestionBox = dynamic(() => import("./SuggestionBox"), {
+  loading: () => null,
+  ssr: false,
+});
 const sampleHotel = {
   title: "SERENE HAVEN INN, TORONTO",
   images: ["/images/hotel-placeholder.jpg"],
@@ -1082,6 +1132,7 @@ const HomePage = ({
           infants: String(normalizedPassengers.infant),
           travelClass: normalizedTravelClass,
         });
+        if (directOnly) params.set("isDriect", "true");
         searchLegs.forEach((leg, i) => {
           params.set(`from${i}`, leg.from || "");
           params.set(`to${i}`, leg.to || "");
@@ -1133,6 +1184,7 @@ const HomePage = ({
       });
       if (fromCode) params.set("origin", fromCode);
       if (toCode) params.set("destination", toCode);
+      if (directOnly) params.set("isDriect", "true");
       router.push(`/flights?${params.toString()}`);
       return;
     }
@@ -1169,6 +1221,31 @@ const HomePage = ({
 
   const [showLoader, setShowLoader] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const handleMotionPreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+      if (mediaQuery.matches) setVideoReady(true);
+    };
+
+    handleMotionPreference();
+    mediaQuery.addEventListener("change", handleMotionPreference);
+
+    return () =>
+      mediaQuery.removeEventListener("change", handleMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setVideoReady(true);
+      return;
+    }
+
+    setVideoReady(false);
+  }, [heroData.videoUrl, prefersReducedMotion]);
 
   useEffect(() => {
     // Logged-in users must wait for:
@@ -1329,17 +1406,30 @@ const HomePage = ({
             loop
             playsInline
           /> */}
-          <video
-            className="absolute inset-0 w-full h-full object-cover"
-            src={heroData.videoUrl}
-            poster="/images/hero-poster.jpg"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            onCanPlayThrough={() => setVideoReady(true)}
-          />
+          {prefersReducedMotion ? (
+            <img
+              className="absolute inset-0 w-full h-full object-cover"
+              src="/images/hero-poster.jpg"
+              alt=""
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <video
+              className="absolute inset-0 w-full h-full object-cover"
+              src={heroData.videoUrl}
+              poster="/images/hero-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              disablePictureInPicture
+              preload="metadata"
+              aria-hidden="true"
+              onLoadedData={() => setVideoReady(true)}
+              onError={() => setVideoReady(true)}
+            />
+          )}
           <img className={styles.gradient} src="/images/gradient.png" />
         </header>
         <div className={`${styles.overlay} absolute inset-0`}></div>
