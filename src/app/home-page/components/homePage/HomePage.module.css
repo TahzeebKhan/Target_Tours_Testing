@@ -178,7 +178,15 @@
   height: 91%;
   padding-top: 42px;
   padding-bottom: 31px;
+  /* justify-content: space-between; */
+}
+.tabsLayout{
+  display: flex;
+  flex-direction: column;
+  /* gap: 70px; */
+  min-height: 70%;
   justify-content: space-between;
+
 }
 
 .contant {
@@ -1497,6 +1505,9 @@
 }
 
 @media (max-width: 895px) {
+  .tabsLayout{
+    min-height: 100%;
+  }
   .glass_panel {
     display: none;
   }
