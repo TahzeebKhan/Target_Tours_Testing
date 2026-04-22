@@ -27,6 +27,9 @@ export default function FlightFilters() {
   const { tripType, committedSearches } = useTripType();
 
   const price = filters.price;
+  const minPrice = 0;
+  const maxPrice = 1000000;
+  const priceStep = 1000;
   const activeRoute = committedSearches?.[tripType] || committedSearches?.oneway || {};
 
   const getRouteLabel = (value, fallback) => {
@@ -205,19 +208,21 @@ export default function FlightFilters() {
           <div
             className={styles.sliderRange}
             style={{
-              left: `${((price[0] - 10000) / (60000 - 10000)) * 100}%`,
-              right: `${100 - ((price[1] - 10000) / (60000 - 10000)) * 100}%`,
+              left: `${((price[0] - minPrice) / (maxPrice - minPrice)) * 100}%`,
+              right: `${100 - ((price[1] - minPrice) / (maxPrice - minPrice)) * 100}%`,
             }}
           />
 
           {/* Min thumb */}
           <input
             type="range"
-            min={10000}
-            max={60000}
+            min={minPrice}
+            max={maxPrice}
+            step={priceStep}
             value={price[0]}
+            onPointerDown={() => setPriceRange(price[0], price[1])}
             onChange={(e) => {
-              const nextMin = Math.min(Number(e.target.value), price[1] - 1000);
+              const nextMin = Math.min(Number(e.target.value), price[1] - priceStep);
               setPriceRange(nextMin, price[1]);
             }}
             className={`${styles.rangeInput} ${styles.rangeLeft}`}
@@ -226,11 +231,13 @@ export default function FlightFilters() {
           {/* Max thumb */}
           <input
             type="range"
-            min={10000}
-            max={60000}
+            min={minPrice}
+            max={maxPrice}
+            step={priceStep}
             value={price[1]}
+            onPointerDown={() => setPriceRange(price[0], price[1])}
             onChange={(e) => {
-              const nextMax = Math.max(Number(e.target.value), price[0] + 1000);
+              const nextMax = Math.max(Number(e.target.value), price[0] + priceStep);
               setPriceRange(price[0], nextMax);
             }}
             className={`${styles.rangeInput} ${styles.rangeRight}`}

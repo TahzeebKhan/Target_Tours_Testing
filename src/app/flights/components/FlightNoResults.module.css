@@ -1,0 +1,46 @@
+.emptyState {
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 16px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.image {
+  width: min(260px, 68vw);
+  height: auto;
+  object-fit: contain;
+}
+
+.emptyState h3 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 15px;
+  color: #4a5565;
+}
+
+@media (max-width: 629px) {
+  .emptyState {
+    min-height: 320px;
+    padding: 36px 12px;
+  }
+
+  .image {
+    width: min(210px, 72vw);
+  }
+
+  .emptyState h3 {
+    font-size: 19px;
+  }
+}

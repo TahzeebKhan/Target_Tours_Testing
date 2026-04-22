@@ -3,7 +3,7 @@ import { createContext, useContext, useMemo, useReducer, useState } from "react"
 
 const FlightFilterContext = createContext(null);
 
-const DEFAULT_PRICE = [11307, 57295];
+const DEFAULT_PRICE = [0, 1000000];
 
 const POPULAR_LABELS = {
   refundable: "Refundable Fare",
@@ -37,6 +37,7 @@ const FILTER_ACTIONS = {
 
 const createDefaultFilters = () => ({
   price: [...DEFAULT_PRICE],
+  priceTouched: false,
   sortBy: null,
   popular: {
     refundable: true,
@@ -96,6 +97,7 @@ const filterReducer = (state, action) => {
       return {
         ...state,
         price: [min, max],
+        priceTouched: true,
       };
     }
     case FILTER_ACTIONS.SET_SORT_BY: {

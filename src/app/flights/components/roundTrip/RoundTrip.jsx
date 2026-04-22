@@ -11,7 +11,8 @@ import FlightDetailsCard from "../PhoneViewComponents/roundTripPhoneView/FlightD
 import { SidebarContext } from "../../SidebarContext";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
-import RoundTripSkeleton from "./RoundTripSkeleton";
+import FlightSearchLoader from "../FlightSearchLoader";
+import FlightNoResults from "../FlightNoResults";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
 const flightResults = [
@@ -803,9 +804,9 @@ const RoundTrip = ({
         </div>
         <div>
           {showLoadingState ? (
-            <RoundTripSkeleton />
+            <FlightSearchLoader />
           ) : hasNoData ? (
-            <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+            <FlightNoResults />
           ) : (
             <TripCard
               fareModalOpen={fareModalOpen}
@@ -925,9 +926,9 @@ const RoundTrip = ({
           </div>
         </div>
         {showLoadingState ? (
-          <RoundTripSkeleton />
+          <FlightSearchLoader />
         ) : hasNoData ? (
-          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+          <FlightNoResults />
         ) : (
           visibleFlights.map((flight, index) => (
             <FlightDetailsCard setFareModalOpen={setFareModalOpen} key={flight.id + index} flight={flight} />

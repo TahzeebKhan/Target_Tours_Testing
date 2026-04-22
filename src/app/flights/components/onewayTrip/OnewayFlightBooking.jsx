@@ -11,7 +11,8 @@ import FlightDetailsCard from "../PhoneViewComponents/oneWayPhoneView/FlightDeta
 import { SidebarContext } from "../../SidebarContext";
 import SortBySheet from "../SortBySheet";
 import SortByDropdown from "../SortByDropdown";
-import OnewaySkeleton from "./OnewaySkeleton";
+import FlightSearchLoader from "../FlightSearchLoader";
+import FlightNoResults from "../FlightNoResults";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
@@ -635,9 +636,9 @@ const OnewayFlightBooking = ({
           </div>
         </div>
         {showLoadingState ? (
-          <OnewaySkeleton />
+          <FlightSearchLoader />
         ) : hasNoData ? (
-          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+          <FlightNoResults />
         ) : (
           visibleFlights.map((flight, index) => (
             <React.Fragment key={index}>
@@ -962,9 +963,9 @@ const OnewayFlightBooking = ({
           prefetchedData={selectedFareFlight?.prefetchedFareData || prefetchedFareData[fareModalOpen] || null}
         />
         {showLoadingState ? (
-          <OnewaySkeleton />
+          <FlightSearchLoader />
         ) : hasNoData ? (
-          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+          <FlightNoResults />
         ) : (
           visibleFlights.map((flight, index) => (
             <FlightDetailsCard
