@@ -7,7 +7,8 @@ import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
 import SortBySheet from "../SortBySheet";
 import SortByDropdown from "../SortByDropdown";
-import RoundTripSkeleton from "../roundTrip/RoundTripSkeleton";
+import FlightSearchLoader from "../FlightSearchLoader";
+import FlightNoResults from "../FlightNoResults";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import FlightDetailsCard from "../PhoneViewComponents/multiTripPhoneView/FlightDetailsCard";
@@ -528,9 +529,9 @@ const MultiCityTrip = ({
         </div>
         <div className={styles.tripCardsContainer}>
           {showLoadingState ? (
-            <RoundTripSkeleton />
+            <FlightSearchLoader />
           ) : hasNoData ? (
-            <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+            <FlightNoResults />
           ) : (
             visibleTripCards.map((card, index) => (
               <div key={card.id || index}>
@@ -657,9 +658,9 @@ const MultiCityTrip = ({
           </div>
         </div>
         {showLoadingState ? (
-          <RoundTripSkeleton />
+          <FlightSearchLoader />
         ) : hasNoData ? (
-          <p style={{ padding: "16px 0", color: "#4A5565" }}>No data found</p>
+          <FlightNoResults />
         ) : (
           visibleFlights.map((flight, index) => (
             <FlightDetailsCard

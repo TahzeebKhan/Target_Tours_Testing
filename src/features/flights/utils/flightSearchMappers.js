@@ -1336,6 +1336,11 @@ export const buildSearchParams = ({
   const priceRange = Array.isArray(currentFilters.price)
     ? currentFilters.price
     : null;
+  const hasUrlPriceRange =
+    urlParams.min_price !== undefined ||
+    urlParams.max_price !== undefined;
+  const shouldApplyPriceRange =
+    Boolean(currentFilters.priceTouched) || hasUrlPriceRange;
 
   const stops = currentFilters.stops || {};
   const popular = currentFilters.popular || {};
@@ -1359,12 +1364,13 @@ export const buildSearchParams = ({
     selectedAirlines.length > 0
       ? selectedAirlines
       : (urlParams.airlines ? [urlParams.airlines] : [""]);
-  base.min_price = Number(
-    priceRange?.[0] ?? urlParams.min_price ?? ''
-  );
-  base.max_price = Number(
-    priceRange?.[1] ?? urlParams.max_price ?? ''
-  );
+  if (shouldApplyPriceRange) {
+    const minPrice = Number(priceRange?.[0] ?? urlParams.min_price);
+    const maxPrice = Number(priceRange?.[1] ?? urlParams.max_price);
+
+    if (Number.isFinite(minPrice)) base.min_price = minPrice;
+    if (Number.isFinite(maxPrice)) base.max_price = maxPrice;
+  }
   // Avoid forcing refundable for RT requests; backend returns 500 for some RT+refundable combinations.
   if (tripType !== "round" && currentFilters.popular?.refundable) {
     base.refundable = true;
