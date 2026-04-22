@@ -718,10 +718,13 @@ export const buildCreateItineraryPayload = (session, prices) => {
     return sum + (value ?? 0);
   }, 0);
   const finalPrice = readNumber(
+    session?.selectedFare?.netAmount,
     fareBreakdownTotal > 0 ? fareBreakdownTotal : null,
     priceResponse?.formatted?.final_price,
     priceResponse?.final_price,
-    priceResponse?.formatted?.finalPrice
+    priceResponse?.formatted?.finalPrice,
+    session?.selectedFare?.price,
+    session?.selectedFare?.pricePerAdult
   );
   const contact = session?.bookingContactDetails || {};
   const travelers = Array.isArray(session?.travelerDetails)
