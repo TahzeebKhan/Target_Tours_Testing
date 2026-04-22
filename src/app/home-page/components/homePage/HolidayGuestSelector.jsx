@@ -5,9 +5,9 @@ import { Minus, Plus } from "lucide-react";
 import styles from "./HolidayGuestSelector.module.css";
 
 const PASSENGER_ROWS = [
+  { key: "room", label: "Room", min: 1 },
   { key: "adult", label: "Adult (above 12 years old)", min: 1 },
   { key: "child", label: "Children (2 - 11 years old)", min: 0 },
-  { key: "infant", label: "Infant (below 2 years old)", min: 0 },
 ];
 
 const HolidayGuestSelector = ({ open, setOpen, passengers, setPassengers }) => {
@@ -18,14 +18,6 @@ const HolidayGuestSelector = ({ open, setOpen, passengers, setPassengers }) => {
         ...current,
         [key]: nextValue,
       };
-
-      if (key === "adult" && nextPassengers.infant > nextValue) {
-        nextPassengers.infant = nextValue;
-      }
-
-      if (key === "infant" && nextValue > nextPassengers.adult) {
-        nextPassengers.infant = nextPassengers.adult;
-      }
 
       return nextPassengers;
     });

@@ -213,6 +213,7 @@ const HomePage = ({
     pets: 0,
   });
   const [passengers, setPassengers] = useState({
+    room: 1,
     adult: 1,
     child: 0,
     infant: 0,
@@ -226,6 +227,8 @@ const HomePage = ({
     hotelGuestOpen.room;
   const totalPassengers =
     passengers.adult + passengers.child + passengers.infant;
+  const totalHolidayGuests = passengers.adult + passengers.child;
+  const totalRooms = Number(passengers.room || 1);
 
   const recentSearches = [
     {
@@ -1146,7 +1149,15 @@ const HomePage = ({
     }
 
     if (bookingType === "holiday") {
-      router.push(`/tour-list?from=${from}&to=${to}&date=${holidayStartDate}`);
+      const params = new URLSearchParams({
+        from,
+        to,
+        date: holidayStartDate,
+        rooms: String(totalRooms),
+        adults: String(normalizedPassengers.adult),
+        children: String(normalizedPassengers.child),
+      });
+      router.push(`/tour-list?${params.toString()}`);
     }
 
     if (bookingType === "insurance") {
@@ -2428,10 +2439,10 @@ const HomePage = ({
                                   totalHotelPassengers > 1 ? "s" : ""
                                 }`
                               : bookingType === "holiday"
-                                ? `${totalPassengers} Room${
-                                    totalPassengers > 1 ? "s" : ""
-                                  }, ${totalPassengers} Guest${
-                                    totalPassengers > 1 ? "s" : ""
+                                ? `${totalRooms} Room${
+                                    totalRooms > 1 ? "s" : ""
+                                  }, ${totalHolidayGuests} Guest${
+                                    totalHolidayGuests > 1 ? "s" : ""
                                   }`
                                 : `${totalPassengers} Traveller${
                                     totalPassengers > 1 ? "s" : ""

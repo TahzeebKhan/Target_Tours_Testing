@@ -113,9 +113,9 @@ const TourHeroSection = () => {
   const [travellerOpend, setTravellerOpend] = useState(false);
   const travellerRef = useRef(null);
   const [passengers, setPassengers] = useState({
-    adult: 1,
-    child: 0,
-    infant: 0,
+    room: Number(searchParams.get("rooms") || 1),
+    adult: Number(searchParams.get("adults") || 1),
+    child: Number(searchParams.get("children") || 0),
   });
 
   const [heroContent, setHeroContent] = useState(DEFAULT_HERO);
@@ -125,8 +125,8 @@ const TourHeroSection = () => {
   const bannerLocationName =
     getLocationNameFromSearchValue(searchParams.get("to")) || "Ottawa";
 
-  const totalPassengers =
-    passengers.adult + passengers.child + passengers.infant;
+  const totalPassengers = passengers.adult + passengers.child;
+  const totalRooms = Number(passengers.room || 1);
 
   const { data: publicBannerResponse } = useQuery({
     queryKey: ["tour-public-banner", bannerLocationName],
@@ -363,6 +363,10 @@ const TourHeroSection = () => {
       nextParams.delete("date");
     }
 
+    nextParams.set("rooms", String(totalRooms));
+    nextParams.set("adults", String(passengers.adult));
+    nextParams.set("children", String(passengers.child));
+
     router.push(`/tour-list?${nextParams.toString()}`);
   };
 
@@ -526,7 +530,7 @@ const TourHeroSection = () => {
 
               <div className={styles.guestSummary}>
                 <span className={styles.guestCount}>
-                  {`${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""}`}
+                  {`${totalRooms} Room${totalRooms > 1 ? "s" : ""}, ${totalPassengers} Guest${totalPassengers > 1 ? "s" : ""}`}
                 </span>
                 <ChevronDown
                   className={`${styles.guestChevron} ${

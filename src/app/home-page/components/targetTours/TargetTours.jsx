@@ -212,6 +212,16 @@ import Cookies from "js-cookie";
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = Cookies.get("auth_token");
 
+const formatPackagePrice = (price) => {
+  const numericPrice = Number(price);
+
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    return "ON REQUEST";
+  }
+
+  return `INR ${numericPrice.toLocaleString("en-IN")}`;
+};
+
 const tabs = [
   "Asia",
   "Explore",
@@ -278,7 +288,9 @@ const TargetTours = () => {
       title: `${pkg.duration_days} Days - ${pkg.title}`,
       cities: pkg.description,
       badge: `${pkg.duration_days} Days & ${pkg.duration_nights} Nights`,
-      price: "INR 2,30,000", // 🔁 replace when backend sends price
+      price: formatPackagePrice(
+        pkg.started_price ?? pkg.starting_from ?? pkg.started_from
+      ),
       img:
         pkg.main_image?.url
           ? `${API_BASE}${pkg.main_image.url}`
