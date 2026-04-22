@@ -1,17 +1,51 @@
 "use client";
 import HomePage from "./home-page/components/homePage/HomePage";
-import TopToFlights from "./home-page/components/topToFlights/TopToFlights";
-import TargetTours from "./home-page/components/targetTours/TargetTours";
-import SignatureExperiences from "./home-page/components/signatureExperiences/SignatureExperiences";
-import PopularFlights from "./home-page/components/popularFlights/PopularFlights";
-import ExploreStays from "./home-page/components/exploreStays/ExploreStays";
-import LimitedTimeOffer from "./home-page/components/limitedTimeOffer/LimitedTimeOffer";
-import GroupPrivateTrips from "./home-page/components/groupPrivateTrips/GroupPrivateTrips";
-import FeatureSection from "./home-page/components/featureSection/FeatureSection";
-import Footer from "./home-page/components/footer/Footer";
-import PrivateGroup from "./home-page/components/privateGroup/PrivateGroup";
-
+import dynamic from "next/dynamic";
 import { Suspense, useEffect, useState } from "react";
+
+const SignatureExperiences = dynamic(
+  () =>
+    import(
+      "./home-page/components/signatureExperiences/SignatureExperiences"
+    ),
+  { loading: () => null },
+);
+const PopularFlights = dynamic(
+  () => import("./home-page/components/popularFlights/PopularFlights"),
+  { loading: () => null },
+);
+const TopToFlights = dynamic(
+  () => import("./home-page/components/topToFlights/TopToFlights"),
+  { loading: () => null },
+);
+const TargetTours = dynamic(
+  () => import("./home-page/components/targetTours/TargetTours"),
+  { loading: () => null },
+);
+const GroupPrivateTrips = dynamic(
+  () => import("./home-page/components/groupPrivateTrips/GroupPrivateTrips"),
+  { loading: () => null },
+);
+const PrivateGroup = dynamic(
+  () => import("./home-page/components/privateGroup/PrivateGroup"),
+  { loading: () => null },
+);
+const LimitedTimeOffer = dynamic(
+  () => import("./home-page/components/limitedTimeOffer/LimitedTimeOffer"),
+  { loading: () => null },
+);
+const ExploreStays = dynamic(
+  () => import("./home-page/components/exploreStays/ExploreStays"),
+  { loading: () => null },
+);
+const FeatureSection = dynamic(
+  () => import("./home-page/components/featureSection/FeatureSection"),
+  { loading: () => null },
+);
+const Footer = dynamic(
+  () => import("./home-page/components/footer/Footer"),
+  { loading: () => null },
+);
 
 export default function Home() {
   const [homeReady, setHomeReady] = useState(false);

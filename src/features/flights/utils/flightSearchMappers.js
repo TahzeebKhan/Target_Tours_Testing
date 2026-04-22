@@ -1386,6 +1386,9 @@ export const buildSearchParams = ({
   }
   base.domain = urlParams.domain || getDefaultDomain();
   base.fareType = tripType === "round" ? "RT" : "ON";
+  if (String(urlParams.isDriect || "").toLowerCase() === "true") {
+    base.isDriect = true;
+  }
 
   return base;
 };
