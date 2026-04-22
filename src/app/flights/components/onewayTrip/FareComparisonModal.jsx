@@ -120,16 +120,36 @@ export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
         ) ||
         fareBreakdown[0] ||
         {};
+    const formattedJourneys = getNestedArray(pricePayload, [
+        ["formatted", "journeys"],
+        ["data", "formatted", "journeys"],
+    ]);
+    const onwardFormattedJourney =
+        formattedJourneys.find((journey) =>
+            String(journey?.journey_type || journey?.journeyType || "").toUpperCase() === "ONWARD"
+        ) ||
+        formattedJourneys[0] ||
+        {};
+    const netPerAdult = readNumber(
+        onwardFormattedJourney?.per_adult?.net,
+        onwardFormattedJourney?.perAdult?.net,
+        onwardFormattedJourney?.per_adult?.netfare,
+        onwardFormattedJourney?.perAdult?.netFare
+    );
     const firstJourneyPrice = readNumber(
         onwardFareBreakdown?.total_journey_price,
         onwardFareBreakdown?.totalJourneyPrice
     );
-    const rootTotal = readNumber(firstJourneyPrice);
+    const safeAdults = Math.max(Number(adults || 1), 1);
+    const rootTotal = readNumber(
+        netPerAdult !== null ? netPerAdult * safeAdults : null,
+        firstJourneyPrice
+    );
     const rootPerAdult = readNumber(
+        netPerAdult,
         onwardFareBreakdown?.ADT?.per_person,
         onwardFareBreakdown?.ADT?.perPerson
     );
-    const safeAdults = Math.max(Number(adults || 1), 1);
     const sourceItems = DEFAULT_FARE_TEMPLATES;
 
     return sourceItems.map((item, index) => {
@@ -163,6 +183,8 @@ export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
                 flightData?.fare?.pricePerAdult ||
                 "N/A"
                 : template.pricePerAdult,
+            netAmount: shouldUseDynamicPrice ? total : undefined,
+            netPerAdult: shouldUseDynamicPrice ? perAdult : undefined,
         };
     });
 };
