@@ -299,8 +299,8 @@ export default function Reservations({
       try {
         const response = await api.get("/bookings", {
           params: {
-            type: "flight,package",
-            domain: "localhost:1337",
+            type: "flight",
+            domain: process.env.NEXT_PUBLIC_DOMAIN,
             page: 1,
             per_page: 1,
           },

@@ -1388,6 +1388,9 @@ const HomePage = ({
         </div>
 
         <div className={styles.homePageContainer}>
+          <div className={styles.tabsLayout}>
+
+         
           <div className={styles.InspiredSection}>
             <h1>{heroData.heading}</h1>
             <p>{heroData.description}</p>
@@ -1422,6 +1425,7 @@ const HomePage = ({
                 </button>
               ))}
             </div>
+          </div>
           </div>
 
 
