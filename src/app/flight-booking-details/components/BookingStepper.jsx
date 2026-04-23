@@ -1,9 +1,9 @@
 "use client";
-"use client";
 import React from "react";
 import styles from "./BookingStepper.module.css";
 import { Check } from "lucide-react";
 import { useFlightBooking } from "../FlightBookingContext";
+import { useRouter } from "next/navigation";
 // import { useSearchParams } from "next/navigation";
 
 const steps = [
@@ -16,25 +16,48 @@ const steps = [
 ];
 
 export default function BookingStepper() {
-  const { currentStep } = useFlightBooking();
-  // Calculate progress line percentage based on currentStep
-  // If currentStep is 3, line goes from 1 to 3.
-  const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
+  const router = useRouter();
+  const { currentStep, setCurrentStep } = useFlightBooking();
+
+  const handleStepClick = (stepId) => {
+    if (stepId > currentStep) return;
+
+    if (stepId === 1) {
+      router.push("/flights");
+      return;
+    }
+
+    setCurrentStep(stepId);
+  };
 
   return (
     <div className={styles.stepperWrapper}>
       <div className={styles.stepperContainer}>
         {/* Steps */}
-        {steps.map((step, index) => {
+        {steps.map((step) => {
           const isActive = step.id === currentStep;
           const isCompleted = step.id < currentStep;
 
           return (
             <div
               key={step.id}
+              role={step.id <= currentStep ? "button" : undefined}
+              tabIndex={step.id <= currentStep ? 0 : undefined}
+              onClick={() => handleStepClick(step.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleStepClick(step.id);
+                }
+              }}
               className={`${styles.stepItem} ${
                 isActive ? styles.stepActive : ""
               } ${isCompleted ? styles.stepCompleted : ""}
+                                ${
+                                  step.id <= currentStep
+                                    ? styles.stepClickable
+                                    : ""
+                                }
                                 ${step.id === 6 ? styles.lastStepItem : ""}
                                 `}
             >
