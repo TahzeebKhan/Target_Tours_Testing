@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+'use client'
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/plane";
@@ -6,6 +7,7 @@ import BelowPlane from "@/app/flight-booking-details/mobileViewComponents/seatin
 import Mobile_footer from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/Mobile_footer";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 const rowData = [
   { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
   { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
@@ -39,29 +41,293 @@ const rowData = [
   { id: 16, seats: ["xl", "xl", "xl", "xl", "xl", "xl"] },
   { id: 17, seats: ["black", "black", "xl", "xl", "black", "black"] },
 ];
+
+const SEAT_COLUMNS = ["A", "B", "C", "D", "E", "F"];
+
+const readNumber = (...values) => {
+  for (const value of values) {
+    const normalized =
+      typeof value === "string"
+        ? Number(value.replace(/[^\d.]/g, ""))
+        : Number(value);
+    if (Number.isFinite(normalized)) return normalized;
+  }
+  return null;
+};
+
+const findSeatArray = (value, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object") return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    const hasSeatShape = value.some((item) => {
+      if (!item || typeof item !== "object") return false;
+      return Boolean(
+        item.SeatNumber ||
+          item.seatNumber ||
+          item.seat_no ||
+          item.seatNo ||
+          item.number ||
+          item.code
+      );
+    });
+
+    if (hasSeatShape) return value;
+
+    for (const item of value) {
+      const nested = findSeatArray(item, seen);
+      if (nested.length) return nested;
+    }
+    return [];
+  }
+
+  for (const nested of Object.values(value)) {
+    const result = findSeatArray(nested, seen);
+    if (result.length) return result;
+  }
+
+  return [];
+};
+
+const getSeatNumber = (seat) =>
+  String(
+    seat?.SeatNumber ||
+      seat?.seatNumber ||
+      seat?.seat_no ||
+      seat?.seatNo ||
+      seat?.number ||
+      seat?.code ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+
+const getSeatType = (seat) => {
+  const status = String(
+    seat?.SeatStatus || seat?.seatStatus || seat?.status || ""
+  ).toLowerCase();
+  const description = String(
+    seat?.SeatDesc || seat?.seatDesc || seat?.description || seat?.SeatInfo || ""
+  ).toLowerCase();
+  const info = String(seat?.SeatInfo || seat?.seatInfo || "").toLowerCase();
+  const isAvailable = Boolean(
+    seat?.AvailStatus ?? seat?.available ?? seat?.isAvailable
+  );
+  const amount = readNumber(
+    seat?.Price,
+    seat?.price,
+    seat?.Amount,
+    seat?.amount,
+    seat?.Fare,
+    seat?.fare
+  );
+
+  if (!isAvailable || status.includes("unavailable") || status.includes("booked")) {
+    return "taken";
+  }
+  if (description.includes("non") && description.includes("reclin")) return "black";
+  if (description.includes("exit") || info.includes("exit")) return "red";
+  if (description.includes("leg") || info.includes("leg")) return "xl";
+  if (!amount || amount <= 0) return "blue";
+  if (amount <= 525) return "blue";
+  if (amount <= 1103) return "purple";
+  return "orange";
+};
+
+const buildFormattedSeatRows = (seatLayoutResponse) => {
+  const formatted =
+    seatLayoutResponse?.data?.formatted ||
+    seatLayoutResponse?.formatted ||
+    null;
+
+  if (!formatted) return { rows: rowData, seatsById: {} };
+
+  const seats = findSeatArray(formatted);
+  if (!seats.length) return { rows: rowData, seatsById: {} };
+
+  const rowMap = new Map();
+  const seatsById = {};
+
+  seats.forEach((seat) => {
+    const seatNumber = getSeatNumber(seat);
+    const match = seatNumber.match(/^(\d+)\s*([A-Z])$/);
+    if (!match) return;
+
+    const rowId = Number(match[1]);
+    const column = match[2];
+    const columnIndex = SEAT_COLUMNS.indexOf(column);
+    if (!Number.isFinite(rowId) || columnIndex < 0) return;
+
+    if (!rowMap.has(rowId)) {
+      rowMap.set(rowId, Array.from({ length: SEAT_COLUMNS.length }, () => "grey"));
+    }
+
+    const type = getSeatType(seat);
+    rowMap.get(rowId)[columnIndex] = type;
+    seatsById[`${rowId}-${column}`] = {
+      ...seat,
+      id: `${rowId}-${column}`,
+      seatNumber: `${rowId}-${column}`,
+      price: readNumber(
+        seat?.Price,
+        seat?.price,
+        seat?.Amount,
+        seat?.amount,
+        seat?.Fare,
+        seat?.fare
+      ) || 0,
+      type,
+    };
+  });
+
+  const rows = Array.from(rowMap.entries())
+    .sort(([left], [right]) => left - right)
+    .map(([id, seatsForRow]) => ({ id, seats: seatsForRow }));
+
+  return {
+    rows: rows.length ? rows : [],
+    seatsById,
+  };
+};
+
+const formatSeatingDate = (value) => {
+  if (!value || value === "N/A") return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 const SeatingDetails = () => {
-  const [openTab, setOpenTab] = useState("");
+  const [openTab, setOpenTab] = useState("flight");
   const [selectedPassenger, setSelectedPassenger] = useState(1);
-  const [selectedSeats, setSelectedSeats] = useState(["3-A", "3-B"]);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [totalSeatPrice, setTotalSeatPrice]= useState(0);
+
+
+
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   const toggleTab = (tab) => {
     if (openTab !== tab) setOpenTab(tab);
   };
-  const { setCurrentStep, currentStep, prices, bookingSession, travelerDetails } = useFlightBooking();
+  const {
+    setCurrentStep,
+    currentStep,
+    prices,
+    bookingSession,
+    travelerDetails,
+    seats,
+    setSeats,
+    seatLayoutLoading,
+  } = useFlightBooking();
+
+  const { rows: seatRows, seatsById } = useMemo(
+    () => buildFormattedSeatRows(bookingSession?.seatLayoutResponse),
+    [bookingSession?.seatLayoutResponse]
+  );
+  const bookingDetailsView = useMemo(
+    () => getBookingDetailsView(bookingSession || {}),
+    [bookingSession]
+  );
+  const seatingFlight = bookingDetailsView?.departureFlight || {};
+  const seatingAirline = seatingFlight?.airline || {};
+  const routeLabel = [
+    bookingDetailsView?.header?.fromCode,
+    bookingDetailsView?.header?.toCode,
+  ]
+    .filter(Boolean)
+    .join("–");
+  const flightDate = formatSeatingDate(
+    seatingFlight?.departure?.date || bookingDetailsView?.header?.date || "N/A"
+  );
+  const flightTimeRange = [
+    seatingFlight?.departure?.time,
+    seatingFlight?.arrival?.time,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+  const airlineLabel = [
+    seatingAirline?.name,
+    seatingAirline?.code ? `(${seatingAirline.code})` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const aircraftLabel = seatingFlight?.aircraft || "N/A";
+  const airlineLogo =
+    seatingAirline?.logo || "/images/flightCompanyLogos/batikAirlines2.png";
+
+
+  const passengerList = useMemo(() => {
+    if (!Array.isArray(travelerDetails) || travelerDetails.length === 0) {
+      return [{ id: 1, name: "Passenger 1" }];
+    }
+
+    return travelerDetails.map((traveler, index) => ({
+      id: index + 1,
+      name:
+        [traveler.FName, traveler.LName].filter(Boolean).join(" ") ||
+        `Passenger ${index + 1}`,
+    }));
+  }, [travelerDetails]);
+  const passengerCount = passengerList.length;
   const priceSummary = useMemo(
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
   );
 
+  useEffect(() => {
+    setSelectedSeats((prev) => prev.filter(Boolean).slice(0, passengerCount));
+    setSelectedPassenger((prev) => Math.min(prev, passengerCount) || 1);
+  }, [passengerCount]);
+
+  useEffect(() => {
+    setSeats(
+      selectedSeats
+        .filter(Boolean)
+        .map((seatId) => {
+          const seat = seatsById[seatId] || {};
+          return {
+            ...seat,
+            id: seatId,
+            seatNumber: seatId,
+            price: seat.price || 0,
+          };
+        })
+    );
+  }, [selectedSeats, seatsById, setSeats]);
+
+
+  useEffect(()=>{
+ console.log("seats",seats)
+  },[seats])
+
+  useEffect(()=>{
+    console.log("booking session",buildFormattedSeatRows(bookingSession?.seatLayoutResponse))
+     },[bookingSession?.seatLayoutResponse])
+
   const toggleSeat = (rowId, colLabel, type) => {
     if (type === "taken") return;
     const seatId = `${rowId}-${colLabel}`;
-    setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
-        : [...prev, seatId]
-    );
+
+    setSelectedSeats((prev) => {
+      const selectedSeatIds = prev.filter(Boolean);
+
+      if (selectedSeatIds.includes(seatId)) {
+        return selectedSeatIds.filter((id) => id !== seatId);
+      }
+
+      if (selectedSeatIds.length >= passengerCount) {
+        return selectedSeatIds;
+      }
+
+      return [...selectedSeatIds, seatId];
+    });
   };
 
   return (
@@ -93,7 +359,9 @@ const SeatingDetails = () => {
           >
             <div className={styles.flightSeatingContainer}>
               <div className={styles.flightExpandableHeaderContainer}>
-                <h3 className={styles.flightExpandableHeader}>DEL–BOM</h3>
+                <h3 className={styles.flightExpandableHeader}>
+                  {routeLabel || "N/A"}
+                </h3>
                 {/* <img
                             src="/icons/DownArrows.svg"
                             alt=""
@@ -102,14 +370,16 @@ const SeatingDetails = () => {
                         /> */}
               </div>
               <div className={styles.aboutFlightContainerRight}>
-                <span>Fri, 26 Dec 2025</span>
+                <span>{flightDate}</span>
                 <div className={styles.dot}></div>
-                <span>23:10 - 10:40</span>
+                <span>{flightTimeRange || "N/A"}</span>
               </div>
             </div>
             <div className={styles.flightSeatingPrice}>
               <div className={styles.priceContainer}>
-                <span className={styles.price}>₹ 3,000</span>
+              {prices.seats ?  <span className={styles.price}> ₹ {prices?.seats} </span> :
+              <span className={styles.selectionPending}> Selection Pending</span> }
+                {/* <span className={styles.price}>{prices.seats ?  ` ₹ ${prices.seats}` : " Selection Pending"}</span> */}
                 <span className={styles.subInfoText}>Added to fare</span>
               </div>
               <img
@@ -131,27 +401,28 @@ const SeatingDetails = () => {
               <div className={styles.flightSeatingWrapper}>
                 <div className={styles.selectSeatsTitle}>
                   Select Seat On Map
+                  {seatLayoutLoading ? "..." : ""}
                 </div>
                 <Plane
                   callFromDesktop={true}
                   toggleSeat={toggleSeat}
                   selectedSeats={selectedSeats}
                   setSelectedSeats={setSelectedSeats}
-                  rowData={rowData}
+                  rowData={seatRows}
                 />
               </div>
               <div className={styles.flightSeatingRight}>
                 <div className={styles.flightSeatingSubRight}>
                   <div className={styles.flightSeatingRightHeader}>
                     <img
-                      src="/images/flightCompanyLogos/batikAirlines2.png"
-                      alt=""
+                      src={airlineLogo}
+                      alt={seatingAirline?.name || "Airline"}
                     />
                     <div className={styles.flightSeatingRightHeaderInfo}>
                       <h3 className={styles.flightName}>
-                        Batik Air Malaysia (OD 804)
+                        {airlineLabel || "N/A"}
                       </h3>
-                      <p className={styles.chip}>Boeing 737</p>
+                      <p className={styles.chip}>{aircraftLabel}</p>
                     </div>
                   </div>
 
@@ -161,10 +432,7 @@ const SeatingDetails = () => {
                       Select your seat
                     </div>
 
-                    {[
-                      { id: 1, name: "Demian" },
-                      { id: 2, name: "Satria" },
-                    ].map((passenger, index) => {
+                    {passengerList.map((passenger, index) => {
                       const seat = selectedSeats[index] || null;
 
                       return (
@@ -239,19 +507,20 @@ const SeatingDetails = () => {
         </div>
         <div className={styles.detailsWrapper}>
           <div className={styles.fromTo}>
-            <span>del</span>–<span>bom</span>
+            <span>{bookingDetailsView?.header?.fromCode || "N/A"}</span>–
+            <span>{bookingDetailsView?.header?.toCode || "N/A"}</span>
           </div>
           <div className={styles.dateTime}>
-            <span>Fri, 26 Dec 2025</span>
+            <span>{flightDate}</span>
             <span className={styles.dot2} />
-            <span>23:10 - 10:40</span>
+            <span>{flightTimeRange || "N/A"}</span>
           </div>
         </div>
         <Plane
           toggleSeat={toggleSeat}
           selectedSeats={selectedSeats}
           setSelectedSeats={setSelectedSeats}
-          rowData={rowData}
+          rowData={seatRows}
         />
         <BelowPlane />
 

@@ -28,14 +28,20 @@ const MobileFlightMeals = ({
         <div className={styles.mealGrid}>
           {meals.map((meal) => (
             <MealItem
-              key={meal.id}
+              key={meal.selectionKey || meal.id}
               {...meal}
-              quantity={segmentQuantities[meal.id] || 0}
+              quantity={segmentQuantities[meal.selectionKey || meal.id] || 0}
               onIncrease={() =>
-                onUpdateQuantity(meal.id, (segmentQuantities[meal.id] || 0) + 1)
+                onUpdateQuantity(
+                  meal.selectionKey || meal.id,
+                  (segmentQuantities[meal.selectionKey || meal.id] || 0) + 1
+                )
               }
               onDecrease={() =>
-                onUpdateQuantity(meal.id, (segmentQuantities[meal.id] || 0) - 1)
+                onUpdateQuantity(
+                  meal.selectionKey || meal.id,
+                  (segmentQuantities[meal.selectionKey || meal.id] || 0) - 1
+                )
               }
             />
           ))}
@@ -46,19 +52,19 @@ const MobileFlightMeals = ({
         <div className={styles.mealGrid}>
           {beverages.map((drink) => (
             <MealItem
-              key={drink.id}
+              key={drink.selectionKey || drink.id}
               {...drink}
-              quantity={segmentQuantities[drink.id] || 0}
+              quantity={segmentQuantities[drink.selectionKey || drink.id] || 0}
               onIncrease={() =>
                 onUpdateQuantity(
-                  drink.id,
-                  (segmentQuantities[drink.id] || 0) + 1
+                  drink.selectionKey || drink.id,
+                  (segmentQuantities[drink.selectionKey || drink.id] || 0) + 1
                 )
               }
               onDecrease={() =>
                 onUpdateQuantity(
-                  drink.id,
-                  (segmentQuantities[drink.id] || 0) - 1
+                  drink.selectionKey || drink.id,
+                  (segmentQuantities[drink.selectionKey || drink.id] || 0) - 1
                 )
               }
             />

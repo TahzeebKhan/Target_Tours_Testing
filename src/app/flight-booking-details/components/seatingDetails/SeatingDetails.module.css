@@ -18,6 +18,10 @@
   gap: 6px;
   align-items: center;
 }
+.selectionPending{
+  color: #FBBF24;
+  font-size: 14px;
+}
 
 .from,
 .to {

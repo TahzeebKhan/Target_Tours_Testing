@@ -10,6 +10,7 @@ import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetails
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
+import { toast } from "react-toastify";
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
@@ -107,8 +108,7 @@ const MealsDetails = () => {
   );
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
-  // State: { "DEL-BOM-1": 2, "BOM-DEL-7": 1 }
-  // Key format: `${segment}-${mealId}`
+  // State: { "DEL-BOM::meal-key": 1 }
   const [mealQuantities, setMealQuantities] = useState({});
 
   const toggleTab = (tabName) => {
@@ -141,10 +141,36 @@ const MealsDetails = () => {
 
   const handleUpdateQuantity = useCallback((segment, selectionKey, newQty) => {
     const key = `${segment}::${selectionKey}`;
-    setMealQuantities((prev) => ({
-      ...prev,
-      [key]: Math.max(0, newQty),
-    }));
+    setMealQuantities((prev) => {
+      const currentQty = prev[key] || 0;
+      const isIncreasing = newQty > currentQty;
+      const selectedMealKey = Object.entries(prev).find(([, qty]) => qty > 0)?.[0];
+
+      if (isIncreasing && currentQty >= 1) {
+        toast.info("Only 1 quantity is allowed for a meal.", {
+          toastId: "single-meal-quantity-limit",
+        });
+        return prev;
+      }
+
+      if (isIncreasing && selectedMealKey && selectedMealKey !== key) {
+        toast.info("Only 1 meal can be selected for this booking.", {
+          toastId: "single-meal-selection-limit",
+        });
+        return prev;
+      }
+
+      const nextQty = Math.min(Math.max(0, newQty), 1);
+      if (nextQty === 0) {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+
+      return {
+        [key]: nextQty,
+      };
+    });
   }, []);
 
   // Filter quantities for a specific segment to pass to Expandable

@@ -135,6 +135,16 @@ export const getFlightSsr = async (payload) => {
   return response?.data;
 };
 
+export const getFlightSeatLayout = async (payload) => {
+  const response = await api.post("/api/flights/seat-layout", payload, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
 export const createFlightItinerary = async (payload) => {
   const response = await api.post("/api/flights/create-itinerary", {
     ...payload,

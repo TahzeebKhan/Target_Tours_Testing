@@ -464,6 +464,57 @@ export const buildSsrPayload = (session) => {
   };
 };
 
+export const buildSeatLayoutPayload = (session) => {
+  const priceRequest = session?.priceRequest || {};
+  const ssrResponse = session?.ssrResponse || {};
+  const priceResponse = session?.priceResponse || {};
+  const selectedFlight = session?.selectedFlight || {};
+  const flightBooking = selectedFlight?.booking || {};
+  const requestTrips = extractTrips(priceRequest);
+  const primaryTrip = requestTrips[0] || {};
+  const ssrPayload = unwrapPayload(ssrResponse);
+  const ssrRaw = ssrPayload?.raw || ssrResponse?.raw || {};
+  const ssrFormatted = ssrPayload?.formatted || ssrResponse?.formatted || {};
+  const rootTui = pickFirst(
+    priceResponse?.data?.tui,
+    priceResponse?.data?.TUI,
+    priceResponse?.tui,
+    priceResponse?.TUI,
+    primaryTrip?.TUI,
+    primaryTrip?.tui,
+    ssrPayload?.tui,
+    ssrPayload?.TUI,
+    ssrRaw?.TUI,
+    ssrFormatted?.tui,
+    ssrFormatted?.TUI
+  );
+
+  return {
+    ClientID: pickFirst(
+      priceRequest?.ClientID,
+      priceResponse?.ClientID,
+      priceResponse?.clientId,
+      priceResponse?.data?.ClientID,
+      flightBooking?.clientId,
+      "FVI6V120g22Ei5ztGK0FIQ=="
+    ),
+    Source: pickFirst(flightBooking?.ssrSource, priceRequest?.Source, "LV"),
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    Trips: [
+      {
+        TUI: rootTui || "",
+        Index: "",
+        OrderID: pickFirst(
+          primaryTrip?.OrderID,
+          primaryTrip?.orderId,
+          primaryTrip?.OrderId,
+          1
+        ),
+      },
+    ],
+  };
+};
+
 export const extractBaseFareAmount = (session) => {
   const priceResponse = session?.priceResponse || {};
   const priceRequest = session?.priceRequest || {};
@@ -732,6 +783,7 @@ export const buildCreateItineraryPayload = (session, prices) => {
     : [];
   const baggageSelections = Array.isArray(session?.baggage) ? session.baggage : [];
   const mealSelections = Array.isArray(session?.meals) ? session.meals : [];
+  const seatSelections = Array.isArray(session?.seats) ? session.seats : [];
   const primaryTraveler = travelers[0] || {};
   const contactMobile = pickFirst(contact.MobileNumber, primaryTraveler.MobileNumber, "");
   const contactCountryCode = pickFirst(
@@ -740,7 +792,7 @@ export const buildCreateItineraryPayload = (session, prices) => {
     ""
   );
   const totalPassengers = Math.max(travelers.length, 1);
-  const ssrSelections = [...baggageSelections, ...mealSelections];
+  const ssrSelections = [...baggageSelections, ...mealSelections, ...seatSelections];
   const ssrPayload = ssrSelections
     .map((item, index) => {
       const paxId = (index % totalPassengers) + 1;

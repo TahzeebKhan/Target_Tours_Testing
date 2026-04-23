@@ -1,10 +1,11 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createFlightItinerary, getFlightSsr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
+import { createFlightItinerary, getFlightSeatLayout, getFlightSsr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
 import { toast } from "react-toastify";
 import {
   buildCreateItineraryPayload,
   buildRetrieveBookingPayload,
+  buildSeatLayoutPayload,
   buildStartPaymentPayload,
   buildSsrPayload,
   extractBaseFareAmount,
@@ -27,6 +28,7 @@ export function FlightBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
   const skipNextHistoryPushRef = useRef(false);
   const ssrRequestInFlightRef = useRef(false);
+  const seatLayoutRequestInFlightRef = useRef(false);
 
   const [baggage, setBaggage] = useState([]);
   const [meals, setMeals] = useState([]);
@@ -41,8 +43,14 @@ export function FlightBookingProvider({ children }) {
   });
   const [bookingError, setBookingError] = useState("");
   const [ssrLoading, setSsrLoading] = useState(false);
+  const [seatLayoutLoading, setSeatLayoutLoading] = useState(false);
   const [itineraryLoading, setItineraryLoading] = useState(false);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
+
+
+
+
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -113,7 +121,7 @@ export function FlightBookingProvider({ children }) {
 
   const loadSsrForBooking = async () => {
     if (!bookingSession?.priceResponse) return false;
-    if (bookingSession?.ssrResponse) return true;
+    if (bookingSession?.ssrResponse && bookingSession?.seatLayoutResponse) return true;
     if (ssrRequestInFlightRef.current) return false;
 
     const ssrPayload = buildSsrPayload(bookingSession);
@@ -126,11 +134,35 @@ export function FlightBookingProvider({ children }) {
     setSsrLoading(true);
     setBookingError("");
     try {
-      const ssrResponse = await getFlightSsr(ssrPayload);
+      const ssrResponse = bookingSession?.ssrResponse || await getFlightSsr(ssrPayload);
+      let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
+      let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+      if (!seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
+        seatLayoutRequestInFlightRef.current = true;
+        setSeatLayoutLoading(true);
+        const sessionWithSsr = {
+          ...(bookingSession || {}),
+          ssrRequest: ssrPayload,
+          ssrResponse,
+        };
+        seatLayoutRequest = buildSeatLayoutPayload(sessionWithSsr);
+
+        if (seatLayoutRequest?.Trips?.[0]?.TUI) {
+          try {
+            seatLayoutResponse = await getFlightSeatLayout(seatLayoutRequest);
+          } catch (seatLayoutError) {
+            console.error("Unable to load seat layout", seatLayoutError);
+          }
+        }
+      }
+
       setBookingSession((prev) => ({
         ...(prev || {}),
         ssrRequest: ssrPayload,
         ssrResponse,
+        seatLayoutRequest,
+        seatLayoutResponse,
       }));
       return true;
     } catch (error) {
@@ -142,7 +174,9 @@ export function FlightBookingProvider({ children }) {
       return false;
     } finally {
       ssrRequestInFlightRef.current = false;
+      seatLayoutRequestInFlightRef.current = false;
       setSsrLoading(false);
+      setSeatLayoutLoading(false);
     }
   };
 
@@ -171,6 +205,7 @@ export function FlightBookingProvider({ children }) {
         bookingContactDetails,
         baggage,
         meals,
+        seats,
       },
       prices
     );
@@ -272,6 +307,7 @@ export function FlightBookingProvider({ children }) {
         setTravelerFormErrors,
         bookingError,
         ssrLoading,
+        seatLayoutLoading,
         loadSsrForBooking,
         itineraryLoading,
         submitItinerary,

@@ -34,6 +34,10 @@
   flex: 1;
 }
 
+.stepClickable {
+  cursor: pointer;
+}
+
 /* Connecting Lines using Pseudo-elements */
 .stepItem::before,
 .stepItem::after {
@@ -81,7 +85,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: default !important;
 }
 
 /* Outer yellow ring for completed/active steps */
@@ -130,7 +133,6 @@
   /* Dark blue */
   color: #ffffff;
   transition: all 1s ease;
-  cursor: default !important;
 }
 
 .stepCompleted .stepCircle:hover,
