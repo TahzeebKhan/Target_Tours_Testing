@@ -91,12 +91,14 @@ text-transform: uppercase;
 .swapper{
     position: relative;
     overflow: hidden;
+    height: 333px;
 }
 .swapper img{
     width: 100%;
-    /* height: 333px; */
+    height: 100%;
     display: block;
-   
+    object-fit: cover;
+    object-position: center;
 }
 
 .overlay {
@@ -165,19 +167,19 @@ text-transform: uppercase;
 
 
 @media (max-width: 1366px) {
-    .swapper img{
+    .swapper{
         height: 300px;
     }
 }
 
 @media (max-width: 1224px){
-    .swapper img{
+    .swapper{
         height: 275px;
     }
 }
 
 @media (max-width: 768px){
-    .swapper img{
+    .swapper{
         height: 333px;
     }
 }

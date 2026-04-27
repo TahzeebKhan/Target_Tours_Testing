@@ -11,7 +11,42 @@ import InnerCarousel from "./InnerCarousel";
 import styles from "./ExpCarousel.module.css";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function ExpCarousel({ activeTab }) {
+const DEFAULT_SLIDES = [
+  {
+    id: "fallback-1",
+    title: "N/A",
+    subtitle: "N/A",
+    favorite: false,
+    images: ["/fallback.png"],
+    desc: "N/A",
+  },
+  {
+    id: "fallback-2",
+    title: "N/A",
+    subtitle: "N/A",
+    favorite: false,
+    images: ["/fallback.png"],
+    desc: "N/A",
+  },
+  {
+    id: "fallback-3",
+    title: "N/A",
+    subtitle: "N/A",
+    favorite: false,
+    images: ["/fallback.png"],
+    desc: "N/A",
+  },
+  {
+    id: "fallback-4",
+    title: "N/A",
+    subtitle: "N/A",
+    favorite: false,
+    images: ["/fallback.png"],
+    desc: "N/A",
+  },
+];
+
+export default function ExpCarousel({ activeTab, slidesData = DEFAULT_SLIDES }) {
   const [swiperRef, setSwiperRef] = useState(null);
   // track the current slidesPerView according to breakpoints so we can
   // conditionally show navigation buttons when there are more slides than visible
@@ -30,148 +65,21 @@ export default function ExpCarousel({ activeTab }) {
     setSelectedItem(null);
   };
 
-  const [allSlidesData, setAllSlidesData] = useState([
-    {
-      title: "Toronto, canada",
-      subtitle: "Serene Haven Inn",
-      price: "₹449/",
-      rating: 3.4,
-      users: 508,
-      type: "Beach",
-      favorite: false,
-      images: ["/images/Frame1.png", "/images/Frame2.png", "/images/Frame3.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Calgary, Canadaa",
-      subtitle: "Calm Waters Lodge",
-      price: "₹899/",
-      rating: 4.5,
-      users: 1020,
-      type: "Beach",
-      favorite: false,
-      images: ["/images/Frame2.png", "/images/Frame3.png", "/images/Frame4.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Ottawa, Canada",
-      subtitle: "Quiet Escape Resort",
-      price: "₹699/",
-      rating: 4.6,
-      users: 720,
-      type: "Beach",
-      favorite: false,
-      images: ["/images/Frame3.png", "/images/Frame4.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Vancouver, Canada",
-      subtitle: "Peaceful Oasis Hotel",
-      price: "₹599/",
-      rating: 4.4,
-      users: 540,
-      type: "Beach",
-      favorite: false,
-      images: ["/images/Frame4.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Darjeeling, Bengal",
-      subtitle: "Mountain View Stay",
-      price: "₹699/",
-      rating: 4.6,
-      users: 720,
-      type: "Beach",
-      favorite: false,
-      images: ["/images/Frame3.png", "/images/Frame4.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Darjeeling, Bengal",
-      subtitle: "Mountain View Stay",
-      price: "₹699/",
-      rating: 4.6,
-      users: 720,
-      type: "Hiking",
-      favorite: false,
-      images: ["/images/Frame1.png", "/images/Frame3.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Manali, Himachal",
-      subtitle: "Family Hill Resort",
-      price: "₹599/",
-      rating: 4.4,
-      users: 540,
-      type: "Family",
-      favorite: false,
-      images: ["/images/Frame2.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Manali, Himachal",
-      subtitle: "Family Hill Resort",
-      price: "₹599/",
-      rating: 4.4,
-      users: 540,
-      type: "Ski",
-      favorite: false,
-      images: ["/images/Frame4.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Darjeeling, Bengal",
-      subtitle: "Mountain View Stay",
-      price: "₹699/",
-      rating: 4.6,
-      users: 720,
-      type: "Ski",
-      favorite: false,
-      images: ["/images/Frame3.png", "/images/Frame4.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Manali, Himachal",
-      subtitle: "Family Hill Resort",
-      price: "₹599/",
-      rating: 4.4,
-      users: 540,
-      type: "Ski",
-      favorite: false,
-      images: ["/images/Frame4.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Shimla, India",
-      subtitle: "Snow Peak Stay",
-      price: "₹799/",
-      rating: 4.5,
-      users: 620,
-      type: "Ski",
-      favorite: false,
-      images: ["/images/Frame2.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-    {
-      title: "Manali, Himachal",
-      subtitle: "Family Hill Resort",
-      price: "₹599/",
-      rating: 4.4,
-      users: 540,
-      type: "Ski",
-      favorite: false,
-      images: ["/images/Frame4.png", "/images/Frame1.png"],
-      desc: "The Oberoi, New Delhi is situated in the heart of central Delhi overlooking the fairways of The Delhi Golf Course. The contemporary luxury hotel has 220 modern guest rooms and suites with teakwood floors, walk-in closets, luxury Italian marble bathrooms, and large picture windows that overlook either the greens or historic Humayun's Tomb. Butler service is available 24 hours a day. Restaurants include an all-day international eatery, a contemporary Indian restaurant and a Chinese restaurant perched on the rooftop. Other amenities include a spa, po"
-    },
-  ]);
+  const [allSlidesData, setAllSlidesData] = useState(
+    slidesData.length ? slidesData : DEFAULT_SLIDES
+  );
+
+  useEffect(() => {
+    setAllSlidesData(slidesData.length ? slidesData : DEFAULT_SLIDES);
+  }, [slidesData]);
 
   // Filter based on active tab
   const slides =
     activeTab === "All"
       ? allSlidesData.map((item, index) => ({ ...item, originalIndex: index }))
       : allSlidesData
-        .map((item, index) => ({ ...item, originalIndex: index }))
-        .filter((item) => item.type === activeTab);
+          .map((item, index) => ({ ...item, originalIndex: index }))
+          .filter((item) => item.type === activeTab);
 
   // Toggle favorite
   const toggleFavorite = (index) => {
