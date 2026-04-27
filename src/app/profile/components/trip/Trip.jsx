@@ -6,7 +6,7 @@ import Reservations from "../reservations/Reservations";
 import IndividualProperty from "../individualProperty/IndividualProperty";
 
 const Trip = () => {
-  const [step, setStep] = useState("EMPTY");
+  const [step, setStep] = useState("RESERVATIONS");
 
   const [activeTab, setActiveTab] = useState("HOTEL BOOKING");
   // EMPTY | RESERVATIONS | DETAILS

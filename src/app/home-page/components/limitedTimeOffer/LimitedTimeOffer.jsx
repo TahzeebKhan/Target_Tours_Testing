@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { useRouter } from "next/navigation";
@@ -28,8 +28,17 @@ const LimitedTimeOffer = () => {
   const formattedPrice = formatPrice(data?.startPrice);
   const videoSrc = isVideoReady ? data?.backgroundVideo : null;
 
+  useEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+
+    swiper.update();
+    setIsBeginning(swiper.isBeginning);
+    setIsEnd(swiper.isEnd);
+  }, [sliderData.length]);
+
   return (
-    <section className="relative w-full h-[689px]">
+    <section className={styles.offerSection}>
       <header className={`${styles.homeSection} w-full`}>
 
         {/* ---------------- HIDDEN MAIN VIDEO (PRELOAD ONLY) ---------------- */}
@@ -140,23 +149,36 @@ const LimitedTimeOffer = () => {
               </div>
 
               {/* SWIPER */}
-              <div className={`${styles.swapper}`}>
+              <div className={styles.swapper}>
                 <Swiper
                   modules={[Navigation]}
-                  slidesPerView={'auto'}
+                  observer
+                  observeParents
+                  watchOverflow
+                  slidesPerView="auto"
                   breakpoints={{
                     0: {
-                      spaceBetween: 12, // mobile
+                      slidesPerView: 1.1,
+                      spaceBetween: 12,
                     },
                     640: {
-                      spaceBetween: 16, // optional: small tablets
+                      slidesPerView: 1.45,
+                      spaceBetween: 16,
+                    },
+                    768: {
+                      slidesPerView: 1.9,
+                      spaceBetween: 18,
                     },
                     1024: {
-                      spaceBetween: 32, // desktop
+                      slidesPerView: 2.4,
+                      spaceBetween: 24,
+                    },
+                    1280: {
+                      slidesPerView: "auto",
+                      spaceBetween: 32,
                     },
                   }}
                   className={styles.carousel}
-
                   onSwiper={(swiper) => {
                     swiperRef.current = swiper;
                     setIsBeginning(swiper.isBeginning);
@@ -170,15 +192,20 @@ const LimitedTimeOffer = () => {
                 >
                   {sliderData.map((item, index) => (
                     <SwiperSlide key={index} className={styles.swapperslider}>
-                      <div className={styles.items}
-                      onClick={()=> router.push(`/tour-details?id=${item.id}`)}
+                      <div
+                        className={styles.items}
+                        onClick={() => router.push(`/tour-details?id=${item.id}`)}
                       >
                         <img src={item.image || "/fallback.jpg"} alt={item.title || "N/A"} />
 
                         <div className={styles.imgMainContainer}>
                           <div className={styles.imgBottom}>
-                            <p className={styles.imgHead}>{item.title || "N/A"}</p>
-                            <p className={styles.imgSubHead}>{item.subtitle || "N/A"}</p>
+                            <p className={styles.imgHead}>{item?.city || "N/A"}</p>
+                            <p className={styles.imgSubHead}>
+                              {item.state?.length > 0
+                                ? `${item?.state}`
+                                :  "N/A"}
+                            </p>
                           </div>
                         </div>
                       </div>

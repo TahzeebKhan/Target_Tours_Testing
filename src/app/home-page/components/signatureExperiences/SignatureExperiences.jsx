@@ -275,32 +275,13 @@ import Carousel from "@/app/3dCarousel/component/Carousel";
 import CarouselMobile from "@/app/3dCarousel/component/CarouselMobile";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-/**
- * UI TAB → BACKEND REGION MAPPING
- * (MOST IMPORTANT PART)
- */
-const REGION_MAP = {
-  Asia: "ASIA",
-  Africa: "WEST_AFRICA",
-
-  "Central America": "CENTRAL_AMERICA",
-  Europe: "EUROPE",
-  // "Indian Ocean": "INDIAN_OCEAN",
-  "Middle East": "MIDDLE_EAST",
-  // Oceania: "OCEANIA",
-  "South America": "SOUTH_AMERICA",
-};
-
-const TABS_DATA = [
-  { title: "Asia" },
-  { title: "Africa" },
-  { title: "Central America" },
-  { title: "Europe" },
-  // { title: "Indian Ocean" },
-  { title: "Middle East" },
-  // { title: "Oceania" },
-  { title: "South America" },
+const FALLBACK_REGIONS = [
+  { title: "Asia", value: "ASIA" },
+  { title: "Africa", value: "WEST_AFRICA" },
+  { title: "Central America", value: "CENTRAL_AMERICA" },
+  { title: "Europe", value: "EUROPE" },
+  { title: "Middle East", value: "MIDDLE_EAST" },
+  { title: "South America", value: "SOUTH_AMERICA" },
 ];
 
 const formatPackagePrice = (price) => {
@@ -328,6 +309,61 @@ const trimText = (text = "", maxLength = 40) => {
 const trimToFirstWords = (text = "", wordCount = 2) =>
   text.trim().split(/\s+/).filter(Boolean).slice(0, wordCount).join(" ");
 
+const REGION_LABELS = {
+  WEST_AFRICA: "Africa",
+  EAST_AFRICA: "Africa",
+  NORTH_AFRICA: "Africa",
+  SOUTH_AFRICA: "Africa",
+  CENTRAL_AFRICA: "Africa",
+  MIDDLE_EAST: "Middle East",
+  CENTRAL_AMERICA: "Central America",
+  SOUTH_AMERICA: "South America",
+  NORTH_AMERICA: "North America",
+  INDIAN_OCEAN: "Indian Ocean",
+};
+
+const formatRegionLabel = (value = "") => {
+  if (!value) return "N/A";
+  if (REGION_LABELS[value]) return REGION_LABELS[value];
+
+  return value
+    .toLowerCase()
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const normalizeRegionOption = (region) => {
+  if (!region) return null;
+
+  if (typeof region === "string") {
+    return {
+      title: formatRegionLabel(region),
+      value: region,
+    };
+  }
+
+  const value =
+    region.value ||
+    region.region ||
+    region.code ||
+    region.key ||
+    region.slug ||
+    region.name;
+
+  if (!value) return null;
+
+  return {
+    title:
+      region.label ||
+      region.title ||
+      region.name ||
+      formatRegionLabel(String(value)),
+    value: String(value),
+  };
+};
+
 const PLACEHOLDER_CAROUSEL_DATA = Array.from({ length: 5 }, (_, index) => ({
   id: `placeholder-${index + 1}`,
   carouselId: index + 1,
@@ -342,6 +378,45 @@ const PLACEHOLDER_CAROUSEL_DATA = Array.from({ length: 5 }, (_, index) => ({
   bottomDescription: "N/A",
   smallContent: true,
 }));
+
+const fetchAvailableRegions = async ({ signal }) => {
+  const query = new URLSearchParams({
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+  }).toString();
+
+  const response = await fetch(
+    `${API_BASE}/api/holiday-package-filters/available-regions?${query}`,
+    {
+      method: "GET",
+      signal,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch available regions");
+  }
+
+  const payload = await response.json();
+  const rawRegions =
+    payload?.data?.regions ||
+    payload?.data ||
+    payload?.regions ||
+    payload;
+
+  if (!Array.isArray(rawRegions)) {
+    return FALLBACK_REGIONS;
+  }
+
+  const normalizedRegions = rawRegions
+    .map(normalizeRegionOption)
+    .filter(Boolean);
+
+  return normalizedRegions.length > 0 ? normalizedRegions : FALLBACK_REGIONS;
+};
 
 const fetchSignatureExperiences = async ({ queryKey, signal }) => {
   const [, region] = queryKey;
@@ -398,7 +473,14 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
   const [displayedTab, setDisplayedTab] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const tabsRef = useRef(null);
-  const activeRegion = REGION_MAP[TABS_DATA[requestedTab].title];
+  const { data: availableRegions = FALLBACK_REGIONS } = useQuery({
+    queryKey: ["signature-experiences-available-regions"],
+    queryFn: fetchAvailableRegions,
+    staleTime: 1000 * 60 * 10,
+  });
+  const safeRequestedTab = Math.min(requestedTab, availableRegions.length - 1);
+  const safeDisplayedTab = Math.min(displayedTab, availableRegions.length - 1);
+  const activeRegion = availableRegions[safeRequestedTab]?.value;
   const {
     data: carouselData = [],
     isFetching,
@@ -407,15 +489,23 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
   } = useQuery({
     queryKey: ["signature-experiences", activeRegion],
     queryFn: fetchSignatureExperiences,
+    enabled: Boolean(activeRegion),
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {
+    if (availableRegions.length === 0) return;
+
+    setRequestedTab((prev) => Math.min(prev, availableRegions.length - 1));
+    setDisplayedTab((prev) => Math.min(prev, availableRegions.length - 1));
+  }, [availableRegions.length]);
+
+  useEffect(() => {
     if (!isFetching && !isPlaceholderData) {
-      setDisplayedTab(requestedTab);
+      setDisplayedTab(safeRequestedTab);
     }
-  }, [isFetching, isPlaceholderData, requestedTab]);
+  }, [isFetching, isPlaceholderData, safeRequestedTab]);
 
   const visibleCarouselData =
     carouselData.length > 0 ? carouselData : PLACEHOLDER_CAROUSEL_DATA;
@@ -430,7 +520,7 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
 
     tabs.style.setProperty("--indicator-width", `${activeTabEl.offsetWidth}px`);
     tabs.style.setProperty("--indicator-left", `${activeTabEl.offsetLeft}px`);
-  }, [displayedTab]);
+  }, [safeDisplayedTab]);
 
   /* ===================== JSX ===================== */
   return (
@@ -447,11 +537,11 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
         {/* Desktop Tabs */}
         <nav className={styles.tabsWrap}>
           <ul className={styles.tabs} ref={tabsRef}>
-            {TABS_DATA.map((tab, index) => (
+            {availableRegions.map((tab, index) => (
               <li
-                key={tab.title}
+                key={tab.value}
                 className={`${styles.tab} ${
-                  index === displayedTab ? styles.activeTab : ""
+                  index === safeDisplayedTab ? styles.activeTab : ""
                 }`}
                 onClick={() => setRequestedTab(index)}
               >
@@ -467,7 +557,7 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
             className={styles.mobileSelect}
             onClick={() => setIsOpen(!isOpen)}
           >
-            <span>{TABS_DATA[displayedTab].title}</span>
+            <span>{availableRegions[safeDisplayedTab]?.title || "Region"}</span>
             <svg
               width="14"
               height="10"
@@ -487,10 +577,10 @@ const SignatureExperiences = ({ isMultiTripMobile }) => {
 
           {isOpen && (
             <ul className={styles.mobileOptions}>
-              {TABS_DATA.map((tab, index) => (
+              {availableRegions.map((tab, index) => (
                 <li
-                  key={tab.title}
-                  className={index === displayedTab ? styles.activeOption : ""}
+                  key={tab.value}
+                  className={index === safeDisplayedTab ? styles.activeOption : ""}
                   onClick={() => {
                     setRequestedTab(index);
                     setIsOpen(false);

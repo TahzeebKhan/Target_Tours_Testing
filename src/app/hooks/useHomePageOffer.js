@@ -30,6 +30,8 @@ export const useHomePageOffer = () => {
           return {
             id: pkg.id,
             title: pkg.title || "N/A",
+            city:pkg?.location?.city,
+            state:pkg?.location?.state,
             subtitle: pkg.description || "N/A",
             image: toMediaUrl(media?.url) || "/fallback.jpg",
           };
