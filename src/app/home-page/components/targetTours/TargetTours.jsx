@@ -210,7 +210,6 @@ import MobileCarousel from "./components/MobileCarousel";
 import Cookies from "js-cookie";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
-const token = Cookies.get("auth_token");
 const FALLBACK_TABS = [
   "Asia",
   "Explore",
@@ -259,6 +258,52 @@ const formatPackagePrice = (price) => {
   }
 
   return `INR ${numericPrice.toLocaleString("en-IN")}`;
+};
+
+const toMediaUrl = (media) => {
+  const url =
+    typeof media === "string"
+      ? media
+      : media?.formats?.large?.url ||
+        media?.formats?.medium?.url ||
+        media?.formats?.small?.url ||
+        media?.formats?.thumbnail?.url ||
+        media?.url;
+
+  if (!url) return "/fallback.jpg";
+  if (/^https?:\/\//i.test(url)) return url;
+
+  return `${API_BASE}${url}`;
+};
+
+const getPackageMedia = (pkg) =>
+  pkg?.hero_image ||
+  pkg?.ro_image ||
+  pkg?.main_image ||
+  pkg?.media?.find((item) => item?.is_explore_more)?.package_media?.[0] ||
+  pkg?.media?.[0]?.package_media?.[0] ||
+  pkg?.package_media?.[0]?.package_media?.[0];
+
+const getPackageDuration = (pkg) => {
+  const days = Number(pkg?.duration_days);
+  const nights = Number(pkg?.duration_nights);
+
+  if (
+    Number.isFinite(days) &&
+    days > 0 &&
+    Number.isFinite(nights) &&
+    nights >= 0
+  ) {
+    return {
+      titlePrefix: `${days} Days`,
+      badge: `${days} Days & ${nights} Nights`,
+    };
+  }
+
+  return {
+    titlePrefix: "",
+    badge: "Custom Duration",
+  };
 };
 
 const TargetTours = () => {
@@ -353,7 +398,9 @@ const TargetTours = () => {
       });
 
       query.set("country", activeTab);
-  
+      const token = Cookies.get("auth_token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       try {
         setLoading(true);
         setPackages([]);
@@ -362,9 +409,7 @@ const TargetTours = () => {
           `${API_BASE}/api/explore-more/company?${query.toString()}`,
           {
             signal: controller.signal,
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers,
           }
         );
         const json = await res.json();
@@ -385,22 +430,27 @@ const TargetTours = () => {
 
   // 🔹 Filter + Transform (BEST PRACTICE)
   const cardsForTab = useMemo(() => {
-    return packages.map((pkg) => ({
-      id: pkg.id,
-      title: `${pkg.duration_days} Days - ${pkg.title}`,
-      cities: pkg.description,
-      badge: `${pkg.duration_days} Days & ${pkg.duration_nights} Nights`,
-      price: formatPackagePrice(
-        pkg.started_price ?? pkg.starting_from ?? pkg.started_from
-      ),
-      img:
-        pkg.main_image?.url
-          ? `${API_BASE}${pkg.main_image.url}`
-          : pkg.media?.[0]?.package_media?.[0]?.url
-          ? `${API_BASE}${pkg.media[0].package_media[0].url}`
-          : "/images/fallback.webp",
-    }));
-  }, [packages, activeTab]);
+    return packages.map((pkg) => {
+      const duration = getPackageDuration(pkg);
+      const title = pkg?.title || "N/A";
+
+      return {
+        id: pkg.id,
+        title: duration.titlePrefix
+          ? `${duration.titlePrefix} - ${title}`
+          : title,
+        cities: pkg?.description || "N/A",
+        badge: duration.badge,
+        price: formatPackagePrice(
+          pkg?.started_price ??
+            pkg?.starting_from ??
+            pkg?.started_from ??
+            pkg?.cheapest_departure?.base_price
+        ),
+        img: toMediaUrl(getPackageMedia(pkg)),
+      };
+    });
+  }, [packages]);
 
   const finalCards =
     loading ? FALLBACK_CARDS : cardsForTab.length > 0 ? cardsForTab : FALLBACK_CARDS;
