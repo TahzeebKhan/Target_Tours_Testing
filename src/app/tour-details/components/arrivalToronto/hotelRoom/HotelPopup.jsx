@@ -111,7 +111,7 @@ const HotelPopup = ({ isOpen, hotel, onClose }) => {
                                     </div>
                                 ))}
 
-                                <button className={styles.confirmBtn}>confirm</button>
+                                <button className={styles.confirmBtn} onClick={onClose}>confirm</button>
                             </div>
 
                             {/* LEFT IMAGE */}
