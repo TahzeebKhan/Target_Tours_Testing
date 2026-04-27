@@ -108,6 +108,7 @@ const DateField = ({
                         mode="oneway"
                         onModeChange={() => { }}
                         onClose={() => setShowCalendar(false)}
+                        showModeToggle={false}
                     >
                         <div>
                             <CalendarMonths startDate={value} endDate={null} onDateClick={handleDateClick} />
@@ -120,7 +121,6 @@ const DateField = ({
 };
 
 export default DateField;
-
 
 
 
