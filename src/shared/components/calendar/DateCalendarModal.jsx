@@ -8,6 +8,7 @@ export default function DateCalendarModal({
   onClose,
   children,
   anchorEl,
+  showModeToggle = true,
 }) {
   const rect = anchorEl?.getBoundingClientRect();
 
@@ -34,22 +35,24 @@ export default function DateCalendarModal({
           {/* <button className={styles.close} onClick={onClose}>
             <X size={24} color="#8d7ac6ff" />
           </button> */}
-          <div className={styles.toggle} onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className={mode === "oneway" ? styles.active : ""}
-              onClick={() => onModeChange("oneway")}
-            >
-              ONE WAY
-            </button>
-            <button
-              type="button"
-              className={mode === "roundtrip" ? styles.active : ""}
-              onClick={() => onModeChange("roundtrip")}
-            >
-              ROUND TRIP
-            </button>
-          </div>
+          {showModeToggle && (
+            <div className={styles.toggle} onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className={mode === "oneway" ? styles.active : ""}
+                onClick={() => onModeChange("oneway")}
+              >
+                ONE WAY
+              </button>
+              <button
+                type="button"
+                className={mode === "roundtrip" ? styles.active : ""}
+                onClick={() => onModeChange("roundtrip")}
+              >
+                ROUND TRIP
+              </button>
+            </div>
+          )}
         </div>
 
 

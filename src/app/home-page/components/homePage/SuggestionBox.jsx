@@ -1,14 +1,18 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from './SuggestionBox.module.css'
 
 const SuggestionBox = ({
   boxRef,
+  anchorRef,
   heading = "RECENT SEARCH",
   suggestions = [],
   onSelect,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [placement, setPlacement] = useState("below");
+  const [maxHeight, setMaxHeight] = useState(320);
+  const localBoxRef = useRef(null);
   const itemRefs = useRef([]);
 
   useEffect(() => {
@@ -20,6 +24,36 @@ const SuggestionBox = ({
     const activeItem = itemRefs.current[activeIndex];
     activeItem?.scrollIntoView({ block: "nearest" });
   }, [activeIndex]);
+
+  useLayoutEffect(() => {
+    if (!suggestions.length) return;
+
+    const updatePlacement = () => {
+      const anchorRect =
+        anchorRef?.current?.getBoundingClientRect() ||
+        localBoxRef.current?.parentElement?.getBoundingClientRect();
+
+      if (!anchorRect) return;
+
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - anchorRect.bottom;
+      const spaceAbove = anchorRect.top;
+      const shouldOpenAbove = spaceBelow < 340 && spaceAbove > spaceBelow;
+      const availableSpace = shouldOpenAbove ? spaceAbove : spaceBelow;
+
+      setPlacement(shouldOpenAbove ? "above" : "below");
+      setMaxHeight(Math.max(180, Math.min(360, availableSpace - 16)));
+    };
+
+    updatePlacement();
+    window.addEventListener("resize", updatePlacement);
+    window.addEventListener("scroll", updatePlacement, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePlacement);
+      window.removeEventListener("scroll", updatePlacement, true);
+    };
+  }, [anchorRef, suggestions]);
 
   useEffect(() => {
     if (!suggestions.length) return;
@@ -52,7 +86,22 @@ const SuggestionBox = ({
   if (!suggestions.length) return null;
 
   return (
-    <div ref={boxRef} className={styles.suggestionBox} role="listbox">
+    <div
+      ref={(node) => {
+        localBoxRef.current = node;
+        if (!boxRef) return;
+        if (typeof boxRef === "function") {
+          boxRef(node);
+          return;
+        }
+        boxRef.current = node;
+      }}
+      className={`${styles.suggestionBox} ${
+        placement === "above" ? styles.above : styles.below
+      }`}
+      style={{ maxHeight: `${maxHeight}px` }}
+      role="listbox"
+    >
       <div className={styles.recentSearchHeading}>{heading}</div>
 
       {suggestions.map((s, index) => (

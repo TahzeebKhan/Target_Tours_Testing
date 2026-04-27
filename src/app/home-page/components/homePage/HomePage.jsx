@@ -2283,6 +2283,7 @@ const HomePage = ({
                           <>
                             <SuggestionBox
                               boxRef={fromSuggestionRef}
+                              anchorRef={fromInputRef}
                               heading="PACKAGE SUGGESTIONS"
                               suggestions={holidayFromSuggestions}
                               onSelect={(s) => selectSuggestion(s, "from")}
@@ -2327,6 +2328,7 @@ const HomePage = ({
                           mode="oneway"
                           onModeChange={() => {}}
                           onClose={() => setShowHolidayCalendar(false)}
+                          showModeToggle={false}
                         >
                           <div ref={holidayCalendarRef}>
                             <CalendarMonths
@@ -2436,6 +2438,7 @@ const HomePage = ({
                           {toSuggestionsOpen && (
                             <SuggestionBox
                               boxRef={toSuggestionRef}
+                              anchorRef={toInputRef}
                               heading="PACKAGE SUGGESTIONS"
                               suggestions={holidayToSuggestions}
                               onSelect={(s) => selectSuggestion(s, "to")}
