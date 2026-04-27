@@ -211,18 +211,7 @@ import Cookies from "js-cookie";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 const token = Cookies.get("auth_token");
-
-const formatPackagePrice = (price) => {
-  const numericPrice = Number(price);
-
-  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
-    return "ON REQUEST";
-  }
-
-  return `INR ${numericPrice.toLocaleString("en-IN")}`;
-};
-
-const tabs = [
+const FALLBACK_TABS = [
   "Asia",
   "Explore",
   "Europe",
@@ -234,15 +223,128 @@ const tabs = [
   "Bali",
   "Maldives",
 ];
+const FALLBACK_CARDS = [
+  {
+    id: "fallback-1",
+    title: "N/A",
+    cities: "N/A",
+    badge: "N/A",
+    price: "N/A",
+    img: "/fallback.jpg",
+  },
+  {
+    id: "fallback-2",
+    title: "N/A",
+    cities: "N/A",
+    badge: "N/A",
+    price: "N/A",
+    img: "/fallback.jpg",
+    centerImage: true,
+  },
+  {
+    id: "fallback-3",
+    title: "N/A",
+    cities: "N/A",
+    badge: "N/A",
+    price: "N/A",
+    img: "/fallback.jpg",
+  },
+];
+
+const formatPackagePrice = (price) => {
+  const numericPrice = Number(price);
+
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    return "ON REQUEST";
+  }
+
+  return `INR ${numericPrice.toLocaleString("en-IN")}`;
+};
 
 const TargetTours = () => {
-  const [activeTab, setActiveTab] = useState("Asia");
+  const [tabs, setTabs] = useState(FALLBACK_TABS);
+  const [activeTab, setActiveTab] = useState(FALLBACK_TABS[0]);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTabs, setLoadingTabs] = useState(true);
   const tabsRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    const normalizeTopCountry = (item) => {
+      if (!item) return "";
+      if (typeof item === "string") return item.trim();
+
+      return String(
+        item.label ||
+          item.name ||
+          item.title ||
+          item.country ||
+          item.location_name ||
+          item.value ||
+          ""
+      ).trim();
+    };
+
+    const fetchTopCountries = async () => {
+      try {
+        setLoadingTabs(true);
+
+        const response = await fetch(
+          `${API_BASE}/api/holiday-package-filters/top-countries?domain=${process.env.NEXT_PUBLIC_DOMAIN}`,
+          {
+            method: "GET",
+            signal: controller.signal,
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch top countries");
+        }
+
+        const json = await response.json();
+        const rawTabs =
+          json?.data?.countries ||
+          json?.data?.top_countries ||
+          json?.data ||
+          json?.countries ||
+          json?.top_countries ||
+          json;
+
+        if (!Array.isArray(rawTabs)) return;
+
+        const nextTabs = rawTabs
+          .map(normalizeTopCountry)
+          .filter(Boolean);
+
+        if (nextTabs.length === 0) return;
+
+        setTabs(nextTabs);
+        setActiveTab((prev) => (nextTabs.includes(prev) ? prev : nextTabs[0]));
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+        console.error("Failed to fetch top-country filters", err);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingTabs(false);
+        }
+      }
+    };
+
+    fetchTopCountries();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!activeTab) return;
+
     const controller = new AbortController();
 
     const fetchTours = async () => {
@@ -250,7 +352,7 @@ const TargetTours = () => {
         domain: process.env.NEXT_PUBLIC_DOMAIN,
       });
 
-      query.set("region", activeTab);
+      query.set("country", activeTab);
   
       try {
         setLoading(true);
@@ -300,7 +402,8 @@ const TargetTours = () => {
     }));
   }, [packages, activeTab]);
 
-  const finalCards = loading ? [] : cardsForTab;
+  const finalCards =
+    loading ? FALLBACK_CARDS : cardsForTab.length > 0 ? cardsForTab : FALLBACK_CARDS;
 
   // 🔹 Animated tab indicator
   // useEffect(() => {
@@ -319,6 +422,7 @@ const TargetTours = () => {
   // }, [activeTab]);
 
   useEffect(() => {
+    if (tabs.length === 0) return;
     if (!tabsRef.current) return;
 
     requestAnimationFrame(() => {
@@ -337,7 +441,7 @@ const TargetTours = () => {
         `${activeEl.offsetLeft}px`
       );
     });
-  }, [activeTab]);
+  }, [activeTab, tabs, loadingTabs]);
 
 
   // if (loading) {
