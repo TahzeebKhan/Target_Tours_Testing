@@ -1,4 +1,31 @@
 const DEFAULT_LOGO = "/images/Flight.png";
+const AIRLINE_LOGOS = [
+  {
+    logo: "/images/indigo.svg",
+    codes: ["6e"],
+    names: ["indigo", "goindigo"],
+  },
+  {
+    logo: "/images/airindia.svg",
+    codes: ["ai"],
+    names: ["airindia", "air india"],
+  },
+  {
+    logo: "/images/airindiaexpress.svg",
+    codes: ["ix", "i5"],
+    names: ["airindiaexpress", "air india express"],
+  },
+  {
+    logo: "/images/spicejet.svg",
+    codes: ["sg"],
+    names: ["spicejet", "spice jet", "spiceget"],
+  },
+  {
+    logo: "/images/akasaair.svg",
+    codes: ["qp"],
+    names: ["akasa", "akasaair", "akasa air"],
+  },
+];
 const DEFAULT_BOOKING_CLIENT_ID = "FVI6V120g22Ei5ztGK0FIQ==";
 const DEFAULT_PRICE_SOURCE = "SF";
 const DEFAULT_BOOKING_MODE = "AS";
@@ -33,6 +60,35 @@ const pickFirst = (...values) => {
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return undefined;
+};
+
+const normalizeAirlineValue = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+const getCarrierCode = (code) => {
+  const normalized = normalizeAirlineValue(code);
+  const match = normalized.match(/^[a-z0-9]{2}/);
+  return match?.[0] || normalized;
+};
+
+const resolveAirlineLogo = ({ name, code, logo } = {}) => {
+  if (logo && logo !== DEFAULT_LOGO) return logo;
+
+  const normalizedName = normalizeAirlineValue(name);
+  const normalizedCode = getCarrierCode(code);
+
+  const match = AIRLINE_LOGOS.find((airline) => {
+    const codeMatches = airline.codes.includes(normalizedCode);
+    const nameMatches = airline.names.some((item) =>
+      normalizedName.includes(normalizeAirlineValue(item))
+    );
+
+    return codeMatches || nameMatches;
+  });
+
+  return match?.logo || DEFAULT_LOGO;
 };
 
 const findFirstDeepValue = (input, matcher, seen = new WeakSet()) => {
@@ -281,20 +337,25 @@ const extractSegments = (flight = {}) => {
 
 const pickAirlinesFromSegments = (segments = []) => {
   const mapped = segments
-    .map((segment, idx) => ({
-      name:
+    .map((segment, idx) => {
+      const name =
         segment?.airline?.name ||
         segment?.carrier?.name ||
         segment?.marketing_airline?.name ||
-        "N/A",
-      code:
+        "N/A";
+      const code =
         segment?.flight_number ||
         segment?.airline?.code ||
         segment?.carrier?.code ||
-        "N/A",
-      logo:
-        segment?.airline?.logo || segment?.carrier?.logo || DEFAULT_LOGO,
-    }))
+        "N/A";
+      const logo = resolveAirlineLogo({
+        name,
+        code,
+        logo: segment?.airline?.logo || segment?.carrier?.logo,
+      });
+
+      return { name, code, logo };
+    })
     .filter((a) => a.name || a.code);
 
   return mapped.length ? mapped : [{ name: "N/A", code: "N/A", logo: DEFAULT_LOGO }];
@@ -369,18 +430,23 @@ const buildOneWayCard = (flight, index, options = {}) => {
   const hasSegments = segments.length > 0;
   const airlines = hasSegments
     ? pickAirlinesFromSegments(segments)
-    : [
-        {
-          name: pickFirst(flight?.airline, flight?.airline_name, "N/A"),
-          code: pickFirst(
-            flight?.flight_number,
-            flight?.airline_code,
-            flight?.index,
-            "N/A"
-          ),
-          logo: DEFAULT_LOGO,
-        },
-      ];
+    : (() => {
+        const name = pickFirst(flight?.airline, flight?.airline_name, "N/A");
+        const code = pickFirst(
+          flight?.flight_number,
+          flight?.airline_code,
+          flight?.index,
+          "N/A"
+        );
+
+        return [
+          {
+            name,
+            code,
+            logo: resolveAirlineLogo({ name, code, logo: flight?.airline_logo }),
+          },
+        ];
+      })();
 
   const first = segments[0] || {};
   const last = segments[segments.length - 1] || first;
@@ -680,18 +746,23 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
   return {
     airlines: hasSegments
       ? pickAirlinesFromSegments(segments)
-      : [
-          {
-            name: pickFirst(leg?.airline, leg?.airline_name, "IndiGo"),
-            code: pickFirst(
-              leg?.flight_number,
-              leg?.airline_code,
-              fallbackCode,
-              "6E-541"
-            ),
-            logo: DEFAULT_LOGO,
-          },
-        ],
+      : (() => {
+          const name = pickFirst(leg?.airline, leg?.airline_name, "IndiGo");
+          const code = pickFirst(
+            leg?.flight_number,
+            leg?.airline_code,
+            fallbackCode,
+            "6E-541"
+          );
+
+          return [
+            {
+              name,
+              code,
+              logo: resolveAirlineLogo({ name, code, logo: leg?.airline_logo }),
+            },
+          ];
+        })(),
     dateLabel: formatDateLabel(
       pickFirst(
         first?.departure?.date,

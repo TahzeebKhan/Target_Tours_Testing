@@ -1,12 +1,8 @@
 .overlay {
   /* background: rgba(0, 0, 0, 0.4); */
-  display: flex;
   position: absolute;
-  justify-content: center;
-  align-items: center;
-  bottom: 0;
+  inset: 0;
   z-index: 1000;
-  left: 0;
 
   background: transparent;
   /* NOT blocking */
@@ -17,24 +13,33 @@
 
 .modal {
   pointer-events: auto;
-  position: fixed;
+  position: absolute;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   background: #171717;
   border: 0.5px solid #ffffff;
   backdrop-filter: blur(39.2px);
   /* width: calc(100% - 24px); */
   max-width: 699px;
+  overflow: auto;
 
   padding: 16px;
   padding-bottom: 36px;
   z-index: 2000;
 
   /* max-width: 6700px; */
+}
+
+.below {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.above {
+  top: auto;
+  bottom: calc(100% + 8px);
 }
 
 .header {

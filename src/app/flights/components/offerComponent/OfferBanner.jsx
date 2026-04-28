@@ -3,16 +3,24 @@
 import React, { useState } from "react";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { useAuth } from "@/app/context/AuthContext";
 import styles from "./OfferBanner.module.css";
+import Cookies from "js-cookie";
 
 const OfferBanner = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const { isLoggedIn, loading } = useAuth();
+  const hasAuthToken = Boolean(Cookies.get("auth_token"));
 
   const openLoginModal = () => {
     setAuthView("login");
     setShowLogin(true);
   };
+
+  if (loading || isLoggedIn || hasAuthToken) {
+    return null;
+  }
 
   return (
     <>

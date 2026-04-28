@@ -168,6 +168,7 @@ const HomePage = ({
   // Flight calendar modal controls
   const calendarRef = useRef(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [activeCalendarField, setActiveCalendarField] = useState("departure");
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);
   const [calendarTripType, setCalendarTripType] = useState("oneway");
 
@@ -766,14 +767,9 @@ const HomePage = ({
   };
 
   const openReturnPicker = () => {
-    const input = returnRef.current;
-    if (!input) return;
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-    } else {
-      input.focus();
-      input.click();
-    }
+    setCalendarTripType("round");
+    setActiveCalendarField("return");
+    setShowCalendar(true);
   };
 
   const handleFieldClick = (e) => {
@@ -1700,12 +1696,14 @@ const HomePage = ({
                             e.stopPropagation();
                             if (tripType === "multi") {
                               setCalendarTripType("oneway");
+                              setActiveCalendarField("departure");
                               setActiveMultiIndex(0);
                               setShowCalendar(true);
                             } else {
                               setCalendarTripType("oneway");
                               if (tripType === "round")
                                 setCalendarTripType("round");
+                              setActiveCalendarField("departure");
                               setShowCalendar(true);
                             }
                           }}
@@ -1713,6 +1711,7 @@ const HomePage = ({
                           <div className={styles.lable}>Departure Date</div>
 
                           {showCalendar &&
+                            activeCalendarField === "departure" &&
                             (tripType !== "multi" ||
                               activeMultiIndex === 0) && (
                               <DateCalendarModal
@@ -1754,12 +1753,14 @@ const HomePage = ({
                               e.stopPropagation();
                               if (tripType === "multi") {
                                 setCalendarTripType("oneway");
+                                setActiveCalendarField("departure");
                                 setActiveMultiIndex(0);
                                 setShowCalendar(true);
                               } else {
                                 setCalendarTripType("oneway");
                                 if (tripType === "round")
                                   setCalendarTripType("round");
+                                setActiveCalendarField("departure");
                                 setShowCalendar(true);
                               }
                             }}
@@ -1800,11 +1801,34 @@ const HomePage = ({
 
                             if (tripType === "round") {
                               setCalendarTripType("round");
+                              setActiveCalendarField("return");
                               setShowCalendar(true);
                             }
                           }}
                         >
                           <div className={styles.lable}>Return Date</div>
+                          {showCalendar &&
+                            tripType === "round" &&
+                            activeCalendarField === "return" && (
+                              <DateCalendarModal
+                                mode="roundtrip"
+                                onModeChange={handleCalendarModeChange}
+                                onClose={() => {
+                                  setShowCalendar(false);
+                                  setActiveMultiIndex(null);
+                                }}
+                              >
+                                <div ref={calendarRef}>
+                                  <CalendarMonths
+                                    startDate={flightDates.round.start}
+                                    endDate={flightDates.round.end}
+                                    onDateClick={handleDateClick}
+                                    price={true}
+                                    faresByDate={datewiseFaresByDate}
+                                  />
+                                </div>
+                              </DateCalendarModal>
+                            )}
                           <div
                             className={styles.dateInputWrapper}
                             onClick={openReturnPicker}
