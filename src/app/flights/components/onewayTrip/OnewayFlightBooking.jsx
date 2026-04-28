@@ -636,7 +636,9 @@ const OnewayFlightBooking = ({
           </div>
         </div>
         {showLoadingState ? (
-          <FlightSearchLoader />
+          <div className={styles.desktopLoaderWrap}>
+            <FlightSearchLoader />
+          </div>
         ) : hasNoData ? (
           <FlightNoResults />
         ) : (
