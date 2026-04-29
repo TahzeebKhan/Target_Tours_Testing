@@ -16,6 +16,60 @@ import {
   buildMobileFareDetails,
   buildMobilePriceSummary,
 } from "../../utils/mobilePriceSummary";
+import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+
+const getFlightTimelineData = (flight) => ({
+  departure: flight?.departure || {
+    date: "N/A",
+    time: "N/A",
+    airport: "N/A",
+    terminal: "Terminal N/A",
+    city: "N/A",
+  },
+  arrival: flight?.arrival || {
+    date: "N/A",
+    time: "N/A",
+    airport: "N/A",
+    terminal: "Terminal N/A",
+    city: "N/A",
+  },
+  duration: flight?.duration || {
+    hours: "00",
+    minutes: "00",
+  },
+  stops: flight?.stops || "N/A",
+});
+
+const getFlightSectionData = (flight, type) => {
+  if (!flight) return null;
+
+  return {
+    type,
+    airline: flight.airline || {
+      name: "N/A",
+      code: "N/A",
+      logo: "/images/Flight.png",
+    },
+    aircraft: flight.aircraft || "N/A",
+    cabinClass: flight.travelClass || "N/A",
+    fareType: flight.flexiPlusFare || "",
+    date: flight.departure?.date || "N/A",
+    departure: {
+      time: flight.departure?.time || "N/A",
+      city: flight.departure?.airport || flight.departure?.city || "N/A",
+    },
+    arrival: {
+      time: flight.arrival?.time || "N/A",
+      city: flight.arrival?.airport || flight.arrival?.city || "N/A",
+    },
+    duration: flight.duration || {
+      hours: "00",
+      minutes: "00",
+    },
+    stops: flight.stops || "N/A",
+  };
+};
+
 const PassengerDetailsMobile = ({ fromBaggage }) => {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [showFareDetailsPopup, setShowFareDetailsPopup] = useState(false);
@@ -35,6 +89,20 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
     () => buildMobileFareDetails({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
   );
+  const bookingView = useMemo(
+    () => getBookingDetailsView(bookingSession),
+    [bookingSession]
+  );
+  const header = bookingView?.header || {};
+  const departureFlight = bookingView?.departureFlight || {};
+  const returnFlight = bookingView?.returnFlight || null;
+  const summaryFlight = getFlightTimelineData(departureFlight);
+  const departureFlightSection = getFlightSectionData(
+    departureFlight,
+    "DEPARTURE"
+  );
+  const returnFlightSection = getFlightSectionData(returnFlight, "RETURN");
+  const airline = departureFlight?.airline || {};
   const flightDetailsRef = useRef(null);
   const travelInsuranceRef = useRef(null);
   const cancellationRef = useRef(null);
@@ -83,68 +151,6 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const returnFlightData = {
-    type: "RETURN",
-    airline: {
-      name: "Garuda Indonesia",
-      code: "6E-541",
-      logo: "/images/GarudaIndonesia.png",
-    },
-    aircraft: "Boeing 737",
-    cabinClass: "Economy",
-    fareType: "Flexi Plus Fare",
-    date: "Thu, 06 Jul 2025",
-
-    departure: {
-      time: "06:00",
-      city: "Jakarta (JKTC)",
-    },
-
-    arrival: {
-      time: "07:40",
-      city: "Surabaya (SUB)",
-    },
-
-    duration: {
-      hours: "01",
-      minutes: "50",
-    },
-
-    stops: "Direct",
-
-    facilities: [
-      "Baggage 20 kg, Cabin Baggage 7kg",
-      "In-flight entertainment",
-      "In-flight meal",
-      "Power & USB Port",
-    ],
-  };
-
-  const flight = {
-    departure: {
-      date: "THU, 18 DEC 2025",
-      time: "06:45",
-      airport: "DEL - DELHI",
-      terminal: "Terminal T2",
-      city: "Delhi, India",
-    },
-
-    arrival: {
-      date: "THU, 18 DEC 2025",
-      time: "08:00",
-      airport: "HKT - PHUKET CITY",
-      terminal: "Terminal T3",
-      city: "Phuket City, Thailand",
-    },
-
-    duration: {
-      hours: 1,
-      minutes: 50,
-    },
-
-    stops: "1 Stop",
-  };
-
   if (showPassengerInfo) {
     return (
       <TravelerDetailsMobileView onClose={() => setShowPassengerInfo(false)} />
@@ -190,27 +196,27 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
             className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
           >
             <div className={styles.TripCardHeaderDetails}>
-              <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{header.fromName || "N/A"}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({header.fromCode || "N/A"})
               </span>
 
               <img src="/icons/right-arrow.svg" alt="" />
-              <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{header.toName || "N/A"}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({header.toCode || "N/A"})
               </span>
             </div>
 
             <div className={styles.TripCardHeaderBookingDate}>
-              <p>Wed, 03 Dec</p>
+              <p>{header.date || "N/A"}</p>
               <div className={styles.PassengerDetailsMobile_navDot_M_nar}>
                 <span className={styles.navDot}></span>
                 <p>1 Traveller</p>
               </div>
               <div className={styles.PassengerDetailsMobile_navDot_M_nar}>
                 <span className={styles.navDot}></span>
-                <p>Economy</p>
+                <p>{header.cabinClass || "N/A"}</p>
               </div>
             </div>
           </div>
@@ -221,45 +227,45 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
         <div className={styles.TripCard}>
           <div className={styles.TripCardHeader}>
             <div className={styles.TripCardHeaderDetails}>
-              <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{header.fromName || "N/A"}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({header.fromCode || "N/A"})
               </span>
 
               <img src="/icons/right-arrow.svg" alt="" />
-              <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
+              <p className={styles.TripCardHeaderDetailsItemText}>{header.toName || "N/A"}</p>
               <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
+                ({header.toCode || "N/A"})
               </span>
             </div>
-            <div className={styles.TripCardHeaderDate}>Wed-11 Feb 2026</div>
+            <div className={styles.TripCardHeaderDate}>{header.date || "N/A"}</div>
           </div>
           <div className={styles.TripFlightDetailsCard}>
             <div className={styles.TripFlightDetailsCardCont}>
               <div className={styles.TripFlightDetailsCardImage}>
-                <img src="/images/Flight.png" alt="" />
+                <img src={airline.logo || "/images/Flight.png"} alt={airline.name || ""} />
               </div>
               <div className={styles.AirLineDetails}>
                 <div className={styles.AirLineDetailsItem}>
                   <span className={styles.AirLineDetailsItemText}>
-                    Air India
+                    {airline.name || "N/A"}
                   </span>
                   <div className={styles.dot}></div>
-                  <span className={styles.AirLineCode}>AI2380</span>
+                  <span className={styles.AirLineCode}>{airline.code || "N/A"}</span>
                 </div>
                 <div className={styles.AirLineDetailsItem}>
                   <span className={styles.AirLineBoeing}>
-                    Boeing 787-9 Dreamliner
+                    {departureFlight?.aircraft || "N/A"}
                   </span>
                   <div className={styles.dot}></div>
                   <span className={styles.AirLineDetailsItemCode}>
-                    Economy Class
+                    {header.cabinClass || departureFlight?.travelClass || "N/A"}
                   </span>
                 </div>
               </div>
             </div>
             <div className={styles.br}></div>
-            <FlightTimeline flight={flight} />
+            <FlightTimeline flight={summaryFlight} />
             <div className={styles.br}></div>
 
             <div className={styles.FareDetailsTag}>
@@ -300,10 +306,13 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
             ref={flightDetailsRef}
             className={styles.flightDepartureReturenDetailsContianer}
           >
-            <FlightSection />
-            <div className={styles.br}></div>
-
-            <FlightSection flight={returnFlightData} />
+            <FlightSection flight={departureFlightSection} />
+            {returnFlightSection && (
+              <>
+                <div className={styles.br}></div>
+                <FlightSection flight={returnFlightSection} />
+              </>
+            )}
           </div>
 
           <div

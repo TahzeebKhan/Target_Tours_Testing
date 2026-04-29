@@ -1,31 +1,6 @@
+import { resolveAirlineLogo } from "./airlineLogos";
+
 const DEFAULT_LOGO = "/images/Flight.png";
-const AIRLINE_LOGOS = [
-  {
-    logo: "/images/indigo.svg",
-    codes: ["6e"],
-    names: ["indigo", "goindigo"],
-  },
-  {
-    logo: "/images/airindia.svg",
-    codes: ["ai"],
-    names: ["airindia", "air india"],
-  },
-  {
-    logo: "/images/airindiaexpress.svg",
-    codes: ["ix", "i5"],
-    names: ["airindiaexpress", "air india express"],
-  },
-  {
-    logo: "/images/spicejet.svg",
-    codes: ["sg"],
-    names: ["spicejet", "spice jet", "spiceget"],
-  },
-  {
-    logo: "/images/akasaair.svg",
-    codes: ["qp"],
-    names: ["akasa", "akasaair", "akasa air"],
-  },
-];
 const DEFAULT_BOOKING_CLIENT_ID = "FVI6V120g22Ei5ztGK0FIQ==";
 const DEFAULT_PRICE_SOURCE = "SF";
 const DEFAULT_BOOKING_MODE = "AS";
@@ -60,35 +35,6 @@ const pickFirst = (...values) => {
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return undefined;
-};
-
-const normalizeAirlineValue = (value) =>
-  String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-
-const getCarrierCode = (code) => {
-  const normalized = normalizeAirlineValue(code);
-  const match = normalized.match(/^[a-z0-9]{2}/);
-  return match?.[0] || normalized;
-};
-
-const resolveAirlineLogo = ({ name, code, logo } = {}) => {
-  if (logo && logo !== DEFAULT_LOGO) return logo;
-
-  const normalizedName = normalizeAirlineValue(name);
-  const normalizedCode = getCarrierCode(code);
-
-  const match = AIRLINE_LOGOS.find((airline) => {
-    const codeMatches = airline.codes.includes(normalizedCode);
-    const nameMatches = airline.names.some((item) =>
-      normalizedName.includes(normalizeAirlineValue(item))
-    );
-
-    return codeMatches || nameMatches;
-  });
-
-  return match?.logo || DEFAULT_LOGO;
 };
 
 const findFirstDeepValue = (input, matcher, seen = new WeakSet()) => {
@@ -133,6 +79,20 @@ const parseDurationMinutes = (value) => {
   if (mOnly) return Number(mOnly[1]);
 
   return null;
+};
+
+const getElapsedMinutes = (start, end) => {
+  if (!start || !end) return null;
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return null;
+  }
+
+  const minutes = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+  return minutes >= 0 ? minutes : null;
 };
 
 const formatDurationLabel = (minutes) => {
@@ -345,6 +305,8 @@ const pickAirlinesFromSegments = (segments = []) => {
         "N/A";
       const code =
         segment?.flight_number ||
+        segment?.flightNo ||
+        segment?.flight_no ||
         segment?.airline?.code ||
         segment?.carrier?.code ||
         "N/A";
@@ -428,13 +390,28 @@ const buildOneWayCard = (flight, index, options = {}) => {
   } = options;
   const segments = extractSegments(flight);
   const hasSegments = segments.length > 0;
+  const firstConnection = toArray(flight?.Connections || flight?.connections)[0] || {};
   const airlines = hasSegments
     ? pickAirlinesFromSegments(segments)
     : (() => {
-        const name = pickFirst(flight?.airline, flight?.airline_name, "N/A");
+        const name = pickFirst(
+          flight?.airline,
+          flight?.airline_name,
+          flight?.Airline,
+          flight?.AirlineName,
+          flight?.airlineName,
+          "N/A"
+        );
         const code = pickFirst(
           flight?.flight_number,
+          flight?.flightNo,
+          flight?.flight_no,
           flight?.airline_code,
+          flight?.AirlineCode,
+          flight?.airlineCode,
+          firstConnection?.MAC,
+          firstConnection?.OAC,
+          firstConnection?.VAC,
           flight?.index,
           "N/A"
         );
@@ -443,7 +420,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
           {
             name,
             code,
-            logo: resolveAirlineLogo({ name, code, logo: flight?.airline_logo }),
+            logo: resolveAirlineLogo({ name, code, logo: flight?.logo }),
           },
         ];
       })();
@@ -750,6 +727,8 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
           const name = pickFirst(leg?.airline, leg?.airline_name, "IndiGo");
           const code = pickFirst(
             leg?.flight_number,
+            leg?.flightNo,
+            leg?.flight_no,
             leg?.airline_code,
             fallbackCode,
             "6E-541"

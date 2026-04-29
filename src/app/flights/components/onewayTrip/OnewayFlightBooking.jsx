@@ -18,10 +18,12 @@ import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import {
+  getFlightInfo,
   getFlightPrice,
   getFlightTravelChecklist,
   getFlightWebSettings,
 } from "@/features/flights/services/flightBooking";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const OnewayFlightBooking = ({
   flightData = [],
@@ -43,6 +45,8 @@ const OnewayFlightBooking = ({
   const [activeTab, setActiveTab] = useState("info");
   const [fareModalOpen, setFareModalOpen] = useState(null); // Track which flight's fare modal is open
   const [prefetchedFareData, setPrefetchedFareData] = useState({});
+  const [flightInfoData, setFlightInfoData] = useState({});
+  const [loadingFlightInfoId, setLoadingFlightInfoId] = useState(null);
   const [selectedFareFlight, setSelectedFareFlight] = useState(null);
   const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
   const OFFER_INDEX = 3;
@@ -54,6 +58,60 @@ const OnewayFlightBooking = ({
   const [isMobile, setIsMobile] = useState(false);
 
   const [mounted, setMounted] = useState(false);
+
+  const buildFlightInfoPayload = (flight) => {
+    const priceRequest = flight?.booking?.priceRequest || {};
+    const trip = priceRequest?.Trips?.[0] || {};
+
+    return {
+      search_key: priceRequest?.search_key || flight?.booking?.searchKey,
+      TripType: priceRequest?.TripType || flight?.booking?.tripType || "ON",
+      Trips: [
+        {
+          TUI: trip?.TUI,
+          Amount: trip?.Amount,
+          Index: trip?.Index,
+          OrderID: trip?.OrderID,
+          ChannelCode: trip?.ChannelCode ?? null,
+        },
+      ],
+    };
+  };
+
+  const toggleDetails = async (flight) => {
+    const flightId = flight?.id;
+    if (!flightId) return;
+
+    const isClosing = openId === flightId;
+    setOpenId(isClosing ? null : flightId);
+    if (isClosing || flightInfoData[flightId] || loadingFlightInfoId === flightId) return;
+
+    const payload = buildFlightInfoPayload(flight);
+    const hasRequiredPayload =
+      payload.search_key &&
+      payload.Trips?.[0]?.TUI &&
+      payload.Trips?.[0]?.Index !== undefined &&
+      payload.Trips?.[0]?.Index !== null;
+
+    if (!hasRequiredPayload) return;
+
+    setLoadingFlightInfoId(flightId);
+    try {
+      const response = await getFlightInfo(payload);
+      setFlightInfoData((prev) => ({
+        ...prev,
+        [flightId]: response,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch flight info", error);
+      setFlightInfoData((prev) => ({
+        ...prev,
+        [flightId]: { error: true },
+      }));
+    } finally {
+      setLoadingFlightInfoId(null);
+    }
+  };
 
   const openFareModal = async (flight) => {
     const flightId = flight?.id ?? null;
@@ -137,281 +195,19 @@ const OnewayFlightBooking = ({
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  const flightResults = [
-    {
-      id: 1,
-      airlines: [
-        {
-          name: "IndiGo",
-          code: "6E-541",
-          logo: "/images/Flight.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 0,
-        via: null,
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-
-    {
-      id: 2,
-      airlines: [
-        {
-          name: "IndiGo",
-          code: "AI-2441",
-          logo: "/images/Flight.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 1,
-        via: "Kolkata",
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-
-    {
-      id: 3,
-      airlines: [
-        {
-          name: "Air India",
-          code: "AI-541",
-          logo: "/images/AirIndia.png",
-        },
-        {
-          name: "IndiGo",
-          code: "6E-234",
-          logo: "/images/Flight.png",
-        },
-      ],
-      departure: {
-        time: "20:15",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "21:30",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 2,
-        minutes: 51,
-      },
-      stops: {
-        type: "1 Stop",
-        count: 0,
-        via: "Kolkata",
-        nextDay: true,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-
-    {
-      id: 4,
-      airlines: [
-        {
-          name: "Air India",
-          code: "6E-541",
-          logo: "/images/flightCompanyLogos/airIndia.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 0,
-        via: null,
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-    {
-      id: 5,
-      airlines: [
-        {
-          name: "AkasaAir",
-          code: "6E- 541",
-          logo: "/images/flightCompanyLogos/akasaair.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 0,
-        via: null,
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-    {
-      id: 6,
-      airlines: [
-        {
-          name: "Air India Express",
-          code: "6E- 541",
-          logo: "/images/flightCompanyLogos/airIndiaExpress.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 0,
-        via: null,
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-    {
-      id: 7,
-      airlines: [
-        {
-          name: "IndiGo",
-          code: "AI-2441",
-          logo: "/images/Flight.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 1,
-        via: "Kolkata",
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-    {
-      id: 8,
-      airlines: [
-        {
-          name: "Air India Express",
-          code: "6E- 541",
-          logo: "/images/flightCompanyLogos/airIndiaExpress.png",
-        },
-      ],
-      departure: {
-        time: "06:45",
-        city: "Jakarta (CGK)",
-      },
-      arrival: {
-        time: "08:00",
-        city: "Singapore (SIN)",
-      },
-      duration: {
-        hours: 1,
-        minutes: 50,
-      },
-      stops: {
-        type: "Non Stop",
-        count: 0,
-        via: null,
-        nextDay: false,
-      },
-      fare: {
-        totalFare: "₹ 3,22,000",
-        pricePerAdult: "₹ 12,000",
-        cabinClass: "ECONOMY",
-      },
-    },
-  ];
-  const resolvedFlightResults = Array.isArray(flightData) ? flightData : [];
+  const resolvedFlightResults = Array.isArray(flightData)
+    ? flightData.map((flight) => ({
+        ...flight,
+        airlines: (flight?.airlines || []).map((airline) => ({
+          ...airline,
+          logo: resolveAirlineLogo({
+            name: airline?.name,
+            code: airline?.code,
+            logo: airline?.logo,
+          }),
+        })),
+      }))
+    : [];
 
   const parseFareValue = (fare) => {
     const raw = String(fare?.totalFare || "").replace(/[^\d]/g, "");
@@ -510,7 +306,7 @@ const OnewayFlightBooking = ({
   const fastestMeta = {
     logo:
       fastestFlight?.airlines?.[0]?.logo ||
-      "/images/flightCompanyLogos/airIndia.png",
+      "/images/Flight.png",
     price:
       sortHighlights?.fastest?.priceLabel ||
       fastestFlight?.fare?.pricePerAdult ||
@@ -581,7 +377,7 @@ const OnewayFlightBooking = ({
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
             <div className={styles.sortedItemMainContainer}>
-              <div className={styles.sortedItemContainer}>
+              {visibleFlights.length > 0 && <div className={styles.sortedItemContainer}>
                 <div
                   className={`${styles.sortedItem} ${
                     quickSort === "cheapest" ? styles.activeSortedItem : ""
@@ -623,7 +419,7 @@ const OnewayFlightBooking = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>}
             </div>
             <div
               ref={sortTriggerRef}
@@ -736,11 +532,7 @@ const OnewayFlightBooking = ({
                     </div>
                     <div
                       className={styles.seeDetailsBtn}
-                      onClick={() =>
-                        setOpenId((prev) =>
-                          prev === flight.id ? null : flight.id
-                        )
-                      }
+                      onClick={() => toggleDetails(flight)}
                     >
                       See Details
                       <svg
@@ -763,11 +555,7 @@ const OnewayFlightBooking = ({
                 <div className={styles.fareDetailsResponsive}>
                   <div
                     className={styles.seeDetailsBtn}
-                    onClick={() =>
-                      setOpenId((prev) =>
-                        prev === flight.id ? null : flight.id
-                      )
-                    }
+                    onClick={() => toggleDetails(flight)}
                   >
                     See Details
                     <svg
@@ -839,6 +627,8 @@ const OnewayFlightBooking = ({
               >
                 <ExpandableTabs
                   flightData={flight}
+                  flightInfoData={flightInfoData[flight.id]}
+                  isFlightInfoLoading={loadingFlightInfoId === flight.id}
                   selectedDepartureDate={selectedDepartureDate}
                   travellerSummary={travellerSummary}
                 />
@@ -896,7 +686,7 @@ const OnewayFlightBooking = ({
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>
             <div className={styles.sortedItemMainContainer}>
-              <div className={styles.sortedItemContainer}>
+              {visibleFlights.length > 0 && <div className={styles.sortedItemContainer}>
                 <div
                   className={`${styles.sortedItem} ${
                     quickSort === "cheapest" ? styles.activeSortedItem : ""
@@ -938,7 +728,7 @@ const OnewayFlightBooking = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>}
             </div>
             <div
               onClick={() => setOpenSort(true)}
