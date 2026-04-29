@@ -68,6 +68,32 @@ export const getFlightPrice = async (payload) => {
   return response?.data;
 };
 
+export const getFlightInfo = async (payload) => {
+  const response = await api.post("/api/flights/flight-info", {
+    ...payload,
+    domain: "localhost:1337",
+  }, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
+export const getFlightFareRules = async (payload) => {
+  const response = await api.post("/api/flights/fare-rule", {
+    ...payload,
+    domain: "localhost:1337",
+  }, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
 export const getFlightWebSettings = async (payload) => {
   const response = await api.post("/api/flights/web-settings", {
     ...payload,

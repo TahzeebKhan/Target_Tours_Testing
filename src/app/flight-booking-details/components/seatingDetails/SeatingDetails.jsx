@@ -303,13 +303,7 @@ const SeatingDetails = () => {
   }, [selectedSeats, seatsById, setSeats]);
 
 
-  useEffect(()=>{
- console.log("seats",seats)
-  },[seats])
 
-  useEffect(()=>{
-    console.log("booking session",buildFormattedSeatRows(bookingSession?.seatLayoutResponse))
-     },[bookingSession?.seatLayoutResponse])
 
   const toggleSeat = (rowId, colLabel, type) => {
     if (type === "taken") return;

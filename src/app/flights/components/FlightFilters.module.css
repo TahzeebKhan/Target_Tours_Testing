@@ -293,6 +293,13 @@
   align-content: center;
   gap: 8px;
 }
+
+.airlineLogoDiv img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 .actionBar {
   display: none;
 }
