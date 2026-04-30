@@ -243,12 +243,7 @@ const TopFilterResponsiveSec = () => {
         };
     }, []);
     const toggleType = (type) => {
-        setSelectedFareTypes(
-            (prev) =>
-                prev.includes(type)
-                    ? prev.filter((t) => t !== type) // uncheck
-                    : [...prev, type] // check
-        );
+        setSelectedFareTypes((prev) => (prev.includes(type) ? [] : [type]));
     };
     useEffect(() => {
         if (!showCalendar) return;

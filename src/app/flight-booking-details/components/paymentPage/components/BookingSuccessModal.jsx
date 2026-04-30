@@ -158,12 +158,12 @@ export default function BookingSuccessModal({
         startData?.status,
         "SUCCESS"
       ),
-      transactionId: pickFirst(
-        startData?.TransactionID,
-        createData?.TransactionID,
-        startData?.transactionId,
-        createData?.transactionId
-      ),
+      // transactionId: pickFirst(
+      //   startData?.TransactionID,
+      //   createData?.TransactionID,
+      //   startData?.transactionId,
+      //   createData?.transactionId
+      // ),
       bookingId: pickFirst(
         createData?.BookingID,
         createData?.bookingId,

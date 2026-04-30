@@ -117,6 +117,12 @@ const OnewayFlightBooking = ({
     const flightId = flight?.id ?? null;
     const priceRequest = flight?.booking?.priceRequest;
     const searchTui = flight?.booking?.tui;
+    const flightNo = String(
+      flight?.booking?.flightNo ||
+        flight?.details?.flightNo ||
+        flight?.airlines?.[0]?.code ||
+        ""
+    ).match(/\d+/)?.[0];
     const hasPricePayload =
       Boolean(priceRequest?.search_key) &&
       priceRequest?.Trips?.[0]?.Index !== undefined &&
@@ -158,6 +164,7 @@ const OnewayFlightBooking = ({
         [flightId]: {
           webSettingsResponse,
           priceResponse,
+          fareOptionsResponse: null,
           checklistResponse,
         },
       }));
@@ -166,6 +173,7 @@ const OnewayFlightBooking = ({
         prefetchedFareData: {
           webSettingsResponse,
           priceResponse,
+          fareOptionsResponse: null,
           checklistResponse,
         },
       });
@@ -644,11 +652,12 @@ const OnewayFlightBooking = ({
 
         {/* Fare Comparison Modal */}
         {/* Fare Comparison Modal */}
-        {mounted && fareModalOpen !== null && (
+        {mounted && fareModalOpen !== null && !isMobile && (
           <>
             (
             <FareComparisonModal
               isOpen={fareModalOpen}
+              isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
               onClose={() => {
                 setFareModalOpen(null);
                 setSelectedFareFlight(null);
@@ -748,8 +757,10 @@ const OnewayFlightBooking = ({
             </div>
           </div>
         </div>
+        {mounted && fareModalOpen !== null && isMobile && (
         <MobileFareComparisonModal
           isOpen={fareModalOpen}
+          isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
           onClose={() => {
             setFareModalOpen(null);
             setSelectedFareFlight(null);
@@ -757,6 +768,7 @@ const OnewayFlightBooking = ({
           flightData={selectedFareFlight || resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           prefetchedData={selectedFareFlight?.prefetchedFareData || prefetchedFareData[fareModalOpen] || null}
         />
+        )}
         {showLoadingState ? (
           <FlightSearchLoader />
         ) : hasNoData ? (

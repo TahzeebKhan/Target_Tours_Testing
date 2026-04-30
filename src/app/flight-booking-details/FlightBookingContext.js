@@ -135,6 +135,14 @@ export function FlightBookingProvider({ children }) {
     setBookingError("");
     try {
       const ssrResponse = bookingSession?.ssrResponse || await getFlightSsr(ssrPayload);
+      if (
+        ssrResponse?.success === false ||
+        ssrResponse?.data?.success === false
+      ) {
+        throw new Error(
+          getApiMessage(ssrResponse, "Unable to load baggage and SSR details.")
+        );
+      }
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
 
@@ -166,11 +174,13 @@ export function FlightBookingProvider({ children }) {
       }));
       return true;
     } catch (error) {
-      setBookingError(
+      const message =
+        error?.response?.data?.data?.message ||
         error?.response?.data?.message ||
-          error?.message ||
-          "Unable to load baggage and SSR details."
-      );
+        error?.message ||
+        "Unable to load baggage and SSR details.";
+      toast.error(message);
+      setBookingError(message);
       return false;
     } finally {
       ssrRequestInFlightRef.current = false;

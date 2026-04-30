@@ -258,7 +258,8 @@
 /* Common range input reset */
 .rangeInput {
   position: absolute;
-  width: 100%;
+  left: -13px;
+  width: calc(100% + 26px);
   height: 32px;
   background: none;
   pointer-events: none;
