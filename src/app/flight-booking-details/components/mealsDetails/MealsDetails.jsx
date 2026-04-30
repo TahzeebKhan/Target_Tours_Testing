@@ -239,14 +239,16 @@ const MealsDetails = () => {
                   openTab === tabName ? styles.expandOpen : ""
                 }`}
               >
-                <Expandable
-                  meals={routeCard.meals}
-                  beverages={routeCard.beverages}
-                  quantities={getSegmentQuantities(routeCard.key)}
-                  onUpdateQuantity={(id, qty) =>
-                    handleUpdateQuantity(routeCard.key, id, qty)
-                  }
-                />
+                <div className={styles.scrollArea}>
+                  <Expandable
+                    meals={routeCard.meals}
+                    beverages={routeCard.beverages}
+                    quantities={getSegmentQuantities(routeCard.key)}
+                    onUpdateQuantity={(id, qty) =>
+                      handleUpdateQuantity(routeCard.key, id, qty)
+                    }
+                  />
+                </div>
               </div>
             </div>
           );

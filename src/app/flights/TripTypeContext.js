@@ -97,14 +97,13 @@ const isTruthyParam = (value = "") => {
 };
 
 const getFareTypesFromParams = (getParam) => {
-  const fareTypes = [];
-  if (isTruthyParam(getParam("IsSeniorCitizen"))) {
-    fareTypes.push(SENIOR_CITIZEN_FARE);
-  }
   if (isTruthyParam(getParam("IsStudentFare"))) {
-    fareTypes.push(STUDENT_FARE);
+    return [STUDENT_FARE];
   }
-  return fareTypes;
+  if (isTruthyParam(getParam("IsSeniorCitizen"))) {
+    return [SENIOR_CITIZEN_FARE];
+  }
+  return [];
 };
 
 /**

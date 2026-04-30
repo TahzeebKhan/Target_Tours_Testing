@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useContext, useMemo, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 const FlightFilterContext = createContext(null);
 
@@ -31,6 +32,8 @@ const FILTER_ACTIONS = {
   SELECT_DEPARTURE: "SELECT_DEPARTURE",
   CLEAR_DEPARTURE: "CLEAR_DEPARTURE",
   SET_PRICE_RANGE: "SET_PRICE_RANGE",
+  SET_POPULAR_FILTER: "SET_POPULAR_FILTER",
+  SET_STOPS_FILTER: "SET_STOPS_FILTER",
   SET_SORT_BY: "SET_SORT_BY",
   RESET_FILTERS: "RESET_FILTERS",
 };
@@ -39,8 +42,9 @@ const createDefaultFilters = () => ({
   price: [...DEFAULT_PRICE],
   priceTouched: false,
   sortBy: null,
+  popularTouched: false,
   popular: {
-    refundable: true,
+    refundable: false,
     oneStop: false,
     lateDeparture: false,
     nonStop: false,
@@ -50,6 +54,7 @@ const createDefaultFilters = () => ({
     oneStop: false,
     twoPlus: false,
   },
+  stopsTouched: false,
   departureJakarta: null,
   departureSingapore: null,
   aircraft: {},
@@ -60,12 +65,17 @@ const filterReducer = (state, action) => {
   switch (action.type) {
     case FILTER_ACTIONS.TOGGLE_GROUP_CHECKBOX: {
       const { group, key } = action.payload;
+      const isStopsFilter =
+        group === "stops" ||
+        (group === "popular" && (key === "nonStop" || key === "oneStop"));
       return {
         ...state,
         [group]: {
           ...state[group],
           [key]: !state[group]?.[key],
         },
+        popularTouched: group === "popular" ? true : state.popularTouched,
+        stopsTouched: isStopsFilter ? true : state.stopsTouched,
       };
     }
     case FILTER_ACTIONS.TOGGLE_MAP_CHECKBOX: {
@@ -100,6 +110,24 @@ const filterReducer = (state, action) => {
         priceTouched: true,
       };
     }
+    case FILTER_ACTIONS.SET_POPULAR_FILTER: {
+      return {
+        ...state,
+        popular: {
+          ...state.popular,
+          ...action.payload,
+        },
+      };
+    }
+    case FILTER_ACTIONS.SET_STOPS_FILTER: {
+      return {
+        ...state,
+        stops: {
+          ...createDefaultFilters().stops,
+          ...action.payload,
+        },
+      };
+    }
     case FILTER_ACTIONS.SET_SORT_BY: {
       return {
         ...state,
@@ -115,11 +143,38 @@ const filterReducer = (state, action) => {
 };
 
 export function FlightFilterProvider({ children }) {
+  const searchParams = useSearchParams();
   const [filters, dispatch] = useReducer(filterReducer, undefined, createDefaultFilters);
   const [apiFilterData, setApiFilterData] = useState(null);
+  const refundableParam = searchParams?.get("refundable");
+  const stopsParam = searchParams?.get("stops") || "";
+
+  useEffect(() => {
+    dispatch({
+      type: FILTER_ACTIONS.SET_POPULAR_FILTER,
+      payload: {
+        refundable: String(refundableParam || "").trim().toLowerCase() === "true",
+      },
+    });
+  }, [refundableParam]);
+
+  useEffect(() => {
+    const selectedStops = String(stopsParam)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    dispatch({
+      type: FILTER_ACTIONS.SET_STOPS_FILTER,
+      payload: {
+        nonStop: selectedStops.includes("0"),
+        oneStop: selectedStops.includes("1"),
+        twoPlus: selectedStops.includes("2"),
+      },
+    });
+  }, [stopsParam]);
 
   const toggleCheckbox = (group, key) => {
-     console.log("group",key,group)
     dispatch({
       type: FILTER_ACTIONS.TOGGLE_GROUP_CHECKBOX,
       payload: { group, key },
@@ -127,7 +182,6 @@ export function FlightFilterProvider({ children }) {
   };
 
   const toggleMapCheckbox = (group, key) => {
-    
     dispatch({
       type: FILTER_ACTIONS.TOGGLE_MAP_CHECKBOX,
       payload: { group, key },

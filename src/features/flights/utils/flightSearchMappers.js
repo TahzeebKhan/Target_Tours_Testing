@@ -480,6 +480,17 @@ const buildOneWayCard = (flight, index, options = {}) => {
 
   const first = segments[0] || {};
   const last = segments[segments.length - 1] || first;
+  const primaryFlightNo = pickFirst(
+    flight?.flightNo,
+    flight?.FlightNo,
+    flight?.flight_no,
+    flight?.flight_number,
+    first?.flightNo,
+    first?.FlightNo,
+    first?.flight_no,
+    first?.flight_number,
+    airlines?.[0]?.code
+  );
 
   const depCity =
     first?.departure?.city ||
@@ -649,6 +660,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
     },
     details: {
       airline: pickFirst(flight?.airline, flight?.airline_name, airlines?.[0]?.name),
+      flightNo: primaryFlightNo,
       aircraft: pickFirst(flight?.AirCraft, flight?.aircraft, flight?.Aircraft),
       fromName: pickFirst(flight?.FromName, flight?.from_name),
       toName: pickFirst(flight?.ToName, flight?.to_name),
@@ -668,6 +680,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
       ),
     },
     booking: {
+      flightNo: primaryFlightNo,
       tui: responseBookingMeta.tui,
       searchKey: responseBookingMeta.searchKey,
       clientId: responseBookingMeta.clientId,
@@ -1470,6 +1483,12 @@ export const buildSearchParams = ({
   if (selectedStops.length > 0) {
     base.stops =
       selectedStops.length === 1 ? selectedStops[0] : selectedStops.join(",");
+  } else if (
+    !currentFilters.stopsTouched &&
+    urlParams.stops !== undefined &&
+    urlParams.stops !== ""
+  ) {
+    base.stops = urlParams.stops;
   }
   base.airlines =
     selectedAirlines.length > 0
@@ -1483,7 +1502,11 @@ export const buildSearchParams = ({
     if (Number.isFinite(maxPrice)) base.max_price = maxPrice;
   }
   // Avoid forcing refundable for RT requests; backend returns 500 for some RT+refundable combinations.
-  if (tripType !== "round" && currentFilters.popular?.refundable) {
+  if (
+    (currentFilters.popularTouched || urlParams.refundable !== undefined) &&
+    tripType !== "round" &&
+    currentFilters.popular?.refundable
+  ) {
     base.refundable = true;
   }
   // Send aircraft codes as comma-separated multi value in `aircrafts`.
@@ -1513,9 +1536,6 @@ export const buildSearchParams = ({
   }
   base.domain = urlParams.domain || getDefaultDomain();
   base.fareType = tripType === "round" ? "RT" : "ON";
-  if (String(urlParams.isDriect || "").toLowerCase() === "true") {
-    base.isDriect = true;
-  }
 
   return base;
 };

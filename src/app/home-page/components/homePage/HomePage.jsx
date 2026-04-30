@@ -1128,7 +1128,7 @@ const HomePage = ({
           infants: String(normalizedPassengers.infant),
           travelClass: normalizedTravelClass,
         });
-        if (directOnly) params.set("isDriect", "true");
+        if (directOnly) params.set("stops", "0");
         searchLegs.forEach((leg, i) => {
           params.set(`from${i}`, leg.from || "");
           params.set(`to${i}`, leg.to || "");
@@ -1180,7 +1180,7 @@ const HomePage = ({
       });
       if (fromCode) params.set("origin", fromCode);
       if (toCode) params.set("destination", toCode);
-      if (directOnly) params.set("isDriect", "true");
+      if (directOnly) params.set("stops", "0");
       router.push(`/flights?${params.toString()}`);
       return;
     }

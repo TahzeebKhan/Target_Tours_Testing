@@ -113,6 +113,13 @@
   transition: max-height 0.35s ease-in-out;
 }
 
+.scrollArea {
+  max-height: min(58vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
 .flightActiveBorder {
   border: 1px solid #E4E6E8;
   transition: border 0.35s ease;
@@ -346,6 +353,12 @@
 
   .mobileView {
     display: flex;
+  }
+
+  .scrollArea {
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
   }
 }
 @media (max-width: 400px) {

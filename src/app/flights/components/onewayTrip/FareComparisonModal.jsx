@@ -47,6 +47,137 @@ const getNestedArray = (payload, paths) => {
     return [];
 };
 
+const getRuleDetails = (fare) => {
+    const rules = fare?.rules;
+    if (!rules) return {};
+    if (typeof rules === "string") {
+        try {
+            return JSON.parse(rules);
+        } catch {
+            return {};
+        }
+    }
+    return rules;
+};
+
+const hasRuleDetails = (fare) => {
+    const rules = getRuleDetails(fare);
+    return (
+        Array.isArray(rules?.summary?.items) ||
+        rules?.change_upto !== undefined ||
+        rules?.cancellation_upto !== undefined
+    );
+};
+
+const collectFareRuleSources = (payload) => {
+    const sources = [];
+    const seen = new Set();
+
+    const visit = (value) => {
+        if (!value || typeof value !== "object" || seen.has(value)) return;
+        seen.add(value);
+
+        if (hasRuleDetails(value)) {
+            sources.push(value);
+        }
+
+        if (Array.isArray(value)) {
+            value.forEach(visit);
+            return;
+        }
+
+        Object.values(value).forEach(visit);
+    };
+
+    visit(payload?.data || payload || {});
+    return sources;
+};
+
+const getMatchingRuleSource = (fare, index, ruleSources) => {
+    if (!ruleSources.length) return fare;
+
+    return (
+        ruleSources.find((source) => String(source?.index || "") === String(fare?.index || "")) ||
+        ruleSources.find((source) => readNumber(source?.price) === readNumber(fare?.price)) ||
+        ruleSources[index] ||
+        fare
+    );
+};
+
+const getFareOptionsFromResponse = (payload, flightNo) => {
+    const response = payload?.data || payload || {};
+    const fareOptions = response?.fare_options || response?.fareOptions || {};
+    const flightKey = String(flightNo || "").trim();
+    const directFares = fareOptions?.[flightKey]?.fares;
+
+    if (Array.isArray(directFares)) return directFares;
+
+    const firstFareGroup = Object.values(fareOptions || {}).find((item) =>
+        Array.isArray(item?.fares)
+    );
+    if (firstFareGroup?.fares) return firstFareGroup.fares;
+
+    return getNestedArray(response, [
+        ["fares"],
+        ["data", "fares"],
+    ]);
+};
+
+const formatAllowance = (value = "", suffix = "Allowance") => {
+    const normalized = String(value || "").trim();
+    if (!normalized) return "";
+    return /allowance/i.test(normalized) ? normalized : `${normalized} ${suffix}`;
+};
+
+const getBaggageDetails = (fare) => {
+    const baggageItems = Array.isArray(fare?.ssr?.baggage) ? fare.ssr.baggage : [];
+    const firstBaggage = baggageItems[0] || {};
+    const baggageName = String(firstBaggage?.name || "").trim();
+    const baggageParts = baggageName
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    const checkin =
+        baggageParts[0] ||
+        firstBaggage?.weight ||
+        firstBaggage?.name ||
+        fare?.inclusions?.Baggage;
+    const cabin =
+        fare?.inclusions?.CabinBaggage ||
+        fare?.inclusions?.Cabin ||
+        fare?.cabinBaggage ||
+        firstBaggage?.cabin_weight ||
+        baggageParts[1] ||
+        "7 Kg";
+
+    return {
+        cabin: formatAllowance(cabin, "Cabin Bag Allowance") || "Cabin baggage as per airline rules",
+        checkin: formatAllowance(checkin, "Check-In Bag Allowance") || "Check-in baggage as per airline rules",
+    };
+};
+
+const getRuleLabel = (fare, type, fallback) => {
+    const rules = getRuleDetails(fare);
+    const ruleItems = Array.isArray(rules?.summary?.items)
+        ? rules.summary.items
+        : [];
+    const match = ruleItems.find((item) =>
+        String(item?.type || item?.label || "")
+            .toLowerCase()
+            .includes(type)
+    );
+    if (match?.label) return match.label;
+
+    const amount = readNumber(
+        type === "change" ? rules?.change_upto : rules?.cancellation_upto
+    );
+    if (amount !== null) {
+        return `${type === "change" ? "Change" : "Cancellation"} Charges Upto INR ${amount.toLocaleString("en-IN")}`;
+    }
+
+    return fallback;
+};
+
 const DEFAULT_FARE_TEMPLATES = [
     {
         id: "saver",
@@ -111,6 +242,63 @@ export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
     const resolvedPrefetchedData = prefetchedData || flightData?.prefetchedFareData || {};
     const priceResponse = resolvedPrefetchedData?.priceResponse || {};
     const pricePayload = priceResponse?.data || priceResponse || {};
+    const flightNo = String(
+        flightData?.booking?.flightNo ||
+        flightData?.details?.flightNo ||
+        flightData?.airlines?.[0]?.code ||
+        ""
+    ).match(/\d+/)?.[0];
+    const fareOptionItems = getFareOptionsFromResponse(
+        resolvedPrefetchedData?.fareOptionsResponse,
+        flightNo
+    );
+    const safeAdults = Math.max(Number(adults || 1), 1);
+
+    if (fareOptionItems.length > 0) {
+        const ruleSources = collectFareRuleSources(pricePayload);
+        return fareOptionItems.map((item, index) => {
+            const ruleSource = getMatchingRuleSource(item, index, ruleSources);
+            const total = readNumber(item?.price, item?.grossFare);
+            const perAdult = readNumber(
+                item?.price,
+                total !== null ? Math.round(total / safeAdults) : null
+            );
+            const fareName = String(
+                pickValue(item?.FCType, item?.fareClass, item?.FCGroup, `Fare ${index + 1}`)
+            ).toUpperCase();
+            const baggage = getBaggageDetails(item);
+            const meals = Array.isArray(item?.ssr?.meals) ? item.ssr.meals : [];
+            const seats = Number(item?.seats);
+
+            return {
+                id: String(pickValue(item?.index, item?.fare_id, item?.id, index)),
+                name: fareName,
+                price: formatCurrency(total) || flightData?.fare?.totalFare || "N/A",
+                pricePerAdult:
+                    formatCurrency(perAdult) || flightData?.fare?.pricePerAdult || "N/A",
+                isPremium: index === 1 || /flex|premium/i.test(fareName),
+                netAmount: total,
+                netPerAdult: perAdult,
+                rawFare: item,
+                baggage,
+                changes: {
+                    charges: getRuleLabel(ruleSource, "change", "Change charges as per airline rules"),
+                    cancellation: getRuleLabel(
+                        ruleSource,
+                        "cancellation",
+                        "Cancellation charges as per airline rules"
+                    ),
+                },
+                addons: {
+                    seats: Number.isFinite(seats) && seats > 0
+                        ? `${seats} seat(s) available`
+                        : "Seats as per availability",
+                    meals: meals.length > 0 ? "Meals available" : "Meals as per airline rules",
+                },
+            };
+        });
+    }
+
     const fareBreakdown = getNestedArray(pricePayload, [
         ["fare_breakdown"],
     ]);
@@ -140,7 +328,6 @@ export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
         onwardFareBreakdown?.total_journey_price,
         onwardFareBreakdown?.totalJourneyPrice
     );
-    const safeAdults = Math.max(Number(adults || 1), 1);
     const rootTotal = readNumber(
         netPerAdult !== null ? netPerAdult * safeAdults : null,
         firstJourneyPrice

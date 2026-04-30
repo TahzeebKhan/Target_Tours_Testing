@@ -68,6 +68,20 @@ export const getFlightPrice = async (payload) => {
   return response?.data;
 };
 
+export const getFlightFareOptions = async ({ search_key, flight_no }) => {
+  const response = await api.get("/api/flights/fare-options", {
+    params: {
+      search_key,
+      flight_no,
+    },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response?.data;
+};
+
 export const getFlightInfo = async (payload) => {
   const response = await api.post("/api/flights/flight-info", {
     ...payload,
