@@ -95,6 +95,59 @@ const getElapsedMinutes = (start, end) => {
   return minutes >= 0 ? minutes : null;
 };
 
+const parseTimeMinutes = (value) => {
+  const time = formatTime(value);
+  const match = String(time || "").match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+};
+
+const getArrivalDayOffset = (departureValue, arrivalValue, durationMinutes) => {
+  if (!departureValue || !arrivalValue) return 0;
+
+  const departureMinutes = parseTimeMinutes(departureValue);
+  const normalizedDuration = Number(durationMinutes);
+  if (departureMinutes !== null && Number.isFinite(normalizedDuration)) {
+    if (normalizedDuration >= 24 * 60) {
+      return Math.ceil(normalizedDuration / (24 * 60));
+    }
+
+    const arrivalMinutes = parseTimeMinutes(arrivalValue);
+    return arrivalMinutes !== null && arrivalMinutes < departureMinutes ? 1 : 0;
+  }
+
+  const departureDate = new Date(departureValue);
+  const arrivalDate = new Date(arrivalValue);
+  if (
+    !Number.isNaN(departureDate.getTime()) &&
+    !Number.isNaN(arrivalDate.getTime())
+  ) {
+    const departureDay = new Date(
+      departureDate.getFullYear(),
+      departureDate.getMonth(),
+      departureDate.getDate()
+    ).getTime();
+    const arrivalDay = new Date(
+      arrivalDate.getFullYear(),
+      arrivalDate.getMonth(),
+      arrivalDate.getDate()
+    ).getTime();
+    return Math.max(
+      Math.round((arrivalDay - departureDay) / (24 * 60 * 60 * 1000)),
+      0
+    );
+  }
+
+  const arrivalMinutes = parseTimeMinutes(arrivalValue);
+  return (
+    departureMinutes !== null &&
+    arrivalMinutes !== null &&
+    arrivalMinutes < departureMinutes
+  )
+    ? 1
+    : 0;
+};
+
 const formatDurationLabel = (minutes) => {
   const normalized = Number(minutes);
   if (!Number.isFinite(normalized) || normalized < 0) return "";
@@ -531,19 +584,31 @@ const buildOneWayCard = (flight, index, options = {}) => {
         value !== ""
     )
   );
+  const departureValue = pickFirst(
+    first?.departure?.date,
+    first?.departure?.time,
+    first?.departure_time,
+    flight?.departure,
+    flight?.departure_time
+  );
+  const arrivalValue = pickFirst(
+    last?.arrival?.date,
+    last?.arrival?.time,
+    last?.arrival_time,
+    flight?.arrival,
+    flight?.arrival_time
+  );
+  const arrivalDayOffset = getArrivalDayOffset(
+    departureValue,
+    arrivalValue,
+    durationMinutes
+  );
 
   return {
     id: flight?.id || flight?.index || `flight-${index + 1}`,
     airlines,
     departure: {
-      time: formatTime(
-        pickFirst(
-          first?.departure?.time,
-          first?.departure_time,
-          flight?.departure,
-          flight?.departure_time
-        )
-      ),
+      time: formatTime(departureValue),
       city: hasSegments
         ? fallbackCity(depCity, depCode)
         : fallbackCity(
@@ -552,14 +617,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
           ),
     },
     arrival: {
-      time: formatTime(
-        pickFirst(
-          last?.arrival?.time,
-          last?.arrival_time,
-          flight?.arrival,
-          flight?.arrival_time
-        )
-      ),
+      time: formatTime(arrivalValue),
       city: hasSegments
         ? fallbackCity(arrCity, arrCode)
         : fallbackCity(
@@ -575,7 +633,8 @@ const buildOneWayCard = (flight, index, options = {}) => {
       type: stopsMeta.type,
       count: stopsCount,
       via: viaCity,
-      nextDay: false,
+      nextDay: arrivalDayOffset > 0,
+      arrivalDayOffset,
     },
     fare: {
       totalFare: formatCurrency(totalFareAmount),
@@ -1343,12 +1402,14 @@ export const buildSearchParams = ({
   endDate,
   passengers,
   travelClass,
+  fareTypes,
   searchParams,
   filters,
 }) => {
   const base = {};
   const urlParams = searchParams || {};
   const currentFilters = filters || {};
+  const selectedFareTypes = Array.isArray(fareTypes) ? fareTypes : [];
   const selectedDepartureSlot = SLOT_KEY_MAP[currentFilters.departureJakarta];
   const selectedArrivalSlot = SLOT_KEY_MAP[currentFilters.departureSingapore];
 
@@ -1412,8 +1473,8 @@ export const buildSearchParams = ({
   }
   base.airlines =
     selectedAirlines.length > 0
-      ? selectedAirlines
-      : (urlParams.airlines ? [urlParams.airlines] : [""]);
+      ? selectedAirlines.join(",")
+      : (urlParams.airlines || "");
   if (shouldApplyPriceRange) {
     const minPrice = Number(priceRange?.[0] ?? urlParams.min_price);
     const maxPrice = Number(priceRange?.[1] ?? urlParams.max_price);
@@ -1432,6 +1493,16 @@ export const buildSearchParams = ({
   base.arrival_slots = selectedArrivalSlot || urlParams.arrival_slots || "";
   if (currentFilters.popular?.lateDeparture) {
     base.late_departure = 1;
+  }
+  const hasSeniorCitizenFare =
+    selectedFareTypes.includes("SENIOR CITIZEN");
+  const hasStudentFare = selectedFareTypes.includes("STUDENT");
+
+  if (hasSeniorCitizenFare) {
+    base.IsSeniorCitizen = true;
+  }
+  if (hasStudentFare) {
+    base.IsStudentFare = true;
   }
   if (Number(urlParams.late_arrival) === 1) {
     base.late_arrival = 1;

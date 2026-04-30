@@ -152,6 +152,7 @@
   position: relative;
   height: 32px;
   margin-top: -6px;
+  overflow: visible;
 }
 
 /* Base track */
@@ -173,6 +174,84 @@
   height: 4px;
   background: #0b0f3f;
   border-radius: 999px;
+}
+
+.rangeTooltip {
+  position: absolute;
+  top: -26px;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-width: max-content;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #0b0f3f;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.rangeTooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  background: #0b0f3f;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.rangeTooltipMin {
+  transform: translateX(-50%);
+}
+
+.rangeTooltipMax {
+  transform: translateX(-100%);
+}
+
+.rangeTooltipMax::after {
+  left: calc(100% - 28px);
+}
+
+.rangeTooltipActive {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.rangeTooltipMin.rangeTooltipActive {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.rangeTooltipMax.rangeTooltipActive {
+  transform: translateX(-100%) translateY(-2px);
+}
+
+.rangeTooltipStartEdge {
+  transform: translateX(0);
+}
+
+.rangeTooltipStartEdge::after {
+  left: 24px;
+}
+
+.rangeTooltipStartEdge.rangeTooltipActive {
+  transform: translateX(0) translateY(-2px);
+}
+
+.rangeTooltipEndEdge {
+  transform: translateX(-100%);
+}
+
+.rangeTooltipEndEdge::after {
+  left: calc(100% - 24px);
+}
+
+.rangeTooltipEndEdge.rangeTooltipActive {
+  transform: translateX(-100%) translateY(-2px);
 }
 
 /* Common range input reset */

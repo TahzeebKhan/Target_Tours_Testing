@@ -1,5 +1,5 @@
 "use client";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
 import Image from "next/image";
@@ -9,8 +9,16 @@ import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { useTripType } from "../TripTypeContext";
 
+const FALLBACK_PRICE_RANGE = [0, 1000000];
+
+const toFiniteNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+};
+
 export default function FlightFilters() {
   const { setIsSidebarOpen, isSidebarOpen } = useContext(SidebarContext);
+  const [activePriceTooltip, setActivePriceTooltip] = useState(null);
 
   useLockBodyScroll(isSidebarOpen);
 
@@ -26,10 +34,26 @@ export default function FlightFilters() {
   } = useFlightFilters();
   const { tripType, committedSearches } = useTripType();
 
-  const price = filters.price;
-  const minPrice = 0;
-  const maxPrice = 1000000;
+  const apiMinPrice = toFiniteNumber(apiFilterData?.price_min);
+  const apiMaxPrice = toFiniteNumber(apiFilterData?.price_max);
+  const hasApiPriceRange =
+    apiMinPrice !== null && apiMaxPrice !== null && apiMaxPrice > apiMinPrice;
+  const minPrice = hasApiPriceRange ? apiMinPrice : FALLBACK_PRICE_RANGE[0];
+  const maxPrice = hasApiPriceRange ? apiMaxPrice : FALLBACK_PRICE_RANGE[1];
   const priceStep = 1000;
+  const clampPrice = (value) => Math.min(Math.max(Number(value), minPrice), maxPrice);
+  const price = filters.priceTouched
+    ? [
+        clampPrice(filters.price?.[0] ?? minPrice),
+        clampPrice(filters.price?.[1] ?? maxPrice),
+      ]
+    : [minPrice, maxPrice];
+  const rangeSize = Math.max(maxPrice - minPrice, 1);
+  const minPricePercent = ((price[0] - minPrice) / rangeSize) * 100;
+  const maxPricePercent = ((price[1] - minPrice) / rangeSize) * 100;
+  const isMinTooltipAtEdge = minPricePercent < 8;
+  const isMaxTooltipAtEdge = maxPricePercent > 92;
+  const formatPrice = (value) => `Rs. ${Number(value).toLocaleString("en-IN")}`;
   const activeRoute = committedSearches?.[tripType] || committedSearches?.oneway || {};
 
   const getRouteLabel = (value, fallback) => {
@@ -208,10 +232,31 @@ export default function FlightFilters() {
           <div
             className={styles.sliderRange}
             style={{
-              left: `${((price[0] - minPrice) / (maxPrice - minPrice)) * 100}%`,
-              right: `${100 - ((price[1] - minPrice) / (maxPrice - minPrice)) * 100}%`,
+              left: `${minPricePercent}%`,
+              right: `${100 - maxPricePercent}%`,
             }}
           />
+
+          <div
+            className={`${styles.rangeTooltip} ${styles.rangeTooltipMin} ${
+              activePriceTooltip === "min" ? styles.rangeTooltipActive : ""
+            } ${
+              isMinTooltipAtEdge ? styles.rangeTooltipStartEdge : ""
+            }`}
+            style={{ left: `${minPricePercent}%` }}
+          >
+            {formatPrice(price[0])}
+          </div>
+          <div
+            className={`${styles.rangeTooltip} ${styles.rangeTooltipMax} ${
+              activePriceTooltip === "max" ? styles.rangeTooltipActive : ""
+            } ${
+              isMaxTooltipAtEdge ? styles.rangeTooltipEndEdge : ""
+            }`}
+            style={{ left: `${maxPricePercent}%` }}
+          >
+            {formatPrice(price[1])}
+          </div>
 
           {/* Min thumb */}
           <input
@@ -220,6 +265,10 @@ export default function FlightFilters() {
             max={maxPrice}
             step={priceStep}
             value={price[0]}
+            onPointerEnter={() => setActivePriceTooltip("min")}
+            onPointerLeave={() => setActivePriceTooltip(null)}
+            onFocus={() => setActivePriceTooltip("min")}
+            onBlur={() => setActivePriceTooltip(null)}
             onPointerDown={() => setPriceRange(price[0], price[1])}
             onChange={(e) => {
               const nextMin = Math.min(Number(e.target.value), price[1] - priceStep);
@@ -235,6 +284,10 @@ export default function FlightFilters() {
             max={maxPrice}
             step={priceStep}
             value={price[1]}
+            onPointerEnter={() => setActivePriceTooltip("max")}
+            onPointerLeave={() => setActivePriceTooltip(null)}
+            onFocus={() => setActivePriceTooltip("max")}
+            onBlur={() => setActivePriceTooltip(null)}
             onPointerDown={() => setPriceRange(price[0], price[1])}
             onChange={(e) => {
               const nextMax = Math.max(Number(e.target.value), price[0] + priceStep);
@@ -245,7 +298,7 @@ export default function FlightFilters() {
         </div>
 
         <div className={styles.rangeValue}>
-          Rs. {price[0].toLocaleString()} – Rs. {price[1].toLocaleString()}
+          {formatPrice(price[0])} – {formatPrice(price[1])}
         </div>
       </section>
 

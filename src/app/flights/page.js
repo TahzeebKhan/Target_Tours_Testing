@@ -65,6 +65,7 @@ const page = () => {
   const [aggregatedMappedData, setAggregatedMappedData] = useState(null);
   const isLoadingMoreRef = useRef(false);
   const lastApiFilterDataRef = useRef("");
+  const lastDatewiseRefreshRef = useRef(0);
 
   const rawQueryParams = useMemo(
     () => Object.fromEntries(urlSearchParams?.entries?.() || []),
@@ -85,6 +86,7 @@ const page = () => {
         endDate: request.endDate,
         passengers: request.passengers,
         travelClass: request.travelClass,
+        fareTypes: request.fareTypes,
         searchParams: rawQueryParams,
         filters: apiFilters,
       }),
@@ -98,6 +100,7 @@ const page = () => {
       request.endDate,
       request.passengers,
       request.travelClass,
+      request.fareTypes,
       rawQueryParams,
       apiFilters,
     ]
@@ -122,13 +125,23 @@ const page = () => {
     isLoadingMoreRef.current = false;
   }, [baseSearchKey]);
 
-  const { data, isLoading, isFetching, error, errorUpdatedAt } = useSearchFlights({
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error,
+    errorUpdatedAt,
+    dataUpdatedAt: searchDataUpdatedAt,
+  } = useSearchFlights({
     params: searchParams,
     enabled: Boolean(tripType && hasCommittedSearch),
     filterTrigger: apiFilters,
   });
 
-  const { data: datewiseFareData } = useDatewiseFare({
+  const {
+    data: datewiseFareData,
+    refetch: refetchDatewiseFare,
+  } = useDatewiseFare({
     tripType: requestTripType,
     from: request.from,
     to: request.to,
@@ -140,6 +153,14 @@ const page = () => {
     domain: process.env.NEXT_PUBLIC_DOMAIN,
     enabled: Boolean(requestTripType && hasCommittedSearch),
   });
+
+  useEffect(() => {
+    if (!searchDataUpdatedAt || currentPage !== 1 || !hasCommittedSearch) return;
+    if (lastDatewiseRefreshRef.current === searchDataUpdatedAt) return;
+
+    lastDatewiseRefreshRef.current = searchDataUpdatedAt;
+    refetchDatewiseFare();
+  }, [currentPage, hasCommittedSearch, refetchDatewiseFare, searchDataUpdatedAt]);
 
   const fallbackDatewiseFareTiles = useMemo(() => {
     const list = Array.isArray(data?.date_wise) ? data.date_wise : [];
@@ -235,6 +256,7 @@ const page = () => {
 
   const selectedDateTilePrice = useMemo(() => {
     if (requestTripType !== "oneway" || !request.startDate) return null;
+    if (currentPage === 1 && isFetching) return null;
 
     const candidates = (mappedData.oneway || [])
       .map((flight) =>
@@ -246,7 +268,7 @@ const page = () => {
 
     if (!candidates.length) return null;
     return Math.min(...candidates);
-  }, [mappedData.oneway, request.startDate, requestTripType]);
+  }, [currentPage, isFetching, mappedData.oneway, request.startDate, requestTripType]);
 
   const resolvedDatewiseFareTiles = useMemo(() => {
     const baseTiles =
@@ -305,10 +327,20 @@ const page = () => {
       data?.aircrafts ||
       data?.data?.aircrafts ||
       [];
+    const resolvedMeta =
+      mappedPageData?.raw?.meta ||
+      mappedPageData?.raw?.data?.meta ||
+      data?.meta ||
+      data?.data?.meta ||
+      {};
+    const priceMin = Number(resolvedMeta?.price_min);
+    const priceMax = Number(resolvedMeta?.price_max);
 
     const mergedFilterData = {
       ...(resolvedFilters || {}),
       aircrafts: Array.isArray(resolvedAircrafts) ? resolvedAircrafts : [],
+      price_min: Number.isFinite(priceMin) ? priceMin : undefined,
+      price_max: Number.isFinite(priceMax) ? priceMax : undefined,
     };
 
     const hasValidSlots =
@@ -317,8 +349,11 @@ const page = () => {
     const hasAircrafts =
       Array.isArray(mergedFilterData?.aircrafts) &&
       mergedFilterData.aircrafts.length > 0;
+    const hasPriceBounds =
+      Number.isFinite(mergedFilterData.price_min) &&
+      Number.isFinite(mergedFilterData.price_max);
 
-    if (hasValidSlots || hasAircrafts) {
+    if (hasValidSlots || hasAircrafts || hasPriceBounds) {
       const nextSerialized = JSON.stringify(mergedFilterData);
       if (lastApiFilterDataRef.current === nextSerialized) return;
 

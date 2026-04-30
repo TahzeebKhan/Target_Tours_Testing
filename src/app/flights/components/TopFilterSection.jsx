@@ -102,6 +102,8 @@ const TopFilterSection = ({
     setEndDate,
     handleSearch,
     isSearchSubmitting,
+    selectedFareTypes,
+    setSelectedFareTypes,
   } = useTripType();
   const [openCalendarFor, setOpenCalendarFor] = useState(null);
   const [directOnly, setDirectOnly] = useState(true);
@@ -133,7 +135,6 @@ const TopFilterSection = ({
     );
 
   const [bookingType, setBookingType] = useState("flight");
-  const [selectedTypes, setSelectedTypes] = useState([]);
   const [multiSegments, setMultiSegments] = useState([
     { from: "", to: "", date: "" },
     { from: "", to: "", date: "" },
@@ -340,7 +341,7 @@ const TopFilterSection = ({
   }, []);
 
   const toggleType = (type) => {
-    setSelectedTypes(
+    setSelectedFareTypes(
       (prev) =>
         prev.includes(type)
           ? prev.filter((t) => t !== type) // uncheck
@@ -1081,7 +1082,7 @@ const TopFilterSection = ({
                   <CustomCheckbox
                     key={type}
                     label={type}
-                    checked={selectedTypes.includes(type)}
+                    checked={selectedFareTypes.includes(type)}
                     onChange={() => toggleType(type)}
                   />
                 ))}
