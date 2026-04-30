@@ -38,7 +38,11 @@ const DEFAULT_FLIGHT_SEARCH = {
     infant: 0,
   },
   travelClass: "ECONOMY",
+  fareTypes: [],
 };
+
+const SENIOR_CITIZEN_FARE = "SENIOR CITIZEN";
+const STUDENT_FARE = "STUDENT";
 
 const parseCodeFromLabel = (label = "") => {
   const match = String(label || "").match(/\(([^)]+)\)/);
@@ -87,6 +91,22 @@ const isSamePlace = (leftLabel, rightLabel, leftCode = "", rightCode = "") => {
   return normalizePlaceValue(leftLabel) === normalizePlaceValue(rightLabel);
 };
 
+const isTruthyParam = (value = "") => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "true" || normalized === "1";
+};
+
+const getFareTypesFromParams = (getParam) => {
+  const fareTypes = [];
+  if (isTruthyParam(getParam("IsSeniorCitizen"))) {
+    fareTypes.push(SENIOR_CITIZEN_FARE);
+  }
+  if (isTruthyParam(getParam("IsStudentFare"))) {
+    fareTypes.push(STUDENT_FARE);
+  }
+  return fareTypes;
+};
+
 /**
  * Provider
  */
@@ -123,6 +143,9 @@ export function TripTypeProvider({ children }) {
   const [travelClass, setTravelClass] = useState(
     getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass
   );
+  const [selectedFareTypes, setSelectedFareTypes] = useState(() =>
+    getFareTypesFromParams(getParam)
+  );
   const [committedSearches, setCommittedSearches] = useState({
     oneway: {
       from: initialRoute.from || DEFAULT_FLIGHT_SEARCH.from,
@@ -151,6 +174,7 @@ export function TripTypeProvider({ children }) {
       infant: Number(getParam("infants") || 0),
     },
     travelClass: getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass,
+    fareTypes: getFareTypesFromParams(getParam),
   });
   const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
 
@@ -170,6 +194,7 @@ export function TripTypeProvider({ children }) {
     const pInfants = Number(getParam("infants") || 0);
     const pTravelClass =
       getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass;
+    const pFareTypes = getFareTypesFromParams(getParam);
     const hasSearchDetails = Boolean(
       (pFrom || pOrigin) &&
       (pTo || pDestination)
@@ -195,6 +220,7 @@ export function TripTypeProvider({ children }) {
       infant: pInfants,
     });
     setTravelClass(pTravelClass);
+    setSelectedFareTypes(pFareTypes);
 
     setCommittedSearches(prev => ({
         ...prev,
@@ -222,6 +248,7 @@ export function TripTypeProvider({ children }) {
           infant: pInfants,
         },
         travelClass: pTravelClass,
+        fareTypes: pFareTypes,
       });
 
     if (!hasSearchDetails) {
@@ -236,6 +263,8 @@ export function TripTypeProvider({ children }) {
       nextParams.set("children", "0");
       nextParams.set("infants", "0");
       nextParams.set("travelClass", DEFAULT_FLIGHT_SEARCH.travelClass);
+      nextParams.delete("IsSeniorCitizen");
+      nextParams.delete("IsStudentFare");
       nextParams.delete("end");
       nextParams.delete("page");
 
@@ -295,6 +324,7 @@ export function TripTypeProvider({ children }) {
       endDate,
       passengers,
       travelClass,
+      fareTypes: selectedFareTypes,
     });
 
     const nextParams = new URLSearchParams(searchParams?.toString() || "");
@@ -330,6 +360,16 @@ export function TripTypeProvider({ children }) {
     nextParams.set("children", String(passengers?.child ?? 0));
     nextParams.set("infants", String(passengers?.infant ?? 0));
     nextParams.set("travelClass", travelClass);
+    if (selectedFareTypes.includes(SENIOR_CITIZEN_FARE)) {
+      nextParams.set("IsSeniorCitizen", "true");
+    } else {
+      nextParams.delete("IsSeniorCitizen");
+    }
+    if (selectedFareTypes.includes(STUDENT_FARE)) {
+      nextParams.set("IsStudentFare", "true");
+    } else {
+      nextParams.delete("IsStudentFare");
+    }
     nextParams.delete("page");
 
     router.push(`/flights?${nextParams.toString()}`);
@@ -366,6 +406,8 @@ export function TripTypeProvider({ children }) {
         setPassengers,
         travelClass,
         setTravelClass,
+        selectedFareTypes,
+        setSelectedFareTypes,
         committedSearches,
         committedRequest,
         handleSearch,

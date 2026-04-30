@@ -408,12 +408,10 @@
 }
 
 .tabContentBaggageRules {
-  display: flex;
-  gap: 10px;
+  display: block;
 }
 
 .tableCard {
-  max-width: 534px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -425,10 +423,9 @@
 
 .tableHeader {
   padding: 11px 13px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   background-color: #000033;
-  /* gap: 34px; */
-  justify-content: space-between;
   color: #ffffff;
 }
 .tableHeader .airlineCellHead {
@@ -450,14 +447,14 @@
 
 .tableRow {
   padding: 9px 13px;
-  display: flex;
-  /* justify-content: space-between; */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   border: 1px solid #e4e6e8;
 }
 .tableRow .baggage,
 .tableRow .airlineCell {
-  width: 33%;
+  min-width: 0;
 }
 
 .airlineCell {

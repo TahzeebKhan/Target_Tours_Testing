@@ -499,9 +499,12 @@ const OnewayFlightBooking = ({
                               <div className={styles.bigDot}></div>
                             </div>
                           </div>
-                          <div className={styles.departureTime}>
+                          <div className={`${styles.departureTime} ${styles.arrivalTime}`}>
                             {flight.stops.nextDay && (
-                              <span className={styles.nextDay}>+1 day </span>
+                              <span className={styles.nextDay}>
+                                +{flight.stops.arrivalDayOffset || 1}{" "}
+                                {(flight.stops.arrivalDayOffset || 1) > 1 ? "Days" : "Day"}
+                              </span>
                             )}
                             {flight.arrival.time}{" "}
                           </div>

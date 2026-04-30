@@ -1,4 +1,4 @@
-const AirlineLogoList = [
+export const AirlineLogoList = [
   {
     "id": "AUTOSTRAD",
     "lcc": "None",
@@ -5673,7 +5673,8 @@ const AirlineLogoList = [
     "id": "IX",
     "lcc": "1",
     "name": "Air India Express",
-    "logo": "https://images.kiwi.com/airlines/64/IX.png"
+    // "logo": "https://images.kiwi.com/airlines/64/IX.png"
+    "logo":"https://imgak.mmtcdn.com/flights/assets/media/dt/common/icons/IX.png"
   },
   {
     "id": "K7",
@@ -6068,8 +6069,9 @@ const AirlineLogoList = [
   {
     "id": "AI",
     "lcc": "0",
-    "name": "Air India Limited",
-    "logo": "https://images.kiwi.com/airlines/64/AI.png"
+    "name": "Air India",
+    // "logo": "https://images.kiwi.com/airlines/64/AI.png"
+    "logo":"https://imgak.mmtcdn.com/flights/assets/media/dt/common/icons/AI.png"
   },
   {
     "id": "VY",
@@ -6303,7 +6305,8 @@ const AirlineLogoList = [
     "id": "6E",
     "lcc": "1",
     "name": "IndiGo Airlines",
-    "logo": "https://images.kiwi.com/airlines/64/6E.png"
+    // "logo": "https://images.kiwi.com/airlines/64/6E.png",
+    "logo":"https://imgak.mmtcdn.com/flights/assets/media/dt/common/icons/6E.png"
   },
   {
     "id": "PG",

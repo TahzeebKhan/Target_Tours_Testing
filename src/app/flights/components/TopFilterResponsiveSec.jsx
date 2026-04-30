@@ -56,6 +56,8 @@ const TopFilterResponsiveSec = () => {
         setEndDate,
         handleSearch,
         isSearchSubmitting,
+        selectedFareTypes,
+        setSelectedFareTypes,
     } = useTripType();
     const [directOnly, setDirectOnly] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -83,7 +85,6 @@ const TopFilterResponsiveSec = () => {
         );
 
     const [bookingType, setBookingType] = useState("flight");
-    const [selectedTypes, setSelectedTypes] = useState([]);
     const [multiSegments, setMultiSegments] = useState([
         { from: "", to: "", date: "" },
         { from: "", to: "", date: "" },
@@ -242,7 +243,7 @@ const TopFilterResponsiveSec = () => {
         };
     }, []);
     const toggleType = (type) => {
-        setSelectedTypes(
+        setSelectedFareTypes(
             (prev) =>
                 prev.includes(type)
                     ? prev.filter((t) => t !== type) // uncheck
@@ -764,7 +765,7 @@ const TopFilterResponsiveSec = () => {
                                     <CustomCheckbox
                                         key={type}
                                         label={type}
-                                        checked={selectedTypes.includes(type)}
+                                        checked={selectedFareTypes.includes(type)}
                                         onChange={() => toggleType(type)}
                                     />
                                 ))}
