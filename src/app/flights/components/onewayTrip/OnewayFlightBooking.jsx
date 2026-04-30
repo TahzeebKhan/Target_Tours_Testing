@@ -19,7 +19,6 @@ import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModa
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import {
   getFlightInfo,
-  getFlightFareOptions,
   getFlightPrice,
   getFlightTravelChecklist,
   getFlightWebSettings,
@@ -135,19 +134,10 @@ const OnewayFlightBooking = ({
     setFareModalOpen(flightId);
     setPrefetchingFlightId(flightId);
     try {
-      const [webSettingsResponse, priceResponse, fareOptionsResponse] = await Promise.all([
+      const [webSettingsResponse, priceResponse] = await Promise.all([
         searchTui ? getFlightWebSettings({ TUI: searchTui }) : Promise.resolve(null),
         hasPricePayload
           ? getFlightPrice(priceRequest)
-          : Promise.resolve(null),
-        priceRequest?.search_key && flightNo
-          ? getFlightFareOptions({
-              search_key: priceRequest.search_key,
-              flight_no: flightNo,
-            }).catch((error) => {
-              console.error("Failed to fetch fare options", error);
-              return null;
-            })
           : Promise.resolve(null),
       ]);
 
@@ -174,7 +164,7 @@ const OnewayFlightBooking = ({
         [flightId]: {
           webSettingsResponse,
           priceResponse,
-          fareOptionsResponse,
+          fareOptionsResponse: null,
           checklistResponse,
         },
       }));
@@ -183,7 +173,7 @@ const OnewayFlightBooking = ({
         prefetchedFareData: {
           webSettingsResponse,
           priceResponse,
-          fareOptionsResponse,
+          fareOptionsResponse: null,
           checklistResponse,
         },
       });
@@ -662,11 +652,12 @@ const OnewayFlightBooking = ({
 
         {/* Fare Comparison Modal */}
         {/* Fare Comparison Modal */}
-        {mounted && fareModalOpen !== null && (
+        {mounted && fareModalOpen !== null && !isMobile && (
           <>
             (
             <FareComparisonModal
               isOpen={fareModalOpen}
+              isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
               onClose={() => {
                 setFareModalOpen(null);
                 setSelectedFareFlight(null);
@@ -766,8 +757,10 @@ const OnewayFlightBooking = ({
             </div>
           </div>
         </div>
+        {mounted && fareModalOpen !== null && isMobile && (
         <MobileFareComparisonModal
           isOpen={fareModalOpen}
+          isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
           onClose={() => {
             setFareModalOpen(null);
             setSelectedFareFlight(null);
@@ -775,6 +768,7 @@ const OnewayFlightBooking = ({
           flightData={selectedFareFlight || resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           prefetchedData={selectedFareFlight?.prefetchedFareData || prefetchedFareData[fareModalOpen] || null}
         />
+        )}
         {showLoadingState ? (
           <FlightSearchLoader />
         ) : hasNoData ? (

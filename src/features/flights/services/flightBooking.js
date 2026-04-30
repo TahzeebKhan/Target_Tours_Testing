@@ -82,6 +82,28 @@ export const getFlightFareOptions = async ({ search_key, flight_no }) => {
   return response?.data;
 };
 
+export const getFlightFareOptionsUntilCached = async (
+  { search_key, flight_no },
+  { maxAttempts = 12, delayMs = 700 } = {}
+) => {
+  let lastResponse = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    lastResponse = await getFlightFareOptions({ search_key, flight_no });
+    const cached = Boolean(
+      lastResponse?.cached ?? lastResponse?.data?.cached ?? lastResponse?.data?.data?.cached
+    );
+
+    if (cached) {
+      return lastResponse;
+    }
+
+    await wait(delayMs * (attempt + 1));
+  }
+
+  return lastResponse;
+};
+
 export const getFlightInfo = async (payload) => {
   const response = await api.post("/api/flights/flight-info", {
     ...payload,
