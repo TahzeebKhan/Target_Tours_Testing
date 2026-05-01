@@ -363,6 +363,19 @@ const HomePage = ({
   };
 
   const selectSuggestion = (sugg, field = "from", index = null) => {
+    if (sugg?.route && tripType !== "multi") {
+      const route = sugg.route;
+      setFrom(route.origin || "");
+      setFromCode(route.originCode || "");
+      setTo(route.destination || "");
+      setToCode(route.destinationCode || "");
+      if (route.departureDate) setDepartureDate(route.departureDate);
+      if (route.returnDate) setReturenDate(route.returnDate);
+      setFromSuggestionsOpen(false);
+      setToSuggestionsOpen(false);
+      return;
+    }
+
     const displayValue = getSuggestionDisplayValue(sugg);
     const iataCode = sugg?.iataCode || sugg?.code || "";
 
@@ -1643,6 +1656,7 @@ const HomePage = ({
                                   : from
                               }
                               fallbackSuggestions={recentSearches}
+                              field="from"
                               onSelect={(s) => selectSuggestion(s, "from", 0)}
                             />
                           )}
@@ -1681,6 +1695,7 @@ const HomePage = ({
                                 tripType === "multi" ? multiCity[0]?.to || "" : to
                               }
                               fallbackSuggestions={recentSearches}
+                              field="to"
                               onSelect={(s) => selectSuggestion(s, "to", 0)}
                             />
                           )}
@@ -1975,6 +1990,7 @@ const HomePage = ({
                                       }
                                       query={leg.from || ""}
                                       fallbackSuggestions={recentSearches}
+                                      field="from"
                                       onSelect={(s) =>
                                         selectSuggestion(s, "from", actualIndex)
                                       }
@@ -2023,6 +2039,7 @@ const HomePage = ({
                                       }
                                       query={leg.to || ""}
                                       fallbackSuggestions={recentSearches}
+                                      field="to"
                                       onSelect={(s) =>
                                         selectSuggestion(s, "to", actualIndex)
                                       }

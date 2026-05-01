@@ -305,6 +305,14 @@ const unwrapFareRulesPayload = (fareRulesData) =>
   fareRulesData ||
   {};
 
+const getFareRulesMessage = (fareRulesData) =>
+  displayValue(
+    fareRulesData?.data?.message ||
+      fareRulesData?.message ||
+      fareRulesData?.data?.data?.message ||
+      fareRulesData?.data?.raw?.message
+  );
+
 const cleanRuleText = (value) =>
   String(value || "")
     .replace(/<br\s*\/?>/gi, " ")
@@ -312,6 +320,172 @@ const cleanRuleText = (value) =>
     .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+const cleanRuleLines = (value) =>
+  String(value || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+const toFareRuleAmount = (value) => {
+  const amount = Number(String(value || "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(amount) && amount > 0 ? amount : null;
+};
+
+const parseRawCancellationRuleRows = (text, context = {}) => {
+  const lines = Array.isArray(text)
+    ? text.map(cleanRuleText).filter(Boolean)
+    : cleanRuleLines(text);
+  const rows = [];
+  let inCancellationSection = false;
+  let pendingCancellationDescription = "";
+  let cancellationFeeIndex = 0;
+
+  lines.forEach((line, index) => {
+    const nextLine = lines[index + 1] || "";
+    const contextText = lines.slice(index, index + 6).join(" ");
+    const effectiveLine =
+      /\bFOR$/i.test(line) && nextLine
+        ? `${line} ${nextLine}`
+        : line;
+    const upperLine = line.toUpperCase();
+    const upperEffectiveLine = effectiveLine.toUpperCase();
+
+    if (/^-+$/.test(line)) return;
+    if (
+      upperLine === "CANCELLATIONS" ||
+      upperEffectiveLine.includes("CANCEL/REFUND") ||
+      upperEffectiveLine.includes("CANCELLATION CHARGES") ||
+      upperEffectiveLine.includes("CANCELLATION FEE")
+    ) {
+      inCancellationSection = true;
+    }
+    if (inCancellationSection && upperLine.includes("NO SHOW")) {
+      inCancellationSection = false;
+    }
+
+    const bookingWindowMatch = effectiveLine.match(
+      /(?:BOOKED|WITHIN|MORE THAN)\s+(.+?)\s+(?:PRIOR TO|OF)\s+COMMENCEMENT/i
+    );
+    if (inCancellationSection && bookingWindowMatch) {
+      pendingCancellationDescription = cleanRuleText(
+        bookingWindowMatch[1].replace(/\bWITHIN\b/i, "")
+      );
+    }
+
+    const atoMatch = effectiveLine.match(
+      /cancellation\s*:\s*adult\s*([0-9][\d.,]*)\s*([A-Z]{3})?/i
+    );
+    if (atoMatch) {
+      rows.push({
+        ...context,
+        head: "ATO Service Fee(Per Pax/ Per Journey)",
+        Description: "Cancellation",
+        adultAmount: toFareRuleAmount(atoMatch[1]),
+        currencyCode: atoMatch[2] || "INR",
+      });
+      return;
+    }
+
+    if (!inCancellationSection) return;
+
+    if (
+      upperEffectiveLine.includes("TO DEPARTURE") ||
+      /^TILL\s+/i.test(effectiveLine)
+    ) {
+      pendingCancellationDescription = cleanRuleText(
+        effectiveLine.replace(/\bCHARGE\b.*$/i, "")
+      );
+    }
+
+    const isExplicitCancellationCharge =
+      /FOR\s+(?:CANCEL|CANCELLATION|REFUND)/i.test(effectiveLine);
+    const chargeMatch = isExplicitCancellationCharge
+      ? effectiveLine.match(
+          /^(?:(TILL\s+[^,.;]+?)\s+)?CHARGE\s+([A-Z]{3})?\s*([0-9][\d.,]*)\s+(?:PER\s+COMPONENT\s+)?FOR\s+(?:CANCEL|CANCELLATION|REFUND)/i
+        )
+      : null;
+    const genericCancellationAmountMatch = !chargeMatch
+      ? effectiveLine.match(
+          /(?:CANCELLATION|CANCEL|REFUND)[^0-9A-Z]*(?:CHARGE|FEE|FEES)?[^0-9A-Z]*([A-Z]{3})?\s*([0-9][\d.,]*)/i
+        )
+      : null;
+    const cancellationMadeMatch =
+      !chargeMatch && !genericCancellationAmountMatch
+        ? contextText.match(
+            /CHARGE\s+([A-Z]{3})?\s*([0-9][\d.,]*)\s+WHEN\s+CANCELLATION\s+ARE\s+MADE/i
+          )
+        : null;
+    const againstChargeMatch =
+      !chargeMatch && !genericCancellationAmountMatch
+        ? contextText.match(/AGAINST\s+A\s+CHARGE\s+OF\s+([A-Z]{3})?\s*([0-9][\d.,]*)/i)
+        : null;
+
+    if (
+      !chargeMatch &&
+      !genericCancellationAmountMatch &&
+      !cancellationMadeMatch &&
+      !againstChargeMatch
+    ) {
+      return;
+    }
+
+    const amount =
+      cancellationMadeMatch?.[2] ||
+      againstChargeMatch?.[2] ||
+      chargeMatch?.[3] ||
+      genericCancellationAmountMatch?.[2];
+    const currency =
+      cancellationMadeMatch?.[1] ||
+      againstChargeMatch?.[1] ||
+      chargeMatch?.[2] ||
+      genericCancellationAmountMatch?.[1] ||
+      "INR";
+    const contextualDescription =
+      contextText.match(/BEFORE\s+24\s+HOURS\s+OF\s+DEPARTURE/i)
+        ? "Before 24 hours of departure"
+        : contextText.match(/WITHIN\s+24\s+HRS?.*?(?:02|2)\s+HRS?.*?DEPARTURE/i)
+          ? "Within 24 hrs until 02 hrs before departure"
+          : "";
+
+    const parsedDescription =
+      contextualDescription ||
+      cleanRuleText(chargeMatch?.[1]) ||
+      pendingCancellationDescription ||
+      (cancellationFeeIndex === 0 ? "Before departure" : "Cancellation");
+    cancellationFeeIndex += 1;
+
+    rows.push({
+      ...context,
+      head: "Cancellation Fee(Per Pax/ Per Journey)",
+      Description: parsedDescription,
+      adultAmount: toFareRuleAmount(amount),
+      currencyCode: currency,
+    });
+  });
+
+  return rows.filter((row) => row.adultAmount);
+};
+
+const getFallbackCancellationTimeFrame = (rule = {}) => {
+  const amount = toFareRuleAmount(
+    rule?.adultAmount || rule?.AdultAmount || rule?.amount || rule?.Amount
+  );
+  const description = String(
+    rule?.Description || rule?.description || ""
+  ).trim();
+
+  if (!description || description.toLowerCase() === "cancellation") {
+    return amount && amount <= 100
+      ? "Cancellation"
+      : "Before departure";
+  }
+
+  return description;
+};
 
 const extractFareRuleRows = (fareRulesData) => {
   const payload = unwrapFareRulesPayload(fareRulesData);
@@ -377,33 +551,53 @@ const extractFareRuleRows = (fareRulesData) => {
       : Array.isArray(node?.TextLines)
         ? node.TextLines
         : [];
-    const rawText = cleanRuleText(node?.rawText || node?.RawText);
-    const cleanedTextLines = textLines.map(cleanRuleText).filter(Boolean);
-    const textRows = cleanedTextLines.length
-      ? cleanedTextLines
-      : rawText
-        ? [rawText]
-        : [];
+    const rawText = node?.rawText || node?.RawText || node?.FareRuleText;
+    const rawRows = parseRawCancellationRuleRows(
+      rawText || textLines,
+      nextContext
+    );
 
-    textRows.forEach((textLine) => {
-      const isAmountLine = /\badult\b|\bchild\b|\binfant\b|\bamount\b|\binr\b|₹/.test(
-        textLine.toLowerCase()
-      );
-
-      recursiveRows.push({
-        ...nextContext,
-        head: nextContext.head || "Cancellation Rules",
-        Description: isAmountLine ? "Cancellation charges" : textLine,
-        feeText: isAmountLine ? textLine : "",
-        rawText: textLine,
-      });
-    });
+    recursiveRows.push(...rawRows);
 
     Object.values(node).forEach((value) => visitFareRuleNode(value, nextContext));
   };
 
+  const dedupeRows = (rows = []) => {
+    const seen = new Set();
+    const meaningfulRows = rows.filter((row) => {
+      const frame = getFareRuleTimeFrame(row).toLowerCase();
+      const fee = getFareRuleFee(row).toLowerCase();
+
+      if (frame === "before departure") {
+        return !rows.some((candidate) => {
+          const candidateFrame = getFareRuleTimeFrame(candidate).toLowerCase();
+          const candidateFee = getFareRuleFee(candidate).toLowerCase();
+          return (
+            candidate !== row &&
+            candidateFee === fee &&
+            candidateFrame !== frame &&
+            candidateFrame !== "cancellation"
+          );
+        });
+      }
+
+      return true;
+    });
+
+    return meaningfulRows.filter((row) => {
+      const key = [
+        row?.head || row?.Head || "",
+        getFareRuleTimeFrame(row),
+        getFareRuleFee(row),
+      ].join("|");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
   visitFareRuleNode(payload);
-  if (recursiveRows.length) return recursiveRows;
+  if (recursiveRows.length) return dedupeRows(recursiveRows);
 
   const flattenSegments = (segments = []) =>
     segments.flatMap((segment) => {
@@ -585,7 +779,8 @@ const extractFareRuleRows = (fareRulesData) => {
 
 const getFareRuleTimeFrame = (rule = {}) =>
   displayValue(
-    rule?.Description ||
+    getFallbackCancellationTimeFrame(rule) ||
+      rule?.Description ||
       rule?.description ||
       rule?.timeDay ||
       rule?.TimeDay ||
@@ -1479,6 +1674,10 @@ const ExpandableTabs = ({
     () => fareRuleRows.filter(isCancellationFareRule),
     [fareRuleRows]
   );
+  const fareRulesMessage = useMemo(
+    () => getFareRulesMessage(fareRulesData),
+    [fareRulesData]
+  );
   const baggageFallbackRow = useMemo(
     () => ({
       id: "baggage-fallback",
@@ -1914,10 +2113,16 @@ const ExpandableTabs = ({
                 </div>
               )}
 
-              {!isFareRulesLoading && !fareRulesError && cancellationFareRuleRows.length === 0 && (
+              {!isFareRulesLoading &&
+                !fareRulesError &&
+                cancellationFareRuleRows.length === 0 && (
                 <div className={styles.tableRows}>
-                  <span className={styles.timeFrame}>Cancellation rules</span>
-                  <span className={styles.textRight}>NOT AVAILABLE</span>
+                  <span className={styles.timeFrame}>
+                    {fareRulesMessage || "Cancellation rules"}
+                  </span>
+                  <span className={styles.textRight}>
+                    {fareRulesMessage ? "PLEASE SEARCH AGAIN" : "NOT AVAILABLE"}
+                  </span>
                 </div>
               )}
 

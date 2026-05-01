@@ -6167,7 +6167,8 @@ export const AirlineLogoList = [
     "id": "FZ",
     "lcc": "1",
     "name": "Fly Dubai",
-    "logo": "https://images.kiwi.com/airlines/64/FZ.png"
+    // "logo": "https://images.kiwi.com/airlines/64/FZ.png",
+    "logo":"https://imgak.mmtcdn.com/flights/assets/media/dt/common/icons/FZ.png?v=20"
   },
   {
     "id": "X3",

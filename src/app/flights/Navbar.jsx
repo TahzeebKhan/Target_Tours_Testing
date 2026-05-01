@@ -6,12 +6,9 @@ import SignupPopup from "../account/signUpPopUp/SignupPopup";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
 import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = ({ scrollProgress = { scrollProgress } }) => {
-  const hasToken = !!Cookies.get("auth_token");
-  const [isLoggedIn, setIsLoggedIn] = useState(hasToken);
-  const { profile: userProfile } = useAuth();
+  const { isLoggedIn, profile: userProfile, user } = useAuth();
   const profileBtnRef = useRef(null);
   const [isMounted, setIsmounted] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -28,6 +25,14 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
   useEffect(() => {
     setIsmounted(true);
   }, []);
+
+  const displayName =
+    userProfile?.display_name ||
+    userProfile?.full_name ||
+    user?.name ||
+    user?.email?.split("@")[0] ||
+    "User";
+
   return (
     <>
       {" "}
@@ -69,7 +74,7 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
                       className={`${styles.glass_button} ${styles.logggedInBtn}`}
                       type="button"
                     >
-                      Hi, {userProfile?.display_name || "User"}
+                      Hi, {displayName}
                     </button>
 
                     {showProfileModal && (
