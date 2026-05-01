@@ -1,6 +1,7 @@
 "use client";
 
 export const RECENT_SEARCHES_QUERY_KEY = ["recent-searches"];
+const RECENT_SEARCH_CACHE_PREFIX = "target_tours_recent_searches";
 
 const getAuthToken = () => {
   if (typeof document === "undefined") return "";
@@ -20,6 +21,40 @@ const normalizeBaseUrl = () => {
 };
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
+
+const getRecentSearchCacheKey = (type = "flight", airport = "") =>
+  [RECENT_SEARCH_CACHE_PREFIX, type, airport].filter(Boolean).join("_");
+
+const readRecentSearchCache = (type = "flight", airport = "") => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const rawValue = window.localStorage.getItem(
+      getRecentSearchCacheKey(type, airport),
+    );
+    if (!rawValue) return [];
+    const parsed = JSON.parse(rawValue);
+    return toArray(parsed?.data);
+  } catch {
+    return [];
+  }
+};
+
+const writeRecentSearchCache = (type = "flight", data = [], airport = "") => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      getRecentSearchCacheKey(type, airport),
+      JSON.stringify({
+        savedAt: new Date().toISOString(),
+        data,
+      }),
+    );
+  } catch {
+    // localStorage can be unavailable in private browsing or quota-limited.
+  }
+};
 
 const parseAirportCode = (value = "") => {
   const trimmed = String(value || "").trim();
@@ -48,6 +83,20 @@ const toAirportPayload = (airport = {}, fallbackCode = "") => ({
   country: String(airport?.country || "").trim(),
   iata_code: String(airport?.iata_code || fallbackCode || "").trim().toUpperCase(),
 });
+
+const getAirportCode = (airport = {}, fallbackCode = "") =>
+  String(airport?.iata_code || fallbackCode || "").trim().toUpperCase();
+
+const getAirportDisplayValue = (airport = {}, fallbackCode = "") => {
+  const code = getAirportCode(airport, fallbackCode);
+  const city = String(airport?.city || "").trim();
+  const name = String(airport?.name || "").trim();
+
+  if (city && code) return `${city} (${code})`;
+  if (city) return city;
+  if (name && code) return `${name} (${code})`;
+  return name || code;
+};
 
 const fetchAirportByCode = async (code = "") => {
   const normalizedCode = String(code || "").trim().toLowerCase();
@@ -96,62 +145,78 @@ const normalizeDetail = (...parts) =>
     .map((part) => String(part).trim())
     .join(", ");
 
-const mapRecentFlightSearch = (item = {}) => {
+const mapRecentFlightSearch = (item = {}, airport = "") => {
   const record = toRecord(item);
   const searchData = record?.search_data || record?.searchData || {};
   const originAirport =
     record?.origin && typeof record.origin === "object" ? record.origin : {};
+  const destinationAirport =
+    record?.destination && typeof record.destination === "object"
+      ? record.destination
+      : {};
+  const isDestinationAirport = airport === "destination";
+  const selectedAirport = isDestinationAirport
+    ? destinationAirport
+    : originAirport;
+  const selectedSearchData = isDestinationAirport
+    ? searchData?.destination
+    : searchData?.origin;
 
   const city = pickFirst(
-    originAirport?.city,
+    selectedAirport?.city,
     record?.city,
-    record?.from_city,
-    record?.origin_city,
+    isDestinationAirport ? record?.to_city : record?.from_city,
+    isDestinationAirport ? record?.destination_city : record?.origin_city,
     record?.departure_city,
     searchData?.from?.city,
-    searchData?.origin?.city,
+    selectedSearchData?.city,
     searchData?.departure?.city,
   );
 
   const country = pickFirst(
-    originAirport?.country,
+    selectedAirport?.country,
     record?.country,
-    record?.from_country,
-    record?.origin_country,
+    isDestinationAirport ? record?.to_country : record?.from_country,
+    isDestinationAirport
+      ? record?.destination_country
+      : record?.origin_country,
     record?.departure_country,
     searchData?.from?.country,
-    searchData?.origin?.country,
+    selectedSearchData?.country,
     searchData?.departure?.country,
   );
 
   const airportName = pickFirst(
-    originAirport?.name,
+    selectedAirport?.name,
     record?.airport,
     record?.airport_name,
-    record?.from_airport,
-    record?.origin_airport,
+    isDestinationAirport ? record?.to_airport : record?.from_airport,
+    isDestinationAirport
+      ? record?.destination_airport
+      : record?.origin_airport,
     record?.departure_airport,
     searchData?.from?.airport,
-    searchData?.origin?.airport,
+    selectedSearchData?.airport,
     searchData?.departure?.airport,
     record?.name,
   );
 
   const code = String(
     pickFirst(
-      originAirport?.iata_code,
+      selectedAirport?.iata_code,
       record?.iata_code,
       record?.iataCode,
       record?.code,
-      record?.from_code,
-      record?.origin_code,
+      isDestinationAirport ? record?.to_code : record?.from_code,
+      isDestinationAirport ? record?.destination_code : record?.origin_code,
       record?.departure_code,
       searchData?.from?.iataCode,
       searchData?.from?.code,
-      searchData?.origin?.iataCode,
-      searchData?.origin?.code,
+      selectedSearchData?.iataCode,
+      selectedSearchData?.code,
       searchData?.departure?.iataCode,
       searchData?.departure?.code,
+      typeof selectedSearchData === "string" ? selectedSearchData : "",
     ),
   )
     .trim()
@@ -159,12 +224,19 @@ const mapRecentFlightSearch = (item = {}) => {
 
   const value = pickFirst(
     record?.value,
-    record?.from,
-    record?.origin,
-    originAirport?.city ? `${originAirport.city} (${originAirport.iata_code || code})` : "",
+    isDestinationAirport ? record?.to : record?.from,
+    selectedAirport?.city
+      ? `${selectedAirport.city} (${selectedAirport.iata_code || code})`
+      : "",
+    typeof (isDestinationAirport ? record?.destination : record?.origin) ===
+      "string"
+      ? isDestinationAirport
+        ? record?.destination
+        : record?.origin
+      : "",
     record?.departure,
     searchData?.from?.value,
-    searchData?.origin?.value,
+    selectedSearchData?.value,
     searchData?.departure?.value,
     city ? `${city}${code ? ` (${code})` : ""}` : "",
     airportName,
@@ -172,37 +244,81 @@ const mapRecentFlightSearch = (item = {}) => {
   );
 
   const label = normalizeLabel(city, country, airportName || code);
-  const detail = normalizeDetail(
-    airportName,
-    [city, country].filter(Boolean).length ? [city, country] : [],
+  const originCode = getAirportCode(originAirport, searchData?.origin);
+  const originValue = getAirportDisplayValue(originAirport, originCode) || value;
+  const destinationCode = getAirportCode(
+    destinationAirport,
+    searchData?.destination,
   );
+  const destinationValue = getAirportDisplayValue(
+    destinationAirport,
+    destinationCode,
+  );
+  const routeLabel =
+    originValue && destinationValue
+      ? `${originValue} to ${destinationValue}`
+      : "";
+  const detail = routeLabel
+    ? normalizeDetail(
+        routeLabel,
+        searchData?.departure_date,
+        searchData?.return_date,
+      )
+    : normalizeDetail(
+        airportName,
+        [city, country].filter(Boolean).length ? [city, country] : [],
+      );
 
   if (!label || !value || !code) return null;
 
   return {
-    label,
+    label: routeLabel || label,
     detail,
     code,
     iataCode: code,
     value,
+    route: destinationCode
+      ? {
+          origin: originValue || (isDestinationAirport ? "" : value),
+          originCode: originCode || code,
+          destination: destinationValue || (isDestinationAirport ? value : ""),
+          destinationCode,
+          departureDate: searchData?.departure_date || "",
+          returnDate: searchData?.return_date || "",
+          searchKey: record?.search_key || "",
+        }
+      : null,
   };
 };
 
-export const fetchRecentSearches = async ({ type = "flight" } = {}) => {
+export const fetchRecentSearches = async ({
+  type = "flight",
+  airport = "",
+} = {}) => {
   const url = new URL("/api/recent-search", normalizeBaseUrl());
   url.searchParams.set("type", type);
+  if (airport) url.searchParams.set("airport", airport);
   const token = getAuthToken();
 
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    cache: "no-store",
-  });
+  let response;
+  try {
+    response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      cache: "no-store",
+    });
+  } catch (error) {
+    const cachedSearches = readRecentSearchCache(type, airport);
+    if (cachedSearches.length) return cachedSearches;
+    throw error;
+  }
 
   if (!response.ok) {
+    const cachedSearches = readRecentSearchCache(type, airport);
+    if (cachedSearches.length) return cachedSearches;
     throw new Error(`Recent search fetch failed with status ${response.status}`);
   }
 
@@ -212,7 +328,11 @@ export const fetchRecentSearches = async ({ type = "flight" } = {}) => {
     .concat(toArray(payload?.data))
     .concat(toArray(payload?.results));
 
-  return list.map(mapRecentFlightSearch).filter(Boolean);
+  const searches = list
+    .map((item) => mapRecentFlightSearch(item, airport))
+    .filter(Boolean);
+  writeRecentSearchCache(type, searches, airport);
+  return searches;
 };
 
 export const saveRecentFlightSearch = async ({
@@ -257,8 +377,42 @@ export const saveRecentFlightSearch = async ({
   });
 
   if (!response.ok) {
-    // throw new Error(`Recent search save failed with status ${response.status}`);
+    return readRecentSearchCache("flight", "origin")[0] || null;
   }
 
-  return response.json().catch(() => null);
+  const savedSearch = await response.json().catch(() => null);
+  const mappedOriginSearch = mapRecentFlightSearch(savedSearch, "origin");
+  const mappedDestinationSearch = mapRecentFlightSearch(
+    savedSearch,
+    "destination",
+  );
+
+  if (mappedOriginSearch) {
+    const cachedSearches = readRecentSearchCache("flight", "origin");
+    const nextSearches = [
+      mappedOriginSearch,
+      ...cachedSearches.filter(
+        (search) =>
+          search?.route?.searchKey !== mappedOriginSearch?.route?.searchKey ||
+          !mappedOriginSearch?.route?.searchKey,
+      ),
+    ];
+    writeRecentSearchCache("flight", nextSearches, "origin");
+  }
+
+  if (mappedDestinationSearch) {
+    const cachedSearches = readRecentSearchCache("flight", "destination");
+    const nextSearches = [
+      mappedDestinationSearch,
+      ...cachedSearches.filter(
+        (search) =>
+          search?.route?.searchKey !==
+            mappedDestinationSearch?.route?.searchKey ||
+          !mappedDestinationSearch?.route?.searchKey,
+      ),
+    ];
+    writeRecentSearchCache("flight", nextSearches, "destination");
+  }
+
+  return savedSearch;
 };

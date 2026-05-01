@@ -32,10 +32,13 @@ const AirportSuggestionBox = ({
   onSelect,
   minChars = 1,
   recentType = "flight",
+  field = "",
 }) => {
   const normalizedQuery = String(query || "").trim();
   const debouncedQuery = useDebouncedValue(normalizedQuery, 300);
   const shouldFetch = debouncedQuery.length >= minChars;
+  const recentAirport =
+    field === "to" || field === "destination" ? "destination" : "origin";
 
   const { data = [] } = useQuery({
     queryKey: [...AIRPORT_SUGGESTIONS_QUERY_KEY, debouncedQuery.toLowerCase()],
@@ -47,15 +50,37 @@ const AirportSuggestionBox = ({
   });
 
   const { data: recentSuggestions = [] } = useQuery({
-    queryKey: [...RECENT_SEARCHES_QUERY_KEY, recentType],
-    queryFn: () => fetchRecentSearches({ type: recentType }),
+    queryKey: [...RECENT_SEARCHES_QUERY_KEY, recentType, recentAirport],
+    queryFn: () =>
+      fetchRecentSearches({ type: recentType, airport: recentAirport }),
     enabled: !shouldFetch,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   });
 
-  const suggestions = shouldFetch ? data : recentSuggestions;
+  const getFieldRecentSuggestion = (suggestion) => {
+    if (!suggestion?.route || !field) return suggestion;
+
+    const route = suggestion.route;
+    const isDestination = field === "to" || field === "destination";
+    const value = isDestination ? route.destination : route.origin;
+    const code = isDestination ? route.destinationCode : route.originCode;
+
+    if (!value || !code) return null;
+
+    return {
+      label: value,
+      detail: suggestion.detail,
+      code,
+      iataCode: code,
+      value,
+    };
+  };
+
+  const suggestions = shouldFetch
+    ? data
+    : recentSuggestions.map(getFieldRecentSuggestion).filter(Boolean);
   const heading = shouldFetch ? "SUGGESTIONS" : "RECENT SEARCH";
 
   if (!suggestions?.length) return null;

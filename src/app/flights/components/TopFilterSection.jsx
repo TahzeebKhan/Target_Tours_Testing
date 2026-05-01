@@ -197,6 +197,19 @@ const TopFilterSection = ({
 
   // Handle suggestion selection
   const selectSuggestion = (suggestion, field) => {
+    if (suggestion?.route && tripType !== "multi") {
+      const route = suggestion.route;
+      setFrom(route.origin || "");
+      setFromCode(route.originCode || "");
+      setTo(route.destination || "");
+      setToCode(route.destinationCode || "");
+      if (route.departureDate) setStartDate(route.departureDate);
+      if (route.returnDate) setEndDate(route.returnDate);
+      setFromSuggestionsOpen(false);
+      setToSuggestionsOpen(false);
+      return;
+    }
+
     const value = suggestion?.value || suggestion?.label || "";
     const iataCode = suggestion?.iataCode || suggestion?.code || "";
 
@@ -676,6 +689,7 @@ const TopFilterSection = ({
                                 : from
                             }
                             fallbackSuggestions={recentSearches}
+                            field="from"
                             onSelect={(s) => selectSuggestion(s, "from")}
                           />
                         )}
@@ -741,6 +755,7 @@ const TopFilterSection = ({
                             tripType === "multi" ? multiSegments[0].to : to
                           }
                           fallbackSuggestions={recentSearches}
+                          field="to"
                           onSelect={(s) => selectSuggestion(s, "to")}
                         />
                       )}
@@ -956,6 +971,7 @@ const TopFilterSection = ({
                                 boxRef={fromSuggestionRef}
                                 query={multiSegments[1].from}
                                 fallbackSuggestions={recentSearches}
+                                field="from"
                                 onSelect={(s) => selectSuggestion(s, "from")}
                               />
                             )}
@@ -1005,6 +1021,7 @@ const TopFilterSection = ({
                               boxRef={toSuggestionRef}
                               query={multiSegments[1].to}
                               fallbackSuggestions={recentSearches}
+                              field="to"
                               onSelect={(s) => selectSuggestion(s, "to")}
                             />
                           )}
