@@ -188,6 +188,7 @@ export const getFlightTravelChecklist = async (payload) => {
 };
 
 export const getFlightSsr = async (payload) => {
+    
   const response = await api.post("/api/flights/ssr", payload, {
     headers: {
       "Content-Type": "application/json",
