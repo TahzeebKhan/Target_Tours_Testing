@@ -15,6 +15,7 @@ import FlightSearchLoader from "../FlightSearchLoader";
 import FlightNoResults from "../FlightNoResults";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 const flightResults = [
   {
     id: 1,
@@ -718,6 +719,16 @@ const RoundTrip = ({
     price: sortHighlights?.fastest?.priceLabel || "N/A",
     duration: sortHighlights?.fastest?.durationLabel || "N/A",
   };
+  const cheapestLogo = resolveAirlineLogo({
+    name: cheapestFlight?.outbound?.airlines?.[0]?.name,
+    code: cheapestFlight?.outbound?.airlines?.[0]?.code,
+    logo: cheapestFlight?.outbound?.airlines?.[0]?.logo,
+  });
+  const fastestLogo = resolveAirlineLogo({
+    name: fastestFlight?.outbound?.airlines?.[0]?.name,
+    code: fastestFlight?.outbound?.airlines?.[0]?.code,
+    logo: fastestFlight?.outbound?.airlines?.[0]?.logo,
+  });
   const resultsText = pagination
     ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
     : "Showing 1-10 of 100 results";
@@ -764,7 +775,7 @@ const RoundTrip = ({
                     }`}
                   onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img src={cheapestLogo} alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
@@ -780,7 +791,7 @@ const RoundTrip = ({
                     }`}
                   onClick={() => applyQuickSort("fastest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img src={fastestLogo} alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>Fastest</span>
                     <div className={styles.priceContainer}>
@@ -878,7 +889,7 @@ const RoundTrip = ({
                     }`}
                   onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img src={cheapestLogo} alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
@@ -894,12 +905,7 @@ const RoundTrip = ({
                     }`}
                   onClick={() => applyQuickSort("fastest")}
                 >
-                  <img
-                    src="/images/flightCompanyLogos/airIndia.png"
-                    height={36}
-                    width={36}
-                    alt=""
-                  />
+                  <img src={fastestLogo} height={36} width={36} alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>fastest</span>
                     <div className={styles.priceContainer}>

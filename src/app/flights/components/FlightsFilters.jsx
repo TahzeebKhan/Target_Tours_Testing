@@ -232,8 +232,8 @@ export default function FlightFilters() {
           <div
             className={styles.sliderRange}
             style={{
-              left: `${minPricePercent}%`,
-              right: `${100 - maxPricePercent}%`,
+              left: `calc(${minPricePercent}% + ${13 - 26 * (minPricePercent / 100)}px)`,
+              right: `calc(${100 - maxPricePercent}% + ${13 - 26 * ((100 - maxPricePercent) / 100)}px)`,
             }}
           />
 

@@ -10,10 +10,12 @@ import FareComparisonModal from "../FareComparisonModalRoundTrip";
 import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
 import {
+  getFlightInfo,
   getFlightPrice,
   getFlightTravelChecklist,
   getFlightWebSettings,
 } from "@/features/flights/services/flightBooking";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { toast } from "react-toastify";
 
 const TripCard = ({
@@ -26,6 +28,8 @@ const TripCard = ({
   const [openId, setOpenId] = useState(null);
   const [prefetchedFareData, setPrefetchedFareData] = useState({});
   const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
+  const [flightInfoData, setFlightInfoData] = useState({});
+  const [loadingFlightInfoId, setLoadingFlightInfoId] = useState(null);
 
   const flightResults = [
     {
@@ -126,6 +130,61 @@ const TripCard = ({
   ];
   const [isMobile, setIsMobile] = useState(false);
 
+  const buildFlightInfoPayload = (flight) => {
+    const priceRequest = flight?.booking?.priceRequest || {};
+
+    return {
+      search_key: priceRequest?.search_key || flight?.booking?.searchKey,
+      TripType: priceRequest?.TripType || flight?.booking?.tripType || "RT",
+      Trips: (priceRequest?.Trips || []).map((trip) => ({
+        TUI: trip?.TUI,
+        Amount: trip?.Amount,
+        Index: trip?.Index,
+        OrderID: trip?.OrderID,
+        ChannelCode: trip?.ChannelCode ?? null,
+      })),
+    };
+  };
+
+  const toggleDetails = async (flight) => {
+    const flightId = flight?.id;
+    if (!flightId) return;
+
+    const isClosing = openId === flightId;
+    setOpenId(isClosing ? null : flightId);
+    if (isClosing || flightInfoData[flightId] || loadingFlightInfoId === flightId) return;
+
+    const payload = buildFlightInfoPayload(flight);
+    const hasRequiredPayload =
+      payload.search_key &&
+      payload.Trips?.length > 0 &&
+      payload.Trips.every(
+        (trip) =>
+          trip?.TUI &&
+          trip?.Index !== undefined &&
+          trip?.Index !== null
+      );
+
+    if (!hasRequiredPayload) return;
+
+    setLoadingFlightInfoId(flightId);
+    try {
+      const response = await getFlightInfo(payload);
+      setFlightInfoData((prev) => ({
+        ...prev,
+        [flightId]: response,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch round-trip flight info", error);
+      setFlightInfoData((prev) => ({
+        ...prev,
+        [flightId]: { error: true },
+      }));
+    } finally {
+      setLoadingFlightInfoId(null);
+    }
+  };
+
   const openFareModal = async (flight) => {
     const searchTui = flight?.booking?.tui;
     const priceRequest = flight?.booking?.priceRequest;
@@ -152,10 +211,10 @@ const TripCard = ({
       const checklistResponse = checklistTui
         ? await getFlightTravelChecklist({
             TUI: checklistTui,
-            ClientID:
-              flight?.booking?.clientId ||
-              priceRequest?.ClientID ||
-              "FVI6V120g22Ei5ztGK0FIQ==",
+            // ClientID:
+            //   flight?.booking?.clientId ||
+            //   priceRequest?.ClientID ||
+            //   "FVI6V120g22Ei5ztGK0FIQ==",
           })
         : null;
 
@@ -206,7 +265,10 @@ const TripCard = ({
                   {/* DEPART */}
                   <div className={styles.departContainer}>
                     <div className={styles.HeadingCont}>
-                      <img src={item.depart.airline.logo} alt="" />
+                      <img
+                        src={resolveAirlineLogo(item.depart.airline)}
+                        alt={item.depart.airline.name}
+                      />
                       <h3 className={styles.ariLineName}>
                         {item.depart.airline.name}
                         <span className={styles.ariLineNumber}>
@@ -229,7 +291,10 @@ const TripCard = ({
                   {/* RETURN */}
                   <div className={styles.returnContainer}>
                     <div className={styles.HeadingCont}>
-                      <img src={item.return.airline.logo} alt="" />
+                      <img
+                        src={resolveAirlineLogo(item.return.airline)}
+                        alt={item.return.airline.name}
+                      />
                       <h3 className={styles.ariLineName}>
                         {item.return.airline.name}
                         <span className={styles.ariLineNumber}>
@@ -253,9 +318,7 @@ const TripCard = ({
                 {/* SEE DETAILS */}
                 <div
                   className={styles.seeDetailsBtn}
-                  onClick={() =>
-                    setOpenId((prev) => (prev === item.id ? null : item.id))
-                  }
+                  onClick={() => toggleDetails(item)}
                 >
                   See Details
                   <svg
@@ -278,9 +341,7 @@ const TripCard = ({
               <div className={styles.cardRight}>
                 <div
                   className={styles.seeDetailsBtn}
-                  onClick={() =>
-                    setOpenId((prev) => (prev === item.id ? null : item.id))
-                  }
+                  onClick={() => toggleDetails(item)}
                 >
                   See Details
                   <svg
@@ -332,7 +393,11 @@ const TripCard = ({
                 openId === item.id ? styles.open : ""
               }`}
             >
-              <RoundTripExpendable />
+              <RoundTripExpendable
+                flightData={item}
+                flightInfoData={flightInfoData[item.id]}
+                isFlightInfoLoading={loadingFlightInfoId === item.id}
+              />
             </div>
 
             {index === 2 && (

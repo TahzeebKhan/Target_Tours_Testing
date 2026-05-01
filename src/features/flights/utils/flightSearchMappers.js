@@ -846,6 +846,8 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
       toName,
       departureTerminal,
       arrivalTerminal,
+      segments,
+      connections: pickFirst(leg?.Connections, leg?.connections),
     },
     booking: {
       amount,
