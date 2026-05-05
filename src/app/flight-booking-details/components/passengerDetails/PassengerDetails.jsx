@@ -194,11 +194,13 @@ const PassengerDetails = () => {
           </div>
         </div>
 
-        <div
-          onClick={handleContinue}
-          className={styles.continueButtonContainer}
-        >
-          <button className={styles.continueButton} disabled={ssrLoading}>
+        <div className={styles.continueButtonContainer}>
+          <button
+            type="button"
+            onClick={handleContinue}
+            className={styles.continueButton}
+            disabled={ssrLoading}
+          >
             {ssrLoading ? "LOADING..." : "CONTINUE"}
           </button>
         </div>

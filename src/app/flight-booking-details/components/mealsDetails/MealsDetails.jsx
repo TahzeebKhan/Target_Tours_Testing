@@ -8,7 +8,7 @@ import { useFlightBooking } from "../../FlightBookingContext";
 import { meals, beverages } from "./mealsData";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import PriceSummary from "@/features/profile/components/PriceSummary";
-import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { getBookingDetailsView, getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 import { toast } from "react-toastify";
 
@@ -106,6 +106,10 @@ const MealsDetails = () => {
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
   );
+  const mealSelectionLimit = React.useMemo(() => {
+    const counts = getBookingPassengerCounts(bookingSession);
+    return Math.max((counts.adult || 0) + (counts.child || 0), 1);
+  }, [bookingSession]);
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // State: { "DEL-BOM::meal-key": 1 }
@@ -144,23 +148,21 @@ const MealsDetails = () => {
     setMealQuantities((prev) => {
       const currentQty = prev[key] || 0;
       const isIncreasing = newQty > currentQty;
-      const selectedMealKey = Object.entries(prev).find(([, qty]) => qty > 0)?.[0];
+      const requestedQty = Math.max(0, newQty);
+      const selectedTotal = Object.entries(prev).reduce(
+        (sum, [entryKey, qty]) =>
+          sum + (entryKey === key ? 0 : Number(qty || 0)),
+        0
+      );
 
-      if (isIncreasing && currentQty >= 1) {
-        toast.info("Only 1 quantity is allowed for a meal.", {
-          toastId: "single-meal-quantity-limit",
+      if (isIncreasing && selectedTotal + requestedQty > mealSelectionLimit) {
+        toast.info(`Meals can be added for up to ${mealSelectionLimit} passenger(s).`, {
+          toastId: "meal-passenger-limit",
         });
         return prev;
       }
 
-      if (isIncreasing && selectedMealKey && selectedMealKey !== key) {
-        toast.info("Only 1 meal can be selected for this booking.", {
-          toastId: "single-meal-selection-limit",
-        });
-        return prev;
-      }
-
-      const nextQty = Math.min(Math.max(0, newQty), 1);
+      const nextQty = Math.min(requestedQty, Math.max(mealSelectionLimit - selectedTotal, 0));
       if (nextQty === 0) {
         const next = { ...prev };
         delete next[key];
@@ -168,10 +170,11 @@ const MealsDetails = () => {
       }
 
       return {
+        ...prev,
         [key]: nextQty,
       };
     });
-  }, []);
+  }, [mealSelectionLimit]);
 
   // Filter quantities for a specific segment to pass to Expandable
   // Expandable expects { mealId: qty }

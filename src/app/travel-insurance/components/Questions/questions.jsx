@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./questions.module.css";
 
@@ -48,6 +48,15 @@ export default function Questions() {
   const toggleAccordion = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
+
+
+  const controller = new AbortController();
+
+
+
+
+// Abort the request
+// controller.abort();
 
   return (
     <section className={styles.faqSection}>

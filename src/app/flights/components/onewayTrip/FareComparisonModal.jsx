@@ -132,7 +132,18 @@ const getFareOptionsFromResponse = (payload, flightNo) => {
 const formatAllowance = (value = "", suffix = "Allowance") => {
     const normalized = String(value || "").trim();
     if (!normalized) return "";
-    return /allowance/i.test(normalized) ? normalized : `${normalized} ${suffix}`;
+    const normalizedSuffix = String(suffix || "").trim();
+    if (!normalizedSuffix) return normalized;
+    if (normalized.toLowerCase().includes(normalizedSuffix.toLowerCase())) {
+        return normalized;
+    }
+    if (
+        normalized.toLowerCase().includes("allowance") &&
+        normalizedSuffix.toLowerCase().includes("allowance")
+    ) {
+        return normalized;
+    }
+    return `${normalized} ${normalizedSuffix}`;
 };
 
 const getBaggageDetails = (fare) => {
@@ -244,7 +255,12 @@ const DEFAULT_FARE_TEMPLATES = [
     },
 ];
 
-export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
+export const buildFareOptions = ({
+    flightData,
+    prefetchedData,
+    adults,
+    allowFallbackCards = true,
+}) => {
     const resolvedPrefetchedData = prefetchedData || flightData?.prefetchedFareData || {};
     const priceResponse = resolvedPrefetchedData?.priceResponse || {};
     const pricePayload = priceResponse?.data || priceResponse || {};
@@ -343,6 +359,10 @@ export const buildFareOptions = ({ flightData, prefetchedData, adults }) => {
         onwardFareBreakdown?.ADT?.per_person,
         onwardFareBreakdown?.ADT?.perPerson
     );
+    if (!allowFallbackCards) {
+        return [];
+    }
+
     const sourceItems = DEFAULT_FARE_TEMPLATES;
 
     return sourceItems.map((item, index) => {

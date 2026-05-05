@@ -16,6 +16,7 @@ import FlightNoResults from "../FlightNoResults";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
+import { useRouter, useSearchParams } from "next/navigation";
 const flightResults = [
   {
     id: 1,
@@ -619,6 +620,8 @@ const RoundTrip = ({
   isRefreshing = false,
 }) => {
   const { committedSearches, handleSearch } = useTripType();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [openSort, setOpenSort] = useState(false);
   const { from, to } = committedSearches.round;
   const [fareModalOpen, setFareModalOpen] = useState(null);
@@ -736,6 +739,12 @@ const RoundTrip = ({
     const targetSortBy = type === "cheapest" ? "lowest" : "shortest";
     setSortBy(filters.sortBy === targetSortBy ? null : targetSortBy);
   };
+  const handleDateSelect = (dateKey) => {
+    const nextParams = new URLSearchParams(searchParams?.toString() || "");
+    nextParams.set("start", dateKey);
+    nextParams.set("tripType", "round");
+    router.replace(`/flights?${nextParams.toString()}`, { scroll: false });
+  };
   const hasNoData =
     hasSearched &&
     !isLoading &&
@@ -764,6 +773,7 @@ const RoundTrip = ({
         <DatePriceSlider
           tiles={datewiseFareTiles}
           selectedDate={selectedDepartureDate}
+          onSelectDate={handleDateSelect}
         />
 
         <div className={styles.sortContainer}>

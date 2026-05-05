@@ -2,9 +2,11 @@
 "use client";
 import React from "react";
 import styles from "./FlightTimeline.module.css";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const FlightTimeline = ({ flight }) => {
     const normalizedClass = flight.travelClass?.toLowerCase().replace(/\s+/g, "");
+    const airlineLogo = resolveAirlineLogo(flight.airline || {});
     return (
         <div className={styles.flightBody}>
             {/* TOP INFO */}
@@ -12,7 +14,7 @@ const FlightTimeline = ({ flight }) => {
                 <div className={styles.aboutFlightContainerLeft}>
                     <img
                         className={styles.flightIcon}
-                        src={flight.airline.logo}
+                        src={airlineLogo}
                         alt={flight.airline.name}
                     />
                     <div className={styles.flightInfoTextContainer}>

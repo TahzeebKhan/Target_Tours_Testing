@@ -9,8 +9,9 @@ import ExtraBaggageItem from "./Components/extraBaggageItem/ExtraBaggageItem";
 import { useFlightBooking } from "../../FlightBookingContext";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import PriceSummary from "@/features/profile/components/PriceSummary";
-import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { getBookingDetailsView, getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
+import { toast } from "react-toastify";
 
 const CABIN_IMAGES = ["/bags/redBag.png", "/bags/pinkBag.svg"];
 const CHECKED_IMAGES = ["/bags/boxBag.png", "/bags/trolly.svg"];
@@ -353,6 +354,10 @@ const BaggageDetails = () => {
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
   );
+  const baggageSelectionLimit = useMemo(() => {
+    const counts = getBookingPassengerCounts(bookingSession);
+    return Math.max((counts.adult || 0) + (counts.child || 0), 1);
+  }, [bookingSession]);
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // 🔥 Quantity state (per flight + per baggage)
@@ -384,11 +389,25 @@ const BaggageDetails = () => {
   }, [quantities, routeCards, setBaggage]);
 
   const increaseQty = useCallback((key) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [key]: (prev[key] || 0) + 1,
-    }));
-  }, []);
+    setQuantities((prev) => {
+      const totalSelected = Object.values(prev).reduce(
+        (sum, qty) => sum + Number(qty || 0),
+        0
+      );
+
+      if (totalSelected >= baggageSelectionLimit) {
+        toast.info(`Extra baggage can be added for up to ${baggageSelectionLimit} passenger(s).`, {
+          toastId: "baggage-passenger-limit",
+        });
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [key]: (prev[key] || 0) + 1,
+      };
+    });
+  }, [baggageSelectionLimit]);
 
   const decreaseQty = useCallback((key) => {
     setQuantities((prev) => ({

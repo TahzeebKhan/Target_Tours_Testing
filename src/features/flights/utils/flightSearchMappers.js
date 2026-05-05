@@ -24,7 +24,10 @@ const getFirstArrayAtPaths = (obj, paths) => {
 
 const readNumber = (...values) => {
   for (const value of values) {
-    const n = Number(value);
+    const n =
+      typeof value === "string"
+        ? Number(value.replace(/[^\d.-]/g, ""))
+        : Number(value);
     if (Number.isFinite(n)) return n;
   }
   return null;
@@ -36,6 +39,53 @@ const pickFirst = (...values) => {
   }
   return undefined;
 };
+
+const deriveTripIndexForOrder = (value, orderId) => {
+  const text = String(value || "").trim();
+  if (!text) return undefined;
+
+  const parts = text.split("|");
+  if (parts.length < 2) return undefined;
+
+  const lastIndex = parts.length - 1;
+  if (!/^\d+$/.test(parts[lastIndex].trim())) return undefined;
+
+  parts[lastIndex] = String(orderId);
+  return parts.join("|");
+};
+
+const normalizeCarrierCode = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  const pipeCode = text.split("|")[0]?.trim();
+  if (pipeCode) return pipeCode;
+
+  const codeMatch = text.match(/^[A-Za-z0-9]{2,3}/);
+  return codeMatch?.[0] || text;
+};
+
+const normalizeFlightNo = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  if (text.includes("|")) {
+    return text.split("|").pop()?.trim() || "";
+  }
+
+  const exact = text.match(/^\d+$/);
+  if (exact) return exact[0];
+
+  const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
+  if (trailing) return trailing[1];
+
+  return text;
+};
+
+const buildAirlineDisplayCode = (carrierCode, flightNo) =>
+  [normalizeCarrierCode(carrierCode), normalizeFlightNo(flightNo)]
+    .filter(Boolean)
+    .join(" ");
 
 const findFirstDeepValue = (input, matcher, seen = new WeakSet()) => {
   if (!input || typeof input !== "object") return undefined;
@@ -356,20 +406,24 @@ const pickAirlinesFromSegments = (segments = []) => {
         segment?.carrier?.name ||
         segment?.marketing_airline?.name ||
         "N/A";
-      const code =
-        segment?.flight_number ||
-        segment?.flightNo ||
-        segment?.flight_no ||
-        segment?.airline?.code ||
-        segment?.carrier?.code ||
-        "N/A";
+      const flightNo = normalizeFlightNo(
+        pickFirst(segment?.flight_number, segment?.flightNo, segment?.flight_no)
+      );
+      const carrierCode = normalizeCarrierCode(
+        pickFirst(
+          segment?.airline?.code,
+          segment?.carrier?.code,
+          segment?.marketing_airline?.code
+        )
+      );
+      const code = buildAirlineDisplayCode(carrierCode, flightNo) || "N/A";
       const logo = resolveAirlineLogo({
         name,
-        code,
+        code: carrierCode || code,
         logo: segment?.airline?.logo || segment?.carrier?.logo,
       });
 
-      return { name, code, logo };
+      return { name, code, carrierCode, flightNo, logo };
     })
     .filter((a) => a.name || a.code);
 
@@ -792,28 +846,38 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
     )
   );
 
-  return {
-    airlines: hasSegments
-      ? pickAirlinesFromSegments(segments)
-      : (() => {
-          const name = pickFirst(leg?.airline, leg?.airline_name, "IndiGo");
-          const code = pickFirst(
-            leg?.flight_number,
-            leg?.flightNo,
-            leg?.flight_no,
+  const airlineItems = hasSegments
+    ? pickAirlinesFromSegments(segments)
+    : (() => {
+        const name = pickFirst(leg?.airline, leg?.airline_name, "IndiGo");
+        const rawFlightNo = pickFirst(
+          leg?.flight_number,
+          leg?.flightNo,
+          leg?.flight_no
+        );
+        const carrierCode = normalizeCarrierCode(
+          pickFirst(
             leg?.airline_code,
-            fallbackCode,
-            "6E-541"
-          );
+            leg?.carrier_code,
+            "6E"
+          )
+        );
+        const flightNo = normalizeFlightNo(rawFlightNo);
+        const code = buildAirlineDisplayCode(carrierCode, flightNo) || carrierCode || "N/A";
 
-          return [
-            {
-              name,
-              code,
-              logo: resolveAirlineLogo({ name, code, logo: leg?.airline_logo }),
-            },
-          ];
-        })(),
+        return [
+          {
+            name,
+            code,
+            carrierCode,
+            flightNo,
+            logo: resolveAirlineLogo({ name, code: carrierCode || code, logo: leg?.airline_logo }),
+          },
+        ];
+      })();
+
+  return {
+    airlines: airlineItems,
     dateLabel: formatDateLabel(
       pickFirst(
         first?.departure?.date,
@@ -842,6 +906,25 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
       type: stopsMeta.type,
     },
     details: {
+      flightNo: normalizeFlightNo(
+        pickFirst(
+          leg?.flightNo,
+          leg?.flight_no,
+          leg?.flight_number,
+          first?.flightNo,
+          first?.flight_no,
+          first?.flight_number,
+          airlineItems?.[0]?.flightNo
+        )
+      ),
+      aircraft: pickFirst(
+        leg?.AirCraft,
+        leg?.aircraft,
+        leg?.Aircraft,
+        first?.AirCraft,
+        first?.aircraft,
+        first?.Aircraft
+      ),
       fromName,
       toName,
       departureTerminal,
@@ -884,7 +967,12 @@ const buildRoundCard = (flight, index, options = {}) => {
       duration: onwardLeg?.duration,
       stops: onwardLeg?.stops,
       airline: onwardLeg?.airline,
-      index: onwardLeg?.index,
+      Index: pickFirst(onwardLeg?.Index, onwardLeg?.index, onwardLeg?.flightIndex),
+      flightNo: pickFirst(
+        onwardLeg?.flightNo,
+        onwardLeg?.flight_no,
+        onwardLeg?.flight_number
+      ),
       Amount: pickFirst(
         onwardLeg?.Amount,
         onwardLeg?.amount,
@@ -926,6 +1014,25 @@ const buildRoundCard = (flight, index, options = {}) => {
       duration: flight?.duration,
       stops: flight?.stops,
       airline: flight?.airline,
+      Index: pickFirst(
+        flight?.outbound?.Index,
+        flight?.outbound?.index,
+        flight?.onward?.Index,
+        flight?.onward?.index,
+        flight?.Index,
+        flight?.index
+      ),
+      flightNo: pickFirst(
+        flight?.outbound?.flightNo,
+        flight?.outbound?.flight_no,
+        flight?.outbound?.flight_number,
+        flight?.onward?.flightNo,
+        flight?.onward?.flight_no,
+        flight?.onward?.flight_number,
+        flight?.flightNo,
+        flight?.flight_no,
+        flight?.flight_number
+      ),
       Amount: pickFirst(
         flight?.outbound?.Amount,
         flight?.outbound?.amount,
@@ -962,7 +1069,12 @@ const buildRoundCard = (flight, index, options = {}) => {
       duration: returnLeg?.duration,
       stops: returnLeg?.stops,
       airline: returnLeg?.airline,
-      index: returnLeg?.index,
+      Index: pickFirst(returnLeg?.Index, returnLeg?.index, returnLeg?.flightIndex),
+      flightNo: pickFirst(
+        returnLeg?.flightNo,
+        returnLeg?.flight_no,
+        returnLeg?.flight_number
+      ),
       Amount: pickFirst(
         returnLeg?.Amount,
         returnLeg?.amount,
@@ -1028,6 +1140,29 @@ const buildRoundCard = (flight, index, options = {}) => {
         flight?.inbound_airline,
         flight?.airline
       ),
+      Index: pickFirst(
+        flight?.return?.Index,
+        flight?.return?.index,
+        flight?.inbound?.Index,
+        flight?.inbound?.index,
+        flight?.return_Index,
+        flight?.return_index,
+        flight?.inbound_Index,
+        flight?.inbound_index,
+        deriveTripIndexForOrder(pickFirst(flight?.Index, flight?.index), 2)
+      ),
+      flightNo: pickFirst(
+        flight?.return?.flightNo,
+        flight?.return?.flight_no,
+        flight?.return?.flight_number,
+        flight?.inbound?.flightNo,
+        flight?.inbound?.flight_no,
+        flight?.inbound?.flight_number,
+        flight?.return_flightNo,
+        flight?.return_flight_no,
+        flight?.inbound_flightNo,
+        flight?.inbound_flight_no
+      ),
       Amount: pickFirst(
         flight?.return?.Amount,
         flight?.return?.amount,
@@ -1070,12 +1205,16 @@ const buildRoundCard = (flight, index, options = {}) => {
   const outbound = buildRoundLeg(
     outboundLeg,
     "outbound",
-    pickFirst(outboundLeg?.index, flight?.index)
+    pickFirst(outboundLeg?.Index, outboundLeg?.index, flight?.Index, flight?.index)
   );
   const inbound = buildRoundLeg(
     inboundLeg,
     "inbound",
-    pickFirst(inboundLeg?.index, flight?.index)
+    pickFirst(
+      inboundLeg?.Index,
+      inboundLeg?.index,
+      deriveTripIndexForOrder(pickFirst(flight?.Index, flight?.index), 2)
+    )
   );
 
   const totalFareAmount =
@@ -1123,6 +1262,7 @@ const buildRoundCard = (flight, index, options = {}) => {
         ) || "",
       OrderID: "1",
       TUI: pickFirst(outbound?.booking?.tui, sharedTripTui),
+      flight_no: outbound?.details?.flightNo || "",
     },
     {
       Amount:
@@ -1143,11 +1283,11 @@ const buildRoundCard = (flight, index, options = {}) => {
           flight?.return?.index,
           flight?.inbound?.Index,
           flight?.inbound?.index,
-          flight?.Index,
-          flight?.index
+          deriveTripIndexForOrder(pickFirst(flight?.Index, flight?.index), 2)
         ) || "",
       OrderID: "2",
       TUI: pickFirst(inbound?.booking?.tui, sharedTripTui),
+      flight_no: inbound?.details?.flightNo || "",
     },
   ];
 
@@ -1174,7 +1314,9 @@ const buildRoundCard = (flight, index, options = {}) => {
       depart: {
         airline: {
           name: outbound.airlines[0]?.name || "IndiGo",
-          code: outbound.airlines[0]?.code || "6E-541",
+          code: outbound.details?.flightNo || outbound.airlines[0]?.code || "N/A",
+          carrierCode: outbound.airlines[0]?.carrierCode || "",
+          flightNo: outbound.details?.flightNo || outbound.airlines[0]?.flightNo || "",
           logo: outbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: outbound.dateLabel,
@@ -1189,7 +1331,9 @@ const buildRoundCard = (flight, index, options = {}) => {
       return: {
         airline: {
           name: inbound.airlines[0]?.name || "IndiGo",
-          code: inbound.airlines[0]?.code || "6E-541",
+          code: inbound.details?.flightNo || inbound.airlines[0]?.code || "N/A",
+          carrierCode: inbound.airlines[0]?.carrierCode || "",
+          flightNo: inbound.details?.flightNo || inbound.airlines[0]?.flightNo || "",
           logo: inbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: inbound.dateLabel,

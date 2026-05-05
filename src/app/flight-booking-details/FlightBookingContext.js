@@ -24,6 +24,26 @@ const getApiMessage = (payload, fallback) => {
   );
 };
 
+const getSsrRequestKey = (payload = {}) => {
+  try {
+    return JSON.stringify({
+      search_key: payload?.search_key,
+      Source: payload?.Source,
+      FareType: payload?.FareType,
+      Trips: Array.isArray(payload?.Trips)
+        ? payload.Trips.map((trip) => ({
+            Amount: trip?.Amount,
+            Index: trip?.Index,
+            OrderID: trip?.OrderID,
+            TUI: trip?.TUI,
+          }))
+        : [],
+    });
+  } catch {
+    return "";
+  }
+};
+
 export function FlightBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
   const skipNextHistoryPushRef = useRef(false);
@@ -121,11 +141,29 @@ export function FlightBookingProvider({ children }) {
 
   const loadSsrForBooking = async () => {
     if (!bookingSession?.priceResponse) return false;
-    if (bookingSession?.ssrResponse && bookingSession?.seatLayoutResponse) return true;
-    if (ssrRequestInFlightRef.current) return false;
 
     const ssrPayload = buildSsrPayload(bookingSession);
-    if (!ssrPayload?.search_key || !ssrPayload?.Trips?.[0]?.TUI) {
+    const ssrRequestKey = getSsrRequestKey(ssrPayload);
+    const cachedSsrRequestKey = getSsrRequestKey(bookingSession?.ssrRequest);
+    const canReuseSsrResponse =
+      bookingSession?.ssrResponse &&
+      cachedSsrRequestKey &&
+      cachedSsrRequestKey === ssrRequestKey;
+
+    if (canReuseSsrResponse && bookingSession?.seatLayoutResponse) return true;
+
+    const hasCompleteSsrTrips =
+      Array.isArray(ssrPayload?.Trips) &&
+      ssrPayload.Trips.length > 0 &&
+      ssrPayload.Trips.every(
+        (trip) =>
+          trip?.TUI &&
+          trip?.OrderID !== undefined &&
+          trip?.OrderID !== null &&
+          trip?.OrderID !== ""
+      );
+
+    if (!ssrPayload?.search_key || !hasCompleteSsrTrips) {
       setBookingError("SSR payload is incomplete for this booking.");
       return false;
     }
@@ -134,7 +172,9 @@ export function FlightBookingProvider({ children }) {
     setSsrLoading(true);
     setBookingError("");
     try {
-      const ssrResponse = bookingSession?.ssrResponse || await getFlightSsr(ssrPayload);
+      const ssrResponse = canReuseSsrResponse
+        ? bookingSession.ssrResponse
+        : await getFlightSsr(ssrPayload);
       if (
         ssrResponse?.success === false ||
         ssrResponse?.data?.success === false
@@ -179,9 +219,17 @@ export function FlightBookingProvider({ children }) {
         error?.response?.data?.message ||
         error?.message ||
         "Unable to load baggage and SSR details.";
-      toast.error(message);
+      toast.warn(message);
       setBookingError(message);
-      return false;
+      setBookingSession((prev) => ({
+        ...(prev || {}),
+        ssrRequest: ssrPayload,
+        ssrResponse: null,
+        seatLayoutRequest: null,
+        seatLayoutResponse: null,
+        ssrError: message,
+      }));
+      return true;
     } finally {
       ssrRequestInFlightRef.current = false;
       seatLayoutRequestInFlightRef.current = false;

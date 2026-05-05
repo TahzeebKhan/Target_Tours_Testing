@@ -727,8 +727,10 @@ const TravelerDetailsMobileView = ({ onClose }) => {
 
           {/* RIGHT */}
           <button
+            type="button"
             onClick={handleContinue}
             className={styles.continueBtn}
+            disabled={ssrLoading}
           >
             {ssrLoading ? "LOADING..." : "CONTINUE BOOKING"}
           </button>

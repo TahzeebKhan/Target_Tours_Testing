@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import styles from "./HotelDetailLayout.module.css";
 import DescriptionComponent from "./Components/descriptionComponent/DescriptionComponent";
 import Amenities from "./Components/amenities/Amenities";
@@ -59,6 +59,15 @@ const Page = () => {
       block: "start",
     });
   };
+
+
+
+
+
+
+
+
+
   return (
     <>
       {/* <Tabs
