@@ -1,5 +1,7 @@
 "use client";
 
+import { resolveAirlineLogo } from "./airlineLogos";
+
 let inMemoryFlightBookingSession = null;
 const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
 
@@ -19,6 +21,35 @@ const pickFirst = (...values) => {
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return undefined;
+};
+
+const deriveTripIndexForOrder = (value, orderId) => {
+  const text = String(value || "").trim();
+  if (!text) return undefined;
+
+  const parts = text.split("|");
+  if (parts.length < 2) return undefined;
+
+  const lastIndex = parts.length - 1;
+  if (!/^\d+$/.test(parts[lastIndex].trim())) return undefined;
+
+  parts[lastIndex] = String(orderId);
+  return parts.join("|");
+};
+
+const normalizeTripIndexForOrder = (trip, index, trips = []) => {
+  const explicitIndex = pickFirst(trip?.Index, trip?.index, trip?.flightIndex);
+  const previousIndex =
+    index > 0 ? pickFirst(trips[index - 1]?.Index, trips[index - 1]?.index, trips[index - 1]?.flightIndex) : undefined;
+
+  if (index > 0 && explicitIndex && explicitIndex === previousIndex) {
+    return deriveTripIndexForOrder(previousIndex, index + 1) || explicitIndex;
+  }
+
+  return (
+    explicitIndex ||
+    deriveTripIndexForOrder(pickFirst(trips[0]?.Index, trips[0]?.index, trips[0]?.flightIndex), index + 1)
+  );
 };
 
 const normalizeGenderCode = (value) => {
@@ -158,6 +189,94 @@ const normalizeTravelClass = (value, selectedFare) => {
   return "Economy";
 };
 
+const normalizeAircraftLabel = (...values) => {
+  for (const value of values) {
+    const text = String(value || "").trim();
+    if (text && text.toUpperCase() !== "N/A") return text;
+  }
+
+  return "Boeing 737";
+};
+
+const buildResolvedAirlineLogo = (airline = {}) =>
+  resolveAirlineLogo({
+    name: airline?.name,
+    code: airline?.carrierCode || airline?.code || airline?.flightNo,
+    logo: airline?.logo,
+  });
+
+const normalizeFlightCardLogo = (flight) => {
+  if (!flight || typeof flight !== "object") return flight;
+
+  return {
+    ...flight,
+    aircraft: normalizeAircraftLabel(flight.aircraft),
+    airline: {
+      ...(flight.airline || {}),
+      logo: buildResolvedAirlineLogo(flight.airline || {}),
+    },
+  };
+};
+
+const getSelectedFareForLeg = (selectedFare, legKey) => {
+  if (legKey === "return") {
+    return selectedFare?.roundTripFares?.return || selectedFare;
+  }
+
+  return selectedFare?.roundTripFares?.onward || selectedFare;
+};
+
+const getSelectedFareForTripIndex = (selectedFare, index) =>
+  index === 1
+    ? selectedFare?.roundTripFares?.return || selectedFare
+    : selectedFare?.roundTripFares?.onward || selectedFare;
+
+const extractTripFromFare = (fare, index) => {
+  const rawFare = fare?.rawFare || {};
+  const fareTrips = extractTrips(fare);
+  const rawFareTrips = extractTrips(rawFare);
+
+  return fareTrips[index] || rawFareTrips[index] || fareTrips[0] || rawFareTrips[0] || {};
+};
+
+const readSelectedFareTripAmount = (fare, index) => {
+  const rawFare = fare?.rawFare || {};
+  const fareTrip = extractTripFromFare(fare, index);
+
+  return readNumber(
+    fareTrip?.Amount,
+    fareTrip?.amount,
+    fare?.Amount,
+    fare?.amount,
+    fare?.netAmount,
+    rawFare?.Amount,
+    rawFare?.amount,
+    rawFare?.netAmount,
+    rawFare?.price,
+    rawFare?.grossFare
+  );
+};
+
+export const buildSelectedFarePriceRequest = (priceRequest, selectedFare) => {
+  const trips = extractTrips(priceRequest);
+  if (!trips.length) return priceRequest;
+
+  return {
+    ...(priceRequest || {}),
+    Trips: trips.map((trip, index) => {
+      const selectedTripFare = getSelectedFareForTripIndex(selectedFare, index);
+      const selectedAmount = readSelectedFareTripAmount(selectedTripFare, index);
+
+      return {
+        ...trip,
+        Amount: selectedAmount ?? readNumber(trip?.Amount, trip?.amount) ?? 0,
+        Index: normalizeTripIndexForOrder(trip, index, trips),
+        OrderID: String(index + 1),
+      };
+    }),
+  };
+};
+
 const parseRouteLabel = (value) => {
   const text = String(value || "").trim();
   const match = text.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
@@ -194,9 +313,13 @@ const buildFlightCard = (source, selectedFare) => {
     airline: {
       name: source?.airline || "N/A",
       code: String(source?.flightNo || source?.flight_no || "N/A").trim(),
-      logo: "/images/Flight.png",
+      logo: buildResolvedAirlineLogo({
+        name: source?.airline,
+        code: source?.carrierCode || source?.airline_code || source?.flightNo || source?.flight_no,
+        logo: source?.logo || source?.airline_logo,
+      }),
     },
-    aircraft: source?.aircraft || source?.AirCraft || "N/A",
+    aircraft: normalizeAircraftLabel(source?.aircraft, source?.AirCraft, source?.Aircraft),
     flexiPlusFare: selectedFare?.name || "",
     travelClass: normalizeTravelClass(
       source?.cabin || source?.cabinClass || source?.travelClass,
@@ -232,9 +355,16 @@ const buildSelectedFlightCard = (selectedFlight, selectedFare) => {
     airline: {
       name: selectedFlight?.airlines?.[0]?.name || details?.airline || "N/A",
       code: selectedFlight?.airlines?.[0]?.code || "N/A",
-      logo: selectedFlight?.airlines?.[0]?.logo || "/images/Flight.png",
+      carrierCode: selectedFlight?.airlines?.[0]?.carrierCode || "",
+      flightNo: selectedFlight?.airlines?.[0]?.flightNo || details?.flightNo || "",
+      logo: buildResolvedAirlineLogo({
+        ...(selectedFlight?.airlines?.[0] || {}),
+        name: selectedFlight?.airlines?.[0]?.name || details?.airline,
+        code: selectedFlight?.airlines?.[0]?.carrierCode || selectedFlight?.airlines?.[0]?.code,
+        logo: selectedFlight?.airlines?.[0]?.logo,
+      }),
     },
-    aircraft: details?.aircraft || "N/A",
+    aircraft: normalizeAircraftLabel(details?.aircraft, selectedFlight?.aircraft),
     flexiPlusFare: selectedFare?.name || "",
     travelClass: normalizeTravelClass(selectedFlight?.fare?.cabinClass, selectedFare),
     departure: {
@@ -260,6 +390,7 @@ const buildSelectedFlightCard = (selectedFlight, selectedFare) => {
 };
 
 const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
+  const legFare = getSelectedFareForLeg(selectedFare, legKey);
   const segmentWrapper =
     legKey === "return"
       ? selectedFlight?.return || selectedFlight?.tripCard?.return
@@ -282,6 +413,8 @@ const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
   const details = leg?.details || {};
   const airlineSource =
     segmentWrapper?.airline ||
+    leg?.airlines?.[0] ||
+    leg?.airline ||
     selectedFlight?.airline ||
     {};
   const departureAirportCode =
@@ -301,13 +434,24 @@ const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
     airline: {
       name: airlineSource?.name || "N/A",
       code: airlineSource?.code || "N/A",
-      logo: airlineSource?.logo || "/images/Flight.png",
+      carrierCode: airlineSource?.carrierCode || "",
+      flightNo: airlineSource?.flightNo || details?.flightNo || "",
+      logo: buildResolvedAirlineLogo({
+        ...airlineSource,
+        code: airlineSource?.carrierCode || airlineSource?.code || details?.flightNo,
+      }),
     },
-    aircraft: details?.aircraft || leg?.aircraft || "N/A",
-    flexiPlusFare: selectedFare?.name || "",
+    aircraft: normalizeAircraftLabel(
+      details?.aircraft,
+      details?.AirCraft,
+      leg?.aircraft,
+      leg?.AirCraft,
+      leg?.Aircraft
+    ),
+    flexiPlusFare: legFare?.name || "",
     travelClass: normalizeTravelClass(
       selectedFlight?.fare?.cabinClass || leg?.fare?.cabinClass || leg?.travelClass,
-      selectedFare
+      legFare
     ),
     departure: {
       date:
@@ -409,6 +553,7 @@ export const mergeFlightBookingSession = (patch) => {
 export const buildSsrPayload = (session) => {
   const priceResponse = session?.priceResponse || {};
   const priceRequest = session?.priceRequest || {};
+  const selectedFare = session?.selectedFare || {};
   const selectedFlight = session?.selectedFlight || {};
   const requestTrips = extractTrips(priceRequest);
   const flightBooking = selectedFlight?.booking || {};
@@ -428,16 +573,14 @@ export const buildSsrPayload = (session) => {
       flightBooking?.searchKey
     ),
     PaidSSR: true,
-    ClientID: pickFirst(
-      priceRequest?.ClientID,
-      priceResponse?.ClientID,
-      priceResponse?.clientId,
-      priceResponse?.data?.ClientID,
-      flightBooking?.clientId
-    ),
     Source: pickFirst(
       flightBooking?.ssrSource,
-      priceRequest?.Source,
+      priceRequest?.SSRSource,
+      priceRequest?.ssrSource,
+      priceResponse?.SSRSource,
+      priceResponse?.ssrSource,
+      priceResponse?.data?.SSRSource,
+      priceResponse?.data?.ssrSource,
       "LV"
     ),
     FareType: pickFirst(
@@ -445,22 +588,28 @@ export const buildSsrPayload = (session) => {
       "N"
     ),
     Trips: (requestTrips.length > 0 ? requestTrips : [extractPrimaryTrip(priceRequest) || {}]).map(
-      (requestTrip, index) => ({
-        Amount: 0,
-        Index: "",
-        OrderID: pickFirst(
-          requestTrip?.OrderID,
-          requestTrip?.orderId,
-          requestTrip?.OrderId,
-          String(index + 1)
-        ),
-        TUI: pickFirst(
-          rootTui,
-          requestTrip?.TUI,
-          requestTrip?.tui
-        ),
-      })
-    ),
+      (requestTrip, index) => {
+        const selectedTripFare = getSelectedFareForTripIndex(selectedFare, index);
+
+        return {
+          Amount:
+            readSelectedFareTripAmount(selectedTripFare, index) ??
+            readNumber(requestTrip?.Amount, requestTrip?.amount) ??
+            0,
+          Index: "",
+          OrderID: pickFirst(
+            requestTrip?.OrderID,
+            requestTrip?.orderId,
+            requestTrip?.OrderId,
+            String(index + 1)
+          ),
+          TUI: pickFirst(
+            rootTui,
+            requestTrip?.TUI,
+            requestTrip?.tui
+          ),
+        };
+      }),
   };
 };
 
@@ -470,8 +619,11 @@ export const buildSeatLayoutPayload = (session) => {
   const priceResponse = session?.priceResponse || {};
   const selectedFlight = session?.selectedFlight || {};
   const flightBooking = selectedFlight?.booking || {};
+  const bookingPriceRequest = flightBooking?.priceRequest || {};
   const requestTrips = extractTrips(priceRequest);
-  const primaryTrip = requestTrips[0] || {};
+  const bookingTrips = extractTrips(bookingPriceRequest);
+  const seatTrips = requestTrips.length > 0 ? requestTrips : bookingTrips;
+  const primaryTrip = seatTrips[0] || {};
   const ssrPayload = unwrapPayload(ssrResponse);
   const ssrRaw = ssrPayload?.raw || ssrResponse?.raw || {};
   const ssrFormatted = ssrPayload?.formatted || ssrResponse?.formatted || {};
@@ -490,28 +642,23 @@ export const buildSeatLayoutPayload = (session) => {
   );
 
   return {
-    ClientID: pickFirst(
-      priceRequest?.ClientID,
-      priceResponse?.ClientID,
-      priceResponse?.clientId,
-      priceResponse?.data?.ClientID,
-      flightBooking?.clientId,
-      "FVI6V120g22Ei5ztGK0FIQ=="
+
+    Source: pickFirst(
+      flightBooking?.ssrSource,
+      priceRequest?.SSRSource,
+      priceRequest?.ssrSource,
+      priceResponse?.SSRSource,
+      priceResponse?.ssrSource,
+      priceResponse?.data?.SSRSource,
+      priceResponse?.data?.ssrSource,
+      "LV"
     ),
-    Source: pickFirst(flightBooking?.ssrSource, priceRequest?.Source, "LV"),
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
-    Trips: [
-      {
-        TUI: rootTui || "",
-        Index: "",
-        OrderID: pickFirst(
-          primaryTrip?.OrderID,
-          primaryTrip?.orderId,
-          primaryTrip?.OrderId,
-          1
-        ),
-      },
-    ],
+    Trips: (seatTrips.length > 0 ? seatTrips : [primaryTrip]).map((trip, index) => ({
+      TUI: pickFirst(trip?.TUI, trip?.tui, rootTui, ""),
+      Index: "",
+      OrderID: String(index + 1),
+    })),
   };
 };
 
@@ -656,14 +803,16 @@ export const getBookingDetailsView = (session) => {
   const selectedReturnFlight = isSelectedRoundTrip
     ? buildRoundSelectedFlightCard(selectedFlight, selectedFare, "return")
     : null;
-  const departureFlight =
+  const rawDepartureFlight =
     selectedDepartureFlight ||
     fallbackView?.departureFlight ||
     buildFlightCard(departureSource, selectedFare);
-  const returnFlight =
+  const rawReturnFlight =
     selectedReturnFlight ||
     fallbackView?.returnFlight ||
     buildFlightCard(returnSource, selectedFare);
+  const departureFlight = normalizeFlightCardLogo(rawDepartureFlight);
+  const returnFlight = normalizeFlightCardLogo(rawReturnFlight);
   const selectedDepartureRoute = isSelectedRoundTrip
     ? parseRouteLabel(
         selectedFlight?.outbound?.departure?.city ||

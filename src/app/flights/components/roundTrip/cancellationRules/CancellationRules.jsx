@@ -25,10 +25,21 @@ const toAmount = (value) => {
     return Number.isFinite(amount) && amount > 0 ? amount : null;
 };
 
-const formatAmount = (amount, currency = "INR") => {
+const getPlatformCharges = (fareRulesData) => {
+    const payload = unwrapFareRulesPayload(fareRulesData);
+    return toAmount(
+        payload?.platform_charges ||
+            payload?.platformCharges ||
+            fareRulesData?.data?.platform_charges ||
+            fareRulesData?.platform_charges
+    );
+};
+
+const formatAmount = (amount, currency = "INR", platformCharges = null) => {
     const value = toAmount(amount);
-    if (!value) return "ADULT : NON REFUNDABLE";
-    return `ADULT : ${currency || "INR"} ${value}`;
+    const platform = toAmount(platformCharges);
+    if (!value) return platform ? `ADULT : NON REFUNDABLE + INR ${platform}` : "ADULT : NON REFUNDABLE";
+    return `ADULT : ${currency || "INR"} ${value}${platform ? ` + INR ${platform}` : ""}`;
 };
 
 const normalizeTimeFrame = (value = "") => {
@@ -41,7 +52,7 @@ const normalizeTimeFrame = (value = "") => {
         .toUpperCase();
 };
 
-const parseRawCancellationRules = (rawText, currency = "INR") => {
+const parseRawCancellationRules = (rawText, currency = "INR", platformCharges = null) => {
     const lines = cleanRuleLines(rawText);
     const rows = [];
     let inCancellationSection = false;
@@ -71,7 +82,7 @@ const parseRawCancellationRules = (rawText, currency = "INR") => {
 
         const row = {
             timeFrame: normalizeTimeFrame(description),
-            fee: formatAmount(amountMatch[1], currency),
+            fee: formatAmount(amountMatch[1], currency, platformCharges),
         };
         const key = `${row.timeFrame}|${row.fee}`;
         if (!rows.some((item) => `${item.timeFrame}|${item.fee}` === key)) {
@@ -83,7 +94,7 @@ const parseRawCancellationRules = (rawText, currency = "INR") => {
     if (atoMatch) {
         rows.push({
             timeFrame: "CANCELLATION",
-            fee: formatAmount(atoMatch[1], currency),
+            fee: formatAmount(atoMatch[1], currency, platformCharges),
         });
     }
 
@@ -108,13 +119,13 @@ const getFareRuleEntries = (fareRulesData) => {
     );
 };
 
-const getStructuredCancellationRows = (fareRule = {}) =>
+const getStructuredCancellationRows = (fareRule = {}, platformCharges = null) =>
     toArray(fareRule?.sections)
         .filter((section) => /cancellation|ato service/i.test(section?.title || ""))
         .flatMap((section) =>
             toArray(section?.items).map((item) => ({
                 timeFrame: normalizeTimeFrame(item?.description || section?.title),
-                fee: formatAmount(item?.adultAmount, item?.currencyCode || "INR"),
+                fee: formatAmount(item?.adultAmount, item?.currencyCode || "INR", platformCharges),
             }))
         );
 
@@ -150,15 +161,17 @@ const buildCancellationRulesData = (fareRulesData, flightData, error, isLoading)
 
     const payload = unwrapFareRulesPayload(fareRulesData);
     const currency = payload?.CurrencyCode || payload?.currencyCode || "INR";
+    const platformCharges = getPlatformCharges(fareRulesData);
     const entries = getFareRuleEntries(fareRulesData);
     const cards = fallbackCards.map((card, index) => {
         const fareRule = entries[index] || entries[0] || {};
-        const rows = getStructuredCancellationRows(fareRule);
+        const rows = getStructuredCancellationRows(fareRule, platformCharges);
         const textRows = rows.length
             ? rows
             : parseRawCancellationRules(
                 fareRule?.rawText || fareRule?.FareRuleText || "",
-                currency
+                currency,
+                platformCharges
             );
 
         return {

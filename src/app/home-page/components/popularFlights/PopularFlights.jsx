@@ -241,11 +241,11 @@ const PopularFlights = () => {
               onClick={() => setIsCityOpen((prev) => !prev)}
             >
               <span>{selectedCity}</span>
-              <img
+              {/* <img
                 src="/icons/dropdown.svg"
                 alt=""
                 className={isCityOpen ? styles.rotate : ""}
-              />
+              /> */}
             </button>
 
             {isCityOpen && (

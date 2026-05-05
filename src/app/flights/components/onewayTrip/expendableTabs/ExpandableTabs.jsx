@@ -335,6 +335,16 @@ const toFareRuleAmount = (value) => {
   return Number.isFinite(amount) && amount > 0 ? amount : null;
 };
 
+const getPlatformCharges = (fareRulesData) => {
+  const payload = unwrapFareRulesPayload(fareRulesData);
+  return toFareRuleAmount(
+    payload?.platform_charges ||
+      payload?.platformCharges ||
+      fareRulesData?.data?.platform_charges ||
+      fareRulesData?.platform_charges
+  );
+};
+
 const parseRawCancellationRuleRows = (text, context = {}) => {
   const lines = Array.isArray(text)
     ? text.map(cleanRuleText).filter(Boolean)
@@ -794,15 +804,12 @@ const getFareRuleTimeFrame = (rule = {}) =>
       rule?.Rule
   );
 
-const getFareRuleFee = (rule = {}) =>
-  displayValue(
-    rule?.AdultAmount
-      ? `ADULT : ${rule.CurrencyCode || "INR"} ${String(rule.AdultAmount).trim()}`
-      : rule?.adultAmount
-        ? `ADULT : ${rule.currencyCode || rule?.currency || "INR"} ${String(rule.adultAmount).trim()}`
-        : rule?.feeText ||
-      rule?.fee ||
-      rule?.Fee ||
+const getFareRuleFee = (rule = {}, platformCharges = null) => {
+  const platform = toFareRuleAmount(platformCharges);
+  const suffix = platform ? ` + INR ${platform}` : "";
+  const amount = toFareRuleAmount(
+    rule?.AdultAmount ||
+      rule?.adultAmount ||
       rule?.amount ||
       rule?.Amount ||
       rule?.airlineFee ||
@@ -812,10 +819,22 @@ const getFareRuleFee = (rule = {}) =>
       rule?.charges ||
       rule?.Charges ||
       rule?.cancellationCharge ||
-      rule?.CancellationCharge ||
-      rule?.text ||
-      rule?.Text
+      rule?.CancellationCharge
   );
+
+  if (amount) {
+    return `ADULT : ${rule.CurrencyCode || rule.currencyCode || rule?.currency || "INR"} ${amount}${suffix}`;
+  }
+
+  return displayValue(
+    (rule?.feeText ||
+      rule?.fee ||
+      rule?.Fee ||
+      rule?.text ||
+      rule?.Text ||
+      (platform ? "ADULT : NON REFUNDABLE" : "")) + suffix
+  );
+};
 
 const isCancellationFareRule = (rule = {}) => {
   const haystack = String(
@@ -1678,6 +1697,10 @@ const ExpandableTabs = ({
     () => getFareRulesMessage(fareRulesData),
     [fareRulesData]
   );
+  const fareRulesPlatformCharges = useMemo(
+    () => getPlatformCharges(fareRulesData),
+    [fareRulesData]
+  );
   const baggageFallbackRow = useMemo(
     () => ({
       id: "baggage-fallback",
@@ -2131,7 +2154,9 @@ const ExpandableTabs = ({
                 cancellationFareRuleRows.map((rule, index) => (
                   <div className={styles.tableRows} key={rule?.id || index}>
                     <span className={styles.timeFrame}>{getFareRuleTimeFrame(rule)}</span>
-                    <span className={styles.textRight}>{getFareRuleFee(rule)}</span>
+                    <span className={styles.textRight}>
+                      {getFareRuleFee(rule, fareRulesPlatformCharges)}
+                    </span>
                   </div>
                 ))}
             </div>

@@ -7,11 +7,14 @@ import { toast } from "react-toastify";
 import {
   getFlightPrice,
   getFlightTravelChecklist,
+  getFlightFareOptions,
 } from "@/features/flights/services/flightBooking";
 import {
   buildBookingFallbackQuery,
+  buildSelectedFarePriceRequest,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
+import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -33,154 +36,6 @@ const formatCurrency = (value) => {
   return `₹ ${new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
   }).format(amount)}`;
-};
-
-const normalizeFareType = (value = "") => String(value || "").trim().toUpperCase();
-
-const getAdultCount = (flightData) => {
-  const searchKey = String(flightData?.booking?.priceRequest?.search_key || "").trim();
-  const parts = searchKey.split("_");
-  return Math.max(Number(parts[4] || 1), 1);
-};
-
-const getFareTemplate = (fareType) => {
-  const normalized = normalizeFareType(fareType);
-
-  if (normalized.includes("FLEXI")) {
-    return {
-      id: "flexi",
-      name: "FLEXI PLUS FARE",
-      isPremium: true,
-      baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-      changes: {
-        charges: "Change up to ₹3,499",
-        cancellation: "Cancel up to ₹3,499",
-      },
-      addons: {
-        seats: "Complimentary meal",
-        meals: "Complimentary standard seat",
-      },
-    };
-  }
-
-  if (normalized.includes("PREMIUM")) {
-    return {
-      id: "premium",
-      name: "PREMIUM FARE",
-      isPremium: false,
-      baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-      changes: {
-        charges: "Change up to ₹3,499",
-        cancellation: "Cancel up to ₹3,499",
-      },
-      addons: {
-        seats: "Chargeable Meals",
-        meals: "Complimentary XL (Extra legroom) Seat",
-      },
-    };
-  }
-
-  return {
-    id: "saver",
-    name: "SAVER FARE",
-    isPremium: false,
-    baggage: { cabin: "7 Kg", checkin: "15 Kg" },
-    changes: {
-      charges: "Change up to ₹2,999",
-      cancellation: "Cancel up to ₹4,999",
-    },
-    addons: { seats: "Chargeable Seats", meals: "Chargeable Meals" },
-  };
-};
-
-const STATIC_ROUND_TRIP_FARE_OPTIONS = [
-  {
-    ...getFareTemplate("FLEXI PLUS FARE"),
-    price: "₹ 78,000",
-    pricePerAdult: "₹ 6,200",
-  },
-  {
-    ...getFareTemplate("PREMIUM FARE"),
-    price: "₹ 78,000",
-    pricePerAdult: "₹ 6,200",
-  },
-];
-
-const readRoundTripAdultFareBreakdown = (priceResponse) => {
-  const breakdown =
-    priceResponse?.data?.raw?.fare_breakdown ||
-    priceResponse?.raw?.fare_breakdown ||
-    priceResponse?.data?.fare_breakdown ||
-    priceResponse?.fare_breakdown ||
-    priceResponse?.data?.formatted?.fare_breakdown ||
-    priceResponse?.formatted?.fare_breakdown ||
-    [];
-
-  if (!Array.isArray(breakdown) || breakdown.length === 0) {
-    return null;
-  }
-
-  let totalPerAdult = 0;
-  let foundAdultFare = false;
-
-  breakdown.forEach((item) => {
-    const adultFare = item?.ADT;
-    const perPerson = readNumber(
-      adultFare?.per_person,
-      adultFare?.perPerson,
-      adultFare?.total,
-      adultFare?.fare
-    );
-
-    if (!Number.isFinite(perPerson)) return;
-    totalPerAdult += perPerson;
-    foundAdultFare = true;
-  });
-
-  return foundAdultFare ? totalPerAdult : null;
-};
-
-const buildRoundTripSaverFare = (priceResponse, flightData) => {
-  const trips =
-    priceResponse?.data?.raw?.Trips ||
-    priceResponse?.raw?.Trips ||
-    priceResponse?.data?.Trips ||
-    priceResponse?.Trips ||
-    [];
-
-  let totalNetFare = 0;
-
-  trips.forEach((trip) => {
-    const journeys = Array.isArray(trip?.Journey) ? trip.Journey : [];
-    journeys.forEach((journey) => {
-      const netFare = readNumber(
-        journey?.NetFare,
-        journey?.netfare,
-        journey?.netFare,
-        journey?.GrossFare,
-        journey?.grossFare
-      );
-
-      if (!Number.isFinite(netFare)) return;
-      totalNetFare += netFare;
-    });
-  });
-
-  if (!Number.isFinite(totalNetFare) || totalNetFare <= 0) {
-    return null;
-  }
-
-  const adults = getAdultCount(flightData);
-  const adultFareBreakdown = readRoundTripAdultFareBreakdown(priceResponse);
-  return {
-    ...getFareTemplate("SAVER"),
-    price: formatCurrency(totalNetFare),
-    pricePerAdult: formatCurrency(
-      Number.isFinite(adultFareBreakdown)
-        ? adultFareBreakdown
-        : Math.round(totalNetFare / adults)
-    ),
-  };
 };
 
 const parseCityLabel = (value = "") => {
@@ -241,6 +96,128 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
   };
 };
 
+const renderLoadingCards = (styles) =>
+  Array.from({ length: 3 }).map((_, index) => (
+    <div key={index} className={styles.loadingCard}>
+      <div className={styles.loadingHeader}>
+        <div className={styles.skeletonLogo} />
+        <div className={styles.loadingHeaderText}>
+          <div className={styles.skeletonLineShort} />
+          <div className={styles.skeletonLineTiny} />
+        </div>
+        <div className={styles.skeletonBadge} />
+      </div>
+      <div className={styles.loadingBaggage}>
+        <div className={styles.skeletonLineMedium} />
+        <div className={styles.skeletonLine} />
+        <div className={styles.skeletonLine} />
+        <div className={styles.skeletonLineMedium} />
+      </div>
+      <div className={styles.loadingActions}>
+        <div className={styles.skeletonButton} />
+        <div className={styles.skeletonButtonDark} />
+      </div>
+    </div>
+  ));
+
+const normalizeFlightNo = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  if (text.includes("|")) {
+    return text.split("|").pop()?.trim() || "";
+  }
+
+  const exact = text.match(/^\d+$/);
+  if (exact) return exact[0];
+
+  const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
+  if (trailing) return trailing[1];
+
+  return text;
+};
+
+const pickFlightNo = (...values) => {
+  for (const value of values) {
+    const text = normalizeFlightNo(value);
+    if (text) return text;
+  }
+
+  return "";
+};
+
+const extractRoundTripFlightNos = (flightData) => {
+  const onwardFlightNo = pickFlightNo(
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flight_no,
+    flightData?.depart?.flight?.details?.flightNo,
+    flightData?.tripCard?.depart?.flight?.details?.flightNo,
+    flightData?.outbound?.details?.flightNo,
+    flightData?.outbound?.flightNo,
+    flightData?.depart?.airline?.flightNo,
+    flightData?.outbound?.airlines?.[0]?.flightNo,
+    flightData?.outbound?.airlines?.[0]?.code,
+    flightData?.booking?.flightNo
+  );
+  const returnFlightNo = pickFlightNo(
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flight_no,
+    flightData?.return?.flight?.details?.flightNo,
+    flightData?.tripCard?.return?.flight?.details?.flightNo,
+    flightData?.inbound?.details?.flightNo,
+    flightData?.inbound?.flightNo,
+    flightData?.return?.airline?.flightNo,
+    flightData?.inbound?.airlines?.[0]?.flightNo,
+    flightData?.inbound?.airlines?.[0]?.code
+  );
+  const fareOptionsFlightNoParam = [onwardFlightNo, returnFlightNo]
+    .filter(Boolean)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(",");
+
+  return {
+    onwardFlightNo,
+    returnFlightNo,
+    fareOptionsFlightNoParam,
+  };
+};
+
+const getSelectedFlightNo = (flightNos, selected) => {
+  if (selected === "return") {
+    return flightNos.returnFlightNo || flightNos.onwardFlightNo || "";
+  }
+
+  return flightNos.onwardFlightNo || flightNos.returnFlightNo || "";
+};
+
+const sameFare = (left, right) =>
+  String(left?.id || "") === String(right?.id || "") &&
+  String(left?.name || "") === String(right?.name || "");
+
+const buildRoundTripSelectedFare = (onwardFare, returnFare) => {
+  const onwardAmount = readNumber(onwardFare?.netAmount);
+  const returnAmount = readNumber(returnFare?.netAmount);
+  const netAmount =
+    onwardAmount !== null && returnAmount !== null
+      ? onwardAmount + returnAmount
+      : undefined;
+
+  return {
+    ...(onwardFare || {}),
+    id: `${onwardFare?.id || "onward"}-${returnFare?.id || "return"}`,
+    name:
+      sameFare(onwardFare, returnFare)
+        ? onwardFare?.name || returnFare?.name || ""
+        : [onwardFare?.name, returnFare?.name].filter(Boolean).join(" / "),
+    price: netAmount !== undefined ? formatCurrency(netAmount) : onwardFare?.price,
+    netAmount,
+    roundTripFares: {
+      onward: onwardFare,
+      return: returnFare,
+    },
+  };
+};
+
 const FareComparisonModalRoundTrip = ({
   isOpen,
   onClose,
@@ -255,9 +232,75 @@ const FareComparisonModalRoundTrip = ({
   const [authView, setAuthView] = useState("login");
   const [pendingFare, setPendingFare] = useState(null);
   const [selected, setSelected] = useState("onward");
+  const [selectedFares, setSelectedFares] = useState({
+    onward: null,
+    return: null,
+  });
+  const [fareOptionsPayload, setFareOptionsPayload] = useState(
+    prefetchedData?.fareOptionsResponse || null
+  );
+  const [isFareOptionsLoading, setIsFareOptionsLoading] = useState(false);
+  const [hasResolvedFareOptions, setHasResolvedFareOptions] = useState(
+    Boolean(prefetchedData?.fareOptionsResponse)
+  );
+
+  const flightNos = React.useMemo(
+    () => extractRoundTripFlightNos(flightData),
+    [flightData]
+  );
+  const activeFlightNo = getSelectedFlightNo(flightNos, selected);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setFareOptionsPayload(prefetchedData?.fareOptionsResponse || null);
+    setIsFareOptionsLoading(false);
+    setHasResolvedFareOptions(Boolean(prefetchedData?.fareOptionsResponse));
+    setSelected("onward");
+    setSelectedFares({ onward: null, return: null });
+
+    const searchKey = flightData?.booking?.priceRequest?.search_key;
+    if (!searchKey || !flightNos.fareOptionsFlightNoParam) {
+      setHasResolvedFareOptions(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadFareOptions = async () => {
+      try {
+        setIsFareOptionsLoading(true);
+        const response = await getFlightFareOptions({
+          search_key: searchKey,
+          flight_no: flightNos.fareOptionsFlightNoParam,
+        });
+
+        if (cancelled) return;
+        setFareOptionsPayload(response);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load round-trip fare options", error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsFareOptionsLoading(false);
+          setHasResolvedFareOptions(true);
+        }
+      }
+    };
+
+    loadFareOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [flightData, flightNos.fareOptionsFlightNoParam, isOpen, prefetchedData?.fareOptionsResponse]);
 
   const performBookNow = useCallback(async (selectedFare) => {
-    const priceRequest = flightData?.booking?.priceRequest;
+    const priceRequest = buildSelectedFarePriceRequest(
+      flightData?.booking?.priceRequest,
+      selectedFare
+    );
     const routeContext = {
       fromName: String(searchParams?.get("from") || "")
         .replace(/\s*\([^)]+\)\s*$/, "")
@@ -334,14 +377,43 @@ const FareComparisonModalRoundTrip = ({
   }, [isLoggedIn, pendingFare, performBookNow]);
 
   const handleBookNow = async (selectedFare) => {
+    const nextSelectedFares = {
+      ...selectedFares,
+      [selected]: selectedFare,
+    };
+    setSelectedFares(nextSelectedFares);
+
+    if (selected === "onward" && !nextSelectedFares.return) {
+      setSelected("return");
+      return;
+    }
+
+    if (selected === "return" && !nextSelectedFares.onward) {
+      setSelected("onward");
+      toast.info("Please select an onward fare to continue.");
+      return;
+    }
+
+    const roundTripFare = buildRoundTripSelectedFare(
+      nextSelectedFares.onward,
+      nextSelectedFares.return
+    );
+
     if (loading) return;
     if (!isLoggedIn) {
-      setPendingFare(selectedFare);
+      setPendingFare(roundTripFare);
       setAuthView("login");
       setShowLogin(true);
       return;
     }
-    performBookNow(selectedFare);
+    performBookNow(roundTripFare);
+  };
+
+  const getBookNowLabel = () => {
+    if (isSubmitting) return "LOADING...";
+    if (selected === "onward" && !selectedFares.return) return "SELECT RETURN";
+    if (selected === "return" && !selectedFares.onward) return "SELECT ONWARD";
+    return "BOOK NOW";
   };
 
   const flightSegments = {
@@ -356,18 +428,33 @@ const FareComparisonModalRoundTrip = ({
     },
   };
 
-  const saverFare =
-    buildRoundTripSaverFare(prefetchedData?.priceResponse, flightData) || {
-      ...getFareTemplate("SAVER"),
-      price: flightData?.fare?.totalFare || "₹ 0",
-      pricePerAdult:
-        flightData?.fare?.pricePerAdult || flightData?.fare?.totalFare || "₹ 0",
-    };
-  const combinedFareOptions = [saverFare, ...STATIC_ROUND_TRIP_FARE_OPTIONS];
-
   const activeSegment = flightSegments[selected];
   const { flight } = activeSegment;
-  const fares = combinedFareOptions;
+  const fareSourcePayload = fareOptionsPayload || prefetchedData?.fareOptionsResponse || null;
+  const hasFareOptionItems = Boolean(fareSourcePayload);
+  const fareOptionsFlightData = React.useMemo(() => {
+    if (!activeFlightNo) return flightData;
+    return {
+      ...flightData,
+      booking: {
+        ...(flightData?.booking || {}),
+        flightNo: activeFlightNo,
+      },
+    };
+  }, [activeFlightNo, flightData]);
+  const fares = hasFareOptionItems
+    ? buildFareOptions({
+        flightData: fareOptionsFlightData,
+        prefetchedData: {
+          ...(prefetchedData || {}),
+          fareOptionsResponse: fareSourcePayload,
+        },
+        adults: searchParams?.get("adults") || 1,
+        allowFallbackCards: false,
+      })
+    : [];
+  const showEmptyFareOptions =
+    hasResolvedFareOptions && !isFareOptionsLoading && fares.length === 0;
   useLockBodyScroll();
   if (!isOpen) return null;
   return (
@@ -485,11 +572,23 @@ const FareComparisonModalRoundTrip = ({
         {/* Fare Cards */}
         <div className={styles.fareCardsOverflowAuto}>
           <div className={styles.fareCards}>
+            {isFareOptionsLoading && !hasFareOptionItems
+              ? renderLoadingCards(styles)
+              : null}
+            {showEmptyFareOptions ? (
+              <div className={styles.emptyFareOptions}>
+                No fare option available
+              </div>
+            ) : null}
             {fares.map((fare) => (
               <div
                 key={fare.id}
                 className={`${styles.fareCardContainer} ${
                   fare.isPremium ? styles.premiumContainer : ""
+                } ${
+                  sameFare(selectedFares[selected], fare)
+                    ? styles.selectedFareCard
+                    : ""
                 }`}
               >
                 {fare.isPremium && (
@@ -581,7 +680,7 @@ const FareComparisonModalRoundTrip = ({
                 <div className={styles.fareActions}>
                   <button className={styles.lockPriceBtn}>LOCK PRICE</button>
                   <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>
-                    {isSubmitting ? "LOADING..." : "BOOK NOW"}
+                    {getBookNowLabel()}
                   </button>
                 </div>
               </div>

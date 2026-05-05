@@ -5,8 +5,6 @@ import FlightTimingDetail from "../../flightTimingDetails/FlightTimingDetail";
 import RoundTripExpendable from "../roundTripExpendable/RoundTripExpendable";
 import OfferBanner from "../../offerComponent/OfferBanner";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
-import MobileFareComparisonModal from "../MobileFareComparisonModalRoundTrip";
-import FareComparisonModal from "../FareComparisonModalRoundTrip";
 import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
 import {
@@ -25,6 +23,7 @@ const TripCard = ({
   selectedFlightId,
   setSelectedFlightId,
 }) => {
+  const isMobileViewport = useMediaQuery("(max-width: 430px)");
   const [openId, setOpenId] = useState(null);
   const [prefetchedFareData, setPrefetchedFareData] = useState({});
   const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
@@ -409,14 +408,20 @@ const TripCard = ({
         ))}
       </div>
 
-      {
+      {isMobileViewport ? (
+        <MobileFareComparisonModalRoundTrip
+          isOpen={fareModalOpen}
+          onClose={() => setFareModalOpen(false)}
+          flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
+        />
+      ) : (
         <FareComparisonModalRoundTrip
           isOpen={fareModalOpen}
           onClose={() => setFareModalOpen(false)}
           flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
           prefetchedData={prefetchedFareData[fareModalOpen] || null}
         />
-      }
+      )}
     </>
   );
 };
