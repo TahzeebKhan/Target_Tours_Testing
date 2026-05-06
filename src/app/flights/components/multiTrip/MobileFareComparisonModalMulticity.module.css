@@ -278,7 +278,7 @@
 }
 
 .bookNowBtn {
-  max-width: 127px;
+  /* max-width: 127px; */
   width: 100%;
   padding: 12px 24px;
   font-family: var(--font-inter);

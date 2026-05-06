@@ -15,6 +15,9 @@ import {
 } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { toast } from "react-toastify";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const TripCard = ({
   tripCardsData,
@@ -24,11 +27,15 @@ const TripCard = ({
   setSelectedFlightId,
 }) => {
   const isMobileViewport = useMediaQuery("(max-width: 430px)");
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const [openId, setOpenId] = useState(null);
   const [prefetchedFareData, setPrefetchedFareData] = useState({});
   const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
   const [flightInfoData, setFlightInfoData] = useState({});
   const [loadingFlightInfoId, setLoadingFlightInfoId] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [authView, setAuthView] = useState("login");
+  const [pendingFareFlight, setPendingFareFlight] = useState(null);
 
   const flightResults = [
     {
@@ -238,6 +245,22 @@ const TripCard = ({
     }
   };
 
+  const handleViewFares = (flight) => {
+    if (authLoading) {
+      setPendingFareFlight(flight);
+      return;
+    }
+
+    if (!isLoggedIn) {
+      setPendingFareFlight(flight);
+      setAuthView("login");
+      setShowLogin(true);
+      return;
+    }
+
+    openFareModal(flight);
+  };
+
   useEffect(() => {
     const checkScreen = () => {
       setIsMobile(window.innerWidth <= 430);
@@ -248,6 +271,21 @@ const TripCard = ({
     window.addEventListener("resize", checkScreen);
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
+
+  useEffect(() => {
+    if (authLoading || !pendingFareFlight) return;
+
+    if (!isLoggedIn) {
+      setAuthView("login");
+      setShowLogin(true);
+      return;
+    }
+
+    const flightToOpen = pendingFareFlight;
+    setShowLogin(false);
+    setPendingFareFlight(null);
+    openFareModal(flightToOpen);
+  }, [authLoading, isLoggedIn, pendingFareFlight]);
 
   return (
     <>
@@ -365,7 +403,7 @@ const TripCard = ({
                     <button
                       disabled={prefetchingFlightId === item.id}
                       onClick={() => {
-                        openFareModal(item);
+                        handleViewFares(item);
                       }}
                       className={styles.viewBtn}
                     >
@@ -420,6 +458,24 @@ const TripCard = ({
           onClose={() => setFareModalOpen(false)}
           flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
           prefetchedData={prefetchedFareData[fareModalOpen] || null}
+        />
+      )}
+      {showLogin && authView === "login" && (
+        <LoginPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingFareFlight(null);
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+      {showLogin && authView === "signup" && (
+        <SignupPopup
+          onClose={() => {
+            setShowLogin(false);
+            setPendingFareFlight(null);
+          }}
+          onNavigate={setAuthView}
         />
       )}
     </>

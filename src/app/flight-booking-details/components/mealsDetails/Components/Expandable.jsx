@@ -3,56 +3,73 @@ import React from "react";
 import styles from "./Expandable.module.css";
 
 const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }) => {
+    const hasMeals = meals.length > 0;
+    const hasBeverages = beverages.length > 0;
+
     return (
         <div className={styles.expandWrap}>
             <div className={styles.expandHeader}>
-                <h2>MAIN MEALS</h2>
+                {!hasMeals && !hasBeverages ? (
+                    <MealEmptyState />
+                ) : (
+                    <>
+                        {hasMeals && (
+                            <>
+                                <h2>MAIN MEALS</h2>
 
-                <div className={styles.mealGrid}>
-                    {meals.map((meal) => (
-                        <MealItem
-                            key={meal.selectionKey || meal.id}
-                            {...meal}
-                            quantity={quantities[meal.selectionKey || meal.id] || 0}
-                            onIncrease={() =>
-                                onUpdateQuantity(
-                                    meal.selectionKey || meal.id,
-                                    (quantities[meal.selectionKey || meal.id] || 0) + 1
-                                )
-                            }
-                            onDecrease={() =>
-                                onUpdateQuantity(
-                                    meal.selectionKey || meal.id,
-                                    (quantities[meal.selectionKey || meal.id] || 0) - 1
-                                )
-                            }
-                        />
-                    ))}
-                </div>
+                                <div className={styles.mealGrid}>
+                                    {meals.map((meal) => (
+                                        <MealItem
+                                            key={meal.selectionKey || meal.id}
+                                            {...meal}
+                                            quantity={quantities[meal.selectionKey || meal.id] || 0}
+                                            onIncrease={() =>
+                                                onUpdateQuantity(
+                                                    meal.selectionKey || meal.id,
+                                                    (quantities[meal.selectionKey || meal.id] || 0) + 1
+                                                )
+                                            }
+                                            onDecrease={() =>
+                                                onUpdateQuantity(
+                                                    meal.selectionKey || meal.id,
+                                                    (quantities[meal.selectionKey || meal.id] || 0) - 1
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
 
-                <h2>BEVERAGES</h2>
+                        {hasBeverages && (
+                            <>
+                                <h2>BEVERAGES</h2>
 
-                <div className={styles.mealGrid}>
-                    {beverages.map((drink) => (
-                        <MealItem
-                            key={drink.selectionKey || drink.id}
-                            {...drink}
-                            quantity={quantities[drink.selectionKey || drink.id] || 0}
-                            onIncrease={() =>
-                                onUpdateQuantity(
-                                    drink.selectionKey || drink.id,
-                                    (quantities[drink.selectionKey || drink.id] || 0) + 1
-                                )
-                            }
-                            onDecrease={() =>
-                                onUpdateQuantity(
-                                    drink.selectionKey || drink.id,
-                                    (quantities[drink.selectionKey || drink.id] || 0) - 1
-                                )
-                            }
-                        />
-                    ))}
-                </div>
+                                <div className={styles.mealGrid}>
+                                    {beverages.map((drink) => (
+                                        <MealItem
+                                            key={drink.selectionKey || drink.id}
+                                            {...drink}
+                                            quantity={quantities[drink.selectionKey || drink.id] || 0}
+                                            onIncrease={() =>
+                                                onUpdateQuantity(
+                                                    drink.selectionKey || drink.id,
+                                                    (quantities[drink.selectionKey || drink.id] || 0) + 1
+                                                )
+                                            }
+                                            onDecrease={() =>
+                                                onUpdateQuantity(
+                                                    drink.selectionKey || drink.id,
+                                                    (quantities[drink.selectionKey || drink.id] || 0) - 1
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );
@@ -60,6 +77,20 @@ const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }
 
 export default Expandable;
 
+
+const MealEmptyState = () => (
+    <div className={styles.emptyState}>
+        <div className={styles.emptyIcon}>
+            <img src="/icons/MEAL.svg" alt="" />
+        </div>
+        <div>
+            <h3 className={styles.emptyTitle}>Meal service not available</h3>
+            <p className={styles.emptyText}>
+                This flight does not provide pre-bookable meals or beverages.
+            </p>
+        </div>
+    </div>
+);
 
 
 const MealItem = ({

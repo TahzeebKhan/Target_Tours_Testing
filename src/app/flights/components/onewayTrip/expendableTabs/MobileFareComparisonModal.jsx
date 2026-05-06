@@ -400,7 +400,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
               </div>
               {/* Action Buttons */}
               <div className={styles.fareActions}>
-                <button className={styles.lockPriceBtn}>LOCK PRICE</button>
+                {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
                 <button onClick={() => handleBookNow(fare)} className={styles.bookNowBtn}>
                   {isSubmitting ? "LOADING..." : "BOOK NOW"}
                 </button>

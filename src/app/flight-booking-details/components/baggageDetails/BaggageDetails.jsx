@@ -252,6 +252,8 @@ const FlightExpandableCard = ({
   onIncrease,
   onDecrease,
 }) => {
+  const hasExtraBaggage = flightCard.baggageRows.length > 0;
+
   return (
     <div className={styles.flightExpandableCard}>
       <div className={styles.flightExpandableHeader}>
@@ -271,24 +273,28 @@ const FlightExpandableCard = ({
         </div>
 
         {/* Extra baggage */}
-        {flightCard.baggageRows.map((row, rowIndex) => (
-          <div key={rowIndex} className={styles.flightExpandableRows}>
-            {row.map((item) => {
-              const key = `${flightCard.key}::${item.selectionKey}`;
-              return (
-                <ExtraBaggageItem
-                  key={key}
-                  image={item.image}
-                  weight={item.weight}
-                  price={item.price}
-                  quantity={quantities[key] || 0}
-                  onIncrease={() => onIncrease(key)}
-                  onDecrease={() => onDecrease(key)}
-                />
-              );
-            })}
-          </div>
-        ))}
+        {hasExtraBaggage ? (
+          flightCard.baggageRows.map((row, rowIndex) => (
+            <div key={rowIndex} className={styles.flightExpandableRows}>
+              {row.map((item) => {
+                const key = `${flightCard.key}::${item.selectionKey}`;
+                return (
+                  <ExtraBaggageItem
+                    key={key}
+                    image={item.image}
+                    weight={item.weight}
+                    price={item.price}
+                    quantity={quantities[key] || 0}
+                    onIncrease={() => onIncrease(key)}
+                    onDecrease={() => onDecrease(key)}
+                  />
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <BaggageEmptyState />
+        )}
       </div>
     </div>
   );
@@ -300,6 +306,8 @@ const MobileFlightCard = ({
   onIncrease,
   onDecrease,
 }) => {
+  const hasExtraBaggage = flightCard.baggageRows.length > 0;
+
   return (
     <div className={styles.baggageMobileCard}>
       <div className={styles.flightExpandableHeader}>
@@ -316,29 +324,47 @@ const MobileFlightCard = ({
           <CabinBaggageInfo data={flightCard.includedBaggage?.cabin || cabinBagData} />
           <CabinBaggageInfo data={flightCard.includedBaggage?.checked || checkedBagData} />
         </div>
-        {flightCard.baggageRows.map((row, rowIndex) => (
-          <div key={rowIndex} className={styles.flightExpandableRows}>
-            {row.map((item) => {
-              const key = `${flightCard.key}::${item.selectionKey}`;
+        {hasExtraBaggage ? (
+          flightCard.baggageRows.map((row, rowIndex) => (
+            <div key={rowIndex} className={styles.flightExpandableRows}>
+              {row.map((item) => {
+                const key = `${flightCard.key}::${item.selectionKey}`;
 
-              return (
-                <ExtraBaggageItem
-                  key={key}
-                  image={item.image}
-                  weight={item.weight}
-                  price={item.price}
-                  quantity={quantities[key] || 0}
-                  onIncrease={() => onIncrease(key)}
-                  onDecrease={() => onDecrease(key)}
-                />
-              );
-            })}
-          </div>
-        ))}
+                return (
+                  <ExtraBaggageItem
+                    key={key}
+                    image={item.image}
+                    weight={item.weight}
+                    price={item.price}
+                    quantity={quantities[key] || 0}
+                    onIncrease={() => onIncrease(key)}
+                    onDecrease={() => onDecrease(key)}
+                  />
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <BaggageEmptyState />
+        )}
       </div>
     </div>
   );
 };
+
+const BaggageEmptyState = () => (
+  <div className={styles.emptyState}>
+    <div className={styles.emptyIcon}>
+      <img src="/icons/bag.svg" alt="" />
+    </div>
+    <div>
+      <h3 className={styles.emptyTitle}>Extra baggage not available</h3>
+      <p className={styles.emptyText}>
+        This flight does not provide pre-bookable extra baggage. Included baggage is shown above.
+      </p>
+    </div>
+  </div>
+);
 
 /* ================== MAIN COMPONENT ================== */
 
@@ -368,9 +394,11 @@ const BaggageDetails = () => {
     const newBaggageList = [];
     Object.entries(quantities).forEach(([key, qty]) => {
       if (qty > 0) {
-        const selectionKey = key.split("::").slice(1).join("::");
-        const matchedItem = routeCards
-          .flatMap((card) => card.baggageRows.flat())
+        const [segment, ...selectionParts] = key.split("::");
+        const selectionKey = selectionParts.join("::");
+        const route = routeCards.find((card) => card.key === segment);
+        const matchedItem = route?.baggageRows
+          .flat()
           .find((item) => item.selectionKey === selectionKey);
 
         const info = matchedItem || null;
@@ -379,6 +407,7 @@ const BaggageDetails = () => {
             newBaggageList.push({
               ...info,
               id: `${key}-${i}`, // unique id
+              segment,
               label: `Extra Baggage ${info.weight}`,
             });
           }
@@ -390,12 +419,14 @@ const BaggageDetails = () => {
 
   const increaseQty = useCallback((key) => {
     setQuantities((prev) => {
-      const totalSelected = Object.values(prev).reduce(
-        (sum, qty) => sum + Number(qty || 0),
+      const segment = key.split("::")[0];
+      const segmentSelected = Object.entries(prev).reduce(
+        (sum, [entryKey, qty]) =>
+          entryKey.startsWith(`${segment}::`) ? sum + Number(qty || 0) : sum,
         0
       );
 
-      if (totalSelected >= baggageSelectionLimit) {
+      if (segmentSelected >= baggageSelectionLimit) {
         toast.info(`Extra baggage can be added for up to ${baggageSelectionLimit} passenger(s).`, {
           toastId: "baggage-passenger-limit",
         });
