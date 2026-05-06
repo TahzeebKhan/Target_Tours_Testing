@@ -104,7 +104,7 @@ const TopFilterSection = ({
     setSelectedFareTypes,
   } = useTripType();
   const [openCalendarFor, setOpenCalendarFor] = useState(null);
-  const [directOnly, setDirectOnly] = useState(true);
+  const [directOnly, setDirectOnly] = useState(false);
   const isScrolled = parentScrolled || false;
   // const [showCalendar, setShowCalendar] = useState(false);
   const [activeMultiIndex, setActiveMultiIndex] = useState(null);

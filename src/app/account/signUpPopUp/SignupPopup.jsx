@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
+import { Eye, EyeOff } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -22,6 +23,8 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [otpVerifyLoading, setOtpVerifyLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -349,14 +352,24 @@ export default function SignupPopup({ onNavigate, onClose }) {
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Enter password</label>
-                <input
-                  type="password"
-                  className={`${styles.input} ${
-                    passwordError ? styles.error : ""
-                  }`}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className={styles.passwordInputWrap}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className={`${styles.input} ${styles.passwordInput} ${
+                      passwordError ? styles.error : ""
+                    }`}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.passwordToggle}
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
 
                 {passwordError && (
                   <p style={{ color: "red", fontSize: "12px" }}>
@@ -367,14 +380,24 @@ export default function SignupPopup({ onNavigate, onClose }) {
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Confirm password</label>
-                <input
-                  type="password"
-                  className={`${styles.input} ${
-                    confirmPasswordError ? styles.error : ""
-                  }`}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <div className={styles.passwordInputWrap}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`${styles.input} ${styles.passwordInput} ${
+                      confirmPasswordError ? styles.error : ""
+                    }`}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.passwordToggle}
+                    onClick={() => setShowConfirmPassword((current) => !current)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
 
                 {confirmPasswordError && (
                   <p style={{ color: "red", fontSize: "12px" }}>
