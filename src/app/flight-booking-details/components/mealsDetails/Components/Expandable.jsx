@@ -102,6 +102,13 @@ const MealItem = ({
     onIncrease,
     onDecrease,
 }) => {
+    const normalizedTag = String(tag || "").toLowerCase();
+    const tagClassName = normalizedTag.includes("non veg")
+        ? styles.tagNonVeg
+        : normalizedTag.includes("veg")
+            ? styles.tagVeg
+            : styles.tagOther;
+
     return (
         <div className={styles.Itemwrapper}>
             {/* Image */}
@@ -116,7 +123,7 @@ const MealItem = ({
 
                     <div className={styles.priceRow}>
                         <span className={styles.price}>₹ {price}</span>
-                        {tag && <span className={styles.tag}>{tag}</span>}
+                        {tag && <span className={`${styles.tag} ${tagClassName}`}>{tag}</span>}
                     </div>
                 </div>
 

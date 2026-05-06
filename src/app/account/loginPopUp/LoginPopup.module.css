@@ -124,6 +124,37 @@
   line-height: 24px;
   letter-spacing: -0.02em;
 }
+
+.passwordInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: rgba(65, 70, 81, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.passwordToggle:hover {
+  color: rgba(0, 0, 51, 1);
+}
+
 .error {
   border: 1px solid red;
 }

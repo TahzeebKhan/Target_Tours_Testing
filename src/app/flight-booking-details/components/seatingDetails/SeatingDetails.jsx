@@ -8,6 +8,7 @@ import Mobile_footer from "@/app/flight-booking-details/mobileViewComponents/sea
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 const rowData = [
   { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
   { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
@@ -305,6 +306,7 @@ const SeatingDetails = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [totalSeatPrice, setTotalSeatPrice]= useState(0);
   const seatLayoutsScrollerRef = useRef(null);
+  const [activeSeatLayoutIndex, setActiveSeatLayoutIndex] = useState(0);
   const [seatNavState, setSeatNavState] = useState({
     canScrollPrevious: false,
     canScrollNext: false,
@@ -348,18 +350,38 @@ const SeatingDetails = () => {
       ),
     [seatLayoutGroups]
   );
-  const seatingFlight = bookingDetailsView?.departureFlight || {};
+  const activeSeatLayout =
+    seatLayoutGroups[activeSeatLayoutIndex] || seatLayoutGroups[0] || {};
+  const activeSeatPrefix = activeSeatLayout?.prefix || "";
+  const activeSelectedSeats = useMemo(
+    () =>
+      activeSeatPrefix
+        ? selectedSeats.filter((seatId) => seatId?.startsWith(activeSeatPrefix))
+        : selectedSeats.filter(Boolean),
+    [activeSeatPrefix, selectedSeats]
+  );
+  const activeSeatPrice = useMemo(
+    () =>
+      activeSelectedSeats.reduce((sum, seatId) => {
+        const seat = seatsById[seatId] || {};
+        return sum + Number(seat.price || 0);
+      }, 0),
+    [activeSelectedSeats, seatsById]
+  );
+  const seatingFlight =
+    [
+      bookingDetailsView?.departureFlight,
+      bookingDetailsView?.returnFlight,
+    ][activeSeatLayoutIndex] ||
+    bookingDetailsView?.departureFlight ||
+    {};
   const seatingAirline = seatingFlight?.airline || {};
-  const routeLabel = [
-    bookingDetailsView?.header?.fromCode,
-    bookingDetailsView?.header?.toCode,
-  ]
-    .filter(Boolean)
-    .join("–");
-  const flightDate = formatSeatingDate(
+  const routeLabel = String(activeSeatLayout?.routeLabel || "")
+    .replace(/-/g, "–");
+  const flightDate = activeSeatLayout?.date || formatSeatingDate(
     seatingFlight?.departure?.date || bookingDetailsView?.header?.date || "N/A"
   );
-  const flightTimeRange = [
+  const flightTimeRange = activeSeatLayout?.timeRange || [
     seatingFlight?.departure?.time,
     seatingFlight?.arrival?.time,
   ]
@@ -372,8 +394,11 @@ const SeatingDetails = () => {
     .filter(Boolean)
     .join(" ");
   const aircraftLabel = seatingFlight?.aircraft || "N/A";
-  const airlineLogo =
-    seatingAirline?.logo || "/images/flightCompanyLogos/batikAirlines2.png";
+  const airlineLogo = resolveAirlineLogo({
+    name: seatingAirline?.name,
+    code: seatingAirline?.code,
+    logo: seatingAirline?.logo,
+  });
 
 
   const passengerList = useMemo(() => {
@@ -470,10 +495,29 @@ const SeatingDetails = () => {
       canScrollPrevious: scroller.scrollLeft > 2,
       canScrollNext: scroller.scrollLeft < maxScrollLeft - 2,
     });
+
+    const panels = Array.from(scroller.children || []);
+    if (panels.length) {
+      const nextActiveIndex = panels.reduce(
+        (closest, panel, index) => {
+          const distance = Math.abs(panel.offsetLeft - scroller.scrollLeft);
+          return distance < closest.distance ? { index, distance } : closest;
+        },
+        { index: 0, distance: Number.POSITIVE_INFINITY }
+      ).index;
+
+      setActiveSeatLayoutIndex(nextActiveIndex);
+    }
   };
 
   useEffect(() => {
     updateSeatNavState();
+  }, [seatLayoutGroups.length]);
+
+  useEffect(() => {
+    setActiveSeatLayoutIndex((current) =>
+      Math.min(current, Math.max(seatLayoutGroups.length - 1, 0))
+    );
   }, [seatLayoutGroups.length]);
 
   return (
@@ -523,7 +567,7 @@ const SeatingDetails = () => {
             </div>
             <div className={styles.flightSeatingPrice}>
               <div className={styles.priceContainer}>
-              {prices.seats ?  <span className={styles.price}> ₹ {prices?.seats} </span> :
+              {activeSeatPrice > 0 ?  <span className={styles.price}> ₹ {activeSeatPrice} </span> :
               <span className={styles.selectionPending}> Selection Pending</span> }
                 {/* <span className={styles.price}>{prices.seats ?  ` ₹ ${prices.seats}` : " Selection Pending"}</span> */}
                 <span className={styles.subInfoText}>Added to fare</span>
@@ -616,7 +660,7 @@ const SeatingDetails = () => {
                     </div>
 
                     {passengerList.map((passenger, index) => {
-                      const seat = selectedSeats[index] || null;
+                      const seat = activeSelectedSeats[index] || null;
 
                       return (
                         <div

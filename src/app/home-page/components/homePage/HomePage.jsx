@@ -144,7 +144,7 @@ const HomePage = ({
   onReady,
   setIsMultiTripMobile,
 }) => {
-  const [directOnly, setDirectOnly] = useState(true);
+  const [directOnly, setDirectOnly] = useState(false);
   const [tripType, setTripType] = useState("round");
   const [bookingType, setBookingType] = useState("flight");
   const [menuOpen, setMenuOpen] = useState(false);

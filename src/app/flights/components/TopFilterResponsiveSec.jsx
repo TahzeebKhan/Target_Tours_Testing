@@ -58,7 +58,7 @@ const TopFilterResponsiveSec = () => {
         selectedFareTypes,
         setSelectedFareTypes,
     } = useTripType();
-    const [directOnly, setDirectOnly] = useState(true);
+    const [directOnly, setDirectOnly] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
     const [activeMultiIndex, setActiveMultiIndex] = useState(null);
