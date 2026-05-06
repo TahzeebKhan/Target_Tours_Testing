@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/plane";
@@ -139,9 +139,7 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
   const formatted =
     seatLayoutResponse?.data?.formatted ||
     seatLayoutResponse?.formatted ||
-    null;
-
-  if (!formatted) return { rows: rowData, seatsById: {} };
+    seatLayoutResponse;
 
   const seats = findSeatArray(formatted);
   if (!seats.length) return { rows: rowData, seatsById: {} };
@@ -191,6 +189,104 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
   };
 };
 
+const unwrapSeatLayoutPayload = (seatLayoutResponse) =>
+  seatLayoutResponse?.data?.raw ||
+  seatLayoutResponse?.raw ||
+  seatLayoutResponse?.data?.data?.raw ||
+  seatLayoutResponse?.data ||
+  seatLayoutResponse ||
+  {};
+
+const getSeatLayoutJourneys = (seatLayoutResponse) => {
+  const payload = unwrapSeatLayoutPayload(seatLayoutResponse);
+  const formatted =
+    seatLayoutResponse?.data?.formatted ||
+    seatLayoutResponse?.formatted ||
+    payload?.formatted ||
+    {};
+  const formattedJourneys =
+    formatted?.journeys || formatted?.Journeys || formatted?.Journey;
+
+  if (Array.isArray(formattedJourneys) && formattedJourneys.length) {
+    return formattedJourneys;
+  }
+
+  const trips = Array.isArray(payload?.Trips)
+    ? payload.Trips
+    : Array.isArray(payload?.trips)
+      ? payload.trips
+      : [];
+  const journeys = trips.flatMap((trip) => {
+    const tripJourneys = trip?.Journey || trip?.Journeys || trip?.journey || trip?.journeys;
+    return Array.isArray(tripJourneys) ? tripJourneys : tripJourneys ? [tripJourneys] : [];
+  });
+
+  return journeys.length ? journeys : [seatLayoutResponse];
+};
+
+const getJourneyRouteLabel = (journey, fallback = "") => {
+  const route =
+    journey?.OriginDestination ||
+    journey?.originDestination ||
+    journey?.Route ||
+    journey?.route ||
+    [journey?.Origin, journey?.Destination].filter(Boolean).join("-");
+
+  return String(route || fallback || "N/A").toUpperCase();
+};
+
+const buildSeatLayoutGroups = (seatLayoutResponse, bookingDetailsView) => {
+  const journeys = getSeatLayoutJourneys(seatLayoutResponse);
+  const fallbackFlights = [
+    bookingDetailsView?.departureFlight,
+    bookingDetailsView?.returnFlight,
+  ];
+
+  return journeys.map((journey, index) => {
+    const { rows, seatsById } = buildFormattedSeatRows(journey);
+    const prefix = `journey-${index + 1}:`;
+    const fallbackFlight = fallbackFlights[index] || fallbackFlights[0] || {};
+    const fallbackRoute = [
+      index === 1 ? bookingDetailsView?.header?.toCode : bookingDetailsView?.header?.fromCode,
+      index === 1 ? bookingDetailsView?.header?.fromCode : bookingDetailsView?.header?.toCode,
+    ]
+      .filter(Boolean)
+      .join("-");
+
+    return {
+      id: `journey-${index + 1}`,
+      prefix,
+      rows,
+      seatsById: Object.fromEntries(
+        Object.entries(seatsById).map(([seatId, seat]) => [
+          `${prefix}${seatId}`,
+          {
+            ...seat,
+            id: `${prefix}${seatId}`,
+            seatNumber: seat?.seatNumber || seatId,
+            journeyIndex: index,
+            journeyLabel: getJourneyRouteLabel(journey, fallbackRoute),
+          },
+        ])
+      ),
+      routeLabel: getJourneyRouteLabel(journey, fallbackRoute),
+      date: formatSeatingDate(
+        journey?.DepartureTime ||
+          journey?.departureTime ||
+          fallbackFlight?.departure?.date ||
+          bookingDetailsView?.header?.date ||
+          "N/A"
+      ),
+      timeRange: [
+        fallbackFlight?.departure?.time,
+        fallbackFlight?.arrival?.time,
+      ]
+        .filter(Boolean)
+        .join(" - "),
+    };
+  });
+};
+
 const formatSeatingDate = (value) => {
   if (!value || value === "N/A") return "N/A";
   const date = new Date(value);
@@ -208,6 +304,11 @@ const SeatingDetails = () => {
   const [selectedPassenger, setSelectedPassenger] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [totalSeatPrice, setTotalSeatPrice]= useState(0);
+  const seatLayoutsScrollerRef = useRef(null);
+  const [seatNavState, setSeatNavState] = useState({
+    canScrollPrevious: false,
+    canScrollNext: false,
+  });
 
 
 
@@ -227,13 +328,25 @@ const SeatingDetails = () => {
     seatLayoutLoading,
   } = useFlightBooking();
 
-  const { rows: seatRows, seatsById } = useMemo(
-    () => buildFormattedSeatRows(bookingSession?.seatLayoutResponse),
-    [bookingSession?.seatLayoutResponse]
-  );
   const bookingDetailsView = useMemo(
     () => getBookingDetailsView(bookingSession || {}),
     [bookingSession]
+  );
+  const seatLayoutGroups = useMemo(
+    () =>
+      buildSeatLayoutGroups(
+        bookingSession?.seatLayoutResponse,
+        bookingDetailsView
+      ),
+    [bookingDetailsView, bookingSession?.seatLayoutResponse]
+  );
+  const seatsById = useMemo(
+    () =>
+      seatLayoutGroups.reduce(
+        (acc, layout) => ({ ...acc, ...layout.seatsById }),
+        {}
+      ),
+    [seatLayoutGroups]
   );
   const seatingFlight = bookingDetailsView?.departureFlight || {};
   const seatingAirline = seatingFlight?.airline || {};
@@ -282,9 +395,13 @@ const SeatingDetails = () => {
   );
 
   useEffect(() => {
-    setSelectedSeats((prev) => prev.filter(Boolean).slice(0, passengerCount));
+    setSelectedSeats((prev) =>
+      prev
+        .filter(Boolean)
+        .slice(0, passengerCount * Math.max(seatLayoutGroups.length, 1))
+    );
     setSelectedPassenger((prev) => Math.min(prev, passengerCount) || 1);
-  }, [passengerCount]);
+  }, [passengerCount, seatLayoutGroups.length]);
 
   useEffect(() => {
     setSeats(
@@ -295,7 +412,7 @@ const SeatingDetails = () => {
           return {
             ...seat,
             id: seatId,
-            seatNumber: seatId,
+            seatNumber: seat?.seatNumber || String(seatId).split(":").pop(),
             price: seat.price || 0,
           };
         })
@@ -305,24 +422,59 @@ const SeatingDetails = () => {
 
 
 
-  const toggleSeat = (rowId, colLabel, type) => {
+  const toggleSeat = (rowId, colLabel, type, seatIdPrefix = "") => {
     if (type === "taken") return;
-    const seatId = `${rowId}-${colLabel}`;
+    const seatId = `${seatIdPrefix}${rowId}-${colLabel}`;
+    const journeySelectedCount = (seatIdPrefix
+      ? selectedSeats.filter((id) => id.startsWith(seatIdPrefix))
+      : selectedSeats
+    ).length;
 
     setSelectedSeats((prev) => {
       const selectedSeatIds = prev.filter(Boolean);
+      const selectedForJourney = seatIdPrefix
+        ? selectedSeatIds.filter((id) => id.startsWith(seatIdPrefix))
+        : selectedSeatIds;
 
       if (selectedSeatIds.includes(seatId)) {
         return selectedSeatIds.filter((id) => id !== seatId);
       }
 
-      if (selectedSeatIds.length >= passengerCount) {
+      if (selectedForJourney.length >= passengerCount || journeySelectedCount >= passengerCount) {
         return selectedSeatIds;
       }
 
       return [...selectedSeatIds, seatId];
     });
   };
+
+  const scrollSeatLayouts = (direction) => {
+    const scroller = seatLayoutsScrollerRef.current;
+    if (!scroller) return;
+
+    scroller.scrollBy({
+      left: direction * Math.max(scroller.clientWidth - 80, 320),
+      behavior: "smooth",
+    });
+  };
+
+  const updateSeatNavState = () => {
+    const scroller = seatLayoutsScrollerRef.current;
+    if (!scroller) {
+      setSeatNavState({ canScrollPrevious: false, canScrollNext: false });
+      return;
+    }
+
+    const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+    setSeatNavState({
+      canScrollPrevious: scroller.scrollLeft > 2,
+      canScrollNext: scroller.scrollLeft < maxScrollLeft - 2,
+    });
+  };
+
+  useEffect(() => {
+    updateSeatNavState();
+  }, [seatLayoutGroups.length]);
 
   return (
     <>
@@ -397,13 +549,50 @@ const SeatingDetails = () => {
                   Select Seat On Map
                   {seatLayoutLoading ? "..." : ""}
                 </div>
-                <Plane
-                  callFromDesktop={true}
-                  toggleSeat={toggleSeat}
-                  selectedSeats={selectedSeats}
-                  setSelectedSeats={setSelectedSeats}
-                  rowData={seatRows}
-                />
+                {seatNavState.canScrollPrevious && (
+                  <button
+                    type="button"
+                    className={`${styles.seatNavButton} ${styles.seatNavPrevious}`}
+                    onClick={() => scrollSeatLayouts(-1)}
+                    aria-label="Previous flight seats"
+                  >
+                    {"<"}
+                  </button>
+                )}
+                <div
+                  className={styles.seatLayoutsScroller}
+                  ref={seatLayoutsScrollerRef}
+                  onScroll={updateSeatNavState}
+                >
+                  {seatLayoutGroups.map((layout) => (
+                    <div key={layout.id} className={styles.seatJourneyPanel}>
+                      <div className={styles.seatJourneyHeader}>
+                        <span>{layout.routeLabel}</span>
+                        <small>
+                          {[layout.date, layout.timeRange].filter(Boolean).join(" • ")}
+                        </small>
+                      </div>
+                      <Plane
+                        callFromDesktop={true}
+                        toggleSeat={toggleSeat}
+                        selectedSeats={selectedSeats}
+                        setSelectedSeats={setSelectedSeats}
+                        rowData={layout.rows}
+                        seatIdPrefix={layout.prefix}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {seatNavState.canScrollNext && (
+                  <button
+                    type="button"
+                    className={`${styles.seatNavButton} ${styles.seatNavNext}`}
+                    onClick={() => scrollSeatLayouts(1)}
+                    aria-label="Next flight seats"
+                  >
+                    {">"}
+                  </button>
+                )}
               </div>
               <div className={styles.flightSeatingRight}>
                 <div className={styles.flightSeatingSubRight}>
@@ -449,7 +638,9 @@ const SeatingDetails = () => {
                             </p>
                             <p className={styles.passengerSeatSub}>
                               {passenger.name} •{" "}
-                              {seat ? `Seat ${seat}` : "No seat selected"}
+                              {seat
+                                ? `Seat ${String(seat).split(":").pop()}`
+                                : "No seat selected"}
                             </p>
                           </div>
                         </div>
@@ -514,7 +705,8 @@ const SeatingDetails = () => {
           toggleSeat={toggleSeat}
           selectedSeats={selectedSeats}
           setSelectedSeats={setSelectedSeats}
-          rowData={seatRows}
+          rowData={seatLayoutGroups[0]?.rows || rowData}
+          seatIdPrefix={seatLayoutGroups[0]?.prefix || ""}
         />
         <BelowPlane />
 

@@ -29,9 +29,7 @@ const truncate = (str) => {
 const passengerTypes = [
   "REGULAR",
   "SENIOR CITIZEN",
-  "STUDENT",
-  "ARMED FORCES",
-  "MEDICAL PROFESSIONAL",
+  "STUDENT"
 ];
 
 const PencilIcon = () => {

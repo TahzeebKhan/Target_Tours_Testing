@@ -27,8 +27,7 @@ const passengerTypes = [
     "REGULAR",
     "SENIOR CITIZEN",
     "STUDENT",
-    "ARMED FORCES",
-    "MEDICAL PROFESSIONAL",
+
 ];
 
 const TopFilterResponsiveSec = () => {

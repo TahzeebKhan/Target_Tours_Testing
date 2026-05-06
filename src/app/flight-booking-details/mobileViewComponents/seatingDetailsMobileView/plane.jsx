@@ -10,13 +10,14 @@ const Plane = ({
   selectedSeats,
   setSelectedSeats,
   toggleSeat,
+  seatIdPrefix = "",
 }) => {
   // Mapping of seats to colors/states based on the provided image
 
   const renderSeat = (type, rowId, index, side) => {
     const labels = side === "left" ? ["A", "B", "C"] : ["D", "E", "F"];
     const label = labels[index];
-    const seatId = `${rowId}-${label}`;
+    const seatId = `${seatIdPrefix}${rowId}-${label}`;
     const isActive = selectedSeats.includes(seatId);
 
     return (
@@ -25,7 +26,7 @@ const Plane = ({
         className={`${styles.seat} ${styles[type]} ${styles.seatDesktop}  ${
           isActive ? styles.active : ""
         }`}
-        onClick={() => toggleSeat(rowId, label, type)}
+        onClick={() => toggleSeat(rowId, label, type, seatIdPrefix)}
       >
         {type === "taken" && (
           <span className={styles.icon}>
