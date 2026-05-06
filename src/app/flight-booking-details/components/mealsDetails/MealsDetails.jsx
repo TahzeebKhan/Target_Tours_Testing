@@ -151,7 +151,9 @@ const MealsDetails = () => {
       const requestedQty = Math.max(0, newQty);
       const selectedTotal = Object.entries(prev).reduce(
         (sum, [entryKey, qty]) =>
-          sum + (entryKey === key ? 0 : Number(qty || 0)),
+          entryKey.startsWith(`${segment}::`) && entryKey !== key
+            ? sum + Number(qty || 0)
+            : sum,
         0
       );
 

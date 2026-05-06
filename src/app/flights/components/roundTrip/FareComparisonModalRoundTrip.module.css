@@ -11,6 +11,7 @@
   justify-content: center;
   z-index: 9999;
   padding: 20px;
+  overflow: hidden;
 }
 
 /* Modal Content */
@@ -18,7 +19,9 @@
   background: white;
   max-width: 1200px;
   width: 100%;
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   position: relative;
 }
 
@@ -641,7 +644,7 @@
 }
 
 .bookNowBtn {
-  max-width: 156px;
+  /* max-width: 156px; */
   width: 100%;
   padding: 12px 24px;
   font-family: var(--font-inter);

@@ -365,7 +365,7 @@ const FareComparisonModalMulticity = ({ isOpen, onClose, flightData }) => {
                 </div>
                 {/* Action Buttons */}
                 <div className={styles.fareActions}>
-                  <button className={styles.lockPriceBtn}>LOCK PRICE</button>
+                  {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
                   <button className={styles.bookNowBtn} onClick={handleBookNow}>
                     BOOK NOW
                   </button>

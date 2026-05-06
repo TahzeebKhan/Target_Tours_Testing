@@ -455,7 +455,7 @@ const FareComparisonModalRoundTrip = ({
     : [];
   const showEmptyFareOptions =
     hasResolvedFareOptions && !isFareOptionsLoading && fares.length === 0;
-  useLockBodyScroll();
+  useLockBodyScroll(isOpen);
   if (!isOpen) return null;
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -678,7 +678,7 @@ const FareComparisonModalRoundTrip = ({
                 </div>
                 {/* Action Buttons */}
                 <div className={styles.fareActions}>
-                  <button className={styles.lockPriceBtn}>LOCK PRICE</button>
+                  {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
                   <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>
                     {getBookNowLabel()}
                   </button>

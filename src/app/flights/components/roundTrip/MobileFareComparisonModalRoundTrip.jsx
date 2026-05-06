@@ -617,7 +617,7 @@ const MobileFareComparisonModalRoundTrip = ({
               </div>
               {/* Action Buttons */}
               <div className={styles.fareActions}>
-                <button className={styles.lockPriceBtn}>LOCK PRICE</button>
+                {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
                 <button onClick={() => handleBookNow(fare)} className={styles.bookNowBtn} disabled={isSubmitting}>
                   {getBookNowLabel()}
                 </button>
