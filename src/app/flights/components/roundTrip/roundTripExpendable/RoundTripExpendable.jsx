@@ -815,8 +815,16 @@ const RoundTripExpendable = ({
 
         {activeTab === "fare" && (
           <div className={styles.flightFareContaienr}>
-            <FlightFare />
-            <FlightFare />
+            <FlightFare
+              flightData={flightData}
+              leg={flightData?.depart}
+              tripIndex={0}
+            />
+            <FlightFare
+              flightData={flightData}
+              leg={flightData?.return}
+              tripIndex={1}
+            />
           </div>
         )}
 

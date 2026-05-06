@@ -10,10 +10,22 @@ import PayWithOptions from "./components/PayWithOptions";
 import BookingSuccessModal from "./components/BookingSuccessModal";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
 const formatSummaryDuration = (duration = {}) =>
   `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
+
+const getDynamicAirlineLogo = (airline = {}) =>
+  resolveAirlineLogo({
+    name: airline?.name,
+    code: airline?.carrierCode || airline?.code || airline?.flightNo,
+    logo:
+      airline?.logo === "/images/Flight.png" ||
+      airline?.logo === "/images/AirlineLogos.png"
+        ? ""
+        : airline?.logo,
+  });
 
 const buildTripCardData = (flight, selectedFare) => {
   if (!flight) return null;
@@ -23,7 +35,7 @@ const buildTripCardData = (flight, selectedFare) => {
       name: flight.airline?.name || "N/A",
       code: flight.airline?.code || "N/A",
       aircraft: flight.aircraft || "N/A",
-      logo: flight.airline?.logo || "/images/Flight.png",
+      logo: getDynamicAirlineLogo(flight.airline),
     },
     fareType: selectedFare?.name || flight.flexiPlusFare || "N/A",
     cabin: String(flight.travelClass || "N/A").toUpperCase(),
@@ -170,7 +182,7 @@ const PaymentPage = () => {
               >
                 <div className={styles.left}>
                   <img
-                    src={summaryFlight?.airline?.logo || "/images/Flight.png"}
+                    src={getDynamicAirlineLogo(summaryFlight?.airline)}
                     alt="Airline Logo"
                     className={styles.logo}
                   />

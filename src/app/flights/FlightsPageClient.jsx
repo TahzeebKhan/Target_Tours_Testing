@@ -349,11 +349,14 @@ const FlightsPageClient = () => {
     const hasAircrafts =
       Array.isArray(mergedFilterData?.aircrafts) &&
       mergedFilterData.aircrafts.length > 0;
+    const hasAirlines =
+      Array.isArray(mergedFilterData?.airlines) &&
+      mergedFilterData.airlines.length > 0;
     const hasPriceBounds =
       Number.isFinite(mergedFilterData.price_min) &&
       Number.isFinite(mergedFilterData.price_max);
 
-    if (hasValidSlots || hasAircrafts || hasPriceBounds) {
+    if (hasValidSlots || hasAircrafts || hasAirlines || hasPriceBounds) {
       const nextSerialized = JSON.stringify(mergedFilterData);
       if (lastApiFilterDataRef.current === nextSerialized) return;
 

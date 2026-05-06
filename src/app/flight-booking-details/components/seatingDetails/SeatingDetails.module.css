@@ -215,6 +215,7 @@
   border: 1px solid #e4e6e8;
   max-height: 620px;
   overflow-y: auto;
+  position: relative;
   background: #f2f3f7;
   padding: 19px 22px;
   max-width: 566px;
@@ -224,6 +225,81 @@
   flex-direction: column;
   align-items: center;
 }
+
+.seatLayoutsScroller {
+  width: 100%;
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  scroll-snap-type: x proximity;
+}
+
+.seatLayoutsScroller::-webkit-scrollbar {
+  height: 8px;
+}
+
+.seatLayoutsScroller::-webkit-scrollbar-thumb {
+  background: #c7d2e0;
+  border-radius: 999px;
+}
+
+.seatNavButton {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #dbe2eb;
+  background: #ffffff;
+  color: #070773;
+  font-family: var(--font-inter);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+  transform: translateY(-50%);
+}
+
+.seatNavPrevious {
+  left: 12px;
+}
+
+.seatNavNext {
+  right: 12px;
+}
+
+.seatJourneyPanel {
+  min-width: 492px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: start;
+}
+
+.seatJourneyHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 12px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: #1a2029;
+}
+
+.seatJourneyHeader span {
+  font-weight: 600;
+}
+
+.seatJourneyHeader small {
+  color: #5b6574;
+  font-size: 12px;
+  text-align: right;
+}
+
 .selectSeatsTitle {
   font-family: var(--font-inter);
   font-weight: 500;

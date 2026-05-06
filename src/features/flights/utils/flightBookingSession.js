@@ -628,6 +628,10 @@ export const buildSeatLayoutPayload = (session) => {
   const ssrRaw = ssrPayload?.raw || ssrResponse?.raw || {};
   const ssrFormatted = ssrPayload?.formatted || ssrResponse?.formatted || {};
   const rootTui = pickFirst(
+    priceResponse?.data?.raw?.TUI,
+    priceResponse?.data?.raw?.tui,
+    priceResponse?.raw?.TUI,
+    priceResponse?.raw?.tui,
     priceResponse?.data?.tui,
     priceResponse?.data?.TUI,
     priceResponse?.tui,
@@ -655,7 +659,7 @@ export const buildSeatLayoutPayload = (session) => {
     ),
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
     Trips: (seatTrips.length > 0 ? seatTrips : [primaryTrip]).map((trip, index) => ({
-      TUI: pickFirst(trip?.TUI, trip?.tui, rootTui, ""),
+      TUI: pickFirst(rootTui, trip?.TUI, trip?.tui, ""),
       Index: "",
       OrderID: String(index + 1),
     })),

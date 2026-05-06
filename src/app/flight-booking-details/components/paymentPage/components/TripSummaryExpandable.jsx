@@ -3,6 +3,19 @@ import styles from "./TripSummaryExpandable.module.css";
 import TravelInsuranceOption from "../../passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
 import FlightSection from "@/app/flight-booking-details/mobileViewComponents/components/FlightSection/FlightSection";
 import CancellationPenalty from "../../passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
+
+const GENERIC_FLIGHT_LOGOS = new Set([
+  "/images/Flight.png",
+  "/images/AirlineLogos.png",
+]);
+
+const getResolvedLogo = (airline = {}) =>
+  resolveAirlineLogo({
+    name: airline?.name,
+    code: airline?.carrierCode || airline?.code || airline?.flightNo,
+    logo: GENERIC_FLIGHT_LOGOS.has(airline?.logo) ? "" : airline?.logo,
+  });
 
 const FlightIcon = () => (
   <svg
@@ -318,7 +331,7 @@ const FlightBlock = ({ data, showReturnLabel = false }) => {
         <div className={styles.flightHeader}>
           <div className={styles.airlineLeft}>
             <img
-              src={airline.logo}
+              src={getResolvedLogo(airline)}
               alt={airline.name}
               className={styles.airlineLogo}
             />

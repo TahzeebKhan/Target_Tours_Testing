@@ -2,12 +2,12 @@
 import { useContext, useState } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
-import Image from "next/image";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "./SVGFile";
 import { SidebarContext } from "../SidebarContext";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { useTripType } from "../TripTypeContext";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const FALLBACK_PRICE_RANGE = [0, 1000000];
 
@@ -128,6 +128,46 @@ export default function FlightFilters() {
 
   const aircraftOptions =
     apiAircraftOptions.length > 0 ? apiAircraftOptions : fallbackAircraftOptions;
+
+  const fallbackAirlineOptions = [
+    { key: "IndiGo", label: "IndiGo", logo: "/images/indigo.svg" },
+    { key: "Air India", label: "Air India", logo: "/images/airindia.svg" },
+    {
+      key: "Air India Express",
+      label: "Air India Express",
+      logo: "/images/airindiaexpress.svg",
+    },
+    { key: "AkasaAir", label: "AkasaAir", logo: "/images/akasaair.svg" },
+    { key: "SpiceJet", label: "SpiceJet", logo: "/images/spicejet.svg" },
+  ];
+
+  const apiAirlineOptions = Array.isArray(apiFilterData?.airlines)
+    ? apiFilterData.airlines
+        .map((item) => {
+          const name =
+            typeof item === "string"
+              ? item
+              : item?.name || item?.airline || item?.label || "";
+          const code =
+            typeof item === "string" ? "" : item?.code || item?.id || item?.airline_code || "";
+          const label = String(name || code || "").trim();
+          if (!label) return null;
+
+          return {
+            key: label,
+            label,
+            logo: resolveAirlineLogo({
+              name: label,
+              code,
+              logo: typeof item === "string" ? "" : item?.logo,
+            }),
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  const airlineOptions =
+    apiAirlineOptions.length > 0 ? apiAirlineOptions : fallbackAirlineOptions;
 
   return (
     <aside className={styles.sidebar}>
@@ -526,105 +566,31 @@ export default function FlightFilters() {
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Preferred Airline
         </h4>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.airlines["IndiGo"]}
-            onChange={() => toggleMapCheckbox("airlines", "IndiGo")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          <div className={styles.airlineLogoDiv}>
-            <Image
-              src="/images/indigo.svg"
-              alt="IndiGo"
-              width={16}
-              height={16}
+        {airlineOptions.map((airline, index) => (
+          <label
+            key={airline.key}
+            style={index === airlineOptions.length - 1 ? { marginBottom: 0 } : undefined}
+            className={styles.checkbox}
+          >
+            <input
+              type="checkbox"
+              checked={!!filters.airlines[airline.key]}
+              onChange={() => toggleMapCheckbox("airlines", airline.key)}
             />
-            <span>IndiGo</span>
-          </div>
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.airlines["AirIndia"]}
-            onChange={() => toggleMapCheckbox("airlines", "AirIndia")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          <div className={styles.airlineLogoDiv}>
-            <Image
-              src="/images/airindia.svg"
-              alt="Air India"
-              width={16}
-              height={16}
-            />
-            <span>Air India</span>
-          </div>
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.airlines["AirIndiaExpress"]}
-            onChange={() => toggleMapCheckbox("airlines", "AirIndiaExpress")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          <div className={styles.airlineLogoDiv}>
-            <Image
-              src="/images/airindiaexpress.svg"
-              alt="Air India Express"
-              width={16}
-              height={16}
-            />
-            <span>Air India Express</span>
-          </div>
-        </label>
-
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.airlines["AkasaAir"]}
-            onChange={() => toggleMapCheckbox("airlines", "AkasaAir")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          <div className={styles.airlineLogoDiv}>
-            <Image
-              src="/images/akasaair.svg"
-              alt="Akasa Air"
-              width={16}
-              height={16}
-            />
-            <span>AkasaAir</span>
-          </div>
-        </label>
-
-        <label style={{ marginBottom: 0 }} className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={!!filters.airlines["SpiceJet"]}
-            onChange={() => toggleMapCheckbox("airlines", "SpiceJet")}
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          <div className={styles.airlineLogoDiv}>
-            <Image
-              src="/images/spicejet.svg"
-              alt="SpiceJet"
-              width={16}
-              height={16}
-            />
-            <span>SpiceJet</span>
-          </div>
-        </label>
+            <span className={styles.customCheckbox}>
+              <span className={styles.checkIcon}></span>
+            </span>
+            <div className={styles.airlineLogoDiv}>
+              <img
+                src={airline.logo}
+                alt={airline.label}
+                width={16}
+                height={16}
+              />
+              <span>{airline.label}</span>
+            </div>
+          </label>
+        ))}
       </section>
       <div className={styles.actionBar}>
         <button onClick={resetFilters} className={styles.resetBtn}>
