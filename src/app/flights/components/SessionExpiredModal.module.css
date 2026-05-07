@@ -1,0 +1,67 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 12, 38, 0.48);
+}
+
+.modal {
+  width: min(420px, 100%);
+  padding: 28px 26px 24px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(5, 12, 38, 0.22);
+  text-align: center;
+}
+
+.icon {
+  display: inline-flex;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f6c344;
+  color: #071342;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title {
+  margin: 18px 0 8px;
+  color: #071342;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.message {
+  margin: 0;
+  color: #303646;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.subText {
+  margin: 8px 0 22px;
+  color: #687084;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.button {
+  min-width: 130px;
+  height: 42px;
+  border: 0;
+  border-radius: 4px;
+  background: #071342;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

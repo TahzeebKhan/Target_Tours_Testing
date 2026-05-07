@@ -15,6 +15,7 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import { isFareExpiredPayload } from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -276,6 +277,10 @@ const FareComparisonModalRoundTrip = ({
         });
 
         if (cancelled) return;
+        if (isFareExpiredPayload(response)) {
+          setFareOptionsPayload(response);
+          return;
+        }
         setFareOptionsPayload(response);
       } catch (error) {
         if (!cancelled) {

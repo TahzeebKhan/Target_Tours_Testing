@@ -6,10 +6,12 @@ import { toast } from "react-toastify";
 import MultiCityTrip from "./components/multiTrip/MultiCityTrip";
 import OnewayFlightBooking from "./components/onewayTrip/OnewayFlightBooking";
 import RoundTrip from "./components/roundTrip/RoundTrip";
+import SessionExpiredModal from "./components/SessionExpiredModal";
 import { useTripType } from "./TripTypeContext";
 import { useSearchFlights } from "@/features/flights/hooks/useSearchFlights";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
+import { FLIGHT_FARE_EXPIRED_EVENT } from "@/features/flights/services/flightBooking";
 import {
   buildSearchParams,
   mapFlightSearchResponse,
@@ -63,9 +65,12 @@ const FlightsPageClient = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [aggregatedMappedData, setAggregatedMappedData] = useState(null);
+  const [searchRefreshToken, setSearchRefreshToken] = useState(0);
+  const [expiredSession, setExpiredSession] = useState(null);
   const isLoadingMoreRef = useRef(false);
   const lastApiFilterDataRef = useRef("");
   const lastDatewiseRefreshRef = useRef(0);
+  const lastExpiredFareRef = useRef("");
 
   const rawQueryParams = useMemo(
     () => Object.fromEntries(urlSearchParams?.entries?.() || []),
@@ -136,6 +141,7 @@ const FlightsPageClient = () => {
     params: searchParams,
     enabled: Boolean(tripType && hasCommittedSearch),
     filterTrigger: apiFilters,
+    refreshTrigger: searchRefreshToken,
   });
 
   const {
@@ -161,6 +167,29 @@ const FlightsPageClient = () => {
     lastDatewiseRefreshRef.current = searchDataUpdatedAt;
     refetchDatewiseFare();
   }, [currentPage, hasCommittedSearch, refetchDatewiseFare, searchDataUpdatedAt]);
+
+  useEffect(() => {
+    const handleFareExpired = (event) => {
+      const detail = event?.detail || {};
+      const message = detail?.message || "Fares expired please search again";
+      const searchKey = detail?.searchKey || "";
+      const eventKey = `${searchKey}:${message}`;
+
+      if (lastExpiredFareRef.current !== eventKey) {
+        lastExpiredFareRef.current = eventKey;
+        toast.warn(message);
+      }
+
+      setExpiredSession({ message });
+      setCurrentPage(1);
+      setAggregatedMappedData(null);
+      setSearchRefreshToken(Date.now());
+    };
+
+    window.addEventListener(FLIGHT_FARE_EXPIRED_EVENT, handleFareExpired);
+    return () =>
+      window.removeEventListener(FLIGHT_FARE_EXPIRED_EVENT, handleFareExpired);
+  }, []);
 
   const fallbackDatewiseFareTiles = useMemo(() => {
     const list = Array.isArray(data?.date_wise) ? data.date_wise : [];
@@ -416,6 +445,12 @@ const FlightsPageClient = () => {
 
   return (
     <>
+      <SessionExpiredModal
+        isOpen={Boolean(expiredSession)}
+        message={expiredSession?.message}
+        onClose={() => setExpiredSession(null)}
+      />
+
       {tripType === "oneway" && (
         <OnewayFlightBooking
           flightData={mappedData.oneway}

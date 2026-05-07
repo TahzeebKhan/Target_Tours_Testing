@@ -48,7 +48,8 @@ export const buildMobilePriceSummary = ({
   const baseFare = Number(prices.baseFare || 0);
   const baggage = Number(prices.baggage || 0);
   const meals = Number(prices.meals || 0);
-  const total = Number(prices.total || baseFare + baggage + meals || 0);
+  const seats = Number(prices.seats || 0);
+  const total = Number(prices.total || baseFare + baggage + meals + seats || 0);
 
   const lineItems = [
     { label: formatPassengerLabel(passengerCounts), value: formatCurrency(baseFare) },
@@ -62,7 +63,11 @@ export const buildMobilePriceSummary = ({
       value: "Included",
       isGreen: true,
     },
-    { label: "Seat Selection", value: "Free", isGreen: true },
+    {
+      label: "Seat Selection",
+      value: seats > 0 ? formatCurrency(seats) : "Free",
+      isGreen: seats <= 0,
+    },
     {
       label: "Meals",
       value: meals > 0 ? formatCurrency(meals) : "Included",

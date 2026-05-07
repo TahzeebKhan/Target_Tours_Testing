@@ -46,14 +46,16 @@ const PassengerInfo = () => {
             <span>CONTACT NUMBER</span>
           </div>
 
-          {passengers.map((passenger, index) => (
-            <div key={index} className={styles.row}>
-              <span>{passenger.name}</span>
-              <span>{passenger.gender}</span>
-              <span>{passenger.email}</span>
-              <span>{passenger.contact}</span>
-            </div>
-          ))}
+          <div className={styles.tableBody}>
+            {passengers.map((passenger, index) => (
+              <div key={index} className={styles.row}>
+                <span title={passenger.name}>{passenger.name}</span>
+                <span title={passenger.gender}>{passenger.gender}</span>
+                <span title={passenger.email}>{passenger.email}</span>
+                <span title={passenger.contact}>{passenger.contact}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className={styles.footer}>

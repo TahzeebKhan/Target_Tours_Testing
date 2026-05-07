@@ -47,6 +47,31 @@ const SEAT_COLUMNS = ["A", "B", "C", "D", "E", "F"];
 
 const readNumber = (...values) => {
   for (const value of values) {
+    if (Array.isArray(value)) {
+      const nested = readNumber(...value);
+      if (Number.isFinite(nested)) return nested;
+      continue;
+    }
+
+    if (value && typeof value === "object") {
+      const nested = readNumber(
+        value.Amount,
+        value.amount,
+        value.Price,
+        value.price,
+        value.TotalAmount,
+        value.totalAmount,
+        value.GrossAmount,
+        value.grossAmount,
+        value.Charge,
+        value.charge,
+        value.Value,
+        value.value
+      );
+      if (Number.isFinite(nested)) return nested;
+      continue;
+    }
+
     const normalized =
       typeof value === "string"
         ? Number(value.replace(/[^\d.]/g, ""))
@@ -104,6 +129,30 @@ const getSeatNumber = (seat) =>
     .trim()
     .toUpperCase();
 
+const getSeatPrice = (seat) =>
+  readNumber(
+    seat?.Price,
+    seat?.price,
+    seat?.Amount,
+    seat?.amount,
+    seat?.Fare,
+    seat?.fare,
+    seat?.SeatFare,
+    seat?.seatFare,
+    seat?.TotalAmount,
+    seat?.totalAmount,
+    seat?.GrossAmount,
+    seat?.grossAmount,
+    seat?.Charge,
+    seat?.charge,
+    seat?.ServiceCharge,
+    seat?.serviceCharge,
+    seat?.SSRAmount,
+    seat?.ssrAmount,
+    seat?.Tax,
+    seat?.tax
+  ) || 0;
+
 const getSeatType = (seat) => {
   const status = String(
     seat?.SeatStatus || seat?.seatStatus || seat?.status || ""
@@ -115,14 +164,7 @@ const getSeatType = (seat) => {
   const isAvailable = Boolean(
     seat?.AvailStatus ?? seat?.available ?? seat?.isAvailable
   );
-  const amount = readNumber(
-    seat?.Price,
-    seat?.price,
-    seat?.Amount,
-    seat?.amount,
-    seat?.Fare,
-    seat?.fare
-  );
+  const amount = getSeatPrice(seat);
 
   if (!isAvailable || status.includes("unavailable") || status.includes("booked")) {
     return "taken";
@@ -168,14 +210,7 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
       ...seat,
       id: `${rowId}-${column}`,
       seatNumber: `${rowId}-${column}`,
-      price: readNumber(
-        seat?.Price,
-        seat?.price,
-        seat?.Amount,
-        seat?.amount,
-        seat?.Fare,
-        seat?.fare
-      ) || 0,
+      price: getSeatPrice(seat),
       type,
     };
   });
@@ -304,7 +339,6 @@ const SeatingDetails = () => {
   const [openTab, setOpenTab] = useState("flight");
   const [selectedPassenger, setSelectedPassenger] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [totalSeatPrice, setTotalSeatPrice]= useState(0);
   const seatLayoutsScrollerRef = useRef(null);
   const [activeSeatLayoutIndex, setActiveSeatLayoutIndex] = useState(0);
   const [seatNavState, setSeatNavState] = useState({
@@ -368,6 +402,7 @@ const SeatingDetails = () => {
       }, 0),
     [activeSelectedSeats, seatsById]
   );
+  const hasActiveSeatSelection = activeSelectedSeats.length > 0;
   const seatingFlight =
     [
       bookingDetailsView?.departureFlight,
@@ -567,8 +602,13 @@ const SeatingDetails = () => {
             </div>
             <div className={styles.flightSeatingPrice}>
               <div className={styles.priceContainer}>
-              {activeSeatPrice > 0 ?  <span className={styles.price}> ₹ {activeSeatPrice} </span> :
-              <span className={styles.selectionPending}> Selection Pending</span> }
+                {hasActiveSeatSelection ? (
+                  <span className={activeSeatPrice > 0 ? styles.price : styles.selectionPending}>
+                    {activeSeatPrice > 0 ? ` ₹ ${activeSeatPrice.toLocaleString()} ` : " Free"}
+                  </span>
+                ) : (
+                  <span className={styles.selectionPending}> Selection Pending</span>
+                )}
                 {/* <span className={styles.price}>{prices.seats ?  ` ₹ ${prices.seats}` : " Selection Pending"}</span> */}
                 <span className={styles.subInfoText}>Added to fare</span>
               </div>

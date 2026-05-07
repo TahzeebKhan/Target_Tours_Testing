@@ -70,7 +70,11 @@ export default function SidebarPriceSummaryCard() {
 
         <div className={styles.row}>
           <span>Seat Selection</span>
-          <span className={styles.success}>Free</span>
+          {prices.seats > 0 ? (
+            <span className={styles.price}>₹ {prices.seats.toLocaleString()}</span>
+          ) : (
+            <span className={styles.success}>Free</span>
+          )}
         </div>
 
         <div className={styles.row}>
