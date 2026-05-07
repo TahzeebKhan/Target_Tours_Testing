@@ -826,13 +826,18 @@ const getFareRuleFee = (rule = {}, platformCharges = null) => {
     return `ADULT : ${rule.CurrencyCode || rule.currencyCode || rule?.currency || "INR"} ${amount}${suffix}`;
   }
 
+  const feeText =
+    rule?.feeText ||
+    rule?.fee ||
+    rule?.Fee ||
+    rule?.text ||
+    rule?.Text;
+  if (/non[-\s]?refundable/i.test(String(feeText || ""))) {
+    return displayValue(feeText || "ADULT : NON REFUNDABLE");
+  }
+
   return displayValue(
-    (rule?.feeText ||
-      rule?.fee ||
-      rule?.Fee ||
-      rule?.text ||
-      rule?.Text ||
-      (platform ? "ADULT : NON REFUNDABLE" : "")) + suffix
+    feeText || "ADULT : NON REFUNDABLE"
   );
 };
 

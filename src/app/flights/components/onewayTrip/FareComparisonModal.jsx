@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./FareComparisonModal.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSelectedFlightSummary } from "./fareComparisonUtils";
@@ -17,10 +17,9 @@ import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import {
+    getCachedFareOptionsRequest,
     getFareOptionItems,
-    isFareOptionsCached,
     isFareExpiredPayload,
-    mergeFareOptionResponses,
 } from "./fareOptionsStreaming";
 
 const readNumber = (...values) => {
@@ -256,6 +255,30 @@ const DEFAULT_FARE_TEMPLATES = [
     },
 ];
 
+const renderLoadingCards = (styles) =>
+    Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className={styles.loadingCard}>
+            <div className={styles.loadingHeader}>
+                <div className={styles.skeletonLogo} />
+                <div className={styles.loadingHeaderText}>
+                    <div className={styles.skeletonLineShort} />
+                    <div className={styles.skeletonLineTiny} />
+                </div>
+                <div className={styles.skeletonBadge} />
+            </div>
+            <div className={styles.loadingBaggage}>
+                <div className={styles.skeletonLineMedium} />
+                <div className={styles.skeletonLine} />
+                <div className={styles.skeletonLine} />
+                <div className={styles.skeletonLineMedium} />
+            </div>
+            <div className={styles.loadingActions}>
+                <div className={styles.skeletonButton} />
+                <div className={styles.skeletonButtonDark} />
+            </div>
+        </div>
+    ));
+
 export const buildFareOptions = ({
     flightData,
     prefetchedData,
@@ -408,12 +431,15 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
     const searchParams = useSearchParams();
     const { isLoggedIn, loading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submittingFareId, setSubmittingFareId] = useState(null);
     const [showLogin, setShowLogin] = useState(false);
     const [authView, setAuthView] = useState("login");
     const [pendingFare, setPendingFare] = useState(null);
     const [fareOptionsPayload, setFareOptionsPayload] = useState(prefetchedData?.fareOptionsResponse || null);
     const [isPollingFareOptions, setIsPollingFareOptions] = useState(false);
-    const pollingTimerRef = useRef(null);
+    const [hasResolvedFareOptions, setHasResolvedFareOptions] = useState(
+        Boolean(prefetchedData?.fareOptionsResponse)
+    );
 
     const flightNo = useMemo(() => {
         return String(
@@ -429,56 +455,54 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
 
         setFareOptionsPayload(prefetchedData?.fareOptionsResponse || null);
         setIsPollingFareOptions(false);
+        setHasResolvedFareOptions(Boolean(prefetchedData?.fareOptionsResponse));
 
         const priceRequest = flightData?.booking?.priceRequest;
         const searchKey = priceRequest?.search_key;
-        if (!searchKey || !flightNo) return;
+        if (!searchKey || !flightNo) {
+            setHasResolvedFareOptions(true);
+            return;
+        }
 
         let cancelled = false;
 
-        const poll = async () => {
+        const loadFareOptions = async () => {
             try {
-                const response = await getFlightFareOptions({
-                    search_key: searchKey,
-                    flight_no: flightNo,
-                });
+                setIsPollingFareOptions(true);
+                const response = await getCachedFareOptionsRequest(
+                    `${searchKey}:${flightNo}`,
+                    () => getFlightFareOptions({
+                        search_key: searchKey,
+                        flight_no: flightNo,
+                    })
+                );
 
                 if (cancelled) return;
 
                 if (isFareExpiredPayload(response)) {
                     setFareOptionsPayload(response);
-                    setIsPollingFareOptions(false);
                     return;
                 }
 
-                setFareOptionsPayload((prev) =>
-                    mergeFareOptionResponses(prev, response, flightNo)
-                );
-
-                if (!isFareOptionsCached(response)) {
-                    setIsPollingFareOptions(true);
-                    pollingTimerRef.current = window.setTimeout(poll, 700);
-                } else {
-                    setIsPollingFareOptions(false);
-                }
+                setFareOptionsPayload(response);
             } catch (error) {
                 if (!cancelled) {
                     console.error("Failed to refresh fare options", error);
+                }
+            } finally {
+                if (!cancelled) {
                     setIsPollingFareOptions(false);
+                    setHasResolvedFareOptions(true);
                 }
             }
         };
 
-        if (!isFareOptionsCached(prefetchedData?.fareOptionsResponse)) {
-            setIsPollingFareOptions(true);
-            pollingTimerRef.current = window.setTimeout(poll, 0);
+        if (!prefetchedData?.fareOptionsResponse) {
+            loadFareOptions();
         }
 
         return () => {
             cancelled = true;
-            if (pollingTimerRef.current) {
-                clearTimeout(pollingTimerRef.current);
-            }
         };
     }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse]);
     
@@ -500,6 +524,8 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
         }
 
         setIsSubmitting(true);
+        setSubmittingFareId(selectedFare?.id ?? null);
+        let shouldResetSubmitting = true;
         try {
             const priceResponse =
                 prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
@@ -536,6 +562,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                     ? `/flight-booking-details?${fallbackQuery}`
                     : "/flight-booking-details"
             );
+            shouldResetSubmitting = false;
         } catch (error) {
             toast.error(
                 error?.response?.data?.message ||
@@ -543,7 +570,10 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 "Unable to continue with this flight right now."
             );
         } finally {
-            setIsSubmitting(false);
+            if (shouldResetSubmitting) {
+                setIsSubmitting(false);
+                setSubmittingFareId(null);
+            }
         }
     }, [flightData, prefetchedData, router, searchParams]);
 
@@ -571,8 +601,8 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
     const fareSourcePayload = fareOptionsPayload || prefetchedData?.fareOptionsResponse || null;
     const hasFareOptionItems = getFareOptionItems(fareSourcePayload, flightNo).length > 0;
     const isStreamingFareOptions = isLoadingFareOptions || isPollingFareOptions;
-    const showFareSkeleton = isStreamingFareOptions && !hasFareOptionItems;
-    const fareOptions = showFareSkeleton
+    const showFareSkeleton = !hasResolvedFareOptions && !hasFareOptionItems;
+    const fareOptions = !hasResolvedFareOptions && !hasFareOptionItems
         ? []
         : buildFareOptions({
             flightData,
@@ -581,13 +611,10 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 fareOptionsResponse: fareSourcePayload,
             },
             adults: searchParams?.get("adults") || 1,
+            allowFallbackCards: false,
         });
-    const streamingSkeletonCount = showFareSkeleton
-        ? 3
-        : (isStreamingFareOptions && fareOptions.length > 0
-            ? Math.max(3 - fareOptions.length, 1)
-            : 0);
-    const streamingSkeletonCards = Array.from({ length: streamingSkeletonCount });
+    const showEmptyFareOptions =
+        hasResolvedFareOptions && !isStreamingFareOptions && fareOptions.length === 0;
 
     const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 
@@ -683,38 +710,18 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 </div>
 
                 {/* Fare Cards */}
-                {showFareSkeleton ? (
-                    <div className={styles.fareLoadingState}>
-                        {streamingSkeletonCards.map((_, index) => (
-                            <div key={index} className={styles.fareSkeletonCard}>
-                                <div className={styles.skeletonLineShort} />
-                                <div className={styles.skeletonPriceRow}>
-                                    <div className={styles.skeletonPrice} />
-                                    <div className={styles.skeletonIcon} />
-                                </div>
-                                <div className={styles.skeletonLineTiny} />
-                                <div className={styles.skeletonDivider} />
-                                <div className={styles.skeletonBlock}>
-                                    <div className={styles.skeletonLineShort} />
-                                    <div className={styles.skeletonLine} />
-                                    <div className={styles.skeletonLine} />
-                                </div>
-                                <div className={styles.skeletonDivider} />
-                                <div className={styles.skeletonBlock}>
-                                    <div className={styles.skeletonLineShort} />
-                                    <div className={styles.skeletonLine} />
-                                    <div className={styles.skeletonLine} />
-                                </div>
-                                <div className={styles.skeletonActions}>
-                                    <div className={styles.skeletonButton} />
-                                    <div className={styles.skeletonButton} />
-                                </div>
+                <div className={styles.fareCards}>
+                        {showFareSkeleton ? renderLoadingCards(styles) : null}
+                        {showEmptyFareOptions ? (
+                            <div className={styles.emptyFareOptions}>
+                                No fare option available
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className={styles.fareCards}>
-                        {fareOptions.map((fare) => (
+                        ) : null}
+                        {fareOptions.map((fare) => {
+                            const isCurrentFareSubmitting =
+                                isSubmitting && submittingFareId === fare.id;
+
+                            return (
                         <div
                             key={fare.id}
                             className={`${styles.fareCardContainer} ${fare.isPremium ? styles.premiumContainer : ""
@@ -787,40 +794,12 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                             {/* Action Buttons */}
                             <div className={styles.fareActions}>
                                 {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
-                                <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isSubmitting ? "LOADING..." : "BOOK NOW"}</button>
+                                <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isCurrentFareSubmitting ? "LOADING..." : "BOOK NOW"}</button>
                             </div>
                         </div>
-                        ))}
-                        {isStreamingFareOptions && streamingSkeletonCount > 0 && (
-                            Array.from({ length: streamingSkeletonCount }).map((_, index) => (
-                                <div key={`streaming-skeleton-${index}`} className={styles.fareSkeletonCard}>
-                                    <div className={styles.skeletonLineShort} />
-                                    <div className={styles.skeletonPriceRow}>
-                                        <div className={styles.skeletonPrice} />
-                                        <div className={styles.skeletonIcon} />
-                                    </div>
-                                    <div className={styles.skeletonLineTiny} />
-                                    <div className={styles.skeletonDivider} />
-                                    <div className={styles.skeletonBlock}>
-                                        <div className={styles.skeletonLineShort} />
-                                        <div className={styles.skeletonLine} />
-                                        <div className={styles.skeletonLine} />
-                                    </div>
-                                    <div className={styles.skeletonDivider} />
-                                    <div className={styles.skeletonBlock}>
-                                        <div className={styles.skeletonLineShort} />
-                                        <div className={styles.skeletonLine} />
-                                        <div className={styles.skeletonLine} />
-                                    </div>
-                                    <div className={styles.skeletonActions}>
-                                        <div className={styles.skeletonButton} />
-                                        <div className={styles.skeletonButton} />
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                )}
+                            );
+                        })}
+                </div>
             </div>
             {showLogin && authView === "login" && (
                 <LoginPopup

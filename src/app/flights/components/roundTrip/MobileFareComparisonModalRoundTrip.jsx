@@ -404,8 +404,8 @@ const MobileFareComparisonModalRoundTrip = ({
 
   const getBookNowLabel = () => {
     if (isSubmitting) return "LOADING...";
-    if (activeTab === "onward" && !selectedFares.return) return "SELECT RETURN";
-    if (activeTab === "return" && !selectedFares.onward) return "SELECT ONWARD";
+    if (activeTab === "onward" && !selectedFares.return) return "BOOK NOW";
+    if (activeTab === "return" && !selectedFares.onward) return "BOOK NOW";
     return "BOOK NOW";
   };
   if (!isOpen) return null;

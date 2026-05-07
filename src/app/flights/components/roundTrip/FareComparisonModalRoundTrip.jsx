@@ -416,8 +416,8 @@ const FareComparisonModalRoundTrip = ({
 
   const getBookNowLabel = () => {
     if (isSubmitting) return "LOADING...";
-    if (selected === "onward" && !selectedFares.return) return "SELECT RETURN";
-    if (selected === "return" && !selectedFares.onward) return "SELECT ONWARD";
+    if (selected === "onward" && !selectedFares.return) return "BOOK NOW";
+    if (selected === "return" && !selectedFares.onward) return "BOOK NOW";
     return "BOOK NOW";
   };
 

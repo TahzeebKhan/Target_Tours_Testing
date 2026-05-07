@@ -38,7 +38,7 @@ const getPlatformCharges = (fareRulesData) => {
 const formatAmount = (amount, currency = "INR", platformCharges = null) => {
     const value = toAmount(amount);
     const platform = toAmount(platformCharges);
-    if (!value) return platform ? `ADULT : NON REFUNDABLE + INR ${platform}` : "ADULT : NON REFUNDABLE";
+    if (!value) return "ADULT : NON REFUNDABLE";
     return `ADULT : ${currency || "INR"} ${value}${platform ? ` + INR ${platform}` : ""}`;
 };
 

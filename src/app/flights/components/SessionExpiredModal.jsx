@@ -1,8 +1,17 @@
 "use client";
 
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import styles from "./SessionExpiredModal.module.css";
 
-export default function SessionExpiredModal({ isOpen, message, onClose }) {
+export default function SessionExpiredModal({
+  isOpen,
+  message,
+  subText = "Refreshing fares with the same search details.",
+  actionLabel = "OK",
+  onClose,
+}) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) return null;
 
   return (
@@ -21,9 +30,9 @@ export default function SessionExpiredModal({ isOpen, message, onClose }) {
         <p className={styles.message}>
           {message || "Fares expired please search again"}
         </p>
-        <p className={styles.subText}>Refreshing fares with the same search details.</p>
+        {subText ? <p className={styles.subText}>{subText}</p> : null}
         <button type="button" className={styles.button} onClick={onClose}>
-          OK
+          {actionLabel}
         </button>
       </div>
     </div>

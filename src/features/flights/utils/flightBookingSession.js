@@ -4,6 +4,7 @@ import { resolveAirlineLogo } from "./airlineLogos";
 
 let inMemoryFlightBookingSession = null;
 const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
+export const FLIGHT_PRICING_SESSION_DURATION_MS = 20 * 60 * 1000;
 
 const readNumber = (...values) => {
   for (const value of values) {
@@ -509,11 +510,21 @@ const buildRoundSelectedFlightCard = (selectedFlight, selectedFare, legKey) => {
 };
 
 export const readFlightBookingSession = () => {
-  if (inMemoryFlightBookingSession) return inMemoryFlightBookingSession;
+  if (inMemoryFlightBookingSession) {
+    if (isFlightBookingSessionExpired(inMemoryFlightBookingSession)) {
+      clearFlightBookingSession();
+      return null;
+    }
+    return inMemoryFlightBookingSession;
+  }
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(FLIGHT_BOOKING_SESSION_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
+    if (isFlightBookingSessionExpired(parsed)) {
+      clearFlightBookingSession();
+      return null;
+    }
     inMemoryFlightBookingSession = parsed || null;
     return inMemoryFlightBookingSession;
   } catch {
@@ -542,13 +553,50 @@ const storeFlightBookingSession = (value) => {
   }
 };
 
+export const getFlightBookingSessionExpiry = (session) => {
+  if (session?.priceResponse) {
+    const startedAt = Number(session?.pricingSessionStartedAt);
+    if (Number.isFinite(startedAt) && startedAt > 0) {
+      return startedAt + FLIGHT_PRICING_SESSION_DURATION_MS;
+    }
+  }
+
+  const expiry = Number(session?.pricingSessionExpiresAt);
+  return Number.isFinite(expiry) && expiry > 0 ? expiry : null;
+};
+
+export const isFlightBookingSessionExpired = (session, now = Date.now()) => {
+  const expiry = getFlightBookingSessionExpiry(session);
+  return Boolean(expiry && now >= expiry);
+};
+
+export const withFlightPricingSessionExpiry = (value) => {
+  if (!value?.priceResponse) return value;
+
+  const startedAt = Number(value.pricingSessionStartedAt) || Date.now();
+  const expiresAt = startedAt + FLIGHT_PRICING_SESSION_DURATION_MS;
+
+  return {
+    ...value,
+    pricingSessionStartedAt: startedAt,
+    pricingSessionExpiresAt: expiresAt,
+  };
+};
+
 export const writeFlightBookingSession = (value) => {
   if (!value) {
     clearFlightBookingSession();
     return;
   }
-  inMemoryFlightBookingSession = value;
-  storeFlightBookingSession(value);
+
+  const nextValue = withFlightPricingSessionExpiry(value);
+  if (isFlightBookingSessionExpired(nextValue)) {
+    clearFlightBookingSession();
+    return;
+  }
+
+  inMemoryFlightBookingSession = nextValue;
+  storeFlightBookingSession(nextValue);
 };
 
 export const readFlightBookingSessionLegacy = () => {
