@@ -770,11 +770,11 @@ const RoundTrip = ({
             </span>
           </div>
         </div>
-        <DatePriceSlider
+        {/* <DatePriceSlider
           tiles={datewiseFareTiles}
           selectedDate={selectedDepartureDate}
           onSelectDate={handleDateSelect}
-        />
+        /> */}
 
         <div className={styles.sortContainer}>
           <div className={styles.sortSubContainer}>

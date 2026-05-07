@@ -54,11 +54,33 @@ const cleanRuleLines = (value) =>
 const normalizeTimeFrame = (value = "") => {
   const text = cleanRuleText(value);
   if (!text || text.toLowerCase() === "cancellation") return "Cancellation";
-  return text
+
+  const normalizedText = text
     .replace(/\s+TO\s+DEPARTURE\b/gi, "")
     .replace(/\bHRS\b/gi, "Hours")
     .replace(/\bHR\b/gi, "Hour")
-    .replace(/\bDAYS\b/gi, "Days");
+    .replace(/\bDAYS\b/gi, "Days")
+    .replace(/\s+/g, " ")
+    .trim();
+  const rangeMatch = normalizedText.match(
+    /\b0*(\d+)\s*(Hours?|Days?)\s*(?:-|to|–|—)\s*0*(\d+)\s*(Hours?|Days?)\b/i
+  );
+
+  if (rangeMatch) {
+    const [, start, startUnit, end, endUnit] = rangeMatch;
+    const normalizedStartUnit = startUnit.toLowerCase().startsWith("hour")
+      ? "Hours"
+      : "Days";
+    const normalizedEndUnit = endUnit.toLowerCase().startsWith("hour")
+      ? "Hours"
+      : "Days";
+
+    if (normalizedStartUnit === normalizedEndUnit) {
+      return `${Number(start)}-${Number(end)} ${normalizedEndUnit}`;
+    }
+  }
+
+  return normalizedText;
 };
 
 const formatCurrency = (amount, currency = "INR") => {

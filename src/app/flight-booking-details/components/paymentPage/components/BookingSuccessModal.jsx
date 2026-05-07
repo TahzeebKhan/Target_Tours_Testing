@@ -96,6 +96,28 @@ export default function BookingSuccessModal({
       retrieveData?.raw && typeof retrieveData.raw === "object"
         ? retrieveData.raw
         : {};
+    const statusMeta =
+      retrieveData?.status_meta ||
+      retrieveData?.statusMeta ||
+      retrieveBookingData?.status_meta ||
+      retrieveBookingData?.statusMeta ||
+      {};
+    const paymentStatus = pickFirst(
+      statusMeta?.payment_status,
+      statusMeta?.paymentStatus,
+      retrieveBookingData?.payment_status,
+      retrieveData?.payment_status,
+      ""
+    );
+    const bookingStatus = pickFirst(
+      statusMeta?.booking_status,
+      statusMeta?.bookingStatus,
+      retrieveBookingData?.booking_status,
+      retrieveData?.booking_status,
+      ""
+    );
+    const hasFailedStatus = [paymentStatus, bookingStatus]
+      .some((value) => String(value || "").toUpperCase() === "FAILED");
     const retrieveSsr = Array.isArray(retrieveBookingData?.SSR)
       ? retrieveBookingData.SSR
       : Array.isArray(retrieveBookingRaw?.SSR)
@@ -143,6 +165,7 @@ export default function BookingSuccessModal({
     );
 
     return {
+      heading: hasFailedStatus ? "Booking Failed" : "Booking Success",
       title: pickFirst(
         retrieveData?.message,
         startData?.message,
@@ -150,6 +173,8 @@ export default function BookingSuccessModal({
         "Payment session started successfully"
       ),
       status: pickFirst(
+        bookingStatus,
+        paymentStatus,
         retrieveBookingData?.status,
         retrieveBookingData?.payment_status,
         retrieveData?.status,
@@ -158,6 +183,26 @@ export default function BookingSuccessModal({
         startData?.status,
         "SUCCESS"
       ),
+      hasFailedStatus,
+      statusMeta: {
+        paymentStatus,
+        bookingStatus,
+        akbarStatusCode: pickFirst(
+          statusMeta?.akbar_status_code,
+          statusMeta?.akbarStatusCode,
+          ""
+        ),
+        akbarStatusLabel: pickFirst(
+          statusMeta?.akbar_status_label,
+          statusMeta?.akbarStatusLabel,
+          ""
+        ),
+        akbarStatusCodes: Array.isArray(statusMeta?.akbar_status_codes)
+          ? statusMeta.akbar_status_codes
+          : Array.isArray(statusMeta?.akbarStatusCodes)
+            ? statusMeta.akbarStatusCodes
+            : [],
+      },
       transactionId: pickFirst(
         startData?.TransactionID,
         createData?.TransactionID,
@@ -364,14 +409,65 @@ export default function BookingSuccessModal({
       <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
         <div className={styles.header}>
           <div>
-            <h2 className={styles.title}>Booking Success</h2>
+            <h2 className={styles.title}>{details.heading}</h2>
             <p className={styles.subtitle}>{details.title}</p>
-            <p className={styles.status}>{details.status}</p>
+            <p
+              className={`${styles.status} ${
+                details.hasFailedStatus ? styles.statusFailed : ""
+              }`}
+            >
+              {details.status}
+            </p>
           </div>
           <button className={styles.closeButton} onClick={onClose} type="button">
             ×
           </button>
         </div>
+
+        {details.statusMeta?.paymentStatus ||
+        details.statusMeta?.bookingStatus ||
+        details.statusMeta?.akbarStatusCode ||
+        details.statusMeta?.akbarStatusLabel ||
+        details.statusMeta?.akbarStatusCodes?.length ? (
+          <div className={styles.statusPanel}>
+            <div className={styles.statusGrid}>
+              {details.statusMeta.paymentStatus ? (
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Payment Status</span>
+                  <span className={styles.statusValue}>
+                    {details.statusMeta.paymentStatus}
+                  </span>
+                </div>
+              ) : null}
+              {details.statusMeta.bookingStatus ? (
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Booking Status</span>
+                  <span className={styles.statusValue}>
+                    {details.statusMeta.bookingStatus}
+                  </span>
+                </div>
+              ) : null}
+              {details.statusMeta.akbarStatusCode ? (
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Akbar Status Code</span>
+                  <span className={styles.statusValue}>
+                    {details.statusMeta.akbarStatusCode}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+            {details.statusMeta.akbarStatusLabel ? (
+              <p className={styles.statusMessage}>
+                {details.statusMeta.akbarStatusLabel}
+              </p>
+            ) : null}
+            {details.statusMeta.akbarStatusCodes?.length ? (
+              <p className={styles.statusCodes}>
+                Codes: {details.statusMeta.akbarStatusCodes.join(", ")}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className={styles.card}>
           <div className={styles.logoWrap}>

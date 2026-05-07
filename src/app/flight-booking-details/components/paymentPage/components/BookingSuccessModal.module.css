@@ -53,6 +53,10 @@
   color: #4e8729;
 }
 
+.statusFailed {
+  color: #c64235;
+}
+
 .closeButton {
   border: none;
   background: transparent;
@@ -60,6 +64,54 @@
   line-height: 1;
   color: #070773;
   cursor: pointer;
+}
+
+.statusPanel {
+  margin: 24px 28px 0;
+  padding: 16px;
+  border: 1px solid #f0b8af;
+  background: #fff7f5;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statusLabel {
+  font-family: Inter;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8a4a42;
+}
+
+.statusValue {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 700;
+  color: #c64235;
+  text-transform: uppercase;
+}
+
+.statusMessage {
+  margin: 12px 0 0;
+  font-family: Inter;
+  font-size: 14px;
+  color: #66251d;
+}
+
+.statusCodes {
+  margin: 6px 0 0;
+  font-family: Inter;
+  font-size: 12px;
+  color: #8a4a42;
 }
 
 .card {
@@ -287,6 +339,16 @@
     margin: 14px 14px 0;
     padding: 12px;
     align-items: flex-start;
+  }
+
+  .statusPanel {
+    margin: 14px 14px 0;
+    padding: 12px;
+  }
+
+  .statusGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .logo {

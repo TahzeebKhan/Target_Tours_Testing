@@ -11,6 +11,7 @@ import {
   extractBaseFareAmount,
   readBookingFallbackFromSearch,
   readFlightBookingSession,
+  withFlightPricingSessionExpiry,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 
@@ -123,14 +124,14 @@ export function FlightBookingProvider({ children }) {
       typeof window !== "undefined"
         ? readBookingFallbackFromSearch(window.location.search)
         : null;
-    setBookingSession(
+    const nextSession =
       savedSession || fallbackView
-        ? {
+        ? withFlightPricingSessionExpiry({
             ...(savedSession || {}),
             ...(fallbackView ? { urlFallback: fallbackView } : {}),
-          }
-        : null
-    );
+          })
+        : null;
+    setBookingSession(nextSession);
     setBookingSessionReady(true);
   }, []);
 
@@ -388,4 +389,8 @@ export function useFlightBooking() {
     );
   }
   return ctx;
+}
+
+export function useOptionalFlightBooking() {
+  return useContext(FlightBookingContext);
 }

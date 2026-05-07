@@ -1,5 +1,8 @@
 "use client";
 
+const fareOptionsRequestCache = new Map();
+const fareOptionsResponseCache = new Map();
+
 const unwrapPayload = (payload) => payload?.data || payload || {};
 
 const getFlightKey = (flightNo) => String(flightNo || "").trim();
@@ -87,4 +90,26 @@ export const mergeFareOptionResponses = (previousPayload, nextPayload, flightNo)
     fare_options: mergedFareOptions,
     fareOptions: mergedFareOptions,
   };
+};
+
+export const getCachedFareOptionsRequest = (key, request) => {
+  const requestKey = String(key || "").trim();
+  if (!requestKey) return request();
+
+  const cachedResponse = fareOptionsResponseCache.get(requestKey);
+  if (cachedResponse) return Promise.resolve(cachedResponse);
+
+  const cached = fareOptionsRequestCache.get(requestKey);
+  if (cached) return cached;
+
+  const promise = request()
+    .then((response) => {
+      fareOptionsResponseCache.set(requestKey, response);
+      return response;
+    })
+    .finally(() => {
+      fareOptionsRequestCache.delete(requestKey);
+    });
+  fareOptionsRequestCache.set(requestKey, promise);
+  return promise;
 };

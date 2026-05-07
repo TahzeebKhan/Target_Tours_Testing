@@ -9,7 +9,10 @@ import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
 import BookingSuccessModal from "./components/BookingSuccessModal";
 import PriceSummary from "@/features/profile/components/PriceSummary";
-import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
+import {
+  clearFlightBookingSession,
+  getBookingDetailsView,
+} from "@/features/flights/utils/flightBookingSession";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 
@@ -76,13 +79,19 @@ const PaymentPage = () => {
     submitItinerary,
     itineraryLoading,
     bookingSession,
+    setBookingSession,
     paymentSuccessData,
     setPaymentSuccessData,
     prices,
     travelerDetails,
+    setTravelerDetails,
     bookingContactDetails,
+    setBookingContactDetails,
     baggage,
+    setBaggage,
     meals,
+    setMeals,
+    setSeats,
   } = useFlightBooking();
   const router = useRouter();
   const [openTab, setOpenTab] = useState("passengerInfo");
@@ -104,15 +113,23 @@ const PaymentPage = () => {
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
+  const handleBookingSuccessClose = () => {
+    clearFlightBookingSession();
+    setPaymentSuccessData(null);
+    setBookingSession(null);
+    setTravelerDetails([]);
+    setBookingContactDetails({});
+    setBaggage([]);
+    setMeals([]);
+    setSeats([]);
+    router.push("/");
+  };
 
   return (
     <>
       <BookingSuccessModal
         isOpen={Boolean(paymentSuccessData)}
-        onClose={() => {
-          setPaymentSuccessData(null);
-          router.push("/");
-        }}
+        onClose={handleBookingSuccessClose}
         bookingView={bookingView}
         paymentSuccessData={paymentSuccessData}
         prices={prices}
