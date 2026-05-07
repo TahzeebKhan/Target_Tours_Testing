@@ -15,6 +15,11 @@
   gap: 16px;
 }
 
+.dropdownOpenUp {
+  top: auto;
+  bottom: 110%;
+}
+
 .heading {
   font-size: 16px;
   font-weight: 600;

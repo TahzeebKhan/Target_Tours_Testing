@@ -1542,6 +1542,12 @@ export const AirlineLogoList = [
     "logo": "https://images.kiwi.com/airlines/64/GF.png"
   },
   {
+    "id": "GF",
+    "lcc": "0",
+    "name": "Gulf Air",
+    "logo": "https://images.kiwi.com/airlines/64/GF.png"
+  },
+  {
     "id": "TY",
     "lcc": "0",
     "name": "Air Caledonie",

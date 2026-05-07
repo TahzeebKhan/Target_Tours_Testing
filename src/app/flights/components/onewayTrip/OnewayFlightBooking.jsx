@@ -299,9 +299,17 @@ const OnewayFlightBooking = ({
 
     return `${Number.isFinite(hours) ? hours : "N/A"}h ${Number.isFinite(minutes) ? minutes : "N/A"}m`;
   };
+  const getHighlightLogo = (highlight, flight) =>
+    highlight?.airlineName || highlight?.airlineCode
+      ? resolveAirlineLogo({
+          name: highlight.airlineName,
+          code: highlight.airlineCode,
+          logo: flight?.airlines?.[0]?.logo,
+        })
+      : flight?.airlines?.[0]?.logo || "/images/Flight.png";
 
   const cheapestMeta = {
-    logo: cheapestFlight?.airlines?.[0]?.logo || "/images/Flight.png",
+    logo: getHighlightLogo(sortHighlights?.cheapest, cheapestFlight),
     price:
       sortHighlights?.cheapest?.priceLabel ||
       cheapestFlight?.fare?.pricePerAdult ||
@@ -312,9 +320,7 @@ const OnewayFlightBooking = ({
   };
 
   const fastestMeta = {
-    logo:
-      fastestFlight?.airlines?.[0]?.logo ||
-      "/images/Flight.png",
+    logo: getHighlightLogo(sortHighlights?.fastest, fastestFlight),
     price:
       sortHighlights?.fastest?.priceLabel ||
       fastestFlight?.fare?.pricePerAdult ||
