@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./PassengerClassSelector.module.css";
 import { Minus, Plus } from "lucide-react";
 import { useTripType } from "../TripTypeContext";
@@ -16,6 +16,34 @@ const PassengerClassSelector = ({
 }) => {
   const { tripType } = useTripType();
   const ref = useRef(null);
+  const [openUp, setOpenUp] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const updatePlacement = () => {
+      const dropdown = ref.current;
+      const trigger = dropdown?.parentElement;
+      if (!dropdown || !trigger) return;
+
+      const triggerRect = trigger.getBoundingClientRect();
+      const dropdownHeight = dropdown.offsetHeight;
+      const gap = 12;
+      const spaceBelow = window.innerHeight - triggerRect.bottom;
+      const spaceAbove = triggerRect.top;
+
+      setOpenUp(spaceBelow < dropdownHeight + gap && spaceAbove > spaceBelow);
+    };
+
+    updatePlacement();
+    window.addEventListener("resize", updatePlacement);
+    window.addEventListener("scroll", updatePlacement, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePlacement);
+      window.removeEventListener("scroll", updatePlacement, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -55,6 +83,7 @@ const PassengerClassSelector = ({
       className={`${styles.dropdown}
       ${tripType === 'oneway' ? styles.oneWayDropdown : ""}
       ${tripType === 'round' ? styles.roundTripDropDown : ""}
+      ${openUp ? styles.dropdownOpenUp : ""}
       `}
       ref={ref}
     >
