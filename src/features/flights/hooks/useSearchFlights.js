@@ -7,9 +7,10 @@ export const useSearchFlights = ({
   params,
   enabled = true,
   filterTrigger = null,
+  refreshTrigger = 0,
 }) => {
   return useQuery({
-    queryKey: ["search-flights", params, filterTrigger],
+    queryKey: ["search-flights", params, filterTrigger, refreshTrigger],
     queryFn: () => searchFlights(params),
     enabled,
     staleTime: 1000 * 60,

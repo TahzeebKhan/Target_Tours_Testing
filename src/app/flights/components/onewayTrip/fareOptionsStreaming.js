@@ -44,6 +44,14 @@ export const isFareOptionsCached = (payload) =>
       payload?.data?.data?.cached
   );
 
+export const isFareExpiredPayload = (payload) =>
+  Boolean(
+    payload?.fare_expired ??
+      payload?.fareExpired ??
+      payload?.data?.fare_expired ??
+      payload?.data?.fareExpired
+  );
+
 export const mergeFareOptionResponses = (previousPayload, nextPayload, flightNo) => {
   const prevRaw = unwrapPayload(previousPayload);
   const nextRaw = unwrapPayload(nextPayload);

@@ -19,6 +19,7 @@ import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import {
     getFareOptionItems,
     isFareOptionsCached,
+    isFareExpiredPayload,
     mergeFareOptionResponses,
 } from "./fareOptionsStreaming";
 
@@ -443,6 +444,12 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 });
 
                 if (cancelled) return;
+
+                if (isFareExpiredPayload(response)) {
+                    setFareOptionsPayload(response);
+                    setIsPollingFareOptions(false);
+                    return;
+                }
 
                 setFareOptionsPayload((prev) =>
                     mergeFareOptionResponses(prev, response, flightNo)

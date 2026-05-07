@@ -7,6 +7,31 @@ const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
 
 const readNumber = (...values) => {
   for (const value of values) {
+    if (Array.isArray(value)) {
+      const nested = readNumber(...value);
+      if (Number.isFinite(nested)) return nested;
+      continue;
+    }
+
+    if (value && typeof value === "object") {
+      const nested = readNumber(
+        value.Amount,
+        value.amount,
+        value.Price,
+        value.price,
+        value.TotalAmount,
+        value.totalAmount,
+        value.GrossAmount,
+        value.grossAmount,
+        value.Charge,
+        value.charge,
+        value.Value,
+        value.value
+      );
+      if (Number.isFinite(nested)) return nested;
+      continue;
+    }
+
     const normalized =
       typeof value === "string"
         ? Number(value.replace(/[^\d.]/g, ""))
@@ -918,15 +943,15 @@ export const buildCreateItineraryPayload = (session, prices) => {
       ? priceResponse.formatted.fare_breakdown
       : [];
   const fareBreakdownTotal = fareBreakdown.reduce((sum, item) => {
-    const value = readNumber(item?.total_journey_price);
+    const value = readNumber(item?.total_journey_price, item?.totalJourneyPrice);
     return sum + (value ?? 0);
   }, 0);
   const finalPrice = readNumber(
-    session?.selectedFare?.netAmount,
     fareBreakdownTotal > 0 ? fareBreakdownTotal : null,
     priceResponse?.formatted?.final_price,
     priceResponse?.final_price,
     priceResponse?.formatted?.finalPrice,
+    session?.selectedFare?.netAmount,
     session?.selectedFare?.price,
     session?.selectedFare?.pricePerAdult
   );
@@ -964,9 +989,29 @@ export const buildCreateItineraryPayload = (session, prices) => {
     })
     .filter(Boolean);
   const ssrAmount = ssrSelections.reduce((sum, item) => {
-    const value = readNumber(item?.price, item?.Price, item?.amount, item?.Amount);
+    const value = readNumber(
+      item?.price,
+      item?.Price,
+      item?.amount,
+      item?.Amount,
+      item?.fare,
+      item?.Fare,
+      item?.seatFare,
+      item?.SeatFare,
+      item?.totalAmount,
+      item?.TotalAmount,
+      item?.grossAmount,
+      item?.GrossAmount,
+      item?.charge,
+      item?.Charge,
+      item?.serviceCharge,
+      item?.ServiceCharge,
+      item?.ssrAmount,
+      item?.SSRAmount
+    );
     return sum + (value ?? 0);
   }, 0);
+  const netAmount = readNumber(finalPrice, prices?.baseFare) ?? 0;
 
   return {
     TUI: pickFirst(
@@ -1015,7 +1060,7 @@ export const buildCreateItineraryPayload = (session, prices) => {
     PLP: [],
     SSR: ssrPayload,
     CrossSell: [],
-    NetAmount: Number(finalPrice ?? prices?.total ?? 0),
+    NetAmount: netAmount,
     SSRAmount: ssrAmount,
     ClientID: "",
     DeviceID: "",

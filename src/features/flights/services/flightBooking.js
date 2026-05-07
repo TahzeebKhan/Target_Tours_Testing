@@ -1,5 +1,36 @@
 import api from "@/lib/axios";
 
+export const FLIGHT_FARE_EXPIRED_EVENT = "target-tours:flight-fare-expired";
+
+export const isFareExpiredResponse = (payload) =>
+  Boolean(
+    payload?.fare_expired ??
+      payload?.fareExpired ??
+      payload?.data?.fare_expired ??
+      payload?.data?.fareExpired
+  );
+
+const emitFareExpired = (payload) => {
+  if (typeof window === "undefined" || !isFareExpiredResponse(payload)) return;
+
+  window.dispatchEvent(
+    new CustomEvent(FLIGHT_FARE_EXPIRED_EVENT, {
+      detail: {
+        message:
+          payload?.message ||
+          payload?.data?.message ||
+          "Fares expired please search again",
+        searchKey:
+          payload?.search_key ||
+          payload?.searchKey ||
+          payload?.data?.search_key ||
+          payload?.data?.searchKey ||
+          "",
+      },
+    })
+  );
+};
+
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const shouldRetryRequest = (error) => {
@@ -79,6 +110,7 @@ export const getFlightFareOptions = async ({ search_key, flight_no }) => {
     },
   });
 
+  emitFareExpired(response?.data);
   return response?.data;
 };
 
@@ -90,6 +122,10 @@ export const getFlightFareOptionsUntilCached = async (
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     lastResponse = await getFlightFareOptions({ search_key, flight_no });
+    if (isFareExpiredResponse(lastResponse)) {
+      return lastResponse;
+    }
+
     const cached = Boolean(
       lastResponse?.cached ?? lastResponse?.data?.cached ?? lastResponse?.data?.data?.cached
     );

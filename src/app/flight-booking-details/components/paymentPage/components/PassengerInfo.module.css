@@ -12,6 +12,11 @@
   overflow: hidden;
 }
 
+.tableBody {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
 .row {
   display: grid;
   grid-template-columns: 2.1fr 1fr 2.2fr 1.7fr;
@@ -28,9 +33,12 @@
 
 .row span {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.row:last-child {
+.tableBody .row:last-child {
   border-bottom: none;
 }
 
@@ -85,6 +93,8 @@
 .wrapperMobile {
   display: flex;
   flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
   padding: 0px 12px;
   border: 1px solid #e4e6e8;
   border-top: none;
