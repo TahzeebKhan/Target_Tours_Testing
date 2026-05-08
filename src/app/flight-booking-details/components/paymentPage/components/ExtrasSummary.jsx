@@ -1,5 +1,5 @@
 import styles from "./ExtrasSummary.module.css";
-import { Briefcase, ShoppingBag, Utensils, MapPin } from "lucide-react";
+import { useFlightBooking } from "../../../FlightBookingContext";
 
 const CabinBagIcon = () => {
   return (
@@ -129,7 +129,63 @@ const LoctaionIcon = () => {
     </svg>
   );
 };
+
+const formatCurrency = (value) => {
+  const amount = Number(value || 0);
+  return amount > 0 ? `₹${amount.toLocaleString("en-IN")}` : "Included";
+};
+
+const sumAmounts = (items = []) =>
+  items.reduce((sum, item) => sum + Number(item?.price || item?.amount || 0), 0);
+
+const getPassengerLabel = (count = 0) =>
+  count === 1 ? "1 passenger" : `${count || "all"} passengers`;
+
+const groupSeatsByJourney = (seats = []) => {
+  const groups = new Map();
+
+  seats.forEach((seat) => {
+    const route = String(seat?.journeyLabel || seat?.segment || "Selected seats")
+      .replace(/-/g, "–");
+    const seatNumber = String(
+      seat?.seatNumber || seat?.SeatNumber || seat?.number || ""
+    )
+      .replace(/^journey-\d+:/, "")
+      .trim();
+
+    if (!seatNumber) return;
+    if (!groups.has(route)) groups.set(route, []);
+    groups.get(route).push(seatNumber);
+  });
+
+  return Array.from(groups.entries())
+    .map(([route, seatNumbers]) => `${route}: ${seatNumbers.join(", ")}`)
+    .join(" | ");
+};
+
 const ExtrasSummary = () => {
+  const { baggage = [], meals = [], seats = [], prices = {}, travelerDetails = [] } =
+    useFlightBooking();
+  const passengerCount = travelerDetails.length || 0;
+  const baggageTotal = Number(prices.baggage || sumAmounts(baggage));
+  const mealsTotal = Number(prices.meals || sumAmounts(meals));
+  const seatsTotal = Number(prices.seats || sumAmounts(seats));
+  const selectedBaggageLabel =
+    baggage.length > 0
+      ? baggage
+          .map((item) => item?.weight || item?.name || item?.label)
+          .filter(Boolean)
+          .join(", ")
+      : "";
+  const selectedMealsLabel =
+    meals.length > 0
+      ? meals
+          .map((item) => item?.title || item?.name || item?.label)
+          .filter(Boolean)
+          .join(", ")
+      : "";
+  const selectedSeatLabel = groupSeatsByJourney(seats);
+
   return (
     <div className={styles.wrapper}>
       {/* BAGGAGE */}
@@ -147,8 +203,18 @@ const ExtrasSummary = () => {
         <div className={`${styles.item} ${styles.itemEnd}`}>
           <CheckeBagIcon />
           <div className={styles.text}>
-            <p className={styles.title}>Checked bag (25kg) - Added</p>
-            <p className={styles.subText}>₹4,400 for all passengers</p>
+            <p className={styles.title}>
+              {selectedBaggageLabel
+                ? `${selectedBaggageLabel} - Added`
+                : "No extra baggage selected"}
+            </p>
+            <p className={styles.subText}>
+              {baggageTotal > 0
+                ? `${formatCurrency(baggageTotal)} for ${getPassengerLabel(
+                    passengerCount
+                  )}`
+                : "No additional baggage charges"}
+            </p>
           </div>
         </div>
       </div>
@@ -162,8 +228,12 @@ const ExtrasSummary = () => {
         <div className={`${styles.item} ${styles.itemEnd}`}>
           <MealsIcon />
           <div className={styles.text}>
-            <p className={styles.title}>Pre-selected meals</p>
-            <p className={styles.subText}>₹1,540 total</p>
+            <p className={styles.title}>
+              {selectedMealsLabel || "No meals selected"}
+            </p>
+            <p className={styles.subText}>
+              {mealsTotal > 0 ? `${formatCurrency(mealsTotal)} total` : "No meal charges"}
+            </p>
           </div>
         </div>
       </div>
@@ -176,9 +246,14 @@ const ExtrasSummary = () => {
         <div className={`${styles.item} ${styles.itemEnd}`}>
           <LoctaionIcon />
           <div className={styles.text}>
-            <p className={styles.title}>Seats selected for all passengers</p>
+            <p className={styles.title}>
+              {seats.length > 0
+                ? `Seats selected for ${getPassengerLabel(passengerCount)}`
+                : "No seats selected"}
+            </p>
             <p className={styles.subText}>
-              DEL–BOM: 1A, 2A, 3A, 4A | BOM–DEL: 1C, 2C, 3C, 4C
+              {selectedSeatLabel ||
+                (seatsTotal > 0 ? `${formatCurrency(seatsTotal)} total` : "Seat selection pending")}
             </p>
           </div>
         </div>
