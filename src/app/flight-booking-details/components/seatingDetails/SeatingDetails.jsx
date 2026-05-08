@@ -153,6 +153,33 @@ const getSeatPrice = (seat) =>
     seat?.tax
   ) || 0;
 
+const getSeatSsrId = (seat) =>
+  readNumber(
+    seat?.SSID,
+    seat?.ssid,
+    seat?.SeatID,
+    seat?.seatID,
+    seat?.SeatId,
+    seat?.seatId,
+    seat?.SSRId,
+    seat?.ssrId,
+    seat?.id
+  );
+
+const getSeatFuid = (seat) =>
+  readNumber(
+    seat?.FUID,
+    seat?.fuid,
+    seat?.flight_uid,
+    seat?.flightUid,
+    seat?.flightId,
+    seat?.FlightID,
+    seat?.FlightId
+  );
+
+const getJourneyFuid = (journeyIndex) =>
+  Number.isFinite(Number(journeyIndex)) ? Number(journeyIndex) + 1 : undefined;
+
 const getSeatType = (seat) => {
   const status = String(
     seat?.SeatStatus || seat?.seatStatus || seat?.status || ""
@@ -208,6 +235,9 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
     rowMap.get(rowId)[columnIndex] = type;
     seatsById[`${rowId}-${column}`] = {
       ...seat,
+      rawId: seat?.id,
+      ssid: getSeatSsrId(seat),
+      fuid: getSeatFuid(seat),
       id: `${rowId}-${column}`,
       seatNumber: `${rowId}-${column}`,
       price: getSeatPrice(seat),
@@ -298,6 +328,9 @@ const buildSeatLayoutGroups = (seatLayoutResponse, bookingDetailsView) => {
           `${prefix}${seatId}`,
           {
             ...seat,
+            rawId: seat?.rawId,
+            ssid: seat?.ssid,
+            fuid: seat?.fuid ?? getJourneyFuid(index),
             id: `${prefix}${seatId}`,
             seatNumber: seat?.seatNumber || seatId,
             journeyIndex: index,
@@ -471,6 +504,9 @@ const SeatingDetails = () => {
           const seat = seatsById[seatId] || {};
           return {
             ...seat,
+            rawId: seat?.rawId,
+            ssid: seat?.ssid,
+            fuid: seat?.fuid ?? getJourneyFuid(seat?.journeyIndex),
             id: seatId,
             seatNumber: seat?.seatNumber || String(seatId).split(":").pop(),
             price: seat.price || 0,

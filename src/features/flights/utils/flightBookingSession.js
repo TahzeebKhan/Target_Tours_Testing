@@ -983,6 +983,28 @@ export const buildBookingFallbackQuery = (session) => {
   return encoded ? `bookingFallback=${encoded}` : "";
 };
 
+const readSsrAmount = (item) =>
+  readNumber(
+    item?.price,
+    item?.Price,
+    item?.amount,
+    item?.Amount,
+    item?.fare,
+    item?.Fare,
+    item?.seatFare,
+    item?.SeatFare,
+    item?.totalAmount,
+    item?.TotalAmount,
+    item?.grossAmount,
+    item?.GrossAmount,
+    item?.charge,
+    item?.Charge,
+    item?.serviceCharge,
+    item?.ServiceCharge,
+    item?.ssrAmount,
+    item?.SSRAmount
+  ) ?? 0;
+
 export const buildCreateItineraryPayload = (session, prices) => {
   const priceResponse = unwrapPayload(session?.priceResponse);
   const fareBreakdown = Array.isArray(priceResponse?.fare_breakdown)
@@ -1019,47 +1041,60 @@ export const buildCreateItineraryPayload = (session, prices) => {
   );
   const totalPassengers = Math.max(travelers.length, 1);
   const ssrSelections = [...baggageSelections, ...mealSelections, ...seatSelections];
-  const ssrPayload = ssrSelections
+  const legacySsrSelections = ssrSelections
     .map((item, index) => {
-      const paxId = (index % totalPassengers) + 1;
-      const fuid = readNumber(item?.fuid, item?.FUID);
-      const ssid = readNumber(item?.ssid, item?.SSID, item?.id);
+      const fuid = readNumber(
+        item?.fuid,
+        item?.FUID,
+        item?.flight_uid,
+        item?.flightUid,
+        item?.flightId,
+        item?.FlightID,
+        item?.FlightId,
+        Number.isFinite(Number(item?.journeyIndex))
+          ? Number(item.journeyIndex) + 1
+          : undefined
+      );
+      const ssid = readNumber(
+        item?.ssid,
+        item?.SSID,
+        item?.SeatID,
+        item?.seatID,
+        item?.SeatId,
+        item?.seatId,
+        item?.SSRId,
+        item?.ssrId,
+        item?.rawId,
+        item?.id
+      );
 
       if (!Number.isFinite(fuid) || !Number.isFinite(ssid)) {
         return null;
       }
 
       return {
-        FUID: fuid,
-        PaxID: paxId,
-        SSID: ssid,
+        item,
+        fuid,
+        ssid,
+        paxId: (index % totalPassengers) + 1,
       };
     })
     .filter(Boolean);
-  const ssrAmount = ssrSelections.reduce((sum, item) => {
-    const value = readNumber(
-      item?.price,
-      item?.Price,
-      item?.amount,
-      item?.Amount,
-      item?.fare,
-      item?.Fare,
-      item?.seatFare,
-      item?.SeatFare,
-      item?.totalAmount,
-      item?.TotalAmount,
-      item?.grossAmount,
-      item?.GrossAmount,
-      item?.charge,
-      item?.Charge,
-      item?.serviceCharge,
-      item?.ServiceCharge,
-      item?.ssrAmount,
-      item?.SSRAmount
-    );
-    return sum + (value ?? 0);
-  }, 0);
-  const netAmount = readNumber(finalPrice, prices?.baseFare) ?? 0;
+  const ssrPayload = legacySsrSelections
+    .map((item, index) => {
+      return {
+        FUID: item.fuid,
+        PaxID: item.paxId || (index % totalPassengers) + 1,
+        SSID: item.ssid,
+      };
+    })
+    .filter(Boolean);
+  const ssrAmount = legacySsrSelections.reduce(
+    (sum, item) => sum + readSsrAmount(item.item),
+    0
+  );
+  const baseNetAmount = readNumber(finalPrice, prices?.baseFare) ?? 0;
+  const netAmount = baseNetAmount;
 
   return {
     TUI: pickFirst(
