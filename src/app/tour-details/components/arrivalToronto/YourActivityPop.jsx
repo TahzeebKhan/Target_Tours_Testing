@@ -56,7 +56,7 @@ const YourActivityPop = ({
                                     <p className={styles.hotelDec}>{hotel?.description || "No details available."}</p>
 
                                 </div>
-                                <div className={styles.popupRight}>
+                                <div className={styles.popupActions}>
                                     <button
                                         className={styles.confirmBtn}
                                         onClick={() => onToggleActivity?.(hotel)}

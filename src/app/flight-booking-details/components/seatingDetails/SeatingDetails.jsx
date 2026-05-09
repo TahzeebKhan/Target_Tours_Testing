@@ -793,7 +793,7 @@ const SeatingDetails = () => {
           onClick={() => setCurrentStep(6)}
           className={styles.continueButtonContainer}
         >
-          <button className={styles.skipButton}>SKIP MEAL</button>
+          <button className={styles.skipButton}>SKIP SEATS</button>
           <button className={styles.continueButton}>CONTINUE</button>
         </div>
       </div>
