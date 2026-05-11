@@ -88,7 +88,7 @@ export default function SidebarPriceSummaryCard() {
 
         <div className={styles.row}>
           <span>Taxes & Fees</span>
-          <span className={styles.price}>₹2,819</span>
+          <span className={styles.price}>₹ {Number(prices.tax || 0).toLocaleString()}</span>
         </div>
       </div>
 

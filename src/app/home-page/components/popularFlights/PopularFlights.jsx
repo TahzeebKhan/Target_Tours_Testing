@@ -238,7 +238,7 @@ const PopularFlights = () => {
           <span className={styles.headingMult} ref={cityRef}>
             <button
               className={styles.cityBtnn}
-              onClick={() => setIsCityOpen((prev) => !prev)}
+              // onClick={() => setIsCityOpen((prev) => !prev)}
             >
               <span>{selectedCity}</span>
               {/* <img

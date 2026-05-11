@@ -14,19 +14,32 @@ const Plane = ({
 }) => {
   // Mapping of seats to colors/states based on the provided image
 
-  const renderSeat = (type, rowId, index, side) => {
+  const renderSeat = (seatCell, rowId, index, side) => {
+    const type = typeof seatCell === "string" ? seatCell : seatCell?.type || "grey";
+    const hasSeatData = typeof seatCell === "object" && Boolean(seatCell?.seatNumber);
     const labels = side === "left" ? ["A", "B", "C"] : ["D", "E", "F"];
-    const label = labels[index];
+    const label = typeof seatCell === "object" && seatCell?.column ? seatCell.column : labels[index];
     const seatId = `${seatIdPrefix}${rowId}-${label}`;
     const isActive = selectedSeats.includes(seatId);
+    const seatLabel = `${rowId}${label}`;
+    const seatDescription = hasSeatData
+      ? `Seat ${seatLabel} • Status: ${seatCell?.statusLabel || "Unknown"}`
+      : "";
+    const isSelectable = hasSeatData && type !== "taken" && type !== "grey";
 
     return (
       <div
         key={seatId}
-        className={`${styles.seat} ${styles[type]} ${styles.seatDesktop}  ${
+        className={`${styles.seat} ${styles[type]} ${styles.seatDesktop} ${
+          seatCell?.isWindow ? styles.windowSeat : ""
+        } ${
           isActive ? styles.active : ""
         }`}
-        onClick={() => toggleSeat(rowId, label, type, seatIdPrefix)}
+        title={seatDescription || undefined}
+        aria-label={seatDescription || `Seat ${seatLabel} not available`}
+        onClick={() => {
+          if (isSelectable) toggleSeat(rowId, label, type, seatIdPrefix);
+        }}
       >
         {type === "taken" && (
           <span className={styles.icon}>

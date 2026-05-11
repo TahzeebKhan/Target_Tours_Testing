@@ -9,6 +9,7 @@ import {
   buildStartPaymentPayload,
   buildSsrPayload,
   extractBaseFareAmount,
+  extractTaxAmount,
   readBookingFallbackFromSearch,
   readFlightBookingSession,
   withFlightPricingSessionExpiry,
@@ -241,12 +242,14 @@ export function FlightBookingProvider({ children }) {
 
   const prices = useMemo(() => {
     const baseFare = extractBaseFareAmount(bookingSession);
+    const tax = extractTaxAmount(bookingSession);
     const baggagePrice = baggage.reduce((s, b) => s + b.price, 0);
     const mealsPrice = meals.reduce((s, m) => s + m.price, 0);
     const seatsPrice = seats.reduce((s, s1) => s + s1.price, 0);
 
     return {
       baseFare,
+      tax,
       baggage: baggagePrice,
       meals: mealsPrice,
       seats: seatsPrice,

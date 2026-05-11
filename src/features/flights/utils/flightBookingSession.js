@@ -110,7 +110,20 @@ const extractTrips = (payload) => {
 };
 
 const extractPrimaryTrip = (payload) => extractTrips(payload)[0] || null;
-const unwrapPayload = (payload) => payload?.data || payload || {};
+const unwrapPayload = (payload) => {
+  const directPayload = payload?.data;
+  const nestedPayload = payload?.data?.data;
+
+  if (nestedPayload?.formatted || nestedPayload?.fare_breakdown || nestedPayload?.tui) {
+    return nestedPayload;
+  }
+
+  if (directPayload?.formatted || directPayload?.fare_breakdown || directPayload?.tui) {
+    return directPayload;
+  }
+
+  return directPayload || payload || {};
+};
 
 const getFormattedJourneys = (payload) => {
   const normalized = unwrapPayload(payload);
@@ -752,6 +765,18 @@ export const extractBaseFareAmount = (session) => {
     const value = readNumber(item?.total_journey_price, item?.totalJourneyPrice);
     return sum + (value ?? 0);
   }, 0);
+  const formattedJourneyTotal = (Array.isArray(payload?.formatted?.journeys)
+    ? payload.formatted.journeys
+    : []
+  ).reduce((sum, journey) => {
+    const value = readNumber(
+      journey?.total_pricing?.net,
+      journey?.total_pricing?.gross,
+      journey?.per_adult?.net,
+      journey?.per_adult?.gross
+    );
+    return sum + (value ?? 0);
+  }, 0);
   const primaryTrip = extractPrimaryTrip(priceResponse) || extractPrimaryTrip(priceRequest) || {};
 
   return (
@@ -760,15 +785,18 @@ export const extractBaseFareAmount = (session) => {
       payload?.formatted?.final_price,
       payload?.final_price,
       payload?.formatted?.finalPrice,
+      formattedJourneyTotal > 0 ? formattedJourneyTotal : null,
       priceResponse?.BaseFare,
       priceResponse?.baseFare,
       priceResponse?.data?.BaseFare,
       priceResponse?.Fare?.BaseFare,
       priceResponse?.fare?.baseFare,
       primaryTrip?.Amount,
+      session?.urlFallback?.priceSummary?.baseFare,
+      session?.urlFallback?.priceSummary?.total,
       session?.selectedFlight?.fare?.pricePerAdult,
       session?.selectedFlight?.fare?.totalFare
-    ) || 5200
+    ) || 0
   );
 };
 
@@ -790,16 +818,29 @@ export const extractTaxAmount = (session) => {
     );
     return sum + (value ?? 0);
   }, 0);
+  const formattedJourneyTax = (Array.isArray(payload?.formatted?.journeys)
+    ? payload.formatted.journeys
+    : []
+  ).reduce((sum, journey) => {
+    const value = readNumber(
+      journey?.total_pricing?.tax,
+      journey?.total_pricing?.totalTax,
+      journey?.per_adult?.tax
+    );
+    return sum + (value ?? 0);
+  }, 0);
 
   return (
     readNumber(
       fareBreakdownTax > 0 ? fareBreakdownTax : null,
+      formattedJourneyTax > 0 ? formattedJourneyTax : null,
       payload?.formatted?.total_tax,
       payload?.formatted?.totalTax,
       payload?.total_tax,
       payload?.totalTax,
       payload?.Tax,
       payload?.tax,
+      session?.urlFallback?.priceSummary?.tax,
       session?.selectedFlight?.fare?.tax
     ) || 0
   );
@@ -807,6 +848,24 @@ export const extractTaxAmount = (session) => {
 
 const readPassengerCountsFromSearchKey = (searchKey) => {
   const parts = String(searchKey || "").trim().split("_");
+  const lastDateIndex = parts.reduce(
+    (lastIndex, part, index) =>
+      /^\d{4}-\d{2}-\d{2}$/.test(String(part || "").trim()) ? index : lastIndex,
+    -1
+  );
+  const countParts = parts
+    .slice(lastDateIndex >= 0 ? lastDateIndex + 1 : 0)
+    .filter((part) => /^\d+$/.test(String(part || "").trim()))
+    .slice(0, 3);
+
+  if (countParts.length >= 3) {
+    return {
+      adult: Math.max(Number(countParts[0] || 1), 1),
+      child: Math.max(Number(countParts[1] || 0), 0),
+      infant: Math.max(Number(countParts[2] || 0), 0),
+    };
+  }
+
   return {
     adult: Math.max(Number(parts[4] || 1), 1),
     child: Math.max(Number(parts[5] || 0), 0),
@@ -815,6 +874,18 @@ const readPassengerCountsFromSearchKey = (searchKey) => {
 };
 
 export const getBookingPassengerCounts = (session) => {
+  const priceRequest = session?.priceRequest || {};
+  const countsFromSearchKey = readPassengerCountsFromSearchKey(
+    priceRequest?.search_key || session?.selectedFlight?.booking?.searchKey
+  );
+  if (
+    countsFromSearchKey.adult > 0 ||
+    countsFromSearchKey.child > 0 ||
+    countsFromSearchKey.infant > 0
+  ) {
+    return countsFromSearchKey;
+  }
+
   const raw =
     session?.createItineraryResponse?.data?.raw ||
     session?.startPaymentResponse?.data?.raw ||
@@ -840,10 +911,7 @@ export const getBookingPassengerCounts = (session) => {
     };
   }
 
-  const priceRequest = session?.priceRequest || {};
-  return readPassengerCountsFromSearchKey(
-    priceRequest?.search_key || session?.selectedFlight?.booking?.searchKey
-  );
+  return countsFromSearchKey;
 };
 
 export const getBookingDetailsView = (session) => {
@@ -974,10 +1042,17 @@ export const getBookingDetailsView = (session) => {
 
 export const buildBookingFallbackQuery = (session) => {
   const view = getBookingDetailsView(session);
+  const baseFare = extractBaseFareAmount(session);
+  const tax = extractTaxAmount(session);
   const payload = {
     header: view?.header || null,
     departureFlight: view?.departureFlight || null,
     returnFlight: view?.returnFlight || null,
+    priceSummary: {
+      baseFare,
+      tax,
+      total: baseFare,
+    },
   };
   const encoded = safeEncodePayload(payload);
   return encoded ? `bookingFallback=${encoded}` : "";

@@ -9,8 +9,6 @@ import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoun
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
 import {
   getFlightInfo,
-  getFlightPrice,
-  getFlightTravelChecklist,
   getFlightWebSettings,
 } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
@@ -193,12 +191,6 @@ const TripCard = ({
 
   const openFareModal = async (flight) => {
     const searchTui = flight?.booking?.tui;
-    const priceRequest = flight?.booking?.priceRequest;
-
-    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
-      toast.error("Missing booking payload for the selected flight.");
-      return;
-    }
 
     setPrefetchingFlightId(flight?.id ?? null);
 
@@ -206,30 +198,11 @@ const TripCard = ({
       const webSettingsResponse = searchTui
         ? await getFlightWebSettings({ TUI: searchTui })
         : null;
-      const priceResponse = await getFlightPrice(priceRequest);
-      const checklistTui =
-        priceResponse?.data?.raw?.TUI ||
-        priceResponse?.raw?.TUI ||
-        priceResponse?.data?.tui ||
-        priceResponse?.data?.TUI ||
-        priceResponse?.tui ||
-        priceResponse?.TUI;
-      const checklistResponse = checklistTui
-        ? await getFlightTravelChecklist({
-            TUI: checklistTui,
-            // ClientID:
-            //   flight?.booking?.clientId ||
-            //   priceRequest?.ClientID ||
-            //   "FVI6V120g22Ei5ztGK0FIQ==",
-          })
-        : null;
 
       setPrefetchedFareData((prev) => ({
         ...prev,
         [flight.id]: {
           webSettingsResponse,
-          priceResponse,
-          checklistResponse,
         },
       }));
       setSelectedFlightId(flight?.id ?? null);

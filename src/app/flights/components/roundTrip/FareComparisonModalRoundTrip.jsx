@@ -219,6 +219,163 @@ const buildRoundTripSelectedFare = (onwardFare, returnFare) => {
   };
 };
 
+const getSelectedFareIndex = (fare) =>
+  fare?.rawFare?.index ??
+  fare?.rawFare?.Index ??
+  fare?.rawFare?.flightIndex ??
+  fare?.index ??
+  fare?.Index ??
+  fare?.flightIndex ??
+  fare?.id;
+
+const getPricePayload = (priceResponse) => {
+  const nestedPayload = priceResponse?.data?.data;
+  const directPayload = priceResponse?.data;
+
+  if (nestedPayload?.formatted || nestedPayload?.fare_breakdown || nestedPayload?.tui) {
+    return nestedPayload;
+  }
+
+  if (directPayload?.formatted || directPayload?.fare_breakdown || directPayload?.tui) {
+    return directPayload;
+  }
+
+  return priceResponse || {};
+};
+
+const getFormattedPricePayload = (priceResponse) => getPricePayload(priceResponse)?.formatted || null;
+
+const buildFormattedOnlyPriceResponse = (priceResponse) => {
+  const payload = getPricePayload(priceResponse);
+  const formatted = getFormattedPricePayload(priceResponse);
+  const fareBreakdown = Array.isArray(payload?.fare_breakdown) ? payload.fare_breakdown : [];
+  const tui =
+    payload?.tui ||
+    payload?.TUI ||
+    priceResponse?.tui ||
+    priceResponse?.TUI;
+
+  return {
+    success: priceResponse?.success ?? payload?.success,
+    message: priceResponse?.message ?? payload?.message,
+    tui,
+    data: {
+      success: payload?.success,
+      cached: payload?.cached,
+      tui,
+      search_key: payload?.search_key || payload?.SearchKey,
+      SSRSource: payload?.SSRSource,
+      ssrSource: payload?.ssrSource,
+      formatted,
+      fare_breakdown: fareBreakdown,
+    },
+    formatted,
+    fare_breakdown: fareBreakdown,
+  };
+};
+
+const getFormattedJourneyByType = (formatted, journeyType, fallbackIndex) => {
+  const journeys = Array.isArray(formatted?.journeys) ? formatted.journeys : [];
+  const type = String(journeyType || "").toUpperCase();
+
+  return (
+    journeys.find((journey) =>
+      String(journey?.journey_type || journey?.journeyType || "").toUpperCase() === type
+    ) ||
+    journeys[fallbackIndex] ||
+    null
+  );
+};
+
+const getFormattedRuleLabel = (journey, matchText, fallback) => {
+  const match = String(matchText || "").toLowerCase();
+  const rule = (journey?.rules || [])
+    .flatMap((group) => (Array.isArray(group?.Rule) ? group.Rule : []))
+    .find((item) => {
+      const head = String(item?.Head || "").toLowerCase();
+      const hasMatchingDescription = (item?.Info || []).some((info) =>
+        String(info?.Description || "").toLowerCase().includes(match)
+      );
+
+      return head.includes(match) || hasMatchingDescription;
+    });
+  const amount =
+    rule?.Info?.find((item) =>
+      String(item?.Description || "").toLowerCase().includes(match)
+    )?.AdultAmount || rule?.Info?.find((item) => item?.AdultAmount)?.AdultAmount;
+
+  if (!amount) return fallback;
+  return `${match === "reissue" ? "Change" : "Cancellation"} Charges ${amount}`;
+};
+
+const buildFareFromFormattedJourney = (fare, journey) => {
+  if (!journey) return fare;
+
+  const totalPrice = readNumber(
+    journey?.total_pricing?.net,
+    journey?.total_pricing?.gross
+  );
+  const perAdultPrice = readNumber(journey?.per_adult?.net, journey?.per_adult?.gross);
+  const fareName = String(journey?.fctype || fare?.name || "").toUpperCase();
+
+  return {
+    ...fare,
+    name: fareName || fare?.name,
+    price: totalPrice !== null ? formatCurrency(totalPrice) : fare?.price,
+    pricePerAdult: perAdultPrice !== null ? formatCurrency(perAdultPrice) : fare?.pricePerAdult,
+    netAmount: totalPrice ?? fare?.netAmount,
+    netPerAdult: perAdultPrice ?? fare?.netPerAdult,
+    formattedFare: journey,
+    baggage: {
+      cabin:
+        journey?.baggage?.cabin ||
+        journey?.baggage?.Cabin ||
+        fare?.baggage?.cabin ||
+        "Cabin baggage as per airline rules",
+      checkin:
+        journey?.baggage?.checkin ||
+        journey?.baggage?.CheckIn ||
+        fare?.baggage?.checkin ||
+        "Check-in baggage as per airline rules",
+    },
+    changes: {
+      charges: getFormattedRuleLabel(
+        journey,
+        "reissue",
+        fare?.changes?.charges || "Change charges as per airline rules"
+      ),
+      cancellation: getFormattedRuleLabel(
+        journey,
+        "cancellation",
+        fare?.changes?.cancellation || "Cancellation charges as per airline rules"
+      ),
+    },
+    addons: fare?.addons,
+  };
+};
+
+const buildRoundTripFareFromFormattedPrice = (selectedFare, priceResponse) => {
+  const formatted = getFormattedPricePayload(priceResponse);
+  if (!formatted) return selectedFare;
+
+  const onwardFare = buildFareFromFormattedJourney(
+    selectedFare?.roundTripFares?.onward || selectedFare,
+    getFormattedJourneyByType(formatted, "ONWARD", 0)
+  );
+  const returnFare = buildFareFromFormattedJourney(
+    selectedFare?.roundTripFares?.return || selectedFare,
+    getFormattedJourneyByType(formatted, "RETURN", 1)
+  );
+  const finalPrice = readNumber(formatted?.final_price);
+  const combinedFare = buildRoundTripSelectedFare(onwardFare, returnFare);
+
+  return {
+    ...combinedFare,
+    price: finalPrice !== null ? formatCurrency(finalPrice) : combinedFare.price,
+    netAmount: finalPrice ?? combinedFare.netAmount,
+  };
+};
+
 const FareComparisonModalRoundTrip = ({
   isOpen,
   onClose,
@@ -302,10 +459,20 @@ const FareComparisonModalRoundTrip = ({
   }, [flightData, flightNos.fareOptionsFlightNoParam, isOpen, prefetchedData?.fareOptionsResponse]);
 
   const performBookNow = useCallback(async (selectedFare) => {
-    const priceRequest = buildSelectedFarePriceRequest(
+    const selectedPriceRequest = buildSelectedFarePriceRequest(
       flightData?.booking?.priceRequest,
       selectedFare
     );
+    const priceRequest = {
+      ...selectedPriceRequest,
+      Trips: (selectedPriceRequest?.Trips || []).map((trip, index) => ({
+        ...trip,
+        Index:
+          index === 0
+            ? getSelectedFareIndex(selectedFare?.roundTripFares?.onward) ?? trip?.Index
+            : getSelectedFareIndex(selectedFare?.roundTripFares?.return) ?? trip?.Index,
+      })),
+    };
     const routeContext = {
       fromName: String(searchParams?.get("from") || "")
         .replace(/\s*\([^)]+\)\s*$/, "")
@@ -316,42 +483,57 @@ const FareComparisonModalRoundTrip = ({
         .trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
     };
-    if (!priceRequest?.search_key || !priceRequest?.Trips?.[0]?.Index) {
+    const hasTripIndexes =
+      Array.isArray(priceRequest?.Trips) &&
+      priceRequest.Trips.length > 0 &&
+      priceRequest.Trips.every(
+        (trip) => trip?.Index !== undefined && trip?.Index !== null
+      );
+
+    if (!priceRequest?.search_key || !hasTripIndexes) {
       toast.error("Missing booking payload for the selected flight.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const priceResponse =
-        prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
-      const checklistResponse = prefetchedData?.checklistResponse || null;
+      const priceResponse = await getFlightPrice(priceRequest);
+      const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
+      const selectedFareFromFormattedPrice = buildRoundTripFareFromFormattedPrice(
+        selectedFare,
+        formattedOnlyPriceResponse
+      );
+      const checklistTui =
+        formattedOnlyPriceResponse?.data?.tui ||
+        formattedOnlyPriceResponse?.data?.TUI ||
+        formattedOnlyPriceResponse?.tui ||
+        formattedOnlyPriceResponse?.TUI ||
+        formattedOnlyPriceResponse?.data?.formatted?.TUI ||
+        formattedOnlyPriceResponse?.data?.formatted?.tui ||
+        formattedOnlyPriceResponse?.formatted?.TUI ||
+        formattedOnlyPriceResponse?.formatted?.tui;
 
-      if (!checklistResponse) {
-        const checklistTui =
-          priceResponse?.data?.raw?.TUI ||
-          priceResponse?.raw?.TUI ||
-          priceResponse?.data?.tui ||
-          priceResponse?.data?.TUI ||
-          priceResponse?.tui ||
-          priceResponse?.TUI;
-
-        if (checklistTui) {
-          await getFlightTravelChecklist({
+      let checklistResponse = null;
+      if (checklistTui) {
+        try {
+          checklistResponse = await getFlightTravelChecklist({
             TUI: checklistTui,
             ClientID:
               flightData?.booking?.clientId ||
               priceRequest?.ClientID ||
               "FVI6V120g22Ei5ztGK0FIQ==",
           });
+        } catch (error) {
+          console.warn("Travel checklist unavailable", error);
         }
       }
       const nextSession = {
         selectedFlight: flightData,
-        selectedFare,
+        selectedFare: selectedFareFromFormattedPrice,
         routeContext,
         priceRequest,
-        priceResponse,
+        priceResponse: formattedOnlyPriceResponse,
+        checklistResponse,
         ssrRequest: null,
         ssrResponse: null,
       };
@@ -371,7 +553,7 @@ const FareComparisonModalRoundTrip = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [flightData, prefetchedData, router, searchParams]);
+  }, [flightData, router, searchParams]);
 
   useEffect(() => {
     if (!pendingFare || !isLoggedIn) return;

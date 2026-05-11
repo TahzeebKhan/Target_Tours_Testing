@@ -11,6 +11,7 @@ import {
 } from "@/features/flights/services/flightBooking";
 import {
     buildBookingFallbackQuery,
+    buildSelectedFarePriceRequest,
     writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { useAuth } from "@/app/context/AuthContext";
@@ -35,6 +36,137 @@ const readNumber = (...values) => {
 
 const pickValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "");
+
+const getSelectedFareIndex = (fare) =>
+    pickValue(
+        fare?.rawFare?.index,
+        fare?.rawFare?.Index,
+        fare?.rawFare?.flightIndex,
+        fare?.index,
+        fare?.Index,
+        fare?.flightIndex,
+        fare?.id
+    );
+
+const getPricePayload = (priceResponse) => {
+    const nestedPayload = priceResponse?.data?.data;
+    const directPayload = priceResponse?.data;
+
+    if (nestedPayload?.formatted || nestedPayload?.fare_breakdown || nestedPayload?.tui) {
+        return nestedPayload;
+    }
+
+    if (directPayload?.formatted || directPayload?.fare_breakdown || directPayload?.tui) {
+        return directPayload;
+    }
+
+    return priceResponse || {};
+};
+
+const getFormattedPricePayload = (priceResponse) => getPricePayload(priceResponse)?.formatted || null;
+
+const getFormattedJourney = (priceResponse) => {
+    const formatted = getFormattedPricePayload(priceResponse);
+    return Array.isArray(formatted?.journeys) ? formatted.journeys[0] || null : null;
+};
+
+const buildFormattedOnlyPriceResponse = (priceResponse) => {
+    const payload = getPricePayload(priceResponse);
+    const formatted = getFormattedPricePayload(priceResponse);
+    const fareBreakdown = Array.isArray(payload?.fare_breakdown) ? payload.fare_breakdown : [];
+    const tui =
+        payload?.tui ||
+        payload?.TUI ||
+        priceResponse?.tui ||
+        priceResponse?.TUI;
+
+    return {
+        success: priceResponse?.success ?? payload?.success,
+        message: priceResponse?.message ?? payload?.message,
+        tui,
+        data: {
+            success: payload?.success,
+            cached: payload?.cached,
+            tui,
+            search_key: payload?.search_key || payload?.SearchKey,
+            SSRSource: payload?.SSRSource,
+            ssrSource: payload?.ssrSource,
+            formatted,
+            fare_breakdown: fareBreakdown,
+        },
+        formatted,
+        fare_breakdown: fareBreakdown,
+    };
+};
+
+const getFormattedRuleLabel = (journey, head, fallback) => {
+    const rule = (journey?.rules || [])
+        .flatMap((group) => (Array.isArray(group?.Rule) ? group.Rule : []))
+        .find((item) => {
+            const ruleHead = String(item?.Head || "").toLowerCase();
+            const hasMatchingDescription = (item?.Info || []).some((info) =>
+                String(info?.Description || "").toLowerCase().includes(head)
+            );
+
+            return ruleHead.includes(head) || hasMatchingDescription;
+        });
+    const amount = rule?.Info?.find((item) =>
+        String(item?.Description || "").toLowerCase().includes(head)
+    )?.AdultAmount || rule?.Info?.find((item) => item?.AdultAmount)?.AdultAmount;
+
+    if (!amount) return fallback;
+    return `${head === "reissue" ? "Change" : "Cancellation"} Charges ${amount}`;
+};
+
+const buildSelectedFareFromFormattedPrice = (selectedFare, priceResponse) => {
+    const formatted = getFormattedPricePayload(priceResponse);
+    const journey = getFormattedJourney(priceResponse);
+
+    if (!formatted || !journey) return selectedFare;
+
+    const totalPrice = readNumber(
+        journey?.total_pricing?.net,
+        journey?.total_pricing?.gross,
+        formatted?.final_price
+    );
+    const perAdultPrice = readNumber(journey?.per_adult?.net, journey?.per_adult?.gross);
+    const fareName = String(journey?.fctype || selectedFare?.name || "").toUpperCase();
+
+    return {
+        ...selectedFare,
+        name: fareName || selectedFare?.name,
+        price: formatCurrency(totalPrice) || selectedFare?.price,
+        pricePerAdult: formatCurrency(perAdultPrice) || selectedFare?.pricePerAdult,
+        netAmount: totalPrice ?? selectedFare?.netAmount,
+        netPerAdult: perAdultPrice ?? selectedFare?.netPerAdult,
+        formattedFare: journey,
+        baggage: {
+            cabin:
+                journey?.baggage?.cabin ||
+                journey?.baggage?.Cabin ||
+                selectedFare?.baggage?.cabin ||
+                "Cabin baggage as per airline rules",
+            checkin:
+                journey?.baggage?.checkin ||
+                journey?.baggage?.CheckIn ||
+                selectedFare?.baggage?.checkin ||
+                "Check-in baggage as per airline rules",
+        },
+        changes: {
+            charges: getFormattedRuleLabel(
+                journey,
+                "reissue",
+                selectedFare?.changes?.charges || "Change charges as per airline rules"
+            ),
+            cancellation: getFormattedRuleLabel(
+                journey,
+                "cancellation",
+                selectedFare?.changes?.cancellation || "Cancellation charges as per airline rules"
+            ),
+        },
+        addons: selectedFare?.addons,
+    };
+};
 
 const formatCurrency = (value) => {
     const amount = readNumber(value);
@@ -507,7 +639,16 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
     }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse]);
     
     const performBookNow = useCallback(async (selectedFare) => {
-        const priceRequest = flightData?.booking?.priceRequest;
+        const basePriceRequest = flightData?.booking?.priceRequest;
+        const selectedFareIndex = getSelectedFareIndex(selectedFare);
+        const selectedPriceRequest = buildSelectedFarePriceRequest(basePriceRequest, selectedFare);
+        const priceRequest = {
+            ...selectedPriceRequest,
+            Trips: (selectedPriceRequest?.Trips || []).map((trip, index) => ({
+                ...trip,
+                Index: index === 0 ? selectedFareIndex ?? trip?.Index : trip?.Index,
+            })),
+        };
         const hasPricePayload =
             Boolean(priceRequest?.search_key) &&
             priceRequest?.Trips?.[0]?.Index !== undefined &&
@@ -527,30 +668,42 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
         setSubmittingFareId(selectedFare?.id ?? null);
         let shouldResetSubmitting = true;
         try {
-            const priceResponse =
-                prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
+            const priceResponse = await getFlightPrice(priceRequest);
+            const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
+            const selectedFareFromFormattedPrice = buildSelectedFareFromFormattedPrice(
+                selectedFare,
+                formattedOnlyPriceResponse
+            );
             const checklistTui =
-                priceResponse?.data?.raw?.TUI ||
-                priceResponse?.raw?.TUI ||
-                priceResponse?.data?.tui ||
-                priceResponse?.data?.TUI ||
-                priceResponse?.tui ||
-                priceResponse?.TUI;
+                formattedOnlyPriceResponse?.data?.tui ||
+                formattedOnlyPriceResponse?.data?.TUI ||
+                formattedOnlyPriceResponse?.tui ||
+                formattedOnlyPriceResponse?.TUI ||
+                formattedOnlyPriceResponse?.data?.formatted?.TUI ||
+                formattedOnlyPriceResponse?.data?.formatted?.tui ||
+                formattedOnlyPriceResponse?.formatted?.TUI ||
+                formattedOnlyPriceResponse?.formatted?.tui;
 
-            const checklistResponse = prefetchedData?.checklistResponse ||
-                (checklistTui ? await getFlightTravelChecklist({
-                    TUI: checklistTui,
-                    ClientID:
-                        flightData?.booking?.clientId ||
-                        priceRequest?.ClientID ||
-                        "FVI6V120g22Ei5ztGK0FIQ==",
-                }) : null);
+            let checklistResponse = null;
+            if (checklistTui) {
+                try {
+                    checklistResponse = await getFlightTravelChecklist({
+                        TUI: checklistTui,
+                        ClientID:
+                            flightData?.booking?.clientId ||
+                            priceRequest?.ClientID ||
+                            "FVI6V120g22Ei5ztGK0FIQ==",
+                    });
+                } catch (error) {
+                    console.warn("Travel checklist unavailable", error);
+                }
+            }
             const nextSession = {
                 selectedFlight: flightData,
-                selectedFare,
+                selectedFare: selectedFareFromFormattedPrice,
                 routeContext,
                 priceRequest,
-                priceResponse,
+                priceResponse: formattedOnlyPriceResponse,
                 checklistResponse,
                 ssrRequest: null,
                 ssrResponse: null,
@@ -575,7 +728,7 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 setSubmittingFareId(null);
             }
         }
-    }, [flightData, prefetchedData, router, searchParams]);
+    }, [flightData, router, searchParams]);
 
     useEffect(() => {
         if (!pendingFare || !isLoggedIn) return;

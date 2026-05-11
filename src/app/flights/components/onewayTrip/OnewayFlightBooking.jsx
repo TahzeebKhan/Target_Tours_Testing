@@ -19,8 +19,6 @@ import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModa
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import {
   getFlightInfo,
-  getFlightPrice,
-  getFlightTravelChecklist,
   getFlightWebSettings,
 } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
@@ -115,18 +113,7 @@ const OnewayFlightBooking = ({
 
   const openFareModal = async (flight) => {
     const flightId = flight?.id ?? null;
-    const priceRequest = flight?.booking?.priceRequest;
     const searchTui = flight?.booking?.tui;
-    const flightNo = String(
-      flight?.booking?.flightNo ||
-        flight?.details?.flightNo ||
-        flight?.airlines?.[0]?.code ||
-        ""
-    ).match(/\d+/)?.[0];
-    const hasPricePayload =
-      Boolean(priceRequest?.search_key) &&
-      priceRequest?.Trips?.[0]?.Index !== undefined &&
-      priceRequest?.Trips?.[0]?.Index !== null;
 
     if (!flightId) return;
 
@@ -134,47 +121,22 @@ const OnewayFlightBooking = ({
     setFareModalOpen(flightId);
     setPrefetchingFlightId(flightId);
     try {
-      const [webSettingsResponse, priceResponse] = await Promise.all([
-        searchTui ? getFlightWebSettings({ TUI: searchTui }) : Promise.resolve(null),
-        hasPricePayload
-          ? getFlightPrice(priceRequest)
-          : Promise.resolve(null),
-      ]);
-
-      const checklistTui =
-        priceResponse?.data?.raw?.TUI ||
-        priceResponse?.raw?.TUI ||
-        priceResponse?.data?.tui ||
-        priceResponse?.data?.TUI ||
-        priceResponse?.tui ||
-        priceResponse?.TUI;
-
-      const checklistResponse = checklistTui
-        ? await getFlightTravelChecklist({
-            TUI: checklistTui,
-            ClientID:
-              flight?.booking?.clientId ||
-              priceRequest?.ClientID ||
-              "FVI6V120g22Ei5ztGK0FIQ==",
-          })
+      const webSettingsResponse = searchTui
+        ? await getFlightWebSettings({ TUI: searchTui })
         : null;
 
       setPrefetchedFareData((prev) => ({
         ...prev,
         [flightId]: {
           webSettingsResponse,
-          priceResponse,
           fareOptionsResponse: null,
-          checklistResponse,
         },
       }));
       setSelectedFareFlight({
         ...flight,
         prefetchedFareData: {
           webSettingsResponse,
-          priceResponse,
           fareOptionsResponse: null,
-          checklistResponse,
         },
       });
     } catch (error) {

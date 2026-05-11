@@ -21,7 +21,7 @@
 
 .container {
   display: flex;
-  gap: 24px;
+  gap: 5px;
   width: 100%;
   max-width: 1520px;
   height: 100%;
@@ -29,7 +29,7 @@
 
 .leftContainer {
   display: flex;
-  flex: 0 0 340px;
+  flex: 0 0 398px;
   flex-direction: column;
   justify-content: space-between;
   padding-bottom: 25px;

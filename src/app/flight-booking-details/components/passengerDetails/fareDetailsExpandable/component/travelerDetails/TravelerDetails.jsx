@@ -25,6 +25,9 @@ const buildPassengerSlots = (bookingSession) => {
     return slots.length > 0 ? slots : [{ id: "adult-1", type: "ADULT" }];
 };
 
+const getPtcForTravelerType = (type) =>
+    type === "CHILD" ? "CHD" : type === "INFANT" ? "INF" : "ADT";
+
 const buildTravelerPayload = (slot, isOpen = true) => ({
     id: slot?.id || "adult-1",
     type: slot?.type || "ADULT",
@@ -35,7 +38,7 @@ const buildTravelerPayload = (slot, isOpen = true) => ({
     Age: "26",
     DOB: "2000-01-01",
     Gender: "Male",
-    PTC: slot?.type === "CHILD" ? "CHD" : slot?.type === "INFANT" ? "INF" : "ADT",
+    PTC: getPtcForTravelerType(slot?.type),
     Nationality: "IN",
     PassportNo: "1234567",
     PLI: "NOIDA",
@@ -62,6 +65,7 @@ const hydrateTravelers = (savedTravelers = [], passengerSlots = []) => {
             ...traveler,
             id: slot.id,
             type: slot.type,
+            PTC: getPtcForTravelerType(slot.type),
             isOpen: true,
         };
     });
