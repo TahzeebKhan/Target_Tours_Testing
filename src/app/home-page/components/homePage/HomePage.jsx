@@ -1254,6 +1254,11 @@ const HomePage = ({
     }
 
     setVideoReady(false);
+    const fallbackTimer = window.setTimeout(() => {
+      setVideoReady(true);
+    }, 3500);
+
+    return () => window.clearTimeout(fallbackTimer);
   }, [heroData.videoUrl, prefersReducedMotion]);
 
   useEffect(() => {
@@ -1435,7 +1440,9 @@ const HomePage = ({
               disablePictureInPicture
               preload="metadata"
               aria-hidden="true"
+              onLoadedMetadata={() => setVideoReady(true)}
               onLoadedData={() => setVideoReady(true)}
+              onCanPlay={() => setVideoReady(true)}
               onError={() => setVideoReady(true)}
             />
           )}

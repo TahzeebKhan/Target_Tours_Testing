@@ -180,6 +180,46 @@ const getSeatFuid = (seat) =>
 const getJourneyFuid = (journeyIndex) =>
   Number.isFinite(Number(journeyIndex)) ? Number(journeyIndex) + 1 : undefined;
 
+const isSeatAvailableStatus = (value) => {
+  if (typeof value === "boolean") return value;
+  if (value === 1) return true;
+  if (value === 0) return false;
+
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return false;
+  return ["open", "available", "true", "yes", "y"].includes(normalized);
+};
+
+const getSeatFlags = (seat) => {
+  const info = String(seat?.SeatInfo || seat?.seatInfo || "").toLowerCase();
+  const description = String(
+    seat?.SeatDesc || seat?.seatDesc || seat?.description || ""
+  ).toLowerCase();
+  const formattedType = String(seat?.type || seat?.seatType || "").toLowerCase();
+
+  return {
+    isWindow:
+      info.includes("window") ||
+      description.includes("window") ||
+      formattedType.includes("window"),
+    isAisle:
+      info.includes("aisle") ||
+      description.includes("aisle") ||
+      formattedType.includes("aisle"),
+    isChildInfantRestricted:
+      info.includes("ees") ||
+      description.includes("ees") ||
+      formattedType.includes("ees"),
+  };
+};
+
+const getSeatCoordinateColumn = (seat) =>
+  readNumber(seat?.col, seat?.column, seat?.XValue, seat?.xValue);
+
+const getSeatStatusLabel = (seat) =>
+  String(seat?.SeatStatus || seat?.seatStatus || seat?.status || "Unknown").trim() ||
+  "Unknown";
+
 const getSeatType = (seat) => {
   const status = String(
     seat?.SeatStatus || seat?.seatStatus || seat?.status || ""
@@ -188,17 +228,35 @@ const getSeatType = (seat) => {
     seat?.SeatDesc || seat?.seatDesc || seat?.description || seat?.SeatInfo || ""
   ).toLowerCase();
   const info = String(seat?.SeatInfo || seat?.seatInfo || "").toLowerCase();
-  const isAvailable = Boolean(
-    seat?.AvailStatus ?? seat?.available ?? seat?.isAvailable
-  );
+  const formattedType = String(seat?.type || seat?.seatType || "").toLowerCase();
   const amount = getSeatPrice(seat);
+  const unavailableStatuses = [
+    "fleetblocked",
+    "fleet blocked",
+    "reserved",
+    "booked",
+    "unknown",
+    "restricted",
+    "ees",
+    "unavailable",
+    "blocked",
+  ];
+  const hasUnavailableStatus = unavailableStatuses.some((item) =>
+    status.includes(item) ||
+    description.includes(item) ||
+    info.includes(item) ||
+    formattedType.includes(item)
+  );
 
-  if (!isAvailable || status.includes("unavailable") || status.includes("booked")) {
+  if (
+    !isSeatAvailableStatus(seat?.AvailStatus ?? seat?.available ?? seat?.isAvailable) ||
+    hasUnavailableStatus
+  ) {
     return "taken";
   }
   if (description.includes("non") && description.includes("reclin")) return "black";
-  if (description.includes("exit") || info.includes("exit")) return "red";
-  if (description.includes("leg") || info.includes("leg")) return "xl";
+  if (description.includes("exit") || info.includes("exit") || formattedType.includes("exit")) return "red";
+  if (description.includes("leg") || info.includes("leg") || formattedType.includes("legroom")) return "xl";
   if (!amount || amount <= 0) return "blue";
   if (amount <= 525) return "blue";
   if (amount <= 1103) return "purple";
@@ -226,13 +284,33 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
     const column = match[2];
     const columnIndex = SEAT_COLUMNS.indexOf(column);
     if (!Number.isFinite(rowId) || columnIndex < 0) return;
+    const coordinateColumn = getSeatCoordinateColumn(seat);
+    const side =
+      Number.isFinite(coordinateColumn)
+        ? coordinateColumn <= 7
+          ? "left"
+          : "right"
+        : columnIndex < 3
+          ? "left"
+          : "right";
 
     if (!rowMap.has(rowId)) {
       rowMap.set(rowId, Array.from({ length: SEAT_COLUMNS.length }, () => "grey"));
     }
 
     const type = getSeatType(seat);
-    rowMap.get(rowId)[columnIndex] = type;
+    const flags = getSeatFlags(seat);
+    const statusLabel = getSeatStatusLabel(seat);
+    rowMap.get(rowId)[columnIndex] = {
+      type,
+      seatNumber: `${rowId}${column}`,
+      rowId,
+      column,
+      side,
+      coordinateColumn,
+      statusLabel,
+      ...flags,
+    };
     seatsById[`${rowId}-${column}`] = {
       ...seat,
       rawId: seat?.id,
@@ -242,6 +320,8 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
       seatNumber: `${rowId}-${column}`,
       price: getSeatPrice(seat),
       type,
+      statusLabel,
+      ...flags,
     };
   });
 
@@ -519,28 +599,32 @@ const SeatingDetails = () => {
 
 
   const toggleSeat = (rowId, colLabel, type, seatIdPrefix = "") => {
-    if (type === "taken") return;
+    if (type === "taken" || type === "grey") return;
     const seatId = `${seatIdPrefix}${rowId}-${colLabel}`;
-    const journeySelectedCount = (seatIdPrefix
-      ? selectedSeats.filter((id) => id.startsWith(seatIdPrefix))
-      : selectedSeats
-    ).length;
+    const passengerIndex = Math.max(Number(selectedPassenger || 1) - 1, 0);
 
     setSelectedSeats((prev) => {
       const selectedSeatIds = prev.filter(Boolean);
       const selectedForJourney = seatIdPrefix
         ? selectedSeatIds.filter((id) => id.startsWith(seatIdPrefix))
         : selectedSeatIds;
+      const selectedForOtherJourneys = seatIdPrefix
+        ? selectedSeatIds.filter((id) => !id.startsWith(seatIdPrefix))
+        : [];
 
       if (selectedSeatIds.includes(seatId)) {
         return selectedSeatIds.filter((id) => id !== seatId);
       }
 
-      if (selectedForJourney.length >= passengerCount || journeySelectedCount >= passengerCount) {
-        return selectedSeatIds;
-      }
+      const nextSelectedForJourney = selectedForJourney
+        .filter((id) => id !== seatId)
+        .slice(0, passengerCount);
+      nextSelectedForJourney[passengerIndex] = seatId;
 
-      return [...selectedSeatIds, seatId];
+      return [
+        ...selectedForOtherJourneys,
+        ...nextSelectedForJourney.filter(Boolean),
+      ];
     });
   };
 

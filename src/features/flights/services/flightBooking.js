@@ -74,8 +74,34 @@ const postWithRetry = async (
   throw lastError;
 };
 
+const getTravellerChecklist = (responseData) =>
+  responseData?.data?.raw?.TravellerCheckList ||
+  responseData?.data?.data?.raw?.TravellerCheckList ||
+  responseData?.raw?.TravellerCheckList ||
+  responseData?.data?.TravellerCheckList ||
+  responseData?.TravellerCheckList;
+
 const hasValidTravellerChecklist = (responseData) =>
-  Array.isArray(responseData?.data?.raw?.TravellerCheckList);
+  Array.isArray(getTravellerChecklist(responseData));
+
+const normalizeTravellerChecklistResponse = (responseData) => {
+  if (!hasValidTravellerChecklist(responseData)) return responseData;
+  if (Array.isArray(responseData?.data?.raw?.TravellerCheckList)) return responseData;
+
+  const nestedData = responseData?.data?.data || {};
+  const raw = nestedData?.raw || responseData?.raw || {
+    TravellerCheckList: getTravellerChecklist(responseData),
+  };
+
+  return {
+    ...responseData,
+    data: {
+      ...(responseData?.data || {}),
+      ...nestedData,
+      raw,
+    },
+  };
+};
 
 const createInvalidTravellerChecklistError = (responseData) => {
   const error = new Error("TravellerCheckList is not an array");
@@ -204,7 +230,7 @@ export const getFlightTravelChecklist = async (payload) => {
       );
 
       if (hasValidTravellerChecklist(response?.data)) {
-        return response?.data;
+        return normalizeTravellerChecklistResponse(response?.data);
       }
 
       lastError = createInvalidTravellerChecklistError(response?.data);
