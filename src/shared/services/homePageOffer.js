@@ -6,5 +6,6 @@ export const fetchHomePageOffer = async () => {
       domain: process.env.NEXT_PUBLIC_DOMAIN,
     },
   });
-  return response.data;
+
+  return response.data?.data;
 };
