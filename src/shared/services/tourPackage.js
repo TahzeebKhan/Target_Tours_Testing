@@ -122,6 +122,22 @@ const getTourImage = (item) => {
     return media ? API_BASE_URL + media : "/tourList/cardItem1.jpg";
 };
 
+const getFlightsTotalPrice = (item) => {
+    const flights = item?.flights || [];
+
+    if (!Array.isArray(flights)) return 0;
+
+    return flights.reduce((total, flight) => {
+        const amount = Number(flight?.price?.amount || 0);
+        return Number.isFinite(amount) ? total + amount : total;
+    }, 0);
+};
+
+const safeNumber = (value) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+};
+
 const normalizeTour = (item) => ({
     id: item.id,
     image: getTourImage(item),
@@ -140,6 +156,11 @@ const normalizeTour = (item) => ({
         ? `₹ ${item.started_price.toLocaleString()}`
         : "N/A",
     startedPrice: item.started_price || 0,
+    withFlightPrice: safeNumber(item?.with_flight_price),
+    withoutFlightPrice: safeNumber(item?.without_flight_price),
+    flightAmountDeducted: safeNumber(item?.flight_amount_deducted),
+    flights: item?.flights || [],
+    flightsTotalPrice: getFlightsTotalPrice(item),
     fromCity: item.start_location?.city || item.start_location?.name || "",
     with_flight: Boolean(item.with_flight),
     raw: item,

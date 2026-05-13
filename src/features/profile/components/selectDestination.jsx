@@ -6,34 +6,96 @@ import styles from "./selectDestination.module.css";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// const REGIONS = [
-//   { id: "africa", name: "Africa", image: "/images/africa-map.svg" },
-//   { id: "asia", name: "Asia", image: "/images/asia-map.svg" },
-//   { id: "europe", name: "Europe", image: "/images/europe-map.svg" },
-// ];
-const REGIONS = [
-  { id: "africa", name: "Africa", image: "/images/africa.png" },
-  { id: "asia", name: "Asia", image: "/images/asia.png" },
-  { id: "europe", name: "Europe", image: "/images/europe.png" },
-  {
-    id: "north-america",
-    name: "North America",
-    image: "/images/northAmerica.png",
-  },
-  {
-    id: "south-america",
-    name: "South America",
-    image: "/images/southAmerica.png",
-  },
-  { id: "australia", name: "Australia", image: "/images/australia.png" },
-  { id: "antarctica", name: "Antarctica", image: "/images/antarctica.png" },
-];
+const formatRegionLabel = (value = "") =>
+  value
+    .toLowerCase()
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const getRegionImagePath = (value = "") => {
+  const [firstPart, ...restParts] = String(value)
+    .toLowerCase()
+    .split(/[-_\s]+/)
+    .filter(Boolean);
+
+  if (!firstPart) return "/fallback.jpg";
+
+  const fileName = [
+    firstPart,
+    ...restParts.map((part) => part.charAt(0).toUpperCase() + part.slice(1)),
+  ].join("");
+
+  return `/images/${fileName}.png`;
+};
+
+const normalizeRegion = (region) => {
+  if (!region) return null;
+
+  const value =
+    typeof region === "string"
+      ? region
+      : region.value ||
+        region.region ||
+        region.code ||
+        region.key ||
+        region.slug ||
+        region.name;
+
+  if (!value) return null;
+
+  const id = String(value).toLowerCase().replace(/[_\s]+/g, "-");
+  const name =
+    typeof region === "string"
+      ? formatRegionLabel(region)
+      : region.label || region.title || region.name || formatRegionLabel(value);
+
+  return {
+    id,
+    name,
+    value: String(value),
+    image:
+      typeof region === "string"
+        ? getRegionImagePath(region)
+        : region.image || region.imageUrl || getRegionImagePath(value),
+  };
+};
+
+const fetchAvailableRegions = async () => {
+  const query = new URLSearchParams({
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+  });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-package-filters/available-regions?${query.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch available regions");
+  }
+
+  const payload = await response.json();
+  const regions =
+    payload?.data?.regions || payload?.data || payload?.regions || payload;
+
+  return Array.isArray(regions)
+    ? regions.map(normalizeRegion).filter(Boolean)
+    : [];
+};
 
 export default function SelectDestination({ onClose }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(true);
-  const [activeRegion, setActiveRegion] = useState("africa");
+  const [activeRegion, setActiveRegion] = useState("");
   const [selectedCountries, setSelectedCountries] = useState(() =>
     String(searchParams.get("country") || "")
       .split(",")
@@ -41,8 +103,16 @@ export default function SelectDestination({ onClose }) {
       .filter(Boolean)
   );
 
-  const activeRegionLabel =
-    REGIONS.find((region) => region.id === activeRegion)?.name || "";
+  const { data: regions = [] } = useQuery({
+    queryKey: ["holiday-available-regions"],
+    queryFn: fetchAvailableRegions,
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const activeRegionOption = regions.find(
+    (region) => region.id === activeRegion
+  );
+  const activeRegionLabel = activeRegionOption?.name || "";
 
   const { data: availableLocationsResponse } = useQuery({
     queryKey: ["holiday-available-locations", activeRegionLabel],
@@ -72,6 +142,7 @@ export default function SelectDestination({ onClose }) {
 
       return response.json();
     },
+    enabled: Boolean(activeRegionLabel),
     staleTime: 1000 * 60 * 10,
   });
 
@@ -89,6 +160,12 @@ export default function SelectDestination({ onClose }) {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!activeRegion && regions.length > 0) {
+      setActiveRegion(regions[0].id);
+    }
+  }, [activeRegion, regions]);
+
   const closeModal = () => {
     setOpen(false);
     onClose?.();
@@ -104,7 +181,7 @@ export default function SelectDestination({ onClose }) {
 
   const handleReset = () => {
     setSelectedCountries([]);
-    setActiveRegion("africa");
+    setActiveRegion(regions[0]?.id || "");
   };
 
   const handleApply = () => {
@@ -161,7 +238,7 @@ export default function SelectDestination({ onClose }) {
             </h2>
 
             <div className={styles.regionGrid}>
-              {REGIONS.map((region) => (
+              {regions.map((region) => (
                 <div
                   key={region.id}
                   className={`${styles.regionCard} ${

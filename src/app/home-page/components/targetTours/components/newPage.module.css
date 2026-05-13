@@ -127,7 +127,7 @@
 
 /* Text overlay */
 .cardOverlay {
-  bottom: -29.9%;
+  /* bottom: -32.9%; */
   transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   position: absolute;
   bottom: -34.6%;

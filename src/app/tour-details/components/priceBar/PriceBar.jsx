@@ -8,6 +8,7 @@ import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSes
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { toast } from "react-toastify";
 
 const PriceBar = ({
   onCall,
@@ -35,6 +36,8 @@ const PriceBar = ({
     data?.started_price
       ? `₹ ${Number(data.started_price).toLocaleString("en-IN")}`
       : "";
+  const hasDepartures =
+    Array.isArray(data?.package_departures) && data.package_departures.length > 0;
 
   // fallback hotel
   const sampleHotel = hotel || {
@@ -68,6 +71,11 @@ const PriceBar = ({
 
   const handleBookNow = () => {
     if (authLoading) return;
+
+    if (!hasDepartures) {
+      toast.error("No departures available.");
+      return;
+    }
 
     if (!isLoggedIn) {
       setPendingBookNow(true);
