@@ -247,7 +247,10 @@ export function TourBookingProvider({ children }) {
     let isActive = true;
     const loadFullPackage = async () => {
       try {
-        const fullPackage = await getTourBookingPackage(packageDetails.id);
+        const fullPackage = await getTourBookingPackage(
+          packageDetails.id,
+          packageDetails.with_flight
+        );
         if (!isActive || !fullPackage) return;
 
         const nextPackageDetails = normalizeTourBookingPackage(fullPackage);
@@ -265,6 +268,10 @@ export function TourBookingProvider({ children }) {
             activitySelectionMode: prev?.activitySelectionMode || null,
             packageDepartureId:
               prev?.packageDepartureId || nextPackageDetails.packageDepartureId,
+            with_flight:
+              typeof prev?.with_flight === "boolean"
+                ? prev.with_flight
+                : nextPackageDetails.with_flight,
           };
           writeTourBookingPackage(mergedPackageDetails);
           return mergedPackageDetails;

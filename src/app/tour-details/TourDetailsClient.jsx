@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +20,8 @@ import ArrivalToronto from "./components/arrivalToronto/ArrivalToronto";
 import PriceBar from "./components/priceBar/PriceBar";
 import styles from "./page.module.css";
 import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
+
+const SELECTED_TOUR_OPTION_KEY = "selectedTourOption";
 
 /* ---------------- Error UI ---------------- */
 const ErrorState = ({ title, description }) => {
@@ -46,12 +48,20 @@ const ErrorState = ({ title, description }) => {
 
 /* ---------------- Query fn ---------------- */
 const fetchTourDetails = async ({ queryKey }) => {
-  const [, tourId] = queryKey;
+  const [, tourId, withFlight] = queryKey;
   const token = Cookies.get("auth_token");
+  const params = {
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+  };
+
+  if (withFlight === "true" || withFlight === "false") {
+    params.with_flight = withFlight;
+  }
 
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-packages/${tourId}?domain=${process.env.NEXT_PUBLIC_DOMAIN}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/holiday-packages/${tourId}`,
     {
+      params,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }
   );
@@ -62,6 +72,8 @@ const fetchTourDetails = async ({ queryKey }) => {
 const TourDetailsClient = () => {
   const searchParams = useSearchParams();
   const tourId = searchParams.get("id");
+  const withFlight = searchParams.get("with_flight");
+  const selectedPrice = searchParams.get("selected_price");
   const itineraryRef = useRef(null);
 
   const scrollToItinerary = () => {
@@ -84,12 +96,50 @@ const TourDetailsClient = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["tour-details", tourId],
+    queryKey: ["tour-details", tourId, withFlight],
     queryFn: fetchTourDetails,
     enabled: !!tourId,           // 🔒 don’t fire without ID
     staleTime: 1000 * 60 * 5,     // 5 min cache
     retry: 1,
   });
+
+  const displayTourDetails = useMemo(() => {
+    if (!tourDetails) return tourDetails;
+
+    const selectedWithFlight =
+      withFlight === "true" ? true : withFlight === "false" ? false : undefined;
+    let selectedPriceValue = Number(selectedPrice);
+
+    if (
+      (!Number.isFinite(selectedPriceValue) || selectedPriceValue <= 0) &&
+      typeof window !== "undefined"
+    ) {
+      try {
+        const selectedOption = JSON.parse(
+          window.sessionStorage.getItem(SELECTED_TOUR_OPTION_KEY) || "{}"
+        );
+        const matchesSelection =
+          String(selectedOption?.id) === String(tourId) &&
+          selectedOption?.with_flight === selectedWithFlight;
+
+        if (matchesSelection) {
+          selectedPriceValue = Number(selectedOption?.selected_price);
+        }
+      } catch {
+        selectedPriceValue = 0;
+      }
+    }
+
+    return {
+      ...tourDetails,
+      ...(Number.isFinite(selectedPriceValue) && selectedPriceValue > 0
+        ? { started_price: selectedPriceValue }
+        : {}),
+      ...(typeof selectedWithFlight === "boolean"
+        ? { with_flight: selectedWithFlight }
+        : {}),
+    };
+  }, [selectedPrice, tourDetails, tourId, withFlight]);
 
   useLayoutEffect(() => {
     if (!tourId) return;
@@ -140,7 +190,7 @@ const TourDetailsClient = () => {
     return <CustomLoaderHomePage />;
   }
 
-  if (isError || !tourDetails) {
+  if (isError || !displayTourDetails) {
     return (
       <ErrorState
         title="Something went wrong"
@@ -153,24 +203,24 @@ const TourDetailsClient = () => {
   return (
     <div>
       <TourBookingHeroSection
-        data={tourDetails}
+        data={displayTourDetails}
         onViewItinerary={scrollToItinerary}
       />
-      <BetweenMajesticPeaks data={tourDetails} />
-      <UpcomingDepartures data={tourDetails} />
-      <TripHighlights data={tourDetails} />
+      <BetweenMajesticPeaks data={displayTourDetails} />
+      <UpcomingDepartures data={displayTourDetails} />
+      <TripHighlights data={displayTourDetails} />
 
       <div className={styles.priceBarContainer}>
-        <PriceBar data={tourDetails} />
+        <PriceBar data={displayTourDetails} />
       </div>
 
       <div ref={itineraryRef}>
-        <ArrivalToronto data={tourDetails} />
+        <ArrivalToronto data={displayTourDetails} />
       </div>
-      <InfoStrip data={tourDetails} />
-      <WhereWillYouStay data={tourDetails} />
+      <InfoStrip data={displayTourDetails} />
+      <WhereWillYouStay data={displayTourDetails} />
 
-      <Testimonial data={tourDetails} />
+      <Testimonial data={displayTourDetails} />
 
       {/* <TravelInspiration /> */}
 

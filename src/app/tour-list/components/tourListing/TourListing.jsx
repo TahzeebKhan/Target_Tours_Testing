@@ -39,6 +39,8 @@ const LoadingCards = ({ viewType = "grid", count = 4 }) =>
     </div>
   ));
 
+const SELECTED_TOUR_OPTION_KEY = "selectedTourOption";
+
 const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
@@ -108,12 +110,73 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
       .join("|")
       .toLowerCase();
 
+  const getFlightsTotalPrice = (item) => {
+    const storedTotal = Number(item?.flightsTotalPrice || 0);
+    if (Number.isFinite(storedTotal) && storedTotal > 0) return storedTotal;
+
+    const flights = item?.raw?.flights || item?.flights || [];
+
+    if (!Array.isArray(flights)) return 0;
+
+    return flights.reduce((total, flight) => {
+      const amount = Number(flight?.price?.amount || 0);
+      return Number.isFinite(amount) ? total + amount : total;
+    }, 0);
+  };
+
+  const getExplicitOptionPrice = (item, withFlight) => {
+    const price = withFlight
+      ? item?.withFlightPrice || item?.raw?.with_flight_price
+      : item?.withoutFlightPrice || item?.raw?.without_flight_price;
+    const amount = Number(price || 0);
+
+    return Number.isFinite(amount) ? amount : 0;
+  };
+
   const getPackageOptions = (item) => {
     const selectedKey = normalizePackageKey(item);
     const matchedOptions = tourData.filter(
       (tour) => normalizePackageKey(tour) === selectedKey
     );
     const options = matchedOptions.length ? matchedOptions : [item];
+    const withFlightOption =
+      options.find((option) => option.with_flight && Number(option.startedPrice) > 0) ||
+      options.find((option) => option.with_flight) ||
+      options.find((option) => getFlightsTotalPrice(option) > 0);
+    const flightPriceSource =
+      options.find((option) => getFlightsTotalPrice(option) > 0) ||
+      withFlightOption;
+    const flightTotalPrice = getFlightsTotalPrice(flightPriceSource);
+    const hasExplicitFlightPrices =
+      getExplicitOptionPrice(withFlightOption, true) > 0 ||
+      getExplicitOptionPrice(withFlightOption, false) > 0;
+
+    if (withFlightOption && (flightTotalPrice > 0 || hasExplicitFlightPrices)) {
+      const pricedFlightOption = {
+        ...withFlightOption,
+        flights: withFlightOption.flights?.length
+          ? withFlightOption.flights
+          : flightPriceSource?.flights || flightPriceSource?.raw?.flights || [],
+        flightsTotalPrice: flightTotalPrice,
+        withFlightPrice:
+          withFlightOption.withFlightPrice || flightPriceSource?.withFlightPrice || 0,
+        withoutFlightPrice:
+          withFlightOption.withoutFlightPrice || flightPriceSource?.withoutFlightPrice || 0,
+      };
+
+      return [
+        {
+          ...pricedFlightOption,
+          optionKey: `${pricedFlightOption.id}-without-flight`,
+          with_flight: false,
+        },
+        {
+          ...pricedFlightOption,
+          optionKey: `${pricedFlightOption.id}-with-flight`,
+          with_flight: true,
+        },
+      ];
+    }
 
     return [...options].sort((a, b) => {
       if (a.with_flight === b.with_flight) return a.startedPrice - b.startedPrice;
@@ -129,9 +192,30 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     setSelectedPackage(null);
   };
 
-  const handleBookNow = (id) => {
+  const handleBookNow = (id, withFlight, selectedPrice) => {
+    const selectedWithFlight = Boolean(withFlight);
+    const params = new URLSearchParams({
+      id: String(id),
+      with_flight: String(selectedWithFlight),
+    });
+
+    if (Number.isFinite(selectedPrice) && selectedPrice > 0) {
+      params.set("selected_price", String(selectedPrice));
+    }
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(
+        SELECTED_TOUR_OPTION_KEY,
+        JSON.stringify({
+          id,
+          with_flight: selectedWithFlight,
+          selected_price: selectedPrice,
+        })
+      );
+    }
+
     closePackageOptions();
-    router.push(`/tour-details?id=${id}`);
+    router.push(`/tour-details?${params.toString()}`);
   };
 
   const toggleExpand = (id) => {
@@ -195,6 +279,25 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const truncateText = (text = "", maxLength = 29) => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + "...";
+  };
+
+  const formatPrice = (amount) => {
+    if (!Number.isFinite(amount) || amount <= 0) return "N/A";
+    return `₹ ${amount.toLocaleString("en-IN")}`;
+  };
+
+  const getPackageOptionAmount = (option) => {
+    const explicitPrice = getExplicitOptionPrice(option, option.with_flight);
+    if (explicitPrice > 0) return explicitPrice;
+
+    const startedPrice = Number(option.startedPrice || 0);
+    return option.with_flight
+      ? startedPrice
+      : startedPrice - getFlightsTotalPrice(option);
+  };
+
+  const getPackageOptionPrice = (option) => {
+    return formatPrice(getPackageOptionAmount(option));
   };
 
   return (
@@ -856,8 +959,14 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                   <button
                     type="button"
                     className={styles.optionCard}
-                    key={option.id}
-                    onClick={() => handleBookNow(option.id)}
+                    key={option.optionKey || `${option.id}-${option.with_flight ? "with" : "without"}`}
+                    onClick={() =>
+                      handleBookNow(
+                        option.id,
+                        option.with_flight,
+                        getPackageOptionAmount(option)
+                      )
+                    }
                   >
                     <div className={styles.optionText}>
                       <span>
@@ -870,7 +979,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                     </div>
 
                     <div className={styles.optionPrice}>
-                      <strong>{option.price}</strong>
+                      <strong>{getPackageOptionPrice(option)}</strong>
                       <span>per person</span>
                     </div>
 

@@ -9,6 +9,7 @@ import { saveTourBookingPackage } from "@/app/tour-bookings/utils/tourBookingSes
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { toast } from "react-toastify";
 const safeDate = (value) => {
   const d = new Date(value);
   return isNaN(d) ? null : d;
@@ -158,6 +159,11 @@ const UpcomingDepartures = ({ data }) => {
 
   const handleBookNow = (departure) => {
     if (authLoading) return;
+
+    if (!departures.length || !departure) {
+      toast.error("No departures available.");
+      return;
+    }
 
     if (!isLoggedIn) {
       setPendingDeparture(departure);

@@ -441,7 +441,7 @@ const TravelerDetails = () => {
                                 <input
                                     className={getFieldClassName(getTravelerFieldError(traveler, "country_code"))}
                                     type="text"
-                                    placeholder="Country Code (optional)"
+                                    placeholder="Country Code"
                                     value={traveler.country_code}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "country_code", event.target.value)}
@@ -456,7 +456,7 @@ const TravelerDetails = () => {
                                 <input
                                     className={getFieldClassName(getTravelerFieldError(traveler, "phone_no"))}
                                     type="text"
-                                    placeholder="Mobile number (optional)"
+                                    placeholder="Mobile number"
                                     value={traveler.phone_no}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "phone_no", event.target.value)}
@@ -471,7 +471,7 @@ const TravelerDetails = () => {
                                 <input
                                     className={getFieldClassName(getTravelerFieldError(traveler, "email"))}
                                     type="email"
-                                    placeholder="Email (Optional)"
+                                    placeholder="Email"
                                     value={traveler.email}
                                     disabled={!!traveler.savedPassengerId}
                                     onChange={(event) => updateTravelerField(index, "email", event.target.value)}
@@ -511,7 +511,7 @@ const TravelerDetails = () => {
                         <label className={styles.label}>Country Code</label>
                         <input
                             className={`${getFieldClassName(getBookingContactFieldError("country_code"))} ${styles.bookingInput}`}
-                            placeholder="Country Code (optional)"
+                            placeholder="Country Code"
                             value={bookingContactInfo.country_code}
                             onChange={(event) =>
                                 updateBookingContactField("country_code", event.target.value)
@@ -526,7 +526,7 @@ const TravelerDetails = () => {
                         <label className={styles.label}>Mobile Number</label>
                         <input
                             className={`${getFieldClassName(getBookingContactFieldError("mobile_number"))} ${styles.bookingInput}`}
-                            placeholder="Mobile number (optional)"
+                            placeholder="Mobile number"
                             value={bookingContactInfo.mobile_number}
                             onChange={(event) =>
                                 updateBookingContactField("mobile_number", event.target.value)
@@ -541,7 +541,7 @@ const TravelerDetails = () => {
                         <label className={styles.label}>Email</label>
                         <input
                             className={`${getFieldClassName(getBookingContactFieldError("email"))} ${styles.bookingInput}`}
-                            placeholder="Email (Optional)"
+                            placeholder="Email"
                             value={bookingContactInfo.email}
                             onChange={(event) =>
                                 updateBookingContactField("email", event.target.value)
