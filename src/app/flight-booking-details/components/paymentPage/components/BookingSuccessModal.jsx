@@ -203,12 +203,12 @@ export default function BookingSuccessModal({
             ? statusMeta.akbarStatusCodes
             : [],
       },
-      // transactionId: pickFirst(
-      //   startData?.TransactionID,
-      //   createData?.TransactionID,
-      //   startData?.transactionId,
-      //   createData?.transactionId
-      // ),
+      transactionId: pickFirst(
+        startData?.TransactionID,
+        createData?.TransactionID,
+        startData?.transactionId,
+        createData?.transactionId
+      ),
       bookingId: pickFirst(
         createData?.BookingID,
         createData?.bookingId,
