@@ -338,11 +338,21 @@ const HomePage = ({
     if (!suggestion) return "";
     if (typeof suggestion === "string") return suggestion;
 
+    const code = String(
+      suggestion?.iataCode || suggestion?.code || ""
+    )
+      .trim()
+      .toUpperCase();
     const directValue =
       typeof suggestion?.value === "string"
         ? suggestion.value
         : "";
-    if (directValue.trim()) return directValue.trim();
+    if (directValue.trim()) {
+      const trimmedValue = directValue.trim();
+      return code && !trimmedValue.toUpperCase().includes(`(${code})`)
+        ? `${trimmedValue} (${code})`
+        : trimmedValue;
+    }
 
     const city =
       typeof suggestion?.city === "string"
@@ -350,11 +360,6 @@ const HomePage = ({
         : typeof suggestion?.label === "string"
           ? suggestion.label.split(",")[0]?.trim()
           : "";
-    const code = String(
-      suggestion?.iataCode || suggestion?.code || ""
-    )
-      .trim()
-      .toUpperCase();
 
     if (city && code) return `${city} (${code})`;
     if (city) return city;
@@ -515,10 +520,16 @@ const HomePage = ({
             : leg,
         ),
       );
+      if (index === 0) {
+        setFromCode(toCode);
+        setToCode(fromCode);
+      }
       return;
     }
     setFrom(to);
     setTo(from);
+    setFromCode(toCode);
+    setToCode(fromCode);
   };
 
   const addMultiLeg = () => {
