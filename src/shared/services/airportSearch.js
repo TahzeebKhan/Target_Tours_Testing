@@ -20,7 +20,11 @@ const toSuggestion = (airport = {}) => {
   const detailParts = [name, city, country].filter(Boolean);
   const detail = detailParts.join(", ");
 
-  const value = city || name || iata;
+  const baseValue = city || name || iata;
+  const value =
+    baseValue && iata && !baseValue.toUpperCase().includes(`(${iata})`)
+      ? `${baseValue} (${iata})`
+      : baseValue;
 
   return {
     label,

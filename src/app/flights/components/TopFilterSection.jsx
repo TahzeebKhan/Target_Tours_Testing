@@ -193,13 +193,52 @@ const TopFilterSection = ({
   const [activeMultiFromIndex, setActiveMultiFromIndex] = useState(null);
   const [activeMultiToIndex, setActiveMultiToIndex] = useState(null);
 
+  const getAirportDisplayValue = (value, code) => {
+    const trimmedValue = String(value || "").trim();
+    const normalizedCode = String(code || "").trim().toUpperCase();
+
+    if (!trimmedValue) return normalizedCode;
+    if (!normalizedCode || trimmedValue.toUpperCase().includes(`(${normalizedCode})`)) {
+      return trimmedValue;
+    }
+
+    return `${trimmedValue} (${normalizedCode})`;
+  };
+
+  const getSuggestionDisplayValue = (suggestion) => {
+    if (!suggestion) return "";
+    if (typeof suggestion === "string") return suggestion;
+
+    const code = String(suggestion?.iataCode || suggestion?.code || "")
+      .trim()
+      .toUpperCase();
+    const directValue =
+      typeof suggestion?.value === "string" ? suggestion.value.trim() : "";
+
+    if (directValue) {
+      return getAirportDisplayValue(directValue, code);
+    }
+
+    const city =
+      typeof suggestion?.city === "string"
+        ? suggestion.city.trim()
+        : typeof suggestion?.label === "string"
+          ? suggestion.label.split(",")[0]?.trim()
+          : "";
+
+    if (city && code) return getAirportDisplayValue(city, code);
+    if (city) return city;
+    if (code) return code;
+    return "";
+  };
+
   // Handle suggestion selection
   const selectSuggestion = (suggestion, field) => {
     if (suggestion?.route && tripType !== "multi") {
       const route = suggestion.route;
-      setFrom(route.origin || "");
+      setFrom(getAirportDisplayValue(route.origin, route.originCode));
       setFromCode(route.originCode || "");
-      setTo(route.destination || "");
+      setTo(getAirportDisplayValue(route.destination, route.destinationCode));
       setToCode(route.destinationCode || "");
       if (route.departureDate) setStartDate(route.departureDate);
       if (route.returnDate) setEndDate(route.returnDate);
@@ -208,7 +247,7 @@ const TopFilterSection = ({
       return;
     }
 
-    const value = suggestion?.value || suggestion?.label || "";
+    const value = getSuggestionDisplayValue(suggestion);
     const iataCode = suggestion?.iataCode || suggestion?.code || "";
 
     if (tripType === "multi") {
