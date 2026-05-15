@@ -635,11 +635,11 @@ const buildOneWayCard = (flight, index, options = {}) => {
     getDefaultOrderId(responseBookingMeta.tripType)
   );
   const tripTui = pickFirst(
+    responseBookingMeta.tui,
     flight?.TUI,
     flight?.tui,
     flight?.trip?.TUI,
     flight?.trip?.tui,
-    responseBookingMeta.tui,
     findFirstDeepValue(
       flight,
       (key, value) =>
@@ -1261,7 +1261,7 @@ const buildRoundCard = (flight, index, options = {}) => {
           flight?.index
         ) || "",
       OrderID: "1",
-      TUI: pickFirst(outbound?.booking?.tui, sharedTripTui),
+      TUI: pickFirst(sharedTripTui, outbound?.booking?.tui),
       flight_no: outbound?.details?.flightNo || "",
     },
     {
@@ -1286,7 +1286,7 @@ const buildRoundCard = (flight, index, options = {}) => {
           deriveTripIndexForOrder(pickFirst(flight?.Index, flight?.index), 2)
         ) || "",
       OrderID: "2",
-      TUI: pickFirst(inbound?.booking?.tui, sharedTripTui),
+      TUI: pickFirst(sharedTripTui, inbound?.booking?.tui),
       flight_no: inbound?.details?.flightNo || "",
     },
   ];
