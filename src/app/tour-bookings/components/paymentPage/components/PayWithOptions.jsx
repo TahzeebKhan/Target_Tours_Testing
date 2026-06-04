@@ -1,47 +1,60 @@
 "use client";
-import { useState } from "react";
 import styles from "./PayWithOptions.module.css";
 
-const paymentMethods = [
-  {
-    id: "card",
-    label: "CREDIT OR DEBIT CARD",
-    icon: "/images/card.png",
+const gatewayMeta = {
+  phonepe: {
+    label: "PhonePe",
+    icon: "/images/phonepeLogo.png",
   },
-  {
-    id: "upi",
-    label: "UPI",
-    icon: "/images/UPI.png",
+  razorpay: {
+    label: "Razorpay",
+    icon: "/images/razorpay-icon.png",
   },
-  {
-    id: "netbanking",
-    label: "NET BANKING",
-    icon: "/images/netbanking.png",
-  },
-];
+};
 
-const PayWithOptions = () => {
-  const [selected, setSelected] = useState("card");
+const formatGatewayLabel = (gateway) =>
+  gatewayMeta[gateway]?.label ||
+  String(gateway || "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const PayWithOptions = ({
+  gateways = [],
+  selected = "",
+  loading = false,
+  error = "",
+  onChange,
+}) => {
+  const paymentMethods = gateways.length ? gateways : ["phonepe"];
 
   return (
     <div className={styles.wrapper}>
+      {loading && <p className={styles.message}>Loading payment options...</p>}
+      {error && <p className={styles.error}>{error}</p>}
+
       {paymentMethods.map((method) => (
         <label
-          key={method.id}
+          key={method}
           className={`${styles.card} ${
-            selected === method.id ? styles.active : ""
+            selected === method ? styles.active : ""
           }`}
         >
           <input
             type="radio"
             name="payment"
-            checked={selected === method.id}
-            onChange={() => setSelected(method.id)}
+            checked={selected === method}
+            onChange={() => onChange?.(method)}
           />
 
-          <img src={method.icon} alt={method.id} />
+          {gatewayMeta[method]?.icon ? (
+            <img src={gatewayMeta[method].icon} alt={method} />
+          ) : (
+            <span className={styles.gatewayBadge}>
+              {formatGatewayLabel(method).slice(0, 2)}
+            </span>
+          )}
 
-          <span>{method.label}</span>
+          <span>{formatGatewayLabel(method)}</span>
         </label>
       ))}
     </div>

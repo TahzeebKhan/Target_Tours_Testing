@@ -1,8 +1,12 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 import { createPassenger } from "@/shared/services/passenger";
-import { createPackageBooking } from "./services/packageBooking";
+import {
+  createPackageBooking,
+  getPaymentGateways,
+} from "./services/packageBooking";
 import { getTourBookingPackage } from "./services/tourBookingPackage";
 import {
   clearTourBookingPackage,
@@ -43,6 +47,21 @@ const normalizeContactInfo = (contactInfo = {}) => ({
   email: contactInfo.email || "",
 });
 
+const normalizeGateway = (gateway) =>
+  String(gateway || "").trim().toLowerCase();
+
+const normalizeGatewayList = (payload) => {
+  const data = payload?.data || payload || {};
+  const gateways = Array.isArray(data?.available_gateways)
+    ? data.available_gateways
+    : [];
+
+  return {
+    defaultGateway: normalizeGateway(data?.default_gateway || gateways[0]),
+    availableGateways: gateways.map(normalizeGateway).filter(Boolean),
+  };
+};
+
 const validateTourTravelerForm = ({ travelerDetails = [], bookingContactInfo = {} }) => {
   const errors = {
     travelers: {},
@@ -68,8 +87,8 @@ const validateTourTravelerForm = ({ travelerDetails = [], bookingContactInfo = {
     if (isBlank(traveler.country_code)) travelerErrors.country_code = "Country Code is required.";
     if (isBlank(traveler.phone_no)) {
       travelerErrors.phone_no = "Mobile Number is required.";
-    } else if (getDigitCount(traveler.phone_no) < 10) {
-      travelerErrors.phone_no = "Enter a valid Mobile Number.";
+    } else if (getDigitCount(traveler.phone_no) !== 10) {
+      travelerErrors.phone_no = "Enter a valid 10-digit Mobile Number.";
     }
     if (isBlank(traveler.email)) {
       travelerErrors.email = "Email is required.";
@@ -91,8 +110,8 @@ const validateTourTravelerForm = ({ travelerDetails = [], bookingContactInfo = {
   }
   if (isBlank(bookingContactInfo.mobile_number)) {
     errors.bookingContact.mobile_number = "Mobile Number is required.";
-  } else if (getDigitCount(bookingContactInfo.mobile_number) < 10) {
-    errors.bookingContact.mobile_number = "Enter a valid Mobile Number.";
+  } else if (getDigitCount(bookingContactInfo.mobile_number) !== 10) {
+    errors.bookingContact.mobile_number = "Enter a valid 10-digit Mobile Number.";
   }
   if (isBlank(bookingContactInfo.email)) {
     errors.bookingContact.email = "Email is required.";
@@ -170,6 +189,51 @@ const getApiErrorMessage = (error, fallback) =>
   error?.message ||
   fallback;
 
+const pickFirst = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const extractPaymentRedirectUrl = (response) =>
+  pickFirst(
+    response?.redirectUrl,
+    response?.redirect_url,
+    response?.paymentUrl,
+    response?.payment_url,
+    response?.url,
+    response?.data?.redirectUrl,
+    response?.data?.redirect_url,
+    response?.data?.paymentUrl,
+    response?.data?.payment_url,
+    response?.data?.url,
+    response?.data?.instrumentResponse?.redirectInfo?.url,
+    response?.instrumentResponse?.redirectInfo?.url
+  );
+
+const extractPaymentMerchantId = (response) =>
+  pickFirst(
+    response?.merchantId,
+    response?.merchant_id,
+    response?.merchantOrderId,
+    response?.merchant_order_id,
+    response?.data?.merchantId,
+    response?.data?.merchant_id,
+    response?.data?.merchantOrderId,
+    response?.data?.merchant_order_id,
+    response?.data?.payment?.merchantId,
+    response?.payment?.merchantId
+  );
+
+const getPaymentRedirectUrl = () => {
+  if (process.env.NEXT_PUBLIC_PAYMENT_REDIRECT_URL) {
+    return process.env.NEXT_PUBLIC_PAYMENT_REDIRECT_URL;
+  }
+
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/tour-bookings/payment-success`;
+  }
+
+  return "";
+};
+
 export function TourBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
   const fullPackageRequestRef = useRef(null);
@@ -209,6 +273,12 @@ export function TourBookingProvider({ children }) {
   const [packageBooking, setPackageBooking] = useState(null);
   const [packageBookingLoading, setPackageBookingLoading] = useState(false);
   const [packageBookingError, setPackageBookingError] = useState("");
+  const [packagePaymentLoading, setPackagePaymentLoading] = useState(false);
+  const [packagePaymentError, setPackagePaymentError] = useState("");
+  const [paymentGateways, setPaymentGateways] = useState([]);
+  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
+  const [paymentGatewaysLoading, setPaymentGatewaysLoading] = useState(false);
+  const [paymentGatewaysError, setPaymentGatewaysError] = useState("");
 
   const prices = useMemo(() => {
     const travelerCount = Math.max(travelerDetails.length, 1);
@@ -233,6 +303,54 @@ export function TourBookingProvider({ children }) {
 
   useEffect(() => {
     setPackageDetails(readTourBookingPackage());
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadPaymentGateways = async () => {
+      const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+
+      setPaymentGatewaysLoading(true);
+      setPaymentGatewaysError("");
+      try {
+        const response = await getPaymentGateways({ domain });
+        if (!isActive) return;
+
+        const { availableGateways, defaultGateway } =
+          normalizeGatewayList(response);
+        const nextGateways = availableGateways.length
+          ? availableGateways
+          : ["phonepe"];
+        const nextSelectedGateway =
+          defaultGateway && nextGateways.includes(defaultGateway)
+            ? defaultGateway
+            : nextGateways[0];
+
+        setPaymentGateways(nextGateways);
+        setSelectedPaymentGateway((current) =>
+          current && nextGateways.includes(current)
+            ? current
+            : nextSelectedGateway
+        );
+      } catch (error) {
+        if (!isActive) return;
+
+        setPaymentGateways(["phonepe"]);
+        setSelectedPaymentGateway((current) => current || "phonepe");
+        setPaymentGatewaysError(
+          getApiErrorMessage(error, "Unable to load payment gateways.")
+        );
+      } finally {
+        if (isActive) setPaymentGatewaysLoading(false);
+      }
+    };
+
+    loadPaymentGateways();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -362,9 +480,9 @@ export function TourBookingProvider({ children }) {
       with_flight: Boolean(
         currentPackageDetails?.with_flight ?? packageDetails?.with_flight ?? false
       ),
-      payment_mode: "stripe",
+      payment_mode: "phonepe",
       amount: prices.total,
-      payment_status: "success",
+      payment_status: "pending",
       booking_contact_info: normalizeContactInfo(bookingContactInfo),
       selected_activities: selectedActivities,
       selected_hotel: [{ id: 1 }],
@@ -389,6 +507,92 @@ export function TourBookingProvider({ children }) {
       return false;
     } finally {
       setPackageBookingLoading(false);
+    }
+  };
+
+  const submitPackagePayment = async () => {
+    if (packageBookingLoading || packagePaymentLoading) return false;
+
+    const currentPackageDetails = readTourBookingPackage();
+    const passengerIds = createdPassengers.map(extractEntityId).filter(Boolean);
+    if (!passengerIds.length) {
+      setPackageBookingError("Passenger ids are missing. Please submit traveler details again.");
+      return false;
+    }
+
+    const selectedActivities = getSelectedPackageActivities(
+      currentPackageDetails,
+      packageDetails
+    );
+    const contactInfo = normalizeContactInfo(bookingContactInfo);
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+    const token = Cookies.get("auth_token");
+    const paymentGateway = normalizeGateway(selectedPaymentGateway || "phonepe");
+
+    setPackagePaymentLoading(true);
+    setPackagePaymentError("");
+    try {
+      window.localStorage.setItem(
+        "tourPackageBookingContactInfo",
+        JSON.stringify(contactInfo)
+      );
+
+      const paymentResponse = await createPackageBooking({
+        booking_type: "package",
+        domain,
+        token,
+        payment_gateway: paymentGateway,
+        payment_mode: paymentGateway,
+        packageId: currentPackageDetails?.id || packageDetails?.id,
+        packageDepartureId:
+          currentPackageDetails?.packageDepartureId ||
+          packageDetails?.packageDepartureId,
+        with_flight: Boolean(
+          currentPackageDetails?.with_flight ??
+            packageDetails?.with_flight ??
+            false
+        ),
+        amount: prices.total,
+        redirectUrl: getPaymentRedirectUrl(),
+        passengers: passengerIds.map((id) => ({ id })),
+        selected_hotels: [],
+        selected_activities: selectedActivities,
+        booking_contact_info: {
+          country_code: contactInfo.country_code,
+          email: contactInfo.email,
+          mobile_number: contactInfo.mobile_number,
+          phone: contactInfo.mobile_number,
+        },
+      });
+
+      const redirectUrl = extractPaymentRedirectUrl(paymentResponse);
+      if (!redirectUrl) {
+        throw new Error("Payment redirect URL is missing.");
+      }
+
+      const merchantId = extractPaymentMerchantId(paymentResponse);
+      if (merchantId) {
+        window.localStorage.setItem("tourPackagePaymentMerchantId", merchantId);
+      }
+
+      const paymentWindow = window.open(
+        redirectUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      if (!paymentWindow) {
+        throw new Error("Please allow pop-ups to open the payment page.");
+      }
+
+      return paymentResponse;
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Unable to start payment.");
+      setPackagePaymentError(message);
+      toast.error(message);
+      return false;
+    } finally {
+      setPackagePaymentLoading(false);
     }
   };
 
@@ -423,8 +627,16 @@ export function TourBookingProvider({ children }) {
         packageBooking,
         packageBookingLoading,
         packageBookingError,
+        packagePaymentLoading,
+        packagePaymentError,
+        paymentGateways,
+        selectedPaymentGateway,
+        setSelectedPaymentGateway,
+        paymentGatewaysLoading,
+        paymentGatewaysError,
         submitPassengers,
         submitPackageBooking,
+        submitPackagePayment,
         completeBooking,
 
         prices,

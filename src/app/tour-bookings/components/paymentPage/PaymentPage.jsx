@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTourBooking } from "../../TourBookingContext";
 import styles from "./PaymentPage.module.css";
 import TripSummaryExpandable from "./components/TripSummaryExpandable";
@@ -8,26 +8,30 @@ import { tripSummaryData } from "./components/dummyData";
 import ExtrasSummary from "./components/ExtrasSummary";
 import PayWithOptions from "./components/PayWithOptions";
 import PassengerInfo from "./components/passengerInfo/PassengerInfo";
-import PackageSuccessModal from "./components/PackageSuccessModal";
 import BookingFooter from "../review/components/bookingFooter/BookingFooter";
 import { AnimatePresence } from "framer-motion";
 import PriceSummary from "../review/components/priceSummary/PriceSummary";
-import { useRouter } from "next/navigation";
 const PaymentPage = () => {
   const {
-    completeBooking,
-    packageBooking,
     packageDetails,
     packageBookingLoading,
+    packagePaymentLoading,
     prices,
     setCurrentStep,
-    submitPackageBooking,
-    travelerDetails,
+    paymentGateways,
+    selectedPaymentGateway,
+    setSelectedPaymentGateway,
+    paymentGatewaysLoading,
+    paymentGatewaysError,
+    submitPackagePayment,
   } = useTourBooking();
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [showPriceSummary, setShowPriceSummary] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const router = useRouter();
+  const isPaymentProcessing =
+    packageBookingLoading ||
+    packagePaymentLoading ||
+    paymentGatewaysLoading ||
+    !selectedPaymentGateway;
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -35,18 +39,9 @@ const PaymentPage = () => {
   const amount = `₹ ${Number(prices?.total || 0).toLocaleString("en-IN")}`;
 
   const handleContinuePayment = async () => {
-    if (packageBookingLoading) return;
-    const booked = await submitPackageBooking();
-    if (booked) {
-      setSuccessModalOpen(true);
-    }
+    if (isPaymentProcessing) return;
+    await submitPackagePayment();
   };
-
-  useEffect(() => {
-    if (packageBooking) {
-      setSuccessModalOpen(true);
-    }
-  }, [packageBooking]);
 
   return (
     <>
@@ -244,7 +239,13 @@ const PaymentPage = () => {
           <div className={`${styles.flightExpandableCard} ${styles.payWithContainer}`}>
             <h3 className={styles.flightExpandableHeader}>Pay with</h3>
           </div>
-          <PayWithOptions />
+          <PayWithOptions
+            gateways={paymentGateways}
+            selected={selectedPaymentGateway}
+            loading={paymentGatewaysLoading}
+            error={paymentGatewaysError}
+            onChange={setSelectedPaymentGateway}
+          />
         </div>
 
         {/* <div
@@ -260,9 +261,11 @@ const PaymentPage = () => {
         <BookingFooter
           title="Starting From"
           amount={amount}
+          buttonLabel={isPaymentProcessing ? "PROCESSING..." : "CONTINUE PAYMENT"}
+          disabled={isPaymentProcessing}
           onInfoClick={() => setShowPriceSummary(true)}
           onContinue={handleContinuePayment}
-        />;
+        />
 
 
         <AnimatePresence mode="wait">
@@ -271,19 +274,6 @@ const PaymentPage = () => {
           )}
         </AnimatePresence>
       </div>
-      <PackageSuccessModal
-        isOpen={successModalOpen}
-        booking={packageBooking}
-        packageDetails={packageDetails}
-        prices={prices}
-        travelerDetails={travelerDetails}
-        onClose={() => setSuccessModalOpen(false)}
-        onDone={() => {
-          setSuccessModalOpen(false);
-          completeBooking();
-          router.push("/tour-list");
-        }}
-      />
     </>
   );
 };

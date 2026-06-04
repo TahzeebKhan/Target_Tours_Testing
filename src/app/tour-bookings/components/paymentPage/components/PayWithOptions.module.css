@@ -34,10 +34,12 @@
 }
 /* ICON */
 .card img {
-  height: 28px;
-  margin-right: -4px;
-  width: auto;
+  /* width: 128px; */
+  max-width: 34%;
+  height: 32px;
+  margin-right: -2px;
   object-fit: contain;
+  object-position: left center;
 }
 
 /* TEXT */
@@ -54,6 +56,39 @@
 }
 
 /* ACTIVE / SELECTED */
+.active {
+  border-color: #000033;
+  box-shadow: 0 0 0 1px #000033;
+}
+
+.gatewayBadge {
+  width: 42px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5dc;
+  background: #f8fafc;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 700;
+  color: #000033;
+}
+
+.message,
+.error {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 13px;
+}
+
+.message {
+  color: #4b5563;
+}
+
+.error {
+  color: #b42318;
+}
 
 @media (max-width: 645px){
     .wrapper{
