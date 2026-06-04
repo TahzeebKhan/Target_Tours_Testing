@@ -196,6 +196,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import BrandLogo from "@/shared/components/BrandLogo";
+import { startGoogleLogin } from "@/shared/services/googleAuth";
 import { Eye, EyeOff } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
@@ -215,6 +216,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
   const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
   const [corporateLogin, setCorporateLogin] = useState(false);
 
@@ -321,6 +323,26 @@ export default function LoginPopup({ onNavigate, onClose }) {
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+
+    try {
+      setGoogleLoginLoading(true);
+      const data = await startGoogleLogin();
+
+      login({
+        token: data.token,
+        user: data.user,
+      });
+
+      onClose();
+    } catch (err) {
+      setError(err.message || "Google login failed");
+    } finally {
+      setGoogleLoginLoading(false);
     }
   };
 
@@ -659,17 +681,22 @@ export default function LoginPopup({ onNavigate, onClose }) {
             </div>
 
             <div className={styles.socialButtons}>
-              <button className={styles.socialButton}>
+              <button
+                type="button"
+                className={styles.socialButton}
+                disabled={googleLoginLoading}
+                onClick={handleGoogleLogin}
+              >
                 <Image
                   src="/icons/google-icon.svg"
                   alt="Google"
                   width={24}
                   height={24}
                 />
-                SIGN IN WITH GOOGLE
+                {googleLoginLoading ? "CONNECTING..." : "SIGN IN WITH GOOGLE"}
               </button>
 
-              <button className={styles.socialButtonFacebook}>
+              <button type="button" className={styles.socialButtonFacebook}>
                 <Image
                   src="/icons/facebook-icon.svg"
                   alt="Facebook"

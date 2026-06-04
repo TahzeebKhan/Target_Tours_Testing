@@ -8,6 +8,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
+import { startGoogleLogin } from "@/shared/services/googleAuth";
+import { useAuth } from "@/app/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
 
 import "swiper/css";
@@ -28,6 +30,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [otpVerifyLoading, setOtpVerifyLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
@@ -36,6 +39,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [otpError, setOtpError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const { login } = useAuth();
 
   useIsomorphicLayoutEffect(() => {
     document.body.style.overflow = "hidden";
@@ -256,6 +260,27 @@ export default function SignupPopup({ onNavigate, onClose }) {
       setOtpError(err.message);
     } finally {
       setResendLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      setGoogleLoginLoading(true);
+      const data = await startGoogleLogin();
+
+      login({
+        token: data.token,
+        user: data.user,
+      });
+
+      onClose();
+    } catch (err) {
+      setError(err.message || "Google login failed");
+    } finally {
+      setGoogleLoginLoading(false);
     }
   };
 
@@ -485,17 +510,22 @@ export default function SignupPopup({ onNavigate, onClose }) {
             </div>
 
             <div className={styles.socialButtons}>
-              <button className={styles.socialButton}>
+              <button
+                type="button"
+                className={styles.socialButton}
+                disabled={googleLoginLoading}
+                onClick={handleGoogleLogin}
+              >
                 <Image
                   src="/icons/google-icon.svg"
                   alt="Google"
                   width={24}
                   height={24}
                 />
-                Sign in with Google
+                {googleLoginLoading ? "Connecting..." : "Sign in with Google"}
               </button>
 
-              <button className={styles.socialButtonFacebook}>
+              <button type="button" className={styles.socialButtonFacebook}>
                 <Image
                   src="/icons/facebook-icon.svg"
                   alt="Facebook"

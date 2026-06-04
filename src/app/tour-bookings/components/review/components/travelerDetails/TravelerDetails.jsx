@@ -157,10 +157,13 @@ const TravelerDetails = () => {
         `${styles.select} ${error ? styles.inputError : ""}`;
 
     const updateTravelerField = (index, field, value) => {
+        const nextValue =
+            field === "phone_no" ? value.replace(/[^\d]/g, "").slice(0, 10) : value;
+
         setTravelers(prev =>
             prev.map((traveler, travelerIndex) =>
                 travelerIndex === index
-                    ? { ...traveler, [field]: value }
+                    ? { ...traveler, [field]: nextValue }
                     : traveler
                 )
         );
@@ -168,9 +171,14 @@ const TravelerDetails = () => {
     };
 
     const updateBookingContactField = (field, value) => {
+        const nextValue =
+            field === "mobile_number"
+                ? value.replace(/[^\d]/g, "").slice(0, 10)
+                : value;
+
         setBookingContactInfo((prev) => ({
             ...prev,
-            [field]: value,
+            [field]: nextValue,
         }));
         clearBookingContactFieldError(field);
     };
@@ -215,6 +223,18 @@ const TravelerDetails = () => {
                 buildTravelerFromPassenger(passenger, nextId),
             ];
         });
+
+        setTravelerFormErrors((prev) => ({
+            ...(prev || {}),
+            travelers: {},
+            bookingContact: prev?.bookingContact || {},
+        }));
+
+        setBookingContactInfo((prev) => ({
+            country_code: prev.country_code || passenger.country_code || "+91",
+            mobile_number: prev.mobile_number || String(passenger.phone_no || "").replace(/[^\d]/g, "").slice(0, 10),
+            email: prev.email || passenger.email || "",
+        }));
     };
 
     const filteredPassengers = useMemo(() => {

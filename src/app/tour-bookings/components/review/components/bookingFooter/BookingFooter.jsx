@@ -2,7 +2,14 @@
 import React from "react";
 import styles from "./BookingFooter.module.css";
 
-const BookingFooter = ({ amount = "₹ 66,945", onContinue, title,  onInfoClick }) => {
+const BookingFooter = ({
+  amount = "₹ 66,945",
+  buttonLabel = "CONTINUE BOOKING",
+  disabled = false,
+  onContinue,
+  title,
+  onInfoClick,
+}) => {
   return (
     <div className={styles.footer}>
       <div className={styles.footerContainer}>
@@ -19,12 +26,13 @@ const BookingFooter = ({ amount = "₹ 66,945", onContinue, title,  onInfoClick 
         <button
           type="button"
           className={styles.continueBtn}
+          disabled={disabled}
           onClick={(e) => {
             e.stopPropagation();
             onContinue?.();
           }}
         >
-          CONTINUE BOOKING
+          {buttonLabel}
         </button>
       </div>
     </div>

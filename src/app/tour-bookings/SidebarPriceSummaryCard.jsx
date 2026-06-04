@@ -6,15 +6,17 @@ export default function SidebarPriceSummaryCard() {
   const {
     packageDetails,
     packageBookingLoading,
+    packagePaymentLoading,
     prices,
     currentStep,
-    submitPackageBooking,
+    submitPackagePayment,
   } = useTourBooking();
   const travelerCount = prices.travelerCount || 1;
+  const isProcessing = packageBookingLoading || packagePaymentLoading;
 
   const handleContinuePayment = async () => {
-    if (packageBookingLoading) return;
-    await submitPackageBooking();
+    if (isProcessing) return;
+    await submitPackagePayment();
   };
 
   return (
@@ -66,10 +68,10 @@ export default function SidebarPriceSummaryCard() {
         <>
           <button
             className={styles.bookNowBtn}
-            disabled={packageBookingLoading}
+            disabled={isProcessing}
             onClick={handleContinuePayment}
           >
-            {packageBookingLoading ? "Processing..." : "Continue Payment"}
+            {isProcessing ? "Processing..." : "Continue Payment"}
           </button>
           <div className={styles.safeBadge}>
             <img src="/images/secure.png" />
