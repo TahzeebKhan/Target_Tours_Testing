@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./TravelerDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 
 const TravelerDetails = () => {
-    const { setCurrentStep } = useFlightBooking();
-    const [travelers, setTravelers] = useState([
-        { id: 1, isOpen: true },
-        { id: 2, isOpen: true },
-        { id: 3, isOpen: true }
-    ]);
+    const {
+        setCurrentStep,
+        travelerDetails: travelers,
+        setTravelerDetails: setTravelers,
+        setBookingContactInfo,
+    } = useFlightBooking();
 
     // ➕ Add Traveler
     // const addTraveler = () => {
@@ -17,7 +17,16 @@ const TravelerDetails = () => {
     const addTraveler = () => {
         setTravelers(prev => [
             ...prev,
-            { id: prev.length + 1, isOpen: true }
+            {
+                id: Math.max(0, ...prev.map((traveler) => Number(traveler.id) || 0)) + 1,
+                isOpen: true,
+                first_name: "",
+                last_name: "",
+                gender: "",
+                country_code: "+91",
+                phone_no: "",
+                email: "",
+            }
         ]);
     };
 
@@ -30,6 +39,21 @@ const TravelerDetails = () => {
                     : t
             )
         );
+    };
+
+    const updateTravelerField = (index, field, value) => {
+        setTravelers(prev => {
+            const nextTravelers = prev.map((traveler, travelerIndex) =>
+                travelerIndex === index ? { ...traveler, [field]: value } : traveler
+            );
+            const primaryTraveler = nextTravelers[0] || {};
+            setBookingContactInfo({
+                country_code: primaryTraveler.country_code || "+91",
+                mobile_number: primaryTraveler.phone_no || "",
+                email: primaryTraveler.email || "",
+            });
+            return nextTravelers;
+        });
     };
 
     return (
@@ -85,6 +109,10 @@ const TravelerDetails = () => {
                                             className={styles.input}
                                             type="text"
                                             placeholder="Enter First Name"
+                                            value={traveler.first_name || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "first_name", event.target.value)
+                                            }
                                         />
                                     </div>
 
@@ -94,12 +122,22 @@ const TravelerDetails = () => {
                                             className={styles.input}
                                             type="text"
                                             placeholder="Enter Last Name"
+                                            value={traveler.last_name || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "last_name", event.target.value)
+                                            }
                                         />
                                     </div>
 
                                     <div className={`${styles.field} ${styles.selectField}`}>
                                         <label className={styles.label}>Gender</label>
-                                        <select className={styles.select} defaultValue="">
+                                        <select
+                                            className={styles.select}
+                                            value={traveler.gender || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "gender", event.target.value)
+                                            }
+                                        >
                                             <option value="" disabled hidden>Select</option>
                                             <option value="male">Male</option>
                                             <option value="female">Female</option>
@@ -114,6 +152,10 @@ const TravelerDetails = () => {
                                             className={styles.input}
                                             type="text"
                                             placeholder="Country Code (optional)"
+                                            value={traveler.country_code || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "country_code", event.target.value)
+                                            }
                                         />
                                     </div>
 
@@ -123,6 +165,10 @@ const TravelerDetails = () => {
                                             className={styles.input}
                                             type="text"
                                             placeholder="Mobile number (optional)"
+                                            value={traveler.phone_no || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "phone_no", event.target.value)
+                                            }
                                         />
                                     </div>
 
@@ -132,6 +178,10 @@ const TravelerDetails = () => {
                                             className={styles.input}
                                             type="email"
                                             placeholder="Email (Optional)"
+                                            value={traveler.email || ""}
+                                            onChange={(event) =>
+                                                updateTravelerField(index, "email", event.target.value)
+                                            }
                                         />
                                     </div>
                                 </div>

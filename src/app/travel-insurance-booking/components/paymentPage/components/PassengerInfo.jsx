@@ -1,33 +1,29 @@
+import { useFlightBooking } from "../../../FlightBookingContext";
 import styles from "./PassengerInfo.module.css";
 
-const passengers = [
-  {
-    name: "MS PRACHI MEHTA (ADULT)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MRS ARUN KUMAR (CHILD)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MS VIKAS MEHTA (INFANT)",
-    gender: "FEMALE",
-    email: "RYTC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-  {
-    name: "MS PRACHI MEHTA (ADULT)",
-    gender: "FEMALE",
-    email: "ABC@GMAIL.COM",
-    contact: "+91 7875434345",
-  },
-];
+const formatName = (traveler, index) => {
+  const name = [traveler?.first_name, traveler?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return `${name || `Traveler ${index + 1}`} (ADULT)`;
+};
+
+const formatContact = (traveler) =>
+  [traveler?.country_code, traveler?.phone_no].filter(Boolean).join(" ");
+
+const formatBookingContact = (contactInfo) =>
+  [contactInfo?.country_code, contactInfo?.mobile_number]
+    .filter(Boolean)
+    .join(" ");
 
 const PassengerInfo = () => {
+  const { travelerDetails: travelers, bookingContactInfo } = useFlightBooking();
+  const primaryTraveler = travelers?.[0] || {};
+  const companionCount = Math.max((travelers?.length || 1) - 1, 0);
+  const bookingContact = formatBookingContact(bookingContactInfo);
+
   return (
     <div className={styles.wrapper}>
       {/* TABLE */}
@@ -39,12 +35,12 @@ const PassengerInfo = () => {
           <span>CONTACT NUMBER</span>
         </div>
 
-        {passengers.map((p, index) => (
-          <div key={index} className={styles.row}>
-            <span>{p.name}</span>
-            <span>{p.gender}</span>
-            <span>{p.email}</span>
-            <span>{p.contact}</span>
+        {travelers.map((traveler, index) => (
+          <div key={traveler.id || index} className={styles.row}>
+            <span>{formatName(traveler, index)}</span>
+            <span>{traveler.gender || "-"}</span>
+            <span>{traveler.email || "-"}</span>
+            <span>{formatContact(traveler) || "-"}</span>
           </div>
         ))}
       </div>
@@ -57,10 +53,13 @@ const PassengerInfo = () => {
 
         <div className={styles.footerRight}>
           <span className={styles.primary}>
-            Prachi Kumari (primary), +4 Traveller
+            {formatName(primaryTraveler, 0).replace(" (ADULT)", "")}
+            {companionCount > 0 ? ` (primary), +${companionCount} Traveller` : " (primary)"}
           </span>
           <span className={styles.secondary}>
-            prachi1605@gmail.com, +91 78795465384
+            {[bookingContactInfo.email, bookingContact]
+              .filter(Boolean)
+              .join(", ") || "-"}
           </span>
         </div>
       </div>
