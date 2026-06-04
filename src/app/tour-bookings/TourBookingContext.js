@@ -575,6 +575,18 @@ export function TourBookingProvider({ children }) {
         window.localStorage.setItem("tourPackagePaymentMerchantId", merchantId);
       }
 
+      window.localStorage.setItem(
+        "tourPackagePaymentSnapshot",
+        JSON.stringify({
+          packageDetails: currentPackageDetails || packageDetails,
+          prices,
+          travelerCount: travelerDetails.length || prices.travelerCount || 1,
+          contactInfo,
+          merchantId,
+          paymentResponse,
+        })
+      );
+
       const paymentWindow = window.open(
         redirectUrl,
         "_blank",

@@ -3,17 +3,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 18px;
-  background: #f7f7f8;
+  padding: 42px 18px;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 51, 0.06) 0%, rgba(247, 248, 252, 0) 38%),
+    #f7f8fb;
+}
+
+.backgroundPanel {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 51, 0.05) 0%, rgba(255, 255, 255, 0) 28%),
+    linear-gradient(180deg, #000033 0, #000033 76px, transparent 76px);
+  pointer-events: none;
 }
 
 .card {
   width: 100%;
-  max-width: 760px;
+  max-width: 820px;
   padding: 34px;
   border: 1px solid #e4e6e8;
   background: #ffffff;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 48px rgba(0, 0, 51, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .status,
@@ -37,7 +52,7 @@
 .title {
   margin: 0;
   font-family: Antic Didone, serif;
-  font-size: 36px;
+  font-size: 34px;
   line-height: 1.1;
   color: #070773;
 }
@@ -51,21 +66,122 @@
   color: #4a5565;
 }
 
+.summaryGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.packageCard,
+.priceCard {
+  border: 1px solid #e4e6e8;
+  background: #fbfcfe;
+}
+
+.packageCard {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px;
+  align-items: center;
+}
+
+.packageCard img {
+  width: 150px;
+  height: 104px;
+  object-fit: cover;
+}
+
+.packageCard h2,
+.priceCard h2 {
+  margin: 0;
+  font-family: Antic Didone, serif;
+  font-weight: 400;
+  color: #070773;
+}
+
+.packageCard h2 {
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.packageCard p {
+  margin: 8px 0 10px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #303847;
+}
+
+.packageCard span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border: 1px solid #b7c4d6;
+  background: #eef7ff;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  color: #000033;
+}
+
+.priceCard {
+  padding: 18px;
+}
+
+.priceCard h2 {
+  font-size: 22px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.priceCard div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: #4a5565;
+}
+
+.priceCard strong {
+  color: #0a0a0a;
+}
+
+.priceCard .totalLine {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #dfe3ea;
+  align-items: baseline;
+}
+
+.totalLine span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+
+.totalLine strong {
+  font-size: 24px;
+  color: #000033;
+}
+
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
   margin-top: 28px;
 }
 
 .infoGrid div {
-  min-height: 84px;
+  min-height: 82px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
   padding: 14px;
   border: 1px solid #e4e6e8;
-  background: #ffffff;
+  background: #fbfcfe;
 }
 
 .infoGrid span {
@@ -100,15 +216,39 @@
   font-family: Inter, sans-serif;
   font-size: 13px;
   text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.actions button:hover {
+  background: #fcc800;
+  color: #000033;
 }
 
 @media (max-width: 720px) {
+  .page {
+    align-items: flex-start;
+    padding: 24px 14px;
+  }
+
   .card {
     padding: 26px 18px;
   }
 
   .title {
     font-size: 30px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .packageCard {
+    grid-template-columns: 1fr;
+  }
+
+  .packageCard img {
+    width: 100%;
+    height: 170px;
   }
 
   .infoGrid {

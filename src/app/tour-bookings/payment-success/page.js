@@ -9,7 +9,10 @@ const pickFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
 
 const formatCurrency = (value) => {
-  const amount = Number(value);
+  const amount =
+    typeof value === "string"
+      ? Number(value.replace(/[^\d.]/g, ""))
+      : Number(value);
   if (!Number.isFinite(amount)) return "N/A";
   return `₹ ${amount.toLocaleString("en-IN")}`;
 };
@@ -37,10 +40,22 @@ const readBookingContactInfo = () => {
   }
 };
 
+const readPaymentSnapshot = () => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const savedValue = window.localStorage.getItem("tourPackagePaymentSnapshot");
+    return savedValue ? JSON.parse(savedValue) : {};
+  } catch {
+    return {};
+  }
+};
+
 function PackagePaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [bookingResponse, setBookingResponse] = useState(null);
+  const [paymentSnapshot, setPaymentSnapshot] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +65,7 @@ function PackagePaymentSuccessContent() {
     return (
       getMerchantOrderIdFromParams(searchParams) ||
       window.localStorage.getItem("tourPackagePaymentMerchantId") ||
+      readPaymentSnapshot()?.merchantId ||
       ""
     );
   }, [searchParams]);
@@ -67,6 +83,7 @@ function PackagePaymentSuccessContent() {
       setLoading(true);
       setError("");
       try {
+        setPaymentSnapshot(readPaymentSnapshot());
         const bookingContactInfo = readBookingContactInfo();
         const response = await confirmPackageBooking({
           merchant_order_id: merchantOrderId,
@@ -109,6 +126,12 @@ function PackagePaymentSuccessContent() {
       bookingResponse?.package_booking ||
       {};
     const payment = bookingResponse?.data?.payment || bookingResponse?.payment || {};
+    const snapshotPackage = paymentSnapshot?.packageDetails || {};
+    const snapshotPrices = paymentSnapshot?.prices || {};
+    const snapshotPayment =
+      paymentSnapshot?.paymentResponse?.data ||
+      paymentSnapshot?.paymentResponse ||
+      {};
 
     return {
       message: pickFirst(
@@ -118,10 +141,21 @@ function PackagePaymentSuccessContent() {
       ),
       bookingId: pickFirst(booking?.id, "N/A"),
       bookingRef: pickFirst(
-        booking?.booking_id,
-        packageBooking?.booking_id,
+        packageBooking?.booking_ref,
+        packageBooking?.bookingRef,
         booking?.booking_ref,
         booking?.bookingRef,
+        booking?.booking_id,
+        packageBooking?.booking_id,
+        "N/A"
+      ),
+      merchantOrderId: pickFirst(
+        payment?.merchant_order_id,
+        payment?.merchantOrderId,
+        booking?.merchant_order_id,
+        snapshotPayment?.merchant_order_id,
+        snapshotPayment?.merchantOrderId,
+        merchantOrderId,
         "N/A"
       ),
       packageBookingId: pickFirst(packageBooking?.id, "N/A"),
@@ -136,6 +170,15 @@ function PackagePaymentSuccessContent() {
         payment?.payment_status,
         "SUCCESS"
       ),
+      transactionId: pickFirst(
+        payment?.transaction_id,
+        payment?.transactionId,
+        payment?.payment_id,
+        payment?.paymentId,
+        snapshotPayment?.transaction_id,
+        snapshotPayment?.transactionId,
+        "N/A"
+      ),
       bookingStatus: pickFirst(
         booking?.booking_status,
         payment?.booking_status,
@@ -144,13 +187,34 @@ function PackagePaymentSuccessContent() {
       amount: pickFirst(
         booking?.amount_paid,
         packageBooking?.amount_paid,
-        payment?.amount_paid
+        payment?.amount_paid,
+        booking?.total_amount,
+        payment?.amount,
+        snapshotPrices?.total,
+        snapshotPayment?.amount
       ),
+      packageTitle: pickFirst(snapshotPackage?.title, booking?.package?.title, "Package booking"),
+      packageImage: pickFirst(snapshotPackage?.image, booking?.package?.image, "/images/splendorsImg.png"),
+      startDate: pickFirst(snapshotPackage?.startDate, booking?.start_date_time, "N/A"),
+      endDate: pickFirst(snapshotPackage?.endDate, booking?.end_date_time, "N/A"),
+      durationLabel: pickFirst(snapshotPackage?.durationLabel, "N/A"),
+      fromCity: pickFirst(snapshotPackage?.fromCity, "N/A"),
+      travelerCount: pickFirst(paymentSnapshot?.travelerCount, snapshotPrices?.travelerCount, 1),
+      baseFare: pickFirst(snapshotPrices?.baseFare, snapshotPrices?.total, booking?.amount_paid),
+      taxes: pickFirst(snapshotPackage?.price?.taxes, booking?.taxes, 0),
     };
-  }, [bookingResponse]);
+  }, [bookingResponse, merchantOrderId, paymentSnapshot]);
+
+  const handleDone = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("tourPackagePaymentSnapshot");
+    }
+    router.push("/tour-list");
+  };
 
   return (
     <main className={styles.page}>
+      <div className={styles.backgroundPanel} />
       <section className={styles.card}>
         {loading ? (
           <>
@@ -177,22 +241,44 @@ function PackagePaymentSuccessContent() {
             <h1 className={styles.title}>Package Booking Confirmed</h1>
             <p className={styles.subtitle}>{details.message}</p>
 
+            <div className={styles.summaryGrid}>
+              <div className={styles.packageCard}>
+                <img src={details.packageImage} alt="" />
+                <div>
+                  <h2>{details.packageTitle}</h2>
+                  <p>
+                    {details.startDate} - {details.endDate}
+                    {details.fromCity !== "N/A" ? ` / From ${details.fromCity}` : ""}
+                  </p>
+                  <span>{details.durationLabel}</span>
+                </div>
+              </div>
+
+              <div className={styles.priceCard}>
+                <h2>Price Summary</h2>
+                <div>
+                  <span>{details.travelerCount}x Adult</span>
+                  <strong>{formatCurrency(details.baseFare)}</strong>
+                </div>
+                <div>
+                  <span>Taxes & Fees</span>
+                  <strong>{formatCurrency(details.taxes)}</strong>
+                </div>
+                <div className={styles.totalLine}>
+                  <span>Total Amount</span>
+                  <strong>{formatCurrency(details.amount)}</strong>
+                </div>
+              </div>
+            </div>
+
             <div className={styles.infoGrid}>
               <div>
-                <span>Merchant Order ID</span>
-                <strong>{merchantOrderId}</strong>
-              </div>
-              <div>
-                <span>Booking Ref</span>
+                <span>Booking No.</span>
                 <strong>{details.bookingRef}</strong>
               </div>
               <div>
-                <span>Booking ID</span>
-                <strong>{details.bookingId}</strong>
-              </div>
-              <div>
-                <span>Package Booking ID</span>
-                <strong>{details.packageBookingId}</strong>
+                <span>Merchant Order ID</span>
+                <strong>{details.merchantOrderId}</strong>
               </div>
               <div>
                 <span>Package ID</span>
@@ -201,6 +287,10 @@ function PackagePaymentSuccessContent() {
               <div>
                 <span>Payment</span>
                 <strong>{details.paymentStatus}</strong>
+              </div>
+              <div>
+                <span>Transaction ID</span>
+                <strong>{details.transactionId}</strong>
               </div>
               <div>
                 <span>Booking Status</span>
@@ -213,7 +303,7 @@ function PackagePaymentSuccessContent() {
             </div>
 
             <div className={styles.actions}>
-              <button type="button" onClick={() => router.push("/tour-list")}>
+              <button type="button" onClick={handleDone}>
                 Done
               </button>
             </div>

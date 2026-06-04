@@ -5,6 +5,43 @@ const FlightBookingContext = createContext(null);
 
 export function FlightBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
+  const [travelerDetails, setTravelerDetails] = useState([
+    {
+      id: 1,
+      isOpen: true,
+      first_name: "",
+      last_name: "",
+      gender: "",
+      country_code: "+91",
+      phone_no: "",
+      email: "",
+    },
+    {
+      id: 2,
+      isOpen: true,
+      first_name: "",
+      last_name: "",
+      gender: "",
+      country_code: "+91",
+      phone_no: "",
+      email: "",
+    },
+    {
+      id: 3,
+      isOpen: true,
+      first_name: "",
+      last_name: "",
+      gender: "",
+      country_code: "+91",
+      phone_no: "",
+      email: "",
+    },
+  ]);
+  const [bookingContactInfo, setBookingContactInfo] = useState({
+    country_code: "+91",
+    mobile_number: "",
+    email: "",
+  });
 
   const [baggage, setBaggage] = useState([]);
   const [meals, setMeals] = useState([]);
@@ -30,6 +67,10 @@ export function FlightBookingProvider({ children }) {
       value={{
         currentStep,
         setCurrentStep,
+        travelerDetails,
+        setTravelerDetails,
+        bookingContactInfo,
+        setBookingContactInfo,
 
         baggage,
         setBaggage,
