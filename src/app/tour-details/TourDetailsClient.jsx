@@ -18,9 +18,13 @@ import TourBookingHeroSection from "./components/tourBookingHeroSection/TourBook
 import UpcomingDepartures from "./components/upcomingDepartures/UpcomingDepartures";
 import ArrivalToronto from "./components/arrivalToronto/ArrivalToronto";
 import PriceBar from "./components/priceBar/PriceBar";
+import StepBar from "./components/itenary/StepBar";
+import Overview from "./components/itenary/ItinaryOverview";
+import DailyJourneyItinerary from "./components/itenary/DailyJourneyItinerary";
+import PolicySection from "./components/itenary/PolicySection";
 import styles from "./page.module.css";
 import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
-
+import ItinaryOverview from "./components/itenary/ItinaryOverview";
 const SELECTED_TOUR_OPTION_KEY = "selectedTourOption";
 
 /* ---------------- Error UI ---------------- */
@@ -77,7 +81,10 @@ const TourDetailsClient = () => {
   const itineraryRef = useRef(null);
 
   const scrollToItinerary = () => {
-    itineraryRef.current?.scrollIntoView({
+    const itinerarySection =
+      itineraryRef.current || document.getElementById("day-itinerary");
+
+    itinerarySection?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
@@ -206,23 +213,38 @@ const TourDetailsClient = () => {
         data={displayTourDetails}
         onViewItinerary={scrollToItinerary}
       />
-      <BetweenMajesticPeaks data={displayTourDetails} />
+      <StepBar />
+      <ItinaryOverview data={displayTourDetails} />
+      <div ref={itineraryRef}>
+        <DailyJourneyItinerary data={displayTourDetails} />
+      </div>
+  
+
+
       <UpcomingDepartures data={displayTourDetails} />
+
+          <PolicySection data={displayTourDetails} />
       <TripHighlights data={displayTourDetails} />
+
 
       <div className={styles.priceBarContainer}>
         <PriceBar data={displayTourDetails} />
       </div>
-
-      <div ref={itineraryRef}>
+{/*
+     <div ref={itineraryRef}>
         <ArrivalToronto data={displayTourDetails} />
-      </div>
+      </div>  */}
+
       <InfoStrip data={displayTourDetails} />
       <WhereWillYouStay data={displayTourDetails} />
 
+
+            {/* <Overview data={displayTourDetails} /> */}
+      <BetweenMajesticPeaks data={displayTourDetails} />
+
       <Testimonial data={displayTourDetails} />
 
-      {/* <TravelInspiration /> */}
+      <TravelInspiration />
 
       <FeatureSection />
       <Footer />

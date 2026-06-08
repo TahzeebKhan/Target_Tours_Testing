@@ -8,10 +8,14 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 
 const parseNumber = (...values) => {
   for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+
+    const normalizedText =
+      typeof value === "string" ? value.replace(/[^\d.-]/g, "") : null;
+    if (typeof value === "string" && !normalizedText) continue;
+
     const number =
-      typeof value === "string"
-        ? Number(value.replace(/[^\d.-]/g, ""))
-        : Number(value);
+      typeof value === "string" ? Number(normalizedText) : Number(value);
     if (Number.isFinite(number)) return number;
   }
 

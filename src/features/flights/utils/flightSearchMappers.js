@@ -24,10 +24,14 @@ const getFirstArrayAtPaths = (obj, paths) => {
 
 const readNumber = (...values) => {
   for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+
+    const normalizedText =
+      typeof value === "string" ? value.replace(/[^\d.-]/g, "") : null;
+    if (typeof value === "string" && !normalizedText) continue;
+
     const n =
-      typeof value === "string"
-        ? Number(value.replace(/[^\d.-]/g, ""))
-        : Number(value);
+      typeof value === "string" ? Number(normalizedText) : Number(value);
     if (Number.isFinite(n)) return n;
   }
   return null;
@@ -460,6 +464,12 @@ const getDefaultOrderId = (tripType) => {
 };
 
 const extractResponseBookingMeta = (payload, tripType) => ({
+  provider: pickFirst(
+    payload?.provider,
+    payload?.Provider,
+    payload?.data?.provider,
+    payload?.data?.Provider
+  ),
   searchKey: pickFirst(
     payload?.search_key,
     payload?.SearchKey,
@@ -611,8 +621,18 @@ const buildOneWayCard = (flight, index, options = {}) => {
     flight?.fare?.gross_fare,
     flight?.fare?.gross
   );
+  const explicitTax = pickFirst(
+    flight?.tax,
+    flight?.Tax,
+    flight?.fare?.tax,
+    flight?.fare?.Tax
+  );
   const taxAmount =
-    grossFareAmount !== null ? Math.max(grossFareAmount - totalFareAmount, 0) : null;
+    explicitTax !== undefined
+      ? readNumber(explicitTax)
+      : grossFareAmount !== null
+        ? Math.max(grossFareAmount - totalFareAmount, 0)
+        : null;
   const rawConnections =
     flight?.Connections && typeof flight.Connections === "object"
       ? flight.Connections
@@ -734,6 +754,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
       ),
     },
     booking: {
+      provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
       flightNo: primaryFlightNo,
       tui: responseBookingMeta.tui,
       searchKey: responseBookingMeta.searchKey,
@@ -744,10 +765,22 @@ const buildOneWayCard = (flight, index, options = {}) => {
       mode: responseBookingMeta.mode,
       options: responseBookingMeta.options,
       priceRequest: {
+        provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
         search_key: responseBookingMeta.searchKey,
         Trips: [
           {
             Amount: tripAmount,
+            FlightID: pickFirst(
+              flight?.FlightID,
+              flight?.flight_id,
+              flight?.flightId,
+              flight?.id
+            ),
+            FlightNumber: primaryFlightNo,
+            Origin: depCode,
+            Destination: arrCode,
+            DepartureDateTime: pickFirst(first?.departure?.date, flight?.departure),
+            ArrivalDateTime: pickFirst(last?.arrival?.date, flight?.arrival),
             Index: tripIndex,
             OrderID: tripOrderId,
             TUI: tripTui,
@@ -933,6 +966,7 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
       connections: pickFirst(leg?.Connections, leg?.connections),
     },
     booking: {
+      provider: pickFirst(leg?.provider, leg?.Provider),
       amount,
       index,
       orderId,
@@ -1262,6 +1296,19 @@ const buildRoundCard = (flight, index, options = {}) => {
         ) || "",
       OrderID: "1",
       TUI: pickFirst(sharedTripTui, outbound?.booking?.tui),
+      FlightID: pickFirst(
+        outboundLeg?.FlightID,
+        outboundLeg?.flight_id,
+        outboundLeg?.flightId,
+        flight?.FlightID,
+        flight?.flight_id,
+        flight?.flightId
+      ),
+      FlightNumber: outbound?.details?.flightNo || "",
+      Origin: outbound?.departure?.airportCode || "",
+      Destination: outbound?.arrival?.airportCode || "",
+      DepartureDateTime: outbound?.departure?.date || "",
+      ArrivalDateTime: outbound?.arrival?.date || "",
       flight_no: outbound?.details?.flightNo || "",
     },
     {
@@ -1287,6 +1334,22 @@ const buildRoundCard = (flight, index, options = {}) => {
         ) || "",
       OrderID: "2",
       TUI: pickFirst(sharedTripTui, inbound?.booking?.tui),
+      FlightID: pickFirst(
+        inboundLeg?.FlightID,
+        inboundLeg?.flight_id,
+        inboundLeg?.flightId,
+        flight?.return?.FlightID,
+        flight?.return?.flight_id,
+        flight?.return?.flightId,
+        flight?.inbound?.FlightID,
+        flight?.inbound?.flight_id,
+        flight?.inbound?.flightId
+      ),
+      FlightNumber: inbound?.details?.flightNo || "",
+      Origin: inbound?.departure?.airportCode || "",
+      Destination: inbound?.arrival?.airportCode || "",
+      DepartureDateTime: inbound?.departure?.date || "",
+      ArrivalDateTime: inbound?.arrival?.date || "",
       flight_no: inbound?.details?.flightNo || "",
     },
   ];
@@ -1347,6 +1410,7 @@ const buildRoundCard = (flight, index, options = {}) => {
       },
       fare,
       booking: {
+        provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
         tui: responseBookingMeta.tui,
         searchKey: responseBookingMeta.searchKey,
         clientId: responseBookingMeta.clientId,
@@ -1356,6 +1420,7 @@ const buildRoundCard = (flight, index, options = {}) => {
         mode: responseBookingMeta.mode,
         options: responseBookingMeta.options,
         priceRequest: {
+          provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
           search_key: responseBookingMeta.searchKey,
           Trips: roundTripsPayload,
           ClientID: responseBookingMeta.clientId,

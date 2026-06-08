@@ -22,18 +22,22 @@ import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const readNumber = (...values) => {
   for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+
+    const normalizedText =
+      typeof value === "string" ? value.replace(/[^\d.]/g, "") : null;
+    if (typeof value === "string" && !normalizedText) continue;
+
     const normalized =
-      typeof value === "string"
-        ? Number(value.replace(/[^\d.]/g, ""))
-        : Number(value);
+      typeof value === "string" ? Number(normalizedText) : Number(value);
     if (Number.isFinite(normalized)) return normalized;
   }
   return null;
 };
 
 const formatCurrency = (value) => {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "₹ 0";
+  const amount = readNumber(value);
+  if (amount === null) return "";
   return `₹ ${new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
   }).format(amount)}`;
@@ -254,23 +258,38 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
     payload?.TUI ||
     priceResponse?.tui ||
     priceResponse?.TUI;
+  const provider =
+    payload?.provider ||
+    payload?.Provider ||
+    priceResponse?.provider ||
+    priceResponse?.Provider;
 
   return {
     success: priceResponse?.success ?? payload?.success,
     message: priceResponse?.message ?? payload?.message,
+    provider,
     tui,
     data: {
       success: payload?.success,
       cached: payload?.cached,
+      provider,
       tui,
       search_key: payload?.search_key || payload?.SearchKey,
       SSRSource: payload?.SSRSource,
       ssrSource: payload?.ssrSource,
       formatted,
       fare_breakdown: fareBreakdown,
+      total_tax: payload?.total_tax,
+      totalTax: payload?.totalTax,
+      Tax: payload?.Tax,
+      tax: payload?.tax,
     },
     formatted,
     fare_breakdown: fareBreakdown,
+    total_tax: payload?.total_tax,
+    totalTax: payload?.totalTax,
+    Tax: payload?.Tax,
+    tax: payload?.tax,
   };
 };
 
@@ -512,12 +531,19 @@ const FareComparisonModalRoundTrip = ({
         formattedOnlyPriceResponse?.data?.formatted?.tui ||
         formattedOnlyPriceResponse?.formatted?.TUI ||
         formattedOnlyPriceResponse?.formatted?.tui;
+      const provider =
+        priceRequest?.provider ||
+        flightData?.booking?.provider ||
+        flightData?.provider ||
+        formattedOnlyPriceResponse?.data?.provider ||
+        formattedOnlyPriceResponse?.provider;
 
       let checklistResponse = null;
       if (checklistTui) {
         try {
           checklistResponse = await getFlightTravelChecklist({
             TUI: checklistTui,
+            provider,
             ClientID:
               flightData?.booking?.clientId ||
               priceRequest?.ClientID ||

@@ -86,10 +86,14 @@ const TripCard = ({ setFareModalOpen, cardData }) => {
 
   const openFareModal = async () => {
     const searchTui = item?.booking?.tui || item?.tripCard?.booking?.tui;
+    const provider =
+      item?.booking?.provider ||
+      item?.tripCard?.booking?.provider ||
+      item?.provider;
 
     if (searchTui) {
       try {
-        await getFlightWebSettings({ TUI: searchTui });
+        await getFlightWebSettings({ TUI: searchTui, provider });
       } catch (error) {
         console.error("Failed to fetch flight web settings", error);
       }

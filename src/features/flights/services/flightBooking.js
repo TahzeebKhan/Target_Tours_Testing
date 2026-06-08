@@ -112,6 +112,9 @@ const createInvalidTravellerChecklistError = (responseData) => {
   return error;
 };
 
+const normalizeProvider = (provider) =>
+  String(provider || "akbar").trim().toLowerCase();
+
 export const getFlightPrice = async (payload) => {
   const response = await api.post("/api/flights/price", {
     ...payload,
@@ -195,6 +198,7 @@ export const getFlightFareRules = async (payload) => {
 export const getFlightWebSettings = async (payload) => {
   const response = await api.post("/api/flights/web-settings", {
     ...payload,
+    provider: normalizeProvider(payload?.provider || payload?.Provider),
     domain: "localhost:1337",
   }, {
     headers: {
@@ -208,6 +212,7 @@ export const getFlightWebSettings = async (payload) => {
 export const getFlightTravelChecklist = async (payload) => {
   const requestPayload = {
     ...payload,
+    provider: normalizeProvider(payload?.provider || payload?.Provider),
     domain: "localhost:1337",
   };
   const requestOptions = {

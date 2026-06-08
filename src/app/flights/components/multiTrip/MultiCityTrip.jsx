@@ -54,10 +54,14 @@ const MultiCityTrip = ({
   const openFareModal = async (flight) => {
     const searchTui =
       flight?.tripCard?.booking?.tui || flight?.booking?.tui;
+    const provider =
+      flight?.tripCard?.booking?.provider ||
+      flight?.booking?.provider ||
+      flight?.provider;
 
     if (searchTui) {
       try {
-        await getFlightWebSettings({ TUI: searchTui });
+        await getFlightWebSettings({ TUI: searchTui, provider });
       } catch (error) {
         console.error("Failed to fetch flight web settings", error);
       }

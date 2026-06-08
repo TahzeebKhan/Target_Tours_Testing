@@ -47,6 +47,8 @@ const SEAT_COLUMNS = ["A", "B", "C", "D", "E", "F"];
 
 const readNumber = (...values) => {
   for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+
     if (Array.isArray(value)) {
       const nested = readNumber(...value);
       if (Number.isFinite(nested)) return nested;
@@ -72,10 +74,12 @@ const readNumber = (...values) => {
       continue;
     }
 
+    const normalizedText =
+      typeof value === "string" ? value.replace(/[^\d.]/g, "") : null;
+    if (typeof value === "string" && !normalizedText) continue;
+
     const normalized =
-      typeof value === "string"
-        ? Number(value.replace(/[^\d.]/g, ""))
-        : Number(value);
+      typeof value === "string" ? Number(normalizedText) : Number(value);
     if (Number.isFinite(normalized)) return normalized;
   }
   return null;

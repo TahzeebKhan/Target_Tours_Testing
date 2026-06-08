@@ -191,12 +191,13 @@ const TripCard = ({
 
   const openFareModal = async (flight) => {
     const searchTui = flight?.booking?.tui;
+    const provider = flight?.booking?.provider || flight?.provider;
 
     setPrefetchingFlightId(flight?.id ?? null);
 
     try {
       const webSettingsResponse = searchTui
-        ? await getFlightWebSettings({ TUI: searchTui })
+        ? await getFlightWebSettings({ TUI: searchTui, provider })
         : null;
 
       setPrefetchedFareData((prev) => ({
