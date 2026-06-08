@@ -128,7 +128,7 @@ const Testimonial = ({ data }) => {
         swiperRef?.slideNext()
     }
   return (
-    <section className={styles.section}>
+    <section className={styles.section} id="testimonials">
       <div className={styles.container}> 
         <h2 className={styles.heading}>What Our Travelers Say</h2>
 

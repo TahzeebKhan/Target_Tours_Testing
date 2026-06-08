@@ -1,408 +1,298 @@
 .tourBookingSection {
-
-    height: 100vh;
-    background-image: url("/tourList/cardItem1.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    padding-bottom: 73px;
-    position: relative;
-    padding-bottom: 63px;
-}
-.navbarContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 5;
+  position: relative;
+  min-height: 820px;
+  height: 88vh;
+  overflow: hidden;
+  background-image: url("/tourList/cardItem1.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fff;
 }
 
-.homeArrow{
-    width:24px !important;
-    height: 24px !important;
-}
 .overlay {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
-    /* top:0 right:0 bottom:0 left:0 */
-    /* background-color: rgba(0, 0, 0, 0.4); */
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
-
-    z-index: 0;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.2) 52%, rgba(0, 0, 0, 0.42) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.04) 38%, rgba(0, 0, 0, 0.72) 100%);
 }
 
-.contianerWrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    position: relative;
-    z-index: 4;
+.topBar {
+  position: relative;
+  z-index: 2;
+  min-height: 76px;
+  padding: 0 clamp(24px, 10.8vw, 210px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
 }
-.heroContainer{
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-       padding: 0 20px;
+
+.logo {
+  width: 72px;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.downloadButton,
+.signInButton {
+  min-height: 36px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font: 400 14px/1 var(--font-inter);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.downloadButton {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.signInButton {
+  border-color: #000033;
+  background: #000033;
+}
+
+.heroContainer {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  left: 0;
+  z-index: 1;
+  padding: 0 24px;
 }
 
 .container {
-    max-width: 1520px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin: 0 auto;
-    align-items: end;
-    /* margin-top:248px ; */
-
+  width: min(1460px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 760px) minmax(420px, 520px);
+  align-items: end;
+  gap: clamp(48px, 7vw, 130px);
 }
 
-.leftContainer {
-    max-width: 722px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 161px;
-}
-
-.leftTop {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-}
-
-.fromToCont {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.fromToCont span {
-    font-family: var(--font-inter);
-    font-weight: 200;
-    font-style: Extra Light;
-    font-size: 32px;
-    line-height: 1.18;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #FFFFFF;
-
-}
-
-.header {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 80px;
-    line-height: 1.18;
-    letter-spacing: 0%;
-    text-transform: uppercase;
-    color: #FFFFFF;
-
-}
-
-.leftBottom p {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 20px;
-    leading-trim: NONE;
-    line-height: 1.60;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    color: #FFFFFF;
-}
-
-.rightContainer {
-    max-width: 489px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.topRight {
-    display: flex;
-    flex-direction: column;
-}
-
-.privateTour {
-    padding: 12px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.privateText {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 20px;
-    line-height: 1.19;
-    letter-spacing: 0px;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #FFFFFF;
-
+.copyBlock {
+  min-width: 0;
 }
 
 .tagsCont {
-    padding: 12px 0;
-    display: flex;
-    gap: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .tags {
-    padding: 12px 17px;
-    border: 0.5px solid rgba(255, 255, 255, 1);
-    border-radius: 50px;
-    color: #FFFFFF;
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 16px;
-    line-height: 1.19;
-    text-transform: uppercase;
-
-
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.24);
+  color: #fff;
+  font: 300 13px/1 var(--font-inter);
+  text-transform: uppercase;
 }
 
-.tailor_made {
-    padding: 12px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 20px;
-    line-height: 1.19;
-    text-transform: uppercase;
-    color: #FFFFFF;
+.fromToCont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #fff;
+  font: 200 28px/1.2 var(--font-inter);
+  text-transform: uppercase;
 }
 
-.centerRight {
-    display: flex;
-    align-items: end;
-    gap: 7px;
+.header {
+  max-width: 760px;
+  margin: 0;
+  color: #fff;
+  font: 400 clamp(48px, 4vw, 74px)/1.08 "Antic Didone", serif;
+  letter-spacing: 0;
+  text-transform: capitalize;
 }
 
-.price {
-    display: flex;
-    align-items: end;
-    gap: 4px;
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 20px;
-    line-height: 1.19;
-    text-transform: uppercase;
-    color: #FFFFFF;
+.routeLabel {
+  margin: 22px 0 0;
+  color: #fff;
+  font: 300 16px/1.5 var(--font-inter);
 }
 
-.price span {
-    font-size: 32px;
+.customizeBar {
+  width: min(790px, 100%);
+  min-height: 44px;
+  margin-top: 24px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1A214399;
+  backdrop-filter: blur(12px);
 }
 
-.person {
-    font-family: var(--font-inter);
-    font-weight: 300;
-    font-style: Light;
-    font-size: 20px;
-    line-height: 1.19;
-    letter-spacing: 0px;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #FFFFFF;
+.customizeBar p {
+  margin: 0;
+  color: #fff;
+  font: 300 14px/1.35 var(--font-inter);
 }
 
-.bottomRight{
-    padding: 12px 24px;
-    border: 1px solid rgba(255, 255, 255, 1);
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background-color: rgba(255, 255, 255, 0.14);
-    cursor: pointer;
+.customizeBar button {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font: 400 13px/1 var(--font-inter);
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-
-@media (max-width: 1440px) {
-    .header{
-        font-size: 70px;
-    }
-    .container{
-        gap: 20px;
-    }
+.statsPanel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 96px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #FFFFFF1A;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
 }
 
-@media (max-width: 1280px) {
-    .leftBottom p{
-        font-size: 18px;
-    }
-    .leftContainer{
-        gap: 140px;
-    }
-}
-@media (max-width: 1200px) {
-    .header{
-        font-size: 56px;
-    }
-    .fromToCont span{
-        font-size: 26px;
-    }
+.statsPanel div {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  text-align: center;
 }
 
-@media (max-width: 1080px) {
-    .header{
-        font-size: 48px;
-    }
-    .tags{
-        padding: 12px 14px;
-        font-size: 14px;
-    }
-    .fromToCont span{
-        font-size: 24px;
-    }
+.statsPanel div + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
 }
 
-@media (max-width: 991px) {
-    .header{
-        font-size: 44px;
-    }
-    .leftBottom p{
-        font-size: 16px;
-    }
-    .rightContainer{
-        max-width: 379px;
-        width: 100%;
-    }
-    .price span{
-        font-size: 28px;
-    }
-    .person{
-        font-size: 18px;
-    }
-    .privateText{
-        font-size: 18px;
-    }
-    .tags{
-        padding: 7px 12px;
-    }
-    .bottomRight{
-        padding: 9px 24px;
-    }
+.statsPanel strong {
+  color: #fff;
+  font: 400 34px/1 "Antic Didone", serif;
 }
 
-@media (max-width: 821px) {
-    .header{
-        font-size: 38px;
-    }
+.statsPanel span {
+  color: #fff;
+  font: 300 10px/1 var(--font-inter);
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
-@media (max-width: 768px) {
-    .header{
-        font-size: 32px;
-    }
-    .leftContainer{
-        gap: 20px;
-    }
-    .container{
-        flex-direction: column;
-        align-items: flex-start;
-        /* padding: 0 20px; */
-        gap: 120px;
-    }
-    .leftBottom p{
-        font-size: 14px;
-    }
-    .overlay{
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+@media (max-width: 1100px) {
+  .tourBookingSection {
+    min-height: 760px;
+  }
 
-    }
-    /* .leftBottom{
-        display: none;
-    } */
+  .topBar {
+    padding-inline: 36px;
+  }
+
+  .container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .statsPanel {
+    width: min(520px, 100%);
+  }
 }
 
-@media (max-width: 660px) {
-    .container{
-        gap: 100px;
-    }
+@media (max-width: 760px) {
+  .tourBookingSection {
+    min-height: 720px;
+    height: 86vh;
+  }
+
+  .topBar {
+    min-height: 64px;
+    padding-inline: 18px;
+  }
+
+  .logo {
+    width: 58px;
+  }
+
+  .downloadButton {
+    display: none;
+  }
+
+  .signInButton {
+    min-height: 34px;
+    padding-inline: 18px;
+    font-size: 12px;
+  }
+
+  .heroContainer {
+    bottom: 26px;
+    padding-inline: 18px;
+  }
+
+  .fromToCont {
+    font-size: 18px;
+  }
+
+  .routeLabel {
+    font-size: 13px;
+  }
+
+  .customizeBar {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px 14px;
+  }
+
+  .customizeBar button {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .statsPanel {
+    min-height: 82px;
+  }
+
+  .statsPanel div {
+    padding: 12px 10px;
+  }
+
+  .statsPanel strong {
+    font-size: 26px;
+  }
+
+  .statsPanel span {
+    letter-spacing: 1.6px;
+  }
 }
 
 @media (max-width: 430px) {
-    .container{
-        gap: 159px;
-        padding: 0;
-    }
-    .header{
-        font-size: 42px;
-    }
-    .leftBottom{
-        display: none;
-    }
-    .heroContainer{
-        /* padding: 0 16px; */
-    }
-    .fromToCont{
-        font-size: 20px;
-    }
-    .privateText{
-        font-size: 16px;
-    }
-    .tags{
-        font-size: 12px;
-    }
-    .tailor_made{
-        font-size: 16px;;
-    }
-    .price span{
-        font-size: 32px;
-    }
-    .person{
-        font-size: 14px;
-    }
-    .heroContainer{
-        bottom: -33px;
-    }
-    .bottomRight{
-        font-size: 14px;
-    }
-    .overlay{
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+  .header {
+    font-size: 42px;
+  }
 
-    }
-}
+  .tags {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
 
-@media (max-width: 375px) {
-    .heroContainer{
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-    .header{
-        font-size: 32px;
-    }
-    .fromToCont span{
-        font-size: 20px;
-    }
-    .tags{
-        padding: 7px 9px;
-        font-size: 10px;
-    }
-    .privateText{
-        font-size: 14px;
-    }
-    .tailor_made{
-        font-size: 14px;
-    }
-    .price {
-        font-size: 18px;
-    }
-    .price span{
-        font-size: 28px;
-    }
+  .statsPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .statsPanel div + div {
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    border-left: 0;
+  }
 }

@@ -114,6 +114,7 @@ const OnewayFlightBooking = ({
   const openFareModal = async (flight) => {
     const flightId = flight?.id ?? null;
     const searchTui = flight?.booking?.tui;
+    const provider = flight?.booking?.provider || flight?.provider;
 
     if (!flightId) return;
 
@@ -122,7 +123,7 @@ const OnewayFlightBooking = ({
     setPrefetchingFlightId(flightId);
     try {
       const webSettingsResponse = searchTui
-        ? await getFlightWebSettings({ TUI: searchTui })
+        ? await getFlightWebSettings({ TUI: searchTui, provider })
         : null;
 
       setPrefetchedFareData((prev) => ({
@@ -143,7 +144,7 @@ const OnewayFlightBooking = ({
       console.error("Failed to fetch fare details", error);
       if (searchTui) {
         try {
-          await getFlightWebSettings({ TUI: searchTui });
+          await getFlightWebSettings({ TUI: searchTui, provider });
         } catch (settingsError) {
           console.error("Failed to fetch flight web settings", settingsError);
         }

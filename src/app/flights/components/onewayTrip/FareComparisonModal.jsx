@@ -25,10 +25,14 @@ import {
 
 const readNumber = (...values) => {
     for (const value of values) {
+        if (value === undefined || value === null || value === "") continue;
+
+        const normalizedText =
+            typeof value === "string" ? value.replace(/[^\d.]/g, "") : null;
+        if (typeof value === "string" && !normalizedText) continue;
+
         const normalized =
-            typeof value === "string"
-                ? Number(value.replace(/[^\d.]/g, ""))
-                : Number(value);
+            typeof value === "string" ? Number(normalizedText) : Number(value);
         if (Number.isFinite(normalized)) return normalized;
     }
     return null;
@@ -79,23 +83,38 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
         payload?.TUI ||
         priceResponse?.tui ||
         priceResponse?.TUI;
+    const provider =
+        payload?.provider ||
+        payload?.Provider ||
+        priceResponse?.provider ||
+        priceResponse?.Provider;
 
     return {
         success: priceResponse?.success ?? payload?.success,
         message: priceResponse?.message ?? payload?.message,
+        provider,
         tui,
         data: {
             success: payload?.success,
             cached: payload?.cached,
+            provider,
             tui,
             search_key: payload?.search_key || payload?.SearchKey,
             SSRSource: payload?.SSRSource,
             ssrSource: payload?.ssrSource,
             formatted,
             fare_breakdown: fareBreakdown,
+            total_tax: payload?.total_tax,
+            totalTax: payload?.totalTax,
+            Tax: payload?.Tax,
+            tax: payload?.tax,
         },
         formatted,
         fare_breakdown: fareBreakdown,
+        total_tax: payload?.total_tax,
+        totalTax: payload?.totalTax,
+        Tax: payload?.Tax,
+        tax: payload?.tax,
     };
 };
 
@@ -130,6 +149,7 @@ const buildSelectedFareFromFormattedPrice = (selectedFare, priceResponse) => {
         formatted?.final_price
     );
     const perAdultPrice = readNumber(journey?.per_adult?.net, journey?.per_adult?.gross);
+    const taxAmount = readNumber(journey?.total_pricing?.tax, journey?.per_adult?.tax, formatted?.total_tax);
     const fareName = String(journey?.fctype || selectedFare?.name || "").toUpperCase();
 
     return {
@@ -137,6 +157,7 @@ const buildSelectedFareFromFormattedPrice = (selectedFare, priceResponse) => {
         name: fareName || selectedFare?.name,
         price: formatCurrency(totalPrice) || selectedFare?.price,
         pricePerAdult: formatCurrency(perAdultPrice) || selectedFare?.pricePerAdult,
+        tax: formatCurrency(taxAmount) || selectedFare?.tax,
         netAmount: totalPrice ?? selectedFare?.netAmount,
         netPerAdult: perAdultPrice ?? selectedFare?.netPerAdult,
         formattedFare: journey,
@@ -683,12 +704,19 @@ const FareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = nul
                 formattedOnlyPriceResponse?.data?.formatted?.tui ||
                 formattedOnlyPriceResponse?.formatted?.TUI ||
                 formattedOnlyPriceResponse?.formatted?.tui;
+            const provider =
+                priceRequest?.provider ||
+                flightData?.booking?.provider ||
+                flightData?.provider ||
+                formattedOnlyPriceResponse?.data?.provider ||
+                formattedOnlyPriceResponse?.provider;
 
             let checklistResponse = null;
             if (checklistTui) {
                 try {
                     checklistResponse = await getFlightTravelChecklist({
                         TUI: checklistTui,
+                        provider,
                         ClientID:
                             flightData?.booking?.clientId ||
                             priceRequest?.ClientID ||

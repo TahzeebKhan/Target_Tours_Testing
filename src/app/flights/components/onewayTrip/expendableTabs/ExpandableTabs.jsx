@@ -75,6 +75,12 @@ const parseCurrencyAmount = (value) => {
   return Number.isFinite(amount) ? amount : null;
 };
 
+const formatCurrencyAmount = (value, fallback = "-") => {
+  const amount = parseCurrencyAmount(value);
+  if (amount === null) return fallback;
+  return `₹ ${amount.toLocaleString("en-IN")}`;
+};
+
 const displayTerminal = (value) => {
   const resolved = displayValue(value);
   return resolved === "N/A" ? "Terminal N/A" : `Terminal ${resolved}`;
@@ -1157,6 +1163,12 @@ const ExpandableTabs = ({
   const totalFare = flightData?.fare?.totalFare || "-";
   const grossFare = flightData?.fare?.grossFare || totalFare;
   const taxAmount = flightData?.fare?.tax || "-";
+  const totalFareAmount = parseCurrencyAmount(totalFare);
+  const taxFareAmount = parseCurrencyAmount(taxAmount);
+  const baseFare =
+    totalFareAmount !== null && taxFareAmount !== null
+      ? formatCurrencyAmount(Math.max(totalFareAmount - taxFareAmount, 0))
+      : totalFare;
   const cabinClass = flightData?.fare?.cabinClass || "-";
   const stopsLabel = flightData?.stops?.type || "-";
   const layoverCity = flightData?.stops?.via || "";
@@ -2022,7 +2034,7 @@ const ExpandableTabs = ({
 
               <div className={styles.row}>
                 <span className={styles.label}>Total (Base Fare)</span>
-                <span className={styles.bold}>{totalFare}</span>
+                <span className={styles.bold}>{baseFare}</span>
               </div>
 
               <div className={styles.row}>

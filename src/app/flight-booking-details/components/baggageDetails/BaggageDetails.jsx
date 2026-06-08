@@ -13,8 +13,8 @@ import { getBookingDetailsView, getBookingPassengerCounts } from "@/features/fli
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 import { toast } from "react-toastify";
 
-const CABIN_IMAGES = ["/bags/redBag.png", "/bags/pinkBag.svg"];
-const CHECKED_IMAGES = ["/bags/boxBag.png", "/bags/trolly.svg"];
+const CABIN_IMAGES = ["/images/cabinbaggage.png", "/images/cabinbaggage.png"];
+const CHECKED_IMAGES = ["/images/checkinbaggage.png", "/images/checkinbaggage.png"];
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 

@@ -186,6 +186,7 @@ const UpcomingDepartures = ({ data }) => {
   return (
     <>
       <section
+        id="upcoming-departures"
         className={styles.section}
         style={{ "--slide-width": `${slideWidth}px` }}
       >
