@@ -154,6 +154,8 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     if (withFlightOption && (flightTotalPrice > 0 || hasExplicitFlightPrices)) {
       const pricedFlightOption = {
         ...withFlightOption,
+        id: item.id,
+        raw: item.raw || withFlightOption.raw,
         flights: withFlightOption.flights?.length
           ? withFlightOption.flights
           : flightPriceSource?.flights || flightPriceSource?.raw?.flights || [],
@@ -167,12 +169,12 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
       return [
         {
           ...pricedFlightOption,
-          optionKey: `${pricedFlightOption.id}-without-flight`,
+          optionKey: `${item.id}-without-flight`,
           with_flight: false,
         },
         {
           ...pricedFlightOption,
-          optionKey: `${pricedFlightOption.id}-with-flight`,
+          optionKey: `${item.id}-with-flight`,
           with_flight: true,
         },
       ];

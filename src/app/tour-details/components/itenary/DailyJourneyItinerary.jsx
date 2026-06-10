@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useEffect, useId, useMemo, useState } from "react";
+import React, { useId, useMemo, useState } from "react";
 import {
   Car,
-  Check,
   ChevronDown,
-  Search,
-  SlidersHorizontal,
-  X,
   MapPin,
   Plane,
-  Utensils,
 } from "lucide-react";
 import styles from "./DailyJourneyItinerary.module.css";
+import HotelSwapModal from "./HotelSwapModal";
+import FlightSwapModal from "./FlightSwapModal";
 
 const FALLBACK_DAYS = [
   {
@@ -45,41 +42,6 @@ const FALLBACK_IMAGES = [
   "/images/jaipur.png",
   "/images/day1.png",
   "/images/day2.png",
-];
-
-const HOTEL_SWAP_OPTIONS = [
-  {
-    name: "Banyan Cove Beach Resort - Deluxe Ocean View",
-    image: "/images/hotel1.png",
-    price: "₹ 6,945",
-    oldPrice: "₹66,945",
-    rating: "5.0",
-    reviews: "1,260 reviews",
-  },
-  {
-    name: "Banyan Cove Beach Resort - Deluxe Ocean View",
-    image: "/images/hotelImage1.png",
-    price: "₹ 3,945",
-    oldPrice: "₹66,945",
-    rating: "5.0",
-    reviews: "1,260 reviews",
-  },
-  {
-    name: "Banyan Cove Beach Resort - Deluxe Ocean View",
-    image: "/images/hotelImage2.png",
-    price: "₹ 9,945",
-    oldPrice: "₹66,945",
-    rating: "5.0",
-    reviews: "1,260 reviews",
-  },
-  {
-    name: "Banyan Cove Beach Resort - Deluxe Ocean View",
-    image: "/images/hotelImage3.png",
-    price: "₹ 2,945",
-    oldPrice: "₹66,945",
-    rating: "5.0",
-    reviews: "1,260 reviews",
-  },
 ];
 
 const stripHtml = (value = "") =>
@@ -209,6 +171,7 @@ const getTransportText = (transport, keys, fallback = "") => {
 };
 
 const FlightDetail = ({ transport, city }) => {
+  const [isFlightModalOpen, setIsFlightModalOpen] = useState(false);
   const from =
     getTransportText(transport, ["from", "origin", "pickup_location"]) ||
     city;
@@ -258,7 +221,12 @@ const FlightDetail = ({ transport, city }) => {
         <span>
           {from} <span aria-hidden="true">→</span> {to}
         </span>
-        <button type="button" className={styles.swapButton} aria-label="Swap flight">
+        <button
+          type="button"
+          className={styles.swapButton}
+          onClick={() => setIsFlightModalOpen(true)}
+          aria-label="Swap flight"
+        >
           <span aria-hidden="true">
             <img src="/images/swap.svg" alt="" />
           </span>
@@ -297,6 +265,13 @@ const FlightDetail = ({ transport, city }) => {
           </div>
         </div>
       </div>
+
+      <FlightSwapModal
+        isOpen={isFlightModalOpen}
+        onClose={() => setIsFlightModalOpen(false)}
+        transport={transport}
+        city={city}
+      />
     </div>
   );
 };
@@ -464,162 +439,6 @@ const RouteMap = ({ days }) => {
         Select a day card to explore its itinerary details.
       </p>
     </aside>
-  );
-};
-
-const HotelSwapModal = ({ isOpen, onClose, currentHotel, city, dayImage }) => {
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const hotelOptions = useMemo(() => {
-    const currentName = currentHotel?.name || "Banyan Cove Beach Resort";
-    return HOTEL_SWAP_OPTIONS.map((hotel, optionIndex) => ({
-      ...hotel,
-      name: optionIndex === 0 && currentHotel?.name ? currentName : hotel.name,
-      image: optionIndex === 0 ? dayImage || hotel.image : hotel.image,
-    }));
-  }, [currentHotel, dayImage]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className={styles.hotelModalOverlay} onMouseDown={onClose}>
-      <section
-        className={styles.hotelModal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="hotel-swap-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          className={styles.hotelModalClose}
-          onClick={onClose}
-          aria-label="Close hotel selection"
-        >
-          <X size={18} />
-        </button>
-
-        <header className={styles.hotelModalHero}>
-          <div>
-            <p>{currentHotel?.name || "Banyan Cove Beach Resort"}</p>
-            <h2 id="hotel-swap-title">Select Hotel To Change</h2>
-          </div>
-        </header>
-
-        <div className={styles.hotelModalContent}>
-          <div className={styles.hotelFilters}>
-            <label>
-              <span>Hotel category</span>
-              <div className={styles.segmentedFilter}>
-                <button type="button">3 ★</button>
-                <button type="button">4 ★</button>
-                <button type="button">5 ★</button>
-              </div>
-            </label>
-            <label>
-              <span>Cities</span>
-              <select defaultValue="all">
-                <option value="all">All Cities</option>
-                <option value={city}>{city}</option>
-              </select>
-            </label>
-            <label>
-              <span>User rating</span>
-              <div className={styles.segmentedFilter}>
-                <button type="button">3 ★</button>
-                <button type="button">4 ★</button>
-                <button type="button">5 ★</button>
-              </div>
-            </label>
-            <label>
-              <span>Theme</span>
-              <select defaultValue="all">
-                <option value="all">All Theme</option>
-                <option value="luxury">Luxury</option>
-              </select>
-            </label>
-            <button type="button" className={styles.filterButton}>
-              <SlidersHorizontal size={14} />
-              Filter
-            </button>
-          </div>
-
-          <strong className={styles.hotelCount}>
-            Showing <span>64 Hotels</span>
-          </strong>
-
-          <label className={styles.hotelSearch}>
-            <Search size={18} />
-            <input type="search" placeholder="Search Hotels.." />
-            <X size={14} aria-hidden="true" />
-          </label>
-
-          <div className={styles.hotelOptions}>
-            {hotelOptions.map((hotel, hotelIndex) => (
-              <article className={styles.hotelOptionCard} key={`${hotel.name}-${hotelIndex}`}>
-                <div className={styles.hotelOptionImage}>
-                  <img src={hotel.image} alt="" />
-                  <button type="button" aria-label="Previous hotel image">
-                    ‹
-                  </button>
-                  <button type="button" aria-label="Next hotel image">
-                    ›
-                  </button>
-                </div>
-                <div className={styles.hotelOptionInfo}>
-                  <small>Phuket stay • 3 nights</small>
-                  <h3>{hotel.name}</h3>
-                  <p>Deluxe Ocean View · King bed</p>
-                  <div className={styles.hotelAmenities}>
-                    <span>1 King Bed</span>
-                    <span>
-                      <Check size={12} /> Valley View
-                    </span>
-                    <span>
-                      <Check size={12} /> Iron/Ironing Board
-                    </span>
-                  </div>
-                  <ul>
-                    <li>Free stay for the kid</li>
-                    <li>1 Extra bed/mattress will be provided at no extra cost</li>
-                  </ul>
-                  <span className={styles.cancellation}>
-                    <Check size={13} /> Free Cancellation before 19 Jan 02:59 PM
-                  </span>
-                </div>
-                <div className={styles.hotelOptionPrice}>
-                  <div>
-                    <strong>Excellent</strong>
-                    <span>{hotel.reviews}</span>
-                    <b>{hotel.rating}</b>
-                  </div>
-                  <p>
-                    <del>{hotel.oldPrice}</del>
-                    <strong>{hotel.price}</strong>
-                    <span>x 5 night</span>
-                    <small>+ ₹ 226 Taxes & fees</small>
-                  </p>
-                  <a href="#">See Details</a>
-                  <button type="button" onClick={onClose}>
-                    <img src="/images/swap.svg" alt="" />
-                    Replace
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
   );
 };
 
