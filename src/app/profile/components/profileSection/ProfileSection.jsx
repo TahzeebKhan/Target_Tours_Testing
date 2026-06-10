@@ -18,14 +18,22 @@ import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { Pencil } from "lucide-react";
 import EditProfileMobile from "./EditProfileMobile";
+import {
+  CountryFlagIcon,
+  countryList,
+  getNationalityCountryCode,
+  NationalityList,
+} from "./CountryName";
 
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
   const { setProfilePhoto, setActiveMenu, activeMenu } = useProfile();
   const [phoneError, setPhoneError] = useState(false);
   const { setProfile, profile, user } = useAuth();
-  const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
+  const [avatarPreview, setAvatarPreview] = useState("/images/profilePlaceholder.avif");
   const [uploading, setUploading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [dropdownSearch, setDropdownSearch] = useState({});
   const handleChangePhotoClick = () => {
     fileInputRef.current?.click();
   };
@@ -117,6 +125,7 @@ const ProfileSection = () => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setProfileFields((prev) => prev.map((f) => ({ ...f, isOpen: false })));
+        setDropdownSearch({});
       }
     };
 
@@ -150,7 +159,10 @@ const ProfileSection = () => {
       label: "Nationality",
       value: "",
       hasFlag: true,
+      isDropdown: true,
       isEditing: false,
+      isOpen: false,
+      options: NationalityList,
     },
     {
       label: "Passport Details",
@@ -177,13 +189,7 @@ const ProfileSection = () => {
       isDropdown: true,
       isEditing: false,
       isOpen: false,
-      options: [
-        "United States",
-        "India",
-        "United Kingdom",
-        "Canada",
-        "Australia",
-      ],
+      options: countryList,
     },
   ]);
 
@@ -204,7 +210,7 @@ const ProfileSection = () => {
     {
       label: "Display Name",
       value:
-        data.display_name || "Choose how your name appears across Transpeed.",
+        data.display_name ||  "",
       placeholder: "Choose how your name appears across Transpeed.",
       isEditing: false,
     },
@@ -233,7 +239,10 @@ const ProfileSection = () => {
       label: "Nationality",
       value: data.nationality || "",
       hasFlag: true,
+      isDropdown: true,
       isEditing: false,
+      isOpen: false,
+      options: NationalityList,
     },
 
     {
@@ -264,13 +273,7 @@ const ProfileSection = () => {
       isDropdown: true,
       isEditing: false,
       isOpen: false,
-      options: [
-        "United States",
-        "India",
-        "United Kingdom",
-        "Canada",
-        "Australia",
-      ],
+      options: countryList,
     },
   ];
 
@@ -397,14 +400,42 @@ const ProfileSection = () => {
     const updated = [...profileFields];
     updated[index].value = value;
     setProfileFields(updated);
+
+    if (validationErrors[updated[index].label]) {
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[updated[index].label];
+        return next;
+      });
+    }
   };
 
   const toggleEdit = async (index) => {
     const updated = [...profileFields];
     const field = updated[index];
+    const emptyFieldMessages = {
+      Address: "Please enter address",
+    };
 
     // If clicking SAVE → call API
     if (field.isEditing) {
+      if (!String(field.value || "").trim()) {
+        const message =
+          emptyFieldMessages[field.label] || `${field.label} is required`;
+        setValidationErrors((prev) => ({
+          ...prev,
+          [field.label]: message,
+        }));
+        toast.error(message);
+        return;
+      }
+
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[field.label];
+        return next;
+      });
+
       await updateProfile();
     }
 
@@ -415,6 +446,13 @@ const ProfileSection = () => {
   const toggleDropdown = (index) => {
     const updated = [...profileFields];
     updated[index].isOpen = !updated[index].isOpen;
+    if (!updated[index].isOpen) {
+      setDropdownSearch((prev) => {
+        const next = { ...prev };
+        delete next[updated[index].label];
+        return next;
+      });
+    }
     setProfileFields(updated);
   };
 
@@ -423,14 +461,76 @@ const ProfileSection = () => {
     updated[index].value = option;
     updated[index].isOpen = false;
     setProfileFields(updated);
+    setDropdownSearch((prev) => {
+      const next = { ...prev };
+      delete next[updated[index].label];
+      return next;
+    });
+
+    if (validationErrors[updated[index].label]) {
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[updated[index].label];
+        return next;
+      });
+    }
+  };
+
+  const getFilteredOptions = (field) => {
+    const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
+    const options = field.options || [];
+
+    if (!search) return options;
+
+    return options.filter((option) =>
+      getOptionSearchText(option).toLowerCase().includes(search)
+    );
+  };
+
+  const getOptionLabel = (option) =>
+    typeof option === "string" ? option : option?.nationality || option?.name || "";
+
+  const getOptionSearchText = (option) =>
+    typeof option === "string"
+      ? option
+      : `${option?.nationality || ""} ${option?.name || ""}`;
+
+  const getOptionFlag = (option) => getNationalityCountryCode(option);
+
+  const getDropdownOptionFlag = (option, field) => {
+    const directFlag = getOptionFlag(option);
+    if (directFlag) return directFlag;
+
+    if (!field.hasFlag) return "";
+
+    const optionLabel = getOptionLabel(option).toLowerCase();
+    const match = NationalityList.find(
+      (item) =>
+        String(item.nationality || "").toLowerCase() === optionLabel ||
+        String(item.name || "").toLowerCase() === optionLabel
+    );
+
+    return getNationalityCountryCode(match);
+  };
+
+  const getFieldFlag = (field) => {
+    const fieldValue = String(field.value || "").trim().toLowerCase();
+    const option = field.options?.find(
+      (item) =>
+        getOptionLabel(item).toLowerCase() === fieldValue ||
+        String(item?.nationality || "").toLowerCase() === fieldValue ||
+        String(item?.name || "").toLowerCase() === fieldValue
+    );
+
+    return getOptionFlag(option) || getNationalityCountryCode(field.value);
   };
 
   const getProfilePhotoUrl = (photo) => {
-    if (!photo) return "/images/profile1.jpg"; // fallback avatar
+    if (!photo) return "/images/profilePlaceholder.avif"; // fallback avatar
 
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${photo}`;
   };
-  // const [avatarPreview, setAvatarPreview] = useState("/images/profile1.jpg");
+  // const [avatarPreview, setAvatarPreview] = useState("/images/profilePlaceholder.avif");
   const handleCorporateChange = (key, value) => {
     setCorporateFields((prev) => ({
       ...prev,
@@ -460,7 +560,7 @@ const ProfileSection = () => {
                   fill
                   className={styles.avatar}
                   sizes="102px"
-                  onError={() => setAvatarPreview("/images/profile1.jpg")}
+                  onError={() => setAvatarPreview("/images/profilePlaceholder.avif")}
                 />
               </div>
             </div>
@@ -500,18 +600,18 @@ const ProfileSection = () => {
                 </button>
               </div>
 
-              <div className={styles.inputContainer}>
-                {field.hasFlag && (
-                  <Image
-                    src="/images/us.svg"
-                    alt="US Flag"
-                    width={20}
-                    height={14}
-                    className={styles.flagIcon}
+              <div
+                className={`${styles.inputContainer} ${
+                  validationErrors[field.label] ? styles.inputError : ""
+                }`}
+              >
+                {field.isDropdown && getFieldFlag(field) ? (
+                  <CountryFlagIcon
+                    code={getFieldFlag(field)}
+                    title={field.value}
+                    className={styles.flagEmoji}
                   />
-                )}
-
-                {field.isDropdown && (
+                ) : field.isDropdown && !field.hasFlag ? (
                   <Image
                     src="/images/globe.svg"
                     alt="Country"
@@ -519,7 +619,7 @@ const ProfileSection = () => {
                     height={18}
                     className={styles.globeIcon}
                   />
-                )}
+                ) : null}
 
                 {field.isDropdown ? (
                   <div
@@ -576,29 +676,64 @@ const ProfileSection = () => {
 
                 {field.isDropdown && field.isOpen && (
                   <div className={styles.dropdownMenu} ref={dropdownRef}>
-                    {field.options.map((option) => (
-                      <div
-                        key={option}
-                        className={`${styles.dropdownItem} ${
-                          option === field.value ? styles.selectedItem : ""
-                        }`}
-                        onClick={() => selectOption(index, option)}
-                      >
-                        <span>{option}</span>
+                    <div className={styles.dropdownSearchWrap}>
+                      <input
+                        className={styles.dropdownSearchInput}
+                        type="text"
+                        value={dropdownSearch[field.label] || ""}
+                        placeholder={`Search ${field.label.toLowerCase()}`}
+                        onChange={(e) =>
+                          setDropdownSearch((prev) => ({
+                            ...prev,
+                            [field.label]: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
 
-                        {option === field.value && (
-                          <Image
-                            src="/icons/check.svg"
-                            alt="Selected"
-                            width={16}
-                            height={16}
-                          />
-                        )}
+                    {getFilteredOptions(field).length > 0 ? (
+                      getFilteredOptions(field).map((option) => (
+                        <div
+                          key={getOptionLabel(option)}
+                          className={`${styles.dropdownItem} ${
+                            getOptionLabel(option) === field.value ? styles.selectedItem : ""
+                          }`}
+                          onClick={() => selectOption(index, getOptionLabel(option))}
+                        >
+                          <span className={styles.dropdownOptionLabel}>
+                            {getDropdownOptionFlag(option, field) && (
+                              <CountryFlagIcon
+                                code={getDropdownOptionFlag(option, field)}
+                                title={getOptionLabel(option)}
+                                className={styles.flagEmoji}
+                              />
+                            )}
+                            {getOptionLabel(option)}
+                          </span>
+
+                          {getOptionLabel(option) === field.value && (
+                            <Image
+                              src="/icons/check.svg"
+                              alt="Selected"
+                              width={16}
+                              height={16}
+                            />
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className={styles.noDropdownResults}>
+                        No results found
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
+              {validationErrors[field.label] && (
+                <p className={styles.errorText}>
+                  {validationErrors[field.label]}
+                </p>
+              )}
             </div>
           ))}
           {isCorporate && (
@@ -668,7 +803,7 @@ const ProfileSection = () => {
                       fill
                       className={styles.avatar}
                       sizes="102px"
-                      onError={() => setAvatarPreview("/images/profile1.jpg")}
+                      onError={() => setAvatarPreview("/images/profilePlaceholder.avif")}
                     />
                   </div>
                   <div className={styles.cameraIconContaier}>
@@ -751,13 +886,11 @@ const ProfileSection = () => {
 
                   {/* Value row */}
                   <div className={styles.valueRow}>
-                    {field.hasFlag && (
-                      <Image
-                        src="/icons/india.svg"
-                        alt="Country Flag"
-                        width={18}
-                        height={12}
-                        className={styles.flagIcon}
+                    {field.isDropdown && getFieldFlag(field) && (
+                      <CountryFlagIcon
+                        code={getFieldFlag(field)}
+                        title={field.value}
+                        className={styles.flagEmoji}
                       />
                     )}
 

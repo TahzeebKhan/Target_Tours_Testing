@@ -29,7 +29,7 @@
   max-width: 593px;
   width: 100%;
   position: relative;
-  max-height: 765px;
+  max-height: 900px;
   height: 100%;
 }
 
@@ -41,7 +41,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 53px 55px;
+  padding: 23px 55px;
   gap: 24px;
 }
 
@@ -118,6 +118,120 @@
   background: rgba(250, 250, 250, 1);
   line-height: 24px;
   letter-spacing: -0.02em;
+}
+
+.phoneInputWrap {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  align-items: center;
+  position: relative;
+  border: 1px solid rgba(213, 215, 218, 1);
+  box-shadow: 0px 1px 2px 0px rgba(10, 13, 18, 0.05);
+  background: rgba(250, 250, 250, 1);
+}
+
+.countryDropdown {
+  position: relative;
+  height: 100%;
+  border-right: 1px solid rgba(213, 215, 218, 1);
+}
+
+.countryTrigger {
+  width: 100%;
+  height: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: rgba(26, 26, 26, 1);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.countryTrigger::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(65, 70, 81, 1);
+}
+
+.countryFlag {
+  width: 20px;
+  height: 14px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(213, 215, 218, 0.75);
+}
+
+.countryMenu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  width: 190px;
+  z-index: 20;
+  padding: 4px;
+  border: 1px solid rgba(213, 215, 218, 1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0px 10px 24px rgba(10, 13, 18, 0.16);
+}
+
+.countrySearch {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(213, 215, 218, 1);
+  outline: none;
+  background: rgba(250, 250, 250, 1);
+  color: rgba(26, 26, 26, 1);
+  font-size: 13px;
+  line-height: 18px;
+  margin-bottom: 4px;
+}
+
+.countryOptionsList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.countryOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(26, 26, 26, 1);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.countryNoResult {
+  padding: 10px 8px;
+  color: rgba(113, 118, 128, 1);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.countryOption:hover,
+.countryOptionActive {
+  background: rgba(245, 245, 245, 1);
+}
+
+.phoneInput {
+  width: 100%;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .passwordInputWrap {

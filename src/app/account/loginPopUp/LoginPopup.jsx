@@ -195,6 +195,7 @@ import { createPortal } from "react-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
+import { appToast } from "@/shared/components/appToast/AppToast";
 import BrandLogo from "@/shared/components/BrandLogo";
 import { startGoogleLogin } from "@/shared/services/googleAuth";
 import { Eye, EyeOff } from "lucide-react";
@@ -318,9 +319,11 @@ export default function LoginPopup({ onNavigate, onClose }) {
       }
 
       // 5️⃣ CLOSE POPUP
+      appToast.success("Welcome! You've Logged in Successfully");
       onClose();
     } catch (err) {
       setError(err.message || "Something went wrong");
+      appToast.error(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -338,12 +341,20 @@ export default function LoginPopup({ onNavigate, onClose }) {
         user: data.user,
       });
 
+      appToast.success("Welcome! You've Logged in Successfully");
       onClose();
     } catch (err) {
       setError(err.message || "Google login failed");
+      appToast.error(err.message || "Google login failed");
     } finally {
       setGoogleLoginLoading(false);
     }
+  };
+
+  const handleCreateAccountClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onNavigate("signup");
   };
 
   const corporateLoginModal = (
@@ -590,7 +601,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
                   New here?{" "}
                   <span
                     className={styles.linkText}
-                    onClick={() => onNavigate("signup")}
+                    onClick={handleCreateAccountClick}
                   >
                     Create an account
                   </span>

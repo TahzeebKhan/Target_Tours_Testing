@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 const Carousel = ({ slideData = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
+  const [visibleSlideCount, setVisibleSlideCount] = useState(5);
   const intervalRef = useRef(null);
    const router = useRouter();
 
@@ -17,9 +18,28 @@ const Carousel = ({ slideData = [] }) => {
     setCurrentSlide(1);
   }, [slideData]);
   const totalSlides = slideData.length;
+  const canNavigate = totalSlides > visibleSlideCount;
+
+  useEffect(() => {
+    const updateVisibleSlideCount = () => {
+      setVisibleSlideCount(window.innerWidth <= 1024 ? 3 : 5);
+    };
+
+    updateVisibleSlideCount();
+    window.addEventListener("resize", updateVisibleSlideCount);
+
+    return () => window.removeEventListener("resize", updateVisibleSlideCount);
+  }, []);
 
   // Auto-advance functionality
   useEffect(() => {
+    if (!canNavigate) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      return;
+    }
+
     if (!isPaused) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => {
@@ -38,7 +58,7 @@ const Carousel = ({ slideData = [] }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPaused, totalSlides]);
+  }, [canNavigate, isPaused, totalSlides]);
 
   const handleSlideChange = (slideNumber) => {
     setCurrentSlide(slideNumber);
@@ -260,6 +280,7 @@ const Carousel = ({ slideData = [] }) => {
           );
         })}
       </div>
+      {canNavigate && (
       <div className={styles.navigation}>
         <button
           className={styles.navButton}
@@ -304,6 +325,7 @@ const Carousel = ({ slideData = [] }) => {
           </svg>
         </button>
       </div>
+      )}
     </div>
   );
 };

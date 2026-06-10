@@ -77,6 +77,7 @@ const PopularFlights = () => {
   const router = useRouter();
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeTab, setActiveTab] = useState("Domestic");
+  const [visibleSlideCount, setVisibleSlideCount] = useState(4);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -191,6 +192,28 @@ const PopularFlights = () => {
 
   const cardData =
     apiPopularFlights?.length > 0 ? apiPopularFlights : [EMPTY_FLIGHT_CARD];
+  const canNavigate = cardData.length > visibleSlideCount;
+
+  useEffect(() => {
+    const updateVisibleSlideCount = () => {
+      const width = window.innerWidth;
+
+      if (width >= 991) {
+        setVisibleSlideCount(4);
+      } else if (width >= 767) {
+        setVisibleSlideCount(3);
+      } else if (width >= 576) {
+        setVisibleSlideCount(2);
+      } else {
+        setVisibleSlideCount(1);
+      }
+    };
+
+    updateVisibleSlideCount();
+    window.addEventListener("resize", updateVisibleSlideCount);
+
+    return () => window.removeEventListener("resize", updateVisibleSlideCount);
+  }, []);
 
   const handleFlightCardClick = (item) => {
     const origin = CITY_IATA_MAP?.[selectedCity] || selectedIataCode;
@@ -320,9 +343,10 @@ const PopularFlights = () => {
                 key={activeTab}
                 modules={[Navigation]}
                 onSwiper={setSwiperRef}
-                navigation={true}
-                loop={true}
-                loopAdditionalSlides={2}
+                navigation={canNavigate}
+                loop={canNavigate}
+                loopAdditionalSlides={canNavigate ? 2 : 0}
+                watchOverflow
                 slidesPerGroup={1}
                 spaceBetween={16}
                 breakpoints={{
@@ -404,6 +428,7 @@ const PopularFlights = () => {
                         <img src="/icons/right.svg" alt="" />
                     </div>
                 </div> */}
+        {canNavigate && (
         <div className={styles.btnContainer}>
           <div
             className={styles.btn}
@@ -427,6 +452,7 @@ const PopularFlights = () => {
             <img src="/icons/right.svg" alt="" />
           </div>
         </div>
+        )}
       </div>
     </section>
   );

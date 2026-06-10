@@ -96,7 +96,7 @@ const SideBar = () => {
                   width={56}
                   height={56}
                   onError={(e) => {
-                    e.currentTarget.src = "/images/profile1.jpg";
+                    e.currentTarget.src = "/images/profilePlaceholder.avif";
                   }}
                 />
               </div>
@@ -240,7 +240,7 @@ const SideBar = () => {
                   width={60}
                   height={60}
                   onError={(e) => {
-                    e.currentTarget.src = "/images/profile1.jpg";
+                    e.currentTarget.src = "/images/profilePlaceholder.avif";
                   }}
                 />
               </div>
