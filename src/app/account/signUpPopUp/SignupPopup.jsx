@@ -1,16 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import styles from "./SignupPopup.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
-import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
+import { appToast } from "@/shared/components/appToast/AppToast";
 import { startGoogleLogin } from "@/shared/services/googleAuth";
 import { useAuth } from "@/app/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  CountryFlagIcon,
+  NationalityList,
+  nationalityAliasToIso,
+} from "@/app/profile/components/profileSection/CountryName";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -18,10 +23,53 @@ import "swiper/css/pagination";
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+const countryCodes = Array.from(
+  new Set(
+    Object.values(nationalityAliasToIso).filter((code) =>
+      /^[A-Z]{2}$/.test(code),
+    ),
+  ),
+).sort();
+
+const countryNameByCode = NationalityList.reduce((countryMap, item) => {
+  if (item.iso && item.name) {
+    countryMap[item.iso] = item.name;
+  }
+
+  return countryMap;
+}, {});
+
+const countryAliasSearchByCode = Object.entries(nationalityAliasToIso).reduce(
+  (countryMap, [alias, code]) => {
+    if (!/^[A-Z]{2}$/.test(code)) return countryMap;
+
+    countryMap[code] = `${countryMap[code] || ""} ${alias}`.trim();
+    return countryMap;
+  },
+  {},
+);
+
+const COUNTRY_OPTIONS = [
+  "IN",
+  ...countryCodes.filter((code) => code !== "IN"),
+].map((code) => ({
+  code,
+  name: countryNameByCode[code] || code,
+  searchText: `${code} ${countryNameByCode[code] || ""} ${
+    countryAliasSearchByCode[code] || ""
+  }`.toLowerCase(),
+  maxLength: code === "IN" || code === "US" ? 10 : 15,
+}));
+
 export default function SignupPopup({ onNavigate, onClose }) {
   const OTP_RESEND_SECONDS = 30;
   const [isPortalReady, setIsPortalReady] = useState(false);
   const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("IN");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,10 +84,13 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [fullNameError, setFullNameError] = useState("");
   const [otpError, setOtpError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const { login } = useAuth();
+  const countryDropdownRef = useRef(null);
 
   useIsomorphicLayoutEffect(() => {
     document.body.style.overflow = "hidden";
@@ -66,29 +117,82 @@ export default function SignupPopup({ onNavigate, onClose }) {
     return () => window.clearInterval(timer);
   }, [otpSent, resendCountdown]);
 
+  useEffect(() => {
+    if (!isCountryDropdownOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!countryDropdownRef.current?.contains(event.target)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [isCountryDropdownOpen]);
+
   const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const isPhoneValid = (value) => /^[6-9]\d{9}$/.test(value); // Indian 10-digit phone
+  const selectedCountry =
+    COUNTRY_OPTIONS.find((option) => option.code === country) ||
+    COUNTRY_OPTIONS[0];
+  const filteredCountryOptions = countrySearch.trim()
+    ? COUNTRY_OPTIONS.filter((option) =>
+        option.searchText.includes(countrySearch.trim().toLowerCase()),
+      )
+    : COUNTRY_OPTIONS;
 
-  const validateEmailOrPhone = () => {
+  const isPhoneValid = (value) => {
+    if (country === "IN") {
+      return /^[6-9]\d{9}$/.test(value);
+    }
+
+    return /^\d{6,15}$/.test(value);
+  };
+
+  const isPasswordValid = (value) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
+
+  const getRegisterPayload = () => ({
+    email: email.trim(),
+    phone_number: phoneNumber.trim(),
+    password,
+    domain: process.env.NEXT_PUBLIC_DOMAIN,
+    country,
+    name: fullName.trim(),
+  });
+
+  const resetOtpState = () => {
+    setOtpSent(false);
+    setOtp("");
+    setOtpError("");
+    setSuccessMessage("");
+  };
+
+  const validateSignupFields = () => {
+    let isValid = true;
+
     if (!email.trim()) {
-      setEmailError("Email or phone number is required");
-      return false;
-    }
-
-    const isNumeric = /^\d+$/.test(email);
-
-    if (isNumeric) {
-      if (!isPhoneValid(email)) {
-        setEmailError("Enter a valid 10-digit phone number");
-        return false;
-      }
-    } else if (!isEmailValid(email)) {
+      setEmailError("Email is required");
+      isValid = false;
+    } else if (!isEmailValid(email.trim())) {
       setEmailError("Enter a valid email address");
-      return false;
+      isValid = false;
     }
 
-    return true;
+    if (!phoneNumber.trim()) {
+      setPhoneNumberError("Mobile number is required");
+      isValid = false;
+    } else if (!isPhoneValid(phoneNumber.trim())) {
+      setPhoneNumberError("Enter a valid mobile number");
+      isValid = false;
+    }
+
+    if (!fullName.trim()) {
+      setFullNameError("Full name is required");
+      isValid = false;
+    }
+
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
@@ -96,22 +200,27 @@ export default function SignupPopup({ onNavigate, onClose }) {
     setError("");
     setSuccessMessage("");
     setEmailError("");
+    setPhoneNumberError("");
+    setFullNameError("");
     setPasswordError("");
     setConfirmPasswordError("");
 
     let hasError = false;
 
-    // 🔹 Email / Phone validation
-    if (!validateEmailOrPhone()) {
+    if (!validateSignupFields()) {
       hasError = true;
     }
 
     if (!password.trim()) {
       setPasswordError("Password is required");
       hasError = true;
+    } else if (!isPasswordValid(password)) {
+      setPasswordError(
+        "Password must be at least 8 characters and include uppercase, lowercase, and special character",
+      );
+      hasError = true;
     }
 
-    // 🔹 Confirm password validation
     if (!confirmPassword.trim()) {
       setConfirmPasswordError("Please confirm your password");
       hasError = true;
@@ -137,11 +246,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-            domain: process.env.NEXT_PUBLIC_DOMAIN, // ❗ as required
-          }),
+          body: JSON.stringify(getRegisterPayload()),
         },
       );
 
@@ -155,8 +260,10 @@ export default function SignupPopup({ onNavigate, onClose }) {
       setOtp("");
       setResendCountdown(OTP_RESEND_SECONDS);
       setSuccessMessage(data?.message || "OTP sent successfully.");
+      appToast.success(data?.message || "OTP sent successfully.");
     } catch (err) {
       setError(err.message);
+      appToast.error(err.message || "Signup failed");
     } finally {
       setRegisterLoading(false);
     }
@@ -166,11 +273,13 @@ export default function SignupPopup({ onNavigate, onClose }) {
     setError("");
     setSuccessMessage("");
     setEmailError("");
+    setPhoneNumberError("");
+    setFullNameError("");
     setOtpError("");
 
     let hasError = false;
 
-    if (!validateEmailOrPhone()) {
+    if (!validateSignupFields()) {
       hasError = true;
     }
 
@@ -195,10 +304,13 @@ export default function SignupPopup({ onNavigate, onClose }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: email,
+            email: email.trim(),
             otp: otp.trim(),
-            password: password,
+            phone_number: phoneNumber.trim(),
+            password,
             domain: process.env.NEXT_PUBLIC_DOMAIN,
+            country,
+            name: fullName.trim(),
           }),
         },
       );
@@ -210,10 +322,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
       }
 
       setSuccessMessage(data?.message || "OTP verified successfully.");
-      toast.success(data?.message || "Successfully registered.");
+      appToast.success("Welcome! You've Registered Successfully");
       onNavigate("login");
     } catch (err) {
       setOtpError(err.message);
+      appToast.error(err.message || "OTP verification failed");
     } finally {
       setOtpVerifyLoading(false);
     }
@@ -223,9 +336,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
     setError("");
     setSuccessMessage("");
     setEmailError("");
+    setPhoneNumberError("");
+    setFullNameError("");
     setOtpError("");
 
-    if (!validateEmailOrPhone()) {
+    if (!validateSignupFields()) {
       return;
     }
 
@@ -239,11 +354,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-            domain: process.env.NEXT_PUBLIC_DOMAIN,
-          }),
+          body: JSON.stringify(getRegisterPayload()),
         },
       );
 
@@ -256,8 +367,10 @@ export default function SignupPopup({ onNavigate, onClose }) {
       setOtp("");
       setResendCountdown(OTP_RESEND_SECONDS);
       setSuccessMessage(data?.message || "OTP resent successfully.");
+      appToast.success(data?.message || "OTP resent successfully.");
     } catch (err) {
       setOtpError(err.message);
+      appToast.error(err.message || "Unable to resend OTP");
     } finally {
       setResendLoading(false);
     }
@@ -276,9 +389,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
         user: data.user,
       });
 
+      appToast.success("Welcome! You've Logged in Successfully");
       onClose();
     } catch (err) {
       setError(err.message || "Google login failed");
+      appToast.error(err.message || "Google login failed");
     } finally {
       setGoogleLoginLoading(false);
     }
@@ -354,7 +469,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
                 <label className={styles.label}>
-                  Enter Email Id/ Phone Number
+                  Enter Email
                 </label>
                 <input
                   type="text"
@@ -364,14 +479,135 @@ export default function SignupPopup({ onNavigate, onClose }) {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setOtpSent(false);
-                    setOtp("");
-                    setOtpError("");
-                    setSuccessMessage("");
+                    setEmailError("");
+                    resetOtpState();
                   }}
                 />
                 {emailError && (
                   <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
+                )}
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Mobile Number</label>
+                <div
+                  className={`${styles.phoneInputWrap} ${
+                    phoneNumberError ? styles.error : ""
+                  }`}
+                >
+                  <div
+                    className={styles.countryDropdown}
+                    ref={countryDropdownRef}
+                  >
+                    <button
+                      type="button"
+                      className={styles.countryTrigger}
+                      aria-expanded={isCountryDropdownOpen}
+                      aria-label="Select country code"
+                      onClick={() => {
+                        setIsCountryDropdownOpen((current) => !current);
+                        setCountrySearch("");
+                      }}
+                    >
+                      <CountryFlagIcon
+                        code={country}
+                        title={country}
+                        className={styles.countryFlag}
+                      />
+                      <span>{country}</span>
+                    </button>
+
+                    {isCountryDropdownOpen && (
+                      <div className={styles.countryMenu}>
+                        <input
+                          type="text"
+                          className={styles.countrySearch}
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          placeholder="Search country"
+                          aria-label="Search country"
+                        />
+
+                        <div className={styles.countryOptionsList}>
+                          {filteredCountryOptions.length > 0 ? (
+                            filteredCountryOptions.map((option) => (
+                              <button
+                                key={option.code}
+                                type="button"
+                                title={option.name}
+                                className={`${styles.countryOption} ${
+                                  option.code === country
+                                    ? styles.countryOptionActive
+                                    : ""
+                                }`}
+                                onClick={() => {
+                                  setCountry(option.code);
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearch("");
+                                  setPhoneNumber((current) =>
+                                    current
+                                      .replace(/[^\d]/g, "")
+                                      .slice(0, option.maxLength),
+                                  );
+                                  setPhoneNumberError("");
+                                  resetOtpState();
+                                }}
+                              >
+                                <CountryFlagIcon
+                                  code={option.code}
+                                  title={option.code}
+                                  className={styles.countryFlag}
+                                />
+                                <span>{option.code}</span>
+                              </button>
+                            ))
+                          ) : (
+                            <p className={styles.countryNoResult}>No result</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    inputMode="tel"
+                    className={`${styles.input} ${styles.phoneInput}`}
+                    value={phoneNumber}
+                    maxLength={selectedCountry.maxLength}
+                    onChange={(e) => {
+                      setPhoneNumber(
+                        e.target.value
+                          .replace(/[^\d]/g, "")
+                          .slice(0, selectedCountry.maxLength),
+                      );
+                      setPhoneNumberError("");
+                      resetOtpState();
+                    }}
+                  />
+                </div>
+                {phoneNumberError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {phoneNumberError}
+                  </p>
+                )}
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Full Name</label>
+                <input
+                  type="text"
+                  className={`${styles.input} ${
+                    fullNameError ? styles.error : ""
+                  }`}
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    setFullNameError("");
+                    resetOtpState();
+                  }}
+                />
+                {fullNameError && (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {fullNameError}
+                  </p>
                 )}
               </div>
 
@@ -384,7 +620,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
                       passwordError ? styles.error : ""
                     }`}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setPasswordError("");
+                      resetOtpState();
+                    }}
                   />
                   <button
                     type="button"
@@ -412,7 +652,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
                       confirmPasswordError ? styles.error : ""
                     }`}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setConfirmPasswordError("");
+                      resetOtpState();
+                    }}
                   />
                   <button
                     type="button"
@@ -489,7 +733,12 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 <button
                   type="button"
                   className={styles.signupButton}
-                  disabled={!email.trim() || otpVerifyLoading}
+                  disabled={
+                    !email.trim() ||
+                    !phoneNumber.trim() ||
+                    !fullName.trim() ||
+                    otpVerifyLoading
+                  }
                   onClick={handleVerifyOtp}
                 >
                   {otpVerifyLoading ? "VERIFYING..." : "VERIFY OTP"}

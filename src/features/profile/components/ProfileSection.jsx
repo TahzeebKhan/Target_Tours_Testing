@@ -3,8 +3,15 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./ProfileSection.module.css";
+import {
+  CountryFlagIcon,
+  countryList,
+  getNationalityCountryCode,
+  NationalityList,
+} from "@/app/profile/components/profileSection/CountryName";
 
 const ProfileSection = () => {
+  const [dropdownSearch, setDropdownSearch] = useState({});
   const [profileFields, setProfileFields] = useState([
     { label: "Full Name", value: "Demian Satria", isEditing: false },
     {
@@ -28,9 +35,12 @@ const ProfileSection = () => {
     },
     {
       label: "Nationality",
-      value: "United State of America",
+      value: "American",
       hasFlag: true,
+      isDropdown: true,
       isEditing: false,
+      isOpen: false,
+      options: NationalityList,
     },
     {
       label: "Passport Details",
@@ -57,13 +67,7 @@ const ProfileSection = () => {
       isDropdown: true,
       isEditing: false,
       isOpen: false,
-      options: [
-        "United States",
-        "India",
-        "United Kingdom",
-        "Canada",
-        "Australia",
-      ],
+      options: countryList,
     },
   ]);
 
@@ -87,10 +91,54 @@ const ProfileSection = () => {
 
   const selectOption = (index, option) => {
     const updated = [...profileFields];
-    updated[index].value = option;
+    updated[index].value = getOptionLabel(option);
     updated[index].isOpen = false;
     setProfileFields(updated);
+
+    setDropdownSearch((prev) => {
+      const next = { ...prev };
+      delete next[updated[index].label];
+      return next;
+    });
   };
+
+  const getOptionLabel = (option) =>
+    typeof option === "string" ? option : option?.nationality || option?.name || "";
+
+  const getOptionSearchText = (option) =>
+    typeof option === "string"
+      ? option
+      : `${option?.nationality || ""} ${option?.name || ""}`;
+
+  const getFilteredOptions = (field) => {
+    const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
+    const options = field.options || [];
+
+    if (!search) return options;
+
+    return options.filter((option) =>
+      getOptionSearchText(option).toLowerCase().includes(search)
+    );
+  };
+
+  const getFieldFlag = (field) => {
+    const fieldValue = String(field.value || "").trim().toLowerCase();
+    const match = field.options?.find((option) => {
+      const label = getOptionLabel(option).toLowerCase();
+      const name = String(option?.name || "").toLowerCase();
+      const nationality = String(option?.nationality || "").toLowerCase();
+
+      return (
+        label === fieldValue ||
+        name === fieldValue ||
+        nationality === fieldValue
+      );
+    });
+
+    return getNationalityCountryCode(match) || getNationalityCountryCode(field.value);
+  };
+
+  const getOptionFlag = (option) => getNationalityCountryCode(option);
 
   return (
     <section className={styles.container}>
@@ -99,7 +147,7 @@ const ProfileSection = () => {
           <div className={styles.avatarCircle}>
             <div className={styles.avatarCircle}>
               <Image
-                src="/images/profile1.jpg"
+                src="/images/profilePlaceholder.avif"
                 alt="Profile Avatar"
                 fill
                 className={styles.avatar}
@@ -138,17 +186,13 @@ const ProfileSection = () => {
             </div>
 
             <div className={styles.inputContainer}>
-              {field.hasFlag && (
-                <Image
-                  src="/images/us.svg"
-                  alt="US Flag"
-                  width={20}
-                  height={14}
-                  className={styles.flagIcon}
+              {field.isDropdown && getFieldFlag(field) ? (
+                <CountryFlagIcon
+                  code={getFieldFlag(field)}
+                  title={field.value}
+                  className={styles.flagEmoji}
                 />
-              )}
-
-              {field.isDropdown && (
+              ) : field.isDropdown && !field.hasFlag ? (
                 <Image
                   src="/images/globe.svg"
                   alt="Country"
@@ -156,25 +200,88 @@ const ProfileSection = () => {
                   height={18}
                   className={styles.globeIcon}
                 />
+              ) : null}
+
+              {field.isDropdown ? (
+                <div
+                  className={styles.dropdownInput}
+                  onClick={() => toggleDropdown(index)}
+                >
+                  <span>{field.value}</span>
+                  <Image
+                    src="/images/chevron-down.svg"
+                    alt="Dropdown"
+                    width={12}
+                    height={12}
+                    className={styles.arrowIcon}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={field.value}
+                  placeholder={field.placeholder}
+                  readOnly={!field.isEditing}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                />
               )}
 
-              <input
-                type="text"
-                className={styles.input}
-                value={field.value}
-                placeholder={field.placeholder}
-                readOnly={!field.isEditing}
-                onChange={(e) => handleChange(index, e.target.value)}
-              />
+              {field.isDropdown && field.isOpen && (
+                <div className={styles.dropdownMenu}>
+                  <div className={styles.dropdownSearchWrap}>
+                    <input
+                      className={styles.dropdownSearchInput}
+                      type="text"
+                      value={dropdownSearch[field.label] || ""}
+                      placeholder={`Search ${field.label.toLowerCase()}`}
+                      onChange={(e) =>
+                        setDropdownSearch((prev) => ({
+                          ...prev,
+                          [field.label]: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
 
-              {field.isDropdown && (
-                <Image
-                  src="/images/chevron-down.svg"
-                  alt="Dropdown"
-                  width={12}
-                  height={12}
-                  className={styles.arrowIcon}
-                />
+                  {getFilteredOptions(field).length > 0 ? (
+                    getFilteredOptions(field).map((option) => (
+                      <div
+                        key={getOptionLabel(option)}
+                        className={`${styles.dropdownItem} ${
+                          getOptionLabel(option) === field.value
+                            ? styles.selectedItem
+                            : ""
+                        }`}
+                        onClick={() => selectOption(index, option)}
+                      >
+                        <span className={styles.dropdownOptionLabel}>
+                          {getOptionFlag(option) && (
+                            <CountryFlagIcon
+                              code={getOptionFlag(option)}
+                              title={getOptionLabel(option)}
+                              className={styles.flagEmoji}
+                            />
+                          )}
+                          {getOptionLabel(option)}
+                        </span>
+
+                        {getOptionLabel(option) === field.value && (
+                          <Image
+                            src="/icons/check.svg"
+                            alt="Selected"
+                            width={16}
+                            height={16}
+                          />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className={styles.noDropdownResults}>
+                      No results found
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

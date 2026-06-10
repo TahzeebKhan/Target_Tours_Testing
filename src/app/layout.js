@@ -102,15 +102,15 @@ export default function RootLayout({ children }) {
           <ToastContainer
             position="top-right"
             style={{ zIndex: 1000000 }}
-            autoClose={3000}
-            hideProgressBar={false}
+            autoClose={true}
+            hideProgressBar
             newestOnTop
             closeOnClick
             pauseOnHover
-            theme="light"
-            toastStyle={{
-              borderRadius: "0px",
-            }}
+            theme="dark"
+            closeButton
+            toastClassName="targetToast"
+            bodyClassName="targetToastBody"
           />
         </QueryProvider>
       </body>

@@ -68,9 +68,17 @@ const CarouselMobile = ({
     setCurrentSlide(1);
   }, [slideData]);
   const totalSlides = slideData.length;
+  const canNavigate = totalSlides > 1;
 
   // Auto-advance functionality
   useEffect(() => {
+    if (!canNavigate) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      return;
+    }
+
     if (!isPaused) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => {
@@ -89,7 +97,7 @@ const CarouselMobile = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPaused, totalSlides]);
+  }, [canNavigate, isPaused, totalSlides]);
 
   const handleSlideChange = (slideNumber) => {
     setCurrentSlide(slideNumber);
@@ -291,6 +299,7 @@ const CarouselMobile = ({
           );
         })}
       </div>
+      {canNavigate && (
       <div className={styles.navigation}>
         <button
           className={styles.navButton}
@@ -335,6 +344,7 @@ const CarouselMobile = ({
           </svg>
         </button>
       </div>
+      )}
     </div>
   );
 };

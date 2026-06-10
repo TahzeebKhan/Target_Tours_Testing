@@ -1,13 +1,21 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
+import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
+import { useAuth } from "../context/AuthContext";
+
 const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
   const router = useRouter();
   const [isMounted, setisMounted] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const profileBtnRef = useRef(null);
+  const { isLoggedIn: authLoggedIn, profile: userProfile } = useAuth();
+  const isUserLoggedIn = isLoggedIn ?? authLoggedIn;
+
   useEffect(() => setisMounted(true), []);
-  // const { isLoggedIn } = useAuth();
+
   return (
     <>
       {" "}
@@ -33,13 +41,31 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
                 >
                   Download the App
                 </button>
-                {!isLoggedIn && (
+                {!isUserLoggedIn ? (
                   <button
                     onClick={() => router.push("/?openLogin=true")}
                     className={styles.signInBtn}
                   >
                     Sign In
                   </button>
+                ) : (
+                  <>
+                    <button
+                      ref={profileBtnRef}
+                      onClick={() => setShowProfileModal(true)}
+                      className={`${styles.glass_button} ${styles.logggedInBtn}`}
+                      type="button"
+                    >
+                      Hi, {userProfile?.display_name || "User"}
+                    </button>
+
+                    {showProfileModal && (
+                      <ProfileModal
+                        anchorRef={profileBtnRef}
+                        onClose={() => setShowProfileModal(false)}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}

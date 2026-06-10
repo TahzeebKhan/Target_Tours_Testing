@@ -15,6 +15,7 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
 
   if (!cards.length) return null;
 
+  const canNavigate = cards.length > 1;
   const orderedCards = [
     ...cards.slice(startIndex),
     ...cards.slice(0, startIndex),
@@ -30,13 +31,23 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
     setStartIndex((prev) => (prev - 1 + cards.length) % cards.length);
   };
 
-   const handlePrev = () => {
-        swiperRef?.slidePrev()
+  const handlePrev = () => {
+    if (!canNavigate) return;
+    if (cards.length > visibleCards.length) {
+      prev();
+      return;
     }
+    swiperRef?.slidePrev();
+  };
 
-    const handleNext = () => {
-        swiperRef?.slideNext()
+  const handleNext = () => {
+    if (!canNavigate) return;
+    if (cards.length > visibleCards.length) {
+      next();
+      return;
     }
+    swiperRef?.slideNext();
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -112,6 +123,7 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
         </motion.div>
       </AnimatePresence>
 
+      {canNavigate && (
       <div className={styles.controls}>
         <button onClick={handlePrev}>
           <ArrowLeft size={14} />
@@ -120,6 +132,7 @@ const MobileCarousel = ({ cards = [], activeTab }) => {
           <ArrowRight size={14} />
         </button>
       </div>
+      )}
     </div>
   );
 };

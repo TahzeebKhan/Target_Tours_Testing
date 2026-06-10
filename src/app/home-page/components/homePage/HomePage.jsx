@@ -1315,6 +1315,16 @@ const HomePage = ({
     setShowLogin(true);
   };
 
+  const closeAuthModal = () => {
+    setShowLogin(false);
+    setAuthView("login");
+  };
+
+  const navigateAuthModal = (view) => {
+    setAuthView(view);
+    setShowLogin(true);
+  };
+
   return (
     <>
       <div
@@ -2774,15 +2784,17 @@ const HomePage = ({
         )}
         {showLogin && authView === "login" && (
           <LoginPopup
-            onClose={() => setShowLogin(false)}
-            onNavigate={setAuthView}
+            key="login"
+            onClose={closeAuthModal}
+            onNavigate={navigateAuthModal}
           />
         )}
 
         {showLogin && authView === "signup" && (
           <SignupPopup
-            onClose={() => setShowLogin(false)}
-            onNavigate={setAuthView}
+            key="signup"
+            onClose={closeAuthModal}
+            onNavigate={navigateAuthModal}
           />
         )}
       </section>

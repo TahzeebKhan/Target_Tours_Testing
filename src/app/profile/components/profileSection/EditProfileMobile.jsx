@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import {
+  CountryFlagIcon,
+  getNationalityCountryCode,
+  NationalityList,
+} from "./CountryName";
 
 const ArrowIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -27,10 +32,69 @@ const EditProfileMobile = ({
   onSave,
 }) => {
   const [dob, setDob] = useState(null);
+  const [dropdownSearch, setDropdownSearch] = useState({});
 
   const formatForBackend = (date) => {
     if (!date) return "";
     return format(date, "yyyy-MM-dd");
+  };
+
+  const getFilteredOptions = (field) => {
+    const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
+    const options = field.options || [];
+
+    if (!search) return options;
+
+    return options.filter((option) =>
+      getOptionSearchText(option).toLowerCase().includes(search)
+    );
+  };
+
+  const getOptionLabel = (option) =>
+    typeof option === "string" ? option : option?.nationality || option?.name || "";
+
+  const getOptionSearchText = (option) =>
+    typeof option === "string"
+      ? option
+      : `${option?.nationality || ""} ${option?.name || ""}`;
+
+  const getOptionFlag = (option) => getNationalityCountryCode(option);
+
+  const getDropdownOptionFlag = (option, field) => {
+    const directFlag = getOptionFlag(option);
+    if (directFlag) return directFlag;
+
+    if (!field.hasFlag) return "";
+
+    const optionLabel = getOptionLabel(option).toLowerCase();
+    const match = NationalityList.find(
+      (item) =>
+        String(item.nationality || "").toLowerCase() === optionLabel ||
+        String(item.name || "").toLowerCase() === optionLabel
+    );
+
+    return getNationalityCountryCode(match);
+  };
+
+  const getFieldFlag = (field) => {
+    const fieldValue = String(field.value || "").trim().toLowerCase();
+    const option = field.options?.find(
+      (item) =>
+        getOptionLabel(item).toLowerCase() === fieldValue ||
+        String(item?.nationality || "").toLowerCase() === fieldValue ||
+        String(item?.name || "").toLowerCase() === fieldValue
+    );
+
+    return getOptionFlag(option) || getNationalityCountryCode(field.value);
+  };
+
+  const handleSelectOption = (index, field, option) => {
+    selectOption(index, getOptionLabel(option));
+    setDropdownSearch((prev) => {
+      const next = { ...prev };
+      delete next[field.label];
+      return next;
+    });
   };
 
   return (
@@ -46,7 +110,13 @@ const EditProfileMobile = ({
 
           {/* ✅ INPUT CONTAINER */}
           <div className={styles.inputContainer}>
-            {field.isDropdown && (
+            {field.isDropdown && getFieldFlag(field) ? (
+              <CountryFlagIcon
+                code={getFieldFlag(field)}
+                title={field.value}
+                className={styles.flagEmoji}
+              />
+            ) : field.isDropdown ? (
               <Image
                 src="/images/globe.svg"
                 alt="Country"
@@ -54,7 +124,7 @@ const EditProfileMobile = ({
                 height={18}
                 className={styles.globeIcon}
               />
-            )}
+            ) : null}
 
             {/* ✅ DROPDOWN */}
             {field.isDropdown ? (
@@ -114,25 +184,55 @@ const EditProfileMobile = ({
             {/* ✅ DROPDOWN MENU */}
             {field.isDropdown && field.isOpen && (
               <div className={styles.dropdownMenu} ref={dropdownRef}>
-                {field.options.map((option) => (
-                  <div
-                    key={option}
-                    className={`${styles.dropdownItem} ${
-                      option === field.value ? styles.selectedItem : ""
-                    }`}
-                    onClick={() => selectOption(index, option)}
-                  >
-                    <span>{option}</span>
-                    {option === field.value && (
-                      <Image
-                        src="/icons/check.svg"
-                        alt="Selected"
-                        width={16}
-                        height={16}
-                      />
-                    )}
+                <div className={styles.dropdownSearchWrap}>
+                  <input
+                    className={styles.dropdownSearchInput}
+                    type="text"
+                    value={dropdownSearch[field.label] || ""}
+                    placeholder={`Search ${field.label.toLowerCase()}`}
+                    onChange={(e) =>
+                      setDropdownSearch((prev) => ({
+                        ...prev,
+                        [field.label]: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                {getFilteredOptions(field).length > 0 ? (
+                  getFilteredOptions(field).map((option) => (
+                    <div
+                      key={getOptionLabel(option)}
+                      className={`${styles.dropdownItem} ${
+                        getOptionLabel(option) === field.value ? styles.selectedItem : ""
+                      }`}
+                      onClick={() => handleSelectOption(index, field, option)}
+                    >
+                      <span className={styles.dropdownOptionLabel}>
+                        {getDropdownOptionFlag(option, field) && (
+                          <CountryFlagIcon
+                            code={getDropdownOptionFlag(option, field)}
+                            title={getOptionLabel(option)}
+                            className={styles.flagEmoji}
+                          />
+                        )}
+                        {getOptionLabel(option)}
+                      </span>
+                      {getOptionLabel(option) === field.value && (
+                        <Image
+                          src="/icons/check.svg"
+                          alt="Selected"
+                          width={16}
+                          height={16}
+                        />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.noDropdownResults}>
+                    No results found
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

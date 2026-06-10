@@ -19,16 +19,19 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
   // SSR safety: if no cards provided, render nothing
   if (!cards.length) return null;
 
+  const canNavigate = cards.length > 3;
   const orderedCards = [
     ...cards.slice(startIndex),
     ...cards.slice(0, startIndex),
   ];
 
   const handleNext = () => {
+    if (!canNavigate) return;
     setStartIndex((prev) => (prev + 1) % cards.length);
   };
 
   const handlePrev = () => {
+    if (!canNavigate) return;
     setStartIndex((prev) => (prev - 1 + cards.length) % cards.length);
   };
 
@@ -117,6 +120,7 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
         </motion.div>
       </AnimatePresence>
 
+      {canNavigate && (
       <div className={styles.navButtons}>
         <button
           type="button"
@@ -161,6 +165,7 @@ const HoverExpandCarousel = ({ cards = [], activeTab }) => {
           </svg>
         </button>
       </div>
+      )}
     </section>
   );
 };

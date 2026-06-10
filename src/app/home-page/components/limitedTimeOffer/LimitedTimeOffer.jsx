@@ -20,6 +20,7 @@ const LimitedTimeOffer = () => {
   const swiperRef = useRef(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+  const [canNavigate, setCanNavigate] = useState(false);
   const { data } = useHomePageOffer();
   const [isVideoReady, setIsVideoReady] = useState(false);
    const router = useRouter();
@@ -28,13 +29,20 @@ const LimitedTimeOffer = () => {
   const formattedPrice = formatPrice(data?.startPrice);
   const videoSrc = isVideoReady ? data?.backgroundVideo : null;
 
+  const updateNavState = (swiper) => {
+    if (!swiper) return;
+
+    setIsBeginning(swiper.isBeginning);
+    setIsEnd(swiper.isEnd);
+    setCanNavigate(!swiper.isLocked && sliderData.length > 1);
+  };
+
   useEffect(() => {
     const swiper = swiperRef.current;
     if (!swiper) return;
 
     swiper.update();
-    setIsBeginning(swiper.isBeginning);
-    setIsEnd(swiper.isEnd);
+    updateNavState(swiper);
   }, [sliderData.length]);
 
   return (
@@ -105,6 +113,7 @@ const LimitedTimeOffer = () => {
             {/* RIGHT */}
             <div className={styles.rightContainer}>
               {/* BUTTONS */}
+              {canNavigate && (
               <div className={styles.btnContainer}>
                 <div
                   className={`${styles.btn} ${isBeginning ? styles.disabledBtn : ""
@@ -147,6 +156,7 @@ const LimitedTimeOffer = () => {
                   </svg>
                 </div>
               </div>
+              )}
 
               {/* SWIPER */}
               <div className={styles.swapper}>
@@ -181,13 +191,11 @@ const LimitedTimeOffer = () => {
                   className={styles.carousel}
                   onSwiper={(swiper) => {
                     swiperRef.current = swiper;
-                    setIsBeginning(swiper.isBeginning);
-                    setIsEnd(swiper.isEnd);
+                    updateNavState(swiper);
                   }}
-                  onSlideChange={(swiper) => {
-                    setIsBeginning(swiper.isBeginning);
-                    setIsEnd(swiper.isEnd);
-                  }}
+                  onResize={updateNavState}
+                  onSlideChange={updateNavState}
+                  onUpdate={updateNavState}
 
                 >
                   {sliderData.map((item, index) => (

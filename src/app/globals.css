@@ -30,6 +30,134 @@ body {
   /* overflow-x: hidden; */
 }
 
+.Toastify__toast-container {
+  width: min(640px, calc(100vw - 32px));
+}
+
+.Toastify__toast-container--top-right {
+  top: 24px;
+  right: 24px;
+}
+
+.targetToast {
+  position: relative;
+  /* height: 99px; */
+  /* min-height: 99px; */
+  padding: 0 54px 0 28px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0px !important;
+  --toastify-color-dark: #000033;
+  background: #000033;
+  background-color: #000033;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+
+}
+
+.targetToast.Toastify__toast-theme--dark {
+  background: #000033;
+  background-color: #000033;
+}
+.toastContent{
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  padding:10px 20px;
+
+}
+
+.targetToast::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  /* background: #1496ff; */
+}
+
+.targetToast.targetToastSuccess {
+  /* border: 3px solid #1496ff; */
+  min-width: 420px;
+  border-radius: none;
+}
+
+.targetToast.targetToastSuccess::before {
+  background: #a7dc76;
+}
+
+.targetToast.targetToastError::before {
+  background: #ff3038;
+}
+
+.targetToast.targetToastWarning::before {
+  background: #fcc800;
+}
+
+.targetToast.targetToastInfo::before {
+  background: #1496ff;
+}
+
+.targetToastBody {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.targetToast .Toastify__close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  background-image: url("/images/close2.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  /* background-size: 24px 24px; */
+  color: #ffffff;
+  fill: #ffffff;
+  opacity: 1;
+  padding:2px
+}
+
+.targetToast .Toastify__close-button > svg {
+  display: none;
+}
+
+.targetToastSuccess .targetToastBody svg {
+  color: #5fa936;
+}
+
+.targetToastError .targetToastBody svg {
+  color: #ff3038;
+}
+
+.targetToastWarning .targetToastBody svg {
+  color: #fcc800;
+}
+
+.targetToastInfo .targetToastBody svg {
+  color: #1496ff;
+}
+
+@media (max-width: 640px) {
+  .Toastify__toast-container {
+    width: calc(100vw - 24px);
+  }
+
+  .Toastify__toast-container--top-right {
+    top: 12px;
+    right: 12px;
+  }
+
+  .targetToast {
+    /* height: 99px;
+    min-height: 99px; */
+    padding: 0 44px 0 20px;
+  }
+}
+
 *::-webkit-scrollbar {
   display: none;
 }
