@@ -240,11 +240,11 @@ const TourDetailsClient = () => {
 
 
             {/* <Overview data={displayTourDetails} /> */}
-      <BetweenMajesticPeaks data={displayTourDetails} />
+      {/* <BetweenMajesticPeaks data={displayTourDetails} /> */}
 
       <Testimonial data={displayTourDetails} />
 
-      <TravelInspiration />
+      {/* <TravelInspiration /> */}
 
       <FeatureSection />
       <Footer />

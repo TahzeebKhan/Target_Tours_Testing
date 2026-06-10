@@ -101,6 +101,7 @@ export default function RootLayout({ children }) {
 
           <ToastContainer
             position="top-right"
+            style={{ zIndex: 1000000 }}
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop
