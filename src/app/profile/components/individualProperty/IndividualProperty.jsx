@@ -11,7 +11,12 @@ import InsurenceDetails from "./InsurenceDetails";
 import ModifyBookingModal from "./ModifyBookingModal";
 import CancelBookingModal from "./CancelBookingModal";
 
-const IndividualProperty = ({ activeTab, setActiveTab }) => {
+const IndividualProperty = ({
+  activeTab,
+  setActiveTab,
+  selectedBooking,
+  onBack,
+}) => {
   const [isActive, setIsActive] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -255,9 +260,11 @@ const IndividualProperty = ({ activeTab, setActiveTab }) => {
         </div>
       )}
 
-      {activeTab === "FLIGHT BOOKING" && <FlightBookingDetails />}
+      {activeTab === "FLIGHT BOOKING" && <FlightBookingDetails onBack={onBack} />}
 
-      {activeTab === "PACKAGES" && <PackageDetails />}
+      {activeTab === "PACKAGES" && (
+        <PackageDetails booking={selectedBooking} onBack={onBack} />
+      )}
 
       {activeTab === "TRAVEL INSURANCE" && <InsurenceDetails />}
 

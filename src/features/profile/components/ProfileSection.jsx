@@ -102,6 +102,13 @@ const ProfileSection = () => {
     });
   };
 
+  const saveProfileFields = () => {
+    setProfileFields((prev) =>
+      prev.map((field) => ({ ...field, isEditing: false, isOpen: false }))
+    );
+    setDropdownSearch({});
+  };
+
   const getOptionLabel = (option) =>
     typeof option === "string" ? option : option?.nationality || option?.name || "";
 
@@ -167,125 +174,143 @@ const ProfileSection = () => {
         </div>
       </header>
 
-      <div className={styles.grid}>
-        {profileFields.map((field, index) => (
-          <div key={index} className={styles.fieldWrapper}>
-            <div className={styles.fieldHeader}>
-              <label className={styles.label}>{field.label}</label>
+      <div className={styles.formPanel}>
+        <div className={styles.grid}>
+          {profileFields.map((field, index) => (
+            <div key={index} className={styles.fieldWrapper}>
+              <div className={styles.fieldHeader}>
+                <label className={styles.label}>{field.label}</label>
 
-              {field.isVerified && (
-                <span className={styles.verifiedBadge}>Verified</span>
-              )}
+                {field.isVerified && (
+                  <span className={styles.verifiedBadge}>Verified</span>
+                )}
 
-              <button
-                className={styles.editBtn}
-                onClick={() => toggleEdit(index)}
-              >
-                {field.isEditing ? "Save" : field.actionText || "Edit"}
-              </button>
-            </div>
-
-            <div className={styles.inputContainer}>
-              {field.isDropdown && getFieldFlag(field) ? (
-                <CountryFlagIcon
-                  code={getFieldFlag(field)}
-                  title={field.value}
-                  className={styles.flagEmoji}
-                />
-              ) : field.isDropdown && !field.hasFlag ? (
-                <Image
-                  src="/images/globe.svg"
-                  alt="Country"
-                  width={18}
-                  height={18}
-                  className={styles.globeIcon}
-                />
-              ) : null}
-
-              {field.isDropdown ? (
-                <div
-                  className={styles.dropdownInput}
-                  onClick={() => toggleDropdown(index)}
+                <button
+                  className={styles.editBtn}
+                  onClick={() => toggleEdit(index)}
                 >
-                  <span>{field.value}</span>
-                  <Image
-                    src="/images/chevron-down.svg"
-                    alt="Dropdown"
-                    width={12}
-                    height={12}
-                    className={styles.arrowIcon}
-                  />
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  className={styles.input}
-                  value={field.value}
-                  placeholder={field.placeholder}
-                  readOnly={!field.isEditing}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                />
-              )}
+                  {field.isEditing ? "Save" : field.actionText || "Edit"}
+                </button>
+              </div>
 
-              {field.isDropdown && field.isOpen && (
-                <div className={styles.dropdownMenu}>
-                  <div className={styles.dropdownSearchWrap}>
-                    <input
-                      className={styles.dropdownSearchInput}
-                      type="text"
-                      value={dropdownSearch[field.label] || ""}
-                      placeholder={`Search ${field.label.toLowerCase()}`}
-                      onChange={(e) =>
-                        setDropdownSearch((prev) => ({
-                          ...prev,
-                          [field.label]: e.target.value,
-                        }))
-                      }
+              <div className={styles.inputContainer}>
+                {field.isDropdown && getFieldFlag(field) ? (
+                  <CountryFlagIcon
+                    code={getFieldFlag(field)}
+                    title={field.value}
+                    className={styles.flagEmoji}
+                  />
+                ) : field.isDropdown && !field.hasFlag ? (
+                  <Image
+                    src="/images/globe.svg"
+                    alt="Country"
+                    width={18}
+                    height={18}
+                    className={styles.globeIcon}
+                  />
+                ) : null}
+
+                {field.isDropdown ? (
+                  <div
+                    className={styles.dropdownInput}
+                    onClick={() => toggleDropdown(index)}
+                  >
+                    <span>{field.value}</span>
+                    <Image
+                      src="/images/chevron-down.svg"
+                      alt="Dropdown"
+                      width={12}
+                      height={12}
+                      className={styles.arrowIcon}
                     />
                   </div>
+                ) : (
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={field.value}
+                    placeholder={field.placeholder}
+                    readOnly={!field.isEditing}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                  />
+                )}
 
-                  {getFilteredOptions(field).length > 0 ? (
-                    getFilteredOptions(field).map((option) => (
-                      <div
-                        key={getOptionLabel(option)}
-                        className={`${styles.dropdownItem} ${
-                          getOptionLabel(option) === field.value
-                            ? styles.selectedItem
-                            : ""
-                        }`}
-                        onClick={() => selectOption(index, option)}
-                      >
-                        <span className={styles.dropdownOptionLabel}>
-                          {getOptionFlag(option) && (
-                            <CountryFlagIcon
-                              code={getOptionFlag(option)}
-                              title={getOptionLabel(option)}
-                              className={styles.flagEmoji}
+                {field.isDropdown && field.isOpen && (
+                  <div className={styles.dropdownMenu}>
+                    <div className={styles.dropdownSearchWrap}>
+                      <input
+                        className={styles.dropdownSearchInput}
+                        type="text"
+                        value={dropdownSearch[field.label] || ""}
+                        placeholder={`Search ${field.label.toLowerCase()}`}
+                        onChange={(e) =>
+                          setDropdownSearch((prev) => ({
+                            ...prev,
+                            [field.label]: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+
+                    {getFilteredOptions(field).length > 0 ? (
+                      getFilteredOptions(field).map((option) => (
+                        <div
+                          key={getOptionLabel(option)}
+                          className={`${styles.dropdownItem} ${
+                            getOptionLabel(option) === field.value
+                              ? styles.selectedItem
+                              : ""
+                          }`}
+                          onClick={() => selectOption(index, option)}
+                        >
+                          <span className={styles.dropdownOptionLabel}>
+                            {getOptionFlag(option) && (
+                              <CountryFlagIcon
+                                code={getOptionFlag(option)}
+                                title={getOptionLabel(option)}
+                                className={styles.flagEmoji}
+                              />
+                            )}
+                            {getOptionLabel(option)}
+                          </span>
+
+                          {getOptionLabel(option) === field.value && (
+                            <Image
+                              src="/icons/check.svg"
+                              alt="Selected"
+                              width={16}
+                              height={16}
                             />
                           )}
-                          {getOptionLabel(option)}
-                        </span>
-
-                        {getOptionLabel(option) === field.value && (
-                          <Image
-                            src="/icons/check.svg"
-                            alt="Selected"
-                            width={16}
-                            height={16}
-                          />
-                        )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className={styles.noDropdownResults}>
+                        No results found
                       </div>
-                    ))
-                  ) : (
-                    <div className={styles.noDropdownResults}>
-                      No results found
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className={styles.formActions}>
+          <button
+            type="button"
+            className={styles.goBackButton}
+            onClick={saveProfileFields}
+          >
+            GO BACK
+          </button>
+          <button
+            type="button"
+            className={styles.saveButton}
+            onClick={saveProfileFields}
+          >
+            SAVE
+          </button>
+        </div>
       </div>
     </section>
   );

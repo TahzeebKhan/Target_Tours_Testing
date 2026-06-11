@@ -16,6 +16,30 @@
   overflow: auto;
 }
 
+.backButton {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  background: #ffffff;
+  color: rgba(0, 0, 51, 1);
+  padding: 8px 16px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.backButton:hover {
+  background: rgba(0, 0, 51, 1);
+  color: #ffffff;
+}
+
 /* Header & Meta */
 .header {
   display: flex;

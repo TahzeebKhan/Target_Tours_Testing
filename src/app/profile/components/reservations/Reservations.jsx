@@ -6,6 +6,8 @@ import styles from "./Reservations.module.css";
 import ActiveReservations from "@/features/profile/components/ActiveReservations";
 import CorporateReservationCard from "./CorporateReservationCard";
 import api from "@/shared/services/axios";
+import { useProfile } from "../../context/ProfileContext";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const reservationData = [
   {
@@ -89,6 +91,16 @@ const tabs = [
 
 const isCorporate = false;
 
+const getBookingStatusParam = (filter) => {
+  const statusMap = {
+    Active: "pending",
+    Completed: "approved",
+    Canceled: "cancelled",
+  };
+
+  return statusMap[filter] || null;
+};
+
 const extractBookingRows = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -142,19 +154,78 @@ const formatDate = (value) => {
   });
 };
 
-const buildMediaUrl = (value) => {
-  if (!value) return "/images/packages.png";
+const buildMediaUrl = (value, fallback = "/images/packages.png") => {
+  if (!value) return fallback;
+  if (typeof value === "object") {
+    return buildMediaUrl(value.url || value.path || value.src, fallback);
+  }
   if (/^https?:\/\//i.test(value) || value.startsWith("/images/")) return value;
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   return `${baseUrl}${value.startsWith("/") ? value : `/${value}`}`;
 };
 
-const getPassengerSummary = (item) => {
+const getAirlineName = (airline, fallback = "Flight") => {
+  if (typeof airline === "string") return airline;
+  return airline?.name || airline?.airline_name || airline?.label || fallback;
+};
+
+const getAirlineCode = (item, flightSummary, airline) =>
+  airline?.code ||
+  airline?.carrierCode ||
+  airline?.carrier_code ||
+  flightSummary?.airline_code ||
+  flightSummary?.carrier_code ||
+  flightSummary?.carrierCode ||
+  item?.airline_code ||
+  item?.carrier_code ||
+  item?.carrierCode ||
+  "";
+
+const getFlightLogo = (item, flightSummary, airline) => {
+  const logo =
+    airline?.logo ||
+    airline?.airline_logo ||
+    flightSummary?.logo ||
+    flightSummary?.airline_logo ||
+    flightSummary?.airlineLogo ||
+    flightSummary?.carrier?.logo ||
+    item?.logo ||
+    item?.airline_logo ||
+    item?.airlineLogo ||
+    item?.flight?.airline?.logo ||
+    item?.carrier?.logo;
+
+  return buildMediaUrl(
+    resolveAirlineLogo({
+      name: getAirlineName(airline, flightSummary?.airline_name || item?.airline_name),
+      code: getAirlineCode(item, flightSummary, airline),
+      logo,
+    }),
+    "/images/Flight.png",
+  );
+};
+
+const getPassengerList = (item) => {
+  const flightBooking = item?.flight_booking || item?.flightBooking || {};
+  const packageBooking = item?.package_booking || item?.packageBooking || {};
   const passengers =
+    item?.passenger_details ||
+    item?.user_passengers ||
     item?.passengers ||
     item?.data?.passengers ||
+    flightBooking?.passenger_details ||
+    flightBooking?.user_passengers ||
+    packageBooking?.passenger_details ||
+    packageBooking?.user_passengers ||
+    packageBooking?.passengers ||
     item?.raw?.Pax ||
     [];
+
+  return Array.isArray(passengers) ? passengers : [];
+};
+
+const getPassengerSummary = (item) => {
+  const passengers = getPassengerList(item);
 
   if (Array.isArray(passengers) && passengers.length > 0) {
     const counts = passengers.reduce((acc, passenger) => {
@@ -186,32 +257,98 @@ const getPassengerSummary = (item) => {
 };
 
 const mapFlightReservation = (item, index) => {
-  const airline = item?.airline || item?.flight?.airline || item?.carrier || "Flight";
+  const flightBooking = item?.flight_booking || item?.flightBooking || {};
+  const flightSummary =
+    flightBooking?.flight_summary ||
+    flightBooking?.flightSummary ||
+    item?.flight_summary ||
+    item?.flightSummary ||
+    item?.flight ||
+    {};
+  const airlineSource =
+    flightSummary?.airline ||
+    item?.airline ||
+    item?.flight?.airline ||
+    item?.carrier ||
+    "Flight";
+  const airline = getAirlineName(airlineSource, flightSummary?.airline_name || "Flight");
   const flightNo = String(
-    item?.flight_no || item?.flightNo || item?.flight_number || item?.raw?.FlightNo || ""
+    flightSummary?.flight_no ||
+      flightSummary?.flightNo ||
+      flightSummary?.flight_number ||
+      item?.flight_no ||
+      item?.flightNo ||
+      item?.flight_number ||
+      item?.raw?.FlightNo ||
+      ""
   ).trim();
-  const fromCode = String(item?.from || item?.origin || item?.from_code || item?.raw?.From || "").toUpperCase();
-  const toCode = String(item?.to || item?.destination || item?.to_code || item?.raw?.To || "").toUpperCase();
+  const fromCode = String(
+    flightSummary?.origin ||
+      flightSummary?.from ||
+      flightSummary?.from_code ||
+      item?.from ||
+      item?.origin ||
+      item?.from_code ||
+      item?.raw?.From ||
+      ""
+  ).toUpperCase();
+  const toCode = String(
+    flightSummary?.destination ||
+      flightSummary?.to ||
+      flightSummary?.to_code ||
+      item?.to ||
+      item?.destination ||
+      item?.to_code ||
+      item?.raw?.To ||
+      ""
+  ).toUpperCase();
   const status = normalizeBookingStatus(
-    item?.status || item?.booking_status || item?.payment_status
+    item?.status ||
+      item?.booking_status ||
+      item?.payment_status ||
+      flightBooking?.booking_status ||
+      flightBooking?.payment_status
   );
 
   return {
-    id: String(item?.booking_id || item?.id || item?.reference_id || index + 1),
+    bookingType: "FLIGHT BOOKING",
+    id: String(
+      flightBooking?.booking_id ||
+        item?.booking_id ||
+        item?.id ||
+        item?.reference_id ||
+        index + 1
+    ),
     hotel: flightNo ? `${airline} (${flightNo})` : airline,
     fromTo: `${fromCode || "N/A"} - ${toCode || "N/A"}`,
-    checkIn: formatDateTime(item?.departure || item?.depart_at || item?.onward_date),
-    checkOut: formatDateTime(item?.arrival || item?.arrive_at || item?.return_date),
+    checkIn: formatDateTime(
+      flightSummary?.departure ||
+        flightSummary?.depart_at ||
+        item?.departure ||
+        item?.depart_at ||
+        item?.onward_date
+    ),
+    checkOut: formatDateTime(
+      flightSummary?.arrival ||
+        flightSummary?.arrive_at ||
+        item?.arrival ||
+        item?.arrive_at ||
+        item?.return_date
+    ),
     guests: getPassengerSummary(item),
     status,
-    image: "/images/flightsReservations.png",
+    image: getFlightLogo(item, flightSummary, airlineSource),
   };
 };
 
 const getPackageImage = (item, packageInfo) => {
+  const packageBooking = item?.package_booking || item?.packageBooking || {};
   const media =
     item?.image ||
     item?.package_image ||
+    item?.package_image?.url ||
+    packageBooking?.package_image ||
+    packageBooking?.package_image?.url ||
     packageInfo?.image ||
     packageInfo?.thumbnail ||
     packageInfo?.media?.[0]?.package_media?.[0]?.url ||
@@ -222,8 +359,12 @@ const getPackageImage = (item, packageInfo) => {
 };
 
 const getPackageTravellerSummary = (item) => {
-  const passengerSummary = getPassengerSummary(item);
-  if (passengerSummary !== "N/A") return passengerSummary;
+  const packageBooking = item?.package_booking || item?.packageBooking || {};
+  const passengers = getPassengerList(item);
+
+  if (passengers.length > 0) {
+    return `${passengers.length} Traveller${passengers.length > 1 ? "s" : ""}`;
+  }
 
   const count =
     item?.travellers ||
@@ -231,45 +372,72 @@ const getPackageTravellerSummary = (item) => {
     item?.traveller_count ||
     item?.traveler_count ||
     item?.no_of_travellers ||
-    item?.total_travellers;
+    item?.total_travellers ||
+    packageBooking?.travellers ||
+    packageBooking?.travelers ||
+    packageBooking?.passenger_count;
 
   return count ? `${count} Traveller${Number(count) > 1 ? "s" : ""}` : "N/A";
 };
 
 const mapPackageReservation = (item, index) => {
+  const packageBooking = item?.package_booking || item?.packageBooking || {};
   const packageInfo =
+    packageBooking?.package ||
+    packageBooking?.holiday_package ||
     item?.package ||
     item?.holiday_package ||
     item?.package_details ||
     item?.package_data ||
     item?.data?.package ||
     {};
+  const packageName =
+    packageBooking?.package_title ||
+    packageBooking?.package_name ||
+    item?.package_name ||
+    item?.title ||
+    packageInfo?.package_name ||
+    packageInfo?.title ||
+    packageInfo?.name ||
+    "Package booking";
+  const passengers = getPassengerList(item);
+  const passengerCount =
+    passengers.length ||
+    Number(
+      packageBooking?.passenger_count ||
+        packageBooking?.travellers ||
+        item?.passenger_count ||
+        item?.travellers ||
+        0,
+    ) ||
+    0;
 
   return {
+    bookingType: "PACKAGES",
     id: String(
-      item?.booking_id ||
+      packageBooking?.booking_id ||
+        item?.booking_id ||
         item?.booking_reference ||
         item?.reference_id ||
         item?.id ||
         index + 1
     ),
-    hotel:
-      item?.package_name ||
-      item?.title ||
-      packageInfo?.package_name ||
-      packageInfo?.title ||
-      packageInfo?.name ||
-      "Package booking",
-    checkIn: formatDate(
-      item?.start_date_time ||
+    hotel: packageName,
+    packageName,
+    checkIn: formatDateTime(
+      packageBooking?.start_date_time ||
+        packageBooking?.start_date ||
+        item?.start_date_time ||
         item?.start_date ||
         item?.package_start_date ||
         item?.departure_date ||
         packageInfo?.start_date_time ||
         packageInfo?.start_date
     ),
-    checkOut: formatDate(
-      item?.end_date_time ||
+    checkOut: formatDateTime(
+      packageBooking?.end_date_time ||
+        packageBooking?.end_date ||
+        item?.end_date_time ||
         item?.end_date ||
         item?.package_end_date ||
         item?.return_date ||
@@ -278,9 +446,17 @@ const mapPackageReservation = (item, index) => {
     ),
     guests: getPackageTravellerSummary(item),
     status: normalizeBookingStatus(
-      item?.status || item?.booking_status || item?.payment_status
+      item?.status ||
+        item?.booking_status ||
+        item?.payment_status ||
+        packageBooking?.status ||
+        packageBooking?.booking_status ||
+        packageBooking?.payment_status
     ),
     image: getPackageImage(item, packageInfo),
+    passengers,
+    passengerCount,
+    raw: item,
   };
 };
 
@@ -291,6 +467,8 @@ export default function Reservations({
 }) {
   const [flightReservationData, setFlightReservationData] = useState([]);
   const [packageReservationData, setPackageReservationData] = useState([]);
+  const { tripFilter } = useProfile();
+  const bookingStatus = getBookingStatusParam(tripFilter);
 
   useEffect(() => {
     let ignore = false;
@@ -302,7 +480,8 @@ export default function Reservations({
             type: "flight",
             domain: process.env.NEXT_PUBLIC_DOMAIN,
             page: 1,
-            per_page: 1,
+            per_page: 20,
+            ...(bookingStatus ? { status: bookingStatus } : {}),
           },
         });
 
@@ -330,7 +509,7 @@ export default function Reservations({
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [bookingStatus]);
 
   useEffect(() => {
     let ignore = false;
@@ -342,7 +521,8 @@ export default function Reservations({
             type: "package",
             domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
             page: 1,
-            per_page: 1,
+            per_page: 20,
+            ...(bookingStatus ? { status: bookingStatus } : {}),
           },
         });
 
@@ -362,7 +542,7 @@ export default function Reservations({
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [bookingStatus]);
 
   const allTabFlightData = useMemo(() => flightReservationData, [flightReservationData]);
   const allTabPackageData = useMemo(
@@ -462,7 +642,7 @@ export default function Reservations({
                     <div className={styles.imageWrapper}>
                       <Image
                         src={item.image}
-                        alt={item.hotel}
+                        alt={item.packageName || item.hotel}
                         fill
                         style={{ objectFit: "cover" }}
                       />
@@ -470,7 +650,9 @@ export default function Reservations({
 
                     <div className={styles.content}>
                       <div className={styles.cardHeader}>
-                        <h2 className={styles.hotelName}>{item.hotel}</h2>
+                        <h2 className={styles.hotelName}>
+                          {item.packageName || item.hotel}
+                        </h2>
                       </div>
 
                       <div className={styles.detailsGrid}>
@@ -503,7 +685,7 @@ export default function Reservations({
 
                     <button
                       className={styles.checkDetails}
-                      onClick={onCheckDetails}
+                      onClick={() => onCheckDetails(item)}
                     >
                       Check Details
                     </button>
@@ -688,12 +870,11 @@ export default function Reservations({
               <article key={index} className={styles.card}>
                 <div className={styles.cardMain}>
                   <div className={styles.imageWrapper}>
-                    <Image
-                      src={item.image}
-                      alt={item.hotel}
-                      fill
-                      style={{ objectFit: "cover" }}
-                    />
+	                    <img
+	                      src={item.image}
+	                      alt={item.hotel}
+	                      style={{ objectFit: "cover" }}
+	                    />
                   </div>
 
                   <div className={styles.content}>
@@ -734,7 +915,7 @@ export default function Reservations({
 
                   <button
                     className={styles.checkDetails}
-                    onClick={onCheckDetails}
+                    onClick={() => onCheckDetails(item)}
                   >
                     Check Details
                   </button>
@@ -751,7 +932,7 @@ export default function Reservations({
                   <div className={styles.imageWrapper}>
                     <Image
                       src={item.image}
-                      alt={item.hotel}
+                      alt={item.packageName || item.hotel}
                       fill
                       style={{ objectFit: "cover" }}
                     />
@@ -759,7 +940,9 @@ export default function Reservations({
 
                   <div className={styles.content}>
                     <div className={styles.cardHeader}>
-                      <h2 className={styles.hotelName}>{item.hotel}</h2>
+                      <h2 className={styles.hotelName}>
+                        {item.packageName || item.hotel}
+                      </h2>
                     </div>
 
                     <div className={styles.detailsGrid}>
@@ -792,7 +975,7 @@ export default function Reservations({
 
                   <button
                     className={styles.checkDetails}
-                    onClick={onCheckDetails}
+                    onClick={() => onCheckDetails(item)}
                   >
                     Check Details
                   </button>
@@ -866,6 +1049,7 @@ export default function Reservations({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onCheckDetails={onCheckDetails}
+          flightReservations={flightReservationData}
           packageReservations={packageReservationData}
         />
       </section>

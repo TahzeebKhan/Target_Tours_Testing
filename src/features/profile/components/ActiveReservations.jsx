@@ -41,6 +41,7 @@ export default function ActiveReservations({
   activeTab,
   setActiveTab,
   onCheckDetails,
+  flightReservations = [],
   packageReservations = [],
 }) {
   const { setMobileTitle } = useProfile();
@@ -129,6 +130,7 @@ export default function ActiveReservations({
             <FlightBooking
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
+              reservations={flightReservations}
             />{" "}
           </>
         ) : activeTab === "PACKAGES" ? (

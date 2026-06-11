@@ -7,6 +7,7 @@ import IndividualProperty from "../individualProperty/IndividualProperty";
 
 const Trip = () => {
   const [step, setStep] = useState("RESERVATIONS");
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const [activeTab, setActiveTab] = useState("HOTEL BOOKING");
   // EMPTY | RESERVATIONS | DETAILS
@@ -20,7 +21,13 @@ const Trip = () => {
       <Reservations
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onCheckDetails={() => setStep("DETAILS")}
+        onCheckDetails={(booking) => {
+          setSelectedBooking(booking || null);
+          if (booking?.bookingType) {
+            setActiveTab(booking.bookingType);
+          }
+          setStep("DETAILS");
+        }}
       />
     );
   }
@@ -29,6 +36,7 @@ const Trip = () => {
     <IndividualProperty
       activeTab={activeTab}
       setActiveTab={setActiveTab}
+      selectedBooking={selectedBooking}
       onBack={() => setStep("RESERVATIONS")}
     />
   );

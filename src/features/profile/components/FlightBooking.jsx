@@ -24,11 +24,18 @@ const RESERVATIONS = [
   },
 ];
 
-const FlightBooking = ({ setMobileTitle, onCheckDetails }) => {
+const FlightBooking = ({ setMobileTitle, onCheckDetails, reservations = [] }) => {
+  const rows = reservations.length
+    ? reservations.map((reservation) => ({
+        ...reservation,
+        flightName: reservation.hotel,
+      }))
+    : RESERVATIONS;
+
   return (
     <div>
       <div className={styles.cardList}>
-        {RESERVATIONS.map((res, index) => (
+        {rows.map((res, index) => (
           <section key={index} className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.imageWrapper}>
@@ -46,7 +53,13 @@ const FlightBooking = ({ setMobileTitle, onCheckDetails }) => {
                   <h2 className={styles.hotelName}>{res.fromTo}</h2>
                 </div>
 
-                <span className={styles.statusBadge}>{res.status}</span>
+                <span
+                  className={`${styles.statusBadge} ${
+                    styles[String(res.status || "").toLowerCase()] || ""
+                  }`}
+                >
+                  {res.status}
+                </span>
               </div>
             </div>
 

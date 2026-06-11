@@ -69,11 +69,49 @@
 }
 
 /* Grid Layout */
+.formPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 32px;
     row-gap: 24px;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 24px;
+}
+
+.goBackButton {
+    border: none;
+    background: transparent;
+    color: rgba(0, 0, 51, 1);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.saveButton {
+    min-width: 64px;
+    height: 40px;
+    border: 1px solid rgba(0, 0, 51, 1);
+    background: rgba(0, 0, 51, 1);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    cursor: pointer;
+    padding: 0 18px;
 }
 
 .fieldWrapper {

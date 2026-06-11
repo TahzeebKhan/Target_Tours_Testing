@@ -19,6 +19,16 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.kiwi.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "imgak.mmtcdn.com",
+        pathname: "/**",
+      },
     ],
   },
 };
