@@ -14,6 +14,11 @@ const nextConfig = {
         hostname: "sprintsell.com",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
 };

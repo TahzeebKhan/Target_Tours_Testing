@@ -296,6 +296,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
       login({
         token: data.token,
         user: data.user,
+        profile: data.userProfile,
       });
 
       // 3️⃣ FETCH USER PROFILE (IMPORTANT PART)
@@ -339,6 +340,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
       login({
         token: data.token,
         user: data.user,
+        profile: data.userProfile,
       });
 
       appToast.success("Welcome! You've Logged in Successfully");

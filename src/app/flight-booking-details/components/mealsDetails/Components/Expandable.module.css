@@ -24,6 +24,63 @@
   color: #070773;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vegToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  color: #000000;
+  font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 13px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggleTrack {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #E5E5E5;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  transition: background-color 0.25s ease;
+}
+
+.toggleThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #000033;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+.vegToggleActive .toggleTrack {
+  background-color: #dff5e7;
+}
+
+.vegToggleActive .toggleThumb {
+  transform: translateX(23px);
+}
+
 .emptyState {
   width: 100%;
   min-height: 132px;
@@ -97,7 +154,7 @@
 .info {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
 }
 
 .title {
@@ -165,10 +222,11 @@
 }
 
 .btn {
-  padding: 8px 5px;
+  padding: 0;
   width: 24px;
   height: 24px;
   border: 0.75px solid #000033;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,6 +316,11 @@
 .btn svg path {
   transition: all 0.5s ease;
 }
+
+.btn svg {
+  flex: 0 0 auto;
+}
+
 .btn:hover svg path {
   fill: white;
 }

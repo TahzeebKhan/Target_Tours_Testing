@@ -282,6 +282,15 @@ const ProfileSection = () => {
     flightBudget: "",
   });
 
+  useEffect(() => {
+    if (!profile) return;
+
+    setProfileFields(mapApiToFields(profile));
+    setDob(parseFromBackend(profile.date_of_birth));
+    setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
+    setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
+  }, [profile]);
+
   const buildPayload = () => {
     const get = (label) =>
       profileFields.find((f) => f.label === label)?.value?.trim();
@@ -390,6 +399,13 @@ const ProfileSection = () => {
           "Failed to fetch profile",
           err.response?.data || err.message,
         );
+
+        if (profile) {
+          setProfileFields(mapApiToFields(profile));
+          setDob(parseFromBackend(profile.date_of_birth));
+          setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
+          setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
+        }
       }
     };
 
@@ -527,6 +543,7 @@ const ProfileSection = () => {
 
   const getProfilePhotoUrl = (photo) => {
     if (!photo) return "/images/profilePlaceholder.avif"; // fallback avatar
+    if (/^https?:\/\//i.test(photo)) return photo;
 
     return `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/user_profile_picture/${photo}`;
   };

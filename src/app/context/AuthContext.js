@@ -10,14 +10,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    console.log("chnaged profile", profile);
-  }, [setProfile, profile]);
+
+  const getProfileFallback = (userData, profileData = null) => ({
+    ...(profileData || {}),
+    full_name:
+      profileData?.full_name ||
+      profileData?.display_name ||
+      userData?.full_name ||
+      userData?.display_name ||
+      userData?.name ||
+      userData?.email?.split("@")[0] ||
+      "",
+    display_name:
+      profileData?.display_name ||
+      profileData?.full_name ||
+      userData?.display_name ||
+      userData?.full_name ||
+      userData?.name ||
+      userData?.email?.split("@")[0] ||
+      "",
+  });
+
   useEffect(() => {
     const initAuth = async () => {
       try {
         const token = Cookies.get("auth_token");
         const userCookie = Cookies.get("user");
+        const profileCookie = Cookies.get("user_profile");
 
         if (!token || !userCookie) {
           setLoading(false);
@@ -25,8 +44,12 @@ export const AuthProvider = ({ children }) => {
         }
 
         const parsedUser = JSON.parse(userCookie);
+        const cachedProfile = profileCookie ? JSON.parse(profileCookie) : null;
         setUser(parsedUser);
         setIsLoggedIn(true);
+        if (cachedProfile) {
+          setProfile(getProfileFallback(parsedUser, cachedProfile));
+        }
         if (!parsedUser.id) {
           console.log("no user id");
           return;
@@ -42,12 +65,14 @@ export const AuthProvider = ({ children }) => {
 
         if (res.ok) {
           const profileData = await res.json();
-          setProfile(profileData);
+          const nextProfile = getProfileFallback(parsedUser, profileData);
+          setProfile(nextProfile);
+          Cookies.set("user_profile", JSON.stringify(nextProfile), {
+            expires: 7,
+          });
         }
       } catch (err) {
         console.error("Auth init failed", err);
-        setUser(null);
-        setProfile(null);
       } finally {
         setLoading(false);
       }
@@ -56,14 +81,19 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async ({ token, user }) => {
+  const login = async ({ token, user, profile: loginProfile = null }) => {
+    const fallbackProfile = getProfileFallback(user, loginProfile);
+
     Cookies.set("auth_token", token, { expires: 7 });
     Cookies.set("user", JSON.stringify(user), { expires: 7 });
     Cookies.set("user_id", user?.id, { expires: 7 });
+    Cookies.set("user_profile", JSON.stringify(fallbackProfile), {
+      expires: 7,
+    });
 
     setUser(user);
     setIsLoggedIn(true);
-    setProfile(null); // show "Hi, User" initially
+    setProfile(fallbackProfile);
     setLoading(true);
 
     try {
@@ -78,16 +108,16 @@ export const AuthProvider = ({ children }) => {
 
       if (res.ok) {
         const profileData = await res.json();
+        const nextProfile = getProfileFallback(user, profileData);
 
-        setProfile(profileData); // 🔥 re-renders → "Hi, Full Name"
+        setProfile(nextProfile); // 🔥 re-renders → "Hi, Full Name"
 
-        Cookies.set("user_profile", JSON.stringify(profileData), {
+        Cookies.set("user_profile", JSON.stringify(nextProfile), {
           expires: 7,
         });
       }
     } catch (err) {
       console.error("Profile fetch after login failed", err);
-      setProfile(null);
     } finally {
       setLoading(false);
     }

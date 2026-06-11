@@ -40,6 +40,15 @@ const SideBar = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const user = getParsedCookie("user");
+  const profileName =
+    profile?.full_name ||
+    profile?.display_name ||
+    profile?.name ||
+    user?.full_name ||
+    user?.display_name ||
+    user?.name ||
+    user?.email?.split("@")[0] ||
+    "";
 
   // console.log(user);
 
@@ -102,7 +111,7 @@ const SideBar = () => {
               </div>
 
               <div className={styles.sideBarProfileDetailsText}>
-                <h3>{profile?.full_name || ""}</h3>
+                <h3>{profileName}</h3>
                 <p>
                   {formatRoleUnderscoreToSpaceSeparated(user && user?.role)}
                 </p>
@@ -246,7 +255,7 @@ const SideBar = () => {
               </div>
 
               <div className={styles.sideBarProfileDetailsText}>
-                <h3>{profile?.full_name || ""}</h3>
+                <h3>{profileName}</h3>
                 <p>{user && user?.email}</p>
               </div>
             </div>
