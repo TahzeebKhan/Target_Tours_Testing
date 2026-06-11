@@ -371,6 +371,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
       login({
         token: data.token,
         user: data.user,
+        profile: data.userProfile,
       });
 
       appToast.success("Welcome! You've Logged in Successfully");
