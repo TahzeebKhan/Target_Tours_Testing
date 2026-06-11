@@ -83,8 +83,8 @@
 
 .imageWrapper {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -128,16 +128,29 @@
   border: 1px solid;
 }
 
-.confirmed {
+.confirmed,
+.completed,
+.approved {
   background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
   border: 1px solid rgba(4, 145, 83, 1);
   color: rgba(4, 145, 83, 1);
 }
 
-.pending {
+.pending,
+.initiated {
   background: var(--Color-Orange-50, rgba(255, 247, 237, 1));
   border: 1px solid var(--Color-Orange-600, rgba(234, 88, 12, 1));
   color: rgba(234, 88, 12, 1);
+}
+
+.cancelled,
+.canceled,
+.failed,
+.failure,
+.rejected {
+  background: rgba(254, 242, 242, 1);
+  border: 1px solid rgba(220, 38, 38, 1);
+  color: rgba(220, 38, 38, 1);
 }
 
 .idLabel {

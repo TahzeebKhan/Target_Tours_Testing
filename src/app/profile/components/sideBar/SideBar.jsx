@@ -32,7 +32,8 @@ const ChevronIcon = () => (
 );
 
 const SideBar = () => {
-  const { activeMenu, setActiveMenu, profilePhoto } = useProfile();
+  const { activeMenu, setActiveMenu, profilePhoto, tripFilter, setTripFilter } =
+    useProfile();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { logout, profile } = useAuth();
@@ -54,7 +55,7 @@ const SideBar = () => {
 
   const router = useRouter();
   const [openTrips, setOpenTrips] = useState(false);
-  const [activeTrip, setActiveTrip] = useState("All");
+  const activeTrip = tripFilter || "All";
   useEffect(() => {
     if (activeMenu !== "trip" && openTrips) setOpenTrips(false);
   }, [setActiveMenu, activeMenu]);
@@ -170,7 +171,7 @@ const SideBar = () => {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveTrip(item);
+                          setTripFilter(item);
                           setActiveMenu("trip");
                         }}
                       >
@@ -317,7 +318,7 @@ const SideBar = () => {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveTrip(item);
+                          setTripFilter(item);
                           setActiveMenu("trip");
                         }}
                       >

@@ -9,7 +9,32 @@
   font-size: 14px;
   height: 100%;
 }
+.titleRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 
+}
+.editProfileBtn{
+  font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: -3%;
+vertical-align: middle;
+text-decoration: underline;
+text-decoration-style: solid;
+text-decoration-offset: 0%;
+
+text-decoration-skip-ink: auto;
+color:#1A2029;
+ cursor: pointer;
+  background: none;
+  border: none;
+}
 /* Header Styles */
 .header {
   display: flex;
@@ -24,6 +49,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  width: 100%;
 }
 
 .avatarCircle {
@@ -56,6 +82,7 @@
   flex-direction: column;
   gap: 5px;
   align-items: flex-start;
+  width: 100%;
 }
 
 .titleGroup .title {
@@ -71,13 +98,52 @@
 }
 
 /* Grid Layout */
+.formPanel {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 24px;
+  gap: 60px;
+  height: 100%;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   column-gap: 32px;
   row-gap: 24px;
-  background-color: #ffffff;
-  padding: 24px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 24px;
+}
+
+.goBackButton {
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 51, 1);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.saveButton {
+  min-width: 64px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 51, 1);
+  background: rgba(0, 0, 51, 1);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+  padding: 0 18px;
 }
 
 .fieldWrapper {
@@ -121,6 +187,130 @@
   padding: 8px 12px;
   background: white;
   height: 48px;
+}
+
+.phoneContainer {
+  padding: 0;
+}
+
+.phoneInputWrap {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  align-items: center;
+  position: relative;
+  background: white;
+}
+
+.countryDropdown {
+  position: relative;
+  height: 100%;
+  border-right: 1px solid rgba(219, 226, 235, 1);
+}
+
+.countryTrigger {
+  width: 100%;
+  height: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: rgba(26, 32, 41, 1);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.countryTrigger:disabled {
+  cursor: default;
+}
+
+.countryTrigger::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(65, 70, 81, 1);
+}
+
+.countryTrigger:disabled::after {
+  opacity: 0.45;
+}
+
+.countryFlag {
+  width: 20px;
+  height: 14px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(213, 215, 218, 0.75);
+}
+
+.countryMenu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  width: 190px;
+  z-index: 20;
+  padding: 4px;
+  border: 1px solid rgba(213, 215, 218, 1);
+  background: #ffffff;
+  box-shadow: 0px 10px 24px rgba(10, 13, 18, 0.16);
+}
+
+.countrySearch {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(213, 215, 218, 1);
+  outline: none;
+  background: rgba(250, 250, 250, 1);
+  color: rgba(26, 32, 41, 1);
+  font-size: 13px;
+  line-height: 18px;
+  margin-bottom: 4px;
+}
+
+.countryOptionsList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.countryOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(26, 32, 41, 1);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.countryNoResult {
+  padding: 10px 8px;
+  color: rgba(91, 101, 116, 1);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.countryOption:hover,
+.countryOptionActive {
+  background: rgba(245, 245, 245, 1);
+}
+
+.phoneInput {
+  width: 100%;
+  padding: 0 12px;
 }
 
 .inputError {

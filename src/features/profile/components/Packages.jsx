@@ -11,17 +11,25 @@ const Packages = ({ setMobileTitle, onCheckDetails, reservations = [] }) => {
               <div className={styles.imageWrapper}>
                 <Image
                   src={res.image}
-                  alt={res.hotel}
+                  alt={res.packageName || res.hotel}
                   fill
                   style={{ objectFit: "cover" }}
                 />
               </div>
               <div className={styles.hotelInfo}>
                 <div className={styles.h2Container}>
-                  <h2 className={styles.hotelName}>{res.hotel}</h2>
+                  <h2 className={styles.hotelName}>
+                    {res.packageName || res.hotel}
+                  </h2>
                 </div>
 
-                <span className={styles.statusBadge}>{res.status}</span>
+                <span
+                  className={`${styles.statusBadge} ${
+                    styles[String(res.status || "").toLowerCase()] || ""
+                  }`}
+                >
+                  {res.status}
+                </span>
               </div>
             </div>
 
@@ -53,7 +61,7 @@ const Packages = ({ setMobileTitle, onCheckDetails, reservations = [] }) => {
               <button
                 onClick={() => {
                   setMobileTitle?.("Booking Details");
-                  onCheckDetails();
+                  onCheckDetails(res);
                 }}
                 className={styles.detailsButton}
               >

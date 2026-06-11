@@ -23,7 +23,46 @@ import {
   countryList,
   getNationalityCountryCode,
   NationalityList,
+  nationalityAliasToIso,
 } from "./CountryName";
+
+const countryCodes = Array.from(
+  new Set(
+    Object.values(nationalityAliasToIso).filter((code) =>
+      /^[A-Z]{2}$/.test(code),
+    ),
+  ),
+).sort();
+
+const countryNameByCode = NationalityList.reduce((countryMap, item) => {
+  if (item.iso && item.name) {
+    countryMap[item.iso] = item.name;
+  }
+
+  return countryMap;
+}, {});
+
+const countryAliasSearchByCode = Object.entries(nationalityAliasToIso).reduce(
+  (countryMap, [alias, code]) => {
+    if (!/^[A-Z]{2}$/.test(code)) return countryMap;
+
+    countryMap[code] = `${countryMap[code] || ""} ${alias}`.trim();
+    return countryMap;
+  },
+  {},
+);
+
+const COUNTRY_OPTIONS = [
+  "IN",
+  ...countryCodes.filter((code) => code !== "IN"),
+].map((code) => ({
+  code,
+  name: countryNameByCode[code] || code,
+  searchText: `${code} ${countryNameByCode[code] || ""} ${
+    countryAliasSearchByCode[code] || ""
+  }`.toLowerCase(),
+  maxLength: code === "IN" || code === "US" ? 10 : 15,
+}));
 
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
@@ -34,11 +73,30 @@ const ProfileSection = () => {
   const [uploading, setUploading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [dropdownSearch, setDropdownSearch] = useState({});
+
+  const [editMode, setEditMode] = useState(false);
+  const [phoneCountry, setPhoneCountry] = useState("IN");
+  const [isPhoneCountryDropdownOpen, setIsPhoneCountryDropdownOpen] = useState(false);
+  const [phoneCountrySearch, setPhoneCountrySearch] = useState("");
+  const phoneCountryDropdownRef = useRef(null);
+  const selectedPhoneCountry =
+    COUNTRY_OPTIONS.find((option) => option.code === phoneCountry) ||
+    COUNTRY_OPTIONS[0];
+  const filteredPhoneCountryOptions = phoneCountrySearch.trim()
+    ? COUNTRY_OPTIONS.filter((option) =>
+        option.searchText.includes(phoneCountrySearch.trim().toLowerCase()),
+      )
+    : COUNTRY_OPTIONS;
+
   const handleChangePhotoClick = () => {
     fileInputRef.current?.click();
   };
   const isValidPhoneNumber = (phone) => {
-    return /^\d{10}$/.test(phone);
+    if (phoneCountry === "IN") {
+      return /^[6-9]\d{9}$/.test(phone);
+    }
+
+    return /^\d{6,15}$/.test(phone);
   };
 
   const handlePhotoSelect = async (e) => {
@@ -127,6 +185,14 @@ const ProfileSection = () => {
         setProfileFields((prev) => prev.map((f) => ({ ...f, isOpen: false })));
         setDropdownSearch({});
       }
+
+      if (
+        phoneCountryDropdownRef.current &&
+        !phoneCountryDropdownRef.current.contains(e.target)
+      ) {
+        setIsPhoneCountryDropdownOpen(false);
+        setPhoneCountrySearch("");
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -204,6 +270,55 @@ const ProfileSection = () => {
     },
   ];
 
+  const normalizeCountryText = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s*\([^)]*\)/g, "")
+      .replace(/\s*\[[^\]]*\]/g, "")
+      .replace(/\bthe\b/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const getCountryCodeFromValue = (value) => {
+    const countryValue = String(value || "").trim();
+    if (!countryValue) return "";
+
+    const upperValue = countryValue.toUpperCase();
+    if (/^[A-Z]{2}$/.test(upperValue)) return upperValue;
+
+    const directCode = getNationalityCountryCode(countryValue);
+    if (/^[A-Z]{2}$/.test(directCode)) return directCode;
+
+    const normalizedValue = normalizeCountryText(countryValue);
+    const countryMatch = NationalityList.find(
+      (item) =>
+        normalizeCountryText(item.name) === normalizedValue ||
+        normalizeCountryText(item.nationality) === normalizedValue
+    );
+
+    if (countryMatch?.iso) return countryMatch.iso;
+
+    if (normalizedValue === "usa" || normalizedValue === "unitedstatesofamerica") {
+      return "US";
+    }
+
+    return "";
+  };
+
+  const getCountryDisplayValue = (country, countryCode) => {
+    const countryValue = String(country || "").trim();
+    const code = getCountryCodeFromValue(countryCode || countryValue);
+
+    if (code) {
+      const match = NationalityList.find((item) => item.iso === code);
+      return match?.name || countryValue;
+    }
+
+    if (normalizeCountryText(countryValue) === "usa") return "United States";
+
+    return countryValue;
+  };
+
   const mapApiToFields = (data) => [
     { label: "Full Name", value: data.full_name || "", isEditing: false },
 
@@ -269,7 +384,7 @@ const ProfileSection = () => {
 
     {
       label: "Country",
-      value: data.country || "",
+      value: getCountryDisplayValue(data.country, data.country_code),
       isDropdown: true,
       isEditing: false,
       isOpen: false,
@@ -287,6 +402,11 @@ const ProfileSection = () => {
 
     setProfileFields(mapApiToFields(profile));
     setDob(parseFromBackend(profile.date_of_birth));
+    setPhoneCountry(
+      getCountryCodeFromValue(
+        profile.dail_code || profile.country_code || profile.country,
+      ) || "IN"
+    );
     setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
     setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
   }, [profile]);
@@ -294,6 +414,8 @@ const ProfileSection = () => {
   const buildPayload = () => {
     const get = (label) =>
       profileFields.find((f) => f.label === label)?.value?.trim();
+    const countryValue = get("Country");
+    const countryCode = getCountryCodeFromValue(countryValue);
 
     const payload = {
       full_name: get("Full Name"),
@@ -301,7 +423,8 @@ const ProfileSection = () => {
       date_of_birth: get("Date of Birth"),
       nationality: get("Nationality"),
       address: get("Address"),
-      country: get("Country"),
+      country: countryCode || countryValue,
+      dail_code: phoneCountry || countryCode,
       zip_code: get("Zip Code"),
       passport_detail: get("Passport Details"),
       phone_no: get("Phone Number"), // ✅ FIX
@@ -330,7 +453,7 @@ const ProfileSection = () => {
 
       if (!userId) {
         console.log("User ID missing in cookies");
-        return;
+        return false;
       }
 
       const phone = profileFields
@@ -341,7 +464,7 @@ const ProfileSection = () => {
       if (phone && !isValidPhoneNumber(phone)) {
         setPhoneError(true);
         toast.error("Enter a valid phone number");
-        return;
+        return false;
       }
 
       setPhoneError(false);
@@ -350,7 +473,7 @@ const ProfileSection = () => {
       // 🔥 nothing to update
       if (Object.keys(payload).length === 1) {
         toast.info("No changes to update");
-        return;
+        return true;
       }
 
       const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
@@ -365,10 +488,40 @@ const ProfileSection = () => {
       setProfile(res?.data?.data);
 
       toast.success("Profile updated successfully");
+      return true;
     } catch (err) {
       console.error("Profile update failed", err.response?.data || err.message);
       toast.error("Failed to update profile");
+      return false;
     }
+  };
+
+  const closeProfileEditing = () => {
+    setEditMode(false);
+    setProfileFields((prev) =>
+      prev.map((field) => ({ ...field, isEditing: false, isOpen: false }))
+    );
+    setDropdownSearch({});
+  };
+
+  const openProfileEditing = () => {
+    setEditMode(true);
+    setProfileFields((prev) =>
+      prev.map((field) => ({ ...field, isEditing: true, isOpen: false }))
+    );
+    setDropdownSearch({});
+  };
+
+  const handleProfileSave = async () => {
+    const saved = await updateProfile();
+    if (saved !== false) {
+      closeProfileEditing();
+    }
+  };
+
+  const handleProfileGoBack = () => {
+    closeProfileEditing();
+    setActiveMenu("Personal Information");
   };
 
   useEffect(() => {
@@ -391,6 +544,11 @@ const ProfileSection = () => {
         // ✅ Prefill fields
         setProfileFields(mapApiToFields(res.data));
         setDob(parseFromBackend(res.data.date_of_birth));
+        setPhoneCountry(
+          getCountryCodeFromValue(
+            res.data.dail_code || res.data.country_code || res.data.country,
+          ) || "IN"
+        );
         // 🔥 MAP PROFILE PHOTO
         setAvatarPreview(getProfilePhotoUrl(res.data.profile_photo));
         setProfilePhoto(getProfilePhotoUrl(res.data.profile_photo));
@@ -403,6 +561,11 @@ const ProfileSection = () => {
         if (profile) {
           setProfileFields(mapApiToFields(profile));
           setDob(parseFromBackend(profile.date_of_birth));
+          setPhoneCountry(
+            getCountryCodeFromValue(
+              profile.dail_code || profile.country_code || profile.country,
+            ) || "IN"
+          );
           setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
           setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
         }
@@ -414,7 +577,10 @@ const ProfileSection = () => {
 
   const handleChange = (index, value) => {
     const updated = [...profileFields];
-    updated[index].value = value;
+    updated[index].value =
+      updated[index].label === "Phone Number"
+        ? value.replace(/[^\d]/g, "").slice(0, selectedPhoneCountry.maxLength)
+        : value;
     setProfileFields(updated);
 
     if (validationErrors[updated[index].label]) {
@@ -426,41 +592,10 @@ const ProfileSection = () => {
     }
   };
 
-  const toggleEdit = async (index) => {
-    const updated = [...profileFields];
-    const field = updated[index];
-    const emptyFieldMessages = {
-      Address: "Please enter address",
-    };
-
-    // If clicking SAVE → call API
-    if (field.isEditing) {
-      if (!String(field.value || "").trim()) {
-        const message =
-          emptyFieldMessages[field.label] || `${field.label} is required`;
-        setValidationErrors((prev) => ({
-          ...prev,
-          [field.label]: message,
-        }));
-        toast.error(message);
-        return;
-      }
-
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field.label];
-        return next;
-      });
-
-      await updateProfile();
-    }
-
-    updated[index].isEditing = !field.isEditing;
-    setProfileFields(updated);
-  };
-
   const toggleDropdown = (index) => {
     const updated = [...profileFields];
+    if (!updated[index].isEditing) return;
+
     updated[index].isOpen = !updated[index].isOpen;
     if (!updated[index].isOpen) {
       setDropdownSearch((prev) => {
@@ -554,6 +689,9 @@ const ProfileSection = () => {
       [key]: value,
     }));
   };
+  const handleEditProfile = () => {
+    openProfileEditing();
+  };
 
   const isCorporate = false;
   return (
@@ -583,7 +721,14 @@ const ProfileSection = () => {
             </div>
 
             <div className={styles.titleGroup}>
-              <h1 className={styles.title}>My Profile</h1>
+              <div className={styles.titleRow}>
+                <h1 className={styles.title}>My Profile</h1>
+                {!editMode && (
+                  <button className={styles.editProfileBtn} onClick={handleEditProfile}>
+                    Edit Profile
+                  </button>
+                )}
+              </div>
               <p className={styles.subtitle}>
                 Keep your details up to date to make your bookings and travel
                 smoother.
@@ -599,201 +744,313 @@ const ProfileSection = () => {
           </div>
         </header>
 
-        <div className={styles.grid}>
-          {profileFields.map((field, index) => (
-            <div key={index} className={`${styles.fieldWrapper}`}>
-              <div className={styles.fieldHeader}>
-                <label className={styles.label}>{field.label}</label>
+        <div className={styles.formPanel}>
+          <div className={styles.grid}>
+            {profileFields.map((field, index) => (
+              <div key={index} className={`${styles.fieldWrapper}`}>
+                <div className={styles.fieldHeader}>
+                  <label className={styles.label}>{field.label}</label>
 
-                {field.isVerified && (
-                  <span className={styles.verifiedBadge}>Verified</span>
-                )}
+                  {field.isVerified && (
+                    <span className={styles.verifiedBadge}>Verified</span>
+                  )}
 
-                <button
-                  className={styles.editBtn}
-                  onClick={() => toggleEdit(index)}
+                </div>
+
+                <div
+                  className={`${styles.inputContainer} ${
+                    validationErrors[field.label] ||
+                    (field.label === "Phone Number" && phoneError)
+                      ? styles.inputError
+                      : ""
+                  } ${field.label === "Phone Number" ? styles.phoneContainer : ""}`}
                 >
-                  {field.isEditing ? "Save" : field.actionText || "Edit"}
-                </button>
-              </div>
-
-              <div
-                className={`${styles.inputContainer} ${
-                  validationErrors[field.label] ? styles.inputError : ""
-                }`}
-              >
-                {field.isDropdown && getFieldFlag(field) ? (
-                  <CountryFlagIcon
-                    code={getFieldFlag(field)}
-                    title={field.value}
-                    className={styles.flagEmoji}
-                  />
-                ) : field.isDropdown && !field.hasFlag ? (
-                  <Image
-                    src="/images/globe.svg"
-                    alt="Country"
-                    width={18}
-                    height={18}
-                    className={styles.globeIcon}
-                  />
-                ) : null}
-
-                {field.isDropdown ? (
-                  <div
-                    className={styles.dropdownInput}
-                    onClick={() => toggleDropdown(index)}
-                  >
-                    <span>{field.value}</span>
-                    <Image
-                      src="/images/chevron-down.svg"
-                      alt="Dropdown"
-                      width={12}
-                      height={12}
-                      className={styles.arrowIcon}
+                  {field.isDropdown && getFieldFlag(field) ? (
+                    <CountryFlagIcon
+                      code={getFieldFlag(field)}
+                      title={field.value}
+                      className={styles.flagEmoji}
                     />
-                  </div>
-                ) : field.label === "Date of Birth" && field.isEditing ? (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className={styles.input} type="button">
-                        {dob ? format(dob, "dd MMM yyyy") : "Select date"}
-                      </button>
-                    </PopoverTrigger>
+                  ) : field.isDropdown && !field.hasFlag ? (
+                    <Image
+                      src="/images/globe.svg"
+                      alt="Country"
+                      width={18}
+                      height={18}
+                      className={styles.globeIcon}
+                    />
+                  ) : null}
 
-                    <PopoverContent
-                      side="bottom"
-                      align="start"
-                      sideOffset={6}
-                      className="w-auto p-0"
+                  {field.isDropdown ? (
+                    <div
+                      className={styles.dropdownInput}
+                      onClick={() => toggleDropdown(index)}
                     >
-                      <Calendar
-                        mode="single"
-                        selected={dob}
-                        onSelect={(date) => {
-                          setDob(date);
-                          handleChange(index, formatForBackend(date));
-                        }}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={field.value}
-                    placeholder={field.placeholder}
-                    readOnly={!field.isEditing}
-                    onChange={(e) => handleChange(index, e.target.value)}
-                  />
-                )}
-
-                {field.isDropdown && field.isOpen && (
-                  <div className={styles.dropdownMenu} ref={dropdownRef}>
-                    <div className={styles.dropdownSearchWrap}>
-                      <input
-                        className={styles.dropdownSearchInput}
-                        type="text"
-                        value={dropdownSearch[field.label] || ""}
-                        placeholder={`Search ${field.label.toLowerCase()}`}
-                        onChange={(e) =>
-                          setDropdownSearch((prev) => ({
-                            ...prev,
-                            [field.label]: e.target.value,
-                          }))
-                        }
+                      <span>{field.value}</span>
+                      <Image
+                        src="/images/chevron-down.svg"
+                        alt="Dropdown"
+                        width={12}
+                        height={12}
+                        className={styles.arrowIcon}
                       />
                     </div>
-
-                    {getFilteredOptions(field).length > 0 ? (
-                      getFilteredOptions(field).map((option) => (
-                        <div
-                          key={getOptionLabel(option)}
-                          className={`${styles.dropdownItem} ${
-                            getOptionLabel(option) === field.value ? styles.selectedItem : ""
-                          }`}
-                          onClick={() => selectOption(index, getOptionLabel(option))}
+                  ) : field.label === "Phone Number" ? (
+                    <div
+                      className={`${styles.phoneInputWrap} ${
+                        phoneError ? styles.inputError : ""
+                      }`}
+                    >
+                      <div
+                        className={styles.countryDropdown}
+                        ref={phoneCountryDropdownRef}
+                      >
+                        <button
+                          type="button"
+                          className={styles.countryTrigger}
+                          aria-expanded={isPhoneCountryDropdownOpen}
+                          aria-label="Select country code"
+                          disabled={!editMode}
+                          onClick={() => {
+                            if (!editMode) return;
+                            setIsPhoneCountryDropdownOpen((current) => !current);
+                            setPhoneCountrySearch("");
+                          }}
                         >
-                          <span className={styles.dropdownOptionLabel}>
-                            {getDropdownOptionFlag(option, field) && (
-                              <CountryFlagIcon
-                                code={getDropdownOptionFlag(option, field)}
-                                title={getOptionLabel(option)}
-                                className={styles.flagEmoji}
+                          <CountryFlagIcon
+                            code={phoneCountry}
+                            title={phoneCountry}
+                            className={styles.countryFlag}
+                          />
+                          <span>{phoneCountry}</span>
+                        </button>
+
+                        {isPhoneCountryDropdownOpen && editMode && (
+                          <div className={styles.countryMenu}>
+                            <input
+                              type="text"
+                              className={styles.countrySearch}
+                              value={phoneCountrySearch}
+                              onChange={(e) => setPhoneCountrySearch(e.target.value)}
+                              placeholder="Search country"
+                              aria-label="Search country"
+                            />
+
+                            <div className={styles.countryOptionsList}>
+                              {filteredPhoneCountryOptions.length > 0 ? (
+                                filteredPhoneCountryOptions.map((option) => (
+                                  <button
+                                    key={option.code}
+                                    type="button"
+                                    title={option.name}
+                                    className={`${styles.countryOption} ${
+                                      option.code === phoneCountry
+                                        ? styles.countryOptionActive
+                                        : ""
+                                    }`}
+                                    onClick={() => {
+                                      setPhoneCountry(option.code);
+                                      setIsPhoneCountryDropdownOpen(false);
+                                      setPhoneCountrySearch("");
+                                      handleChange(
+                                        index,
+                                        String(field.value || "")
+                                          .replace(/[^\d]/g, "")
+                                          .slice(0, option.maxLength),
+                                      );
+                                      setPhoneError(false);
+                                    }}
+                                  >
+                                    <CountryFlagIcon
+                                      code={option.code}
+                                      title={option.code}
+                                      className={styles.countryFlag}
+                                    />
+                                    <span>{option.code}</span>
+                                  </button>
+                                ))
+                              ) : (
+                                <p className={styles.countryNoResult}>
+                                  No result
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <input
+                        type="text"
+                        inputMode="tel"
+                        className={`${styles.input} ${styles.phoneInput}`}
+                        value={field.value}
+                        placeholder={field.placeholder}
+                        readOnly={!editMode}
+                        maxLength={selectedPhoneCountry.maxLength}
+                        onChange={(e) => handleChange(index, e.target.value)}
+                      />
+                    </div>
+                  ) : field.label === "Date of Birth" && editMode ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={styles.input} type="button">
+                          {dob ? format(dob, "dd MMM yyyy") : "Select date"}
+                        </button>
+                      </PopoverTrigger>
+
+                      <PopoverContent
+                        side="bottom"
+                        align="start"
+                        sideOffset={6}
+                        className="w-auto p-0"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={dob}
+                          onSelect={(date) => {
+                            setDob(date);
+                            handleChange(index, formatForBackend(date));
+                          }}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={field.value}
+                      placeholder={field.placeholder}
+                      readOnly={!editMode}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                    />
+                  )}
+
+                  {field.isDropdown && editMode && field.isOpen && (
+                    <div className={styles.dropdownMenu} ref={dropdownRef}>
+                      <div className={styles.dropdownSearchWrap}>
+                        <input
+                          className={styles.dropdownSearchInput}
+                          type="text"
+                          value={dropdownSearch[field.label] || ""}
+                          placeholder={`Search ${field.label.toLowerCase()}`}
+                          onChange={(e) =>
+                            setDropdownSearch((prev) => ({
+                              ...prev,
+                              [field.label]: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+
+                      {getFilteredOptions(field).length > 0 ? (
+                        getFilteredOptions(field).map((option) => (
+                          <div
+                            key={getOptionLabel(option)}
+                            className={`${styles.dropdownItem} ${
+                              getOptionLabel(option) === field.value ? styles.selectedItem : ""
+                            }`}
+                            onClick={() => selectOption(index, getOptionLabel(option))}
+                          >
+                            <span className={styles.dropdownOptionLabel}>
+                              {getDropdownOptionFlag(option, field) && (
+                                <CountryFlagIcon
+                                  code={getDropdownOptionFlag(option, field)}
+                                  title={getOptionLabel(option)}
+                                  className={styles.flagEmoji}
+                                />
+                              )}
+                              {getOptionLabel(option)}
+                            </span>
+
+                            {getOptionLabel(option) === field.value && (
+                              <Image
+                                src="/icons/check.svg"
+                                alt="Selected"
+                                width={16}
+                                height={16}
                               />
                             )}
-                            {getOptionLabel(option)}
-                          </span>
-
-                          {getOptionLabel(option) === field.value && (
-                            <Image
-                              src="/icons/check.svg"
-                              alt="Selected"
-                              width={16}
-                              height={16}
-                            />
-                          )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className={styles.noDropdownResults}>
+                          No results found
                         </div>
-                      ))
-                    ) : (
-                      <div className={styles.noDropdownResults}>
-                        No results found
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {validationErrors[field.label] && (
+                  <p className={styles.errorText}>
+                    {validationErrors[field.label]}
+                  </p>
                 )}
               </div>
-              {validationErrors[field.label] && (
-                <p className={styles.errorText}>
-                  {validationErrors[field.label]}
-                </p>
-              )}
-            </div>
-          ))}
-          {isCorporate && (
-            <>
-              <div className={styles.fieldWrapper}>
-                <div className={styles.fieldHeader}>
-                  <label className={styles.label}>
-                    Hotel Budget for Each Booking
-                  </label>
+            ))}
+            {isCorporate && (
+              <>
+                <div className={styles.fieldWrapper}>
+                  <div className={styles.fieldHeader}>
+                    <label className={styles.label}>
+                      Hotel Budget for Each Booking
+                    </label>
+                  </div>
+                  <div className={styles.inputContainer}>
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={corporateFields.hotelBudget}
+                      placeholder="Enter hotel budget"
+                      onChange={(e) =>
+                        handleCorporateChange("hotelBudget", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-                <div className={styles.inputContainer}>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={corporateFields.hotelBudget}
-                    placeholder="Enter hotel budget"
-                    onChange={(e) =>
-                      handleCorporateChange("hotelBudget", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
 
-              <div className={styles.fieldWrapper}>
-                <div className={styles.fieldHeader}>
-                  <label className={styles.label}>
-                    Flight Budget for Each Booking
-                  </label>
+                <div className={styles.fieldWrapper}>
+                  <div className={styles.fieldHeader}>
+                    <label className={styles.label}>
+                      Flight Budget for Each Booking
+                    </label>
+                  </div>
+                  <div className={styles.inputContainer}>
+                    {" "}
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={corporateFields.flightBudget}
+                      placeholder="Enter flight budget"
+                      onChange={(e) =>
+                        handleCorporateChange("flightBudget", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-                <div className={styles.inputContainer}>
-                  {" "}
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={corporateFields.flightBudget}
-                    placeholder="Enter flight budget"
-                    onChange={(e) =>
-                      handleCorporateChange("flightBudget", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </>
+              </>
+            )}
+          </div>
+          {editMode && (
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                className={styles.goBackButton}
+                onClick={handleProfileGoBack}
+              >
+                GO BACK
+              </button>
+              <button
+                type="button"
+                className={styles.saveButton}
+                onClick={handleProfileSave}
+              >
+                SAVE
+              </button>
+            </div>
           )}
         </div>
       </section>

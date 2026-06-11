@@ -1,32 +1,96 @@
 import styles from "./PackageDetails.module.css";
 import { useState } from "react";
 import Image from "next/image";
-const PackageDetails = () => {
+
+const getPassengerName = (passenger) =>
+  passenger?.full_name ||
+  [passenger?.title, passenger?.first_name, passenger?.last_name]
+    .filter(Boolean)
+    .join(" ") ||
+  passenger?.name ||
+  "Passenger";
+
+const getPassengerCountLabel = (passengers = [], fallbackCount) => {
+  const count = passengers.length || Number(fallbackCount) || 0;
+  if (!count) return "0 Travellers";
+  return `${count} Traveller${count > 1 ? "s" : ""}`;
+};
+
+const getDateParts = (value) => {
+  if (!value || value === "N/A") {
+    return { day: "N/A", month: "" };
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    const [day, month] = String(value).split(" ");
+    return { day: day || "N/A", month: month || "" };
+  }
+
+  return {
+    day: date.toLocaleDateString("en-GB", { day: "numeric" }),
+    month: date.toLocaleDateString("en-GB", { month: "long" }),
+  };
+};
+
+const PackageDetails = ({ booking, onBack }) => {
   const [isActive, setIsActive] = useState(true);
+  const passengers = booking?.passengers?.length ? booking.passengers : [];
+  const passengerCountLabel = getPassengerCountLabel(
+    passengers,
+    booking?.passengerCount,
+  );
+  const fallbackPassengerCount = Number(booking?.passengerCount) || 0;
+  const displayPassengers = passengers.length
+    ? passengers
+    : Array.from({ length: fallbackPassengerCount }, (_, index) => ({
+        full_name: `Passenger ${index + 1}`,
+      }));
+  const packageName = booking?.packageName || booking?.hotel || "Package";
+  const packageImage = booking?.image || "/images/packages.png";
+  const status = booking?.status || "CONFIRMED";
+  const startDate = booking?.checkIn || "N/A";
+  const endDate = booking?.checkOut || "N/A";
+  const startDateParts = getDateParts(startDate);
+  const endDateParts = getDateParts(endDate);
+
   return (
     <div className={styles.container}>
       <div className={styles.innerContainer}>
+        {onBack && (
+          <button
+            type="button"
+            className={styles.backButton}
+            onClick={onBack}
+          >
+            <span aria-hidden="true">←</span>
+            Back
+          </button>
+        )}
+
         {/* Header Section */}
         <header className={styles.header}>
           <div className={styles.hotelInfo}>
             <div className={styles.imageWrapper}>
               <Image
-                src="/images/packages.png"
-                alt="Hotel Arts Barcelona"
+                src={packageImage}
+                alt={packageName}
                 fill
                 className={styles.objectFit}
               />
             </div>
             <div className={styles.details}>
-              <h1 className={styles.hotelName}>Maldives Magic</h1>
+              <h1 className={styles.hotelName}>{packageName}</h1>
               <p className={styles.textSecondary}>
                 <span className={styles.infoLabel}>Date:</span>
-                <span className={styles.infoValue}>14 - 18 August 2026</span>
+                <span className={styles.infoValue}>
+                  {startDate} - {endDate}
+                </span>
               </p>
 
               <p className={styles.textSecondary}>
                 <span className={styles.infoLabel}>Travellers:</span>
-                <span className={styles.infoValue}>4 Adults</span>
+                <span className={styles.infoValue}>{passengerCountLabel}</span>
               </p>
 
               <p className={styles.textSecondary}>
@@ -39,8 +103,8 @@ const PackageDetails = () => {
           <div className={styles.bookingMeta}>
             <div className={styles.metaBox}>
               <span className={styles.label}>Start Date</span>
-              <span className={styles.dateNumber}>14</span>
-              <span className={styles.month}>August</span>
+              <span className={styles.dateNumber}>{startDateParts.day}</span>
+              <span className={styles.month}>{startDateParts.month}</span>
               {/* <div className={styles.timeWrapper}>
                 <Image
                   src="/icons/alarm-clock.svg"
@@ -55,8 +119,8 @@ const PackageDetails = () => {
             <div className={styles.divider} />
             <div className={styles.metaBox}>
               <span className={styles.label}>End Date</span>
-              <span className={styles.dateNumber}>19</span>
-              <span className={styles.month}>August</span>
+              <span className={styles.dateNumber}>{endDateParts.day}</span>
+              <span className={styles.month}>{endDateParts.month}</span>
               {/* <div className={styles.timeWrapper}>
                 <Image
                   src="/icons/alarm-clock.svg"
@@ -76,7 +140,7 @@ const PackageDetails = () => {
                   isActive ? styles.active : ""
                 }`}
               >
-                CONFIRMED
+                {status}
               </button>
               <div className={styles.roomCount}>
                 <div className={styles.countGroup}>
@@ -248,15 +312,14 @@ const PackageDetails = () => {
             <div className={styles.passengerHeader}>
               <h2 className={styles.passengerTitle}>
                 PASSENGER DETAILS{" "}
-                <span className={styles.passengerCount}>4 Adults</span>
+                <span className={styles.passengerCount}>
+                  {passengerCountLabel}
+                </span>
               </h2>
             </div>
 
             <div className={styles.passengerList}>
-              {[
-                { name: "Mr Ayush Kumar", status: "CONFIRMED" },
-                { name: "Mr Ayush Kumar", status: "CONFIRMED" },
-              ].map((passenger, index) => (
+              {displayPassengers.map((passenger, index) => (
                 <div key={index} className={styles.passengerRow}>
                   <div className={styles.passengerInfo}>
                     <div className={styles.passengerAvatar}>
@@ -265,12 +328,12 @@ const PackageDetails = () => {
                       </span>
                     </div>
                     <span className={styles.passengerName}>
-                      {passenger.name}
+                      {getPassengerName(passenger)}
                     </span>
                   </div>
 
                   <span className={styles.passengerStatus}>
-                    {passenger.status}
+                    {passenger.status || status}
                   </span>
                 </div>
               ))}

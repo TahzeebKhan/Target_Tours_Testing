@@ -2,7 +2,7 @@ import { useState } from "react";
 import styles from "./FlightBookingDetails.module.css";
 import Image from "next/image";
 import CancelBookingModal from "./CancelBookingModal";
-const FlightBookingDetails = () => {
+const FlightBookingDetails = ({ onBack }) => {
   const [isActive, setIsActive] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -15,6 +15,17 @@ const FlightBookingDetails = () => {
       {" "}
       <div className={styles.container}>
         <div className={styles.innerContainer}>
+          {onBack && (
+            <button
+              type="button"
+              className={styles.backButton}
+              onClick={onBack}
+            >
+              <span aria-hidden="true">←</span>
+              Back
+            </button>
+          )}
+
           {/* Header Section */}
           <header className={styles.header}>
             <div className={styles.hotelInfo}>
