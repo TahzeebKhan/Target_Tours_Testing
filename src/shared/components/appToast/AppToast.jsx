@@ -1,37 +1,31 @@
 "use client";
 
-import { AlertCircle, Check } from "lucide-react";
 import { toast } from "react-toastify";
 import styles from "./AppToast.module.css";
 
 const toastConfig = {
   success: {
     className: "targetToastSuccess",
-    icon: Check,
   },
   error: {
     className: "targetToastError",
-    icon: AlertCircle,
   },
   info: {
     className: "targetToastInfo",
-    icon: AlertCircle,
   },
   warn: {
     className: "targetToastWarning",
-    icon: AlertCircle,
   },
 };
 
 function AppToastContent({ message, type }) {
-  const Icon = toastConfig[type]?.icon || AlertCircle;
+  const iconSrc =
+    type === "error" ? "/images/errorIcon.svg" : "/images/checkIcon.svg";
 
   return (
     <div className={`${styles.toastContent} toastContent`}>
-      {/* <Icon className={styles.toastIcon} strokeWidth={2.5} /> */}
-      <img src="/images/checkIcon.svg" alt="check" className={styles.toastIcon} />
+      <img src={iconSrc} alt="" className={styles.toastIcon} />
       <span className={styles.toastMessage}>{message}</span>
-      
     </div>
   );
 }

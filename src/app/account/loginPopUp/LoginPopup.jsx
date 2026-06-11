@@ -319,7 +319,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
       }
 
       // 5️⃣ CLOSE POPUP
-      appToast.success(profileRes?.message || "Welcome! You've Logged in Successfully");
+      appToast.success(data?.message || "Welcome! You've Logged in Successfully");
       onClose();
     } catch (err) {
       setError(err.message || "Something went wrong");
