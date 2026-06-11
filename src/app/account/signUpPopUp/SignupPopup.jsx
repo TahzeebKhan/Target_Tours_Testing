@@ -168,71 +168,65 @@ export default function SignupPopup({ onNavigate, onClose }) {
     setSuccessMessage("");
   };
 
-  const validateSignupFields = () => {
-    let isValid = true;
+  const clearValidationErrors = () => {
+    setEmailError("");
+    setPhoneNumberError("");
+    setFullNameError("");
+    setOtpError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+  };
 
+  const validateSignupFields = () => {
     if (!email.trim()) {
       setEmailError("Email is required");
-      isValid = false;
+      return false;
     } else if (!isEmailValid(email.trim())) {
       setEmailError("Enter a valid email address");
-      isValid = false;
+      return false;
     }
 
     if (!phoneNumber.trim()) {
       setPhoneNumberError("Mobile number is required");
-      isValid = false;
+      return false;
     } else if (!isPhoneValid(phoneNumber.trim())) {
       setPhoneNumberError("Enter a valid mobile number");
-      isValid = false;
+      return false;
     }
 
     if (!fullName.trim()) {
       setFullNameError("Full name is required");
-      isValid = false;
+      return false;
     }
 
-    return isValid;
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-    setEmailError("");
-    setPhoneNumberError("");
-    setFullNameError("");
-    setPasswordError("");
-    setConfirmPasswordError("");
-
-    let hasError = false;
+    clearValidationErrors();
 
     if (!validateSignupFields()) {
-      hasError = true;
+      return;
     }
 
     if (!password.trim()) {
       setPasswordError("Password is required");
-      hasError = true;
+      return;
     } else if (!isPasswordValid(password)) {
       setPasswordError(
         "Password must be at least 8 characters and include uppercase, lowercase, and special character",
       );
-      hasError = true;
+      return;
     }
 
     if (!confirmPassword.trim()) {
       setConfirmPasswordError("Please confirm your password");
-      hasError = true;
+      return;
     } else if (password !== confirmPassword) {
       setConfirmPasswordError("Passwords do not match");
-      hasError = true;
-    }
-
-    if (hasError) return;
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
       return;
     }
 
@@ -263,7 +257,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
       appToast.success(data?.message || "OTP sent successfully.");
     } catch (err) {
       setError(err.message);
-      appToast.error(err.message || "Signup failed");
+      // appToast.error(err.message || "Signup failed");
     } finally {
       setRegisterLoading(false);
     }
@@ -272,26 +266,19 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const handleVerifyOtp = async () => {
     setError("");
     setSuccessMessage("");
-    setEmailError("");
-    setPhoneNumberError("");
-    setFullNameError("");
-    setOtpError("");
-
-    let hasError = false;
+    clearValidationErrors();
 
     if (!validateSignupFields()) {
-      hasError = true;
+      return;
     }
 
     if (!otp.trim()) {
       setOtpError("OTP is required");
-      hasError = true;
+      return;
     } else if (!/^\d{4,6}$/.test(otp.trim())) {
       setOtpError("Enter a valid OTP");
-      hasError = true;
+      return;
     }
-
-    if (hasError) return;
 
     try {
       setOtpVerifyLoading(true);
@@ -335,10 +322,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const handleResendOtp = async () => {
     setError("");
     setSuccessMessage("");
-    setEmailError("");
-    setPhoneNumberError("");
-    setFullNameError("");
-    setOtpError("");
+    clearValidationErrors();
 
     if (!validateSignupFields()) {
       return;
@@ -469,7 +453,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
                 <label className={styles.label}>
-                  Enter Email
+                  Enter Email *
                 </label>
                 <input
                   type="text"
@@ -488,7 +472,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 )}
               </div>
               <div className={styles.inputGroup}>
-                <label className={styles.label}>Mobile Number</label>
+                <label className={styles.label}>Mobile Number *</label>
                 <div
                   className={`${styles.phoneInputWrap} ${
                     phoneNumberError ? styles.error : ""
@@ -591,7 +575,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                 )}
               </div>
               <div className={styles.inputGroup}>
-                <label className={styles.label}>Full Name</label>
+                <label className={styles.label}>Full Name *</label>
                 <input
                   type="text"
                   className={`${styles.input} ${
@@ -612,7 +596,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
               </div>
 
               <div className={styles.inputGroup}>
-                <label className={styles.label}>Enter password</label>
+                <label className={styles.label}>Enter password *</label>
                 <div className={styles.passwordInputWrap}>
                   <input
                     type={showPassword ? "text" : "password"}
@@ -644,7 +628,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
               </div>
 
               <div className={styles.inputGroup}>
-                <label className={styles.label}>Confirm password</label>
+                <label className={styles.label}>Confirm password *</label>
                 <div className={styles.passwordInputWrap}>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
