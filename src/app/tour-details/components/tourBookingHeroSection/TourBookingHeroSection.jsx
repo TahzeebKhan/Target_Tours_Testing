@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import styles from "./TourBookingHeroSection.module.css";
 
 const TourBookingHeroSection = ({ data, onViewItinerary }) => {
@@ -51,7 +52,9 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
       <div className={styles.overlay}></div>
 
       <div className={styles.topBar}>
-        <img className={styles.logo} src="/images/tour-logo.svg" alt="Target Tours" />
+        <Link href="/" aria-label="Go to home">
+          <img className={styles.logo} src="/images/tour-logo.svg" alt="Target Tours" />
+        </Link>
         <div className={styles.topActions}>
           <button type="button" className={styles.downloadButton}>
             Download The App

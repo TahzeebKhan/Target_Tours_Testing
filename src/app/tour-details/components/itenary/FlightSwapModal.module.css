@@ -17,6 +17,7 @@
   background: #fff;
   box-shadow: -20px 0 50px rgba(0, 0, 0, 0.22);
   animation: flightPanelIn 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
 }
 
 .flightModalClose {
@@ -379,11 +380,9 @@ color:#000000;
 
 @keyframes flightPanelIn {
   from {
-    opacity: 0;
-    transform: translateX(44px);
+    transform: translateX(100%);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }

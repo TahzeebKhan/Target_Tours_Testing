@@ -73,6 +73,9 @@ const UpcomingDepartures = ({ data }) => {
           month,
           items: BookingData.filter((b) => b.month === month),
         }));
+  const hasDepartureMonths = BookingData.length > 0 && groupedData.length > 1;
+  const canShowPrev = hasDepartureMonths && activeIndex > 0;
+  const canShowNext = hasDepartureMonths && activeIndex < groupedData.length - 1;
 
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -346,14 +349,20 @@ const UpcomingDepartures = ({ data }) => {
           ))}
         </Swiper>
       </div>
-      <div className={styles.btnContainer}>
-        <div className={styles.btn} onClick={handlePrev}>
-          <img src="/icons/left.svg" alt="Previous" />
+      {hasDepartureMonths && (
+        <div className={styles.btnContainer}>
+          {canShowPrev && (
+            <div className={styles.btn} onClick={handlePrev}>
+              <img src="/icons/left.svg" alt="Previous" />
+            </div>
+          )}
+          {canShowNext && (
+            <div className={styles.btn} onClick={handleNext}>
+              <img src="/icons/right.svg" alt="Next" />
+            </div>
+          )}
         </div>
-        <div className={styles.btn} onClick={handleNext}>
-          <img src="/icons/right.svg" alt="Next" />
-        </div>
-      </div>
+      )}
       </section>
 
       {showLogin && authView === "login" && (

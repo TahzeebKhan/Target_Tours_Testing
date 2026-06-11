@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import styles from "./Navbar.module.css";
 import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = () => {
@@ -9,7 +10,9 @@ const Navbar = () => {
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
-          <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+          <Link href="/" aria-label="Go to home">
+            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+          </Link>
           <div className={`${styles.navRight} flex gap-3`}>
             <div className={styles.sessionExpires}>
               <img src="/icons/watchIcon.svg" alt="" />

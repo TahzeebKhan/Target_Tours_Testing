@@ -443,7 +443,7 @@ const RouteMap = ({ days }) => {
 };
 
 const DayCard = ({ day, index }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [isHotelModalOpen, setIsHotelModalOpen] = useState(false);
   const hotel = getHotel(day);
   const meals = getMeals(day);
