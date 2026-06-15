@@ -100,6 +100,17 @@ const normalizeGenderCode = (value) => {
 const normalizeProviderCode = (provider) =>
   String(provider || "").trim().toLowerCase();
 
+const getProviderFromSearchKey = (searchKey) => {
+  const parts = String(searchKey || "").split("_").filter(Boolean);
+  const originalLength = parts.length;
+
+  while (["true", "false"].includes(parts.at(-1)?.toLowerCase())) {
+    parts.pop();
+  }
+
+  return parts.length < originalLength ? parts.at(-1) : undefined;
+};
+
 const formatRiyaSeatDateTime = (value) => {
   if (!value) return "";
   const text = String(value).trim();
@@ -574,6 +585,15 @@ export const readFlightBookingSession = () => {
       return null;
     }
     inMemoryFlightBookingSession = parsed || null;
+
+
+    const sizeInBytes = new Blob([
+  JSON.stringify(inMemoryFlightBookingSession)
+]).size;
+
+console.log(`Size: ${sizeInBytes} bytes`);
+console.log(`Size: ${(sizeInBytes / 1024).toFixed(2)} KB`);
+     console.log("inMemoryFlightBookingSession", inMemoryFlightBookingSession);
     return inMemoryFlightBookingSession;
   } catch {
     return null;
@@ -672,6 +692,7 @@ export const mergeFlightBookingSession = (patch) => {
 };
 
 export const buildSsrPayload = (session) => {
+
   const priceResponse = session?.priceResponse || {};
   const priceRequest = session?.priceRequest || {};
   const selectedFare = session?.selectedFare || {};
@@ -686,6 +707,27 @@ export const buildSsrPayload = (session) => {
   );
 
   return {
+    provider:
+      normalizeProviderCode(
+        pickFirst(
+          priceRequest?.provider,
+          priceRequest?.Provider,
+          flightBooking?.provider,
+          selectedFlight?.provider,
+          priceResponse?.provider,
+          priceResponse?.Provider,
+          session?.priceResponse?.provider,
+          session?.priceResponse?.Provider,
+          getProviderFromSearchKey(
+            pickFirst(
+              priceRequest?.search_key,
+              priceResponse?.search_key,
+              priceResponse?.SearchKey,
+              flightBooking?.searchKey
+            )
+          )
+        )
+      ),
     search_key: pickFirst(
       priceRequest?.search_key,
       priceResponse?.search_key,
@@ -745,7 +787,15 @@ const resolveFlightProvider = (session = {}) => {
       priceResponse?.provider,
       priceResponse?.Provider,
       session?.priceResponse?.provider,
-      session?.priceResponse?.Provider
+      session?.priceResponse?.Provider,
+      getProviderFromSearchKey(
+        pickFirst(
+          session?.priceRequest?.search_key,
+          session?.priceResponse?.search_key,
+          session?.priceResponse?.SearchKey,
+          session?.selectedFlight?.booking?.searchKey
+        )
+      )
     )
   );
 };
@@ -759,6 +809,7 @@ const getRiyaSeatFormattedJourneys = (priceResponse = {}) => {
 
 const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const priceResponse = unwrapPayload(session?.priceResponse);
+  const rawPriceResponse = session?.priceResponse || {};
   const priceRequest = session?.priceRequest || {};
   const selectedFlight = session?.selectedFlight || {};
   const booking = selectedFlight?.booking || {};
@@ -770,10 +821,22 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const routeContext = session?.routeContext || {};
   const fallbackDeparture = selectedFlight?.departure || selectedFlight?.depart?.flight?.departure || {};
   const fallbackArrival = selectedFlight?.arrival || selectedFlight?.depart?.flight?.arrival || {};
+  const rawTripType = String(
+    pickFirst(
+      priceRequest?.TripType,
+      priceRequest?.tripType,
+      booking?.tripType,
+      session?.routeContext?.tripType,
+      "O"
+    )
+  ).trim().toUpperCase();
+  const tripType = rawTripType === "RT" || rawTripType === "ROUND" ? "R" : "O";
   const baseOrigin = String(
     pickFirst(
       firstFlightDetails?.from,
       firstJourney?.origin,
+      firstTrip?.Origin,
+      firstTrip?.origin,
       routeContext?.fromCode,
       fallbackDeparture?.airportCode,
       fallbackDeparture?.airport?.split?.("-")?.[0],
@@ -784,6 +847,8 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
     pickFirst(
       firstFlightDetails?.to,
       firstJourney?.destination,
+      firstTrip?.Destination,
+      firstTrip?.destination,
       routeContext?.toCode,
       fallbackArrival?.airportCode,
       fallbackArrival?.airport?.split?.("-")?.[0],
@@ -791,38 +856,67 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
     )
   ).trim().toUpperCase();
 
-  const flightsInfo = (journeys.length ? journeys : [firstJourney]).map((journey, index) => {
-    const flightDetails = journey?.flight_details || {};
+  const flightSources = journeys.length
+    ? journeys
+    : bookingTrips.length
+      ? bookingTrips
+      : [firstJourney];
+
+  const flightsInfo = flightSources.map((_, index) => {
     const trip = bookingTrips[index] || firstTrip;
+    const journey = journeys[index] || firstJourney;
+    const flightDetails = journey?.flight_details || {};
     const flightNo = String(
       pickFirst(
         flightDetails?.flightNo,
         flightDetails?.flight_number,
-        selectedFlight?.details?.flightNo,
-        booking?.flightNo,
+        flightDetails?.FlightNumber,
         trip?.FlightNumber,
         trip?.flightNumber,
         trip?.flightNo,
         trip?.flight_no,
+        selectedFlight?.details?.flightNo,
+        booking?.flightNo,
         ""
       )
     ).trim();
+    const stock = String(
+      pickFirst(
+        flightDetails?.Stock,
+        flightDetails?.stock,
+        flightDetails?.airlineCode,
+        flightDetails?.airline_code,
+        journey?.Stock,
+        journey?.stock,
+        journey?.airline_code,
+        trip?.Stock,
+        trip?.stock,
+        trip?.AirlineCode,
+        selectedFlight?.airlines?.[index]?.code,
+        selectedFlight?.airlines?.[0]?.code,
+        flightNo.split(/\s+/)[0],
+        ""
+      )
+    ).trim().toUpperCase();
 
     return {
       FlightID: String(
         pickFirst(
           flightDetails?.FlightID,
+          flightDetails?.FlightId,
           flightDetails?.flight_id,
           flightDetails?.flightId,
-          selectedFlight?.FlightID,
-          selectedFlight?.flightId,
           trip?.FlightID,
+          trip?.FlightId,
           trip?.flight_id,
           trip?.flightId,
+          selectedFlight?.FlightID,
+          selectedFlight?.flightId,
           selectedFlight?.id,
           ""
         )
       ),
+      Stock: stock,
       FlightNumber: flightNo,
       Origin: String(
         pickFirst(flightDetails?.from, journey?.origin, trip?.Origin, trip?.origin, baseOrigin)
@@ -836,6 +930,36 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
           baseDestination
         )
       ).trim().toUpperCase(),
+      DepartureTerminal: String(
+        pickFirst(
+          flightDetails?.terminal?.departure,
+          flightDetails?.DepartureTerminal,
+          flightDetails?.departureTerminal,
+          flightDetails?.departure_terminal,
+          journey?.DepartureTerminal,
+          journey?.departureTerminal,
+          trip?.DepartureTerminal,
+          trip?.departureTerminal,
+          selectedFlight?.details?.departureTerminal,
+          fallbackDeparture?.terminal,
+          ""
+        )
+      ).trim(),
+      ArrivalTerminal: String(
+        pickFirst(
+          flightDetails?.terminal?.arrival,
+          flightDetails?.ArrivalTerminal,
+          flightDetails?.arrivalTerminal,
+          flightDetails?.arrival_terminal,
+          journey?.ArrivalTerminal,
+          journey?.arrivalTerminal,
+          trip?.ArrivalTerminal,
+          trip?.arrivalTerminal,
+          selectedFlight?.details?.arrivalTerminal,
+          fallbackArrival?.terminal,
+          ""
+        )
+      ).trim(),
       DepartureDateTime: formatRiyaSeatDateTime(
         pickFirst(
           flightDetails?.departure,
@@ -865,33 +989,64 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
     SegmentInfo: {
       BaseOrigin: baseOrigin,
       BaseDestination: baseDestination,
+      TripType: tripType,
     },
     FlightsInfo: flightsInfo,
     APIPaxDetails: (Array.isArray(travelerDetails) ? travelerDetails : []).map(
       (traveler, index) => ({
         PaxRefNumber: String(index + 1),
         Title: String(traveler?.Title || "").replace(/\./g, "").toUpperCase(),
+        PaxType: (() => {
+          const type = String(traveler?.PTC || traveler?.type || "ADT").toUpperCase();
+          if (type === "CHILD" || type === "CHD") return "CHD";
+          if (type === "INFANT" || type === "INF") return "INF";
+          return "ADT";
+        })(),
         FirstName: String(traveler?.FName || "").trim().toUpperCase(),
         LastName: String(traveler?.LName || "").trim().toUpperCase(),
       })
     ),
     TrackId: String(
       pickFirst(
-        priceResponse?.tui,
-        priceResponse?.TUI,
-        session?.priceResponse?.tui,
-        session?.priceResponse?.TUI,
-        priceRequest?.TUI,
-        booking?.tui,
-        ""
-      )
+        priceResponse?.trackid,
+        priceResponse?.TrackId,
+        priceResponse?.TrackID,
+        priceResponse?.trackId,
+        priceResponse?.track_id,
+        priceResponse?.raw?.trackid,
+        priceResponse?.raw?.TrackId,
+        rawPriceResponse?.trackid,
+        rawPriceResponse?.TrackId,
+        rawPriceResponse?.TrackID,
+        rawPriceResponse?.trackId,
+        rawPriceResponse?.data?.trackid,
+        rawPriceResponse?.data?.TrackId,
+        rawPriceResponse?.data?.data?.trackid,
+        rawPriceResponse?.data?.data?.TrackId,
+        session?.ssrResponse?.trackid,
+        session?.ssrResponse?.TrackId,
+        session?.ssrResponse?.data?.trackid,
+        session?.ssrResponse?.data?.TrackId,
+        priceRequest?.trackid,
+        priceRequest?.TrackId,
+        priceRequest?.TrackID,
+        booking?.trackid,
+        booking?.trackId,
+        booking?.TrackId,
+      ) || ""
     ),
   };
 };
 
 export const buildSeatLayoutPayload = (session, travelerDetails = []) => {
-  if (resolveFlightProvider(session) === "riya") {
-    return buildRiyaSeatLayoutPayload(session, travelerDetails);
+  const provider = resolveFlightProvider(session);
+  const providerPayloadBuilders = {
+    riya: buildRiyaSeatLayoutPayload,
+  };
+  const providerPayloadBuilder = providerPayloadBuilders[provider];
+
+  if (providerPayloadBuilder) {
+    return providerPayloadBuilder(session, travelerDetails);
   }
 
   const priceRequest = session?.priceRequest || {};

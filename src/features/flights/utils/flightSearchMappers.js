@@ -457,6 +457,36 @@ const normalizeBookingTripType = (tripType) => {
   return "ON";
 };
 
+const getProviderFromSearchKey = (searchKey) => {
+  const parts = String(searchKey || "").split("_").filter(Boolean);
+  const originalLength = parts.length;
+
+  while (["true", "false"].includes(parts.at(-1)?.toLowerCase())) {
+    parts.pop();
+  }
+
+  return parts.length < originalLength ? parts.at(-1) : undefined;
+};
+
+const getFlightProvider = (flight, responseBookingMeta = {}) =>
+  pickFirst(
+    flight?.provider,
+    flight?.Provider,
+    flight?.booking?.provider,
+    flight?.raw?.provider,
+    flight?.raw?.Provider,
+    flight?.data?.provider,
+    flight?.data?.Provider,
+    responseBookingMeta.provider,
+    getProviderFromSearchKey(
+      pickFirst(
+        flight?.search_key,
+        flight?.SearchKey,
+        responseBookingMeta.searchKey
+      )
+    )
+  );
+
 const getDefaultOrderId = (tripType) => {
   const normalized = normalizeBookingTripType(tripType);
   if (normalized === "RT") return "2";
@@ -465,6 +495,10 @@ const getDefaultOrderId = (tripType) => {
 
 const extractResponseBookingMeta = (payload, tripType) => ({
   provider: pickFirst(
+    payload?.meta?.provider,
+    payload?.meta?.Provider,
+    payload?.data?.meta?.provider,
+    payload?.data?.meta?.Provider,
     payload?.provider,
     payload?.Provider,
     payload?.data?.provider,
@@ -508,6 +542,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
   const segments = extractSegments(flight);
   const hasSegments = segments.length > 0;
   const firstConnection = toArray(flight?.Connections || flight?.connections)[0] || {};
+  const flightProvider = getFlightProvider(flight, responseBookingMeta);
   const airlines = hasSegments
     ? pickAirlinesFromSegments(segments)
     : (() => {
@@ -754,7 +789,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
       ),
     },
     booking: {
-      provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
+      provider: flightProvider,
       flightNo: primaryFlightNo,
       tui: responseBookingMeta.tui,
       searchKey: responseBookingMeta.searchKey,
@@ -765,7 +800,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
       mode: responseBookingMeta.mode,
       options: responseBookingMeta.options,
       priceRequest: {
-        provider: pickFirst(flight?.provider, flight?.Provider, responseBookingMeta.provider),
+        provider: flightProvider,
         search_key: responseBookingMeta.searchKey,
         Trips: [
           {

@@ -24,6 +24,7 @@ import {
   getFareOptionItems,
   isFareExpiredPayload,
 } from "../fareOptionsStreaming";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const pickValue = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
@@ -59,6 +60,13 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
   const formatted = payload?.formatted || null;
   const fareBreakdown = Array.isArray(payload?.fare_breakdown) ? payload.fare_breakdown : [];
   const tui = payload?.tui || payload?.TUI || priceResponse?.tui || priceResponse?.TUI;
+  const trackid =
+    payload?.trackid ||
+    payload?.trackId ||
+    payload?.TrackId ||
+    priceResponse?.trackid ||
+    priceResponse?.trackId ||
+    priceResponse?.TrackId;
   const provider =
     payload?.provider ||
     payload?.Provider ||
@@ -70,11 +78,13 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
     message: priceResponse?.message ?? payload?.message,
     provider,
     tui,
+    trackid,
     data: {
       success: payload?.success,
       cached: payload?.cached,
       provider,
       tui,
+      trackid,
       search_key: payload?.search_key || payload?.SearchKey,
       SSRSource: payload?.SSRSource,
       ssrSource: payload?.ssrSource,
@@ -95,6 +105,7 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
 };
 
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = null, isLoadingFareOptions = false }) => {
+  useLockBodyScroll(isOpen);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();

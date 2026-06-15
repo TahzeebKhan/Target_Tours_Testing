@@ -16,6 +16,7 @@ import Footer from "../home-page/components/footer/Footer";
 import FeatureSection from "../home-page/components/featureSection/FeatureSection";
 import TourBookingHeroSection from "./components/tourBookingHeroSection/TourBookingHeroSection";
 import UpcomingDepartures from "./components/upcomingDepartures/UpcomingDepartures";
+import CustomDeparture from "./components/customDeparture";
 import ArrivalToronto from "./components/arrivalToronto/ArrivalToronto";
 import PriceBar from "./components/priceBar/PriceBar";
 import StepBar from "./components/itenary/StepBar";
@@ -222,6 +223,7 @@ const TourDetailsClient = () => {
 
 
       <UpcomingDepartures data={displayTourDetails} />
+      <CustomDeparture data={displayTourDetails} />
 
           <PolicySection data={displayTourDetails} />
       <TripHighlights data={displayTourDetails} />

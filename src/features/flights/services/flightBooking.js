@@ -115,6 +115,17 @@ const createInvalidTravellerChecklistError = (responseData) => {
 const normalizeProvider = (provider) =>
   String(provider || "akbar").trim().toLowerCase();
 
+const getProviderFromSearchKey = (searchKey) => {
+  const parts = String(searchKey || "").split("_").filter(Boolean);
+  const originalLength = parts.length;
+
+  while (["true", "false"].includes(parts.at(-1)?.toLowerCase())) {
+    parts.pop();
+  }
+
+  return parts.length < originalLength ? parts.at(-1) || "" : "";
+};
+
 export const getFlightPrice = async (payload) => {
   const response = await api.post("/api/flights/price", {
     ...payload,
@@ -255,8 +266,18 @@ export const getFlightTravelChecklist = async (payload) => {
 };
 
 export const getFlightSsr = async (payload) => {
-    
-  const response = await api.post("/api/flights/ssr", payload, {
+  const provider = String(
+    payload?.provider ||
+      payload?.Provider ||
+      getProviderFromSearchKey(payload?.search_key || payload?.SearchKey) ||
+      ""
+  )
+    .trim()
+    .toLowerCase();
+  const response = await api.post("/api/flights/ssr", {
+    ...payload,
+    ...(provider ? { provider } : {}),
+  }, {
     headers: {
       "Content-Type": "application/json",
     },

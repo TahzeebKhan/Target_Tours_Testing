@@ -1739,6 +1739,12 @@ const ExpandableTabs = ({
     const displayedFareAmount = parseCurrencyAmount(flightData?.fare?.totalFare);
 
     return {
+      provider:
+        priceRequest?.provider ||
+        priceRequest?.Provider ||
+        flightData?.booking?.provider ||
+        flightData?.provider ||
+        "akbar",
       search_key: priceRequest?.search_key || flightData?.booking?.searchKey,
       PaidSSR: false,
       ClientID:"APITRAGET",
@@ -1793,6 +1799,7 @@ const ExpandableTabs = ({
     const payload = buildSsrPayload();
     const trip = payload.Trips?.[0] || {};
     const requestKey = [
+      payload.provider,
       payload.search_key,
       trip.Amount,
       trip.Index,

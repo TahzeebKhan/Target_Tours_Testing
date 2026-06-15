@@ -29,6 +29,7 @@ const getApiMessage = (payload, fallback) => {
 const getSsrRequestKey = (payload = {}) => {
   try {
     return JSON.stringify({
+      provider: payload?.provider,
       search_key: payload?.search_key,
       Source: payload?.Source,
       FareType: payload?.FareType,

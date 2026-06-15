@@ -20,19 +20,12 @@ import { Pencil } from "lucide-react";
 import EditProfileMobile from "./EditProfileMobile";
 import {
   CountryFlagIcon,
+  CountryCodes,
   countryList,
   getNationalityCountryCode,
   NationalityList,
   nationalityAliasToIso,
 } from "./CountryName";
-
-const countryCodes = Array.from(
-  new Set(
-    Object.values(nationalityAliasToIso).filter((code) =>
-      /^[A-Z]{2}$/.test(code),
-    ),
-  ),
-).sort();
 
 const countryNameByCode = NationalityList.reduce((countryMap, item) => {
   if (item.iso && item.name) {
@@ -52,17 +45,39 @@ const countryAliasSearchByCode = Object.entries(nationalityAliasToIso).reduce(
   {},
 );
 
-const COUNTRY_OPTIONS = [
-  "IN",
-  ...countryCodes.filter((code) => code !== "IN"),
-].map((code) => ({
-  code,
-  name: countryNameByCode[code] || code,
-  searchText: `${code} ${countryNameByCode[code] || ""} ${
-    countryAliasSearchByCode[code] || ""
-  }`.toLowerCase(),
-  maxLength: code === "IN" || code === "US" ? 10 : 15,
-}));
+const COUNTRY_OPTIONS = [...CountryCodes]
+  .sort((a, b) => {
+    if (a.code === "IN") return -1;
+    if (b.code === "IN") return 1;
+    return a.name.localeCompare(b.name);
+  })
+  .map((country) => ({
+    code: country.code,
+    name: country.name || countryNameByCode[country.code] || country.code,
+    dialCode: country.dial_code,
+    searchText: `${country.code} ${country.name || ""} ${country.dial_code || ""} ${
+      countryAliasSearchByCode[country.code] || ""
+    }`.toLowerCase(),
+    maxLength: country.code === "IN" || country.code === "US" ? 10 : 15,
+  }));
+
+const getPhoneCountryCode = (value, fallbackCountry) => {
+  const normalizedValue = String(value || "").trim().toUpperCase();
+  const normalizedFallback = String(fallbackCountry || "").trim().toUpperCase();
+
+  if (/^[A-Z]{2}$/.test(normalizedValue)) return normalizedValue;
+
+  const dialMatches = COUNTRY_OPTIONS.filter(
+    (option) => option.dialCode === normalizedValue,
+  );
+
+  if (dialMatches.length === 1) return dialMatches[0].code;
+  if (dialMatches.some((option) => option.code === normalizedFallback)) {
+    return normalizedFallback;
+  }
+
+  return dialMatches[0]?.code || normalizedFallback || "IN";
+};
 
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
@@ -403,9 +418,10 @@ const ProfileSection = () => {
     setProfileFields(mapApiToFields(profile));
     setDob(parseFromBackend(profile.date_of_birth));
     setPhoneCountry(
-      getCountryCodeFromValue(
-        profile.dail_code || profile.country_code || profile.country,
-      ) || "IN"
+      getPhoneCountryCode(
+        profile.dail_code,
+        getCountryCodeFromValue(profile.country_code || profile.country),
+      )
     );
     setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
     setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
@@ -424,7 +440,7 @@ const ProfileSection = () => {
       nationality: get("Nationality"),
       address: get("Address"),
       country: countryCode || countryValue,
-      dail_code: phoneCountry || countryCode,
+      dail_code: selectedPhoneCountry.dialCode,
       zip_code: get("Zip Code"),
       passport_detail: get("Passport Details"),
       phone_no: get("Phone Number"), // ✅ FIX
@@ -490,8 +506,16 @@ const ProfileSection = () => {
       toast.success("Profile updated successfully");
       return true;
     } catch (err) {
-      console.error("Profile update failed", err.response?.data || err.message);
-      toast.error("Failed to update profile");
+      const errorData = err.response?.data;
+      const message =
+        errorData?.error?.message ||
+        errorData?.message ||
+        errorData?.error?.details?.message ||
+        err.message ||
+        "Failed to update profile";
+
+      console.error("Profile update failed", errorData || err.message);
+      toast.error(message);
       return false;
     }
   };
@@ -545,9 +569,10 @@ const ProfileSection = () => {
         setProfileFields(mapApiToFields(res.data));
         setDob(parseFromBackend(res.data.date_of_birth));
         setPhoneCountry(
-          getCountryCodeFromValue(
-            res.data.dail_code || res.data.country_code || res.data.country,
-          ) || "IN"
+          getPhoneCountryCode(
+            res.data.dail_code,
+            getCountryCodeFromValue(res.data.country_code || res.data.country),
+          )
         );
         // 🔥 MAP PROFILE PHOTO
         setAvatarPreview(getProfilePhotoUrl(res.data.profile_photo));
@@ -562,9 +587,10 @@ const ProfileSection = () => {
           setProfileFields(mapApiToFields(profile));
           setDob(parseFromBackend(profile.date_of_birth));
           setPhoneCountry(
-            getCountryCodeFromValue(
-              profile.dail_code || profile.country_code || profile.country,
-            ) || "IN"
+            getPhoneCountryCode(
+              profile.dail_code,
+              getCountryCodeFromValue(profile.country_code || profile.country),
+            )
           );
           setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
           setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
@@ -822,7 +848,7 @@ const ProfileSection = () => {
                             title={phoneCountry}
                             className={styles.countryFlag}
                           />
-                          <span>{phoneCountry}</span>
+                          <span>{selectedPhoneCountry.dialCode}</span>
                         </button>
 
                         {isPhoneCountryDropdownOpen && editMode && (
@@ -866,7 +892,7 @@ const ProfileSection = () => {
                                       title={option.code}
                                       className={styles.countryFlag}
                                     />
-                                    <span>{option.code}</span>
+                                    <span>{option.dialCode}</span>
                                   </button>
                                 ))
                               ) : (
