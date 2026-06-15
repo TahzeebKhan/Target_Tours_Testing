@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const FareComparisonModalMulticity = ({ isOpen, onClose, flightData }) => {
-  if (!isOpen) return null;
   const router = useRouter();
+  useLockBodyScroll(isOpen);
 
   const handleBookNow = () => {
     router.push("/flight-booking-details");
@@ -155,7 +155,7 @@ const FareComparisonModalMulticity = ({ isOpen, onClose, flightData }) => {
   const [selected, setSelected] = useState("onward");
   const activeSegment = flightSegments[selected];
   const { flight, fares } = activeSegment;
-  useLockBodyScroll();
+  if (!isOpen) return null;
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>

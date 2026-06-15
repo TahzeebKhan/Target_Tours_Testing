@@ -4,19 +4,21 @@ import styles from "./MobileFareComparisonModalMulticity.module.css";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter } from "next/navigation";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const MobileFareComparisonModalMulticity = ({
   isOpen,
   onClose,
   flightData,
 }) => {
-  if (!isOpen) return null;
   const router = useRouter();
+  useLockBodyScroll(isOpen);
 
   const handleBookNow = () => {
     router.push("/flight-booking-details");
   };
   const [activeTab, setActibeTab] = useState("onward");
+  if (!isOpen) return null;
   const fareOptions = [
     {
       id: "saver",

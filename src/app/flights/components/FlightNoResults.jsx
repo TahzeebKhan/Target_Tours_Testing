@@ -7,7 +7,7 @@ const FlightNoResults = () => {
   return (
     <div className={styles.emptyState}>
       <Image
-        src="/lottie/noplane.png"
+        src="/images/noFlight.webp"
         alt="No flight search results found"
         width={360}
         height={379}

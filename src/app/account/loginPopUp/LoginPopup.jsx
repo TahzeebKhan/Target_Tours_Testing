@@ -311,8 +311,11 @@ export default function LoginPopup({ onNavigate, onClose }) {
         );
 
         if (profileRes?.data) {
+          const authExpiresAt = Number(Cookies.get("auth_expires_at"));
           Cookies.set("user_profile", JSON.stringify(profileRes.data), {
-            expires: 7,
+            expires: Number.isFinite(authExpiresAt)
+              ? new Date(authExpiresAt)
+              : 1,
           });
         }
       } catch (profileErr) {

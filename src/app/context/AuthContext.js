@@ -4,6 +4,30 @@ import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 const AuthContext = createContext(null);
+const AUTH_SESSION_DURATION_MS = 24 * 60 * 60 * 1000;
+const AUTH_EXPIRY_COOKIE = "auth_expires_at";
+
+const clearAuthCookies = () => {
+  Cookies.remove("auth_token");
+  Cookies.remove("user");
+  Cookies.remove("user_id");
+  Cookies.remove("user_profile");
+  Cookies.remove(AUTH_EXPIRY_COOKIE);
+};
+
+const DISPLAY_NAME_PLACEHOLDER =
+  "USER";
+
+const getValidName = (...values) =>
+  values.find((value) => {
+    if (typeof value !== "string") return false;
+
+    const name = value.trim();
+    return (
+      name &&
+      name.toLowerCase() !== DISPLAY_NAME_PLACEHOLDER.toLowerCase()
+    );
+  })?.trim() || "";
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -13,22 +37,22 @@ export const AuthProvider = ({ children }) => {
 
   const getProfileFallback = (userData, profileData = null) => ({
     ...(profileData || {}),
-    full_name:
-      profileData?.full_name ||
-      profileData?.display_name ||
-      userData?.full_name ||
-      userData?.display_name ||
-      userData?.name ||
-      userData?.email?.split("@")[0] ||
-      "",
-    display_name:
-      profileData?.display_name ||
-      profileData?.full_name ||
-      userData?.display_name ||
-      userData?.full_name ||
-      userData?.name ||
-      userData?.email?.split("@")[0] ||
-      "",
+    full_name: getValidName(
+      profileData?.full_name,
+      profileData?.display_name,
+      userData?.full_name,
+      userData?.display_name,
+      userData?.name,
+      userData?.email?.split("@")[0],
+    ),
+    display_name: getValidName(
+      profileData?.display_name,
+      profileData?.full_name,
+      userData?.display_name,
+      userData?.full_name,
+      userData?.name,
+      userData?.email?.split("@")[0],
+    ),
   });
 
   useEffect(() => {
@@ -37,8 +61,15 @@ export const AuthProvider = ({ children }) => {
         const token = Cookies.get("auth_token");
         const userCookie = Cookies.get("user");
         const profileCookie = Cookies.get("user_profile");
+        const expiresAt = Number(Cookies.get(AUTH_EXPIRY_COOKIE));
 
-        if (!token || !userCookie) {
+        if (
+          !token ||
+          !userCookie ||
+          !Number.isFinite(expiresAt) ||
+          Date.now() >= expiresAt
+        ) {
+          clearAuthCookies();
           setLoading(false);
           return;
         }
@@ -68,7 +99,7 @@ export const AuthProvider = ({ children }) => {
           const nextProfile = getProfileFallback(parsedUser, profileData);
           setProfile(nextProfile);
           Cookies.set("user_profile", JSON.stringify(nextProfile), {
-            expires: 7,
+            expires: new Date(expiresAt),
           });
         }
       } catch (err) {
@@ -81,15 +112,42 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  useEffect(() => {
+    if (!isLoggedIn) return undefined;
+
+    const expiresAt = Number(Cookies.get(AUTH_EXPIRY_COOKIE));
+    const remainingTime = expiresAt - Date.now();
+
+    if (!Number.isFinite(expiresAt) || remainingTime <= 0) {
+      clearAuthCookies();
+      setUser(null);
+      setProfile(null);
+      setIsLoggedIn(false);
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      clearAuthCookies();
+      setUser(null);
+      setProfile(null);
+      setIsLoggedIn(false);
+    }, remainingTime);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isLoggedIn]);
+
   const login = async ({ token, user, profile: loginProfile = null }) => {
     const fallbackProfile = getProfileFallback(user, loginProfile);
+    const expiresAt = Date.now() + AUTH_SESSION_DURATION_MS;
+    const expires = new Date(expiresAt);
 
-    Cookies.set("auth_token", token, { expires: 7 });
-    Cookies.set("user", JSON.stringify(user), { expires: 7 });
-    Cookies.set("user_id", user?.id, { expires: 7 });
+    Cookies.set("auth_token", token, { expires });
+    Cookies.set("user", JSON.stringify(user), { expires });
+    Cookies.set("user_id", user?.id, { expires });
     Cookies.set("user_profile", JSON.stringify(fallbackProfile), {
-      expires: 7,
+      expires,
     });
+    Cookies.set(AUTH_EXPIRY_COOKIE, String(expiresAt), { expires });
 
     setUser(user);
     setIsLoggedIn(true);
@@ -113,7 +171,7 @@ export const AuthProvider = ({ children }) => {
         setProfile(nextProfile); // 🔥 re-renders → "Hi, Full Name"
 
         Cookies.set("user_profile", JSON.stringify(nextProfile), {
-          expires: 7,
+          expires,
         });
       }
     } catch (err) {
@@ -124,9 +182,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    Cookies.remove("auth_token");
-    Cookies.remove("user");
-    Cookies.remove("user_profile");
+    clearAuthCookies();
 
     setUser(null);
     setProfile(null);

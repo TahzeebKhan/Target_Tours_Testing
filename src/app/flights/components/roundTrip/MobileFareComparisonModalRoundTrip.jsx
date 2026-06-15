@@ -19,6 +19,7 @@ import { isFareExpiredPayload } from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const parseCityLabel = (value = "") => {
   const text = String(value || "").trim();
@@ -262,6 +263,13 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
     payload?.TUI ||
     priceResponse?.tui ||
     priceResponse?.TUI;
+  const trackid =
+    payload?.trackid ||
+    payload?.trackId ||
+    payload?.TrackId ||
+    priceResponse?.trackid ||
+    priceResponse?.trackId ||
+    priceResponse?.TrackId;
   const provider =
     payload?.provider ||
     payload?.Provider ||
@@ -273,11 +281,13 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
     message: priceResponse?.message ?? payload?.message,
     provider,
     tui,
+    trackid,
     data: {
       success: payload?.success,
       cached: payload?.cached,
       provider,
       tui,
+      trackid,
       search_key: payload?.search_key || payload?.SearchKey,
       SSRSource: payload?.SSRSource,
       ssrSource: payload?.ssrSource,
@@ -404,6 +414,7 @@ const MobileFareComparisonModalRoundTrip = ({
   onClose,
   flightData,
 }) => {
+  useLockBodyScroll(isOpen);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, loading } = useAuth();

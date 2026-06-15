@@ -422,6 +422,12 @@ const buildAncillaryPayload = (flightData) => {
   }));
 
   return {
+    provider:
+      priceRequest?.provider ||
+      priceRequest?.Provider ||
+      flightData?.booking?.provider ||
+      flightData?.provider ||
+      "akbar",
     search_key: priceRequest?.search_key || flightData?.booking?.searchKey,
     // ClientID: priceRequest?.ClientID || "APITRAGET",
     Source:  "LV",
@@ -434,6 +440,7 @@ const buildAncillaryPayload = (flightData) => {
 
 const getAncillaryRequestKey = (payload = {}) =>
   [
+    payload.provider,
     payload.search_key,
     payload.TripType,
     ...toArray(payload.Trips).flatMap((trip) => [

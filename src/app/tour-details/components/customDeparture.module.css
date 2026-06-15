@@ -1,0 +1,304 @@
+.section {
+  padding: 72px 24px;
+  background: #0b1017;
+  color: #fff;
+  scroll-margin-top: 76px;
+}
+
+.content {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 56px;
+line-height: 100%;
+letter-spacing: 0%;
+
+}
+
+.subtitle {
+  margin: 12px 0 30px;
+font-family: Inter;
+font-size: 16px;
+line-height: 150%;
+letter-spacing: 0%;
+color:#9CA3AF;
+}
+
+.months {
+  display: grid;
+  gap: 14px;
+}
+
+.monthCard {
+  border: 1px solid #263147;
+  background: #0f1930;
+}
+
+.monthHeader {
+  width: 100%;
+  min-height: 78px;
+  padding: 16px 18px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.monthHeader strong {
+  display: block;
+ font-family: Antic Didone;
+font-size: 22px;
+line-height: 100%;
+letter-spacing: 0%;
+
+}
+
+.monthHeader small {
+  display: block;
+  font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 13px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+color:#9CA3AF;
+margin-top: 4px;
+}
+
+.chevron {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d5ad37;
+  border-radius: 50%;
+  color: #f5c92e;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.departureBody {
+  padding: 22px;
+  border-top: 1px solid #263147;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+  gap: 20px;
+}
+
+.calendarHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendarHeader p {
+  margin: 0;
+  text-align: center;
+  font-family: "Antic Didone", serif;
+  font-size: 18px;
+}
+
+.calendarHeader small {
+  display: block;
+  font-family: inherit;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.calendarHeader button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d5ad37;
+  border-radius: 50%;
+  background: transparent;
+  color: #f5c92e;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.weekdays,
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekdays span {
+  padding: 10px 4px;
+  text-align: center;
+  font-family: Inter;
+font-weight: 700;
+font-style: Bold;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 8%;
+text-transform: uppercase;
+color:#FBBF24;
+}
+
+.calendarGrid {
+  gap: 2px;
+}
+
+.day {
+  padding: 14px 4px;
+  border: 1px solid #172239;
+  background: #0b111c;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.day small {
+  color: #C9A84C;
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+
+}
+
+.day:hover,
+.selected {
+  background: #0b3a82;
+}
+
+.muted {
+  opacity: .55;
+}
+
+.tripCard {
+  padding: 22px;
+  border: 1px solid #263147;
+  background: #0d172c;
+}
+
+.tripLabel {
+  margin: 0 0 18px;
+  color: #aeb5c1;
+  font-size: 13px;
+}
+
+.tripDate {
+  margin: 10px 0;
+  font-family: "Antic Didone", serif;
+  font-size: 17px;
+}
+
+.nights {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #080e17;
+  color: #bec4cf;
+  font-size: 11px;
+}
+
+.breakdown {
+  margin-top: 18px;
+  padding: 16px 0;
+  border-top: 1px solid #263147;
+  border-bottom: 1px solid #263147;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+.breakdown p {
+  margin: 0 0 5px;
+  color: #aeb5c1;
+}
+
+.breakdown button,
+.detailsButton {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: #aeb5c1;
+  cursor: pointer;
+}
+
+.total {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #aeb5c1;
+  font-size: 12px;
+}
+
+.total strong {
+  color: #d6b442;
+  font-family: "Antic Didone", serif;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.bookButton {
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  background: #d4b24d;
+  color: #050505;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detailsButton {
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .departureBody {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 600px) {
+  .section {
+    padding: 48px 14px;
+  }
+
+  .departureBody {
+    padding: 12px;
+  }
+
+  .day {
+    min-height: 50px;
+  }
+
+  .day small {
+    font-size: 8px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+}
