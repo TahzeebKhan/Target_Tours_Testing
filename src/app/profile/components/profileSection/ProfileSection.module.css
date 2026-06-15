@@ -335,6 +335,10 @@ color:#1A2029;
   background: transparent;
 }
 
+.nameInput {
+  text-transform: capitalize;
+}
+
 .input::placeholder {
   color: rgba(91, 101, 116, 1);
 }

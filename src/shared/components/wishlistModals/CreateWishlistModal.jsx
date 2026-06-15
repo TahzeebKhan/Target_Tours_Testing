@@ -5,7 +5,7 @@ import styles from "./WishlistModal.module.css";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
+import { appToast } from "@/shared/components/appToast/AppToast";
 const createWishlist = async ({ type, name, ids }) => {
   const token = Cookies.get("auth_token");
 
@@ -42,17 +42,22 @@ const CreateWishlistModal = ({
   const [name, setName] = useState("");
   const queryClient = useQueryClient();
 
+  const handleClose = () => {
+    setName("");
+    onClose();
+  };
+
   const { mutate, isLoading } = useMutation({
     mutationFn: createWishlist,
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-wishlists"]);
       onCreate?.(data);
-      setName("");
-      onClose();
+      handleClose();
     },
     onError: (err) => {
-      console.error("Create wishlist failed:", err);
-      alert("Something went wrong. Please try again.");
+
+      console.error("Create wishlist failed:", err?.message || err);
+      appToast.error(err?.message || err || "Failed to create wishlist");
     },
   });
 
@@ -64,7 +69,7 @@ const CreateWishlistModal = ({
         {/* HEADER */}
         <div className={styles.header}>
           <h2>Create wishlist</h2>
-          <button onClick={onClose}>✕</button>
+          <button onClick={handleClose}>✕</button>
         </div>
 
         {/* INPUT */}
@@ -82,7 +87,7 @@ const CreateWishlistModal = ({
         <div className={styles.footer}>
           <button
             className={styles.cancelBtn}
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isLoading}
           >
             Cancel

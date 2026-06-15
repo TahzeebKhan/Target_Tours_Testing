@@ -227,7 +227,11 @@ const ProfileSection = () => {
                 ) : (
                   <input
                     type="text"
-                    className={styles.input}
+                    className={`${styles.input} ${
+                      ["Full Name", "Display Name"].includes(field.label)
+                        ? styles.nameInput
+                        : ""
+                    }`}
                     value={field.value}
                     placeholder={field.placeholder}
                     readOnly={!field.isEditing}
