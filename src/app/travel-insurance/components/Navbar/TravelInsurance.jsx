@@ -4,6 +4,7 @@ import TravelInsuranceSearch from "../travelInsuranceSearch/TravelInsuranceSearc
 import styles from "./Navbar.module.css";
 import { useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
+import Link from "next/link";
 
 const TravelInsurance = ({ setMenuOpen }) => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -35,7 +36,9 @@ const TravelInsurance = ({ setMenuOpen }) => {
       <div className={styles.mobileNavBar}>
         <div className={styles.navContainer}>
           <div className={styles.navbar}>
-            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            <Link href="/" aria-label="Go to home">
+              <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            </Link>
 
             <div className={styles.navRight}>
               <button

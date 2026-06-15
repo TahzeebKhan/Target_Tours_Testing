@@ -13,8 +13,11 @@ import SelectTravellerProfile from "@/features/profile/components/selectTravelle
 import SelectPreferences from "@/features/profile/components/selectPreferences";
 import { useInfiniteTours } from "@/features/tours/hooks/useInfiniteTours";
 import { useToursData } from "@/features/tours/hooks/useToursData";
+import { useQuery } from "@tanstack/react-query";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import SaveToWishlistModal, {
+  fetchUserWishlists,
+} from "@/shared/components/wishlistModals/SaveToWishlistModal";
 
 const LoadingCards = ({ viewType = "grid", count = 4 }) =>
   Array.from({ length: count }).map((_, index) => (
@@ -58,6 +61,21 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
   const [selectedTourId, setSelectedTourId] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
 
+  const { data: wishlistData } = useQuery({
+    queryKey: ["user-wishlists"],
+    queryFn: fetchUserWishlists,
+  });
+
+  useEffect(() => {
+    const wishlistGroups = Object.entries(wishlistData || {});
+    const wishlistTourIds = wishlistGroups.flatMap(([, group]) =>
+      (group?.data || []).map((item) => String(item.id)),
+    );
+
+    setLikedTours([...new Set(wishlistTourIds)]);
+    setWishlists(wishlistGroups);
+  }, [wishlistData]);
+
   const handleHeartClick = (tourId) => {
     setSelectedTourId(tourId);
 
@@ -68,10 +86,13 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     }
   };
 
-  const handleCreateWishlist = (name) => {
+  const handleCreateWishlist = (data) => {
+    const tourId = String(selectedTourId);
+    setLikedTours((prev) => (prev.includes(tourId) ? prev : [...prev, tourId]));
+
     const newWishlist = {
       id: Date.now(),
-      name,
+      name: data?.list_name || data?.name || "Wishlist",
       count: 0,
     };
 
@@ -224,14 +245,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const toggleLike = (id) => {
-    setLikedTours((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id],
-    );
-  };
-
   const { tourData, meta } = useToursData({ data });
   const showLoadingCards = isLoading || (isFetching && !isFetchingNextPage);
   const hasNoResults = !showLoadingCards && tourData.length === 0;
@@ -351,7 +364,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       </div>
                       <img
                         src={
-                          likedTours.includes(item.id)
+                          likedTours.includes(String(item.id))
                             ? "/icons/heartIconFilled.svg"
                             : "/icons/heartIcon.svg"
                         }
@@ -359,7 +372,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         className={styles.heartIcon}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id); // change icon
                           handleHeartClick(item.id); // open modal
                         }}
                       />
@@ -538,7 +550,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                       <img
                         src={
-                          likedTours.includes(item.id)
+                          likedTours.includes(String(item.id))
                             ? "/icons/heartIconFilled.svg"
                             : "/icons/heartIcon.svg"
                         }
@@ -546,7 +558,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                         className={styles.heartIcon}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id); // change icon
                           handleHeartClick(item.id); // open modal
                         }}
                       />
@@ -770,7 +781,7 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
 
                     <img
                       src={
-                        likedTours.includes(item.id)
+                        likedTours.includes(String(item.id))
                           ? "/icons/heartIconFilled.svg"
                           : "/icons/heartIcon.svg"
                       }
@@ -778,7 +789,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
                       className={styles.heartIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleLike(item.id); // change icon
                         handleHeartClick(item.id); // open modal
                       }}
                     />

@@ -10,10 +10,12 @@ import { useRouter } from "next/navigation";
 export const fetchUserWishlists = async () => {
   const token = Cookies.get("auth_token");
 
+  if (!token) return {};
+
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/package?limit=10&page=1`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/package?limit=50&page=1`,
     {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { Authorization: `Bearer ${token}` },
     },
   );
 

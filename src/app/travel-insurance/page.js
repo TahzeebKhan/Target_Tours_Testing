@@ -29,7 +29,9 @@ const page = () => {
           <div
             className={`${styles.navbar}  w-full flex  justify-between items-center`}
           >
-            <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            <Link href="/" aria-label="Go to home">
+              <BrandLogo fallbackSrc="/Logo.svg" alt="Target Tours Logo" />
+            </Link>
             <div className={`${styles.navRight} flex gap-3`}>
               <button
                 className={`${styles.glass_button} ${styles.downloadBtn}`}

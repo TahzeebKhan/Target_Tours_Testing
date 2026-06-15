@@ -25,9 +25,9 @@
 .stepBarInner {
   width: max-content;
   min-width: 100%;
-  min-height: 58px;
+  /* min-height: 58px; */
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 11px 24px 1px 24px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
