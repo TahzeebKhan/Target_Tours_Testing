@@ -1,6 +1,6 @@
 import { AirlineLogo, AirlineLogoList } from "../../../../utiles/airlines.jsx";
 
-const DEFAULT_LOGO = "/images/Flight.png";
+const DEFAULT_LOGO = "/images/dummyFlightlogo.png";
 
 const normalizeAirlineValue = (value) =>
   String(value || "")

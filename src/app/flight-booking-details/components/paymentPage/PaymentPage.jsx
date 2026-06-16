@@ -24,7 +24,7 @@ const getDynamicAirlineLogo = (airline = {}) =>
     name: airline?.name,
     code: airline?.carrierCode || airline?.code || airline?.flightNo,
     logo:
-      airline?.logo === "/images/Flight.png" ||
+      airline?.logo === "/images/dummyFlightlogo.png" ||
       airline?.logo === "/images/AirlineLogos.png"
         ? ""
         : airline?.logo,

@@ -229,7 +229,7 @@ const toTimelineFlight = (leg = {}, fallbackAirline = {}) => {
     airline: {
       name: fallbackAirline?.name || "N/A",
       code: fallbackAirline?.code || "N/A",
-      logo: fallbackAirline?.logo || "/images/Flight.png",
+      logo: fallbackAirline?.logo || "/images/dummyFlightlogo.png",
     },
     aircraft: leg?.flight?.details?.aircraft || leg?.flight?.details?.aircraftName || "",
     departure: {

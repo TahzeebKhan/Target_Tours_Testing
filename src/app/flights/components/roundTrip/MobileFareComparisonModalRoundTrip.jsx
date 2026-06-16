@@ -59,7 +59,7 @@ const buildMobileSegment = (flight, dateLabel) => {
     airline: {
       name: flight?.airlines?.[0]?.name || "N/A",
       code: flight?.airlines?.[0]?.code || "N/A",
-      logo: flight?.airlines?.[0]?.logo || "/images/Flight.png",
+      logo: flight?.airlines?.[0]?.logo || "/images/dummyFlightlogo.png",
       aircraft: "N/A",
       cabinClass: flight?.fare?.cabinClass || "N/A",
     },

@@ -201,7 +201,7 @@ const getFlightLogo = (item, flightSummary, airline) => {
       code: getAirlineCode(item, flightSummary, airline),
       logo,
     }),
-    "/images/Flight.png",
+    "/images/dummyFlightlogo.png",
   );
 };
 

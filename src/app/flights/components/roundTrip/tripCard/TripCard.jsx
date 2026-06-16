@@ -41,7 +41,7 @@ const TripCard = ({
       airline: {
         code: "AI",
         name: "Air India",
-        logo: "/images/Flight.png",
+        logo: "/images/dummyFlightlogo.png",
       },
       aircraft: "Boeing 787-9 Dreamliner",
       cabinClass: "Economy",

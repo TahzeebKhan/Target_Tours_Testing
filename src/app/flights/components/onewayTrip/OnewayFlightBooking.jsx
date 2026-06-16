@@ -269,7 +269,7 @@ const OnewayFlightBooking = ({
           code: highlight.airlineCode,
           logo: flight?.airlines?.[0]?.logo,
         })
-      : flight?.airlines?.[0]?.logo || "/images/Flight.png";
+      : flight?.airlines?.[0]?.logo || "/images/dummyFlightlogo.png";
 
   const cheapestMeta = {
     logo: getHighlightLogo(sortHighlights?.cheapest, cheapestFlight),

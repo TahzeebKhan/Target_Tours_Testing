@@ -1,6 +1,6 @@
 import { resolveAirlineLogo } from "./airlineLogos";
 
-const DEFAULT_LOGO = "/images/Flight.png";
+const DEFAULT_LOGO = "/images/dummyFlightlogo.png";
 const DEFAULT_BOOKING_CLIENT_ID = "FVI6V120g22Ei5ztGK0FIQ==";
 const DEFAULT_PRICE_SOURCE = "SF";
 const DEFAULT_BOOKING_MODE = "AS";

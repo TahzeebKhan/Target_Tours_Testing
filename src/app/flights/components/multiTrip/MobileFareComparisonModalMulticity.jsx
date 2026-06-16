@@ -143,7 +143,7 @@ const MobileFareComparisonModalMulticity = ({
           <div className={styles.TripFlightDetailsCard}>
             <div className={styles.TripFlightDetailsCardCont}>
               <div className={styles.TripFlightDetailsCardImage}>
-                <img src="/images/Flight.png" alt="" />
+                <img src="/images/dummyFlightlogo.png" alt="" />
               </div>
               <div className={styles.AirLineDetails}>
                 <div className={styles.AirLineDetailsItem}>

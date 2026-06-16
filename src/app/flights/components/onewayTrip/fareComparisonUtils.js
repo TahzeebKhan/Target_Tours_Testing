@@ -10,7 +10,7 @@ export const FALLBACK_FLIGHT_SUMMARY = {
   airline: {
     name: "Air India",
     code: "AI2380",
-    logo: "/images/Flight.png",
+    logo: "/images/dummyFlightlogo.png",
     aircraft: "Boeing 787-9 Dreamliner",
     cabinClass: "Economy Class",
   },

@@ -395,7 +395,18 @@ export function FlightBookingProvider({ children }) {
       },
       prices
     );
-    if (!payload?.TUI || !payload?.Travellers?.length) {
+    const provider = String(payload?.provider || payload?.Provider || "")
+      .trim()
+      .toLowerCase();
+    const hasAkbarPayload = Boolean(payload?.TUI && payload?.Travellers?.length);
+    const hasRiyaPayload = Boolean(
+      provider === "riya" &&
+        payload?.TrackId &&
+        payload?.ItineraryFlightsInfo?.length &&
+        payload?.PaxDetailsInfo?.length
+    );
+
+    if (!hasAkbarPayload && !hasRiyaPayload) {
       setBookingError("Passenger or booking data is incomplete.");
       return false;
     }

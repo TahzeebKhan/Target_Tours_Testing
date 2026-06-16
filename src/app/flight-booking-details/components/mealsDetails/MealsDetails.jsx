@@ -14,6 +14,21 @@ import { toast } from "react-toastify";
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
+const pickFirst = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
+};
+
+const buildQuantitiesFromSelections = (items = []) =>
+  items.reduce((acc, item) => {
+    if (!item?.segment || !item?.selectionKey) return acc;
+    const key = `${item.segment}::${item.selectionKey}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
 const MAIN_MEAL_IMAGES = meals.map((item) => item.image);
 const BEVERAGE_IMAGES = beverages.map((item) => item.image);
 
@@ -25,15 +40,37 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
     const title = String(item?.name || "").trim() || "Meal";
     const isBeverage = /beverage|tea|coffee|drink|juice/i.test(title);
     const imagePool = isBeverage ? BEVERAGE_IMAGES : MAIN_MEAL_IMAGES;
+    const mealId = pickFirst(
+      item?.MealID,
+      item?.mealID,
+      item?.MealId,
+      item?.mealId,
+      item?.meal_id,
+      item?.ssid,
+      item?.SSID,
+      item?.id
+    );
+    const fuid = pickFirst(
+      item?.fuid,
+      item?.FUID,
+      item?.flight_uid,
+      item?.flightUid,
+      item?.flightId,
+      item?.FlightID,
+      item?.FlightId,
+      ""
+    );
 
     return {
-      id: item?.id ?? index + 1,
-      ssid: item?.ssid ?? item?.id ?? index + 1,
-      fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+      ...item,
+      id: mealId ?? index + 1,
+      MealID: mealId ? String(mealId) : "",
+      ssid: mealId ? String(mealId) : "",
+      fuid,
       selectionKey: [
-        item?.id ?? index + 1,
-        item?.ssid ?? item?.id ?? index + 1,
-        item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+        mealId ?? index + 1,
+        mealId ?? index + 1,
+        fuid,
       ].join("::"),
       image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
       title,
@@ -92,7 +129,7 @@ const getMealInfo = (routeCards, routeKey, selectionKey) => {
 };
 
 const MealsDetails = () => {
-  const { setMeals, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
+  const { meals: selectedMealsContext, setMeals, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
   const bookingView = React.useMemo(
     () => getBookingDetailsView(bookingSession),
@@ -113,7 +150,18 @@ const MealsDetails = () => {
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // State: { "DEL-BOM::meal-key": 1 }
-  const [mealQuantities, setMealQuantities] = useState({});
+  const [mealQuantities, setMealQuantities] = useState(() =>
+    buildQuantitiesFromSelections(selectedMealsContext)
+  );
+
+  useEffect(() => {
+    if (!selectedMealsContext?.length) return;
+    setMealQuantities((current) =>
+      Object.keys(current).length
+        ? current
+        : buildQuantitiesFromSelections(selectedMealsContext)
+    );
+  }, [selectedMealsContext]);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
@@ -121,6 +169,8 @@ const MealsDetails = () => {
 
   // Sync with Context
   useEffect(() => {
+    if (!Object.keys(mealQuantities).length && selectedMealsContext?.length) return;
+
     const selectedMeals = [];
     Object.entries(mealQuantities).forEach(([key, qty]) => {
       if (qty > 0) {
@@ -141,7 +191,7 @@ const MealsDetails = () => {
       }
     });
     setMeals((current) => (areEqual(current, selectedMeals) ? current : selectedMeals));
-  }, [mealQuantities, routeCards, setMeals]);
+  }, [mealQuantities, routeCards, selectedMealsContext?.length, setMeals]);
 
   const handleUpdateQuantity = useCallback((segment, selectionKey, newQty) => {
     const key = `${segment}::${selectionKey}`;

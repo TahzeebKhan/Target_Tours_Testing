@@ -439,7 +439,7 @@ const CancellationPenalty = () => {
             <div className={styles.header}>
               <div className={styles.route}>
                 <img
-                  src={card.flight?.airline?.logo || "/images/Flight.png"}
+                  src={card.flight?.airline?.logo || "/images/dummyFlightlogo.png"}
                   alt=""
                   aria-hidden
                   className={styles.airlineIcon}
