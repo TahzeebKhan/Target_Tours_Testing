@@ -114,29 +114,31 @@ const PolicySection = ({ data }) => {
   const policies = getPolicies(data);
 
   return (
-    <section className={styles.section} id="inclusions">
+    <section className={styles.section}>
       <div className={styles.container}>
-        <header>
-          <h2 className={styles.heading}>
-            Comprehensive Journey Inclusions and Exclusion
-          </h2>
-          <p className={styles.subheading}>
-            Toggle specific days to read granular guides and highlight
-            accommodation details
-          </p>
-        </header>
+        <div id="inclusions" className={styles.anchorSection}>
+          <header>
+            <h2 className={styles.heading}>
+              Comprehensive Journey Inclusions and Exclusion
+            </h2>
+            <p className={styles.subheading}>
+              Toggle specific days to read granular guides and highlight
+              accommodation details
+            </p>
+          </header>
 
-        <div className={styles.listGrid}>
-          <PolicyList
-            icon="/images/greenCheack.svg"
-            items={inclusionItems}
-            title="Inclusion"
-          />
-          <PolicyList
-            icon="/images/redCross.svg"
-            items={exclusionItems}
-            title="Exclusion"
-          />
+          <div className={styles.listGrid}>
+            <PolicyList
+              icon="/images/greenCheack.svg"
+              items={inclusionItems}
+              title="Inclusion"
+            />
+            <PolicyList
+              icon="/images/redCross.svg"
+              items={exclusionItems}
+              title="Exclusion"
+            />
+          </div>
         </div>
 
         <div className={styles.policyGrid} id="tour-policy">

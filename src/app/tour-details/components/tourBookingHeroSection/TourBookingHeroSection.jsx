@@ -86,14 +86,19 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
 
             <p className={styles.routeLabel}>{routeLabel}</p>
 
-            <div className={styles.customizeBar}>
-              <span aria-hidden="true">✣</span>
+            {/* <div className={styles.customizeBar}>
+              <span aria-hidden="true"><img src="/images/shineStar.svg" alt="Customize" /></span>
               <p>Want to customize this iconic journey privately for your own personal group?</p>
               <button type="button" onClick={onViewItinerary}>
                 Customize This Package
               </button>
-            </div>
+            </div> */}
+
+            
           </div>
+
+
+          <div className={styles.statsContParent}>
 
           <div className={styles.statsPanel} aria-label="Tour summary">
             <div>
@@ -109,6 +114,7 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
               <span>Guests (Max)</span>
             </div>
           </div>
+             </div>
         </div>
       </div>
     </section>

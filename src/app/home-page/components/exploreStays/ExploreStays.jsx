@@ -11,8 +11,11 @@ const ExploreStays = () => {
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
   const [wishlists, setWishlists] = useState([]);
+  const pendingWishlistSuccessRef = useRef(null);
 
-  const handleWishlistClick = () => {
+  const handleWishlistClick = ({ onSuccess } = {}) => {
+    pendingWishlistSuccessRef.current = onSuccess || null;
+
     if (!wishlists.length) {
       setIsCreateWishlistOpen(true);
     } else {
@@ -137,18 +140,28 @@ const ExploreStays = () => {
       </section>
       <CreateWishlistModal
         isOpen={isCreateWishlistOpen}
-        onClose={() => setIsCreateWishlistOpen(false)}
+        onClose={() => {
+          pendingWishlistSuccessRef.current = null;
+          setIsCreateWishlistOpen(false);
+        }}
         onCreate={(name) => {
           setWishlists((prev) => [...prev, { id: Date.now(), name }]);
+          pendingWishlistSuccessRef.current?.();
+          pendingWishlistSuccessRef.current = null;
           setIsCreateWishlistOpen(false);
           setIsSaveWishlistOpen(true); // Airbnb flow ✨
         }}
+        type="hotel"
+        ids={[]}
       />
 
       <SaveToWishlistModal
         isOpen={isSaveWishlistOpen}
         wishlists={wishlists}
-        onClose={() => setIsSaveWishlistOpen(false)}
+        onClose={() => {
+          pendingWishlistSuccessRef.current = null;
+          setIsSaveWishlistOpen(false);
+        }}
         onCreateNew={() => {
           setIsSaveWishlistOpen(false);
           setIsCreateWishlistOpen(true);

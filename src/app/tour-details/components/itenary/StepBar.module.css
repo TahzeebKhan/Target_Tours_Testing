@@ -31,7 +31,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 64px
+  /* gap: 64px */
 }
 
 .step {
@@ -54,6 +54,7 @@ letter-spacing: 0%;
 text-align: center;
 vertical-align: middle;
 text-transform: uppercase;
+padding:0 32px;
 
 }
 
@@ -69,7 +70,7 @@ letter-spacing: 0%;
 text-align: center;
 vertical-align: middle;
 text-transform: uppercase;
-
+padding:0 32px;
   color: #000033;
 }
 

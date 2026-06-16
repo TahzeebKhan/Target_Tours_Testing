@@ -206,12 +206,21 @@ export default function ExpCarousel({ onWishlistClick, activeTab }) {
           .map((item, index) => ({ ...item, originalIndex: index }))
           .filter((item) => item.type === activeTab);
 
-  // Toggle favorite
-  const toggleFavorite = (index) => {
-    const updated = [...allSlidesData];
-    updated[index].favorite = !updated[index].favorite;
-    setAllSlidesData(updated);
-     onWishlistClick?.();
+  const markFavorite = (index) => {
+    setAllSlidesData((prev) =>
+      prev.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, favorite: true } : item,
+      ),
+    );
+  };
+
+  const handleFavoriteClick = (index, item) => {
+    if (item.favorite) return;
+
+    onWishlistClick?.({
+      item,
+      onSuccess: () => markFavorite(index),
+    });
   };
 
   useEffect(() => {
@@ -285,7 +294,9 @@ export default function ExpCarousel({ onWishlistClick, activeTab }) {
                     <InnerCarousel
                       images={item.images}
                       favorite={item.favorite}
-                      onFavorite={() => toggleFavorite(item.originalIndex)}
+                      onFavorite={() =>
+                        handleFavoriteClick(item.originalIndex, item)
+                      }
                     />
 
                     <div className={styles.innerCarouselContent}>

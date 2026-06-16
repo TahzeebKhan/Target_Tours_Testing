@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./WishlistModal.module.css";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { appToast } from "@/shared/components/appToast/AppToast";
+import { useRouter } from "next/navigation";
+
+const getErrorMessage = (err) =>
+  err?.response?.data?.error?.message ||
+  err?.response?.data?.message ||
+  err?.response?.data?.error?.details?.message ||
+  err?.message ||
+  "Failed to create wishlist";
+
 const createWishlist = async ({ type, name, ids }) => {
   const token = Cookies.get("auth_token");
 
@@ -41,11 +50,20 @@ const CreateWishlistModal = ({
 }) => {
   const [name, setName] = useState("");
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const token = Cookies.get("auth_token");
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setName("");
-    onClose();
-  };
+    onClose?.();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (isOpen && !token) {
+      handleClose();
+      router.push("/?openLogin=true");
+    }
+  }, [handleClose, isOpen, token, router]);
 
   const { mutate, isLoading } = useMutation({
     mutationFn: createWishlist,
@@ -55,13 +73,20 @@ const CreateWishlistModal = ({
       handleClose();
     },
     onError: (err) => {
+      const message = getErrorMessage(err);
 
-      console.error("Create wishlist failed:", err?.message || err);
-      appToast.error(err?.message || err || "Failed to create wishlist");
+      console.error("Create wishlist failed:", err?.response?.data || err);
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        handleClose();
+        router.push("/?openLogin=true");
+        return;
+      }
+
+      appToast.error(message);
     },
   });
 
-  if (!isOpen) return null;
+  if (!isOpen || !token) return null;
 
   return (
     <div className={styles.backdrop}>

@@ -243,6 +243,10 @@
   justify-content: center;
 }
 
+.multiCitySearchPanel {
+  bottom: 2%;
+}
+
 /* Only apply animation when NOT switching between holiday/insurance */
 .searchPanelWrapper:not(.noAnimation) {
   animation: searchFadeIn 350ms ease-out;

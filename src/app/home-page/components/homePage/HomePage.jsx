@@ -1578,6 +1578,10 @@ const HomePage = ({
                 bookingType === "holiday" || bookingType === "insurance"
                   ? styles.noAnimation
                   : ""
+              } ${
+                bookingType === "flight" && tripType === "multi"
+                  ? styles.multiCitySearchPanel
+                  : ""
               }`}
             >
               {bookingType === "flight" && (
