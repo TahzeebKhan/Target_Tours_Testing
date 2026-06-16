@@ -24,6 +24,60 @@
 
 }
 
+.reviewSourceTabs {
+    position: relative;
+    width: min(445px, 100%);
+    padding: 6px;
+    margin: 18px auto 22px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: #eef2fc;
+    overflow: hidden;
+}
+
+.reviewSourceTabs::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 6px;
+    width: calc(50% - 6px);
+    background: #000033;
+    box-shadow: 0 2px 8px rgba(0, 0, 51, 0.18);
+    transform: translateX(0);
+    transition: transform 260ms ease;
+    will-change: transform;
+}
+
+.reviewSourceTabsRight::before {
+    transform: translateX(100%);
+}
+
+.reviewSourceBtn {
+    position: relative;
+    z-index: 1;
+    min-height: 50px;
+    padding: 20px 24px;
+    border: 0;
+    background: transparent;
+    color: #000033;
+   font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: -2%;
+text-align: center;
+text-transform: uppercase;
+    cursor: pointer;
+    transition: color 220ms ease;
+}
+
+.reviewSourceBtnActive {
+    color: #fff;
+}
+
 .testimonialContainer {
     display: flex;
     align-items: center;
@@ -186,6 +240,17 @@
 
     .section {
         padding: 20px;
+    }
+
+    .reviewSourceTabs {
+        min-height: 56px;
+        margin: 6px 0 8px;
+    }
+
+    .reviewSourceBtn {
+        min-height: 44px;
+        padding: 14px;
+        font-size: 13px;
     }
 }
 

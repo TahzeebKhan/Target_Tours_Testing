@@ -549,6 +549,12 @@
   border: 1px solid #e5e7f0;
 }
 
+.inlineFarePanel {
+  border: 1px solid #e5e7f0;
+  border-top: none;
+  background: #ffffff;
+}
+
 .open {
   max-height: 600px;
   /* enough for content */

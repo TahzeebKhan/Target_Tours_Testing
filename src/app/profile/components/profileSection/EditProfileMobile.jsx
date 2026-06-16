@@ -129,8 +129,11 @@ const EditProfileMobile = ({
             {/* ✅ DROPDOWN */}
             {field.isDropdown ? (
               <div
-                className={styles.dropdownInput}
+                className={`${styles.dropdownInput} ${
+                  field.isLocked ? styles.disabledField : ""
+                }`}
                 onClick={() => toggleDropdown(index)}
+                aria-disabled={field.isLocked}
               >
                 <span>{field.value}</span>
                 <Image
@@ -177,12 +180,14 @@ const EditProfileMobile = ({
                 className={styles.input}
                 value={field.value}
                 placeholder={field.placeholder}
+                disabled={field.isLocked}
+                readOnly={field.isLocked}
                 onChange={(e) => handleChange(index, e.target.value)}
               />
             )}
 
             {/* ✅ DROPDOWN MENU */}
-            {field.isDropdown && field.isOpen && (
+            {field.isDropdown && field.isOpen && !field.isLocked && (
               <div className={styles.dropdownMenu} ref={dropdownRef}>
                 <div className={styles.dropdownSearchWrap}>
                   <input

@@ -118,6 +118,12 @@ const OnewayFlightBooking = ({
 
     if (!flightId) return;
 
+    if (!isMobile && fareModalOpen === flightId) {
+      setFareModalOpen(null);
+      setSelectedFareFlight(null);
+      return;
+    }
+
     setSelectedFareFlight(flight);
     setFareModalOpen(flightId);
     setPrefetchingFlightId(flightId);
@@ -583,7 +589,11 @@ const OnewayFlightBooking = ({
                       disabled={prefetchingFlightId === flight.id}
                       onClick={() => openFareModal(flight)}
                     >
-                      {prefetchingFlightId === flight.id ? "LOADING..." : "VIEW FARES"}
+                      {prefetchingFlightId === flight.id
+                        ? "LOADING..."
+                        : fareModalOpen === flight.id && !isMobile
+                          ? "HIDE FARES"
+                          : "VIEW FARES"}
                     </button>
                   </div>
                   <div className={styles.fareAmount}>
@@ -613,29 +623,32 @@ const OnewayFlightBooking = ({
                   travellerSummary={travellerSummary}
                 />
               </div>
+              {mounted && fareModalOpen === flight.id && !isMobile && (
+                <div className={styles.inlineFarePanel}>
+                  <FareComparisonModal
+                    inline
+                    isOpen={fareModalOpen}
+                    isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
+                    onClose={() => {
+                      setFareModalOpen(null);
+                      setSelectedFareFlight(null);
+                    }}
+                    flightData={
+                      selectedFareFlight ||
+                      resolvedFlightResults.find((f) => f.id === fareModalOpen)
+                    }
+                    prefetchedData={
+                      selectedFareFlight?.prefetchedFareData ||
+                      prefetchedFareData[fareModalOpen] ||
+                      null
+                    }
+                  />
+                </div>
+              )}
             </div>
               {index === OFFER_INDEX && <OfferBanner />}
             </React.Fragment>
           ))
-        )}
-
-        {/* Fare Comparison Modal */}
-        {/* Fare Comparison Modal */}
-        {mounted && fareModalOpen !== null && !isMobile && (
-          <>
-            (
-            <FareComparisonModal
-              isOpen={fareModalOpen}
-              isLoadingFareOptions={prefetchingFlightId === fareModalOpen}
-              onClose={() => {
-                setFareModalOpen(null);
-                setSelectedFareFlight(null);
-              }}
-              flightData={selectedFareFlight || resolvedFlightResults.find((f) => f.id === fareModalOpen)}
-              prefetchedData={selectedFareFlight?.prefetchedFareData || prefetchedFareData[fareModalOpen] || null}
-            />
-            )
-          </>
         )}
       </section>
       <section className={styles.isMobileView}>

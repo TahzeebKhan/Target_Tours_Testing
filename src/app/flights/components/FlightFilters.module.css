@@ -393,6 +393,126 @@
   display: none;
 }
 
+.roundSidebar {
+  display: flex;
+  flex-direction: column;
+  padding-top: 16px;
+}
+
+.roundSidebar .border {
+  display: none;
+}
+
+.roundSidebar .section,
+.roundSidebar .sectionPopularFilter {
+  padding: 16px 0;
+  border-bottom: 1px solid #0000001a;
+}
+
+.roundSidebar .header {
+  order: 0;
+  margin-bottom: 0;
+}
+
+.roundSidebar .sectionPopularFilter {
+  order: 1;
+}
+
+.roundStopsSection {
+  order: 2;
+}
+
+.roundTimingTabsSection {
+  order: 3;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+.roundDepartureFromSection {
+  order: 4;
+}
+
+.roundArrivalSection {
+  order: 5;
+}
+
+.roundPriceSection {
+  order: 6;
+}
+
+.roundAircraftSection {
+  order: 7;
+}
+
+.roundDurationSection {
+  order: 8;
+}
+
+.roundAirlineSection {
+  order: 9;
+  border-bottom: none !important;
+}
+
+.roundTimingTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  background: #eef2f7;
+}
+
+.roundTimingTab {
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: #66748a;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.activeRoundTimingTab {
+  background: #ffffff;
+  color: #000033;
+  box-shadow: 0 0 0 1px #edf0f5 inset;
+}
+
+.durationTrackWrap {
+  --range-thumb-size: 26px;
+  --range-thumb-half: calc(var(--range-thumb-size) / 2);
+  position: relative;
+  height: 32px;
+  margin-top: -6px;
+}
+
+.durationThumb {
+  position: absolute;
+  top: 50%;
+  width: var(--range-thumb-size);
+  height: var(--range-thumb-size);
+  border-radius: 50%;
+  background: #0b0f3f;
+  border: 7px solid #ffffff;
+  box-shadow: 0px 0px 0px 1px #c6d8e3, 0px 0px 25px 0px #0000001a;
+  transform: translateY(-50%);
+}
+
+.durationThumbStart {
+  left: 0;
+}
+
+.durationThumbEnd {
+  right: 0;
+}
+
+.durationLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -5px;
+  font-size: 14px;
+  color: #000000;
+}
+
 @media (max-width: 630px) {
   .reset {
     display: none;
