@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import {
   Car,
   ChevronDown,
@@ -365,15 +365,17 @@ const DetailRow = ({ label, children, defaultOpen = false }) => {
   );
 };
 
-const RouteMap = ({ days }) => {
-  const points = days.slice(0, 8);
+const RouteMap = ({ days, activeDayIndex }) => {
+  const points = days;
+  const activeDay = points[activeDayIndex] || points[0];
 
   return (
     <aside className={styles.mapCard}>
       <div className={styles.mapHeader}>
         <p>Interactive route map</p>
         <span>
-          Active: <strong>{getDayCity(points[0])}</strong> (Day 1)
+          Active: <strong>{getDayCity(activeDay)}</strong> (Day{" "}
+          {activeDay?.day_number || activeDayIndex + 1})
         </span>
       </div>
 
@@ -410,8 +412,12 @@ const RouteMap = ({ days }) => {
                 <circle
                   cx={x}
                   cy={y}
-                  r={index === 0 ? 10 : 6}
-                  className={index === 0 ? styles.activePoint : styles.routePoint}
+                  r={index === activeDayIndex ? 10 : 6}
+                  className={
+                    index === activeDayIndex
+                      ? styles.activePoint
+                      : styles.routePoint
+                  }
                 />
                 <text
                   x={x + (index % 2 ? 11 : -11)}
@@ -613,6 +619,7 @@ const DayCard = ({ day, index }) => {
 };
 
 const DailyJourneyItinerary = ({ data }) => {
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
   const days = useMemo(() => {
     const itinerary = Array.isArray(data?.package_itinerarie)
       ? [...data.package_itinerarie].sort(
@@ -622,6 +629,37 @@ const DailyJourneyItinerary = ({ data }) => {
 
     return itinerary.length ? itinerary : FALLBACK_DAYS;
   }, [data]);
+
+  useEffect(() => {
+    const dayElements = days
+      .map((_, index) => document.getElementById(`itinerary-day-${index + 1}`))
+      .filter(Boolean);
+
+    if (!dayElements.length) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (!visibleEntry) return;
+
+        const index = dayElements.indexOf(visibleEntry.target);
+        if (index !== -1) {
+          setActiveDayIndex(index);
+        }
+      },
+      {
+        rootMargin: "-28% 0px -55% 0px",
+        threshold: [0, 0.15, 0.35, 0.6],
+      },
+    );
+
+    dayElements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, [days]);
 
   return (
     <section className={styles.section} aria-label="Daily journey itinerary">
@@ -638,7 +676,7 @@ const DailyJourneyItinerary = ({ data }) => {
 
       <div className={styles.layout}>
         <div className={styles.stickyColumn}>
-          <RouteMap days={days} />
+          <RouteMap days={days} activeDayIndex={activeDayIndex} />
         </div>
         <div className={styles.cards}>
           {days.map((day, index) => (

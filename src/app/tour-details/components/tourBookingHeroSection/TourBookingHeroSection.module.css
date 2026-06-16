@@ -23,7 +23,9 @@
   position: relative;
   z-index: 2;
   min-height: 76px;
-  padding: 0 clamp(24px, 10.8vw, 210px);
+  padding: 0 148px;
+  margin: 0 auto;
+   /* width: min(1520px, 100%); */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -74,12 +76,13 @@
 }
 
 .container {
-  width: min(1460px, 100%);
+  width: min(1520px, 100%);
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 760px) minmax(420px, 520px);
-  align-items: end;
-  gap: clamp(48px, 7vw, 130px);
+  display: flex;
+  justify-content: space-between;
+  /* grid-template-columns: minmax(0, 760px) minmax(420px, 520px); */
+  /* align-items: end; */
+  /* gap: clamp(48px, 7vw, 130px); */
 }
 
 .copyBlock {
@@ -106,9 +109,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 9px;
   color: #fff;
-  font: 200 28px/1.2 var(--font-inter);
+ font-family: Inter;
+font-weight: 200;
+font-style: Extra Light;
+font-size: 24px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+
   text-transform: uppercase;
 }
 
@@ -116,15 +127,28 @@
   max-width: 760px;
   margin: 0;
   color: #fff;
-  font: 400 clamp(48px, 4vw, 74px)/1.08 "Antic Didone", serif;
+font-family: Antic Didone;
+font-size: 48px;
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+margin-bottom: 12px;
   letter-spacing: 0;
   text-transform: capitalize;
 }
 
 .routeLabel {
-  margin: 22px 0 0;
+  /* margin: 22px 0 0; */
   color: #fff;
-  font: 300 16px/1.5 var(--font-inter);
+font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 16px;
+leading-trim: NONE;
+line-height: 160%;
+letter-spacing: -2%;
+vertical-align: middle;
+
 }
 
 .customizeBar {
@@ -135,7 +159,7 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: #1A214399;
   backdrop-filter: blur(12px);
@@ -144,7 +168,15 @@
 .customizeBar p {
   margin: 0;
   color: #fff;
-  font: 300 14px/1.35 var(--font-inter);
+  font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 14px;
+leading-trim: NONE;
+line-height: 16px;
+letter-spacing: 0%;
+vertical-align: middle;
+color:#E7E5E4;
 }
 
 .customizeBar button {
@@ -157,11 +189,15 @@
   text-transform: uppercase;
   cursor: pointer;
 }
-
+.statsContParent{
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
 .statsPanel {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  min-height: 96px;
+  display: flex;
+  width: min(500px, 100%);
+ max-height: 92px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: #FFFFFF1A;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
@@ -169,9 +205,12 @@
 }
 
 .statsPanel div {
-  display: grid;
-  place-items: center;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 158px;
   gap: 10px;
   padding: 14px 20px;
   text-align: center;

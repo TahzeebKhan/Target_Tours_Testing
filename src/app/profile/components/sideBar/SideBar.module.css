@@ -7,6 +7,7 @@
   max-height: calc(100vh - 158px);
   position: sticky;
   top: 133px;
+  z-index: 2;
 }
 
 .sideBarTop {
@@ -114,7 +115,9 @@
   flex-direction: column;
   gap: 8px;
   border-left: 3px solid #dddfe3;
-  padding-left: 12px;
+  padding-left: 14px;
+  position: relative;
+  overflow: visible !important;
 }
 
 /* Sub items */
@@ -132,6 +135,7 @@
   letter-spacing: 0%;
   color: #000033;
   border-radius: 6px;
+  z-index: 1;
 }
 
 .subActive {
@@ -141,14 +145,15 @@
 }
 
 .activeIndicator {
-  height: 29px !important;
   position: absolute;
-  left: -16px;
-  top: calc(50% - 12px);
+  left: -18px;
+  top: calc(50% - 14px);
   width: 6px;
-  height: 24px;
+  height: 29px;
   background: #0b0b45;
   border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .logout {

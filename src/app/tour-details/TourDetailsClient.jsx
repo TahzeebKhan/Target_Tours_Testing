@@ -238,7 +238,9 @@ const TourDetailsClient = () => {
       </div>  */}
 
       <InfoStrip data={displayTourDetails} />
-      <WhereWillYouStay data={displayTourDetails} />
+      <div id="stays">
+        <WhereWillYouStay data={displayTourDetails} />
+      </div>
 
 
             {/* <Overview data={displayTourDetails} /> */}

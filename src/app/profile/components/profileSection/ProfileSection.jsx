@@ -428,8 +428,11 @@ const ProfileSection = () => {
   }, [profile]);
 
   const buildPayload = () => {
-    const get = (label) =>
-      profileFields.find((f) => f.label === label)?.value?.trim();
+    const get = (label) => {
+      const value = profileFields.find((f) => f.label === label)?.value;
+
+      return typeof value === "string" ? value.trim() : "";
+    };
     const countryValue = get("Country");
     const countryCode = getCountryCodeFromValue(countryValue);
 
@@ -448,13 +451,9 @@ const ProfileSection = () => {
       profile_completed: true,
     };
 
-    // remove empty fields
+    // Keep empty strings so users can clear saved profile fields.
     Object.keys(payload).forEach((key) => {
-      if (
-        payload[key] === "" ||
-        payload[key] === null ||
-        payload[key] === undefined
-      ) {
+      if (payload[key] === null || payload[key] === undefined) {
         delete payload[key];
       }
     });
@@ -501,7 +500,19 @@ const ProfileSection = () => {
         },
       });
 
-      setProfile(res?.data?.data);
+      const responseProfile = res?.data?.data || res?.data || {};
+      const nextProfile = {
+        ...(profile || {}),
+        ...responseProfile,
+        ...payload,
+      };
+
+      setProfile(nextProfile);
+
+      const expiresAt = Number(Cookies.get("auth_expires_at"));
+      Cookies.set("user_profile", JSON.stringify(nextProfile), {
+        ...(Number.isFinite(expiresAt) && { expires: new Date(expiresAt) }),
+      });
 
       toast.success("Profile updated successfully");
       return true;
