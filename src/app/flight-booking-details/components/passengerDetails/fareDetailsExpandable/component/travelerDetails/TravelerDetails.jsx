@@ -42,7 +42,7 @@ const buildTravelerPayload = (slot, isOpen = true) => ({
     Nationality: "IN",
     PassportNo: "1234567",
     PLI: "NOIDA",
-    PDOE: "2026-04-28",
+    PDOE: "2026-09-28",
     VisaType: "Business",
     CountryCode: "IN",
     MobileNumber: "8532907106",

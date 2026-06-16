@@ -713,7 +713,7 @@ const FareComparisonModalRoundTrip = ({
             <div className={styles.flightInfoStatus}>
               <img
                 className={styles.flightIconStatus}
-                src={selected === "onward" ? flightData?.depart?.airline?.logo || "/images/Flight.png" : flightData?.return?.airline?.logo || "/images/Flight.png"}
+                src={selected === "onward" ? flightData?.depart?.airline?.logo || "/images/dummyFlightlogo.png" : flightData?.return?.airline?.logo || "/images/dummyFlightlogo.png"}
                 alt=""
               />
               <div className={styles.flightInfoNameDatesContainer}>

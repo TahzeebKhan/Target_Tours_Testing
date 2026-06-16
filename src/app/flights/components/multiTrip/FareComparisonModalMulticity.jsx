@@ -190,7 +190,7 @@ const FareComparisonModalMulticity = ({ isOpen, onClose, flightData }) => {
             <div className={styles.flightInfoStatus}>
               <img
                 className={styles.flightIconStatus}
-                src="/images/Flight.png"
+                src="/images/dummyFlightlogo.png"
                 alt=""
               />
               <div className={styles.flightInfoNameDatesContainer}>

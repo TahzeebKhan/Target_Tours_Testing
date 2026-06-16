@@ -1443,7 +1443,320 @@ const readSsrAmount = (item) =>
     item?.SSRAmount
   ) ?? 0;
 
+const formatRiyaDateSlash = (value) => {
+  if (!value) return "";
+  const text = String(value).trim();
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return text;
+
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return text;
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
+
+const normalizeRiyaGender = (value) => {
+  const gender = String(value || "").trim().toUpperCase();
+  if (gender === "M" || gender === "MALE") return "Male";
+  if (gender === "F" || gender === "FEMALE") return "Female";
+  return value || "";
+};
+
+const normalizeRiyaPaxType = (value) => {
+  const type = String(value || "ADT").trim().toUpperCase();
+  if (type === "CHILD" || type === "CHD") return "CHD";
+  if (type === "INFANT" || type === "INF") return "INF";
+  return "ADT";
+};
+
+const formatRiyaAmount = (value) => {
+  const amount = readNumber(value);
+  if (!Number.isFinite(amount)) return "0";
+
+  return Number.isInteger(amount) ? String(amount) : String(amount);
+};
+
+const getRiyaSsrId = (item, keys = []) => {
+  const value = pickFirst(...keys.map((key) => item?.[key]));
+  if (value === undefined || value === null || value === "") return "";
+  const text = String(value).trim();
+  if (
+    !text ||
+    text.includes("::") ||
+    /^journey-\d+:/i.test(text) ||
+    /^(cabin|checked)-\d+$/i.test(text)
+  ) {
+    return "";
+  }
+  return text;
+};
+
+const normalizeRiyaSsrSelections = (items = [], idKeys = [], idField) => {
+  const passengerTotalsBySegment = {};
+
+  return (Array.isArray(items) ? items : [])
+    .map((item) => {
+      const id = getRiyaSsrId(item, idKeys);
+      if (!id) return null;
+
+      const segment = String(
+        pickFirst(item?.segment, item?.journeyLabel, item?.journeyIndex, "default")
+      );
+      const paxRefNumber = pickFirst(
+        item?.PaxRefNumber,
+        item?.paxRefNumber,
+        item?.PaxID,
+        item?.paxId,
+        item?.passengerId,
+        Number.isFinite(Number(item?.passengerIndex))
+          ? Number(item.passengerIndex) + 1
+          : undefined
+      );
+      const nextSegmentPax =
+        (passengerTotalsBySegment[segment] || 0) + 1;
+      passengerTotalsBySegment[segment] = nextSegmentPax;
+
+      return {
+        [idField]: id,
+        PaxRefNumber: String(paxRefNumber || nextSegmentPax),
+      };
+    })
+    .filter(Boolean);
+};
+
+const buildRiyaSeatsSsrInfo = (seats = []) =>
+  normalizeRiyaSsrSelections(
+    seats,
+    [
+      "SeatID",
+      "seatID",
+      "SeatId",
+      "seatId",
+      "seat_id",
+      "SSRId",
+      "ssrId",
+      "ssid",
+      "SSID",
+      "rawId",
+    ],
+    "SeatID"
+  );
+
+const buildRiyaBaggageSsrInfo = (baggage = []) =>
+  normalizeRiyaSsrSelections(
+    baggage,
+    [
+      "BaggageID",
+      "baggageID",
+      "BaggageId",
+      "baggageId",
+      "SSRId",
+      "ssrId",
+      "ssid",
+      "SSID",
+    ],
+    "BaggageID"
+  );
+
+const buildRiyaMealsSsrInfo = (meals = []) =>
+  normalizeRiyaSsrSelections(
+    meals,
+    [
+      "MealID",
+      "mealID",
+      "MealId",
+      "mealId",
+      "SSRId",
+      "ssrId",
+      "ssid",
+      "SSID",
+    ],
+    "MealID"
+  );
+
+const getRiyaSelectedSsrAmount = (session = {}, prices = {}) => {
+  const pricedSsrAmount = readNumber(prices?.baggage, prices?.meals, prices?.seats);
+  if (Number.isFinite(pricedSsrAmount)) {
+    return (
+      (readNumber(prices?.baggage) || 0) +
+      (readNumber(prices?.meals) || 0) +
+      (readNumber(prices?.seats) || 0)
+    );
+  }
+
+  const selectedSsrItems = [
+    ...(Array.isArray(session?.baggage) ? session.baggage : []),
+    ...(Array.isArray(session?.meals) ? session.meals : []),
+    ...(Array.isArray(session?.seats) ? session.seats : []),
+  ];
+
+  return selectedSsrItems.reduce((sum, item) => sum + readSsrAmount(item), 0);
+};
+
+const buildRiyaCreateItineraryPayload = (session, prices) => {
+  const priceResponse = unwrapPayload(session?.priceResponse);
+  const rawPriceResponse = session?.priceResponse || {};
+  const priceRequest = session?.priceRequest || {};
+  const selectedFlight = session?.selectedFlight || {};
+  const booking = selectedFlight?.booking || {};
+  const selectedFare = session?.selectedFare || {};
+  const priceData = rawPriceResponse?.data || {};
+  const nestedPriceData = priceData?.data || {};
+  const travelers = Array.isArray(session?.travelerDetails)
+    ? session.travelerDetails
+    : [];
+  const contact = session?.bookingContactDetails || {};
+  const seatPayload = buildRiyaSeatLayoutPayload(session, travelers);
+  const passengerCounts = getBookingPassengerCounts(session);
+  const seatsSsrInfo = buildRiyaSeatsSsrInfo(session?.seats);
+  const baggageSsrInfo = buildRiyaBaggageSsrInfo(session?.baggage);
+  const mealsSsrInfo = buildRiyaMealsSsrInfo(session?.meals);
+  const selectedSsrAmount = getRiyaSelectedSsrAmount(session, prices);
+  const providerFareAmount = readFirstPositiveNumber(
+    priceResponse?.formatted?.final_price,
+    priceResponse?.formatted?.finalPrice,
+    priceResponse?.final_price,
+    priceResponse?.finalPrice,
+    priceResponse?.TotalAmount,
+    priceData?.TotalAmount,
+    nestedPriceData?.TotalAmount,
+    selectedFare?.netAmount,
+    selectedFare?.price,
+    prices?.baseFare
+  );
+  const totalAmount = readFirstPositiveNumber(
+    Number.isFinite(providerFareAmount)
+      ? providerFareAmount + selectedSsrAmount
+      : undefined,
+    prices?.total,
+    priceResponse?.TotalAmount,
+    priceData?.TotalAmount,
+    nestedPriceData?.TotalAmount,
+    0
+  );
+  const formattedJourneys = Array.isArray(priceResponse?.formatted?.journeys)
+    ? priceResponse.formatted.journeys
+    : [];
+  const rawFormattedJourneys = Array.isArray(priceData?.formatted?.journeys)
+    ? priceData.formatted.journeys
+    : Array.isArray(nestedPriceData?.formatted?.journeys)
+      ? nestedPriceData.formatted.journeys
+      : [];
+  const firstFormattedJourney =
+    formattedJourneys[0] || rawFormattedJourneys[0] || {};
+  const token = String(
+    pickFirst(
+      firstFormattedJourney?.Token,
+      firstFormattedJourney?.token,
+      priceResponse?.Token,
+      priceResponse?.token,
+      priceResponse?.formatted?.Token,
+      priceResponse?.formatted?.token,
+      priceResponse?.raw?.Token,
+      priceResponse?.raw?.token,
+      rawPriceResponse?.Token,
+      rawPriceResponse?.token,
+      priceData?.Token,
+      priceData?.token,
+      priceData?.raw?.Token,
+      priceData?.raw?.token,
+      nestedPriceData?.Token,
+      nestedPriceData?.token,
+      nestedPriceData?.raw?.Token,
+      nestedPriceData?.raw?.token,
+      selectedFare?.Token,
+      selectedFare?.token,
+      booking?.Token,
+      booking?.token,
+      priceRequest?.Token,
+      priceRequest?.token,
+      ""
+    )
+  ).trim();
+
+  return {
+    provider: "riya",
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    AdultCount: passengerCounts.adult,
+    ChildCount: passengerCounts.child,
+    InfantCount: passengerCounts.infant,
+    ItineraryFlightsInfo: [
+      {
+        Token: token,
+        FlighstInfo: (seatPayload?.FlightsInfo || []).map((flight) => ({
+          FlightID: flight.FlightID || "",
+          FlightNumber: flight.FlightNumber || "",
+          Origin: flight.Origin || "",
+          Destination: flight.Destination || "",
+          DepartureDateTime: flight.DepartureDateTime || "",
+          ArrivalDateTime: flight.ArrivalDateTime || "",
+        })),
+        PaymentMode: "T",
+        SeatsSSRInfo: seatsSsrInfo,
+        BaggSSRInfo: baggageSsrInfo,
+        MealsSSRInfo: mealsSsrInfo,
+        OtherSSRInfo: [],
+        PaymentInfo: [
+          {
+            TotalAmount: formatRiyaAmount(totalAmount),
+          },
+        ],
+      },
+    ],
+    PaxDetailsInfo: travelers.map((traveler, index) => ({
+      PaxRefNumber: String(index + 1),
+      Title: String(traveler?.Title || "").replace(/\./g, "").toUpperCase(),
+      FirstName: String(traveler?.FName || "").trim(),
+      LastName: String(traveler?.LName || "").trim(),
+      DOB: formatRiyaDateSlash(traveler?.DOB),
+      Gender: normalizeRiyaGender(traveler?.Gender),
+      PaxType: normalizeRiyaPaxType(traveler?.PTC || traveler?.type),
+      PassportNo: traveler?.PassportNo || "",
+      PassportExpiry: formatRiyaDateSlash(
+        traveler?.PDOE || traveler?.PassportExpiry
+      ),
+      PassportIssuedDate: formatRiyaDateSlash(
+        traveler?.PassportIssuedDate || traveler?.PassportIssuedOn
+      ),
+      PassportCountryCode:
+        traveler?.PassportCountryCode || traveler?.Nationality || "IN",
+      InfantRef: traveler?.InfantRef || "",
+    })),
+    AddressDetails: {
+      CountryCode: String(pickFirst(contact.CountryCode, "91")).replace(
+        /[^\d]/g,
+        ""
+      ) || "91",
+      ContactNumber: String(
+        pickFirst(contact.MobileNumber, contact.Phone, travelers[0]?.MobileNumber, "")
+      ),
+      EmailID: String(pickFirst(contact.Email, travelers[0]?.Email, "")),
+    },
+    GSTInfo: {
+      GSTNumber: "",
+      GSTCompanyName: "",
+      GSTAddress: "",
+      GSTEmailID: "",
+      GSTMobileNumber: "",
+    },
+    TripType: seatPayload?.SegmentInfo?.TripType || "O",
+    BlockPNR: false,
+    BaseOrigin: seatPayload?.SegmentInfo?.BaseOrigin || "",
+    BaseDestination: seatPayload?.SegmentInfo?.BaseDestination || "",
+    TrackId: seatPayload?.TrackId || "",
+  };
+};
+
 export const buildCreateItineraryPayload = (session, prices) => {
+  const provider = resolveFlightProvider(session);
+
+  if (provider === "riya") {
+    return buildRiyaCreateItineraryPayload(session, prices);
+  }
+
   const priceResponse = unwrapPayload(session?.priceResponse);
   const fareBreakdown = Array.isArray(priceResponse?.fare_breakdown)
     ? priceResponse.fare_breakdown

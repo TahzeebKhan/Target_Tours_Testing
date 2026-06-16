@@ -31,7 +31,7 @@ const BaggageRules = ({ onClose }) => {
                         <div className={styles.tableRow}>
                             <div className={styles.airlineCell}>
 
-                                <img className={styles.airlineIcon} src="/images/Flight.png" alt="" />
+                                <img className={styles.airlineIcon} src="/images/dummyFlightlogo.png" alt="" />
 
                                 <div className={styles.airlineText}>
                                     <span className={styles.airlineName}>INDIGO</span>

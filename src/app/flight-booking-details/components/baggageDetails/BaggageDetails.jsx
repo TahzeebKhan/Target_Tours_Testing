@@ -18,6 +18,14 @@ const CHECKED_IMAGES = ["/images/checkinbaggage.png", "/images/checkinbaggage.pn
 
 const areEqual = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
+const buildQuantitiesFromSelections = (items = []) =>
+  items.reduce((acc, item) => {
+    if (!item?.segment || !item?.selectionKey) return acc;
+    const key = `${item.segment}::${item.selectionKey}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
 const pickFirst = (...values) => {
   for (const value of values) {
     if (value !== undefined && value !== null && value !== "") return value;
@@ -145,16 +153,38 @@ const buildExtraBaggageData = (routeBaggage = []) => {
     const weightValue = parseWeightValue(weightLabel);
     const bucket = weightValue < 10 ? "cabin" : "checked";
     const imagePool = bucket === "cabin" ? CABIN_IMAGES : CHECKED_IMAGES;
+    const baggageId = pickFirst(
+      item?.BaggageID,
+      item?.baggageID,
+      item?.BaggageId,
+      item?.baggageId,
+      item?.baggage_id,
+      item?.ssid,
+      item?.SSID,
+      item?.id
+    );
+    const fuid = pickFirst(
+      item?.fuid,
+      item?.FUID,
+      item?.flight_uid,
+      item?.flightUid,
+      item?.flightId,
+      item?.FlightID,
+      item?.FlightId,
+      ""
+    );
 
     return {
-      id: item?.id || `${bucket}-${index}`,
-      ssid: item?.ssid ?? item?.id ?? `${bucket}-${index}`,
-      fuid: item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+      ...item,
+      id: baggageId || `${bucket}-${index}`,
+      BaggageID: baggageId ? String(baggageId) : "",
+      ssid: baggageId ? String(baggageId) : "",
+      fuid,
       code: item?.code || `${bucket}-${index}`,
       selectionKey: [
         item?.code || `${bucket}-${index}`,
-        item?.ssid ?? item?.id ?? `${bucket}-${index}`,
-        item?.fuid ?? item?.FUID ?? item?.flight_uid ?? item?.flightId ?? "",
+        baggageId || `${bucket}-${index}`,
+        fuid,
       ].join("::"),
       image: imagePool[index % imagePool.length],
       weight: weightLabel,
@@ -370,7 +400,7 @@ const BaggageEmptyState = () => (
 
 const BaggageDetails = () => {
   const router = useRouter();
-  const { setBaggage, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
+  const { baggage, setBaggage, setCurrentStep, currentStep, bookingSession, prices, travelerDetails } = useFlightBooking();
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const routeCards = useMemo(
     () => buildRouteCards(bookingSession, bookingView),
@@ -387,10 +417,19 @@ const BaggageDetails = () => {
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
   // 🔥 Quantity state (per flight + per baggage)
-  const [quantities, setQuantities] = useState({});
+  const [quantities, setQuantities] = useState(() => buildQuantitiesFromSelections(baggage));
+
+  React.useEffect(() => {
+    if (!baggage?.length) return;
+    setQuantities((current) =>
+      Object.keys(current).length ? current : buildQuantitiesFromSelections(baggage)
+    );
+  }, [baggage]);
 
   // Sync with Context whenever quantities change
   React.useEffect(() => {
+    if (!Object.keys(quantities).length && baggage?.length) return;
+
     const newBaggageList = [];
     Object.entries(quantities).forEach(([key, qty]) => {
       if (qty > 0) {
@@ -415,7 +454,7 @@ const BaggageDetails = () => {
       }
     });
     setBaggage((current) => (areEqual(current, newBaggageList) ? current : newBaggageList));
-  }, [quantities, routeCards, setBaggage]);
+  }, [baggage?.length, quantities, routeCards, setBaggage]);
 
   const increaseQty = useCallback((key) => {
     setQuantities((prev) => {

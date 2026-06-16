@@ -672,7 +672,7 @@ const ArrivalToronto = ({ data }) => {
                           <div className={styles.flightDetailsCont}>
                             <div className={styles.flightDetailsSubCont}>
                               <div className={styles.flightDetails}>
-                                <img src="/images/Flight.png" alt="" />
+                                <img src="/images/dummyFlightlogo.png" alt="" />
                                 <div className={styles.flightNameContainer}>
                                   <h2>{currentFlightTransport?.airline_name || "N/A"}</h2>
                                   <span>{currentFlightTransport?.flight_number || "N/A"}</span>
@@ -1133,7 +1133,7 @@ const ArrivalToronto = ({ data }) => {
                         <div className={styles.flightDetailsCont}>
                           <div className={styles.flightDetailsSubCont}>
                             <div className={styles.flightDetails}>
-                              <img src="/images/Flight.png" alt="" />
+                              <img src="/images/dummyFlightlogo.png" alt="" />
                               <div className={styles.flightNameContainer}>
                                 <h2>{currentFlightTransport?.airline_name || "N/A"}</h2>
                                 <span>{currentFlightTransport?.flight_number || "N/A"}</span>

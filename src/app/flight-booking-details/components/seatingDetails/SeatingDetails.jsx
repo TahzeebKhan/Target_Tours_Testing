@@ -157,18 +157,21 @@ const getSeatPrice = (seat) =>
     seat?.tax
   ) || 0;
 
-const getSeatSsrId = (seat) =>
-  readNumber(
-    seat?.SSID,
-    seat?.ssid,
-    seat?.SeatID,
-    seat?.seatID,
-    seat?.SeatId,
-    seat?.seatId,
-    seat?.SSRId,
-    seat?.ssrId,
-    seat?.id
-  );
+const getSeatSsrId = (seat) => {
+  const value =
+    seat?.SeatID ??
+    seat?.seatID ??
+    seat?.SeatId ??
+    seat?.seatId ??
+    seat?.seat_id ??
+    seat?.SSID ??
+    seat?.ssid ??
+    seat?.SSRId ??
+    seat?.ssrId ??
+    "";
+
+  return value === undefined || value === null ? "" : String(value).trim();
+};
 
 const getSeatFuid = (seat) =>
   readNumber(
@@ -456,6 +459,7 @@ const SeatingDetails = () => {
   const [openTab, setOpenTab] = useState("flight");
   const [selectedPassenger, setSelectedPassenger] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedSeatAssignments, setSelectedSeatAssignments] = useState({});
   const seatLayoutsScrollerRef = useRef(null);
   const [activeSeatLayoutIndex, setActiveSeatLayoutIndex] = useState(0);
   const [seatNavState, setSeatNavState] = useState({
@@ -594,10 +598,11 @@ const SeatingDetails = () => {
             id: seatId,
             seatNumber: seat?.seatNumber || String(seatId).split(":").pop(),
             price: seat.price || 0,
+            PaxRefNumber: String(selectedSeatAssignments[seatId] || ""),
           };
         })
     );
-  }, [selectedSeats, seatsById, setSeats]);
+  }, [selectedSeatAssignments, selectedSeats, seatsById, setSeats]);
 
 
 
@@ -617,13 +622,25 @@ const SeatingDetails = () => {
         : [];
 
       if (selectedSeatIds.includes(seatId)) {
+        setSelectedSeatAssignments((current) => {
+          const next = { ...current };
+          delete next[seatId];
+          return next;
+        });
         return selectedSeatIds.filter((id) => id !== seatId);
       }
 
       const nextSelectedForJourney = selectedForJourney
         .filter((id) => id !== seatId)
         .slice(0, passengerCount);
+      const replacedSeatId = nextSelectedForJourney[passengerIndex];
       nextSelectedForJourney[passengerIndex] = seatId;
+      setSelectedSeatAssignments((current) => {
+        const next = { ...current };
+        if (replacedSeatId) delete next[replacedSeatId];
+        next[seatId] = selectedPassenger;
+        return next;
+      });
 
       return [
         ...selectedForOtherJourneys,

@@ -142,7 +142,7 @@ const MultiCityTrip = ({
           {
             name: "Indigo",
             code: "6E-541",
-            logo: "/images/Flight.png",
+            logo: "/images/dummyFlightlogo.png",
           },
         ],
         dateLabel: "WED, 17 DEC",
@@ -319,7 +319,7 @@ const MultiCityTrip = ({
           {
             name: "Indigo",
             code: "6E-541",
-            logo: "/images/Flight.png",
+            logo: "/images/dummyFlightlogo.png",
           },
         ],
         dateLabel: "WED, 17 DEC",
@@ -488,7 +488,7 @@ const MultiCityTrip = ({
                     }`}
                   onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img src="/images/dummyFlightlogo.png" alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>
@@ -614,7 +614,7 @@ const MultiCityTrip = ({
                     }`}
                   onClick={() => applyQuickSort("cheapest")}
                 >
-                  <img src="/images/Flight.png" alt="" />
+                  <img src="/images/dummyFlightlogo.png" alt="" />
                   <div className={styles.sortedTextContainer}>
                     <span className={styles.budget}>CHEAPEST</span>
                     <div className={styles.priceContainer}>

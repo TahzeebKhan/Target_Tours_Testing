@@ -89,7 +89,7 @@ const flightResults = [
         {
           name: "Indigo",
           code: "6E-541",
-          logo: "/images/Flight.png",
+          logo: "/images/dummyFlightlogo.png",
         },
       ],
       dateLabel: "WED, 17 DEC",
@@ -266,7 +266,7 @@ const flightResults = [
         {
           name: "Indigo",
           code: "6E-541",
-          logo: "/images/Flight.png",
+          logo: "/images/dummyFlightlogo.png",
         },
       ],
       dateLabel: "WED, 17 DEC",

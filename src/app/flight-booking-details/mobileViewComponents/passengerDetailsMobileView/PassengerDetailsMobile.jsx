@@ -48,7 +48,7 @@ const getFlightSectionData = (flight, type) => {
     airline: flight.airline || {
       name: "N/A",
       code: "N/A",
-      logo: "/images/Flight.png",
+      logo: "/images/dummyFlightlogo.png",
     },
     aircraft: flight.aircraft || "N/A",
     cabinClass: flight.travelClass || "N/A",
@@ -243,7 +243,7 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
           <div className={styles.TripFlightDetailsCard}>
             <div className={styles.TripFlightDetailsCardCont}>
               <div className={styles.TripFlightDetailsCardImage}>
-                <img src={airline.logo || "/images/Flight.png"} alt={airline.name || ""} />
+                <img src={airline.logo || "/images/dummyFlightlogo.png"} alt={airline.name || ""} />
               </div>
               <div className={styles.AirLineDetails}>
                 <div className={styles.AirLineDetailsItem}>

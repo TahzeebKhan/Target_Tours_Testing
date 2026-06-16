@@ -472,7 +472,7 @@ export default function BookingSuccessModal({
         <div className={styles.card}>
           <div className={styles.logoWrap}>
             <img
-              src={summaryFlight?.airline?.logo || "/images/Flight.png"}
+              src={summaryFlight?.airline?.logo || "/images/dummyFlightlogo.png"}
               alt=""
               className={styles.logo}
             />
@@ -502,7 +502,7 @@ export default function BookingSuccessModal({
           <div className={styles.card}>
             <div className={styles.logoWrap}>
               <img
-                src={returnFlight?.airline?.logo || "/images/Flight.png"}
+                src={returnFlight?.airline?.logo || "/images/dummyFlightlogo.png"}
                 alt=""
                 className={styles.logo}
               />

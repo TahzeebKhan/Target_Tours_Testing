@@ -6,7 +6,7 @@ import CancellationPenalty from "../../passengerDetails/fareDetailsExpandable/co
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const GENERIC_FLIGHT_LOGOS = new Set([
-  "/images/Flight.png",
+  "/images/dummyFlightlogo.png",
   "/images/AirlineLogos.png",
 ]);
 
@@ -287,7 +287,7 @@ const toMobileFlight = (card, type) => {
     airline: {
       name: card.airline?.name || "N/A",
       code: card.airline?.code || "N/A",
-      logo: card.airline?.logo || "/images/Flight.png",
+      logo: card.airline?.logo || "/images/dummyFlightlogo.png",
     },
     aircraft: card.airline?.aircraft || "N/A",
     cabinClass: card.cabin || "N/A",
