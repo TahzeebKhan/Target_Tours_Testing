@@ -52,6 +52,9 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
       <div className={styles.overlay}></div>
 
       <div className={styles.topBar}>
+        <div className={styles.container}>
+
+        
         <Link href="/" aria-label="Go to home">
           <img className={styles.logo} src="/images/tour-logo.svg" alt="Target Tours" />
         </Link>
@@ -62,6 +65,7 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
           <button type="button" className={styles.signInButton}>
             Sign In
           </button>
+        </div>
         </div>
       </div>
 

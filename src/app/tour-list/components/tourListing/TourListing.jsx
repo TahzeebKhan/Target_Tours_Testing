@@ -4,10 +4,11 @@ import styles from "./TourListing.module.css";
 import SearchResults from "../searchResult/SearchResults";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Pencil, X } from "lucide-react";
+import { Pencil } from "lucide-react";
 import MobileFilterWrapper from "../mobileFilterWrapper/MobileFilterWrapper";
 import SortBySheet from "../sortBySheet/SortBySheet";
 import PreferencesSection from "../preferencesSection/PreferencesSection";
+import PackageOptionModal from "./PackageOptionModal";
 import SelectDestination from "@/features/profile/components/selectDestination";
 import SelectTravellerProfile from "@/features/profile/components/selectTravellerProfile";
 import SelectPreferences from "@/features/profile/components/selectPreferences";
@@ -258,17 +259,6 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
       onDataLoaded(meta);
     }
   }, [meta, onDataLoaded]);
-
-  useEffect(() => {
-    if (!selectedPackage) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [selectedPackage]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -933,76 +923,14 @@ const TourListing = ({ filters, page, setPage, onDataLoaded }) => {
         onClose={() => setIsSaveWishlistOpen(false)}
       />
 
-      <AnimatePresence>
-        {selectedPackage && (
-          <motion.div
-            className={styles.optionOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closePackageOptions}
-          >
-            <motion.div
-              className={styles.optionSheet}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className={styles.optionMedia}>
-                <img src={selectedPackage.image} alt={selectedPackage.title} />
-              </div>
-
-              <div className={styles.optionHeader}>
-                <h3>{selectedPackage.title}</h3>
-                <button
-                  type="button"
-                  className={styles.optionClose}
-                  onClick={closePackageOptions}
-                  aria-label="Close package options"
-                >
-                  <X size={22} />
-                </button>
-              </div>
-
-              <div className={styles.optionList}>
-                {getPackageOptions(selectedPackage).map((option) => (
-                  <button
-                    type="button"
-                    className={styles.optionCard}
-                    key={option.optionKey || `${option.id}-${option.with_flight ? "with" : "without"}`}
-                    onClick={() =>
-                      handleBookNow(
-                        option.id,
-                        option.with_flight,
-                        getPackageOptionAmount(option)
-                      )
-                    }
-                  >
-                    <div className={styles.optionText}>
-                      <span>
-                        Starting from
-                        {option.fromCity ? ` - ${option.fromCity}` : ""}
-                      </span>
-                      <strong>
-                        {option.with_flight ? "With Flight" : "Without Flight"}
-                      </strong>
-                    </div>
-
-                    <div className={styles.optionPrice}>
-                      <strong>{getPackageOptionPrice(option)}</strong>
-                      <span>per person</span>
-                    </div>
-
-                    <ChevronRight className={styles.optionArrow} size={26} />
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PackageOptionModal
+        packageItem={selectedPackage}
+        options={selectedPackage ? getPackageOptions(selectedPackage) : []}
+        getOptionAmount={getPackageOptionAmount}
+        getOptionPrice={getPackageOptionPrice}
+        onClose={closePackageOptions}
+        onContinue={handleBookNow}
+      />
     </>
   );
 };

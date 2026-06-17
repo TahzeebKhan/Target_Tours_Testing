@@ -42,12 +42,19 @@ const EditProfileMobile = ({
   const getFilteredOptions = (field) => {
     const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
     const options = field.options || [];
+    const filteredOptions = search
+      ? options.filter((option) =>
+          getOptionSearchText(option).toLowerCase().includes(search)
+        )
+      : options;
+    const seenLabels = new Set();
 
-    if (!search) return options;
-
-    return options.filter((option) =>
-      getOptionSearchText(option).toLowerCase().includes(search)
-    );
+    return filteredOptions.filter((option) => {
+      const label = getOptionLabel(option).trim().toLowerCase();
+      if (!label || seenLabels.has(label)) return false;
+      seenLabels.add(label);
+      return true;
+    });
   };
 
   const getOptionLabel = (option) =>
