@@ -92,6 +92,7 @@ const fetchPackageReviews = async ({ queryKey }) => {
 const Testimonial = ({ data }) => {
   const [swiperRef, setSwiperRef] = useState(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [activeSource, setActiveSource] = useState("google")
   const itemId = data?.id;
   const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
@@ -131,6 +132,37 @@ const Testimonial = ({ data }) => {
     <section className={styles.section} id="testimonials">
       <div className={styles.container}> 
         <h2 className={styles.heading}>What Our Travelers Say</h2>
+
+        <div
+          className={`${styles.reviewSourceTabs} ${
+            activeSource === "tripadvisor" ? styles.reviewSourceTabsRight : ""
+          }`}
+          role="tablist"
+          aria-label="Review source"
+        >
+          <button
+            type="button"
+            className={`${styles.reviewSourceBtn} ${
+              activeSource === "google" ? styles.reviewSourceBtnActive : ""
+            }`}
+            onClick={() => setActiveSource("google")}
+            role="tab"
+            aria-selected={activeSource === "google"}
+          >
+            Google Reviews
+          </button>
+          <button
+            type="button"
+            className={`${styles.reviewSourceBtn} ${
+              activeSource === "tripadvisor" ? styles.reviewSourceBtnActive : ""
+            }`}
+            onClick={() => setActiveSource("tripadvisor")}
+            role="tab"
+            aria-selected={activeSource === "tripadvisor"}
+          >
+            Tripadvisor
+          </button>
+        </div>
 
         <div className={styles.testimonialContainer}>
           <Swiper

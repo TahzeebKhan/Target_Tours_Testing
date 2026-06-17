@@ -249,8 +249,8 @@ vertical-align: middle;
   position: sticky;
   top: 245px;
   width: 100%;
-  max-width: 600px;
-  flex: 1 1 600px;
+  max-width: 638px;
+  flex: 0 0 638px;
 }
 
 .mapCard,
@@ -260,14 +260,17 @@ vertical-align: middle;
 }
 
 .mapCard {
-  min-height: 530px;
+  position: relative;
+  height: 599px;
+  min-height: 599px;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
+  max-width: 638px;
   width: 100%;
 }
 
 .mapHeader {
+  min-height: 98px;
   padding: 25px 22px 18px;
   text-align: center;
   border-bottom: 1px solid #e9e9ed;
@@ -292,59 +295,100 @@ vertical-align: middle;
 
 .mapCanvas {
   flex: 1;
-  min-height: 410px;
-  padding: 12px 20px;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: #eef3f1;
 }
 
-.routeSvg {
-  display: block;
+.mapCanvas > div {
   width: 100%;
   height: 100%;
 }
 
-.countryShape {
-  fill: #fafbfc;
-  stroke: #dbe1ea;
-  stroke-width: 2;
-  stroke-dasharray: 5 5;
+.mapFrame {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  display: block;
+  border: 0;
 }
 
-.routeLine {
-  fill: none;
-  stroke: var(--navy);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 4;
+.mapMarker {
+  position: relative;
+  min-width: 84px;
+  padding: 7px 10px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(8, 8, 61, 0.18);
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(8, 8, 61, 0.18);
+  color: var(--navy);
+  font-family: var(--font-inter);
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
-.routePoint {
-  fill: var(--navy);
-  stroke: #fff;
-  stroke-width: 3;
+.mapMarker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border-right: 1px solid rgba(8, 8, 61, 0.18);
+  border-bottom: 1px solid rgba(8, 8, 61, 0.18);
+  background: #fff;
+  transform: translateX(-50%) rotate(45deg);
 }
 
-.activePoint {
-  fill: #fff;
-  stroke: var(--navy);
-  stroke-width: 4;
+.mapMarker span {
+  width: fit-content;
+  min-width: 36px;
+  margin: 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
-.routeLabel {
-  fill: #22223d;
-  font: 600 10px var(--font-inter);
+.mapMarker strong {
+  overflow: hidden;
+  max-width: 112px;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
-.dayLabel {
-  fill: #9a9ba5;
-  font: 400 8px var(--font-inter);
+.mapMarker:hover,
+.mapMarker:focus-visible {
+  border-color: var(--navy);
+  box-shadow: 0 12px 24px rgba(8, 8, 61, 0.24);
+  outline: 0;
 }
 
 .mapHint {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
   margin: 0;
-  padding: 17px 20px;
-  border-top: 1px solid #e9e9ed;
-  color: #42424a;
-  text-align: center;
+  padding: 0;
+  border: 0;
+  color: #111;
   font: 400 11px/1.4 var(--font-inter);
+  pointer-events: none;
 }
 
 .cards {
@@ -940,14 +984,17 @@ color:#000000;
   .stickyColumn {
     position: static;
     margin-bottom: 24px;
+    max-width: none;
   }
 
   .mapCard {
-    min-height: 0;
+    height: 520px;
+    min-height: 520px;
+    max-width: none;
   }
 
   .mapCanvas {
-    min-height: 310px;
+    min-height: 0;
   }
 
   .cardHeader,

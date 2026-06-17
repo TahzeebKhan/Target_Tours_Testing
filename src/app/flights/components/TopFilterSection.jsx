@@ -672,6 +672,10 @@ const TopFilterSection = ({
                     className={`${styles.serarchingContBottom} ${
                       styles.flightSearchFormWrapper
                     } ${styles.formVisible} ${
+                      openCalendarFor === "main"
+                        ? styles.calendarActiveForm
+                        : ""
+                    } ${
                       tripType === "round"
                         ? styles.roundTripSerarchingContBottom
                         : ""
@@ -955,7 +959,13 @@ const TopFilterSection = ({
                 {tripType === "multi" && (
                   <>
                     <div
-                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                      className={`${styles.serarchingContBottom} ${styles.multiSearch} ${
+                        styles.flightSearchFormWrapper
+                      } ${styles.formVisible} ${
+                        openCalendarFor === "multi-1"
+                          ? styles.calendarActiveForm
+                          : ""
+                      }`}
                       style={{ pointerEvents: "none" }}
                     >
                       {/* First row is now handled by the unified block above. 
@@ -1064,7 +1074,9 @@ const TopFilterSection = ({
                           )}
                         </div>
 
-                        <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
+                        <div
+                          className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.calendarAnchor}`}
+                        >
                           <div className={styles.lable}>Departure Date</div>
                           {openCalendarFor === "multi-1" && (
                             <DateCalendarModal

@@ -396,7 +396,13 @@ const TopFilterResponsiveSec = () => {
                                 {/* Unified One-way, Round-trip, and Multi-city (first row) form */}
                                 {(tripType === "oneway" || tripType === "round" || tripType === "multi") && (
                                     <div
-                                        className={`${styles.serarchingContBottom}  ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                                        className={`${styles.serarchingContBottom}  ${
+                                            styles.flightSearchFormWrapper
+                                        } ${styles.formVisible} ${
+                                            showCalendar && activeMultiIndex !== 1
+                                                ? styles.calendarActiveForm
+                                                : ""
+                                        }`}
                                     >
                                         <div
                                             className={`${styles.fromBtn} ${styles.fromBtn2} ${tripType === "oneway" || tripType === "multi" ? styles.growRight : ""
@@ -618,7 +624,13 @@ const TopFilterResponsiveSec = () => {
                                 {tripType === "multi" && (
                                     <>
                                         <div
-                                            className={`${styles.serarchingContBottom} ${styles.multiSearch} ${isScrolled ? styles.scrolledPadding : ""} ${styles.flightSearchFormWrapper} ${styles.formVisible}`}
+                                            className={`${styles.serarchingContBottom} ${styles.multiSearch} ${
+                                                isScrolled ? styles.scrolledPadding : ""
+                                            } ${styles.flightSearchFormWrapper} ${styles.formVisible} ${
+                                                showCalendar && activeMultiIndex === 1
+                                                    ? styles.calendarActiveForm
+                                                    : ""
+                                            }`}
                                             style={{ pointerEvents: 'none' }}
                                         >
                                             {/* First row is now handled by the unified block above. 
@@ -632,7 +644,7 @@ const TopFilterResponsiveSec = () => {
                                                     }`}
                                                 style={{ pointerEvents: 'auto' }}
                                             >
-                                                <div className={`${styles.fromBtn} ${styles.fromBtn3}`}>
+                                                <div className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.calendarAnchor}`}>
                                                     <div className={styles.lable}>From</div>
                                                     <input
                                                         type="text"

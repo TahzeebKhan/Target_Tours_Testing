@@ -7,6 +7,12 @@ import {
   MapPin,
   Plane,
 } from "lucide-react";
+import {
+  GoogleMap,
+  LoadScriptNext,
+  OverlayView,
+  Polyline,
+} from "@react-google-maps/api";
 import styles from "./DailyJourneyItinerary.module.css";
 import HotelSwapModal from "./HotelSwapModal";
 import FlightSwapModal from "./FlightSwapModal";
@@ -102,6 +108,51 @@ const getDayCity = (day) =>
   getHotel(day)?.city ||
   day?.city ||
   `Day ${day?.day_number || ""}`;
+
+const CITY_COORDINATES = {
+  agra: { lat: 27.1767, lng: 78.0081 },
+  bangalore: { lat: 12.9716, lng: 77.5946 },
+  bengaluru: { lat: 12.9716, lng: 77.5946 },
+  delhi: { lat: 28.6139, lng: 77.209 },
+  jaipur: { lat: 26.9124, lng: 75.7873 },
+  jodhpur: { lat: 26.2389, lng: 73.0243 },
+  mumbai: { lat: 19.076, lng: 72.8777 },
+  narlai: { lat: 25.3416, lng: 73.5794 },
+  "new delhi": { lat: 28.6139, lng: 77.209 },
+  phuket: { lat: 7.8804, lng: 98.3923 },
+  singapore: { lat: 1.3521, lng: 103.8198 },
+  udaipur: { lat: 24.5854, lng: 73.7125 },
+  varanasi: { lat: 25.3176, lng: 82.9739 },
+};
+
+const normalizeCityName = (value = "") =>
+  stripHtml(value).toLowerCase().replace(/\s+/g, " ").trim();
+
+const toCoordinate = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+};
+
+const getDayCoordinates = (day) => {
+  const hotel = getHotel(day);
+  const location = day?.location || {};
+  const candidatePairs = [
+    [location.latitude, location.longitude],
+    [location.lat, location.lng],
+    [day?.latitude, day?.longitude],
+    [day?.lat, day?.lng],
+    [hotel?.latitude, hotel?.longitude],
+    [hotel?.lat, hotel?.lng],
+  ];
+
+  for (const [latValue, lngValue] of candidatePairs) {
+    const lat = toCoordinate(latValue);
+    const lng = toCoordinate(lngValue);
+    if (lat !== null && lng !== null) return { lat, lng };
+  }
+
+  return CITY_COORDINATES[normalizeCityName(getDayCity(day))] || null;
+};
 
 const getDayImage = (day, index) => {
   const activity = getActivities(day)[0];
@@ -365,84 +416,125 @@ const DetailRow = ({ label, children, defaultOpen = false }) => {
   );
 };
 
-const RouteMap = ({ days, activeDayIndex }) => {
+const mapContainerStyle = { width: "100%", height: "100%" };
+
+const RouteMap = ({ days }) => {
+  const [map, setMap] = useState(null);
   const points = days;
-  const activeDay = points[activeDayIndex] || points[0];
+  const apiKey = process.env.NEXT_PUBLIC_MAP_KEY;
+  const routePoints = useMemo(
+    () =>
+      points
+        .map((day, index) => ({
+          day,
+          index,
+          city: getDayCity(day),
+          position: getDayCoordinates(day),
+        }))
+        .filter((point) => point.position),
+    [points],
+  );
+  const mapCenter = routePoints[0]?.position || CITY_COORDINATES.delhi;
+
+  useEffect(() => {
+    if (!map || !routePoints.length || !window.google?.maps) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    routePoints.forEach((point) => bounds.extend(point.position));
+
+    if (routePoints.length === 1) {
+      map.setCenter(routePoints[0].position);
+      map.setZoom(11);
+      return;
+    }
+
+    map.fitBounds(bounds, 44);
+  }, [map, routePoints]);
+
+  const fallbackQuery =
+    routePoints.map((point) => point.city).filter(Boolean).join(" to ") ||
+    "India tour route";
+  const fallbackMapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
+    fallbackQuery,
+  )}&output=embed`;
 
   return (
     <aside className={styles.mapCard}>
       <div className={styles.mapHeader}>
         <p>Interactive route map</p>
-        <span>
-          Active: <strong>{getDayCity(activeDay)}</strong> (Day{" "}
-          {activeDay?.day_number || activeDayIndex + 1})
-        </span>
       </div>
 
       <div className={styles.mapCanvas}>
-        <svg
-          viewBox="0 0 360 430"
-          className={styles.routeSvg}
-          role="img"
-          aria-label="Tour route"
-        >
-          <path
-            className={styles.countryShape}
-            d="M116 39c32 18 48 1 73 13 31 15 42 42 67 60 32 24 43 64 24 94-15 25-6 58-26 78-23 24-34 69-69 97-22 18-43-2-54-29-11-29-37-40-47-71-10-30 11-48 5-75-6-31-21-55-12-87 8-29 10-62 39-80Z"
-          />
-          {points.length > 1 && (
-            <polyline
-              className={styles.routeLine}
-              points={points
-                .map((_, index) => {
-                  const x = 118 + ((index * 53) % 140);
-                  const y = 88 + index * (260 / (points.length - 1));
-                  return `${x},${y}`;
-                })
-                .join(" ")}
-            />
-          )}
-          {points.map((day, index) => {
-            const x = 118 + ((index * 53) % 140);
-            const y =
-              88 + index * (points.length > 1 ? 260 / (points.length - 1) : 1);
-
-            return (
-              <g key={day.id || index}>
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={index === activeDayIndex ? 10 : 6}
-                  className={
-                    index === activeDayIndex
-                      ? styles.activePoint
-                      : styles.routePoint
-                  }
+        {apiKey ? (
+          <LoadScriptNext googleMapsApiKey={apiKey}>
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={mapCenter}
+              zoom={7}
+              onLoad={setMap}
+              options={{
+                clickableIcons: false,
+                fullscreenControl: false,
+                mapTypeControl: false,
+                streetViewControl: false,
+                gestureHandling: "greedy",
+              }}
+            >
+              {routePoints.length > 1 && (
+                <Polyline
+                  path={routePoints.map((point) => point.position)}
+                  options={{
+                    strokeColor: "#000033",
+                    strokeOpacity: 0.85,
+                    strokeWeight: 2,
+                    icons: [
+                      {
+                        icon: {
+                          path: "M 0,-1 0,1",
+                          strokeOpacity: 1,
+                          scale: 3,
+                        },
+                        offset: "0",
+                        repeat: "14px",
+                      },
+                    ],
+                  }}
                 />
-                <text
-                  x={x + (index % 2 ? 11 : -11)}
-                  y={y - 10}
-                  textAnchor={index % 2 ? "start" : "end"}
-                  className={styles.routeLabel}
+              )}
+              {routePoints.map((point) => (
+                <OverlayView
+                  key={point.day?.id || `route-${point.index}`}
+                  position={point.position}
+                  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                 >
-                  {getDayCity(day)}
-                </text>
-                <text
-                  x={x + (index % 2 ? 11 : -11)}
-                  y={y + 6}
-                  textAnchor={index % 2 ? "start" : "end"}
-                  className={styles.dayLabel}
-                >
-                  Day {day.day_number || index + 1}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+                  <a
+                    className={styles.mapMarker}
+                    href={`#itinerary-day-${point.index + 1}`}
+                    style={{ transform: "translate(-50%, -100%)" }}
+                    aria-label={`Jump to day ${
+                      point.day?.day_number || point.index + 1
+                    } in ${point.city}`}
+                  >
+                    <span>{point.day?.day_number || point.index + 1}</span>
+                    <strong>{point.city}</strong>
+                  </a>
+                </OverlayView>
+              ))}
+            </GoogleMap>
+          </LoadScriptNext>
+        ) : (
+          <iframe
+            className={styles.mapFrame}
+            title="Tour route Google map"
+            src={fallbackMapUrl}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        )}
       </div>
 
       <p className={styles.mapHint}>
-        Select a day card to explore its itinerary details.
+        Click map markers to instantly jump to that day's itinerary detail.
       </p>
     </aside>
   );

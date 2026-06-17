@@ -42,12 +42,19 @@ const EditProfileMobile = ({
   const getFilteredOptions = (field) => {
     const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
     const options = field.options || [];
+    const filteredOptions = search
+      ? options.filter((option) =>
+          getOptionSearchText(option).toLowerCase().includes(search)
+        )
+      : options;
+    const seenLabels = new Set();
 
-    if (!search) return options;
-
-    return options.filter((option) =>
-      getOptionSearchText(option).toLowerCase().includes(search)
-    );
+    return filteredOptions.filter((option) => {
+      const label = getOptionLabel(option).trim().toLowerCase();
+      if (!label || seenLabels.has(label)) return false;
+      seenLabels.add(label);
+      return true;
+    });
   };
 
   const getOptionLabel = (option) =>
@@ -129,8 +136,11 @@ const EditProfileMobile = ({
             {/* ✅ DROPDOWN */}
             {field.isDropdown ? (
               <div
-                className={styles.dropdownInput}
+                className={`${styles.dropdownInput} ${
+                  field.isLocked ? styles.disabledField : ""
+                }`}
                 onClick={() => toggleDropdown(index)}
+                aria-disabled={field.isLocked}
               >
                 <span>{field.value}</span>
                 <Image
@@ -177,12 +187,14 @@ const EditProfileMobile = ({
                 className={styles.input}
                 value={field.value}
                 placeholder={field.placeholder}
+                disabled={field.isLocked}
+                readOnly={field.isLocked}
                 onChange={(e) => handleChange(index, e.target.value)}
               />
             )}
 
             {/* ✅ DROPDOWN MENU */}
-            {field.isDropdown && field.isOpen && (
+            {field.isDropdown && field.isOpen && !field.isLocked && (
               <div className={styles.dropdownMenu} ref={dropdownRef}>
                 <div className={styles.dropdownSearchWrap}>
                   <input

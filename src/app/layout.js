@@ -106,7 +106,8 @@ export default function RootLayout({ children }) {
             hideProgressBar
             newestOnTop
             closeOnClick
-            pauseOnHover
+            pauseOnHover={false}
+            pauseOnFocusLoss={false}
             theme="dark"
             closeButton
             toastClassName="targetToast"

@@ -94,6 +94,10 @@
   border: 1px solid #0000001A;
   cursor: pointer;
 }
+.sortedItem img {
+  width: 36px;
+  height: 36px;
+}
 .sortedItem.activeSortedItem {
   border: 1px solid #000033;
   background-color: #f0f3ff;

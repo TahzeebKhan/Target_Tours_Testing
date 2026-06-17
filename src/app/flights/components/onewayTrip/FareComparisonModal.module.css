@@ -436,6 +436,55 @@
   overflow-y: auto;
 }
 
+.inlinePanel {
+  width: 100%;
+  background: #ffffff;
+}
+
+.inlineFareCards {
+  padding: 24px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.inlineFareCards .fareCardContainer,
+.inlineFareCards .fareSkeletonCard,
+.inlineFareCards .loadingCard {
+  flex: 0 0 calc((100% - 48px) / 3);
+  min-width: 320px;
+  max-width: 380px;
+  padding: 24px;
+}
+
+.inlineFareCards .loadingCard {
+  width: auto;
+  min-height: 420px;
+  max-height: 520px;
+}
+
+.inlineFareCards .loadingActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.inlineFareCards .fareActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.inlineFareCards .price {
+  font-size: 32px;
+}
+
+.inlineFareCards .featureItem span {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .fareLoadingState {
   padding: 16px 32px 24px 32px;
   display: flex;
@@ -620,6 +669,114 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  position: relative;
+}
+
+.priceInfoTrigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  cursor: help;
+  outline: none;
+  z-index: 4;
+}
+
+.priceInfoTrigger img {
+  width: 18px;
+  height: 18px;
+}
+
+.priceInfoCard {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  width: 260px;
+  background: #ffffff;
+  border: 1px solid #d9dce5;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.priceInfoTrigger:hover .priceInfoCard,
+.priceInfoTrigger:focus .priceInfoCard,
+.priceInfoTrigger:focus-within .priceInfoCard {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.priceInfoTitle {
+  padding: 9px 12px;
+  background: #000033;
+  color: #ffffff;
+ font-family: Inter;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: -2%;
+text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.priceInfoBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.priceInfoRow,
+.priceInfoTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-inter);
+  color: #000000;
+}
+
+
+.priceInfoRow span {
+  font-weight: 400;
+}
+
+.priceInfoRow strong {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.priceInfoDivider {
+  height: 1px;
+  background: #e4e6e8;
+}
+
+.priceInfoTotal span,
+.priceInfoTotal strong {
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.priceInfoBody p {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-style: italic;
+  color: #9aa0ad;
 }
 
 .pricePerAdult {
@@ -635,6 +792,29 @@
   text-transform: capitalize;
   color: #000033;
 }
+.priceInfoTotal{
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+
+}
+.priceInfoTotal2{
+font-family: Inter;
+font-weight: 600;
+font-style: Semi Bold;
+font-size: 14px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+
+}
+
 
 .adult {
   font-family: var(--font-inter);
@@ -750,9 +930,10 @@
 
 .loadingCard {
   min-width: 360px;
-  max-width: none;
+  max-width: 380px;
   width: 100%;
-  min-height: 100%;
+  min-height: 420px;
+  max-height: 520px;
   flex-shrink: 0;
   border: 1px solid #e4e6e8;
   padding: 24px;

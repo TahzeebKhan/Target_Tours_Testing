@@ -189,6 +189,20 @@ color:#1A2029;
   height: 48px;
 }
 
+.inputContainer:has(input:disabled),
+.disabledField {
+  background: #fafbfc;
+  color: rgba(26, 32, 41, 0.72);
+  cursor: not-allowed;
+}
+
+.input:disabled,
+.phoneInput:disabled {
+  color: rgba(26, 32, 41, 0.72);
+  cursor: not-allowed;
+  -webkit-text-fill-color: rgba(26, 32, 41, 0.72);
+}
+
 .phoneContainer {
   padding: 0;
 }

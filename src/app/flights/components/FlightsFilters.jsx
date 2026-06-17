@@ -19,6 +19,7 @@ const toFiniteNumber = (value) => {
 export default function FlightFilters() {
   const { setIsSidebarOpen, isSidebarOpen } = useContext(SidebarContext);
   const [activePriceTooltip, setActivePriceTooltip] = useState(null);
+  const [roundTripTimingTab, setRoundTripTimingTab] = useState("departure");
 
   useLockBodyScroll(isSidebarOpen);
 
@@ -66,6 +67,7 @@ export default function FlightFilters() {
 
   const fromLabel = getRouteLabel(activeRoute.from, "JAKARTA");
   const toLabel = getRouteLabel(activeRoute.to, "SINGAPORE");
+  const isRoundTrip = tripType === "round";
 
   const slotKeyMap = {
     before6: "before_6am",
@@ -170,7 +172,7 @@ export default function FlightFilters() {
     apiAirlineOptions.length > 0 ? apiAirlineOptions : fallbackAirlineOptions;
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isRoundTrip ? styles.roundSidebar : ""}`}>
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.titleAndCrossContainer}>
@@ -259,7 +261,7 @@ export default function FlightFilters() {
       <div className={styles.border} />
 
       {/* Price Range */}
-      <section className={styles.section}>
+      <section className={`${styles.section} ${isRoundTrip ? styles.roundPriceSection : ""}`}>
         <h4 className={`${styles.sectionTitle} ${styles.titlePriceRange}`}>
           PRICE RANGE
         </h4>
@@ -345,7 +347,7 @@ export default function FlightFilters() {
       <div className={styles.border} />
 
       {/* Stops */}
-      <section className={styles.section}>
+      <section className={`${styles.section} ${isRoundTrip ? styles.roundStopsSection : ""}`}>
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>STOPS</h4>
         <label className={styles.checkbox}>
           <input
@@ -384,9 +386,38 @@ export default function FlightFilters() {
 
       <div className={styles.border} />
 
+      {isRoundTrip && (
+        <section className={`${styles.section} ${styles.roundTimingTabsSection}`}>
+          <div className={styles.roundTimingTabs}>
+            <button
+              type="button"
+              className={`${styles.roundTimingTab} ${
+                roundTripTimingTab === "departure" ? styles.activeRoundTimingTab : ""
+              }`}
+              onClick={() => setRoundTripTimingTab("departure")}
+            >
+              Departure
+            </button>
+            <button
+              type="button"
+              className={`${styles.roundTimingTab} ${
+                roundTripTimingTab === "return" ? styles.activeRoundTimingTab : ""
+              }`}
+              onClick={() => setRoundTripTimingTab("return")}
+            >
+              Return
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* departure from jakarta */}
-      <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>DEPARTURE FROM {fromLabel}</h4>
+      <section className={`${styles.section} ${isRoundTrip ? styles.roundDepartureFromSection : ""}`}>
+        <h4 className={styles.sectionTitle}>
+          {isRoundTrip && roundTripTimingTab === "return"
+            ? `DEPARTURE FROM ${toLabel}`
+            : `DEPARTURE FROM ${fromLabel}`}
+        </h4>
 
         <div className={styles.departureGrid}>
           <button
@@ -402,7 +433,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>Before 6AM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("departure_slots", "before6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_departure_slots"
+                  : "departure_slots",
+                "before6"
+              )}
             </span>
           </button>
 
@@ -419,7 +455,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>6AM – 12PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("departure_slots", "6to12")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_departure_slots"
+                  : "departure_slots",
+                "6to12"
+              )}
             </span>
           </button>
 
@@ -436,7 +477,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>12PM – 6PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("departure_slots", "12to6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_departure_slots"
+                  : "departure_slots",
+                "12to6"
+              )}
             </span>
           </button>
 
@@ -453,7 +499,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>After 6PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("departure_slots", "after6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_departure_slots"
+                  : "departure_slots",
+                "after6"
+              )}
             </span>
           </button>
         </div>
@@ -461,8 +512,14 @@ export default function FlightFilters() {
 
       <div className={styles.border} />
 
-      <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>DEPARTURE IN {toLabel}</h4>
+      <section className={`${styles.section} ${isRoundTrip ? styles.roundArrivalSection : ""}`}>
+        <h4 className={styles.sectionTitle}>
+          {isRoundTrip && roundTripTimingTab === "return"
+            ? `ARRIVAL IN ${fromLabel}`
+            : isRoundTrip
+              ? `ARRIVAL IN ${toLabel}`
+              : `DEPARTURE IN ${toLabel}`}
+        </h4>
 
         <div className={styles.departureGrid}>
           <button
@@ -478,7 +535,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>Before 6AM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("arrival_slots", "before6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_arrival_slots"
+                  : "arrival_slots",
+                "before6"
+              )}
             </span>
           </button>
 
@@ -495,7 +557,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>6AM – 12PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("arrival_slots", "6to12")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_arrival_slots"
+                  : "arrival_slots",
+                "6to12"
+              )}
             </span>
           </button>
 
@@ -512,7 +579,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>12PM – 6PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("arrival_slots", "12to6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_arrival_slots"
+                  : "arrival_slots",
+                "12to6"
+              )}
             </span>
           </button>
 
@@ -529,7 +601,12 @@ export default function FlightFilters() {
             </span>
             <span className={styles.departureTime}>After 6PM</span>
             <span className={styles.departurePrice}>
-              {getSlotPrice("arrival_slots", "after6")}
+              {getSlotPrice(
+                isRoundTrip && roundTripTimingTab === "return"
+                  ? "return_arrival_slots"
+                  : "arrival_slots",
+                "after6"
+              )}
             </span>
           </button>
         </div>
@@ -538,7 +615,7 @@ export default function FlightFilters() {
       <div className={styles.border} />
 
       {/* aircraft model */}
-      <section className={styles.section}>
+      <section className={`${styles.section} ${isRoundTrip ? styles.roundAircraftSection : ""}`}>
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Aircraft Model
         </h4>
@@ -558,10 +635,29 @@ export default function FlightFilters() {
       </section>
       <div className={styles.border} />
 
+      {isRoundTrip && (
+        <section className={`${styles.section} ${styles.roundDurationSection}`}>
+          <h4 className={`${styles.sectionTitle} ${styles.stops}`}>DURATION</h4>
+          <div className={styles.durationTrackWrap}>
+            <div className={styles.sliderTrack} />
+            <div className={styles.sliderRange} style={{ left: 13, right: 13 }} />
+            <div className={`${styles.durationThumb} ${styles.durationThumbStart}`} />
+            <div className={`${styles.durationThumb} ${styles.durationThumbEnd}`} />
+          </div>
+          <div className={styles.durationLabels}>
+            <span>0 Hrs</span>
+            <span>24 Hrs</span>
+          </div>
+        </section>
+      )}
+      {isRoundTrip && <div className={styles.border} />}
+
       {/* preferred airline */}
 
       <section
-        className={`${styles.section} ${styles.sectionPrefferedAirline}`}
+        className={`${styles.section} ${styles.sectionPrefferedAirline} ${
+          isRoundTrip ? styles.roundAirlineSection : ""
+        }`}
       >
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Preferred Airline

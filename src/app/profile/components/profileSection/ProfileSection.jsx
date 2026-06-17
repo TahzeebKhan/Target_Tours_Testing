@@ -194,6 +194,11 @@ const ProfileSection = () => {
     }
   };
 
+  const getProfileEmailValue = (data = {}) =>
+    Object.prototype.hasOwnProperty.call(data, "email")
+      ? data.email || ""
+      : getUserEmailFromCookie();
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -224,9 +229,10 @@ const ProfileSection = () => {
     },
     {
       label: "Email Address",
-      value: getUserEmailFromCookie(),
+      value: getProfileEmailValue(profile || {}),
       isVerified: true,
       isEditing: false,
+      isLocked: true,
     },
 
     { label: "Phone Number", value: "", isEditing: false },
@@ -347,9 +353,10 @@ const ProfileSection = () => {
 
     {
       label: "Email Address",
-      value: getUserEmailFromCookie(),
+      value: getProfileEmailValue(data),
       isVerified: true,
       isEditing: false,
+      isLocked: true,
     },
 
     {
@@ -443,10 +450,8 @@ const ProfileSection = () => {
       nationality: get("Nationality"),
       address: get("Address"),
       country: countryCode || countryValue,
-      dail_code: selectedPhoneCountry.dialCode,
       zip_code: get("Zip Code"),
       passport_detail: get("Passport Details"),
-      phone_no: get("Phone Number"), // ✅ FIX
       profile_photo: null, // ✅ SAFE
       profile_completed: true,
     };
@@ -542,7 +547,11 @@ const ProfileSection = () => {
   const openProfileEditing = () => {
     setEditMode(true);
     setProfileFields((prev) =>
-      prev.map((field) => ({ ...field, isEditing: true, isOpen: false }))
+      prev.map((field) => ({
+        ...field,
+        isEditing: !field.isLocked,
+        isOpen: false,
+      }))
     );
     setDropdownSearch({});
   };
@@ -554,66 +563,74 @@ const ProfileSection = () => {
     }
   };
 
-  const handleProfileGoBack = () => {
+  const applyProfileData = (profileData) => {
+    if (!profileData) return;
+
+    setProfileFields(mapApiToFields(profileData));
+    setDob(parseFromBackend(profileData.date_of_birth));
+    setPhoneCountry(
+      getPhoneCountryCode(
+        profileData.dail_code,
+        getCountryCodeFromValue(profileData.country_code || profileData.country),
+      )
+    );
+    setAvatarPreview(getProfilePhotoUrl(profileData.profile_photo));
+    setProfilePhoto(getProfilePhotoUrl(profileData.profile_photo));
+    setProfile(profileData);
+
+    const expiresAt = Number(Cookies.get("auth_expires_at"));
+    Cookies.set("user_profile", JSON.stringify(profileData), {
+      ...(Number.isFinite(expiresAt) && { expires: new Date(expiresAt) }),
+    });
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const userId = Cookies.get("user_id");
+      const token = Cookies.get("auth_token");
+
+      if (!userId) return null;
+
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
+
+      const res = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      const profileData = res?.data?.data || res?.data || null;
+      applyProfileData(profileData);
+      return profileData;
+    } catch (err) {
+      console.error(
+        "Failed to fetch profile",
+        err.response?.data || err.message,
+      );
+
+      if (profile) {
+        applyProfileData(profile);
+      }
+
+      return null;
+    }
+  };
+
+  const handleProfileGoBack = async () => {
+    await fetchProfile();
     closeProfileEditing();
     setActiveMenu("Personal Information");
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const userId = Cookies.get("user_id");
-        const token = Cookies.get("auth_token");
-
-        if (!userId) return;
-
-        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${userId}`;
-
-        const res = await axios.get(url, {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
-
-        // ✅ Prefill fields
-        setProfileFields(mapApiToFields(res.data));
-        setDob(parseFromBackend(res.data.date_of_birth));
-        setPhoneCountry(
-          getPhoneCountryCode(
-            res.data.dail_code,
-            getCountryCodeFromValue(res.data.country_code || res.data.country),
-          )
-        );
-        // 🔥 MAP PROFILE PHOTO
-        setAvatarPreview(getProfilePhotoUrl(res.data.profile_photo));
-        setProfilePhoto(getProfilePhotoUrl(res.data.profile_photo));
-      } catch (err) {
-        console.error(
-          "Failed to fetch profile",
-          err.response?.data || err.message,
-        );
-
-        if (profile) {
-          setProfileFields(mapApiToFields(profile));
-          setDob(parseFromBackend(profile.date_of_birth));
-          setPhoneCountry(
-            getPhoneCountryCode(
-              profile.dail_code,
-              getCountryCodeFromValue(profile.country_code || profile.country),
-            )
-          );
-          setAvatarPreview(getProfilePhotoUrl(profile.profile_photo));
-          setProfilePhoto(getProfilePhotoUrl(profile.profile_photo));
-        }
-      }
-    };
-
     fetchProfile();
   }, []);
 
   const handleChange = (index, value) => {
     const updated = [...profileFields];
+    if (updated[index]?.isLocked) return;
+
     updated[index].value =
       updated[index].label === "Phone Number"
         ? value.replace(/[^\d]/g, "").slice(0, selectedPhoneCountry.maxLength)
@@ -631,7 +648,7 @@ const ProfileSection = () => {
 
   const toggleDropdown = (index) => {
     const updated = [...profileFields];
-    if (!updated[index].isEditing) return;
+    if (!updated[index].isEditing || updated[index].isLocked) return;
 
     updated[index].isOpen = !updated[index].isOpen;
     if (!updated[index].isOpen) {
@@ -646,6 +663,8 @@ const ProfileSection = () => {
 
   const selectOption = (index, option) => {
     const updated = [...profileFields];
+    if (updated[index]?.isLocked) return;
+
     updated[index].value = option;
     updated[index].isOpen = false;
     setProfileFields(updated);
@@ -667,12 +686,19 @@ const ProfileSection = () => {
   const getFilteredOptions = (field) => {
     const search = dropdownSearch[field.label]?.trim().toLowerCase() || "";
     const options = field.options || [];
+    const filteredOptions = search
+      ? options.filter((option) =>
+          getOptionSearchText(option).toLowerCase().includes(search)
+        )
+      : options;
+    const seenLabels = new Set();
 
-    if (!search) return options;
-
-    return options.filter((option) =>
-      getOptionSearchText(option).toLowerCase().includes(search)
-    );
+    return filteredOptions.filter((option) => {
+      const label = getOptionLabel(option).trim().toLowerCase();
+      if (!label || seenLabels.has(label)) return false;
+      seenLabels.add(label);
+      return true;
+    });
   };
 
   const getOptionLabel = (option) =>
@@ -820,8 +846,11 @@ const ProfileSection = () => {
 
                   {field.isDropdown ? (
                     <div
-                      className={styles.dropdownInput}
+                      className={`${styles.dropdownInput} ${
+                        field.isLocked ? styles.disabledField : ""
+                      }`}
                       onClick={() => toggleDropdown(index)}
+                      aria-disabled={field.isLocked}
                     >
                       <span>{field.value}</span>
                       <Image
@@ -847,9 +876,9 @@ const ProfileSection = () => {
                           className={styles.countryTrigger}
                           aria-expanded={isPhoneCountryDropdownOpen}
                           aria-label="Select country code"
-                          disabled={!editMode}
+                          disabled={!editMode || field.isLocked}
                           onClick={() => {
-                            if (!editMode) return;
+                            if (!editMode || field.isLocked) return;
                             setIsPhoneCountryDropdownOpen((current) => !current);
                             setPhoneCountrySearch("");
                           }}
@@ -862,7 +891,7 @@ const ProfileSection = () => {
                           <span>{selectedPhoneCountry.dialCode}</span>
                         </button>
 
-                        {isPhoneCountryDropdownOpen && editMode && (
+                        {isPhoneCountryDropdownOpen && editMode && !field.isLocked && (
                           <div className={styles.countryMenu}>
                             <input
                               type="text"
@@ -922,7 +951,8 @@ const ProfileSection = () => {
                         className={`${styles.input} ${styles.phoneInput}`}
                         value={field.value}
                         placeholder={field.placeholder}
-                        readOnly={!editMode}
+                        readOnly={!editMode || field.isLocked}
+                        disabled={field.isLocked}
                         maxLength={selectedPhoneCountry.maxLength}
                         onChange={(e) => handleChange(index, e.target.value)}
                       />
@@ -965,7 +995,8 @@ const ProfileSection = () => {
                       }`}
                       value={field.value}
                       placeholder={field.placeholder}
-                      readOnly={!editMode}
+                      readOnly={!editMode || field.isLocked}
+                      disabled={field.isLocked}
                       onChange={(e) => handleChange(index, e.target.value)}
                     />
                   )}
