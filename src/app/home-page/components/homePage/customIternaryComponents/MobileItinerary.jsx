@@ -14,6 +14,7 @@ import CustomCheckbox from "@/shared/components/CustomCheckbox";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 /* ✅ REQUIRED CONSTANTS (WERE MISSING) */
 const MIN = 5000;
@@ -22,15 +23,9 @@ const GAP = 5000;
 const STEP = 1000;
 
 const MobileItinerary = ({ type, isOpen, onClose, hotel }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+  useLockBodyScroll(isOpen);
 
-  // 🔒 Lock background scroll
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  const [currentStep, setCurrentStep] = useState(1);
 
   // ===== FORM STATE (UNCHANGED) =====
   const [travelDateType, setTravelDateType] = useState(null);

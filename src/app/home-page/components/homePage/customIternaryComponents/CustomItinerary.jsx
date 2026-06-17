@@ -14,8 +14,11 @@ import CustomCheckbox from "@/shared/components/CustomCheckbox";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const CustomItinerary = ({ type, isOpen, hotel, onClose }) => {
+  useLockBodyScroll(isOpen);
+
   const [selected, setSelected] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
 

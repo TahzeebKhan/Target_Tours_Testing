@@ -10,58 +10,40 @@ import BrandLogo from "@/shared/components/BrandLogo";
 import { appToast } from "@/shared/components/appToast/AppToast";
 import { startGoogleLogin } from "@/shared/services/googleAuth";
 import { useAuth } from "@/app/context/AuthContext";
-import { Eye, EyeOff } from "lucide-react";
 import {
+  CountryCodes,
   CountryFlagIcon,
-  NationalityList,
-  nationalityAliasToIso,
 } from "@/app/profile/components/profileSection/CountryName";
+import Link from "next/link";
 
 import "swiper/css";
 import "swiper/css/pagination";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const countryCodes = Array.from(
-  new Set(
-    Object.values(nationalityAliasToIso).filter((code) =>
-      /^[A-Z]{2}$/.test(code),
-    ),
-  ),
-).sort();
+const SIGNUP_OTP_LENGTH = 6;
 
-const countryNameByCode = NationalityList.reduce((countryMap, item) => {
-  if (item.iso && item.name) {
-    countryMap[item.iso] = item.name;
-  }
-
-  return countryMap;
-}, {});
-
-const countryAliasSearchByCode = Object.entries(nationalityAliasToIso).reduce(
-  (countryMap, [alias, code]) => {
-    if (!/^[A-Z]{2}$/.test(code)) return countryMap;
-
-    countryMap[code] = `${countryMap[code] || ""} ${alias}`.trim();
-    return countryMap;
-  },
-  {},
-);
-
-const COUNTRY_OPTIONS = [
-  "IN",
-  ...countryCodes.filter((code) => code !== "IN"),
-].map((code) => ({
-  code,
-  name: countryNameByCode[code] || code,
-  searchText: `${code} ${countryNameByCode[code] || ""} ${
-    countryAliasSearchByCode[code] || ""
-  }`.toLowerCase(),
-  maxLength: code === "IN" || code === "US" ? 10 : 15,
-}));
+const COUNTRY_OPTIONS = [...CountryCodes]
+  .sort((a, b) => {
+    if (a.code === "IN") return -1;
+    if (b.code === "IN") return 1;
+    return a.name.localeCompare(b.name);
+  })
+  .map((country) => ({
+    code: country.code,
+    name: country.name,
+    dialCode: country.dial_code,
+    searchText: `${country.code} ${country.name || ""} ${
+      country.dial_code || ""
+    }`.toLowerCase(),
+    maxLength: country.code === "IN" || country.code === "US" ? 10 : 15,
+  }));
 
 export default function SignupPopup({ onNavigate, onClose }) {
+  useLockBodyScroll(true);
+
   const OTP_RESEND_SECONDS = 30;
   const [isPortalReady, setIsPortalReady] = useState(false);
   const [email, setEmail] = useState("");
@@ -70,11 +52,9 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [countrySearch, setCountrySearch] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState("");
-  const [otp, setOtp] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otpDigits, setOtpDigits] = useState(() =>
+    Array(SIGNUP_OTP_LENGTH).fill(""),
+  );
   const [registerLoading, setRegisterLoading] = useState(false);
   const [otpVerifyLoading, setOtpVerifyLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -87,17 +67,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [fullNameError, setFullNameError] = useState("");
   const [otpError, setOtpError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const { login } = useAuth();
   const countryDropdownRef = useRef(null);
 
   useIsomorphicLayoutEffect(() => {
-    document.body.style.overflow = "hidden";
     setIsPortalReady(true);
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, []);
 
   useEffect(() => {
@@ -149,13 +123,9 @@ export default function SignupPopup({ onNavigate, onClose }) {
     return /^\d{6,15}$/.test(value);
   };
 
-  const isPasswordValid = (value) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
-
   const getRegisterPayload = () => ({
     email: email.trim(),
     phone_number: phoneNumber.trim(),
-    password,
     domain: process.env.NEXT_PUBLIC_DOMAIN,
     country,
     name: fullName.trim(),
@@ -163,7 +133,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
 
   const resetOtpState = () => {
     setOtpSent(false);
-    setOtp("");
+    setOtpDigits(Array(SIGNUP_OTP_LENGTH).fill(""));
     setOtpError("");
     setSuccessMessage("");
   };
@@ -173,16 +143,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
     setPhoneNumberError("");
     setFullNameError("");
     setOtpError("");
-    setPasswordError("");
-    setConfirmPasswordError("");
   };
 
   const validateSignupFields = () => {
-    if (!email.trim()) {
-      setEmailError("Email is required");
-      return false;
-    } else if (!isEmailValid(email.trim())) {
-      setEmailError("Enter a valid email address");
+    if (!fullName.trim()) {
+      setFullNameError("Full name is required");
       return false;
     }
 
@@ -194,8 +159,11 @@ export default function SignupPopup({ onNavigate, onClose }) {
       return false;
     }
 
-    if (!fullName.trim()) {
-      setFullNameError("Full name is required");
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return false;
+    } else if (!isEmailValid(email.trim())) {
+      setEmailError("Enter a valid email address");
       return false;
     }
 
@@ -209,24 +177,6 @@ export default function SignupPopup({ onNavigate, onClose }) {
     clearValidationErrors();
 
     if (!validateSignupFields()) {
-      return;
-    }
-
-    if (!password.trim()) {
-      setPasswordError("Password is required");
-      return;
-    } else if (!isPasswordValid(password)) {
-      setPasswordError(
-        "Password must be at least 8 characters and include uppercase, lowercase, and special character",
-      );
-      return;
-    }
-
-    if (!confirmPassword.trim()) {
-      setConfirmPasswordError("Please confirm your password");
-      return;
-    } else if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
       return;
     }
 
@@ -251,7 +201,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
       }
 
       setOtpSent(true);
-      setOtp("");
+      setOtpDigits(Array(SIGNUP_OTP_LENGTH).fill(""));
       setResendCountdown(OTP_RESEND_SECONDS);
       setSuccessMessage(data?.message || "OTP sent successfully.");
       appToast.success(data?.message || "OTP sent successfully.");
@@ -272,10 +222,12 @@ export default function SignupPopup({ onNavigate, onClose }) {
       return;
     }
 
-    if (!otp.trim()) {
+    const otpValue = otpDigits.join("");
+
+    if (!otpValue.trim()) {
       setOtpError("OTP is required");
       return;
-    } else if (!/^\d{4,6}$/.test(otp.trim())) {
+    } else if (otpValue.length !== SIGNUP_OTP_LENGTH) {
       setOtpError("Enter a valid OTP");
       return;
     }
@@ -292,12 +244,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
           },
           body: JSON.stringify({
             email: email.trim(),
-            otp: otp.trim(),
-            phone_number: phoneNumber.trim(),
-            password,
-            domain: process.env.NEXT_PUBLIC_DOMAIN,
-            country,
-            name: fullName.trim(),
+            otp: otpValue,
           }),
         },
       );
@@ -305,7 +252,9 @@ export default function SignupPopup({ onNavigate, onClose }) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error?.message || data?.message || "OTP verification failed");
+        throw new Error(
+          data?.error?.message || data?.message || "OTP verification failed",
+        );
       }
 
       setSuccessMessage(data?.message || "OTP verified successfully.");
@@ -348,7 +297,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
         throw new Error(data?.error?.message || data?.message || "Unable to resend OTP");
       }
 
-      setOtp("");
+      setOtpDigits(Array(SIGNUP_OTP_LENGTH).fill(""));
       setResendCountdown(OTP_RESEND_SECONDS);
       setSuccessMessage(data?.message || "OTP resent successfully.");
       appToast.success(data?.message || "OTP resent successfully.");
@@ -357,6 +306,19 @@ export default function SignupPopup({ onNavigate, onClose }) {
       appToast.error(err.message || "Unable to resend OTP");
     } finally {
       setResendLoading(false);
+    }
+  };
+
+  const handleOtpDigitChange = (index, value) => {
+    const digit = value.replace(/[^\d]/g, "").slice(-1);
+    const nextOtp = [...otpDigits];
+    nextOtp[index] = digit;
+    setOtpDigits(nextOtp);
+    setOtpError("");
+
+    if (digit) {
+      const nextInput = document.getElementById(`signup-otp-${index + 1}`);
+      nextInput?.focus();
     }
   };
 
@@ -403,7 +365,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
             {slides.map((_, index) => (
               <SwiperSlide key={index} className={styles.logoSlide}>
                 <Image
-                  src="/images/signup-hero.webp"
+                  src="/images/travel-hero.webp"
                   alt="Target Tours Logo"
                   width={87}
                   priority
@@ -426,8 +388,8 @@ export default function SignupPopup({ onNavigate, onClose }) {
         {/* Right Section */}
         <section className={styles.formSection}>
           <div className={styles.formContent}>
-            <header className={styles.header}>
-              <div className={styles.logoContainer}>
+            {otpSent ? (
+              <div className={styles.otpContent}>
                 <BrandLogo
                   fallbackSrc="/images/tour-logo.svg"
                   alt="Target Tours Logo"
@@ -435,286 +397,37 @@ export default function SignupPopup({ onNavigate, onClose }) {
                   height={73}
                   className={styles.logo}
                 />
-              </div>
 
-              <div className={styles.titleWrapper}>
-                <h1 className={styles.title}>Create new account</h1>
-                <p className={styles.subtitle}>
-                  Already a member?{" "}
-                  <span
-                    className={styles.linkText}
-                    onClick={() => onNavigate("login")}
-                  >
-                    Log in
-                  </span>
-                </p>
-              </div>
-            </header>
+                <div className={styles.otpTitleWrapper}>
+                  <h1 className={styles.title}>Almost there!</h1>
+                  <p className={styles.subtitle}>
+                    Enter the OTP sent to your number
+                  </p>
+                </div>
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>
-                  Enter Email *
-                </label>
-                <input
-                  type="text"
-                  className={`${styles.input} ${
-                    emailError ? styles.error : ""
-                  }`}
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setEmailError("");
-                    resetOtpState();
-                  }}
-                />
-                {emailError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
-                )}
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Mobile Number *</label>
-                <div
-                  className={`${styles.phoneInputWrap} ${
-                    phoneNumberError ? styles.error : ""
-                  }`}
-                >
-                  <div
-                    className={styles.countryDropdown}
-                    ref={countryDropdownRef}
-                  >
-                    <button
-                      type="button"
-                      className={styles.countryTrigger}
-                      aria-expanded={isCountryDropdownOpen}
-                      aria-label="Select country code"
-                      onClick={() => {
-                        setIsCountryDropdownOpen((current) => !current);
-                        setCountrySearch("");
-                      }}
-                    >
-                      <CountryFlagIcon
-                        code={country}
-                        title={country}
-                        className={styles.countryFlag}
+                <form className={styles.otpForm} onSubmit={(e) => e.preventDefault()}>
+                  <div className={styles.otpInputs}>
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={`signup-otp-${index}`}
+                        id={`signup-otp-${index}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        className={styles.otpInput}
+                        value={digit}
+                        onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                       />
-                      <span>{country}</span>
-                    </button>
-
-                    {isCountryDropdownOpen && (
-                      <div className={styles.countryMenu}>
-                        <input
-                          type="text"
-                          className={styles.countrySearch}
-                          value={countrySearch}
-                          onChange={(e) => setCountrySearch(e.target.value)}
-                          placeholder="Search country"
-                          aria-label="Search country"
-                        />
-
-                        <div className={styles.countryOptionsList}>
-                          {filteredCountryOptions.length > 0 ? (
-                            filteredCountryOptions.map((option) => (
-                              <button
-                                key={option.code}
-                                type="button"
-                                title={option.name}
-                                className={`${styles.countryOption} ${
-                                  option.code === country
-                                    ? styles.countryOptionActive
-                                    : ""
-                                }`}
-                                onClick={() => {
-                                  setCountry(option.code);
-                                  setIsCountryDropdownOpen(false);
-                                  setCountrySearch("");
-                                  setPhoneNumber((current) =>
-                                    current
-                                      .replace(/[^\d]/g, "")
-                                      .slice(0, option.maxLength),
-                                  );
-                                  setPhoneNumberError("");
-                                  resetOtpState();
-                                }}
-                              >
-                                <CountryFlagIcon
-                                  code={option.code}
-                                  title={option.code}
-                                  className={styles.countryFlag}
-                                />
-                                <span>{option.code}</span>
-                              </button>
-                            ))
-                          ) : (
-                            <p className={styles.countryNoResult}>No result</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    inputMode="tel"
-                    className={`${styles.input} ${styles.phoneInput}`}
-                    value={phoneNumber}
-                    maxLength={selectedCountry.maxLength}
-                    onChange={(e) => {
-                      setPhoneNumber(
-                        e.target.value
-                          .replace(/[^\d]/g, "")
-                          .slice(0, selectedCountry.maxLength),
-                      );
-                      setPhoneNumberError("");
-                      resetOtpState();
-                    }}
-                  />
-                </div>
-                {phoneNumberError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>
-                    {phoneNumberError}
-                  </p>
-                )}
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Full Name *</label>
-                <input
-                  type="text"
-                  className={`${styles.input} ${
-                    fullNameError ? styles.error : ""
-                  }`}
-                  value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    setFullNameError("");
-                    resetOtpState();
-                  }}
-                />
-                {fullNameError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>
-                    {fullNameError}
-                  </p>
-                )}
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Enter password *</label>
-                <div className={styles.passwordInputWrap}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className={`${styles.input} ${styles.passwordInput} ${
-                      passwordError ? styles.error : ""
-                    }`}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setPasswordError("");
-                      resetOtpState();
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={styles.passwordToggle}
-                    onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-
-                {passwordError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>
-                    {passwordError}
-                  </p>
-                )}
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Confirm password *</label>
-                <div className={styles.passwordInputWrap}>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    className={`${styles.input} ${styles.passwordInput} ${
-                      confirmPasswordError ? styles.error : ""
-                    }`}
-                    value={confirmPassword}
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                      setConfirmPasswordError("");
-                      resetOtpState();
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={styles.passwordToggle}
-                    onClick={() => setShowConfirmPassword((current) => !current)}
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                  >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-
-                {confirmPasswordError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>
-                    {confirmPasswordError}
-                  </p>
-                )}
-              </div>
-
-              {error && (
-                <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
-              )}
-
-              {successMessage && (
-                <p className={styles.successText}>{successMessage}</p>
-              )}
-
-              {otpSent && (
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>OTP verification</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    placeholder="Enter OTP"
-                    className={`${styles.input} ${
-                      otpError ? styles.error : ""
-                    }`}
-                    value={otp}
-                    onChange={(e) =>
-                      setOtp(e.target.value.replace(/[^\d]/g, "").slice(0, 6))
-                    }
-                  />
-                  <div className={styles.otpMetaRow}>
-                    <button
-                      type="button"
-                      className={styles.resendOtpButton}
-                      disabled={resendCountdown > 0 || resendLoading}
-                      onClick={handleResendOtp}
-                    >
-                      {resendLoading
-                        ? "Sending..."
-                        : resendCountdown > 0
-                          ? `Resend OTP in ${resendCountdown}s`
-                          : "Resend OTP"}
-                    </button>
+                    ))}
                   </div>
                   {otpError && (
                     <p style={{ color: "red", fontSize: "12px" }}>{otpError}</p>
                   )}
-                </div>
-              )}
+                  {error && (
+                    <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
+                  )}
+                </form>
 
-              <div className={styles.formOptions}>
-                <label className={styles.checkboxContainer}>
-                  <input type="checkbox" className={styles.checkboxInput} />
-                  <span className={styles.customCheckbox}></span>
-                  <span className={styles.checkboxLabel}>
-                    Keep me signed in
-                  </span>
-                </label>
-              </div>
-
-              {otpSent ? (
                 <button
                   type="button"
                   className={styles.signupButton}
@@ -726,55 +439,280 @@ export default function SignupPopup({ onNavigate, onClose }) {
                   }
                   onClick={handleVerifyOtp}
                 >
-                  {otpVerifyLoading ? "VERIFYING..." : "VERIFY OTP"}
+                  {otpVerifyLoading ? "CREATING..." : "CREATE ACCOUNT"}
                 </button>
-              ) : (
+
+                <div className={styles.otpResend}>
+                  <p>
+                    Haven't received the code?{" "}
+                    <button
+                      type="button"
+                      className={styles.linkButton}
+                      disabled={resendCountdown > 0 || resendLoading}
+                      onClick={handleResendOtp}
+                    >
+                      {resendLoading ? "Sending..." : "Resend OTP"}
+                    </button>
+                  </p>
+                  <span>
+                    {resendCountdown > 0
+                      ? `Resend in 0:${String(resendCountdown).padStart(2, "0")}`
+                      : "Resend now"}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.backToSignup}
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtpDigits(Array(SIGNUP_OTP_LENGTH).fill(""));
+                    setOtpError("");
+                  }}
+                >
+                  ← Back to Signup
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* <button
+                  type="button"
+                  className={styles.backToLogin}
+                  onClick={() => onNavigate("login")}
+                >
+                  ← Back to Login
+                </button> */}
+
+                <header className={styles.header}>
+                  <div className={styles.logoContainer}>
+                    <BrandLogo
+                      fallbackSrc="/images/tour-logo.svg"
+                      alt="Target Tours Logo"
+                      width={87}
+                      height={73}
+                      className={styles.logo}
+                    />
+                  </div>
+
+                  <div className={styles.titleWrapper}>
+                    <h1 className={styles.title}>Create your account</h1>
+                    <p className={styles.subtitle}>
+                      Already have an account?{" "}
+                      <span
+                        className={styles.linkText}
+                        onClick={() => onNavigate("login")}
+                      >
+                        Log In
+                      </span>
+                    </p>
+                  </div>
+                </header>
+
+                <form className={styles.form} onSubmit={handleSubmit}>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Full Name</label>
+                    <input
+                      type="text"
+                      placeholder="Olivia Rhye"
+                      className={`${styles.input} ${
+                        fullNameError ? styles.error : ""
+                      }`}
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        setFullNameError("");
+                        resetOtpState();
+                      }}
+                    />
+                    {fullNameError && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {fullNameError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Phone Number</label>
+                    <div
+                      className={`${styles.phoneInputWrap} ${
+                        phoneNumberError ? styles.error : ""
+                      }`}
+                    >
+                      <div
+                        className={styles.countryDropdown}
+                        ref={countryDropdownRef}
+                      >
+                        <button
+                          type="button"
+                          className={styles.countryTrigger}
+                          aria-expanded={isCountryDropdownOpen}
+                          aria-label="Select country code"
+                          onClick={() => {
+                            setIsCountryDropdownOpen((current) => !current);
+                            setCountrySearch("");
+                          }}
+                        >
+                          <CountryFlagIcon
+                            code={country}
+                            title={country}
+                            className={styles.countryFlag}
+                          />
+                          <span>{selectedCountry.dialCode}</span>
+                        </button>
+
+                        {isCountryDropdownOpen && (
+                          <div className={styles.countryMenu}>
+                            <input
+                              type="text"
+                              className={styles.countrySearch}
+                              value={countrySearch}
+                              onChange={(e) => setCountrySearch(e.target.value)}
+                              placeholder="Search country"
+                              aria-label="Search country"
+                            />
+
+                            <div className={styles.countryOptionsList}>
+                              {filteredCountryOptions.length > 0 ? (
+                                filteredCountryOptions.map((option) => (
+                                  <button
+                                    key={option.code}
+                                    type="button"
+                                    title={option.name}
+                                    className={`${styles.countryOption} ${
+                                      option.code === country
+                                        ? styles.countryOptionActive
+                                        : ""
+                                    }`}
+                                    onClick={() => {
+                                      setCountry(option.code);
+                                      setIsCountryDropdownOpen(false);
+                                      setCountrySearch("");
+                                      setPhoneNumber((current) =>
+                                        current
+                                          .replace(/[^\d]/g, "")
+                                          .slice(0, option.maxLength),
+                                      );
+                                      setPhoneNumberError("");
+                                      resetOtpState();
+                                    }}
+                                  >
+                                    <CountryFlagIcon
+                                      code={option.code}
+                                      title={option.code}
+                                      className={styles.countryFlag}
+                                    />
+                                    <span>{option.dialCode}</span>
+                                  </button>
+                                ))
+                              ) : (
+                                <p className={styles.countryNoResult}>
+                                  No result
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="(555) 000-0000"
+                        className={`${styles.input} ${styles.phoneInput}`}
+                        value={phoneNumber}
+                        maxLength={selectedCountry.maxLength}
+                        onChange={(e) => {
+                          setPhoneNumber(
+                            e.target.value
+                              .replace(/[^\d]/g, "")
+                              .slice(0, selectedCountry.maxLength),
+                          );
+                          setPhoneNumberError("");
+                          resetOtpState();
+                        }}
+                      />
+                    </div>
+                    {phoneNumberError && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {phoneNumberError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Email Address</label>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      placeholder="olivia@example.com"
+                      className={`${styles.input} ${
+                        emailError ? styles.error : ""
+                      }`}
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError("");
+                        resetOtpState();
+                      }}
+                    />
+                    {emailError && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {emailError}
+                      </p>
+                    )}
+                  </div>
+
+                  {error && (
+                    <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
+                  )}
+
                 <button
                   type="submit"
                   className={styles.signupButton}
                   disabled={registerLoading}
                 >
-                  {registerLoading ? "SENDING OTP..." : "SIGN UP"}
+                    {registerLoading ? "SENDING OTP..." : "SEND OTP TO VERIFY"}
                 </button>
-              )}
-            </form>
+                </form>
 
-            <div className={styles.divider}>
-              <span className={styles.dividerText}>Or sign in with</span>
-            </div>
+                <div className={styles.policyParent}>
+                                  By proceeding, you agree to{" "}
+                                  <Link href="/" className={styles.Policy}>Privacy Policy</Link>,{" "}
+                                  <Link href="/" className={styles.Policy}>User Agreement</Link>{" "}
+                                  and <Link href="/" className={styles.Policy}>T&amp;C</Link>
+                                </div>
 
-            <div className={styles.socialButtons}>
-              <button
-                type="button"
-                className={styles.socialButton}
-                disabled={googleLoginLoading}
-                onClick={handleGoogleLogin}
-              >
-                <Image
-                  src="/icons/google-icon.svg"
-                  alt="Google"
-                  width={24}
-                  height={24}
-                />
-                {googleLoginLoading ? "Connecting..." : "Sign in with Google"}
-              </button>
+                <div className={styles.divider}>
+                  <span className={styles.dividerText}>Or sign in with</span>
+                </div>
 
-              <button type="button" className={styles.socialButtonFacebook}>
-                <Image
-                  src="/icons/facebook-icon.svg"
-                  alt="Facebook"
-                  width={24}
-                  height={24}
-                />
-                Sign in with Facebook
-              </button>
-            </div>
+                <div className={styles.socialButtons}>
+                  <button
+                    type="button"
+                    className={styles.socialButton}
+                    disabled={googleLoginLoading}
+                    onClick={handleGoogleLogin}
+                  >
+                    <Image
+                      src="/icons/google-icon.svg"
+                      alt="Google"
+                      width={24}
+                      height={24}
+                    />
+                    {googleLoginLoading ? "Connecting..." : "Sign in with Google"}
+                  </button>
 
-            <footer className={styles.footer}>
-              <p className={styles.copyright}>
-                Copyrights ©2023 Target tours. Build by Webninjaz.
-              </p>
-            </footer>
+                  <button type="button" className={styles.socialButtonApple}>
+                    <Image
+                      src="/images/AppleIcon.svg"
+                      alt="Facebook"
+                      width={24}
+                      height={24}
+                    />
+                    Sign in with Apple
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </section>
       </div>
