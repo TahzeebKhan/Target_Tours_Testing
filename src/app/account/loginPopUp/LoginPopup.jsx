@@ -1,196 +1,8 @@
-// "use client";
-// import Image from "next/image";
-// import styles from "./LoginPopup.module.css";
-// import React, { useState, useEffect } from "react";
-
-// export default function LoginPopup({ onNavigate, onClose }) {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     document.body.style.overflow = "hidden";
-//     return () => {
-//       document.body.style.overflow = "";
-//     };
-//   }, []);
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-//     setError("");
-
-//     try {
-//       setLoading(true);
-
-//       const res = await fetch(
-//         "http://139.84.175.121:1337/api/frontend-user/login",
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify({
-//             email: email,
-//             password: password,
-//             domain: process.env.NEXT_PUBLIC_DOMAIN, // ❗ required
-//           }),
-//         }
-//       );
-
-//       const data = await res.json();
-
-//       if (!res.ok) {
-//         throw new Error(data?.error?.message || "Login failed");
-//       }
-
-//       // ✅ SUCCESS
-//       console.log("Login success:", data);
-
-//       // OPTIONAL: store token if backend sends it
-//       // localStorage.setItem("token", data.token);
-
-//       onClose(); // close popup after login
-
-//     } catch (err) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className={styles.overlay} onClick={onClose}>
-//       <div
-//         className={styles.mainContainer}
-//         onClick={(e) => e.stopPropagation()}
-//       >
-//         {/* Left Section */}
-//         <section className={styles.imageSection}>
-//           <Image
-//             src="/images/travel-hero.jpg"
-//             alt="Scenic view of Ko Tapu"
-//             fill
-//             className={styles.heroImage}
-//             priority
-//           />
-//         </section>
-
-//         {/* Right Section */}
-//         <section className={styles.formSection}>
-//           <div className={styles.formContent}>
-//             <header className={styles.header}>
-//               <div className={styles.logoContainer}>
-//                 <Image
-//                   src="/images/tour-logo.svg"
-//                   alt="Target Tours Logo"
-//                   width={87}
-//                   height={73}
-//                   className={styles.logo}
-//                 />
-//               </div>
-
-//               <div className={styles.titleWrapper}>
-//                 <h1 className={styles.title}>Welcome back</h1>
-//                 <p className={styles.subtitle}>
-//                   New here?{" "}
-//                   <span
-//                     className={styles.linkText}
-//                     onClick={() => onNavigate("signup")}
-//                   >
-//                     Create an account
-//                   </span>
-//                 </p>
-//               </div>
-//             </header>
-
-//             <form className={styles.form} onSubmit={handleLogin}>
-//               <div className={styles.inputGroup}>
-//                 <label className={styles.label}>
-//                   Enter Email Id/ Phone Number
-//                 </label>
-//                 <input
-//                   type="text"
-//                   className={styles.input}
-//                   value={email}
-//                   onChange={(e) => setEmail(e.target.value)}
-//                 />
-//               </div>
-
-//               <div className={styles.inputGroup}>
-//                 <label className={styles.label}>Enter password</label>
-//                 <input
-//                   type="password"
-//                   className={styles.input}
-//                   value={password}
-//                   onChange={(e) => setPassword(e.target.value)}
-//                 />
-//               </div>
-
-//               {error && (
-//                 <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
-//               )}
-
-//               <div className={styles.formOptions}>
-//                 <label className={styles.checkboxContainer}>
-//                   <input type="checkbox" className={styles.checkboxInput} />
-//                   <span className={styles.customCheckbox}></span>
-//                   <span className={styles.checkboxLabel}>Remember me?</span>
-//                 </label>
-//                 <span className={styles.forgotPassword}>Forgot password?</span>
-//               </div>
-
-//               <button
-//                 type="submit"
-//                 className={styles.loginButton}
-//                 disabled={loading}
-//               >
-//                 {loading ? "LOGGING IN..." : "LOGIN"}
-//               </button>
-//             </form>
-
-//             <div className={styles.divider}>
-//               <span className={styles.dividerText}>Or sign in with</span>
-//             </div>
-
-//             <div className={styles.socialButtons}>
-//               <button className={styles.socialButton}>
-//                 <Image
-//                   src="/icons/google-icon.svg"
-//                   alt="Google"
-//                   width={24}
-//                   height={24}
-//                 />
-//                 SIGN IN WITH GOOGLE
-//               </button>
-
-//               <button className={styles.socialButtonFacebook}>
-//                 <Image
-//                   src="/icons/facebook-icon.svg"
-//                   alt="Facebook"
-//                   width={24}
-//                   height={24}
-//                 />
-//                 SIGN IN WITH FACEBOOK
-//               </button>
-//             </div>
-
-//             <footer className={styles.footer}>
-//               <p className={styles.copyright}>
-//                 Copyrights ©2023 Target tours. Build by Webninjaz.
-//               </p>
-//             </footer>
-//           </div>
-//         </section>
-//       </div>
-//     </div>
-//   );
-// }
 
 "use client";
 import Image from "next/image";
 import styles from "./LoginPopup.module.css";
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -199,16 +11,42 @@ import { appToast } from "@/shared/components/appToast/AppToast";
 import BrandLogo from "@/shared/components/BrandLogo";
 import { startGoogleLogin } from "@/shared/services/googleAuth";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  CountryCodes,
+  CountryFlagIcon,
+} from "@/app/profile/components/profileSection/CountryName";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
+import Link from "next/link";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+const OTP_LENGTH = 6;
+
+const COUNTRY_OPTIONS = [...CountryCodes]
+  .sort((a, b) => {
+    if (a.code === "IN") return -1;
+    if (b.code === "IN") return 1;
+    return a.name.localeCompare(b.name);
+  })
+  .map((country) => ({
+    code: country.code,
+    name: country.name,
+    dialCode: country.dial_code,
+    searchText: `${country.code} ${country.name || ""} ${
+      country.dial_code || ""
+    }`.toLowerCase(),
+    maxLength: country.code === "IN" || country.code === "US" ? 10 : 15,
+  }));
+
 export default function LoginPopup({ onNavigate, onClose }) {
+  useLockBodyScroll(true);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -220,19 +58,216 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
   const slides = Array.from({ length: 5 }); // 5 slides (change count if needed)
   const [corporateLogin, setCorporateLogin] = useState(false);
+  const [loginMode, setLoginMode] = useState("phone");
+  const [authStep, setAuthStep] = useState("login");
+  const [otpDigits, setOtpDigits] = useState(() => Array(OTP_LENGTH).fill(""));
+  const [otpError, setOtpError] = useState("");
+  const [otpVerifyLoading, setOtpVerifyLoading] = useState(false);
+  const [phoneCountry, setPhoneCountry] = useState("IN");
+  const [isPhoneCountryDropdownOpen, setIsPhoneCountryDropdownOpen] =
+    useState(false);
+  const [phoneCountrySearch, setPhoneCountrySearch] = useState("");
+  const phoneCountryDropdownRef = useRef(null);
+  const selectedPhoneCountry =
+    COUNTRY_OPTIONS.find((option) => option.code === phoneCountry) ||
+    COUNTRY_OPTIONS[0];
+  const filteredPhoneCountryOptions = phoneCountrySearch.trim()
+    ? COUNTRY_OPTIONS.filter((option) =>
+        option.searchText.includes(phoneCountrySearch.trim().toLowerCase()),
+      )
+    : COUNTRY_OPTIONS;
 
   const { login } = useAuth();
 
   useIsomorphicLayoutEffect(() => {
-    document.body.style.overflow = "hidden";
     setIsPortalReady(true);
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        phoneCountryDropdownRef.current &&
+        !phoneCountryDropdownRef.current.contains(event.target)
+      ) {
+        setIsPhoneCountryDropdownOpen(false);
+        setPhoneCountrySearch("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const isPhoneValid = (value) => /^[6-9]\d{9}$/.test(value); // Indian 10-digit numbers
+  const isPhoneValid = (value) => {
+    if (phoneCountry === "IN") return /^[6-9]\d{9}$/.test(value);
+    return /^\d{6,15}$/.test(value);
+  };
+
+  const getLoginPayload = (includeCountry = true) => {
+    const payload = {
+      domain: process.env.NEXT_PUBLIC_DOMAIN,
+    };
+
+    if (loginMode === "phone") {
+      payload.phone_number = email.trim();
+      if (includeCountry) payload.country = phoneCountry;
+    } else {
+      payload.email = email.trim();
+    }
+
+    return payload;
+  };
+
+  const saveVerifiedLogin = async (data) => {
+    const authData = data?.data || data || {};
+    const token = authData.token;
+    const user = authData.user;
+    const profile = authData.userProfile || authData.profile;
+
+    if (!token || !user) return;
+
+    login({
+      token,
+      user,
+      profile,
+    });
+
+    try {
+      const profileRes = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user-profiles/by-user/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (profileRes?.data) {
+        const authExpiresAt = Number(Cookies.get("auth_expires_at"));
+        Cookies.set("user_profile", JSON.stringify(profileRes.data), {
+          expires: Number.isFinite(authExpiresAt) ? new Date(authExpiresAt) : 1,
+        });
+      }
+    } catch (profileErr) {
+      console.log("Profile fetch failed (non-blocking)");
+    }
+  };
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setError("");
+    setEmailError("");
+    setOtpError("");
+
+    if (!email.trim()) {
+      setEmailError(
+        loginMode === "phone" ? "Phone number is required" : "Email is required",
+      );
+      return;
+    }
+
+    if (loginMode === "phone" && !isPhoneValid(email)) {
+      setEmailError("Enter a valid phone number");
+      return;
+    }
+
+    if (loginMode === "email" && !isEmailValid(email)) {
+      setEmailError("Enter a valid email address");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(getLoginPayload()),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || data?.message || "Login failed");
+      }
+
+      setOtpDigits(Array(OTP_LENGTH).fill(""));
+      setAuthStep("otp");
+      appToast.success(data?.message || "OTP sent successfully.");
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+      appToast.error(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    const digit = value.replace(/[^\d]/g, "").slice(-1);
+    const nextOtp = [...otpDigits];
+    nextOtp[index] = digit;
+    setOtpDigits(nextOtp);
+    setOtpError("");
+
+    if (digit) {
+      const nextInput = document.getElementById(`login-otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    const otpValue = otpDigits.join("");
+    setOtpError("");
+    setError("");
+
+    if (otpValue.length !== OTP_LENGTH) {
+      setOtpError(`Enter the ${OTP_LENGTH}-digit OTP`);
+      return;
+    }
+
+    try {
+      setOtpVerifyLoading(true);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/frontend-user/verify-login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...getLoginPayload(false),
+            otp: otpValue,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error?.message || data?.message || "OTP verification failed",
+        );
+      }
+
+      await saveVerifiedLogin(data);
+      appToast.success(data?.message || "Welcome! You've Logged in Successfully");
+      onClose();
+    } catch (err) {
+      setOtpError(err.message || "OTP verification failed");
+      appToast.error(err.message || "OTP verification failed");
+    } finally {
+      setOtpVerifyLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -243,22 +278,20 @@ export default function LoginPopup({ onNavigate, onClose }) {
     let hasError = false;
 
     if (!email.trim()) {
-      setEmailError("Email or phone number is required");
+      setEmailError(
+        loginMode === "phone" ? "Phone number is required" : "Email is required",
+      );
+      hasError = true;
+    } else if (loginMode === "phone") {
+      if (!isPhoneValid(email)) {
+        setEmailError("Enter a valid 10-digit phone number");
+        hasError = true;
+      }
+    } else if (!isEmailValid(email)) {
+      setEmailError("Enter a valid email address");
       hasError = true;
     } else {
-      const isNumeric = /^\d+$/.test(email);
-
-      if (isNumeric) {
-        if (!isPhoneValid(email)) {
-          setEmailError("Enter a valid 10-digit phone number");
-          hasError = true;
-        }
-      } else {
-        if (!isEmailValid(email)) {
-          setEmailError("Enter a valid email address");
-          hasError = true;
-        }
-      }
+      setEmailError("");
     }
 
     if (!password.trim()) {
@@ -359,6 +392,10 @@ export default function LoginPopup({ onNavigate, onClose }) {
   const handleCreateAccountClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent?.stopImmediatePropagation?.();
+    setAuthStep("login");
+    setCorporateLogin(false);
+    setIsPhoneCountryDropdownOpen(false);
     onNavigate("signup");
   };
 
@@ -589,8 +626,8 @@ export default function LoginPopup({ onNavigate, onClose }) {
         {/* Right Section */}
         <section className={styles.formSection}>
           <div className={styles.formContent}>
-            <header className={styles.header}>
-              <div className={styles.logoContainer}>
+            {authStep === "otp" ? (
+              <div className={styles.otpContent}>
                 <BrandLogo
                   fallbackSrc="/images/tour-logo.svg"
                   alt="Target Tours Logo"
@@ -598,136 +635,322 @@ export default function LoginPopup({ onNavigate, onClose }) {
                   height={73}
                   className={styles.logo}
                 />
-              </div>
+                <div className={styles.otpTitleGroup}>
+                  <h1 className={styles.title}>Verify your number</h1>
+                  <p className={styles.subtitle}>
+                    We've sent a {OTP_LENGTH}-digit code to
+                  </p>
+                </div>
 
-              <div className={styles.titleWrapper}>
-                <h1 className={styles.title}>Welcome back</h1>
-                <p className={styles.subtitle}>
-                  New here?{" "}
-                  <span
-                    className={styles.linkText}
-                    onClick={handleCreateAccountClick}
+                <form className={styles.otpForm} onSubmit={handleVerifyOtp}>
+                  <div className={styles.otpInputs}>
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={`login-otp-${index}`}
+                        id={`login-otp-${index}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        className={styles.otpInput}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                      />
+                    ))}
+                  </div>
+                  {otpError && (
+                    <p style={{ color: "red", fontSize: "12px" }}>{otpError}</p>
+                  )}
+                  <button
+                    type="submit"
+                    className={styles.loginButton}
+                    disabled={otpVerifyLoading}
                   >
-                    Create an account
-                  </span>
-                </p>
-                <p className={styles.subtitle}>
-                  Corporate Employee?{" "}
-                  <span
-                    className={styles.linkText}
-                    onClick={() => setCorporateLogin(true)}
+                    {otpVerifyLoading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                </form>
+
+                <div className={styles.otpResend}>
+                  <p>
+                    Haven't received the code?{" "}
+                    <button type="button" className={styles.linkButton}>
+                      Resend OTP
+                    </button>
+                  </p>
+                  <span>Resend in 0:45</span>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.backToLogin}
+                  onClick={() => {
+                    setAuthStep("login");
+                    setOtpDigits(Array(OTP_LENGTH).fill(""));
+                    setOtpError("");
+                  }}
+                >
+                  ← Back to Login
+                </button>
+              </div>
+            ) : (
+              <>
+                <header className={styles.header}>
+                  <div className={styles.logoContainer}>
+                    <BrandLogo
+                      fallbackSrc="/images/tour-logo.svg"
+                      alt="Target Tours Logo"
+                      width={87}
+                      height={73}
+                      className={styles.logo}
+                    />
+                  </div>
+
+                  <div className={styles.titleWrapper}>
+                    <h1 className={styles.title}>Welcome back</h1>
+                    <p className={styles.subtitle}>
+                      New here?{" "}
+                      <button
+                        type="button"
+                        className={styles.linkText}
+                        onClick={handleCreateAccountClick}
+                      >
+                        Create an account
+                      </button>
+                    </p>
+                    <p className={styles.subtitle}>
+                      Corporate Employee?{" "}
+                      <span
+                        className={styles.linkText}
+                        onClick={() => setCorporateLogin(true)}
+                      >
+                        Sign In Here
+                      </span>
+                    </p>
+                  </div>
+                </header>
+
+                <form className={styles.form} onSubmit={handleSendOtp}>
+                  <div className={styles.inputGroup}>
+                    <div className={styles.labelParent}>
+                      <label className={styles.label}>
+                        {loginMode === "phone" ? "Phone Number" : "Email Address"}
+                      </label>
+
+                      <div className={styles.loginModeToggle} role="tablist">
+                        <button
+                          type="button"
+                          className={`${styles.loginModeButton} ${
+                            loginMode === "phone"
+                              ? styles.loginModeButtonActive
+                              : ""
+                          }`}
+                          onClick={() => {
+                            setLoginMode("phone");
+                            setEmail("");
+                            setEmailError("");
+                            setIsPhoneCountryDropdownOpen(false);
+                          }}
+                          aria-selected={loginMode === "phone"}
+                          role="tab"
+                        >
+                          Phone
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.loginModeButton} ${
+                            loginMode === "email"
+                              ? styles.loginModeButtonActive
+                              : ""
+                          }`}
+                          onClick={() => {
+                            setLoginMode("email");
+                            setEmail("");
+                            setEmailError("");
+                            setIsPhoneCountryDropdownOpen(false);
+                          }}
+                          aria-selected={loginMode === "email"}
+                          role="tab"
+                        >
+                          Email
+                        </button>
+                      </div>
+                    </div>
+                    {loginMode === "phone" ? (
+                      <div
+                        className={`${styles.phoneInputWrap} ${
+                          emailError ? styles.error : ""
+                        }`}
+                      >
+                        <div
+                          className={styles.countryDropdown}
+                          ref={phoneCountryDropdownRef}
+                        >
+                          <button
+                            type="button"
+                            className={styles.countryTrigger}
+                            aria-expanded={isPhoneCountryDropdownOpen}
+                            aria-label="Select country code"
+                            onClick={() => {
+                              setIsPhoneCountryDropdownOpen((current) => !current);
+                              setPhoneCountrySearch("");
+                            }}
+                          >
+                            <CountryFlagIcon
+                              code={phoneCountry}
+                              title={phoneCountry}
+                              className={styles.countryFlag}
+                            />
+                            <span>{selectedPhoneCountry.dialCode}</span>
+                          </button>
+
+                          {isPhoneCountryDropdownOpen && (
+                            <div className={styles.countryMenu}>
+                              <input
+                                type="text"
+                                className={styles.countrySearch}
+                                value={phoneCountrySearch}
+                                onChange={(e) =>
+                                  setPhoneCountrySearch(e.target.value)
+                                }
+                                placeholder="Search country"
+                                aria-label="Search country"
+                              />
+
+                              <div className={styles.countryOptionsList}>
+                                {filteredPhoneCountryOptions.length > 0 ? (
+                                  filteredPhoneCountryOptions.map((option) => (
+                                    <button
+                                      key={option.code}
+                                      type="button"
+                                      title={option.name}
+                                      className={`${styles.countryOption} ${
+                                        option.code === phoneCountry
+                                          ? styles.countryOptionActive
+                                          : ""
+                                      }`}
+                                      onClick={() => {
+                                        setPhoneCountry(option.code);
+                                        setIsPhoneCountryDropdownOpen(false);
+                                        setPhoneCountrySearch("");
+                                        setEmail((current) =>
+                                          current
+                                            .replace(/[^\d]/g, "")
+                                            .slice(0, option.maxLength),
+                                        );
+                                        setEmailError("");
+                                      }}
+                                    >
+                                      <CountryFlagIcon
+                                        code={option.code}
+                                        title={option.code}
+                                        className={styles.countryFlag}
+                                      />
+                                      <span>{option.dialCode}</span>
+                                    </button>
+                                  ))
+                                ) : (
+                                  <p className={styles.countryNoResult}>No result</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          className={`${styles.input} ${styles.phoneInput}`}
+                          value={email}
+                          placeholder="(555) 000-0000"
+                          maxLength={selectedPhoneCountry.maxLength}
+                          onChange={(e) => {
+                            setEmail(
+                              e.target.value
+                                .replace(/[^\d]/g, "")
+                                .slice(0, selectedPhoneCountry.maxLength),
+                            );
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <input
+                        type="email"
+                        inputMode="email"
+                        className={`${styles.input} ${
+                          emailError ? styles.error : ""
+                        }`}
+                        value={email}
+                        placeholder="you@example.com"
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    )}
+
+                    {emailError && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {emailError}
+                      </p>
+                    )}
+                    {error && (
+                      <p style={{ color: "red", fontSize: "12px" }}>
+                        {error}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className={styles.loginButton}
+                    disabled={loading}
                   >
-                    Sign In Here
-                  </span>
-                </p>
-              </div>
-            </header>
+                    {loading ? "Sending..." : "Send OTP"}
+                  </button>
+                </form>
+                <div className={styles.policyParent}>
+                  By proceeding, you agree to{" "}
+                  <Link href="/" className={styles.Policy}>Privacy Policy</Link>,{" "}
+                  <Link href="/" className={styles.Policy}>User Agreement</Link>{" "}
+                  and <Link href="/" className={styles.Policy}>T&amp;C</Link>
+                </div>
 
-            <form className={styles.form} onSubmit={handleLogin}>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>
-                  Enter Email Id/ Phone Number
-                </label>
-                <input
-                  type="text"
-                  className={`${styles.input} ${
-                    emailError ? styles.error : ""
-                  }`}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  // required
-                />
+                <div className={styles.divider}>
+                  <span className={styles.dividerText}>Or sign in with</span>
+                </div>
 
-                {emailError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
-                )}
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Enter password</label>
-                <div className={styles.passwordInputWrap}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className={`${styles.input} ${styles.passwordInput} ${
-                      passwordError ? styles.error : ""
-                    }`}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                <div className={styles.socialButtons}>
                   <button
                     type="button"
-                    className={styles.passwordToggle}
-                    onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className={styles.socialButton}
+                    disabled={googleLoginLoading}
+                    onClick={handleGoogleLogin}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    <Image
+                      src="/icons/google-icon.svg"
+                      alt="Google"
+                      width={24}
+                      height={24}
+                    />
+                    {googleLoginLoading
+                      ? "CONNECTING..."
+                      : "SIGN IN WITH GOOGLE"}
+                  </button>
+
+                  <button type="button" className={styles.socialButtonFacebook}>
+                    <Image
+                      src="/icons/facebook-icon.svg"
+                      alt="Facebook"
+                      width={24}
+                      height={24}
+                    />
+                    SIGN IN WITH FACEBOOK
                   </button>
                 </div>
-                {passwordError && (
-                  <p style={{ color: "red", fontSize: "12px" }}>
-                    {passwordError}
+
+                <footer className={styles.footer}>
+                  <p className={styles.copyright}>
+                    Copyrights ©2023 Target tours. Build by Webninjaz.
                   </p>
-                )}
-              </div>
-
-              {error && (
-                <p style={{ color: "red", fontSize: "12px" }}>{error}</p>
-              )}
-
-              <div className={styles.formOptions}>
-                <label className={styles.checkboxContainer}>
-                  <input type="checkbox" className={styles.checkboxInput} />
-                  <span className={styles.customCheckbox}></span>
-                  <span className={styles.checkboxLabel}>Remember me?</span>
-                </label>
-                <span className={styles.forgotPassword}>Forgot password?</span>
-              </div>
-
-              <button
-                type="submit"
-                className={styles.loginButton}
-                disabled={loading}
-              >
-                {loading ? "LOGGING IN..." : "LOGIN"}
-              </button>
-            </form>
-
-            <div className={styles.divider}>
-              <span className={styles.dividerText}>Or sign in with</span>
-            </div>
-
-            <div className={styles.socialButtons}>
-              <button
-                type="button"
-                className={styles.socialButton}
-                disabled={googleLoginLoading}
-                onClick={handleGoogleLogin}
-              >
-                <Image
-                  src="/icons/google-icon.svg"
-                  alt="Google"
-                  width={24}
-                  height={24}
-                />
-                {googleLoginLoading ? "CONNECTING..." : "SIGN IN WITH GOOGLE"}
-              </button>
-
-              <button type="button" className={styles.socialButtonFacebook}>
-                <Image
-                  src="/icons/facebook-icon.svg"
-                  alt="Facebook"
-                  width={24}
-                  height={24}
-                />
-                SIGN IN WITH FACEBOOK
-              </button>
-            </div>
-
-            <footer className={styles.footer}>
-              <p className={styles.copyright}>
-                Copyrights ©2023 Target tours. Build by Webninjaz.
-              </p>
-            </footer>
+                </footer>
+              </>
+            )}
           </div>
         </section>
       </div>

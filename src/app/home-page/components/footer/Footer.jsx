@@ -358,7 +358,7 @@ const Footer = () => {
                                 <h3 className={styles.linkHead}>{section?.title || ""}</h3>
                                 <ul>
                                     {(section?.links || []).map((link, linkIndex) => (
-                                        <li key={`${link?.label || "N/A"}`}>
+                                        <li key={`${link?.label || "N/A"}-${linkIndex}`}>
                                             <a href={link?.url || "#"}>
                                                 <span className={styles.linkText}>
                                                     {sectionIndex === 3 ? <img src={link?.icon || getStaticFooterIcon(sectionIndex, linkIndex, link?.label)} alt="" /> : null}{link?.label || "N/A"}

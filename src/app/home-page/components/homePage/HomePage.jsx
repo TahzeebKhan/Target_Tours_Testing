@@ -154,6 +154,7 @@ const HomePage = ({
   const [checkOut, setCheckOut] = useState("");
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const [authModalKey, setAuthModalKey] = useState(0);
   const [searchSubmitting, setSearchSubmitting] = useState(false);
   const [heroData, setHeroData] = useState({
     heading: "",
@@ -1312,6 +1313,7 @@ const HomePage = ({
 
   const openLoginModal = () => {
     setAuthView("login");
+    setAuthModalKey((current) => current + 1);
     setShowLogin(true);
   };
 
@@ -1322,6 +1324,7 @@ const HomePage = ({
 
   const navigateAuthModal = (view) => {
     setAuthView(view);
+    setAuthModalKey((current) => current + 1);
     setShowLogin(true);
   };
 
@@ -2788,7 +2791,7 @@ const HomePage = ({
         )}
         {showLogin && authView === "login" && (
           <LoginPopup
-            key="login"
+            key={`login-${authModalKey}`}
             onClose={closeAuthModal}
             onNavigate={navigateAuthModal}
           />
@@ -2796,7 +2799,7 @@ const HomePage = ({
 
         {showLogin && authView === "signup" && (
           <SignupPopup
-            key="signup"
+            key={`signup-${authModalKey}`}
             onClose={closeAuthModal}
             onNavigate={navigateAuthModal}
           />
