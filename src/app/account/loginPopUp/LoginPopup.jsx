@@ -222,6 +222,28 @@ export default function LoginPopup({ onNavigate, onClose }) {
     }
   };
 
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key !== "Backspace") return;
+
+    event.preventDefault();
+    setOtpError("");
+
+    const nextOtp = [...otpDigits];
+
+    if (nextOtp[index]) {
+      nextOtp[index] = "";
+      setOtpDigits(nextOtp);
+      return;
+    }
+
+    if (index > 0) {
+      nextOtp[index - 1] = "";
+      setOtpDigits(nextOtp);
+      const previousInput = document.getElementById(`login-otp-${index - 1}`);
+      previousInput?.focus();
+    }
+  };
+
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const otpValue = otpDigits.join("");
@@ -654,6 +676,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
                         className={styles.otpInput}
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       />
                     ))}
                   </div>

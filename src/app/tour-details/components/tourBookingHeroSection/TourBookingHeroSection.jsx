@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import styles from "./TourBookingHeroSection.module.css";
 
-const TourBookingHeroSection = ({ data, onViewItinerary }) => {
+const TourBookingHeroSection = ({ data, onViewItinerary, onSignIn }) => {
   const fromLocation = data?.start_location?.name || "Mumbai";
   const toLocation = data?.end_location?.name || "Delhi";
   const title = data?.title || "Taj Mahal & The Treasures Of India 2026";
@@ -62,7 +62,11 @@ const TourBookingHeroSection = ({ data, onViewItinerary }) => {
           <button type="button" className={styles.downloadButton}>
             Download The App
           </button>
-          <button type="button" className={styles.signInButton}>
+          <button
+            type="button"
+            className={styles.signInButton}
+            onClick={onSignIn}
+          >
             Sign In
           </button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +26,8 @@ import PolicySection from "./components/itenary/PolicySection";
 import styles from "./page.module.css";
 import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
 import ItinaryOverview from "./components/itenary/ItinaryOverview";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 const SELECTED_TOUR_OPTION_KEY = "selectedTourOption";
 
 /* ---------------- Error UI ---------------- */
@@ -80,6 +82,17 @@ const TourDetailsClient = () => {
   const withFlight = searchParams.get("with_flight");
   const selectedPrice = searchParams.get("selected_price");
   const itineraryRef = useRef(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
+
+  const openAuthModal = (view = "login") => {
+    setAuthView(view);
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+  };
 
   const scrollToItinerary = () => {
     const itinerarySection =
@@ -213,6 +226,7 @@ const TourDetailsClient = () => {
       <TourBookingHeroSection
         data={displayTourDetails}
         onViewItinerary={scrollToItinerary}
+        onSignIn={() => openAuthModal("login")}
       />
       <StepBar />
       <ItinaryOverview data={displayTourDetails} />
@@ -252,6 +266,14 @@ const TourDetailsClient = () => {
 
       <FeatureSection />
       <Footer />
+
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </div>
   );
 };

@@ -322,6 +322,28 @@ export default function SignupPopup({ onNavigate, onClose }) {
     }
   };
 
+  const handleOtpDigitKeyDown = (index, event) => {
+    if (event.key !== "Backspace") return;
+
+    event.preventDefault();
+    setOtpError("");
+
+    const nextOtp = [...otpDigits];
+
+    if (nextOtp[index]) {
+      nextOtp[index] = "";
+      setOtpDigits(nextOtp);
+      return;
+    }
+
+    if (index > 0) {
+      nextOtp[index - 1] = "";
+      setOtpDigits(nextOtp);
+      const previousInput = document.getElementById(`signup-otp-${index - 1}`);
+      previousInput?.focus();
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setError("");
     setSuccessMessage("");
@@ -417,6 +439,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                         className={styles.otpInput}
                         value={digit}
                         onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpDigitKeyDown(index, e)}
                       />
                     ))}
                   </div>
@@ -670,7 +693,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                   className={styles.signupButton}
                   disabled={registerLoading}
                 >
-                    {registerLoading ? "SENDING OTP..." : "SEND OTP TO VERIFY"}
+                    {registerLoading ? "SENDING OTP TO VERIFY..." : "SEND OTP TO VERIFY"}
                 </button>
                 </form>
 
