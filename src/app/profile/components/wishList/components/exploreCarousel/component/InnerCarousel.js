@@ -32,7 +32,6 @@ export default function InnerCarousel({ images = [], favorite, onFavorite }) {
             handleSlideChange(swiper);
           }}
           onSlideChange={handleSlideChange}
-          lazy={true}
           pagination={{ clickable: true, type: "bullets" }}
           navigation={false}
           modules={[Pagination]}
