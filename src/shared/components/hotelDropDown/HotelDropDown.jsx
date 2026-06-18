@@ -34,12 +34,8 @@ const HotelDropDown = ({
   const updateCount = (key, delta) => {
     setPassengers((prev) => {
       const next = { ...prev };
-      next[key] = Math.max(0, prev[key] + delta);
-
-      // infants <= adults
-      if (key === "adult" && next.infant > next.adult) {
-        next.infant = next.adult;
-      }
+      const minimum = key === "room" || key === "adults" ? 1 : 0;
+      next[key] = Math.max(minimum, Number(prev[key] || 0) + delta);
 
       return next;
     });
@@ -71,7 +67,11 @@ const HotelDropDown = ({
               <button
                 onClick={() => updateCount(row.key, -1)}
                 className={styles.minusBtn}
-                disabled={passengers[row.key] === 0}
+                disabled={
+                  row.key === "room" || row.key === "adults"
+                    ? passengers[row.key] <= 1
+                    : passengers[row.key] === 0
+                }
               >
                 <Minus size={13} />
               </button>

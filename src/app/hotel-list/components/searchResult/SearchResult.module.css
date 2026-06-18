@@ -2,6 +2,18 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  position: sticky;
+  top: var(--hotel-hero-sticky-offset, 342px);
+  z-index: 120;
+  background-color: #f9f9f9;
+  padding: 12px 0;
+  margin: -12px 0 0;
+}
+
+.searchResultsLeft,
+.searchResultsRight {
+  position: relative;
+  z-index: 1;
 }
 
 .searchResultsLeft {
@@ -90,5 +102,3 @@
     }
    
 }
-
-

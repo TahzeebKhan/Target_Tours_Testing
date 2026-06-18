@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from './MobileHotelDetails.module.css'
 import { Pencil } from 'lucide-react'
 import MapSection from '../mapSection/MapSection'
@@ -7,13 +7,32 @@ import StickyHeader from './ResultsBottomSheet'
 import ResultsStickyBar from './ResultsBottomSheet'
 import ResultsBottomSheet from './ResultsBottomSheet'
 import HotelGridView from './hotelGridView/HotelGridView'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import {
+  HOTEL_SEARCH_RESULTS_EVENT,
+  HOTEL_SEARCH_RESULTS_KEY,
+} from '@/shared/services/hotelSearch'
+import {
+  getHotelsFromMessage,
+  isHotelTerminalPayload,
+  normalizeHotelCard,
+} from '../tourListing/TourListing'
+
+const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
+const HOTEL_RENDER_BATCH_SIZE = 300;
 
 const MobileHotelDetails = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const hotelSearchChannel = searchParams.get("channel") || "";
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   /* ✅ REQUIRED STATES */
   const [likedTours, setLikedTours] = useState([]);
+  const [hotelResults, setHotelResults] = useState([]);
+  const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
+  const hotelResultSourceRef = useRef("");
+  const normalizeRunRef = useRef(0);
 
       const toggleLike = (id) => {
     setLikedTours((prev) =>
@@ -27,74 +46,121 @@ const MobileHotelDetails = () => {
     router.push("/hotel-detail");
   };
 
-     const tourData = [
-    {
-      id: 1,
-      image: "/hotelList/hotelCardImg.png",
-      route: "9211 Forest Avenue, California - 90734",
-      title: "Splendors of the Canadian West",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 2,
-      image: "/tourList/cardItem2.jpg",
-      route: "9211 Forest Avenue, California - 90734",
-      title: "Splendors of the Rocky Mountains",
-      days: "14 DAYS & 13 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 72,990",
-    },
-    {
-      id: 3,
-      image: "/tourList/cardItem3.jpg",
-      route: "TORONTO TO MONTREAL",
-      title: "Charms of Eastern Canada",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 4,
-      image: "/tourList/cardItem4.jpg",
-      route: "WHITEHORSE TO FAIRBANKS",
-      title: "Northern Lights of Canada",
-      days: "10 DAYS & 9 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "4 ACTIVITIES",
-      price: "₹ 89,900",
-    },
-    {
-      id: 5,
-      image: "/tourList/cardItem5.jpg",
-      route: "MONTREAL TO QUEBEC CITY",
-      title: "Colors of Quebec Fall",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 6,
-      image: "/tourList/cardItem6.jpg",
-      route: "VANCOUVER TO WHISTLER",
-      title: "Elegance of Canada's West Coast",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-  ];
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const handleViewportChange = () => {
+      setIsMobileViewport(mediaQuery.matches);
+    };
+
+    handleViewportChange();
+    mediaQuery.addEventListener("change", handleViewportChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleViewportChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileViewport) {
+      normalizeRunRef.current += 1;
+      setHotelResults([]);
+      setIsHotelLoading(false);
+      hotelResultSourceRef.current = "";
+      return;
+    }
+
+    normalizeRunRef.current += 1;
+    setHotelResults([]);
+    setIsHotelLoading(Boolean(hotelSearchChannel));
+    hotelResultSourceRef.current = "";
+
+    const normalizeHotelsInBatches = (hotels) => {
+      const runId = normalizeRunRef.current + 1;
+      normalizeRunRef.current = runId;
+      const firstBatch = hotels
+        .slice(0, FIRST_HOTEL_RENDER_BATCH_SIZE)
+        .map((hotel, index) => normalizeHotelCard(hotel, index));
+
+      setHotelResults(firstBatch);
+      setIsHotelLoading(false);
+
+      let nextIndex = FIRST_HOTEL_RENDER_BATCH_SIZE;
+
+      const appendNextBatch = () => {
+        if (normalizeRunRef.current !== runId || nextIndex >= hotels.length) {
+          return;
+        }
+
+        const batchStart = nextIndex;
+        const batch = hotels
+          .slice(batchStart, batchStart + HOTEL_RENDER_BATCH_SIZE)
+          .map((hotel, index) => normalizeHotelCard(hotel, batchStart + index));
+
+        nextIndex += HOTEL_RENDER_BATCH_SIZE;
+        setHotelResults((prev) => [...prev, ...batch]);
+
+        if (nextIndex < hotels.length) {
+          window.setTimeout(appendNextBatch, 0);
+        }
+      };
+
+      window.setTimeout(appendNextBatch, 0);
+    };
+
+    const applyHotelResults = (payload) => {
+      if (payload?.channel && payload.channel !== hotelSearchChannel) {
+        return;
+      }
+
+      // console.log("Mobile hotel socket payload:", payload);
+
+      const nextResults = getHotelsFromMessage(payload);
+      // console.log("Mobile hotel result source:", nextResults.source);
+      // console.log("Mobile hotels before UI normalize:", nextResults.hotels);
+
+      if (!nextResults.hotels.length) {
+        if (isHotelTerminalPayload(payload)) {
+          setIsHotelLoading(false);
+        }
+        return;
+      }
+      if (
+        hotelResultSourceRef.current === "merged" &&
+        nextResults.source !== "merged"
+      ) {
+        return;
+      }
+
+      normalizeHotelsInBatches(nextResults.hotels);
+      hotelResultSourceRef.current = nextResults.source;
+    };
+
+    const handleHotelResults = (event) => {
+      applyHotelResults(event.detail);
+    };
+
+    window.addEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+
+    const cachedResults = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    if (cachedResults) {
+      try {
+        const cachedPayload = JSON.parse(cachedResults);
+        if (!hotelSearchChannel || cachedPayload?.channel === hotelSearchChannel) {
+          applyHotelResults(cachedPayload);
+        }
+      } catch {
+        // Ignore stale malformed session data.
+      }
+    }
+
+    return () => {
+      normalizeRunRef.current += 1;
+      window.removeEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+    };
+  }, [hotelSearchChannel, isMobileViewport]);
+
+  const displayHotels = hotelResults;
+
     return (
         <div className={styles.hotelDetailsMobileContainer}>
             <div
@@ -133,10 +199,11 @@ const MobileHotelDetails = () => {
             <MapSection />
             <ResultsBottomSheet>
                     <HotelGridView
-                        tourData={tourData}
+                        tourData={displayHotels}
                         likedTours={likedTours}
                         toggleLike={toggleLike}
                         handleBookNow={handleBookNow}
+                        isLoading={isHotelLoading}
                     />
             </ResultsBottomSheet>
         </div>
