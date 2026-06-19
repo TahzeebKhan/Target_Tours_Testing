@@ -45,14 +45,14 @@ const BookingSummary = ({
                 stroke="black"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M5 5L15 15"
                 stroke="black"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
             </svg>
           </div>

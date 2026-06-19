@@ -30,6 +30,8 @@ padding-top: 73px;
 
 /* ROOM CARD */
 .roomWrapper {
+    position: sticky;
+    top: 150px;
     opacity: 1;
     transform: translateY(0);
     transition:
@@ -129,6 +131,9 @@ padding-top: 73px;
         flex-direction: column-reverse;
         margin-top: 24px;
         
+    }
+    .roomWrapper{
+        position: static;
     }
     
 

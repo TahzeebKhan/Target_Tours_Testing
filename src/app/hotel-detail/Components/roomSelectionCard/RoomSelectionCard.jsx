@@ -3,7 +3,13 @@
 import styles from "./RoomSelectionCard.module.css";
 import { CalendarDays } from "lucide-react";
 
-export default function RoomSelectionCard({onBookNow}) {
+export default function RoomSelectionCard({
+    onBookNow,
+    checkIn = "Check-in",
+    checkOut = "Check-out",
+    rooms = 1,
+    adults = 1,
+}) {
     return (
         <div className={styles.card}>
             <div className={styles.innerBox}>
@@ -16,7 +22,7 @@ export default function RoomSelectionCard({onBookNow}) {
 
                                 <p className={styles.label}>CHECK-IN</p>
                             </div>
-                            <p className={styles.date}> <span></span>08/14/2025</p>
+                            <p className={styles.date}> <span></span>{checkIn}</p>
 
                         </div>
                     </div>
@@ -30,7 +36,7 @@ export default function RoomSelectionCard({onBookNow}) {
 
                                 <p className={styles.label}>CHECK-OUT</p>
                             </div>
-                            <p className={styles.date}> <span></span>08/19/2025</p>
+                            <p className={styles.date}> <span></span>{checkOut}</p>
 
                         </div>
 
@@ -41,8 +47,8 @@ export default function RoomSelectionCard({onBookNow}) {
                 <div className={styles.roomsSection}>
                     <p className={styles.label}>ROOMS & GUESTS</p>
                     <div className={styles.guestRoomCont}>
-                        <p className={styles.roomsText}>1 ROOM,</p>
-                        <p className={styles.roomsText}>2 ADULTS</p>
+                        <p className={styles.roomsText}>{rooms} ROOM{Number(rooms) === 1 ? "" : "S"},</p>
+                        <p className={styles.roomsText}>{adults} ADULT{Number(adults) === 1 ? "" : "S"}</p>
                     </div>
                 </div>
             </div>

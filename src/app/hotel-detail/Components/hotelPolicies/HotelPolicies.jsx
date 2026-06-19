@@ -44,19 +44,19 @@ const policies = [
     },
 ];
 
-const HotelPolicies = () => {
+const HotelPolicies = ({ policies: hotelPolicies = policies, hotelName = "This hotel" }) => {
     return (
         <div className={styles.container}>
             <div className={styles.topContainer}>
                 <h2 className={styles.heading}>HOTEL POLICIES</h2>
                 <p className={styles.subHeading}>
-                    Lazur Hotel Apartments takes special requests – add in the next step!
+                    {hotelName} takes special requests – add in the next step!
                 </p>
             </div>
 
 
             <div className={styles.table}>
-                {policies.map((item, index) => (
+                {hotelPolicies.map((item, index) => (
                     <div key={index} className={styles.row}>
                         <div className={styles.left}>{item.title}</div>
                         <div className={styles.right}>{item.description}</div>

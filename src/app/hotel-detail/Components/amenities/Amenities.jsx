@@ -29,38 +29,33 @@ const ICONS = {
 
 
 
-const Amenities = () => {
+const getAmenityIcon = (label = "") => {
+    const normalized = label.toLowerCase();
+    if (normalized.includes("wifi") || normalized.includes("internet")) return "wifi";
+    if (normalized.includes("parking")) return "parking";
+    if (normalized.includes("restaurant") || normalized.includes("breakfast") || normalized.includes("food")) return "restaurant";
+    if (normalized.includes("elevator") || normalized.includes("lift")) return "elevator";
+    if (normalized.includes("pool") || normalized.includes("spa")) return "pool";
+    if (normalized.includes("laundry")) return "cleaning";
+    if (normalized.includes("disability") || normalized.includes("accessible")) return "desk";
+    if (normalized.includes("air") || normalized.includes("conditioning")) return "ac";
+    return "desk";
+};
+
+const Amenities = ({ amenities = [] }) => {
+    const amenityItems = amenities.length
+        ? amenities.map((label) => ({ icon: getAmenityIcon(label), label }))
+        : [
+            { icon: "ac", label: "Air conditioning" },
+            { icon: "wifi", label: "Free WiFi" },
+            { icon: "parking", label: "Free Parking" },
+            { icon: "restaurant", label: "Restaurant" },
+        ];
+
     const amenitiesData = [
         {
             title: "General",
-            items: [
-                { icon: "ac", label: "Air conditioning" },
-                { icon: "wifi", label: "Free WiFi" },
-                { icon: "parking", label: "Free Parking" },
-                { icon: "restaurant", label: "Restaurant" },
-                { icon: "phone", label: "Room service" },
-                { icon: "desk", label: "24-hour front desk" },
-                { icon: "cleaning", label: "Daily housekeeping" },
-                { icon: "elevator", label: "Elevator" },
-            ],
-        },
-        {
-            title: "Bathroom",
-            items: [
-                { icon: "shower", label: "Shower" },
-                { icon: "shower", label: "Hot water" },
-                { icon: "parking", label: "Complimentary toiletries" },
-                { icon: "restaurant", label: "Hair dryer" },
-            ],
-        },
-        {
-            title: "Activities",
-            items: [
-                { icon: "pool", label: "Swimming pool" },
-                { icon: "gym", label: "Fitness center" },
-                { icon: "kids", label: "Kids club" },
-                { icon: "game", label: "Game room" },
-            ],
+            items: amenityItems,
         },
     ];
     return (

@@ -24,6 +24,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
+const safeSetSessionStorage = (key, value) => {
+  if (typeof window === "undefined") return false;
+
+  try {
+    window.sessionStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    console.warn(`Unable to cache ${key} in sessionStorage:`, error);
+    return false;
+  }
+};
+
 const TourHeroSection = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -162,7 +174,7 @@ const TourHeroSection = () => {
                 response: initResponse,
               });
 
-              window.sessionStorage.setItem(
+              safeSetSessionStorage(
                 HOTEL_SEARCH_SESSION_KEY,
                 JSON.stringify({
                   ...searchContext,
@@ -172,7 +184,7 @@ const TourHeroSection = () => {
               );
             } catch (error) {
               initStartedChannelsRef.current.delete(hotelSearchChannel);
-              window.sessionStorage.setItem(
+              safeSetSessionStorage(
                 HOTEL_SEARCH_SESSION_KEY,
                 JSON.stringify({
                   ...searchContext,
@@ -248,14 +260,17 @@ const TourHeroSection = () => {
               cachedResult = null;
             }
 
-            if (
-              cachedResult?.type !== "HOTEL_MERGED_RESPONSE" ||
-              payload?.type === "HOTEL_MERGED_RESPONSE"
-            ) {
-              window.sessionStorage.setItem(
+            if (payload?.type === "HOTEL_MERGED_RESPONSE") {
+              window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+            } else if (cachedResult?.type !== "HOTEL_MERGED_RESPONSE") {
+              const didCacheResults = safeSetSessionStorage(
                 HOTEL_SEARCH_RESULTS_KEY,
                 JSON.stringify(payload),
               );
+
+              if (!didCacheResults) {
+                window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+              }
             }
 
             window.dispatchEvent(
@@ -503,7 +518,7 @@ const TourHeroSection = () => {
 
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
-        window.sessionStorage.setItem(
+        safeSetSessionStorage(
           HOTEL_SEARCH_SESSION_KEY,
           JSON.stringify({
             ...searchContext,

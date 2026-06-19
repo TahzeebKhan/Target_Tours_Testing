@@ -17,6 +17,7 @@ import {
 import {
   getStaySummary,
   getHotelsFromMessage,
+  getHotelDetailUrl,
   isHotelTerminalPayload,
   normalizeHotelCard,
   shouldApplyHotelResults,
@@ -74,9 +75,7 @@ const MobileHotelDetails = () => {
           details,
         }),
       );
-      router.push(
-        `/hotel-detail?hotelId=${encodeURIComponent(payload.hotelId || "")}`,
-      );
+      router.push(getHotelDetailUrl(payload));
     } catch (error) {
       console.error("Hotel details request failed:", error);
     } finally {

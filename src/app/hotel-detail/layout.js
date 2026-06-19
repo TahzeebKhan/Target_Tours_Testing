@@ -11,6 +11,7 @@ import FeatureSection from "../home-page/components/featureSection/FeatureSectio
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import Cookies from "js-cookie";
+import { HotelDetailDataProvider } from "./HotelDetailDataContext";
 
 const Layout = ({ children }) => {
   const [activeTab, setActiveTab] = useState("Description");
@@ -30,7 +31,7 @@ const Layout = ({ children }) => {
     }
   };
   return (
-    <>
+    <HotelDetailDataProvider>
       <div className={styles.navBar}>
         <div className={styles.navBarContainer}>
           <Navbar isLoggedIn={isLoggedIn} />
@@ -77,7 +78,7 @@ const Layout = ({ children }) => {
       <div className={styles.mobileView}>
         <HotelDetaislMobileView />
       </div>
-    </>
+    </HotelDetailDataProvider>
   );
 };
 

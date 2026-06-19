@@ -179,7 +179,7 @@ const roomsData = [
   },
 ];
 
-const AvailabilityComponent = () => {
+const AvailabilityComponent = ({ rooms = roomsData }) => {
   const router = useRouter();
   const swiperRefs = useRef({});
   const [swiperRef, setSwiperRef] = useState(null);
@@ -224,7 +224,7 @@ const AvailabilityComponent = () => {
     <div className={styles.availabilitySection}>
       <h3 className={styles.heading}>Availability</h3>
 
-      {roomsData.map((room) => {
+      {rooms.map((room) => {
         const qty = roomQty[room.id] || 0;
 
         return (
@@ -239,7 +239,7 @@ const AvailabilityComponent = () => {
                 slidesPerView={1}
               >
                 {room.image.map((item, index) => (
-                  <SwiperSlide key={item.id} className={styles.slide}>
+                  <SwiperSlide key={`${room.id}-image-${index}`} className={styles.slide}>
                     <img key={index} src={item.img} alt="" />
                   </SwiperSlide>
                 ))}

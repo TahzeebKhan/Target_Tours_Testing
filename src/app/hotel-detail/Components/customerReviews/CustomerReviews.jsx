@@ -1,52 +1,13 @@
 import React from "react";
 import styles from "./CustomerReviews.module.css";
-
-const ratingBars = [
-  { star: 5, value: 250, percent: 80 },
-  { star: 4, value: 80, percent: 45 },
-  { star: 3, value: 30, percent: 20 },
-  { star: 2, value: 8, percent: 10 },
-  { star: 1, value: 3, percent: 5 },
-];
-
-const scoreDetails = [
-  { label: "Amenities", score: 5.0 },
-  { label: "Cleanliness", score: 5.0 },
-  { label: "Communication", score: 5.0 },
-  { label: "Location", score: 5.0 },
-  { label: "Value", score: 5.0 },
-];
-const reviews = [
-  {
-    id: 1,
-    name: "John Smith",
-    rating: 5,
-    time: "2 months ago",
-    comment:
-      "I recently stayed at the Grand Vista Hotel and it was an amazing experience! The staff was incredibly friendly and attentive, making sure all my needs were met. The room was spacious and beautifully decorated, with a stunning view of the city skyline. The amenities were top-notch, especially the rooftop pool which was perfect for relaxing after a long day. I highly recommend this hotel for anyone looking for a comfortable and enjoyable stay!",
-    helpful: 23,
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    rating: 5,
-    time: "2 months ago",
-    comment:
-      "I recently stayed at the Grand Vista Hotel and it was an amazing experience! The staff was incredibly friendly and attentive, making sure all my needs were met. The room was spacious and beautifully decorated, with a stunning view of the city skyline. The amenities were top-notch, especially the rooftop pool which was perfect for relaxing after a long day. I highly recommend this hotel for anyone looking for a comfortable and enjoyable stay!",
-    helpful: 23,
-  },
-  {
-    id: 3,
-    name: "John Smith",
-    rating: 5,
-    time: "2 months ago",
-    comment:
-      "I recently stayed at the Grand Vista Hotel and it was an amazing experience! The staff was incredibly friendly and attentive, making sure all my needs were met. The room was spacious and beautifully decorated, with a stunning view of the city skyline. The amenities were top-notch, especially the rooftop pool which was perfect for relaxing after a long day. I highly recommend this hotel for anyone looking for a comfortable and enjoyable stay!",
-    helpful: 23,
-  },
-];
+import { useHotelDetailData } from "../../HotelDetailDataContext";
 
 const CustomerReviews = () => {
+  const { hotelDetail } = useHotelDetailData();
+  const ratingBars = hotelDetail?.ratingBars || [];
+  const scoreDetails = hotelDetail?.scoreDetails || [];
+  const reviews = hotelDetail?.reviews || [];
+  
   return (
     <div className={styles.wrapper}>
       <div className={styles.reviewWrapper}>
@@ -74,8 +35,8 @@ const CustomerReviews = () => {
           {/* RIGHT SIDE */}
           <div className={styles.rightSection}>
             {scoreDetails.map((item) => (
-              <div className={styles.scoreContainer}>
-                <div key={item.label} className={styles.scoreBox}>
+              <div key={item.label} className={styles.scoreContainer}>
+                <div className={styles.scoreBox}>
                   <div className={styles.scoreLabelBox}>
                     <p className={styles.scoreLabel}>{item.label}</p>
                   </div>
@@ -122,6 +83,9 @@ const CustomerReviews = () => {
           </div>
         ))}
       </div>
+      {!reviews.length && (
+        <p className={styles.comment}>No customer reviews available for this hotel yet.</p>
+      )}
     </div>
   );
 };

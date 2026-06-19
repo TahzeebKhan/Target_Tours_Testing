@@ -405,6 +405,15 @@ const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
 
+export const getHotelDetailUrl = ({ hotelId, searchId, priceProvider }) => {
+  const params = new URLSearchParams();
+  params.set("hotelId", hotelId || "");
+  params.set("searchId", searchId || "");
+  params.set("priceProvider", priceProvider || "");
+
+  return `/hotel-detail?${params.toString()}`;
+};
+
 const getHotelPriceNumber = (hotel = {}) => {
   const priceText = String(hotel.price || "").replace(/[^\d.]/g, "");
   if (!priceText) return null;
@@ -688,9 +697,7 @@ const TourListing = () => {
           details,
         }),
       );
-      router.push(
-        `/hotel-detail?hotelId=${encodeURIComponent(payload.hotelId || "")}`,
-      );
+      router.push(getHotelDetailUrl(payload));
     } catch (error) {
       console.error("Hotel details request failed:", error);
     } finally {

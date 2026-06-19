@@ -11,8 +11,26 @@ import BarcelonaSection from "./Components/BarcelonaSection/BarcelonaSection";
 import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
 import BookingSummary from "./Components/bookingSummary/BookingSummary";
 import Tabs from "./Components/tabs/Tabs";
+import { useHotelDetailData } from "./HotelDetailDataContext";
+
+const parseCurrencyNumber = (value) => {
+  const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
+const formatDisplayDate = (value, fallback) => {
+  if (!value) return fallback;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 const Page = () => {
+  const { hotelDetail } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
   const [showSummary, setShowSummary] = useState(false);
   const onBookNow = () => {
@@ -38,6 +56,33 @@ const Page = () => {
       nights: 8,
     },
   ]);
+  const searchRequest = hotelDetail?.request || {};
+  const checkIn = formatDisplayDate(
+    searchRequest.checkIn || searchRequest.check_in,
+    "Check-in",
+  );
+  const checkOut = formatDisplayDate(
+    searchRequest.checkOut || searchRequest.check_out,
+    "Check-out",
+  );
+  const rooms = searchRequest.rooms || searchRequest.roomCount || 1;
+  const adults = searchRequest.adults || searchRequest.adultCount || 1;
+
+  useEffect(() => {
+    if (!hotelDetail?.rooms?.length) return;
+
+    setRoomList(
+      hotelDetail.rooms.slice(0, 2).map((room) => ({
+        id: room.id,
+        title: room.title,
+        image: room.image?.[0]?.img || "/images/hotelArt1.png",
+        pricePerNight: parseCurrencyNumber(room.price?.offer),
+        quantity: 1,
+        maxQuantity: 5,
+        nights: 1,
+      })),
+    );
+  }, [hotelDetail?.rooms]);
   const removeRoom = (id) => {
     setRoomList((prev) =>
       prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room))
@@ -91,13 +136,13 @@ const Page = () => {
       <main className={styles.contentWrapper}>
         <div className={styles.leftContent}>
           <section ref={sectionRefs.Description}>
-            <DescriptionComponent />
+            <DescriptionComponent description={hotelDetail?.description} />
           </section>
           <section ref={sectionRefs.Amenities}>
-            <Amenities />
+            <Amenities amenities={hotelDetail?.amenities} />
           </section>
           <section ref={sectionRefs.Rooms}>
-            <AvailabilityComponent />
+            <AvailabilityComponent rooms={hotelDetail?.rooms} />
           </section>
         </div>
 
@@ -107,7 +152,13 @@ const Page = () => {
               showSummary ? styles.hide : ""
             }`}
           >
-            <RoomSelectionCard onBookNow={() => setShowSummary(true)} />
+            <RoomSelectionCard
+              onBookNow={() => setShowSummary(true)}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              rooms={rooms}
+              adults={adults}
+            />
           </div>
 
           {/* Booking Summary */}
@@ -126,11 +177,14 @@ const Page = () => {
         className={styles.policySection}
         ref={sectionRefs["HOTEL POLICY"]}
       >
-        <HotelPolicies />
+        <HotelPolicies
+          policies={hotelDetail?.policies}
+          hotelName={hotelDetail?.name}
+        />
       </section>
 
       <section className={styles.Reviews} ref={sectionRefs.Reviews}>
-        <CustomerReviews />
+        <CustomerReviews  Reviews={hotelDetail?.reviews} />
       </section>
       <BarcelonaSection />
     </>
