@@ -222,6 +222,28 @@ export default function LoginPopup({ onNavigate, onClose }) {
     }
   };
 
+  const handleOtpPaste = (event) => {
+    event.preventDefault();
+
+    const pastedOtp = event.clipboardData
+      .getData("text")
+      .replace(/[^\d]/g, "")
+      .slice(0, OTP_LENGTH);
+
+    if (!pastedOtp) return;
+
+    const nextOtp = Array(OTP_LENGTH).fill("");
+    pastedOtp.split("").forEach((digit, index) => {
+      nextOtp[index] = digit;
+    });
+
+    setOtpDigits(nextOtp);
+    setOtpError("");
+
+    const focusIndex = Math.min(pastedOtp.length, OTP_LENGTH) - 1;
+    document.getElementById(`login-otp-${focusIndex}`)?.focus();
+  };
+
   const handleOtpKeyDown = (index, event) => {
     if (event.key !== "Backspace") return;
 
@@ -676,6 +698,7 @@ export default function LoginPopup({ onNavigate, onClose }) {
                         className={styles.otpInput}
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onPaste={handleOtpPaste}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       />
                     ))}

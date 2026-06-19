@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import styles from "./HotelGridView.module.css";
+import { HotelBenefits } from "../../tourListing/TourListing";
 
 const HotelGridView = ({
   tourData,
@@ -8,7 +9,9 @@ const HotelGridView = ({
   toggleLike,
   rating,
   handleBookNow,
-  isLoading = false
+  isLoading = false,
+  staySummary = "1 night, 1 guest",
+  loadingHotelDetailsId = "",
 }) => {
   const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
 
@@ -129,20 +132,7 @@ const HotelGridView = ({
                   </div>
                 </div>
 
-                <ul className={styles.freeList}>
-                  <li>
-                    <div className={styles.tickCont}>
-                      <img src="/icons/checkIcon.svg" alt="" />
-                    </div>
-                    Free Cancellation till 7 Jan 2022
-                  </li>
-                  <li>
-                    <div className={styles.tickCont}>
-                      <img src="/icons/checkIcon.svg" alt="" />
-                    </div>
-                    Free Breakfast
-                  </li>
-                </ul>
+                <HotelBenefits benefits={item.benefits} classes={styles} />
               </div>
             </div>
 
@@ -152,12 +142,18 @@ const HotelGridView = ({
                   {item.price}
                 </div>
                 <div className={styles.totalPrice}>
-                  <span>1 night, 2 adults</span>
+                  <span>{staySummary}</span>
                 </div>
               </div>
 
-              <button className={styles.bookNowBtn} onClick={handleBookNow}>
-                SEE AVAILABILITY
+              <button
+                className={styles.bookNowBtn}
+                disabled={loadingHotelDetailsId === item.id}
+                onClick={() => handleBookNow(item)}
+              >
+                {loadingHotelDetailsId === item.id
+                  ? "LOADING"
+                  : "SEE AVAILABILITY"}
               </button>
             </div>
           </div>

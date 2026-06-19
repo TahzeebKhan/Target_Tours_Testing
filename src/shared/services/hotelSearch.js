@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 export const HOTEL_SEARCH_SESSION_KEY = "hotelSearchContext";
 export const HOTEL_SEARCH_RESULTS_KEY = "hotelSearchResults";
 export const HOTEL_SEARCH_RESULTS_EVENT = "hotel-search-results";
+export const HOTEL_DETAILS_KEY = "hotelDetails";
 
 const normalizeBaseUrl = () => {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
@@ -11,6 +12,17 @@ const normalizeBaseUrl = () => {
 };
 
 const getDomain = () => process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+
+const getAuthToken = () => Cookies.get("auth_token") || "";
+
+const getHotelSearchHeaders = () => {
+  const token = getAuthToken();
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 const getUuid = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -57,6 +69,10 @@ export const subscribeHotelSearchChannel = (channel, handlers = {}) => {
 
   socket.addEventListener("error", (event) => {
     handlers.onError?.(event, socket);
+  });
+
+  socket.addEventListener("close", (event) => {
+    handlers.onClose?.(event, socket);
   });
 
   return socket;
@@ -106,7 +122,8 @@ export const fetchHotelSearchSuggestions = async (query) => {
 
   const response = await fetch(url.toString(), {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -132,14 +149,17 @@ export const fetchHotelSearchSuggestions = async (query) => {
 
 export const initHotelSearch = async (payload) => {
   const url = new URL("/api/hotel-search/init", normalizeBaseUrl());
-  const token = Cookies.get("auth_token");
+
+  console.log("[Hotel timing] init API fetch", {
+    url: url.toString(),
+    payload,
+  });
 
   const response = await fetch(url.toString(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
     body: JSON.stringify({
       domain: getDomain(),
       ...payload,
@@ -151,6 +171,37 @@ export const initHotelSearch = async (payload) => {
   if (!response.ok) {
     throw new Error(
       data?.error?.message || data?.message || "Hotel search init failed",
+    );
+  }
+
+  return data;
+};
+
+export const fetchHotelDetails = async ({
+  searchId,
+  hotelId,
+  priceProvider,
+}) => {
+  const url = new URL("/api/hotel-search/hotel-details", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      domain: getDomain(),
+      searchId,
+      hotelId,
+      priceProvider,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error?.message || data?.message || "Hotel details failed",
     );
   }
 
