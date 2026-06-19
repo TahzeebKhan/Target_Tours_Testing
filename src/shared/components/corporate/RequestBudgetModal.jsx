@@ -46,22 +46,22 @@ const RequestBudgetModal = ({ remainingBudget, onClose }) => {
                 <path
                   d="M28 20V25.3333C28 26.0406 27.719 26.7189 27.219 27.219C26.7189 27.719 26.0406 28 25.3333 28H6.66667C5.95942 28 5.28115 27.719 4.78105 27.219C4.28095 26.7189 4 26.0406 4 25.3333V20"
                   stroke="#7B8799"
-                  stroke-width="2.66667"
-                  stroke-linecap="round"
+                  strokeWidth="2.66667"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M22.6673 10.6667L16.0007 4L9.33398 10.6667"
                   stroke="#7B8799"
-                  stroke-width="2.66667"
-                  stroke-linecap="round"
+                  strokeWidth="2.66667"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M16 4V20"
                   stroke="#7B8799"
-                  stroke-width="2.66667"
-                  stroke-linecap="round"
+                  strokeWidth="2.66667"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </svg>

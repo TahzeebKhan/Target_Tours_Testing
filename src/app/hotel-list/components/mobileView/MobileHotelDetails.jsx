@@ -9,13 +9,17 @@ import ResultsBottomSheet from './ResultsBottomSheet'
 import HotelGridView from './hotelGridView/HotelGridView'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
+  HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
+  fetchHotelDetails,
 } from '@/shared/services/hotelSearch'
 import {
+  getStaySummary,
   getHotelsFromMessage,
   isHotelTerminalPayload,
   normalizeHotelCard,
+  shouldApplyHotelResults,
 } from '../tourListing/TourListing'
 
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
@@ -25,12 +29,14 @@ const MobileHotelDetails = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const hotelSearchChannel = searchParams.get("channel") || "";
+    const staySummary = getStaySummary(searchParams);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   /* ✅ REQUIRED STATES */
   const [likedTours, setLikedTours] = useState([]);
   const [hotelResults, setHotelResults] = useState([]);
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
+  const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
 
@@ -42,8 +48,40 @@ const MobileHotelDetails = () => {
     );
   };
 
-  const handleBookNow = () => {
-    router.push("/hotel-detail");
+  const handleBookNow = async (hotel) => {
+    if (!hotel) return;
+
+    const payload = {
+      searchId: hotel.searchId,
+      hotelId: hotel.hotelId || hotel.id,
+      priceProvider: hotel.priceProvider,
+    };
+
+    if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
+      console.warn("Missing hotel details payload fields:", payload);
+      return;
+    }
+
+    setLoadingHotelDetailsId(hotel.id);
+
+    try {
+      const details = await fetchHotelDetails(payload);
+      window.sessionStorage.setItem(
+        HOTEL_DETAILS_KEY,
+        JSON.stringify({
+          request: payload,
+          hotel,
+          details,
+        }),
+      );
+      router.push(
+        `/hotel-detail?hotelId=${encodeURIComponent(payload.hotelId || "")}`,
+      );
+    } catch (error) {
+      console.error("Hotel details request failed:", error);
+    } finally {
+      setLoadingHotelDetailsId("");
+    }
   };
 
   useEffect(() => {
@@ -74,12 +112,19 @@ const MobileHotelDetails = () => {
     setIsHotelLoading(Boolean(hotelSearchChannel));
     hotelResultSourceRef.current = "";
 
-    const normalizeHotelsInBatches = (hotels) => {
+    const normalizeHotelsInBatches = (hotels, meta = {}) => {
       const runId = normalizeRunRef.current + 1;
       normalizeRunRef.current = runId;
+      const withSearchMeta = (hotel) => ({
+        ...hotel,
+        searchId: hotel.searchId || hotel.search_id || meta.searchId,
+        requestId: hotel.requestId || hotel.request_id || meta.requestId,
+        hotelSearchKey:
+          hotel.hotelSearchKey || hotel.hotel_search_key || meta.hotelSearchKey,
+      });
       const firstBatch = hotels
         .slice(0, FIRST_HOTEL_RENDER_BATCH_SIZE)
-        .map((hotel, index) => normalizeHotelCard(hotel, index));
+        .map((hotel, index) => normalizeHotelCard(withSearchMeta(hotel), index));
 
       setHotelResults(firstBatch);
       setIsHotelLoading(false);
@@ -94,7 +139,9 @@ const MobileHotelDetails = () => {
         const batchStart = nextIndex;
         const batch = hotels
           .slice(batchStart, batchStart + HOTEL_RENDER_BATCH_SIZE)
-          .map((hotel, index) => normalizeHotelCard(hotel, batchStart + index));
+          .map((hotel, index) =>
+            normalizeHotelCard(withSearchMeta(hotel), batchStart + index),
+          );
 
         nextIndex += HOTEL_RENDER_BATCH_SIZE;
         setHotelResults((prev) => [...prev, ...batch]);
@@ -125,13 +172,15 @@ const MobileHotelDetails = () => {
         return;
       }
       if (
-        hotelResultSourceRef.current === "merged" &&
-        nextResults.source !== "merged"
+        !shouldApplyHotelResults(
+          hotelResultSourceRef.current,
+          nextResults.source,
+        )
       ) {
         return;
       }
 
-      normalizeHotelsInBatches(nextResults.hotels);
+      normalizeHotelsInBatches(nextResults.hotels, nextResults.meta);
       hotelResultSourceRef.current = nextResults.source;
     };
 
@@ -204,6 +253,8 @@ const MobileHotelDetails = () => {
                         toggleLike={toggleLike}
                         handleBookNow={handleBookNow}
                         isLoading={isHotelLoading}
+                        staySummary={staySummary}
+                        loadingHotelDetailsId={loadingHotelDetailsId}
                     />
             </ResultsBottomSheet>
         </div>

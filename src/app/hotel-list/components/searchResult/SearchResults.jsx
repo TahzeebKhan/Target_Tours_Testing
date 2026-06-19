@@ -1,24 +1,26 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import styles from "./SearchResult.module.css";
 import SortDropdown from "@/app/tour-list/components/sortDropdown/SortDropdown";
 
-const SearchResults = ({ viewType, setViewType, totalResults = 100 }) => {
-  const [sort, setSort] = useState("recent");
-
+const SearchResults = ({
+  viewType,
+  setViewType,
+  totalResults = 100,
+  sort,
+  setSort,
+}) => {
   return (
     <div className={styles.searchResultsContainer}>
       <div className={styles.searchResultsLeft}>
         <div>
-          Showing <span>{totalResults ? 1 : 0}</span> -{" "}
-          <span>{Math.min(10, totalResults)}</span> of{" "}
-          <span>{totalResults}</span> results
+           Total  <span>{totalResults}</span> results
         </div>
       </div>
 
       <div className={styles.searchResultsRight}>
         <div className={styles.viewTypeContainer}>
-          <span className={styles.viewType}>View by</span>
+       <span className={styles.viewType}>View by</span>
 
           {/* GRID VIEW */}
           <button

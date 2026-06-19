@@ -72,36 +72,36 @@ const CorporateReservationCard = ({ data }) => {
                 <path
                   d="M4 2H12"
                   stroke="#4A5565"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M4 5.33333H12"
                   stroke="#4A5565"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M4 8.66667L9.66667 14"
                   stroke="#4A5565"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M4 8.66667H6"
                   stroke="#4A5565"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M6 8.66667C10.4447 8.66667 10.4447 2 6 2"
                   stroke="#4A5565"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                   stroke-linejoin="round"
                 />
               </svg>

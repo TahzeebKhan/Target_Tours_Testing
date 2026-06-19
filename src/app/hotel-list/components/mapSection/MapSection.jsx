@@ -12,6 +12,7 @@ import {
 import {
   getHotelsFromMessage,
   normalizeHotelCard,
+  shouldApplyHotelResults,
 } from "../tourListing/TourListing";
 
 const position = { lat: 25.1972, lng: 55.2744 };
@@ -80,8 +81,10 @@ export default function MapSection() {
       if (!nextResults.hotels.length) return;
 
       if (
-        hotelResultSourceRef.current === "merged" &&
-        nextResults.source !== "merged"
+        !shouldApplyHotelResults(
+          hotelResultSourceRef.current,
+          nextResults.source,
+        )
       ) {
         return;
       }

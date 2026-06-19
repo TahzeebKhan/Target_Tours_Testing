@@ -54,22 +54,22 @@ export default function CorporateSidebarSummary() {
                   <path
                     d="M9.99935 18.3333C14.6017 18.3333 18.3327 14.6024 18.3327 10C18.3327 5.39763 14.6017 1.66667 9.99935 1.66667C5.39698 1.66667 1.66602 5.39763 1.66602 10C1.66602 14.6024 5.39698 18.3333 9.99935 18.3333Z"
                     stroke="#F97316"
-                    stroke-width="1.66667"
-                    stroke-linecap="round"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
                     stroke-linejoin="round"
                   />
                   <path
                     d="M10 6.66667V10"
                     stroke="#F97316"
-                    stroke-width="1.66667"
-                    stroke-linecap="round"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
                     stroke-linejoin="round"
                   />
                   <path
                     d="M10 13.3333H10.0083"
                     stroke="#F97316"
-                    stroke-width="1.66667"
-                    stroke-linecap="round"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
                     stroke-linejoin="round"
                   />
                 </g>
@@ -91,15 +91,15 @@ export default function CorporateSidebarSummary() {
                   <path
                     d="M9.99935 18.3333C14.6017 18.3333 18.3327 14.6024 18.3327 9.99999C18.3327 5.39762 14.6017 1.66666 9.99935 1.66666C5.39698 1.66666 1.66602 5.39762 1.66602 9.99999C1.66602 14.6024 5.39698 18.3333 9.99935 18.3333Z"
                     stroke="#059669"
-                    stroke-width="1.66667"
-                    stroke-linecap="round"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
                     stroke-linejoin="round"
                   />
                   <path
                     d="M7.5 10L9.16667 11.6667L12.5 8.33334"
                     stroke="#059669"
-                    stroke-width="1.66667"
-                    stroke-linecap="round"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
                     stroke-linejoin="round"
                   />
                 </g>

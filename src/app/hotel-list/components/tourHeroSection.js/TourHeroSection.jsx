@@ -121,11 +121,24 @@ const TourHeroSection = () => {
               searchContext = null;
             }
 
-            if (
-              searchContext?.channel !== hotelSearchChannel ||
-              !searchContext?.initPayload ||
-              searchContext?.initResponse
-            ) {
+            const initSkipReason =
+              searchContext?.channel !== hotelSearchChannel
+                ? "session channel does not match URL channel"
+                : !searchContext?.initPayload
+                  ? "missing initPayload in sessionStorage"
+                  : searchContext?.initResponse
+                    ? "initResponse already exists in sessionStorage"
+                    : "";
+
+            if (initSkipReason) {
+              console.log("[Hotel timing] init API skipped", {
+                channel: hotelSearchChannel,
+                reason: initSkipReason,
+                sessionChannel: searchContext?.channel,
+                initStatus: searchContext?.initStatus,
+                hasInitPayload: Boolean(searchContext?.initPayload),
+                hasInitResponse: Boolean(searchContext?.initResponse),
+              });
               return;
             }
 
@@ -175,6 +188,13 @@ const TourHeroSection = () => {
           onError: () => {
             console.warn("Hotel list socket connection failed.");
             setSearchSubmitting(false);
+          },
+          onClose: (event) => {
+            console.warn("Hotel list socket closed.", {
+              code: event.code,
+              reason: event.reason,
+              wasClean: event.wasClean,
+            });
           },
           onMessage: (payload) => {
             if (payload?.channel && payload.channel !== hotelSearchChannel) {

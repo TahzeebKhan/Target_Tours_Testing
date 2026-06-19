@@ -21,7 +21,7 @@ const SearchResults = ({
       <div className={styles.searchResultsLeft}>
         <div>
           Showing <span>{startResult}</span> - <span>{endResult}</span> of{" "}
-          <span>{totalResults}</span> results
+          Total <span>{totalResults}</span> results
         </div>
       </div>
 

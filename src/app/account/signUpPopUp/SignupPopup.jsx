@@ -322,6 +322,28 @@ export default function SignupPopup({ onNavigate, onClose }) {
     }
   };
 
+  const handleOtpDigitPaste = (event) => {
+    event.preventDefault();
+
+    const pastedOtp = event.clipboardData
+      .getData("text")
+      .replace(/[^\d]/g, "")
+      .slice(0, SIGNUP_OTP_LENGTH);
+
+    if (!pastedOtp) return;
+
+    const nextOtp = Array(SIGNUP_OTP_LENGTH).fill("");
+    pastedOtp.split("").forEach((digit, index) => {
+      nextOtp[index] = digit;
+    });
+
+    setOtpDigits(nextOtp);
+    setOtpError("");
+
+    const focusIndex = Math.min(pastedOtp.length, SIGNUP_OTP_LENGTH) - 1;
+    document.getElementById(`signup-otp-${focusIndex}`)?.focus();
+  };
+
   const handleOtpDigitKeyDown = (index, event) => {
     if (event.key !== "Backspace") return;
 
@@ -439,6 +461,7 @@ export default function SignupPopup({ onNavigate, onClose }) {
                         className={styles.otpInput}
                         value={digit}
                         onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                        onPaste={handleOtpDigitPaste}
                         onKeyDown={(e) => handleOtpDigitKeyDown(index, e)}
                       />
                     ))}
