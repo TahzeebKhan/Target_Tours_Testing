@@ -1,4 +1,5 @@
 .tourContent {
+  --hotel-hero-sticky-offset: 342px;
   width: 100%;
   background-color: #F9F9F9;
   position: relative;
@@ -13,6 +14,14 @@
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   padding: 42px 0px 24px 64px;
+  align-items: stretch;
+}
+
+.tourResults {
+  min-height: calc(100vh - var(--hotel-hero-sticky-offset));
+  position: sticky;
+  top: var(--hotel-hero-sticky-offset);
+  align-self: start;
 }
 
 .tourListSectionMobileView{
@@ -67,6 +76,10 @@
 
 
 @media (max-width: 991px) {
+  .tourContent {
+    --hotel-hero-sticky-offset: 320px;
+  }
+
   .tourLayout {
     grid-template-columns: 1fr minmax(0, 360px);
     padding-left: 16px;
@@ -84,5 +97,8 @@
   }
   .tourListSectionMobileView{
     display: flex;
+  }
+  .tourResults {
+    position: static;
   }
 }

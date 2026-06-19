@@ -1,5 +1,6 @@
 .mapContainer {
-    height: 500px;
+    height: calc(100vh - var(--hotel-hero-sticky-offset, 342px));
+    min-height: calc(100vh - var(--hotel-hero-sticky-offset, 342px));
     width: 100%;
 }
 

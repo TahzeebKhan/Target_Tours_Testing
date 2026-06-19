@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import styles from "./HotelGridView.module.css";
 
@@ -7,8 +7,11 @@ const HotelGridView = ({
   likedTours,
   toggleLike,
   rating,
-  handleBookNow
+  handleBookNow,
+  isLoading = false
 }) => {
+  const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
+
   return (
     <motion.div
       className={styles.gridWrapper}
@@ -19,13 +22,42 @@ const HotelGridView = ({
       exit={{ opacity: 0, y: 0 }}
       transition={{ duration: 0.55, ease: "easeInOut" }}
     >
+      {!tourData.length &&
+        isLoading &&
+        skeletonCards.map((item) => (
+          <div
+            key={`hotel-mobile-skeleton-${item}`}
+            className={`${styles.gridCard} ${styles.skeletonCard}`}
+          >
+            <div className={styles.skeletonImage}></div>
+            <div className={styles.skeletonContent}>
+              <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
+              <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
+              <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
+              <div className={styles.skeletonFeatures}>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
+              <div className={styles.skeletonFooter}>
+                <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
+                <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
+              </div>
+            </div>
+          </div>
+        ))}
       {tourData.map((item, index) => (
         <div
           key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}
           className={styles.gridCard}
         >
           <div className={styles.gridCardImage}>
-            <img className={styles.ListViewCardImage} src="/hotelList/hotelCardImg.png" alt="" />
+            <img
+              className={styles.ListViewCardImage}
+              src={item.image || "/hotelList/hotelCardImg.png"}
+              alt={item.title || "Hotel"}
+            />
             <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
               <div className={styles.headerLeft}>
                 <div className={styles.new}>New</div>
@@ -54,7 +86,7 @@ const HotelGridView = ({
                       <img
                         key={index}
                         src={
-                          index < rating
+                          index < (item.rating ?? rating ?? 5)
                             ? "/icons/conicstar.svg"
                             : "/icons/star-gray.svg"
                         }
@@ -92,7 +124,7 @@ const HotelGridView = ({
                     <span>•</span>
                   </div>
                   <div className={styles.featureItem}>
-                    <img src="/icons/Mixer.svg" alt="mixer" />
+                    <img src="/icons/pool.svg" alt="mixer" />
                     <p>Mixer</p>
                   </div>
                 </div>

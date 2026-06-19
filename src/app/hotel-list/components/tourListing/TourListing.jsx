@@ -1,13 +1,264 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TourListing.module.css";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SearchResults from "../searchResult/SearchResults";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import {
+  HOTEL_SEARCH_RESULTS_EVENT,
+  HOTEL_SEARCH_RESULTS_KEY,
+} from "@/shared/services/hotelSearch";
+
+const parseSocketValue = (value) => {
+  if (typeof value !== "string") return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
+export const getMessageData = (payload = {}) => {
+  const parsedPayload = parseSocketValue(payload);
+  const data = parseSocketValue(parsedPayload?.data);
+
+  return data || parsedPayload;
+};
+
+export const getMessageContent = (payload = {}) => {
+  const data = getMessageData(payload);
+  const content = parseSocketValue(data?.content || data?.data?.content);
+
+  return content || data;
+};
+
+export const getHotelsFromMessage = (payload = {}) => {
+  const data = getMessageData(payload);
+  const content = getMessageContent(payload);
+  const nestedData = parseSocketValue(data?.data);
+  const nestedDataContent = parseSocketValue(nestedData?.content);
+  const nestedContent = parseSocketValue(content?.content || content?.data?.content);
+  const mergedHotels =
+    data?.mergedHotels ||
+    content?.mergedHotels ||
+    data?.hotels?.mergedHotels ||
+    content?.hotels?.mergedHotels ||
+    nestedData?.mergedHotels ||
+    nestedDataContent?.mergedHotels ||
+    nestedContent?.mergedHotels;
+  const curatedHotels =
+    content?.curatedHotels ||
+    data?.curatedHotels ||
+    data?.hotels?.curatedHotels ||
+    content?.hotels?.curatedHotels ||
+    nestedData?.curatedHotels ||
+    nestedDataContent?.curatedHotels ||
+    nestedContent?.curatedHotels;
+
+  if (Array.isArray(mergedHotels) && mergedHotels.length) {
+    return { source: "merged", hotels: mergedHotels };
+  }
+
+  if (Array.isArray(curatedHotels) && curatedHotels.length) {
+    return { source: "curated", hotels: curatedHotels };
+  }
+
+  if (Array.isArray(data?.hotels) && data.hotels.length) {
+    return { source: "hotels", hotels: data.hotels };
+  }
+
+  if (Array.isArray(content?.hotels) && content.hotels.length) {
+    return { source: "hotels", hotels: content.hotels };
+  }
+
+  return { source: "", hotels: [] };
+};
+
+export const getHotelImage = (hotel = {}) => {
+  const image =
+    hotel.image ||
+    hotel.imageUrl ||
+    hotel.thumbnail ||
+    hotel.heroImage ||
+    hotel.mainImage ||
+    hotel.images?.[0]?.url ||
+    hotel.images?.[0]?.imageUrl ||
+    hotel.images?.[0];
+
+  return typeof image === "string" && image ? image : "/hotelList/hotelCardImg.png";
+};
+
+const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number" || typeof value === "string") return value;
+  if (depth > 4 || typeof value !== "object" || visitedCount.current > 80) {
+    return null;
+  }
+
+  visitedCount.current += 1;
+
+  const priceKeys = [
+    "total",
+    "totalRate",
+    "finalRate",
+    "netRate",
+    "amount",
+    "price",
+    "minRate",
+    "baseRate",
+    "publishedRate",
+    "sellingRate",
+    "roomRate",
+    "rate",
+  ];
+
+  if (Array.isArray(value)) {
+    for (const nestedValue of value.slice(0, 5)) {
+      const price = findPriceValue(nestedValue, depth + 1, visitedCount);
+      if (price !== null) return price;
+    }
+
+    return null;
+  }
+
+  for (const key of priceKeys) {
+    const nestedValue = findPriceValue(value[key], depth + 1, visitedCount);
+    if (nestedValue !== null) return nestedValue;
+  }
+
+  for (const nestedValue of Object.values(value).slice(0, 20)) {
+    const price = findPriceValue(nestedValue, depth + 1, visitedCount);
+    if (price !== null) return price;
+  }
+
+  return null;
+};
+
+export const formatHotelPrice = (hotel = {}) => {
+  const price = [
+    hotel.price,
+    hotel.amount,
+    hotel.minRate,
+    hotel.totalRate,
+    hotel.baseRate,
+    hotel.rate,
+    hotel.pricing,
+    hotel.rates,
+    hotel.rooms,
+  ].reduce((foundPrice, candidate) => {
+    if (foundPrice !== null) return foundPrice;
+    return findPriceValue(candidate);
+  }, null);
+
+  if (price === null || price === undefined || price === "") return "₹ --";
+
+  const numericPrice = Number(price);
+  if (!Number.isNaN(numericPrice)) {
+    return `₹ ${numericPrice.toLocaleString("en-IN")}`;
+  }
+
+  return String(price).startsWith("₹") ? String(price) : `₹ ${price}`;
+};
+
+export const getHotelRating = (hotel = {}) => {
+  const rating = Number(hotel.starRating || hotel.rating || hotel.stars || 5);
+  if (!Number.isFinite(rating)) return 5;
+  return Math.max(0, Math.min(5, Math.round(rating)));
+};
+
+export const getHotelCoordinates = (hotel = {}) => {
+  const coordinates =
+    hotel.coordinates ||
+    hotel.geoCode ||
+    hotel.geo_code ||
+    hotel.location?.coordinates ||
+    hotel.location?.geoCode ||
+    {};
+  const lat =
+    coordinates.lat ??
+    coordinates.latitude ??
+    hotel.lat ??
+    hotel.latitude ??
+    hotel.geoLat;
+  const lng =
+    coordinates.lng ??
+    coordinates.long ??
+    coordinates.longitude ??
+    hotel.lng ??
+    hotel.long ??
+    hotel.longitude ??
+    hotel.geoLong;
+  const latitude = Number(lat);
+  const longitude = Number(lng);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return { latitude, longitude };
+};
+
+export const normalizeHotelCard = (hotel = {}, index = 0) => {
+  const addressParts = [
+    hotel.address,
+    hotel.addressLine1,
+    hotel.locality,
+    hotel.city,
+    hotel.locationName,
+    hotel.country,
+  ]
+    .filter(Boolean)
+    .map((part) => String(part).trim());
+
+  const coordinates = getHotelCoordinates(hotel);
+
+  return {
+    id:
+      hotel.id ||
+      hotel.hotelId ||
+      hotel.api_hotel_id ||
+      hotel.hotelCode ||
+      `${hotel.name || "hotel"}-${index}`,
+    image: getHotelImage(hotel),
+    route: addressParts.join(", ") || "Address not available",
+    title: hotel.name || hotel.hotelName || hotel.title || "Hotel",
+    price: formatHotelPrice(hotel),
+    rating: getHotelRating(hotel),
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
+    raw: hotel,
+  };
+};
+
+const HOTEL_TERMINAL_MESSAGE_TYPES = new Set([
+  "HOTEL_INIT_COMPLETE",
+  "HOTEL_STREAM_FAILED",
+  "HOTEL_INIT_ERROR",
+  "HOTEL_MERGED_RESPONSE",
+]);
+
+export const isHotelTerminalPayload = (payload = {}) => {
+  const data = getMessageData(payload);
+  const type = payload?.type || data?.type;
+  const status = data?.status || getMessageContent(payload)?.status;
+
+  return (
+    HOTEL_TERMINAL_MESSAGE_TYPES.has(type) ||
+    status === "completed" ||
+    status === "failed"
+  );
+};
+
+const skeletonCards = Array.from({ length: 6 }, (_, index) => index);
+const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
+const HOTEL_RENDER_BATCH_SIZE = 300;
 
 const TourListing = () => {
+  const searchParams = useSearchParams();
+  const hotelSearchChannel = searchParams.get("channel") || "";
   const [likedTours, setLikedTours] = useState([]);
   const [viewType, setViewType] = useState("grid");
   const [expandedId, setExpandedId] = useState(null);
@@ -16,6 +267,12 @@ const TourListing = () => {
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
   const [wishlists, setWishlists] = useState([]); // fetch later from backend
   const [selectedTourId, setSelectedTourId] = useState(null);
+  const [hotelResults, setHotelResults] = useState([]);
+  const [totalHotelResults, setTotalHotelResults] = useState(0);
+  const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
+  const [hotelResultSource, setHotelResultSource] = useState("");
+  const hotelResultSourceRef = useRef("");
+  const normalizeRunRef = useRef(0);
 
   const handleHeartClick = (tourId) => {
     setSelectedTourId(tourId);
@@ -48,74 +305,104 @@ const TourListing = () => {
   };
 
   const rating = 5;
-  const tourData = [
-    {
-      id: 1,
-      image: "/hotelList/hotelCardImg.png",
-      route: "9211 Forest Avenue, California - 90734",
-      title: "Splendors of the Canadian West",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 2,
-      image: "/tourList/cardItem2.jpg",
-      route: "9211 Forest Avenue, California - 90734",
-      title: "Splendors of the Rocky Mountains",
-      days: "14 DAYS & 13 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 72,990",
-    },
-    {
-      id: 3,
-      image: "/tourList/cardItem3.jpg",
-      route: "TORONTO TO MONTREAL",
-      title: "Charms of Eastern Canada",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 4,
-      image: "/tourList/cardItem4.jpg",
-      route: "WHITEHORSE TO FAIRBANKS",
-      title: "Northern Lights of Canada",
-      days: "10 DAYS & 9 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "4 ACTIVITIES",
-      price: "₹ 89,900",
-    },
-    {
-      id: 5,
-      image: "/tourList/cardItem5.jpg",
-      route: "MONTREAL TO QUEBEC CITY",
-      title: "Colors of Quebec Fall",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-    {
-      id: 6,
-      image: "/tourList/cardItem6.jpg",
-      route: "VANCOUVER TO WHISTLER",
-      title: "Elegance of Canada's West Coast",
-      days: "17 DAYS & 16 NIGHTS",
-      meals: "SELECTED MEALS",
-      hotel: "4-STAR HOTEL",
-      activities: "3 ACTIVITIES",
-      price: "₹ 66,945",
-    },
-  ];
+
+  useEffect(() => {
+    normalizeRunRef.current += 1;
+    setHotelResults([]);
+    setTotalHotelResults(0);
+    setIsHotelLoading(Boolean(hotelSearchChannel));
+    setHotelResultSource("");
+    hotelResultSourceRef.current = "";
+
+    const normalizeHotelsInBatches = (hotels) => {
+      const runId = normalizeRunRef.current + 1;
+      normalizeRunRef.current = runId;
+      setTotalHotelResults(hotels.length);
+
+      const firstBatch = hotels
+        .slice(0, FIRST_HOTEL_RENDER_BATCH_SIZE)
+        .map((hotel, index) => normalizeHotelCard(hotel, index));
+
+      setHotelResults(firstBatch);
+      setIsHotelLoading(false);
+
+      let nextIndex = FIRST_HOTEL_RENDER_BATCH_SIZE;
+
+      const appendNextBatch = () => {
+        if (normalizeRunRef.current !== runId || nextIndex >= hotels.length) {
+          return;
+        }
+
+        const batchStart = nextIndex;
+        const batch = hotels
+          .slice(batchStart, batchStart + HOTEL_RENDER_BATCH_SIZE)
+          .map((hotel, index) => normalizeHotelCard(hotel, batchStart + index));
+
+        nextIndex += HOTEL_RENDER_BATCH_SIZE;
+        setHotelResults((prev) => [...prev, ...batch]);
+
+        if (nextIndex < hotels.length) {
+          window.setTimeout(appendNextBatch, 0);
+        }
+      };
+
+      window.setTimeout(appendNextBatch, 0);
+    };
+
+    const applyHotelResults = (payload) => {
+      if (payload?.channel && payload.channel !== hotelSearchChannel) {
+        return;
+      }
+
+      const nextResults = getHotelsFromMessage(payload);
+      console.log("Hotel result source:", {
+        source: nextResults.source,
+        count: nextResults.hotels.length,
+      });
+
+      if (!nextResults.hotels.length) {
+        if (isHotelTerminalPayload(payload)) {
+          setIsHotelLoading(false);
+        }
+        return;
+      }
+      if (
+        hotelResultSourceRef.current === "merged" &&
+        nextResults.source !== "merged"
+      ) {
+        return;
+      }
+
+      normalizeHotelsInBatches(nextResults.hotels);
+      hotelResultSourceRef.current = nextResults.source;
+      setHotelResultSource(nextResults.source);
+    };
+
+    const handleHotelResults = (event) => {
+      applyHotelResults(event.detail);
+    };
+
+    window.addEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+
+    const cachedResults = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    if (cachedResults) {
+      try {
+        const cachedPayload = JSON.parse(cachedResults);
+        if (!hotelSearchChannel || cachedPayload?.channel === hotelSearchChannel) {
+          applyHotelResults(cachedPayload);
+        }
+      } catch {
+        // Ignore stale malformed session data.
+      }
+    }
+
+    return () => {
+      normalizeRunRef.current += 1;
+      window.removeEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+    };
+  }, [hotelSearchChannel]);
+
+  const displayHotels = useMemo(() => hotelResults, [hotelResults]);
 
   const toggleLike = (id) => {
     setLikedTours((prev) =>
@@ -128,7 +415,11 @@ const TourListing = () => {
   return (
     <>
       <section className={styles.tourListSection}>
-        <SearchResults viewType={viewType} setViewType={setViewType} />
+        <SearchResults
+          viewType={viewType}
+          setViewType={setViewType}
+          totalResults={totalHotelResults || displayHotels.length}
+        />
 
         <AnimatePresence mode="popLayout">
           {viewType === "grid" && (
@@ -141,7 +432,32 @@ const TourListing = () => {
               exit={{ opacity: 0, y: 0 }}
               transition={{ duration: 0.55, ease: "easeInOut" }}
             >
-              {tourData.map((item, index) => (
+              {!displayHotels.length &&
+                isHotelLoading &&
+                skeletonCards.map((item) => (
+                  <div
+                    key={`hotel-grid-skeleton-${item}`}
+                    className={`${styles.gridCard} ${styles.skeletonCard}`}
+                  >
+                    <div className={styles.skeletonImage}></div>
+                    <div className={styles.skeletonContent}>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
+                      <div className={styles.skeletonFeatures}>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
+                      <div className={styles.skeletonFooter}>
+                        <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
+                        <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              {displayHotels.map((item, index) => (
                 <div
                   key={item?.id || item?.api_hotel_id || item?.title || `hotel-grid-${index}`}
                   className={styles.gridCard}
@@ -149,8 +465,8 @@ const TourListing = () => {
                   <div className={styles.gridCardImage}>
                     <img
                       className={styles.ListViewCardImage}
-                      src="/hotelList/hotelCardImg.png"
-                      alt=""
+                      src={item.image}
+                      alt={item.title}
                     />
                     <div
                       className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
@@ -185,7 +501,7 @@ const TourListing = () => {
                               <img
                                 key={index}
                                 src={
-                                  index < rating
+                                  index < (item.rating ?? rating)
                                     ? "/icons/conicstar.svg"
                                     : "/icons/star-gray.svg"
                                 }
@@ -222,7 +538,7 @@ const TourListing = () => {
                             <span></span>
                           </div>
                           <div className={styles.featureItem}>
-                            <img src="/icons/Mixer.svg" alt="mixer" />
+                            <img src="/icons/pool.svg" alt="mixer" />
                             <p>Mixer</p>
                           </div>
                         </div>
@@ -276,7 +592,32 @@ const TourListing = () => {
               exit={{ opacity: 0, y: 0 }}
               transition={{ duration: 0.55, ease: "easeInOut" }}
             >
-              {tourData.map((item, index) => (
+              {!displayHotels.length &&
+                isHotelLoading &&
+                skeletonCards.map((item) => (
+                  <div
+                    key={`hotel-list-skeleton-${item}`}
+                    className={`${styles.ListViewCardContainer} ${styles.skeletonCard}`}
+                  >
+                    <div className={styles.skeletonListImage}></div>
+                    <div className={styles.skeletonListContent}>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
+                      <div className={styles.skeletonFeatures}>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
+                      <div className={styles.skeletonFooter}>
+                        <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
+                        <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              {displayHotels.map((item, index) => (
                 <motion.div
                   className={styles.ListViewCardContainer}
                   key={item.id}
@@ -325,7 +666,7 @@ const TourListing = () => {
                               <img
                                 key={index}
                                 src={
-                                  index < rating
+                                  index < (item.rating ?? rating)
                                     ? "/icons/conicstar.svg"
                                     : "/icons/star-gray.svg"
                                 }
@@ -362,7 +703,7 @@ const TourListing = () => {
                             <span>•</span>
                           </div>
                           <div className={styles.featureItem}>
-                            <img src="" alt="" />
+                            <img src="/icons/pool.svg" alt="mixer" />
                             <p>Mixer</p>
                           </div>
                         </div>

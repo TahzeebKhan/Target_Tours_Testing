@@ -255,6 +255,8 @@
   gap: 24px;
   background-color: #ffffff;
   transition: all 0.45s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
 }
 .ListViewCardContainer:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
@@ -692,6 +694,8 @@
   flex-direction: column;
   background-color: #ffffff;
   transition: all 0.45s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
 }
 .gridCard:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
@@ -711,6 +715,110 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.skeletonCard {
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.skeletonCard:hover {
+  box-shadow: none;
+}
+
+.skeletonImage,
+.skeletonListImage,
+.skeletonLine,
+.skeletonFeatures span {
+  background: linear-gradient(90deg, #eceff3 0%, #f7f8fa 45%, #eceff3 100%);
+  background-size: 220% 100%;
+  animation: hotelSkeletonPulse 1.2s ease-in-out infinite;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 285px;
+}
+
+.skeletonListImage {
+  max-width: 320px;
+  width: 100%;
+  height: 285px;
+  flex: 0 0 320px;
+}
+
+.skeletonContent,
+.skeletonListContent {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.skeletonListContent {
+  width: 100%;
+  padding-left: 0;
+}
+
+.skeletonLine {
+  height: 14px;
+}
+
+.skeletonStars {
+  width: 112px;
+  height: 16px;
+}
+
+.skeletonTitle {
+  width: 72%;
+  height: 24px;
+}
+
+.skeletonAddress {
+  width: 88%;
+}
+
+.skeletonFeatures {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.skeletonFeatures span {
+  width: 104px;
+  height: 16px;
+}
+
+.skeletonBenefit {
+  width: 64%;
+}
+
+.skeletonFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.skeletonPrice {
+  width: 120px;
+  height: 32px;
+}
+
+.skeletonButton {
+  max-width: 210px;
+  width: 42%;
+  height: 41px;
+}
+
+@keyframes hotelSkeletonPulse {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
 }
 .tourListSectionMobileView {
   display: none;

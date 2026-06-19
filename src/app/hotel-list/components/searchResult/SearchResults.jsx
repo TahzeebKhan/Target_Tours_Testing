@@ -3,14 +3,16 @@ import React, { useState } from "react";
 import styles from "./SearchResult.module.css";
 import SortDropdown from "@/app/tour-list/components/sortDropdown/SortDropdown";
 
-const SearchResults = ({ viewType, setViewType }) => {
+const SearchResults = ({ viewType, setViewType, totalResults = 100 }) => {
   const [sort, setSort] = useState("recent");
 
   return (
     <div className={styles.searchResultsContainer}>
       <div className={styles.searchResultsLeft}>
         <div>
-          Showing <span>1</span> - <span>10</span> of <span>100</span> results
+          Showing <span>{totalResults ? 1 : 0}</span> -{" "}
+          <span>{Math.min(10, totalResults)}</span> of{" "}
+          <span>{totalResults}</span> results
         </div>
       </div>
 

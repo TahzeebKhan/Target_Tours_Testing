@@ -24,6 +24,12 @@ import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
 import { toast } from "react-toastify";
 import BrandLogo from "@/shared/components/BrandLogo";
 import { fetchHolidayPackageSuggestions } from "@/shared/services/tourPackage";
+import {
+  HOTEL_SEARCH_SESSION_KEY,
+  HOTEL_SEARCH_RESULTS_KEY,
+  createHotelSearchChannel,
+  fetchHotelSearchSuggestions,
+} from "@/shared/services/hotelSearch";
 
 const AirportSuggestionBox = dynamic(
   () => import("@/shared/components/airport/AirportSuggestionBox"),
@@ -417,11 +423,20 @@ const HomePage = ({
   const [to, setTo] = useState("");
   const [fromCode, setFromCode] = useState("");
   const [toCode, setToCode] = useState("");
+  const [selectedHotelLocation, setSelectedHotelLocation] = useState(null);
 
   const [multiCity, setMultiCity] = useState([
     { from: "", to: "" },
     { from: "", to: "" },
   ]);
+
+  const selectHotelSuggestion = (suggestion) => {
+    setSelectedHotelLocation(suggestion || null);
+    setTo(suggestion?.value || suggestion?.label || "");
+    setToCode(suggestion?.locationId || suggestion?.id || "");
+    setToSuggestionsOpen(false);
+    if (toInputRef.current) toInputRef.current.focus();
+  };
 
   const [direction, setDirection] = useState("right");
   const [flightDirection, setFlightDirection] = useState("right");
@@ -505,12 +520,25 @@ const HomePage = ({
     enabled: bookingType === "holiday" && toSuggestionsOpen && to.trim().length > 0,
     staleTime: 1000 * 60 * 5,
   });
+  const {
+    data: hotelSuggestionResponse = [],
+  } = useQuery({
+    queryKey: [
+      "hotel-search-suggestions",
+      to,
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () => fetchHotelSearchSuggestions(to),
+    enabled: bookingType === "hotel" && toSuggestionsOpen && to.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
   const holidayFromSuggestions = normalizeHolidaySuggestions(
     holidayFromSuggestionResponse,
   );
   const holidayToSuggestions = normalizeHolidaySuggestions(
     holidayToSuggestionResponse,
   );
+  const hotelSuggestions = hotelSuggestionResponse;
 
   const swapLocations = (index) => {
     if (typeof index === "number" && tripType === "multi") {
@@ -961,6 +989,18 @@ const HomePage = ({
     return `${year}-${month}-${day}`;
   };
 
+  const formatHotelApiDate = (value) => {
+    if (!value) return "";
+    const parsedDate = new Date(value);
+    if (isNaN(parsedDate.getTime())) return "";
+
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const year = parsedDate.getFullYear();
+
+    return `${month}/${day}/${year}`;
+  };
+
   const normalizePlaceValue = (value = "") =>
     String(value || "")
       .trim()
@@ -1211,14 +1251,123 @@ const HomePage = ({
     }
 
     if (bookingType === "hotel") {
-      router.push(
-        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`,
-      );
-    }
-    if (bookingType === "hotel") {
-      router.push(
-        `/hotel-list?city=${to}&checkIn=${hotelStartDate}&checkOut=${hotelEndDate}`,
-      );
+      try {
+        const channel = createHotelSearchChannel();
+        const checkInDate = normalizeSearchDate(hotelStartDate);
+        const checkOutDate = normalizeSearchDate(hotelEndDate);
+        const fetchedHotelSuggestions = selectedHotelLocation
+          ? []
+          : await fetchHotelSearchSuggestions(to);
+        const matchedHotelLocation =
+          selectedHotelLocation ||
+          fetchedHotelSuggestions.find(
+            (item) =>
+              String(item.value || item.label || "").toLowerCase() ===
+              String(to || "").toLowerCase(),
+          ) ||
+          fetchedHotelSuggestions[0];
+        const hotelLocation = matchedHotelLocation || {
+          label: to,
+          value: to,
+          locationId: toCode,
+          geoCode: {},
+        };
+        const adults = Math.max(1, Number(hotelGuestOpen?.adults || 1));
+        const children = Math.max(0, Number(hotelGuestOpen?.children || 0));
+        const rooms = Math.max(1, Number(hotelGuestOpen?.room || 1));
+        const geoCode = {
+          lat: Number(hotelLocation?.geoCode?.lat),
+          long: Number(hotelLocation?.geoCode?.long),
+        };
+        const hasGeoCode = Number.isFinite(geoCode.lat) && Number.isFinite(geoCode.long);
+        const locationPayload = hotelLocation?.raw || {
+          id: hotelLocation?.locationId || toCode || "",
+          name: hotelLocation?.label || hotelLocation?.value || to,
+          fullName:
+            hotelLocation?.detail ||
+            hotelLocation?.label ||
+            hotelLocation?.value ||
+            to,
+          code: null,
+          type: hotelLocation?.type || "city",
+          city: null,
+          state: hotelLocation?.state || "",
+          country: hotelLocation?.country || "IN",
+          score: 0,
+          referenceId: null,
+          ...(hasGeoCode ? { coordinates: geoCode } : {}),
+        };
+        const initPayload = {
+          locations: [locationPayload],
+          channel,
+          ...(hasGeoCode ? { geoCode } : {}),
+          locationId: hotelLocation?.locationId || toCode || "",
+          currency: "INR",
+          culture: "en-US",
+          checkIn: formatHotelApiDate(hotelStartDate),
+          checkOut: formatHotelApiDate(hotelEndDate),
+          rooms: [
+            {
+              adults: String(adults),
+              children: String(children),
+              childAges: [],
+            },
+          ],
+          agentCode: "14005",
+          destinationCountryCode: hotelLocation?.country || "IN",
+          nationality: "IN",
+          countryOfResidence: "IN",
+          channelId: "b2bIndiaDeals",
+          affiliateRegion: "B2B_India",
+          segmentId: "",
+          companyId: "1",
+          gstPercentage: 0,
+          tdsPercentage: 0,
+        };
+        const searchContext = {
+          channel,
+          initPayload,
+          city: hotelLocation?.value || hotelLocation?.label || to,
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          rooms,
+          adults,
+          children,
+          location: hotelLocation,
+        };
+
+        if (typeof window !== "undefined") {
+          window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+          window.sessionStorage.setItem(
+            HOTEL_SEARCH_SESSION_KEY,
+            JSON.stringify({
+              ...searchContext,
+              initResponse: null,
+              initStatus: "pending",
+            }),
+          );
+        }
+
+        const params = new URLSearchParams({
+          city: searchContext.city,
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          channel,
+          rooms: String(rooms),
+          adults: String(adults),
+          children: String(children),
+        });
+
+        if (hotelLocation?.locationId || toCode) {
+          params.set("locationId", hotelLocation?.locationId || toCode);
+        }
+
+        router.push(`/hotel-list?${params.toString()}`);
+      } catch (error) {
+        setSearchSubmitting(false);
+        toast.error(error.message || "Unable to start hotel search.");
+      }
+      return;
     }
 
     if (bookingType === "holiday") {
@@ -2322,6 +2471,8 @@ const HomePage = ({
                           onChange={(e) => {
                             if (bookingType === "hotel") {
                               setTo(e.target.value);
+                              setToCode("");
+                              setSelectedHotelLocation(null);
                               setToSuggestionsOpen(true);
                             } else {
                               setFrom(e.target.value);
@@ -2346,14 +2497,13 @@ const HomePage = ({
                         />
 
                         {bookingType === "hotel" && toSuggestionsOpen && (
-                          <div ref={toSuggestionRef}>
-                            <RecentSearch
-                              onSelect={(city) => {
-                                setTo(city); // ✅ input value set
-                                setToSuggestionsOpen(false); // ✅ dropdown close
-                              }}
-                            />
-                          </div>
+                          <SuggestionBox
+                            boxRef={toSuggestionRef}
+                            anchorRef={toInputRef}
+                            heading="HOTEL DESTINATIONS"
+                            suggestions={hotelSuggestions}
+                            onSelect={selectHotelSuggestion}
+                          />
                         )}
                         {bookingType === "holiday" && fromSuggestionsOpen && (
                           <>
@@ -2503,6 +2653,8 @@ const HomePage = ({
                             value={to}
                             onChange={(e) => {
                               setTo(e.target.value);
+                              setToCode("");
+                              setSelectedHotelLocation(null);
                               setToSuggestionsOpen(true);
                             }}
                             onFocus={() => setToSuggestionsOpen(true)}
@@ -2515,9 +2667,21 @@ const HomePage = ({
                             <SuggestionBox
                               boxRef={toSuggestionRef}
                               anchorRef={toInputRef}
-                              heading="PACKAGE SUGGESTIONS"
-                              suggestions={holidayToSuggestions}
-                              onSelect={(s) => selectSuggestion(s, "to")}
+                              heading={
+                                bookingType === "hotel"
+                                  ? "HOTEL DESTINATIONS"
+                                  : "PACKAGE SUGGESTIONS"
+                              }
+                              suggestions={
+                                bookingType === "hotel"
+                                  ? hotelSuggestions
+                                  : holidayToSuggestions
+                              }
+                              onSelect={(s) =>
+                                bookingType === "hotel"
+                                  ? selectHotelSuggestion(s)
+                                  : selectSuggestion(s, "to")
+                              }
                             />
                           )}
                         </>
@@ -2731,11 +2895,15 @@ const HomePage = ({
             handleSearch={handleSearch}
             styles={styles}
             to={to}
-            setTo={setTo}
-            checkIn={checkIn}
-            setCheckIn={setCheckIn}
-            checkOut={checkOut}
-            setCheckOut={setCheckOut}
+            setTo={(value) => {
+              setTo(value);
+              setToCode("");
+              setSelectedHotelLocation(null);
+            }}
+            checkIn={hotelStartDate}
+            setCheckIn={setHotelStartDate}
+            checkOut={hotelEndDate}
+            setCheckOut={setHotelEndDate}
             travellerOpen={travellerOpen}
             setTravellerOpen={setTravellerOpen}
             totalPassengers={totalPassengers}

@@ -20,18 +20,24 @@ const HotelList = () => {
           <div className={styles.tourLayout}>
             {/* LEFT: FILTERS */}
             <aside className={styles.tourFilters}>
-              <TourListing />
+              <Suspense fallback={null}>
+                <TourListing />
+              </Suspense>
             </aside>
 
             {/* RIGHT: RESULTS GRID */}
             <div className={styles.tourResults}>
-              <MapSection />
+              <Suspense fallback={null}>
+                <MapSection />
+              </Suspense>
             </div>
           </div>
         </section>
       </div>
       <div className={styles.tourListSectionMobileView}>
-        <MobileHotelDetails />
+        <Suspense fallback={null}>
+          <MobileHotelDetails />
+        </Suspense>
       </div>
     </>
   );
