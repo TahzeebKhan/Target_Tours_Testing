@@ -355,7 +355,12 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       recommendation.recommendationId,
       recommendation.standardRoomId,
     );
-    const occupancy = Array.isArray(room.occupancies) ? room.occupancies[0] : null;
+    const occupancies = Array.isArray(room.occupancies)
+      ? room.occupancies
+      : Array.isArray(roomDetail.occupancies)
+        ? roomDetail.occupancies
+        : [];
+    const occupancy = occupancies[0] || null;
     const guestCount =
       Number(roomDetail.maxGuestAllowed || 0) ||
       Number(occupancy?.numOfAdults || 0) + Number(occupancy?.numOfChildren || 0);
@@ -384,6 +389,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       recommendationId: room.recommendationId || recommendation.recommendationId || "",
       supplierName: room.providerName || recommendation.providerName || "",
       guestCode: room.guestCode || room.GuestCode || "",
+      occupancies,
       raw: room,
       image: (roomImages.length ? roomImages : images).map((img) => ({ img })),
       beds: getFirst(
