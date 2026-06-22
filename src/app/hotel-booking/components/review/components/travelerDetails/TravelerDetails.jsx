@@ -11,6 +11,8 @@ const createTraveler = () => ({
     email: "",
 });
 
+const fallbackRooms = [{ id: "default-room", title: "Room" }];
+
 const TravelerDetails = ({ rooms = [], onChange }) => {
     const [roomGuests, setRoomGuests] = useState({});
     const [bookingContact, setBookingContact] = useState({
@@ -29,11 +31,27 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     useEffect(() => {
         setRoomGuests(prev => {
             const next = {};
-            const activeRooms = rooms.length ? rooms : [{ id: "default-room", title: "Room" }];
+            const activeRooms = rooms.length ? rooms : fallbackRooms;
+            let hasChanges = false;
 
             activeRooms.forEach(room => {
-                next[room.id] = prev[room.id]?.length ? prev[room.id] : [createTraveler()];
+                if (prev[room.id]?.length) {
+                    next[room.id] = prev[room.id];
+                    return;
+                }
+
+                hasChanges = true;
+                next[room.id] = [createTraveler()];
             });
+
+            const prevKeys = Object.keys(prev);
+            if (prevKeys.length !== activeRooms.length) {
+                hasChanges = true;
+            }
+
+            if (!hasChanges) {
+                return prev;
+            }
 
             return next;
         });
@@ -75,7 +93,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     return (
         <div className={styles.wrapper}>
             {/* Traveler Cards */}
-            {(rooms.length ? rooms : [{ id: "default-room", title: "Room" }]).map((room) => (
+            {(rooms.length ? rooms : fallbackRooms).map((room) => (
                 <div key={room.id}>
                     <div className={styles.addTraveler} onClick={() => addTraveler(room.id)}>
                         +Add Guest for {room.title}

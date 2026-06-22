@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import styles from "./ReviewPage.module.css";
 
 import { useRouter } from "next/navigation";
@@ -102,7 +102,71 @@ const toApiDate = (value) => {
   return value;
 };
 
-const buildGuestCode = (age = "25") => `|1|1:A:${age}|`;
+const getOccupancyValue = (occupancy = {}, ...keys) => {
+  for (const key of keys) {
+    const value = occupancy[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+
+  return "";
+};
+
+const normalizeChildAges = (childAges) => {
+  if (Array.isArray(childAges)) return childAges;
+  if (typeof childAges === "string") {
+    return childAges
+      .split(/[:,|]/)
+      .map((age) => age.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const buildGuestCode = (occupancies = []) => {
+  const occupancyList = Array.isArray(occupancies) ? occupancies : [];
+
+  if (!occupancyList.length) return "|1|1:A:25|";
+
+  return occupancyList
+    .map((occupancy, index) => {
+      const occupancyId =
+        getOccupancyValue(occupancy, "occupancyId", "OccupancyID", "occupancyID", "id") ||
+        index + 1;
+      const adultCount = Number(
+        getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") ||
+          0,
+      );
+      const childCount = Number(
+        getOccupancyValue(
+          occupancy,
+          "numOfChildren",
+          "NumOfChildren",
+          "children",
+          "childCount",
+        ) || 0,
+      );
+      const segments = [];
+
+      if (adultCount > 0) {
+        segments.push(`|${occupancyId}|${adultCount}:A:${Array.from({ length: adultCount }, () => "25").join(":")}|`);
+      }
+
+      if (childCount > 0) {
+        const childAges = normalizeChildAges(
+          getOccupancyValue(occupancy, "childAges", "ChildAges", "childrenAges"),
+        );
+        const ages = Array.from({ length: childCount }, (_, childIndex) =>
+          String(childAges[childIndex] || "0"),
+        ).join(":");
+
+        segments.push(`|${occupancyId}|${childCount}:C:${ages}|`);
+      }
+
+      return segments.join("");
+    })
+    .join("");
+};
 
 const ReviewPage = () => {
   // 👇 default open = flight
@@ -115,7 +179,10 @@ const ReviewPage = () => {
   const { roomList, increaseRoom, decreaseRoom, bookingSession } = useRoom();
   const hotel = bookingSession?.hotel || {};
   const request = bookingSession?.request || {};
-  const selectedRooms = roomList.filter((room) => room.quantity > 0);
+  const selectedRooms = useMemo(
+    () => roomList.filter((room) => room.quantity > 0),
+    [roomList],
+  );
   const visibleRooms = roomList.length ? roomList : [];
   const totalAmount = selectedRooms.reduce(
     (sum, room) => sum + Number(room.pricePerNight || 0) * Number(room.quantity || 0) * Number(room.nights || 1),
@@ -198,7 +265,7 @@ const ReviewPage = () => {
 
           return {
             RoomId: room.roomId || room.id || "",
-            GuestCode: room.guestCode || buildGuestCode(guests[0]?.age || "25"),
+            GuestCode: room.guestCode || buildGuestCode(room.occupancies),
             SupplierName: room.supplierName || "",
             RoomGroupId: room.roomGroupId || room.id || "",
             Guests: guests.map((guest, guestIndex) => ({

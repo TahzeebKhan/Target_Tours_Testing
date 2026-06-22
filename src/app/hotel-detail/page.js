@@ -108,6 +108,7 @@ const Page = () => {
         recommendationId: room.recommendationId,
         supplierName: room.supplierName,
         guestCode: room.guestCode,
+        occupancies: room.occupancies,
         netAmount: parseCurrencyNumber(room.price?.offer),
       })),
     );
