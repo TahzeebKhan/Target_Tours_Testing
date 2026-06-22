@@ -26,10 +26,19 @@ padding-top: 73px;
 
 .rightSidebar {
     margin-top: 79px;
+    align-self: start;
+}
+
+.summarySidebar {
+    position: sticky;
+    top: 150px;
+    margin-top: 0;
 }
 
 /* ROOM CARD */
 .roomWrapper {
+    position: sticky;
+    top: 150px;
     opacity: 1;
     transform: translateY(0);
     transition:
@@ -109,6 +118,9 @@ padding-top: 73px;
     .rightSidebar{
         margin: 0;
     }
+    .summarySidebar{
+        top: 120px;
+    }
     
 
 }
@@ -129,6 +141,12 @@ padding-top: 73px;
         flex-direction: column-reverse;
         margin-top: 24px;
         
+    }
+    .roomWrapper{
+        position: static;
+    }
+    .summarySidebar{
+        position: static;
     }
     
 

@@ -49,13 +49,13 @@ const CreateWishlistModal = ({ onClose }) => {
                 d="M18 8L22 12L18 16"
                 stroke="white"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M2 12H22"
                 stroke="white"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
             </svg>
           </span>

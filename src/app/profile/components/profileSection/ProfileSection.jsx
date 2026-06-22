@@ -1165,14 +1165,14 @@ const ProfileSection = () => {
                         stroke="#000033"
                         strokeWidth="1.16667"
                         strokeLinecap="round"
-                        stroke-linejoin="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M7 9.33337C7.9665 9.33337 8.75 8.54987 8.75 7.58337C8.75 6.61688 7.9665 5.83337 7 5.83337C6.0335 5.83337 5.25 6.61688 5.25 7.58337C5.25 8.54987 6.0335 9.33337 7 9.33337Z"
                         stroke="#000033"
                         strokeWidth="1.16667"
                         strokeLinecap="round"
-                        stroke-linejoin="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                   </div>
@@ -1215,14 +1215,14 @@ const ProfileSection = () => {
                             stroke="white"
                             strokeWidth="1.33333"
                             strokeLinecap="round"
-                            stroke-linejoin="round"
+                            strokeLinejoin="round"
                           />
                           <path
                             d="M6 7.99996L7.33333 9.33329L10 6.66663"
                             stroke="white"
                             strokeWidth="1.33333"
                             strokeLinecap="round"
-                            stroke-linejoin="round"
+                            strokeLinejoin="round"
                           />
                         </svg>
                         Verified

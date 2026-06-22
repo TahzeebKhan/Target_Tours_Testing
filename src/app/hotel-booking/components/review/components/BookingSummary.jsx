@@ -3,6 +3,7 @@ import React from "react";
 import styles from "./BookingSummary.module.css";
 import { Delete, Trash, Trash2, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useRoom } from "@/app/context/RoomContext";
 
 const BookingSummary = ({
   setSideBarOpen,
@@ -11,6 +12,8 @@ const BookingSummary = ({
   onRemove,
 }) => {
   const router = useRouter();
+  const { bookingSession } = useRoom();
+  const request = bookingSession?.request || {};
 
   const handleDelete = () => {
     router.push("/hotel-booking");
@@ -19,6 +22,7 @@ const BookingSummary = ({
     (sum, r) => sum + r.pricePerNight * r.quantity * r.nights,
     0
   );
+  const nights = roomList[0]?.nights || request.nights || 1;
 
   return (
     <>
@@ -27,7 +31,8 @@ const BookingSummary = ({
         <div className={styles.header}>
           <h2>BOOKING SUMMARY</h2>
           <p>
-            <span>2 night</span> starting from <span>Tue 30 Dec, 2025</span>
+            <span>{nights} night</span> starting from{" "}
+            <span>{request.checkIn || "Check-in"}</span>
           </p>
           <div
             onClick={() => setSideBarOpen(false)}
@@ -45,14 +50,14 @@ const BookingSummary = ({
                 stroke="black"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M5 5L15 15"
                 stroke="black"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                stroke-linejoin="round"
+                strokeLinejoin="round"
               />
             </svg>
           </div>
@@ -93,19 +98,19 @@ const BookingSummary = ({
         <div className={styles.priceBreakup}>
           <div className={styles.row}>
             <span className={styles.rowTitle}>Base Price</span>
-            <span className={styles.basePrice}>₹ 64,126</span>
+            <span className={styles.basePrice}>₹ {basePrice.toFixed(2)}</span>
           </div>
           <div className={styles.row}>
             <span className={styles.rowTitle}>Discount</span>
-            <span className={styles.discount}>-₹5538.56</span>
+            <span className={styles.discount}>-₹0</span>
           </div>
           <div className={styles.row}>
             <span className={styles.rowTitle}>Coupon Discount</span>
-            <span className={styles.discount}>-₹5538.56</span>
+            <span className={styles.discount}>-₹0</span>
           </div>
           <div className={styles.row}>
             <span className={styles.rowTitle}>Taxes & Fees</span>
-            <span className={styles.taxes}>₹2,819</span>
+            <span className={styles.taxes}>₹0</span>
           </div>
         </div>
 

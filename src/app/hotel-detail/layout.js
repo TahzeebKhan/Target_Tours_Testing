@@ -1,26 +1,35 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styles from "./HotelDetailLayout.module.css";
 import Footer from "../home-page/components/footer/Footer";
 import HeroSection from "./Components/heroSection/HeroSection";
-import RoomSelectionCard from "./Components/roomSelectionCard/RoomSelectionCard";
-import Tabs from "./Components/tabs/Tabs";
 import Navbar from "./Navbar";
 import HotelDetaislMobileView from "./Components/hotelDetailsMobileView/HotelDetaislMobileView";
 import FeatureSection from "../home-page/components/featureSection/FeatureSection";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
-import Cookies from "js-cookie";
+import { HotelDetailDataProvider } from "./HotelDetailDataContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const Layout = ({ children }) => {
-  const [activeTab, setActiveTab] = useState("Description");
   const [liked, setLiked] = useState(false);
-  const hasToken = !!Cookies.get("auth_token");
-  const [isLoggedIn, setIsLoggedIn] = useState(hasToken);
 
   const [wishlists, setWishlists] = useState([]);
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
+
+  const openLoginModal = useCallback(() => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  }, []);
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
 
   const handleWishlistClick = () => {
     if (!wishlists.length) {
@@ -30,10 +39,10 @@ const Layout = ({ children }) => {
     }
   };
   return (
-    <>
+    <HotelDetailDataProvider onUnauthorized={openLoginModal}>
       <div className={styles.navBar}>
         <div className={styles.navBarContainer}>
-          <Navbar isLoggedIn={isLoggedIn} />
+          <Navbar />
         </div>
       </div>
       <div className={styles.layoutWrapper}>
@@ -77,7 +86,14 @@ const Layout = ({ children }) => {
       <div className={styles.mobileView}>
         <HotelDetaislMobileView />
       </div>
-    </>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+    </HotelDetailDataProvider>
   );
 };
 

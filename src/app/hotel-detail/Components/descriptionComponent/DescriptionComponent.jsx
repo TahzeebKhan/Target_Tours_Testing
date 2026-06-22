@@ -64,19 +64,14 @@
 import React, { useState, useEffect } from "react";
 import styles from "./DescriptionComponent.module.css";
 
-const DescriptionComponent = () => {
+const DescriptionComponent = ({ description }) => {
   const [expanded, setExpanded] = useState(false);
   const [charLimit, setCharLimit] = useState(null);
 
-  const paragraphs = [
-    "Hotel size 200 rooms , Arranged over 6 floors. Barcelonia elegance with 6-star service. Simply elegant in all respects, this beautiful Parisian property offers a wonderful location that enhances your stay. Enjoy spacious rooms with great amenities and 6-star service from a superb team dedicated to making you feel like a VIP.",
-
-    "The Peninsula Spa has 8 treatment rooms including couples treatment rooms. The palace's spa offers hot stone massages and treatments such as aromatherapy. Other on-site facilities include a steam room and a sauna.",
-
-    "Pets. Pets stay for free (dogs and cats only, 1 total, up to 5 kg per pet. Service animals welcome",
-
-    "Special check-in instructions. Front desk staff will greet guests on arrival at the property. Special check-in instructions. Front desk staff will greet guests on arrival at the property"
-  ];
+  const paragraphs = String(description || "Hotel details are being updated.")
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 
   // 🔹 screen-size based char limit
   useEffect(() => {

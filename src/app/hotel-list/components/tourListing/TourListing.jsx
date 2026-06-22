@@ -11,7 +11,10 @@ import {
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
+  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const parseSocketValue = (value) => {
   if (typeof value !== "string") return value;
@@ -333,6 +336,94 @@ export const getHotelCoordinates = (hotel = {}) => {
   return { latitude, longitude };
 };
 
+const pickProviderValue = (value) => {
+  if (!value) return "";
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value).trim();
+  }
+
+  if (typeof value !== "object") return "";
+
+  return String(
+    value.priceProvider ||
+      value.price_provider ||
+      value.providerName ||
+      value.provider_name ||
+      value.supplierName ||
+      value.supplier_name ||
+      value.provider ||
+      value.supplier ||
+      value.name ||
+      value.code ||
+      "",
+  ).trim();
+};
+
+export const getHotelPriceProvider = (hotel = {}) => {
+  const directProvider = pickProviderValue(hotel.priceProvider) ||
+    pickProviderValue(hotel.price_provider) ||
+    pickProviderValue(hotel.providerName) ||
+    pickProviderValue(hotel.provider_name) ||
+    pickProviderValue(hotel.supplierName) ||
+    pickProviderValue(hotel.supplier_name) ||
+    pickProviderValue(hotel.provider) ||
+    pickProviderValue(hotel.supplier) ||
+    pickProviderValue(hotel.rate?.priceProvider) ||
+    pickProviderValue(hotel.rate?.price_provider) ||
+    pickProviderValue(hotel.rate?.providerName) ||
+    pickProviderValue(hotel.rate?.provider_name) ||
+    pickProviderValue(hotel.rate?.provider) ||
+    pickProviderValue(hotel.pricing?.priceProvider) ||
+    pickProviderValue(hotel.pricing?.providerName) ||
+    pickProviderValue(hotel.pricing?.provider);
+
+  if (directProvider) return directProvider;
+
+  const providerLists = [
+    hotel.availableSuppliers,
+    hotel.suppliers,
+    hotel.providers,
+    hotel.rates,
+    hotel.rooms,
+  ];
+
+  for (const list of providerLists) {
+    if (!Array.isArray(list)) continue;
+
+    for (const item of list) {
+      const provider = pickProviderValue(item);
+      if (provider) return provider;
+    }
+  }
+
+  return "";
+};
+
+export const getHotelDetailsPayload = (hotel = {}) => ({
+  searchId: String(
+    hotel.searchId ||
+      hotel.search_id ||
+      hotel.hotelSearchId ||
+      hotel.hotel_search_id ||
+      hotel.raw?.searchId ||
+      hotel.raw?.search_id ||
+      "",
+  ).trim(),
+  hotelId: String(
+    hotel.hotelId ||
+      hotel.id ||
+      hotel.hotelCode ||
+      hotel.api_hotel_id ||
+      hotel.raw?.hotelId ||
+      hotel.raw?.id ||
+      hotel.raw?.hotelCode ||
+      hotel.raw?.api_hotel_id ||
+      "",
+  ).trim(),
+  priceProvider: getHotelPriceProvider(hotel) || getHotelPriceProvider(hotel.raw),
+});
+
 export const normalizeHotelCard = (hotel = {}, index = 0) => {
   const addressParts = [
     hotel.address,
@@ -350,12 +441,7 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
   const hasPrice = /\d/.test(price);
   const hotelId =
     hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode;
-  const priceProvider =
-    hotel.priceProvider ||
-    hotel.price_provider ||
-    hotel.rate?.provider ||
-    hotel.availableSuppliers?.[0] ||
-    hotel.provider;
+  const priceProvider = getHotelPriceProvider(hotel);
 
   return {
     id:
@@ -404,6 +490,15 @@ const LIST_ROW_HEIGHT = 310;
 const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
+
+export const getHotelDetailUrl = ({ hotelId, searchId, priceProvider }) => {
+  const params = new URLSearchParams();
+  params.set("hotelId", hotelId || "");
+  params.set("searchId", searchId || "");
+  params.set("priceProvider", priceProvider || "");
+
+  return `/hotel-detail?${params.toString()}`;
+};
 
 const getHotelPriceNumber = (hotel = {}) => {
   const priceText = String(hotel.price || "").replace(/[^\d.]/g, "");
@@ -629,6 +724,8 @@ const TourListing = () => {
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
   const [hotelResultSource, setHotelResultSource] = useState("");
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const [sortType, setSortType] = useState("recent");
   const [scrollState, setScrollState] = useState({
     scrollY: 0,
@@ -662,14 +759,20 @@ const TourListing = () => {
     setIsSaveWishlistOpen(true);
   };
   const router = useRouter();
+  const openLoginModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
+
   const handleBookNow = async (hotel) => {
     if (!hotel) return;
 
-    const payload = {
-      searchId: hotel.searchId,
-      hotelId: hotel.hotelId || hotel.id,
-      priceProvider: hotel.priceProvider,
-    };
+    const payload = getHotelDetailsPayload(hotel);
 
     if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
@@ -688,11 +791,12 @@ const TourListing = () => {
           details,
         }),
       );
-      router.push(
-        `/hotel-detail?hotelId=${encodeURIComponent(payload.hotelId || "")}`,
-      );
+      router.push(getHotelDetailUrl(payload));
     } catch (error) {
       console.error("Hotel details request failed:", error);
+      if (isMissingHotelAuthTokenError(error)) {
+        openLoginModal();
+      }
     } finally {
       setLoadingHotelDetailsId("");
     }
@@ -1208,6 +1312,13 @@ const TourListing = () => {
         wishlists={wishlists}
         onClose={() => setIsSaveWishlistOpen(false)}
       />
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

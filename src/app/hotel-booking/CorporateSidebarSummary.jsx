@@ -56,21 +56,21 @@ export default function CorporateSidebarSummary() {
                     stroke="#F97316"
                     strokeWidth="1.66667"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                   <path
                     d="M10 6.66667V10"
                     stroke="#F97316"
                     strokeWidth="1.66667"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                   <path
                     d="M10 13.3333H10.0083"
                     stroke="#F97316"
                     strokeWidth="1.66667"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                 </g>
                 <defs>
@@ -93,14 +93,14 @@ export default function CorporateSidebarSummary() {
                     stroke="#059669"
                     strokeWidth="1.66667"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                   <path
                     d="M7.5 10L9.16667 11.6667L12.5 8.33334"
                     stroke="#059669"
                     strokeWidth="1.66667"
                     strokeLinecap="round"
-                    stroke-linejoin="round"
+                    strokeLinejoin="round"
                   />
                 </g>
                 <defs>

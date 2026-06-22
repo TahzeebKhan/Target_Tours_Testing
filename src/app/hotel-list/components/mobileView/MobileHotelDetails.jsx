@@ -13,14 +13,19 @@ import {
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
+  isMissingHotelAuthTokenError,
 } from '@/shared/services/hotelSearch'
 import {
   getStaySummary,
   getHotelsFromMessage,
+  getHotelDetailUrl,
+  getHotelDetailsPayload,
   isHotelTerminalPayload,
   normalizeHotelCard,
   shouldApplyHotelResults,
 } from '../tourListing/TourListing'
+import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
+import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
 
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
@@ -37,6 +42,8 @@ const MobileHotelDetails = () => {
   const [hotelResults, setHotelResults] = useState([]);
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
 
@@ -51,11 +58,7 @@ const MobileHotelDetails = () => {
   const handleBookNow = async (hotel) => {
     if (!hotel) return;
 
-    const payload = {
-      searchId: hotel.searchId,
-      hotelId: hotel.hotelId || hotel.id,
-      priceProvider: hotel.priceProvider,
-    };
+    const payload = getHotelDetailsPayload(hotel);
 
     if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
@@ -74,11 +77,13 @@ const MobileHotelDetails = () => {
           details,
         }),
       );
-      router.push(
-        `/hotel-detail?hotelId=${encodeURIComponent(payload.hotelId || "")}`,
-      );
+      router.push(getHotelDetailUrl(payload));
     } catch (error) {
       console.error("Hotel details request failed:", error);
+      if (isMissingHotelAuthTokenError(error)) {
+        setAuthView("login");
+        setShowAuthModal(true);
+      }
     } finally {
       setLoadingHotelDetailsId("");
     }
@@ -257,6 +262,25 @@ const MobileHotelDetails = () => {
                         loadingHotelDetailsId={loadingHotelDetailsId}
                     />
             </ResultsBottomSheet>
+            {showAuthModal && authView === "login" && (
+              <LoginPopup
+                onClose={() => {
+                  setShowAuthModal(false);
+                  setAuthView("login");
+                }}
+                onNavigate={setAuthView}
+              />
+            )}
+
+            {showAuthModal && authView === "signup" && (
+              <SignupPopup
+                onClose={() => {
+                  setShowAuthModal(false);
+                  setAuthView("login");
+                }}
+                onNavigate={setAuthView}
+              />
+            )}
         </div>
     )
 }

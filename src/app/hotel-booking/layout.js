@@ -1,14 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../flight-booking-details/Navbar";
 import styles from "./HotelBooking.module.css";
 import BookingSummary from "./components/review/components/BookingSummary";
 import { RoomProvider } from "../context/RoomContext";
 import { useRouter } from "next/navigation";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
+import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
 
 const layout = ({ children }) => {
   const router = useRouter();
+  const [bookingSession, setBookingSession] = useState(null);
   const [roomList, setRoomList] = useState([
     {
       id: "deluxe_ac_room",
@@ -29,6 +31,21 @@ const layout = ({ children }) => {
       nights: 8,
     },
   ]);
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
+      const session = raw ? JSON.parse(raw) : null;
+
+      if (session?.rooms?.length) {
+        setBookingSession(session);
+        setRoomList(session.rooms);
+      }
+    } catch {
+      setBookingSession(null);
+    }
+  }, []);
+
   const [sidebarOpen, setSideBarOpen] = useState(false);
   const removeRoom = (id) => {
     setRoomList((prev) =>
@@ -65,7 +82,9 @@ const layout = ({ children }) => {
   );
   const isCorporate = false;
   return (
-    <RoomProvider value={{ roomList, increaseRoom, decreaseRoom, removeRoom }}>
+    <RoomProvider
+      value={{ roomList, increaseRoom, decreaseRoom, removeRoom, bookingSession }}
+    >
       <section className={styles.contentWrapper}>
         <div className={styles.navbarWrapper}>
           <Navbar />

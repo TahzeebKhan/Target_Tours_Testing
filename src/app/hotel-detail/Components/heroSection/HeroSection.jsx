@@ -1,26 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import styles from "./HeroSection.module.css";
 import HotelGallery from "../hotelGallery/HotelGallery";
+import { useHotelDetailData } from "../../HotelDetailDataContext";
 
 const HeroSection = ({ liked, onLike }) => {
+  const { hotelDetail } = useHotelDetailData();
+  const rating = hotelDetail?.rating || 0;
+
   return (
     <div className={styles.HeroSection}>
       <div className={styles.container}>
         <div className={styles.textSection}>
-          <h2 className={styles.hotelName}>Hotel Arts Barcelona</h2>
+          <h2 className={styles.hotelName}>{hotelDetail?.name || "Hotel"}</h2>
           <div className={styles.locationAndRating}>
             <img src="/icons/blackAddress.svg" alt="" />
-            <span className={styles.hotelAddress}>Barcelona, Spain</span>
+            <span className={styles.hotelAddress}>{hotelDetail?.address || "Address not available"}</span>
             <div className={styles.ratingSection}>
               <div className={styles.stars}>
-                <img src="/icons/tetimonialStart.svg" alt="" />
-                <img src="/icons/tetimonialStart.svg" alt="" />
-                <img src="/icons/tetimonialStart.svg" alt="" />
-                <img src="/icons/tetimonialStart.svg" alt="" />
-                <img src="/icons/conicstarEmpty.svg" alt="" />
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <img
+                    key={`hotel-star-${index}`}
+                    src={
+                      index < rating
+                        ? "/icons/tetimonialStart.svg"
+                        : "/icons/conicstarEmpty.svg"
+                    }
+                    alt=""
+                  />
+                ))}
               </div>
-              <div className={styles.reviewCount}>4.5 (371 reviews)</div>
+              <div className={styles.reviewCount}>
+                {rating || "-"} ({hotelDetail?.reviewText || "No reviews yet"})
+              </div>
             </div>
           </div>
         </div>
@@ -39,7 +51,7 @@ const HeroSection = ({ liked, onLike }) => {
           </div>
         </div>
       </div>
-      <HotelGallery />
+      <HotelGallery images={hotelDetail?.images} />
     </div>
   );
 };

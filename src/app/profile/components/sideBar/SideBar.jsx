@@ -26,7 +26,7 @@ const ChevronIcon = () => (
       stroke="#000033"
       strokeWidth="1.66667"
       strokeLinecap="round"
-      stroke-linejoin="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

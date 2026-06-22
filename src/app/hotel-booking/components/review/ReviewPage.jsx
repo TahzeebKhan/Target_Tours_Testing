@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styles from "./ReviewPage.module.css";
 
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import TravelInsuranceOption from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
 import CancellationPenalty from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
 import RoomPriceRow from "./components/roomPriceRow/RoomPriceRow";
@@ -10,34 +11,231 @@ import TravelerDetails from "./components/travelerDetails/TravelerDetails";
 import CancellationPolicy from "./components/cancellationPolicy/CancellationPolicy";
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import { useRoom } from "@/app/context/RoomContext";
+import { startHotelBooking } from "@/shared/services/hotelSearch";
+
+const fallbackHotelStartBookingPayload = {
+  TUI: "cc6a2275-d39c-43ce-a57e-316e3f6b4070",
+  ServiceEnquiry: "",
+  ContactInfo: {
+    Title: "Mr",
+    FName: "TEST",
+    LName: "AV",
+    Mobile: "8590055610",
+    Email: "robin@benzyinfotech.com",
+    Address: "MRRA 4  EDAPPALLY  Edappally , EDAPPALLY , Edappally",
+    State: "Kerala",
+    City: "Cochin",
+    PIN: "6865245",
+    GSTCompanyName: "",
+    GSTTIN: "",
+    GSTMobile: "",
+    GSTEmail: "",
+    UpdateProfile: true,
+    IsGuest: false,
+    CountryCode: "IN",
+    MobileCountryCode: "+91",
+    NetAmount: "",
+    DestMobCountryCode: "",
+    DestMob: "",
+  },
+  Auxiliaries: [
+    {
+      Code: "PROMO",
+      Parameters: [
+        { Type: "Code", Value: "" },
+        { Type: "ID", Value: "" },
+        { Type: "Amount", Value: "" },
+      ],
+    },
+    {
+      Code: "CUSTOMER DETAILS",
+      parameters: [
+        { Type: "Nationality", Value: "IN" },
+        { Type: "Country of Residence", Value: "IN" },
+      ],
+    },
+  ],
+  Rooms: [
+    {
+      RoomId: "2247c12a-bb99-42fe-8bd3-0e45fc3e17cc",
+      GuestCode: "|1|1:A:25|",
+      SupplierName: "Sabre",
+      RoomGroupId: "c6b6658c-b413-4175-bfc1-140e3475f9f9",
+      Guests: [
+        {
+          GuestID: "0",
+          Operation: "U",
+          Title: "Ms",
+          FirstName: "REXY",
+          MiddleName: "",
+          LastName: "RAJU",
+          MobileNo: "",
+          PaxType: "A",
+          Age: "25",
+          Email: "",
+          Pan: "",
+        },
+      ],
+    },
+  ],
+  NetAmount: "862576",
+  ClientID: "FVI6V120g22Ei5ztGK0FIQ==",
+  DeviceID: "",
+  AppVersion: "",
+  SearchId: "05f95641-197f-4719-901e-bc878ac6d2bf.UcPgZrc4QDFQO_g5L_EzkEYBHlHFapV_nr-j8m8_0rU",
+  RecommendationId: "e77812cb-10df-424c-adfd-924c917298be",
+  LocationName: null,
+  HotelCode: "39743918",
+  CheckInDate: "2026-09-09",
+  CheckOutDate: "2026-10-10",
+  TravelingFor: "NTF",
+};
+
+const toApiDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+
+  const [day, month, year] = String(value).split(/[/-]/);
+  if (day && month && year) return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+  return value;
+};
+
+const buildGuestCode = (age = "25") => `|1|1:A:${age}|`;
 
 const ReviewPage = () => {
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
-  const { roomList, increaseRoom, decreaseRoom } = useRoom();
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [guestDetails, setGuestDetails] = useState({
+    roomGuests: {},
+    bookingContact: {},
+  });
+  const { roomList, increaseRoom, decreaseRoom, bookingSession } = useRoom();
+  const hotel = bookingSession?.hotel || {};
+  const request = bookingSession?.request || {};
+  const selectedRooms = roomList.filter((room) => room.quantity > 0);
+  const visibleRooms = roomList.length ? roomList : [];
+  const totalAmount = selectedRooms.reduce(
+    (sum, room) => sum + Number(room.pricePerNight || 0) * Number(room.quantity || 0) * Number(room.nights || 1),
+    0,
+  );
+  const nights = selectedRooms[0]?.nights || request.nights || 1;
+
+  const handleGuestDetailsChange = useCallback((value) => {
+    setGuestDetails(value);
+  }, []);
+
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
-  const roomListStatic = [
-    {
-      id: "deluxe_ac_room",
-      title: "Deluxe Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 8,
-    },
-    {
-      id: "premium_ac_room",
-      title: "Premium Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 8,
-    },
-  ];
+
+  const handleStartBooking = async () => {
+    if (bookingLoading) return;
+
+    const roomGuests = guestDetails.roomGuests || {};
+    const firstRoomGuests = roomGuests[selectedRooms[0]?.id] || [];
+    const firstTraveler = firstRoomGuests[0] || {};
+    const contact = guestDetails.bookingContact || {};
+
+    const hasIncompleteGuest = selectedRooms.some((room) => {
+      const guests = roomGuests[room.id] || [];
+
+      return (
+        !guests.length ||
+        guests.some(
+          (guest) => !guest.title || !guest.firstName || !guest.lastName || !guest.gender,
+        )
+      );
+    });
+
+    if (hasIncompleteGuest) {
+      toast.error("Please complete required guest details for each selected room.");
+      setOpenTab("guestDetails");
+      return;
+    }
+
+    if (
+      !contact.title ||
+      !contact.firstName ||
+      !contact.lastName ||
+      !contact.mobile ||
+      !contact.email ||
+      !contact.address ||
+      !contact.state ||
+      !contact.city ||
+      !contact.pin ||
+      !contact.countryCode
+    ) {
+      toast.error("Please complete booking contact details.");
+      setOpenTab("guestDetails");
+      return;
+    }
+
+    setBookingLoading(true);
+
+    try {
+      const firstRoom = selectedRooms[0] || roomList[0] || {};
+      const payload = {
+        ...fallbackHotelStartBookingPayload,
+        ContactInfo: {
+          ...fallbackHotelStartBookingPayload.ContactInfo,
+          Title: contact.title,
+          FName: contact.firstName,
+          LName: contact.lastName,
+          Mobile: contact.mobile,
+          Email: contact.email,
+          Address: contact.address,
+          State: contact.state,
+          City: contact.city,
+          PIN: contact.pin,
+          CountryCode: contact.countryCode,
+          MobileCountryCode: firstTraveler.countryCode || contact.countryCode,
+        },
+        Rooms: selectedRooms.map((room) => {
+          const guests = roomGuests[room.id] || [];
+
+          return {
+            RoomId: room.roomId || room.id || "",
+            GuestCode: room.guestCode || buildGuestCode(guests[0]?.age || "25"),
+            SupplierName: room.supplierName || "",
+            RoomGroupId: room.roomGroupId || room.id || "",
+            Guests: guests.map((guest, guestIndex) => ({
+              GuestID: String(guestIndex),
+              Operation: "U",
+              Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
+              FirstName: guest.firstName,
+              MiddleName: "",
+              LastName: guest.lastName,
+              MobileNo: guest.mobile || contact.mobile,
+              PaxType: "A",
+              Age: guest.age || "25",
+              Email: guest.email || contact.email,
+              Pan: "",
+            })),
+          };
+        }),
+        NetAmount: String(Math.round(totalAmount || firstRoom.netAmount || 0)),
+        SearchId: request.searchId || request.SearchId || fallbackHotelStartBookingPayload.SearchId,
+        RecommendationId:
+          firstRoom.recommendationId ||
+          request.recommendationId ||
+          fallbackHotelStartBookingPayload.RecommendationId,
+        HotelCode: hotel.id || request.hotelId || fallbackHotelStartBookingPayload.HotelCode,
+        CheckInDate: toApiDate(request.checkIn || request.check_in),
+        CheckOutDate: toApiDate(request.checkOut || request.check_out),
+      };
+
+      await startHotelBooking(payload);
+      toast.success("Hotel booking started successfully");
+    } catch (error) {
+      toast.error(error.message || "Unable to start hotel booking.");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
   const getQuantity = (id) => {
     const room = roomList.find((r) => r.id === id);
     return room?.quantity || 0;
@@ -52,14 +250,14 @@ const ReviewPage = () => {
       <div className={styles.hotelContainer}>
         <div className={styles.hotelTopContainer}>
           <div className={styles.hotelImageContainer}>
-            <img src="/images/hotelArt1.png" alt="" />
+            <img src={hotel.image || "/images/hotelArt1.png"} alt="" />
           </div>
           <div className={styles.hotelTextContainer}>
             <div className={styles.hotelNameAndLocation}>
-              <h3>Hotel Arts Barcelona</h3>
+              <h3>{hotel.name || "Hotel"}</h3>
               <div className={styles.locationAndRating}>
                 <img src="/icons/blackAddress.svg" alt="" />
-                <span className={styles.hotelAddress}>Barcelona, Spain</span>
+                <span className={styles.hotelAddress}>{hotel.address || "Address not available"}</span>
                 <div className={styles.ratingSection}>
                   <div className={styles.stars}>
                     <img src="/icons/tetimonialStart.svg" alt="" />
@@ -67,7 +265,9 @@ const ReviewPage = () => {
                     <img src="/icons/tetimonialStart.svg" alt="" />
                     <img src="/icons/tetimonialStart.svg" alt="" />
                   </div>
-                  <div className={styles.reviewCount}>4.5 (371 reviews)</div>
+                  <div className={styles.reviewCount}>
+                    {hotel.rating || "-"} ({hotel.reviewText || "No reviews yet"})
+                  </div>
                 </div>
               </div>
             </div>
@@ -76,23 +276,23 @@ const ReviewPage = () => {
                 <span className={styles.checkinText}>check in</span>
                 <div className={styles.dateAndTimeContainer}>
                   <span className={styles.dateAndTime}>
-                    21 Jan '26 | <span className={styles.time}>1:00 PM</span>
+                    {request.checkIn || "Check-in"} | <span className={styles.time}>1:00 PM</span>
                   </span>
                 </div>
               </div>
-              <div className={styles.perNight}>X 10 Nights</div>
+              <div className={styles.perNight}>X {nights} Nights</div>
               <div className={styles.checkinContainer}>
                 <span className={styles.checkinText}>check Out</span>
                 <div className={styles.dateAndTimeContainer}>
                   <span className={styles.dateAndTime}>
-                    21 Jan '26 | <span className={styles.time}>1:00 PM</span>
+                    {request.checkOut || "Check-out"} | <span className={styles.time}>1:00 PM</span>
                   </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        {roomListStatic.map((room) => (
+        {visibleRooms.map((room) => (
           <RoomPriceRow
             key={room.id}
             image={room.image}
@@ -130,7 +330,7 @@ const ReviewPage = () => {
             openTab === "guestDetails" ? styles.expandOpen : ""
           }`}
         >
-          <TravelerDetails />
+          <TravelerDetails rooms={selectedRooms} onChange={handleGuestDetailsChange} />
         </div>
       </div>
       <div
@@ -196,7 +396,13 @@ const ReviewPage = () => {
         // onClick={() => setCurrentStep(3)}
         className={styles.continueButtonContainer}
       >
-        <button className={styles.continueButton}>CONTINUE</button>
+        <button
+          className={styles.continueButton}
+          disabled={bookingLoading}
+          onClick={handleStartBooking}
+        >
+          {bookingLoading ? "LOADING..." : "CONTINUE"}
+        </button>
       </div>
     </div>
   );

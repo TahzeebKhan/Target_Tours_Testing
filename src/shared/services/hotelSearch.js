@@ -4,6 +4,7 @@ export const HOTEL_SEARCH_SESSION_KEY = "hotelSearchContext";
 export const HOTEL_SEARCH_RESULTS_KEY = "hotelSearchResults";
 export const HOTEL_SEARCH_RESULTS_EVENT = "hotel-search-results";
 export const HOTEL_DETAILS_KEY = "hotelDetails";
+export const HOTEL_BOOKING_SESSION_KEY = "hotelBookingSession";
 
 const normalizeBaseUrl = () => {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
@@ -23,6 +24,21 @@ const getHotelSearchHeaders = () => {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
+
+const createApiError = (data, fallbackMessage) => {
+  const apiError = data?.error || {};
+  const error = new Error(apiError.message || data?.message || fallbackMessage);
+
+  error.status = apiError.status;
+  error.name = apiError.name || error.name;
+  error.details = apiError.details || {};
+
+  return error;
+};
+
+export const isMissingHotelAuthTokenError = (error) =>
+  Number(error?.status) === 401 &&
+  (error?.message === "JWT token missing" || error?.name === "UnauthorizedError");
 
 const getUuid = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -169,9 +185,7 @@ export const initHotelSearch = async (payload) => {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(
-      data?.error?.message || data?.message || "Hotel search init failed",
-    );
+    throw createApiError(data, "Hotel search init failed");
   }
 
   return data;
@@ -200,9 +214,60 @@ export const fetchHotelDetails = async ({
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(
-      data?.error?.message || data?.message || "Hotel details failed",
-    );
+    throw createApiError(data, "Hotel details failed");
+  }
+
+  return data;
+};
+
+export const fetchHotelRooms = async ({
+  searchId,
+  hotelId,
+  priceProvider,
+}) => {
+  const url = new URL("/api/hotel-search/get-rooms", normalizeBaseUrl());
+  const headers = getHotelSearchHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      domain: getDomain(),
+      searchId,
+      hotelId,
+      priceProvider,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel rooms failed");
+  }
+
+  return data;
+};
+
+export const startHotelBooking = async (payload = {}) => {
+  const url = new URL("/api/hotel-search/start-booking", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      domain: payload.domain || getDomain(),
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel booking failed");
   }
 
   return data;

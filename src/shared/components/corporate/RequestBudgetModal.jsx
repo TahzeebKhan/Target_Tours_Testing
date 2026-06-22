@@ -48,21 +48,21 @@ const RequestBudgetModal = ({ remainingBudget, onClose }) => {
                   stroke="#7B8799"
                   strokeWidth="2.66667"
                   strokeLinecap="round"
-                  stroke-linejoin="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M22.6673 10.6667L16.0007 4L9.33398 10.6667"
                   stroke="#7B8799"
                   strokeWidth="2.66667"
                   strokeLinecap="round"
-                  stroke-linejoin="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M16 4V20"
                   stroke="#7B8799"
                   strokeWidth="2.66667"
                   strokeLinecap="round"
-                  stroke-linejoin="round"
+                  strokeLinejoin="round"
                 />
               </svg>
 
