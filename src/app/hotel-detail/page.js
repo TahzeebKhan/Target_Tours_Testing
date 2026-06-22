@@ -8,10 +8,10 @@ import HotelPolicies from "./Components/hotelPolicies/HotelPolicies";
 import RoomSelectionCard from "./Components/roomSelectionCard/RoomSelectionCard";
 import CustomerReviews from "./Components/customerReviews/CustomerReviews";
 import BarcelonaSection from "./Components/BarcelonaSection/BarcelonaSection";
-import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
 import BookingSummary from "./Components/bookingSummary/BookingSummary";
 import Tabs from "./Components/tabs/Tabs";
 import { useHotelDetailData } from "./HotelDetailDataContext";
+import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
 
 const parseCurrencyNumber = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
@@ -30,12 +30,9 @@ const formatDisplayDate = (value, fallback) => {
 };
 
 const Page = () => {
-  const { hotelDetail } = useHotelDetailData();
+  const { hotelDetail, roomsLoading } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
   const [showSummary, setShowSummary] = useState(false);
-  const onBookNow = () => {
-    setShowSummary(true);
-  };
   const [roomList, setRoomList] = useState([
     {
       id: "deluxe_ac_room",
@@ -67,26 +64,73 @@ const Page = () => {
   );
   const rooms = searchRequest.rooms || searchRequest.roomCount || 1;
   const adults = searchRequest.adults || searchRequest.adultCount || 1;
+  const selectedRooms = roomList.filter((room) => room.quantity > 0);
+
+  const saveBookingSession = () => {
+    if (typeof window === "undefined") return;
+
+    const payload = {
+      hotel: {
+        id: hotelDetail?.id || "",
+        name: hotelDetail?.name || "Hotel",
+        address: hotelDetail?.address || "",
+        rating: hotelDetail?.rating || 0,
+        reviewText: hotelDetail?.reviewText || "",
+        image: hotelDetail?.images?.[0] || "/images/hotelArt1.png",
+      },
+      request: {
+        ...searchRequest,
+        checkIn,
+        checkOut,
+        rooms,
+        adults,
+      },
+      rooms: selectedRooms,
+    };
+
+    window.sessionStorage.setItem(HOTEL_BOOKING_SESSION_KEY, JSON.stringify(payload));
+  };
 
   useEffect(() => {
     if (!hotelDetail?.rooms?.length) return;
 
     setRoomList(
-      hotelDetail.rooms.slice(0, 2).map((room) => ({
+      hotelDetail.rooms.map((room) => ({
         id: room.id,
         title: room.title,
         image: room.image?.[0]?.img || "/images/hotelArt1.png",
         pricePerNight: parseCurrencyNumber(room.price?.offer),
-        quantity: 1,
-        maxQuantity: 5,
+        quantity: 0,
+        maxQuantity: Number(room.availability) || 1,
         nights: 1,
+        roomId: room.roomId,
+        roomGroupId: room.roomGroupId,
+        recommendationId: room.recommendationId,
+        supplierName: room.supplierName,
+        guestCode: room.guestCode,
+        netAmount: parseCurrencyNumber(room.price?.offer),
       })),
     );
   }, [hotelDetail?.rooms]);
   const removeRoom = (id) => {
-    setRoomList((prev) =>
-      prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room))
-    );
+    setRoomList((prev) => {
+      const nextRooms = prev.map((room) =>
+        room.id === id ? { ...room, quantity: 0 } : room,
+      );
+
+      setShowSummary(nextRooms.some((room) => room.quantity > 0));
+      return nextRooms;
+    });
+  };
+  const handleRoomQuantityChange = (id, quantity) => {
+    setRoomList((prev) => {
+      const nextRooms = prev.map((room) =>
+        room.id === id ? { ...room, quantity } : room,
+      );
+
+      setShowSummary(nextRooms.some((room) => room.quantity > 0));
+      return nextRooms;
+    });
   };
   const sectionRefs = {
     Description: useRef(null),
@@ -142,11 +186,19 @@ const Page = () => {
             <Amenities amenities={hotelDetail?.amenities} />
           </section>
           <section ref={sectionRefs.Rooms}>
-            <AvailabilityComponent rooms={hotelDetail?.rooms} />
+            <AvailabilityComponent
+              rooms={hotelDetail?.rooms || []}
+              loading={roomsLoading}
+              onRoomQuantityChange={handleRoomQuantityChange}
+            />
           </section>
         </div>
 
-        <div className={styles.rightSidebar}>
+        <div
+          className={`${styles.rightSidebar} ${
+            showSummary ? styles.summarySidebar : ""
+          }`}
+        >
           <div
             className={`${styles.roomWrapper} ${
               showSummary ? styles.hide : ""
@@ -167,7 +219,11 @@ const Page = () => {
               showSummary ? styles.show : ""
             }`}
           >
-            <BookingSummary roomList={roomList} onRemove={removeRoom} />
+            <BookingSummary
+              roomList={selectedRooms}
+              onRemove={removeRoom}
+              onBookNow={saveBookingSession}
+            />
           </div>
         </div>
       </main>

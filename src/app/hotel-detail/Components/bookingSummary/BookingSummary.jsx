@@ -4,10 +4,11 @@ import styles from "./BookingSummary.module.css";
 import { Delete, Trash, Trash2, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const BookingSummary = ({ roomList, onRemove }) => {
+const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
   const router = useRouter();
 
   const handleDelete = () => {
+    onBookNow?.();
     router.push("/hotel-booking");
   };
   const basePrice = roomList.reduce(

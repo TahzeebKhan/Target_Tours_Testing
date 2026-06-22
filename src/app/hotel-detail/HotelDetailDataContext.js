@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import {
   HOTEL_DETAILS_KEY,
   fetchHotelDetails,
+  fetchHotelRooms,
+  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 
 const FALLBACK_IMAGES = [
@@ -17,6 +19,7 @@ const FALLBACK_IMAGES = [
 const HotelDetailDataContext = createContext({
   hotelDetail: null,
   loading: true,
+  roomsLoading: false,
 });
 
 const readStoredHotelDetail = () => {
@@ -109,11 +112,58 @@ const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
     value.links?.["350px"]?.href,
   ].forEach((candidate) => collectImages(candidate, images, depth + 1, seen));
 
-  ["images", "photos", "gallery", "media", "hotelImages"].forEach((key) => {
+  ["images", "photos", "gallery", "media", "hotelImages", "room", "roomGroup"].forEach((key) => {
     collectImages(value[key], images, depth + 1, seen);
   });
 
   return images;
+};
+
+const collectFacilities = (
+  value,
+  facilities = [],
+  depth = 0,
+  seen = new WeakSet(),
+  fromFacilityList = false,
+) => {
+  if (!value || depth > 7) return facilities;
+
+  if (typeof value === "string") {
+    if (fromFacilityList) facilities.push(value);
+    return facilities;
+  }
+
+  if (typeof value !== "object" || seen.has(value)) return facilities;
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    value.forEach((item) =>
+      collectFacilities(item, facilities, depth + 1, seen, fromFacilityList),
+    );
+    return facilities;
+  }
+
+  if (fromFacilityList && (value.name || value.label || value.description)) {
+    facilities.push(value.name || value.label || value.description);
+  }
+
+  Object.entries(value).forEach(([key, entry]) => {
+    const normalizedKey = key.toLowerCase();
+    const isFacilityKey =
+      normalizedKey.includes("facilit") ||
+      normalizedKey.includes("amenit") ||
+      normalizedKey === "facilitygroups";
+
+    collectFacilities(
+      entry,
+      facilities,
+      depth + 1,
+      seen,
+      fromFacilityList || isFacilityKey,
+    );
+  });
+
+  return facilities;
 };
 
 const normalizeRating = (rating) => {
@@ -151,28 +201,66 @@ const getRateValue = (hotel = {}) =>
     hotel.baseRate,
   );
 
+const getTaxValue = (...sources) =>
+  sources.reduce((total, source) => {
+    if (!source) return total;
+
+    if (Array.isArray(source)) {
+      return (
+        total +
+        source.reduce((sum, item) => sum + Number(item?.amount || item?.value || 0), 0)
+      );
+    }
+
+    if (typeof source === "object") {
+      return total + Number(source.amount || source.value || 0);
+    }
+
+    return total + Number(source || 0);
+  }, 0);
+
 const normalizeFacilities = (facilities = []) =>
   facilities
     .map((facility) =>
       typeof facility === "string" ? facility : facility?.name || facility?.label,
     )
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((facility, index, list) => list.indexOf(facility) === index);
 
 const getRecommendationRooms = (data = {}) => {
+  const source = data?.content || data?.data || data;
+
+  if (Array.isArray(source.roomCategories)) {
+    return source.roomCategories.flatMap((category, categoryIndex) => {
+      const categoryRooms = Array.isArray(category.room) ? category.room : [];
+
+      if (!categoryRooms.length) {
+        return [{ room: category, recommendation: category, recommendationIndex: categoryIndex }];
+      }
+
+      return categoryRooms.map((room, roomIndex) => ({
+        room,
+        recommendation: category,
+        recommendationIndex: categoryIndex,
+        roomIndex,
+      }));
+    });
+  }
+
   const directRooms = [
-    data.roomRates,
-    data.roomTypes,
-    data.availableRooms,
-    data.rates,
+    source.roomRates,
+    source.roomTypes,
+    source.availableRooms,
+    source.rates,
   ].find(Array.isArray);
 
   if (directRooms) return directRooms.map((room) => ({ room }));
 
-  if (Array.isArray(data.rooms)) {
-    return data.rooms.map((room) => ({ room }));
+  if (Array.isArray(source.rooms)) {
+    return source.rooms.map((room) => ({ room }));
   }
 
-  const recommendations = data.rooms?.recommendations;
+  const recommendations = source.rooms?.recommendations || source.recommendations;
   if (!Array.isArray(recommendations)) return [];
 
   return recommendations.flatMap((recommendation, recommendationIndex) => {
@@ -193,28 +281,21 @@ const getRecommendationRooms = (data = {}) => {
   });
 };
 
-const getRoomFeatureTexts = (room = {}, recommendation = {}, hotel = {}) => {
+const getRoomFeatureTexts = (room = {}, recommendation = {}) => {
   const roomFacilities = normalizeFacilities(
-    room.facilities || room.amenities || room.facilityGroups || [],
+    [
+      ...(Array.isArray(room.facilities) ? room.facilities : []),
+      ...(Array.isArray(room.amenities) ? room.amenities : []),
+      ...(Array.isArray(room.facilityGroups) ? room.facilityGroups : []),
+      ...(Array.isArray(recommendation.facilities) ? recommendation.facilities : []),
+      ...(Array.isArray(recommendation.amenities) ? recommendation.amenities : []),
+      ...(Array.isArray(recommendation.facilityGroups) ? recommendation.facilityGroups : []),
+    ],
   );
-  const hotelFacilities = normalizeFacilities(hotel.facilities || []);
-  const inclusions = [
-    room.boardBasis?.description,
-    room.boardBasis,
-    room.mealPlan,
-    room.roomBasis,
-    room.cancellationPolicy,
-    recommendation.cancellationPolicy,
-    ...(Array.isArray(room.inclusions) ? room.inclusions : []),
-    ...(Array.isArray(recommendation.inclusions) ? recommendation.inclusions : []),
-  ]
-    .map((item) => (typeof item === "string" ? item : item?.description || item?.name))
-    .filter(Boolean);
 
-  return [...roomFacilities, ...inclusions, ...hotelFacilities]
+  return roomFacilities
     .filter(Boolean)
     .filter((item, index, list) => list.indexOf(item) === index)
-    .slice(0, 10)
     .map((text) => ({
       icon: "/icons/greenTick.svg",
       text,
@@ -227,93 +308,123 @@ const normalizeRooms = (data = {}, hotel = {}) => {
   const fallbackPrice = getRateValue(hotel);
 
   if (!rooms.length) {
-    return [
-      {
-        id: hotel.id || hotel.hotelId || "selected-room",
-        title: getFirst(hotel.roomName, "Selected Room"),
-        image: images.map((img) => ({ img })),
-        beds: getFirst(hotel.beds, hotel.bedType, "Room"),
-        persons: getFirst(hotel.persons, hotel.occupancy, "Guests"),
-        featuresLeft: normalizeFacilities(hotel.facilities).slice(0, 10).map((text) => ({
-          icon: "/icons/greenTick.svg",
-          text,
-        })),
-        benefits: [
-          hotel.freeBreakfast ? "Free Breakfast" : "",
-          hotel.freeCancellation || hotel.isRefundable ? "Free Cancellation" : "",
-        ].filter(Boolean),
-        cancellation:
-          hotel.freeCancellation || hotel.isRefundable
-            ? "Free Cancellation"
-            : "Cancellation policy applies",
-        rating: {
-          label: "Excellent",
-          reviews: "No reviews yet",
-          score: String(normalizeRating(hotel.starRating || hotel.rating)),
-        },
-        price: {
-          actual: formatCurrency(fallbackPrice),
-          offer: formatCurrency(fallbackPrice),
-          nights: "per night",
-          taxes: hotel.rate?.taxes ? `+ ${formatCurrency(hotel.rate.taxes)} Taxes & fees` : "",
-          bookWith: "₹ 0",
-        },
-      },
-    ];
+    return [];
   }
 
   return rooms.map(({ room = {}, recommendation = {}, recommendationIndex, roomIndex }, index) => {
-    const roomImages = collectImages(room);
-    const roomPrice = getRateValue(room) || getRateValue(recommendation) || fallbackPrice;
-    const taxes = getFirst(
+    const roomDetail = room.room && typeof room.room === "object" ? room.room : room;
+    const roomImages = collectImages(roomDetail);
+    const roomPrice =
+      getRateValue(room) ||
+      getRateValue(roomDetail) ||
+      getRateValue(recommendation) ||
+      fallbackPrice;
+    const taxes = getTaxValue(
+      roomDetail.rate?.taxes,
+      roomDetail.taxes,
+      roomDetail.fees,
       room.rate?.taxes,
       room.taxes,
+      room.fees,
       recommendation.rate?.taxes,
       recommendation.taxes,
+      recommendation.fees,
+    );
+    const publishedRate = getFirst(
+      room.publishedRate,
+      roomDetail.publishedRate,
+      room.recommendationMeta?.publishedRate,
+      recommendation.publishedRate,
+      recommendation.recommendationMeta?.publishedRate,
+      roomPrice,
     );
     const roomTitle = getFirst(
+      roomDetail.name,
+      roomDetail.title,
+      roomDetail.roomName,
+      roomDetail.standardRoomName,
+      roomDetail.description,
       room.name,
-      room.title,
-      room.roomName,
-      room.description,
+      recommendation.standardRoomName,
       recommendation.name,
       `Room Option ${index + 1}`,
     );
-    const recommendationId = getFirst(recommendation.id, recommendation.recommendationId);
+    const recommendationId = getFirst(
+      room.recommendationId,
+      recommendation.id,
+      recommendation.recommendationId,
+      recommendation.standardRoomId,
+    );
+    const occupancy = Array.isArray(room.occupancies) ? room.occupancies[0] : null;
+    const guestCount =
+      Number(roomDetail.maxGuestAllowed || 0) ||
+      Number(occupancy?.numOfAdults || 0) + Number(occupancy?.numOfChildren || 0);
+    const isRefundable = Boolean(
+      roomDetail.freeCancellation ||
+        room.freeCancellation ||
+        recommendation.freeCancellation ||
+        room.refundable ||
+        room.refundability === "Refundable" ||
+        hotel.freeCancellation ||
+        hotel.isRefundable,
+    );
 
     return {
       id:
         room.id ||
+        room.roomGroupId ||
+        roomDetail.id ||
         room.roomId ||
+        roomDetail.roomId ||
         `${recommendationId || "recommendation"}-${recommendationIndex ?? index}-${roomIndex ?? 0}`,
       title: roomTitle,
+      availability: Number(room.availability || roomDetail.availability || 1),
+      roomId: room.roomId || roomDetail.roomId || roomDetail.id || "",
+      roomGroupId: room.roomGroupId || room.id || "",
+      recommendationId: room.recommendationId || recommendation.recommendationId || "",
+      supplierName: room.providerName || recommendation.providerName || "",
+      guestCode: room.guestCode || room.GuestCode || "",
+      raw: room,
       image: (roomImages.length ? roomImages : images).map((img) => ({ img })),
-      beds: getFirst(room.beds, room.bedType, room.bed, room.roomType, "Room"),
-      persons: getFirst(room.persons, room.occupancy, room.guests, "Guests"),
-      featuresLeft: getRoomFeatureTexts(room, recommendation, hotel),
-      benefits: [
-        room.freeBreakfast || recommendation.freeBreakfast || hotel.freeBreakfast ? "Free Breakfast" : "",
-        room.freeCancellation ||
-        recommendation.freeCancellation ||
-        hotel.freeCancellation ||
-        hotel.isRefundable
-          ? "Free Cancellation"
+      beds: getFirst(
+        Array.isArray(roomDetail.beds) && roomDetail.beds.length
+          ? roomDetail.beds
+              .map((bed) =>
+                [bed.count, bed.description || bed.type].filter(Boolean).join(" "),
+              )
+              .join(", ")
           : "",
+        roomDetail.standardRoomName,
+        recommendation.standardRoomName,
+        roomDetail.bedType,
+        roomDetail.bed,
+        roomDetail.roomType,
+        "Room",
+      ),
+      persons: getFirst(
+        roomDetail.maxGuestAllowed ? `${roomDetail.maxGuestAllowed} Guests` : "",
+        guestCount ? `${guestCount} Guest${guestCount === 1 ? "" : "s"}` : "",
+        roomDetail.persons,
+        roomDetail.occupancy,
+        roomDetail.guests,
+        "Guests",
+      ),
+      featuresLeft: getRoomFeatureTexts(roomDetail, recommendation, hotel),
+      benefits: [
+        room.boardBasis?.description || roomDetail.boardBasis?.description || "",
+        room.providerName ? `Provider: ${room.providerName}` : "",
+        room.needsPriceCheck ? "Price check required before booking" : "",
+        room.payAtHotel ? "Pay at hotel" : "",
+        isRefundable ? "Refundable" : "Non refundable",
       ].filter(Boolean),
-      cancellation:
-        room.freeCancellation ||
-        recommendation.freeCancellation ||
-        hotel.freeCancellation ||
-        hotel.isRefundable
-          ? "Free Cancellation"
-          : "Cancellation policy applies",
+      cancellation: isRefundable ? "Refundable booking" : "Non refundable booking",
       rating: {
         label: "Excellent",
         reviews: "No reviews yet",
         score: String(normalizeRating(hotel.starRating || hotel.rating)),
       },
       price: {
-        actual: formatCurrency(roomPrice),
+        actual: formatCurrency(publishedRate),
         offer: formatCurrency(roomPrice),
         nights: "per night",
         taxes: taxes ? `+ ${formatCurrency(taxes)} Taxes & fees` : "",
@@ -490,7 +601,7 @@ const normalizeScoreDetails = (data = {}, hotel = {}) => {
   ];
 };
 
-const normalizeHotelDetail = (stored, routeHotelId = "") => {
+const normalizeHotelDetail = (stored, routeHotelId = "", roomsPayload = null) => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
   const foundHotel = findFirstObject(data, (item) => item.name && (item.address || item.heroImage));
@@ -507,7 +618,7 @@ const normalizeHotelDetail = (stored, routeHotelId = "") => {
   ].filter(Boolean);
   const uniqueImages = [...new Set(images)].slice(0, 12);
   const facilities = normalizeFacilities(
-    getFirst(hotel.facilities, data.facilities, data.amenities, []),
+    collectFacilities(data),
   );
   const reviews = normalizeReviews(data, hotel);
   const ratingBars = normalizeRatingBars(data, reviews);
@@ -530,7 +641,7 @@ const normalizeHotelDetail = (stored, routeHotelId = "") => {
       ) || `${getFirst(hotel.name, "This hotel")} details are being updated.`,
     amenities: facilities,
     policies: normalizePolicies(data, hotel),
-    rooms: normalizeRooms(data, hotel),
+    rooms: roomsPayload ? normalizeRooms(roomsPayload, { ...hotel, facilities }) : [],
     reviews,
     ratingBars,
     scoreDetails,
@@ -538,10 +649,12 @@ const normalizeHotelDetail = (stored, routeHotelId = "") => {
   };
 };
 
-export const HotelDetailDataProvider = ({ children }) => {
+export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   const [routeHotelId, setRouteHotelId] = useState("");
   const [storedDetail, setStoredDetail] = useState(null);
+  const [roomsPayload, setRoomsPayload] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [roomsLoading, setRoomsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -552,56 +665,83 @@ export const HotelDetailDataProvider = ({ children }) => {
     const storedHotelId = getStoredHotelId(stored);
     const canUseStored =
       stored && (!hotelId || !storedHotelId || storedHotelId === String(hotelId));
+    const roomsRequest = request || stored?.request || null;
 
     setRouteHotelId(hotelId);
 
     if (canUseStored) {
       setStoredDetail(stored);
       setLoading(false);
-      return undefined;
-    }
-
-    if (!request) {
+    } else if (!request) {
       setStoredDetail(stored);
       setLoading(false);
-      return undefined;
+    } else {
+      const loadHotelDetails = async () => {
+        setLoading(true);
+
+        try {
+          const details = await fetchHotelDetails(request);
+          const nextStoredDetail = {
+            request,
+            hotel: {},
+            details,
+          };
+
+          writeStoredHotelDetail(nextStoredDetail);
+          if (isMounted) setStoredDetail(nextStoredDetail);
+        } catch (error) {
+          console.error("Hotel details refresh failed:", error);
+          if (isMissingHotelAuthTokenError(error)) {
+            onUnauthorized?.();
+          }
+          if (isMounted) setStoredDetail(stored);
+        } finally {
+          if (isMounted) setLoading(false);
+        }
+      };
+
+      loadHotelDetails();
     }
 
-    const loadHotelDetails = async () => {
-      setLoading(true);
+    const hasRoomsRequest =
+      roomsRequest?.searchId && roomsRequest?.hotelId && roomsRequest?.priceProvider;
 
-      try {
-        const details = await fetchHotelDetails(request);
-        const nextStoredDetail = {
-          request,
-          hotel: {},
-          details,
-        };
+    if (hasRoomsRequest) {
+      const loadHotelRooms = async () => {
+        setRoomsLoading(true);
 
-        writeStoredHotelDetail(nextStoredDetail);
-        if (isMounted) setStoredDetail(nextStoredDetail);
-      } catch (error) {
-        console.error("Hotel details refresh failed:", error);
-        if (isMounted) setStoredDetail(stored);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
+        try {
+          const rooms = await fetchHotelRooms(roomsRequest);
+          if (isMounted) setRoomsPayload(rooms);
+        } catch (error) {
+          console.error("Hotel rooms request failed:", error);
+          if (isMissingHotelAuthTokenError(error)) {
+            onUnauthorized?.();
+          }
+          if (isMounted) setRoomsPayload(null);
+        } finally {
+          if (isMounted) setRoomsLoading(false);
+        }
+      };
 
-    loadHotelDetails();
+      loadHotelRooms();
+    } else {
+      setRoomsPayload(null);
+      setRoomsLoading(false);
+    }
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [onUnauthorized]);
 
   const hotelDetail = useMemo(
-    () => normalizeHotelDetail(storedDetail, routeHotelId),
-    [storedDetail, routeHotelId],
+    () => normalizeHotelDetail(storedDetail, routeHotelId, roomsPayload),
+    [storedDetail, routeHotelId, roomsPayload],
   );
 
   return (
-    <HotelDetailDataContext.Provider value={{ hotelDetail, loading }}>
+    <HotelDetailDataContext.Provider value={{ hotelDetail, loading, roomsLoading }}>
       {children}
     </HotelDetailDataContext.Provider>
   );

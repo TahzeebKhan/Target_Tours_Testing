@@ -26,6 +26,13 @@ padding-top: 73px;
 
 .rightSidebar {
     margin-top: 79px;
+    align-self: start;
+}
+
+.summarySidebar {
+    position: sticky;
+    top: 150px;
+    margin-top: 0;
 }
 
 /* ROOM CARD */
@@ -111,6 +118,9 @@ padding-top: 73px;
     .rightSidebar{
         margin: 0;
     }
+    .summarySidebar{
+        top: 120px;
+    }
     
 
 }
@@ -133,6 +143,9 @@ padding-top: 73px;
         
     }
     .roomWrapper{
+        position: static;
+    }
+    .summarySidebar{
         position: static;
     }
     

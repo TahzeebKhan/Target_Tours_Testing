@@ -1,196 +1,23 @@
 "use client";
-// Top pe yeh imports add karo
 import "swiper/css";
 import "swiper/css/navigation";
-import "swiper/css/pagination";
 import React, { useRef, useState } from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import { useRouter } from "next/navigation";
+import { Navigation } from "swiper/modules";
 
-const roomsData = [
-  {
-    id: 1,
-    image: [
-      { img: "/images/hotelImage1.png" },
-      { img: "/images/hotelImage2.png" },
-      { img: "/images/hotelImage3.png" },
-    ],
-    title: "Deluxe Private AC Room with Ensuite Bathroom",
-    beds: "2 Single bed",
-    persons: "2 Persons",
-
-    featuresLeft: [
-      { icon: "/icons/arrows-expand.svg", text: "30 m2" },
-      { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-      { icon: "/icons/greenTick.svg", text: "Breakfast" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
-      { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-      { icon: "/icons/greenTick.svg", text: "Valley View" },
-      { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-    ],
-
-    // featuresRight: [
-    //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-    //     { icon: "/icons/greenTick.svg", text: "Valley View" },
-    //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-    //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-    //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
-    // ],
-
-    benefits: [
-      "Free stay for the kid",
-      "1 Extra bed/mattress will be provided at no extra cost",
-      "15% off on Food & Beverage services",
-      "Complimentary Welcome Drink on arrival",
-    ],
-
-    cancellation: "Free Cancellation before 19 Jan 02:59 PM",
-
-    rating: {
-      label: "Excellent",
-      reviews: "1,260 reviews",
-      score: "5.0",
-    },
-
-    price: {
-      actual: "₹66,945",
-      offer: "₹ 66,945",
-      nights: "x 5 night",
-      taxes: "+ ₹ 226 Taxes & fees",
-      bookWith: "₹ 0",
-    },
-  },
-
-  {
-    id: 2,
-    image: [
-      { img: "/images/hotelImage2.png" },
-      { img: "/images/hotelImage1.png" },
-      { img: "/images/hotelImage3.png" },
-    ],
-    title: "Deluxe Private AC Room with Ensuite Bathroom",
-    beds: "2 Single bed",
-    persons: "2 Persons",
-
-    featuresLeft: [
-      { icon: "/icons/arrows-expand.svg", text: "30 m2" },
-      { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-      { icon: "/icons/greenTick.svg", text: "Breakfast" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
-      { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-      { icon: "/icons/greenTick.svg", text: "Valley View" },
-      { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-    ],
-
-    // featuresRight: [
-    //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-    //     { icon: "/icons/greenTick.svg", text: "Valley View" },
-    //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-    //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-    //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
-    // ],
-
-    benefits: [
-      "Free stay for the kid",
-      "1 Extra bed/mattress will be provided at no extra cost",
-      "15% off on Food & Beverage services",
-      "Complimentary Welcome Drink on arrival",
-    ],
-
-    cancellation: "Free Cancellation before 19 Jan 02:59 PM",
-
-    rating: {
-      label: "Excellent",
-      reviews: "1,260 reviews",
-      score: "5.0",
-    },
-
-    price: {
-      actual: "₹66,945",
-      offer: "₹ 66,945",
-      nights: "x 5 night",
-      taxes: "+ ₹ 226 Taxes & fees",
-      bookWith: "₹ 0",
-    },
-  },
-
-  {
-    id: 3,
-    image: [
-      { img: "/images/hotelImage3.png" },
-      { img: "/images/hotelImage2.png" },
-      { img: "/images/hotelImage1.png" },
-    ],
-    title: "Deluxe Private AC Room with Ensuite Bathroom",
-    beds: "2 Single bed",
-    persons: "2 Persons",
-
-    featuresLeft: [
-      { icon: "/icons/arrows-expand.svg", text: "30 m2" },
-      { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-      { icon: "/icons/greenTick.svg", text: "Breakfast" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Air Conditioner" },
-      { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-      { icon: "/icons/greenTick.svg", text: "Valley View" },
-      { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-      { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-      { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-    ],
-
-    // featuresRight: [
-    //     { icon: "/icons/greenTick.svg", text: "1 King Bed" },
-    //     { icon: "/icons/greenTick.svg", text: "Valley View" },
-    //     { icon: "/icons/greenTick.svg", text: "Iron/Ironing Board" },
-    //     { icon: "/icons/greenTick.svg", text: "Laundry Service" },
-    //     { icon: "/icons/greenTick.svg", text: "Free Wifi" }
-    // ],
-
-    benefits: [
-      "Free stay for the kid",
-      "1 Extra bed/mattress will be provided at no extra cost",
-      "15% off on Food & Beverage services",
-      "Complimentary Welcome Drink on arrival",
-    ],
-
-    cancellation: "Free Cancellation before 19 Jan 02:59 PM",
-
-    rating: {
-      label: "Excellent",
-      reviews: "1,260 reviews",
-      score: "5.0",
-    },
-
-    price: {
-      actual: "₹66,945",
-      offer: "₹ 66,945",
-      nights: "x 5 night",
-      taxes: "+ ₹ 226 Taxes & fees",
-      bookWith: "₹ 0",
-    },
-  },
-];
-
-const AvailabilityComponent = ({ rooms = roomsData }) => {
-  const router = useRouter();
+const AvailabilityComponent = ({ rooms = [], loading = false, onRoomQuantityChange }) => {
   const swiperRefs = useRef({});
-  const [swiperRef, setSwiperRef] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
   const [roomQty, setRoomQty] = useState({});
-  const increase = (id) => {
-    setRoomQty((prev) => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1,
-    }));
+  const increase = (id, maxQty = Infinity) => {
+    setRoomQty((prev) => {
+      const nextQty = Math.min((prev[id] || 0) + 1, maxQty);
+      onRoomQuantityChange?.(id, nextQty);
+      return {
+        ...prev,
+        [id]: nextQty,
+      };
+    });
   };
 
   const decrease = (id) => {
@@ -199,32 +26,34 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
 
       if (nextQty <= 0) {
         const copy = { ...prev };
-        delete copy[id]; // 🔥 remove → back to ADD ROOM
+        delete copy[id];
+        onRoomQuantityChange?.(id, 0);
         return copy;
       }
 
+      onRoomQuantityChange?.(id, nextQty);
       return { ...prev, [id]: nextQty };
     });
   };
-  const handleSlideChange = (swiper) => {
-    setActiveIndex(swiper.activeIndex);
+  const handleAddRoom = (id, maxQty) => {
+    increase(id, maxQty);
   };
 
-  const handlePrev = () => {
-    swiperRef?.slidePrev();
-  };
-
-  const handleNext = () => {
-    swiperRef?.slideNext();
-  };
-  const handleAddRoom = (id) => {
-    increase(id);
-  };
   return (
     <div className={styles.availabilitySection}>
       <h3 className={styles.heading}>Availability</h3>
 
+      {loading && <p className={styles.statusText}>Loading available rooms...</p>}
+
+      {!loading && !rooms.length && (
+        <p className={styles.statusText}>No available rooms found.</p>
+      )}
+
       {rooms.map((room) => {
+        const roomImages = Array.isArray(room.image) ? room.image : [];
+        const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
+        const benefits = Array.isArray(room.benefits) ? room.benefits : [];
+        const maxQty = Math.max(0, Number(room.availability) || 0);
         const qty = roomQty[room.id] || 0;
 
         return (
@@ -235,10 +64,9 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
                 onSwiper={(swiper) => {
                   swiperRefs.current[room.id] = swiper;
                 }}
-                pagination={{ clickable: true }}
                 slidesPerView={1}
               >
-                {room.image.map((item, index) => (
+                {roomImages.map((item, index) => (
                   <SwiperSlide key={`${room.id}-image-${index}`} className={styles.slide}>
                     <img key={index} src={item.img} alt="" />
                   </SwiperSlide>
@@ -279,22 +107,26 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
 
                 {/* FEATURES */}
                 <div className={styles.featureSec}>
-                  <ul className={styles.featureList}>
-                    {room.featuresLeft.map((item, idx) => (
-                      <li key={idx}>
-                        <div className={styles.iconCont}>
-                          <img src={item.icon} alt="" />
-                        </div>
-                        {item.text}
-                      </li>
-                    ))}
-                  </ul>
+                  {features.length ? (
+                    <ul className={styles.featureList}>
+                      {features.map((item, idx) => (
+                        <li key={idx}>
+                          <div className={styles.iconCont}>
+                            <img src={item.icon} alt="" />
+                          </div>
+                          {item.text}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className={styles.statusText}>No facilities available</p>
+                  )}
                 </div>
 
                 {/* BENEFITS */}
                 <div className={styles.benefitsSec}>
                   <ul className={styles.benefitsList}>
-                    {room.benefits.map((benefit, idx) => (
+                    {benefits.map((benefit, idx) => (
                       <li key={idx}>{benefit}</li>
                     ))}
                   </ul>
@@ -359,7 +191,8 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
                     className={`${styles.addRoomBtn} ${
                       qty > 0 ? styles.fadeOut : styles.fadeIn
                     }`}
-                    onClick={() => handleAddRoom(room.id)}
+                    disabled={maxQty <= 0}
+                    onClick={() => handleAddRoom(room.id, maxQty)}
                   >
                     ADD ROOM
                   </button>
@@ -392,9 +225,10 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
                     <span className={styles.count}>{qty}</span>
                     <button
                       className={styles.btn}
+                      disabled={qty >= maxQty}
                       onClick={(e) => {
                         e.stopPropagation();
-                        increase(room.id);
+                        increase(room.id, maxQty);
                       }}
                     >
                       <svg
@@ -405,7 +239,7 @@ const AvailabilityComponent = ({ rooms = roomsData }) => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M5.75 7.24995H0.75C0.5375 7.24995 0.359375 7.17805 0.215625 7.03425C0.071875 6.89043 0 6.71223 0 6.49965C0 6.28705 0.071875 6.10896 0.215625 5.96538C0.359375 5.82179 0.5375 5.75 0.75 5.75H5.75V0.75C5.75 0.5375 5.8219 0.359375 5.9657 0.215625C6.10952 0.071875 6.28772 0 6.5003 0C6.7129 0 6.89099 0.071875 7.03457 0.215625C7.17816 0.359375 7.24995 0.5375 7.24995 0.75V5.75H12.25C12.4625 5.75 12.6406 5.8219 12.7843 5.9657C12.9281 6.10952 13 6.28772 13 6.5003C13 6.7129 12.9281 6.89099 12.7843 7.03458C12.6406 7.17816 12.4625 7.24995 12.25 7.24995H7.24995V12.25C7.24995 12.4625 7.17805 12.6406 7.03425 12.7843C6.89043 12.9281 6.71223 13 6.49965 13C6.28705 13 6.10896 12.9281 5.96537 12.7843C5.82179 12.6406 5.75 12.4625 5.75 12.25V7.24995Z"
+                          d="M5.75 7.24995H0.75C0.5375 7.24995 0.359375 7.17805 0.215625 7.03425C0.071875 6.89043 0 6.71223 0 6.49965C0 6.28705 0.071875 6.10896 0.215625 5.96538C0.359375 5.82179 0.5375 5.75 0.75 5.75H5.75V0.75C5.75 0.5375 5.8219 0.359375 5.9657 0.215625C6.10952 0.071875 6.28772 0 6.5003 0C6.7129 0 6.89099 0.071875 7.03457 0.215625C7.17816 0.359375 7.24995 0.5375 7.24995 0.75V5.75H12.25C12.4625 5.75 12.6406 5.8219 12.7843 5.9657C12.9281 6.10952 13 6.28772 13 6.5003C13 6.7129 12.9281 6.89099 12.7843 7.03458C12.6406 7.17816 12.4625 7.24995 12.25 7.24995H7.24995V12.25C7.24995 12.4625 7.17805 12.6406 7.03425 12.7843C6.89043 12.9281 6.71223 13 6.49965C6.28705 13 6.10896 12.9281 5.96537 12.7843C5.82179 12.6406 5.75 12.4625 5.75 12.25V7.24995Z"
                           fill="#000033"
                         />
                       </svg>
