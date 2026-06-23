@@ -316,7 +316,7 @@ const buildGuestCode = (occupancies = [], guests = []) => {
   const occupancyList = Array.isArray(occupancies) ? occupancies : [];
   let adultAgeIndex = 0;
 
-  if (!occupancyList.length) return `|1|1:A:${guests[0]?.age || "25"}|`;
+  if (!occupancyList.length) return `|1|1:A:${"25" || guests[0]?.age || "25"}|`;
 
   return occupancyList
     .map((occupancy, index) => {
