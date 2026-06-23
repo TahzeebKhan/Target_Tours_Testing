@@ -266,7 +266,7 @@ const HomePage = ({
   const [travellerOpend, setTravellerOpend] = useState(false);
   const [hotelGuestOpen, setHotelGuestOpen] = useState({
     room: 1,
-    adults: 0,
+    adults: 1,
     children: 0,
     pets: 0,
   });
@@ -278,11 +278,9 @@ const HomePage = ({
   });
   const [showDestinationSearch, setShowDestinationSearch] = useState(false);
 
-  const totalHotelPassengers =
-    hotelGuestOpen.adults +
-    hotelGuestOpen.children +
-    hotelGuestOpen.pets +
-    hotelGuestOpen.room;
+  const hotelGuestCount =
+    Number(hotelGuestOpen.adults || 0) + Number(hotelGuestOpen.children || 0);
+  const hotelRoomCount = Number(hotelGuestOpen.room || 1);
   const totalPassengers =
     passengers.adult + passengers.child + passengers.infant;
   const totalHolidayGuests = passengers.adult + passengers.child;
@@ -2766,10 +2764,10 @@ const HomePage = ({
                         <div className={styles.contant}>
                           {truncate(
                             bookingType === "hotel"
-                              ? `${totalHotelPassengers} Guest${
-                                  totalHotelPassengers > 1 ? "s" : ""
-                                }, ${totalHotelPassengers} Room${
-                                  totalHotelPassengers > 1 ? "s" : ""
+                              ? `${hotelGuestCount} Guest${
+                                  hotelGuestCount > 1 ? "s" : ""
+                                }, ${hotelRoomCount} Room${
+                                  hotelRoomCount > 1 ? "s" : ""
                                 }`
                               : bookingType === "holiday"
                                 ? `${totalRooms} Room${

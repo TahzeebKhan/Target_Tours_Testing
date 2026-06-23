@@ -52,6 +52,121 @@
   color: #d92d20;
 }
 
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.skeletonCard {
+  min-height: 268px;
+  overflow: hidden;
+}
+
+.skeletonDetails {
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  padding-left: 0;
+}
+
+.skeletonLeft {
+  min-width: 488px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonRight {
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.skeletonImage,
+.skeletonLine {
+  position: relative;
+  overflow: hidden;
+  background: #f1f3f6;
+}
+
+.skeletonImage::after,
+.skeletonLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.72),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+.skeletonImage {
+  min-height: 268px;
+}
+
+.skeletonLine {
+  display: block;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.skeletonTitle {
+  width: 48%;
+  height: 22px;
+}
+
+.skeletonMeta {
+  width: 34%;
+}
+
+.skeletonFeatureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.skeletonBenefit {
+  width: 42%;
+  margin-top: auto;
+}
+
+.skeletonRating {
+  width: 72px;
+  height: 32px;
+}
+
+.skeletonPrice {
+  width: 126px;
+  height: 24px;
+  margin-top: auto;
+}
+
+.skeletonTax {
+  width: 104px;
+}
+
+.skeletonButton {
+  width: 170px;
+  height: 40px;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .cardDetails {
   display: flex;
   gap: 16px;

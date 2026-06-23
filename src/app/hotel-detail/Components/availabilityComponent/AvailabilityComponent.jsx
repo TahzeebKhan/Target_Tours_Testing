@@ -6,6 +6,39 @@ import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 
+const AvailabilitySkeleton = () => (
+  <div className={styles.skeletonList} aria-label="Loading available rooms">
+    {[0, 1].map((item) => (
+      <div key={item} className={`${styles.CardSection} ${styles.skeletonCard}`}>
+        <div className={`${styles.imagesNestedCarousel} ${styles.skeletonImage}`}></div>
+
+        <div className={styles.skeletonDetails}>
+          <div className={styles.skeletonLeft}>
+            <span className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></span>
+            <span className={`${styles.skeletonLine} ${styles.skeletonMeta}`}></span>
+            <div className={styles.skeletonFeatureGrid}>
+              <span className={styles.skeletonLine}></span>
+              <span className={styles.skeletonLine}></span>
+              <span className={styles.skeletonLine}></span>
+              <span className={styles.skeletonLine}></span>
+            </div>
+            <span className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></span>
+          </div>
+
+          <div className={styles.br}></div>
+
+          <div className={styles.skeletonRight}>
+            <span className={`${styles.skeletonLine} ${styles.skeletonRating}`}></span>
+            <span className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></span>
+            <span className={`${styles.skeletonLine} ${styles.skeletonTax}`}></span>
+            <span className={`${styles.skeletonLine} ${styles.skeletonButton}`}></span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const AvailabilityComponent = ({
   rooms = [],
   loading = false,
@@ -46,7 +79,7 @@ const AvailabilityComponent = ({
     <div className={styles.availabilitySection}>
       <h3 className={styles.heading}>Availability</h3>
 
-      {loading && <p className={styles.statusText}>Loading available rooms...</p>}
+      {loading && <AvailabilitySkeleton />}
 
       {!loading && !rooms.length && (
         <p className={errorMessage ? styles.errorText : styles.statusText}>
@@ -54,7 +87,7 @@ const AvailabilityComponent = ({
         </p>
       )}
 
-      {rooms.map((room) => {
+      {!loading && rooms.map((room) => {
         const roomImages = Array.isArray(room.image) ? room.image : [];
         const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
         const benefits = Array.isArray(room.benefits) ? room.benefits : [];

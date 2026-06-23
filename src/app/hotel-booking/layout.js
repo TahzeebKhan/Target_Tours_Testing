@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../flight-booking-details/Navbar";
 import styles from "./HotelBooking.module.css";
 import BookingSummary from "./components/review/components/BookingSummary";
@@ -10,6 +10,8 @@ import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
 
 const layout = ({ children }) => {
   const router = useRouter();
+  const bookingUrlRef = useRef("");
+  const roomListRef = useRef([]);
   const [bookingSession, setBookingSession] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [roomList, setRoomList] = useState([
@@ -34,6 +36,10 @@ const layout = ({ children }) => {
   ]);
 
   useEffect(() => {
+    roomListRef.current = roomList;
+  }, [roomList]);
+
+  useEffect(() => {
     try {
       const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
       const session = raw ? JSON.parse(raw) : null;
@@ -48,6 +54,79 @@ const layout = ({ children }) => {
   }, []);
 
   const [sidebarOpen, setSideBarOpen] = useState(false);
+  const getSelectedRoomCount = (rooms = []) =>
+    rooms.reduce((total, room) => total + Number(room.quantity || 0), 0);
+
+  const stepBackRoomSelection = () => {
+    setRoomList((prev) => {
+      if (getSelectedRoomCount(prev) <= 1) return prev;
+
+      const nextRooms = [...prev];
+      let lastSelectedIndex = -1;
+
+      for (let index = nextRooms.length - 1; index >= 0; index -= 1) {
+        if (Number(nextRooms[index]?.quantity || 0) > 0) {
+          lastSelectedIndex = index;
+          break;
+        }
+      }
+
+      if (lastSelectedIndex < 0) return prev;
+
+      const selectedRoom = nextRooms[lastSelectedIndex];
+      const nextQuantity = Number(selectedRoom.quantity || 0) - 1;
+
+      if (nextQuantity > 0) {
+        nextRooms[lastSelectedIndex] = {
+          ...selectedRoom,
+          quantity: nextQuantity,
+        };
+        return nextRooms;
+      }
+
+      return nextRooms.filter((_, index) => index !== lastSelectedIndex);
+    });
+  };
+
+  const handleBookingBack = () => {
+    if (getSelectedRoomCount(roomListRef.current) > 1) {
+      stepBackRoomSelection();
+      return;
+    }
+
+    router.back();
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    bookingUrlRef.current = window.location.href;
+    window.history.replaceState(
+      { ...(window.history.state || {}), hotelBookingPage: true },
+      "",
+      window.location.href,
+    );
+    window.history.pushState({ hotelBookingGuard: true }, "", window.location.href);
+
+    const handleBackButton = () => {
+      if (getSelectedRoomCount(roomListRef.current) > 1) {
+        stepBackRoomSelection();
+        window.history.pushState(
+          { hotelBookingGuard: true },
+          "",
+          bookingUrlRef.current,
+        );
+        return;
+      }
+
+      window.removeEventListener("popstate", handleBackButton);
+      window.history.back();
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+    return () => window.removeEventListener("popstate", handleBackButton);
+  }, []);
+
   const removeRoom = (id) => {
     setRoomList((prev) =>
       prev.map((room) => (room.id === id ? { ...room, quantity: 0 } : room)),
@@ -135,9 +214,7 @@ const layout = ({ children }) => {
         <div className={styles.tripDetailsContainer}>
           <div className={styles.tripDetailsHeader}>
             <img
-              onClick={() => {
-                router && router.push("/");
-              }}
+              onClick={handleBookingBack}
               className={styles.backArrow}
               src="/icons/leftArrowTrip.svg"
               alt=""

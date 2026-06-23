@@ -11,6 +11,7 @@ const createTraveler = () => ({
     middleName: "Kumar",
     lastName: "Mishra",
     gender: "male",
+    passengerType: "A",
     age: "",
     countryCode: "IN",
     mobile: "8532907106",
@@ -270,6 +271,7 @@ const StateDropdown = ({ value, onChange, required }) => {
 
 const TravelerDetails = ({ rooms = [], onChange }) => {
     const [roomGuests, setRoomGuests] = useState({});
+    const [collapsedGuests, setCollapsedGuests] = useState({});
     const [bookingContact, setBookingContact] = useState({
         title: "Mr",
         firstName: "Mukul",
@@ -324,11 +326,23 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
         }));
     };
 
-    // ➖ Remove Traveler
     const removeTraveler = (roomId, index) => {
         setRoomGuests(prev => ({
             ...prev,
             [roomId]: (prev[roomId] || []).filter((_, i) => i !== index),
+        }));
+        setCollapsedGuests((prev) => {
+            const next = { ...prev };
+            delete next[`${roomId}-${index}`];
+            return next;
+        });
+    };
+
+    const toggleTravelerCollapse = (roomId, index) => {
+        const guestKey = `${roomId}-${index}`;
+        setCollapsedGuests((prev) => ({
+            ...prev,
+            [guestKey]: !prev[guestKey],
         }));
     };
 
@@ -358,25 +372,46 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
             </div>
 
             {(roomGuests[room.id] || [createTraveler()]).map(
-              (traveler, index) => (
+              (traveler, index) => {
+                const guestKey = `${room.id}-${index}`;
+                const isCollapsed = Boolean(collapsedGuests[guestKey]);
+                const passengerLabel =
+                  traveler.passengerType === "C" ? "CHILD" : "ADULT";
+
+                return (
                 <div key={`${room.id}-${index}`} className={styles.card}>
                   <div className={styles.cardHeader}>
                     <h3>
-                      {room.title} - GUEST {index + 1} - ADULT
+                      {room.title} - GUEST {index + 1} - {passengerLabel}
                     </h3>
 
-                    {/* Remove button (hide for first traveler) */}
-                    {index > 0 && (
-                      <span
+                    <div className={styles.cardActions}>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          className={styles.removeGuest}
+                          onClick={() => removeTraveler(room.id, index)}
+                          aria-label={`Remove guest ${index + 1}`}
+                        >
+                          ×
+                        </button>
+                      )}
+                      <button
+                        type="button"
                         className={styles.collapse}
-                        onClick={() => removeTraveler(room.id, index)}
-                        style={{ cursor: "pointer" }}
+                        onClick={() => toggleTravelerCollapse(room.id, index)}
+                        aria-label={
+                          isCollapsed
+                            ? `Expand guest ${index + 1}`
+                            : `Collapse guest ${index + 1}`
+                        }
                       >
-                        —
-                      </span>
-                    )}
+                        {isCollapsed ? "+" : "—"}
+                      </button>
+                    </div>
                   </div>
 
+                  {!isCollapsed && (
                   <div className={styles.cardBody}>
                     <div className={styles.grid}>
                       <div className={`${styles.field} ${styles.selectField}`}>
@@ -399,7 +434,6 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           <option value="Mrs">Mrs</option>
                         </select>
                       </div>
-
                       <div className={styles.field}>
                         <label className={styles.label}>First Name</label>
                         <input
@@ -477,6 +511,30 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           <option value="female">Female</option>
                         </select>
                       </div>
+                      <div className={`${styles.field} ${styles.selectField}`}>
+                        <label className={styles.label}>Passenger Type</label>
+                        <select
+                          className={styles.select}
+                          required
+                          value={traveler.passengerType}
+                          onChange={(event) =>
+                            updateTraveler(
+                              room.id,
+                              index,
+                              "passengerType",
+                              event.target.value,
+                            )
+                          }
+                        >
+                          <option value="" disabled hidden>
+                            Select
+                          </option>
+                          <option value="A">Adult</option>
+                          <option value="C">Child</option>
+                        </select>
+                      </div>
+
+
                       <div className={styles.field}>
                         <label className={styles.label}>Age</label>
                         <input
@@ -495,10 +553,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           placeholder="Enter Age"
                         />
                       </div>
-                    </div>
-
-                    <div className={styles.grid}>
-                      <div className={styles.field}>
+                        <div className={styles.field}>
                         <label className={styles.label}>Country Code</label>
                         <CountryCodeDropdown
                           value={traveler.countryCode}
@@ -512,8 +567,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           }
                         />
                       </div>
-
-                      <div className={styles.field}>
+                            <div className={styles.field}>
                         <label className={styles.label}>Mobile Number</label>
                         <input
                           className={styles.input}
@@ -531,6 +585,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                         />
                       </div>
 
+                    </div>
+
+                    <div className={styles.grid}>
                       <div className={styles.field}>
                         <label className={styles.label}>Email</label>
                         <input
@@ -550,8 +607,10 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                       </div>
                     </div>
                   </div>
+                  )}
                 </div>
-              ),
+                );
+              },
             )}
           </div>
         ))}
