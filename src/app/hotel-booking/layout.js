@@ -132,7 +132,7 @@ const layout = ({ children }) => {
             setSideBarOpen={setSideBarOpen}
           />
         </div>
-        <div className={tripDetailsContainer}>
+        <div className={styles.tripDetailsContainer}>
           <div className={styles.tripDetailsHeader}>
             <img
               onClick={() => {
