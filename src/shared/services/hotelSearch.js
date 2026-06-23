@@ -25,9 +25,26 @@ const getHotelSearchHeaders = () => {
   };
 };
 
+const getApiMessage = (data) => {
+  const candidates = [
+    data?.error,
+    data?.data?.rooms,
+    data?.rooms,
+    data?.data?.content,
+    data?.content,
+    data?.data,
+    data,
+  ];
+  const messageSource = candidates.find(
+    (item) => item && typeof item === "object" && item.message,
+  );
+
+  return messageSource?.message || "";
+};
+
 const createApiError = (data, fallbackMessage) => {
   const apiError = data?.error || {};
-  const error = new Error(apiError.message || data?.message || fallbackMessage);
+  const error = new Error(getApiMessage(data) || fallbackMessage);
 
   error.status = apiError.status;
   error.name = apiError.name || error.name;
@@ -260,6 +277,7 @@ export const startHotelBooking = async (payload = {}) => {
     cache: "no-store",
     body: JSON.stringify({
       ...payload,
+      ...(getAuthToken() ? { token: getAuthToken() } : {}),
       domain: payload.domain || getDomain(),
     }),
   });
@@ -268,6 +286,54 @@ export const startHotelBooking = async (payload = {}) => {
 
   if (!response.ok) {
     throw createApiError(data, "Hotel booking failed");
+  }
+
+  return data;
+};
+
+export const refreshHotelSession = async (payload = {}) => {
+  const url = new URL("/api/hotel-search/refresh-session", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      ...(getAuthToken() ? { token: getAuthToken() } : {}),
+      domain: payload.domain || getDomain(),
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel session refresh failed");
+  }
+
+  return data;
+};
+
+export const confirmHotelBooking = async (payload = {}) => {
+  const url = new URL("/api/hotel-search/confirm-booking", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      ...(getAuthToken() ? { token: getAuthToken() } : {}),
+      domain: payload.domain || getDomain(),
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel booking confirmation failed");
   }
 
   return data;

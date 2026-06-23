@@ -38,6 +38,7 @@ export default function RoomSelectionCard({
     checkOut = "Check-out",
     rooms = 1,
     adults = 1,
+    children = 0,
 }) {
     const cardRef = useRef(null);
     const checkInRef = useRef(null);
@@ -51,7 +52,7 @@ export default function RoomSelectionCard({
     const [guestState, setGuestState] = useState({
         room: Number(rooms) || 1,
         adults: Number(adults) || 1,
-        children: 0,
+        children: Number(children) || 0,
         pets: 0,
     });
 
@@ -65,8 +66,9 @@ export default function RoomSelectionCard({
             ...prev,
             room: Number(rooms) || 1,
             adults: Number(adults) || 1,
+            children: Number(children) || 0,
         }));
-    }, [rooms, adults]);
+    }, [rooms, adults, children]);
 
     const openCalendar = (field) => {
         setActiveDateField(field);

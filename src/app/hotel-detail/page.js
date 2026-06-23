@@ -11,7 +11,10 @@ import BarcelonaSection from "./Components/BarcelonaSection/BarcelonaSection";
 import BookingSummary from "./Components/bookingSummary/BookingSummary";
 import Tabs from "./Components/tabs/Tabs";
 import { useHotelDetailData } from "./HotelDetailDataContext";
-import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
+import {
+  HOTEL_BOOKING_SESSION_KEY,
+  HOTEL_SEARCH_SESSION_KEY,
+} from "@/shared/services/hotelSearch";
 
 const parseCurrencyNumber = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
@@ -28,6 +31,34 @@ const formatDisplayDate = (value, fallback) => {
     year: "numeric",
   });
 };
+
+const readStoredHotelSearch = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const getSearchParamValue = (key) => {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(key) || "";
+};
+
+const isPlaceholderDate = (value) =>
+  ["check-in", "check-out"].includes(String(value || "").trim().toLowerCase());
+
+const getFirstValue = (...values) =>
+  values.find(
+    (value) =>
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      !isPlaceholderDate(value),
+  ) || "";
 
 const Page = () => {
   const { hotelDetail, roomsLoading } = useHotelDetailData();
@@ -54,16 +85,55 @@ const Page = () => {
     },
   ]);
   const searchRequest = hotelDetail?.request || {};
+  const storedHotelSearch = readStoredHotelSearch() || {};
+  const urlCheckIn = getSearchParamValue("checkIn");
+  const urlCheckOut = getSearchParamValue("checkOut");
+  const apiCheckIn = getFirstValue(
+    urlCheckIn,
+    searchRequest.checkInDate,
+    searchRequest.checkInRaw,
+    searchRequest.checkIn,
+    searchRequest.check_in,
+    storedHotelSearch.checkIn,
+    storedHotelSearch.initPayload?.checkIn,
+  );
+  const apiCheckOut = getFirstValue(
+    urlCheckOut,
+    searchRequest.checkOutDate,
+    searchRequest.checkOutRaw,
+    searchRequest.checkOut,
+    searchRequest.check_out,
+    storedHotelSearch.checkOut,
+    storedHotelSearch.initPayload?.checkOut,
+  );
   const checkIn = formatDisplayDate(
-    searchRequest.checkIn || searchRequest.check_in,
+    apiCheckIn,
     "Check-in",
   );
   const checkOut = formatDisplayDate(
-    searchRequest.checkOut || searchRequest.check_out,
+    apiCheckOut,
     "Check-out",
   );
-  const rooms = searchRequest.rooms || searchRequest.roomCount || 1;
-  const adults = searchRequest.adults || searchRequest.adultCount || 1;
+  const rooms =
+    getSearchParamValue("rooms") ||
+    searchRequest.rooms ||
+    searchRequest.roomCount ||
+    storedHotelSearch.rooms ||
+    1;
+  const adults =
+    getSearchParamValue("adults") ||
+    searchRequest.adults ||
+    searchRequest.adultCount ||
+    storedHotelSearch.adults ||
+    storedHotelSearch.initPayload?.rooms?.[0]?.adults ||
+    1;
+  const children =
+    getSearchParamValue("children") ||
+    searchRequest.children ||
+    searchRequest.childCount ||
+    storedHotelSearch.children ||
+    storedHotelSearch.initPayload?.rooms?.[0]?.children ||
+    0;
   const selectedRooms = roomList.filter((room) => room.quantity > 0);
 
   const saveBookingSession = () => {
@@ -80,10 +150,15 @@ const Page = () => {
       },
       request: {
         ...searchRequest,
+        searchContext: storedHotelSearch,
+        initResponse: storedHotelSearch.initResponse,
+        checkInDate: apiCheckIn,
+        checkOutDate: apiCheckOut,
         checkIn,
         checkOut,
         rooms,
         adults,
+        children,
       },
       rooms: selectedRooms,
     };
@@ -100,6 +175,8 @@ const Page = () => {
         title: room.title,
         image: room.image?.[0]?.img || "/images/hotelArt1.png",
         pricePerNight: parseCurrencyNumber(room.price?.offer),
+        publishedRate: Number(room.price?.actualAmount) || parseCurrencyNumber(room.price?.actual),
+        taxPerNight: Number(room.price?.taxAmount) || 0,
         quantity: 0,
         maxQuantity: Number(room.availability) || 1,
         nights: 1,
@@ -190,6 +267,7 @@ const Page = () => {
             <AvailabilityComponent
               rooms={hotelDetail?.rooms || []}
               loading={roomsLoading}
+              errorMessage={hotelDetail?.roomsErrorMessage}
               onRoomQuantityChange={handleRoomQuantityChange}
             />
           </section>
@@ -207,10 +285,11 @@ const Page = () => {
           >
             <RoomSelectionCard
               onBookNow={() => setShowSummary(true)}
-              checkIn={checkIn}
-              checkOut={checkOut}
+              checkIn={apiCheckIn}
+              checkOut={apiCheckOut}
               rooms={rooms}
               adults={adults}
+              children={children}
             />
           </div>
 
