@@ -77,7 +77,11 @@ const layout = ({ children }) => {
     );
   };
   const totalAmount = roomList.reduce(
-    (sum, room) => sum + room.pricePerNight * room.quantity * room.nights,
+    (sum, room) =>
+      sum +
+      (Number(room.pricePerNight || 0) + Number(room.taxPerNight || 0)) *
+        Number(room.quantity || 0) *
+        Number(room.nights || 1),
     0,
   );
   const isCorporate = false;

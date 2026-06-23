@@ -8,6 +8,7 @@ import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishli
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import {
   HOTEL_DETAILS_KEY,
+  HOTEL_SEARCH_SESSION_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
@@ -339,15 +340,22 @@ export const getHotelCoordinates = (hotel = {}) => {
 const pickProviderValue = (value) => {
   if (!value) return "";
 
+  const normalizeProvider = (provider) => {
+    const normalizedProvider = String(provider || "").trim();
+    return /^\d+$/.test(normalizedProvider) ? "" : normalizedProvider;
+  };
+
   if (typeof value === "string" || typeof value === "number") {
-    return String(value).trim();
+    return normalizeProvider(value);
   }
 
   if (typeof value !== "object") return "";
 
-  return String(
+  return normalizeProvider(
     value.priceProvider ||
       value.price_provider ||
+      value.priceProviderCode ||
+      value.price_provider_code ||
       value.providerName ||
       value.provider_name ||
       value.supplierName ||
@@ -367,6 +375,8 @@ export const getHotelPriceProvider = (hotel = {}) => {
     pickProviderValue(hotel.provider_name) ||
     pickProviderValue(hotel.supplierName) ||
     pickProviderValue(hotel.supplier_name) ||
+    pickProviderValue(hotel.priceProviderCode) ||
+    pickProviderValue(hotel.price_provider_code) ||
     pickProviderValue(hotel.provider) ||
     pickProviderValue(hotel.supplier) ||
     pickProviderValue(hotel.rate?.priceProvider) ||
@@ -414,10 +424,12 @@ export const getHotelDetailsPayload = (hotel = {}) => ({
     hotel.hotelId ||
       hotel.id ||
       hotel.hotelCode ||
+      hotel.code ||
       hotel.api_hotel_id ||
       hotel.raw?.hotelId ||
       hotel.raw?.id ||
       hotel.raw?.hotelCode ||
+      hotel.raw?.code ||
       hotel.raw?.api_hotel_id ||
       "",
   ).trim(),
@@ -491,11 +503,19 @@ const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
 
-export const getHotelDetailUrl = ({ hotelId, searchId, priceProvider }) => {
+export const getHotelDetailUrl = ({
+  hotelId,
+  searchId,
+  priceProvider,
+  checkIn,
+  checkOut,
+}) => {
   const params = new URLSearchParams();
   params.set("hotelId", hotelId || "");
   params.set("searchId", searchId || "");
   params.set("priceProvider", priceProvider || "");
+  if (checkIn) params.set("checkIn", checkIn);
+  if (checkOut) params.set("checkOut", checkOut);
 
   return `/hotel-detail?${params.toString()}`;
 };
@@ -708,6 +728,78 @@ export const getStaySummary = (searchParams) => {
   return `${nights} ${nights === 1 ? "night" : "nights"}, ${guestParts.join(", ")}`;
 };
 
+const readStoredHotelSearch = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || depth > 7) return "";
+  if (seen.has(value)) return "";
+  seen.add(value);
+
+  if (!Array.isArray(value) && value[key]) return value[key];
+
+  const entries = Array.isArray(value) ? value : Object.values(value);
+  for (const entry of entries) {
+    const found = findDeepValue(entry, key, depth + 1, seen);
+    if (found) return found;
+  }
+
+  return "";
+};
+
+const getSearchParam = (searchParams, ...keys) => {
+  for (const key of keys) {
+    const value = searchParams?.get?.(key);
+    if (value) return value;
+  }
+
+  return "";
+};
+
+export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
+  const storedHotelSearch = readStoredHotelSearch() || {};
+  const payload = getHotelDetailsPayload(hotel);
+
+  return {
+    ...payload,
+    searchId:
+      payload.searchId ||
+      getSearchParam(searchParams, "searchId", "searchid") ||
+      findDeepValue(storedHotelSearch, "searchId") ||
+      findDeepValue(storedHotelSearch, "search_id"),
+    hotelId:
+      payload.hotelId ||
+      String(
+        hotel.hotelId ||
+          hotel.id ||
+          hotel.hotelCode ||
+          hotel.code ||
+          hotel.raw?.hotelId ||
+          hotel.raw?.id ||
+          hotel.raw?.hotelCode ||
+          hotel.raw?.code ||
+          "",
+      ).trim(),
+    priceProvider:
+      payload.priceProvider ||
+      getHotelPriceProvider(hotel.raw) ||
+      pickProviderValue(hotel.providerName) ||
+      pickProviderValue(hotel.priceProviderCode) ||
+      pickProviderValue(hotel.raw?.providerName) ||
+      pickProviderValue(hotel.raw?.priceProviderCode),
+    checkIn: getSearchParam(searchParams, "checkIn", "checkin"),
+    checkOut: getSearchParam(searchParams, "checkOut", "checkout"),
+  };
+};
+
 const TourListing = () => {
   const searchParams = useSearchParams();
   const hotelSearchChannel = searchParams.get("channel") || "";
@@ -772,7 +864,7 @@ const TourListing = () => {
   const handleBookNow = async (hotel) => {
     if (!hotel) return;
 
-    const payload = getHotelDetailsPayload(hotel);
+    const payload = getHotelDetailsRequest(hotel, searchParams);
 
     if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);

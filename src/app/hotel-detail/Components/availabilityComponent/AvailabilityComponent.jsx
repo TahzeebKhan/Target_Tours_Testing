@@ -6,34 +6,37 @@ import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 
-const AvailabilityComponent = ({ rooms = [], loading = false, onRoomQuantityChange }) => {
+const AvailabilityComponent = ({
+  rooms = [],
+  loading = false,
+  errorMessage = "",
+  onRoomQuantityChange,
+}) => {
   const swiperRefs = useRef({});
   const [roomQty, setRoomQty] = useState({});
   const increase = (id, maxQty = Infinity) => {
-    setRoomQty((prev) => {
-      const nextQty = Math.min((prev[id] || 0) + 1, maxQty);
-      onRoomQuantityChange?.(id, nextQty);
-      return {
-        ...prev,
-        [id]: nextQty,
-      };
-    });
+    const nextQty = Math.min((roomQty[id] || 0) + 1, maxQty);
+
+    setRoomQty((prev) => ({
+      ...prev,
+      [id]: nextQty,
+    }));
+    onRoomQuantityChange?.(id, nextQty);
   };
 
   const decrease = (id) => {
-    setRoomQty((prev) => {
-      const nextQty = (prev[id] || 0) - 1;
+    const nextQty = (roomQty[id] || 0) - 1;
 
+    setRoomQty((prev) => {
       if (nextQty <= 0) {
         const copy = { ...prev };
         delete copy[id];
-        onRoomQuantityChange?.(id, 0);
         return copy;
       }
 
-      onRoomQuantityChange?.(id, nextQty);
       return { ...prev, [id]: nextQty };
     });
+    onRoomQuantityChange?.(id, Math.max(nextQty, 0));
   };
   const handleAddRoom = (id, maxQty) => {
     increase(id, maxQty);
@@ -46,7 +49,9 @@ const AvailabilityComponent = ({ rooms = [], loading = false, onRoomQuantityChan
       {loading && <p className={styles.statusText}>Loading available rooms...</p>}
 
       {!loading && !rooms.length && (
-        <p className={styles.statusText}>No available rooms found.</p>
+        <p className={errorMessage ? styles.errorText : styles.statusText}>
+          {errorMessage || "No available rooms found."}
+        </p>
       )}
 
       {rooms.map((room) => {

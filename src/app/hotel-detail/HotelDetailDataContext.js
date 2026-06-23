@@ -8,6 +8,8 @@ import {
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 
+const roomsRequestCache = new Map();
+
 const FALLBACK_IMAGES = [
   "/images/hotelArt1.png",
   "/images/hotelArt2.png",
@@ -48,6 +50,8 @@ const getDetailRequestFromParams = (params) => {
     hotelId: params.get("hotelId") || "",
     searchId: params.get("searchId") || "",
     priceProvider: params.get("priceProvider") || "",
+    checkIn: params.get("checkIn") || "",
+    checkOut: params.get("checkOut") || "",
   };
 
   return request.hotelId && request.searchId && request.priceProvider
@@ -66,6 +70,27 @@ const getStoredHotelId = (stored) =>
 
 const getFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
+
+const getApiFailureMessage = (payload) => {
+  const candidates = [
+    payload?.data?.rooms,
+    payload?.rooms,
+    payload?.data?.content,
+    payload?.content,
+    payload?.data,
+    payload,
+  ];
+
+  const failure = candidates.find(
+    (item) =>
+      item &&
+      typeof item === "object" &&
+      String(item.status || "").toLowerCase() === "failure" &&
+      item.message,
+  );
+
+  return failure?.message || "";
+};
 
 const findFirstObject = (value, predicate, depth = 0, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || depth > 6) return null;
@@ -178,6 +203,11 @@ const formatCurrency = (value) => {
   return `₹ ${numericValue.toLocaleString("en-IN", {
     maximumFractionDigits: 2,
   })}`;
+};
+
+const getCurrencyNumber = (value) => {
+  const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(numericValue) ? numericValue : 0;
 };
 
 const getRateValue = (hotel = {}) =>
@@ -432,6 +462,9 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       price: {
         actual: formatCurrency(publishedRate),
         offer: formatCurrency(roomPrice),
+        actualAmount: getCurrencyNumber(publishedRate),
+        offerAmount: getCurrencyNumber(roomPrice),
+        taxAmount: getCurrencyNumber(taxes),
         nights: "per night",
         taxes: taxes ? `+ ${formatCurrency(taxes)} Taxes & fees` : "",
         bookWith: "₹ 0",
@@ -607,7 +640,12 @@ const normalizeScoreDetails = (data = {}, hotel = {}) => {
   ];
 };
 
-const normalizeHotelDetail = (stored, routeHotelId = "", roomsPayload = null) => {
+const normalizeHotelDetail = (
+  stored,
+  routeHotelId = "",
+  roomsPayload = null,
+  roomsErrorMessage = "",
+) => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
   const foundHotel = findFirstObject(data, (item) => item.name && (item.address || item.heroImage));
@@ -648,6 +686,7 @@ const normalizeHotelDetail = (stored, routeHotelId = "", roomsPayload = null) =>
     amenities: facilities,
     policies: normalizePolicies(data, hotel),
     rooms: roomsPayload ? normalizeRooms(roomsPayload, { ...hotel, facilities }) : [],
+    roomsErrorMessage: roomsErrorMessage || (roomsPayload ? getApiFailureMessage(roomsPayload) : ""),
     reviews,
     ratingBars,
     scoreDetails,
@@ -659,6 +698,7 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   const [routeHotelId, setRouteHotelId] = useState("");
   const [storedDetail, setStoredDetail] = useState(null);
   const [roomsPayload, setRoomsPayload] = useState(null);
+  const [roomsErrorMessage, setRoomsErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [roomsLoading, setRoomsLoading] = useState(false);
 
@@ -714,17 +754,29 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
 
     if (hasRoomsRequest) {
       const loadHotelRooms = async () => {
+        const requestKey = JSON.stringify(roomsRequest);
         setRoomsLoading(true);
 
         try {
-          const rooms = await fetchHotelRooms(roomsRequest);
-          if (isMounted) setRoomsPayload(rooms);
+          const roomsPromise =
+            roomsRequestCache.get(requestKey) || fetchHotelRooms(roomsRequest);
+
+          roomsRequestCache.set(requestKey, roomsPromise);
+          const rooms = await roomsPromise;
+          if (isMounted) {
+            setRoomsPayload(rooms);
+            setRoomsErrorMessage("");
+          }
         } catch (error) {
+          roomsRequestCache.delete(requestKey);
           console.error("Hotel rooms request failed:", error);
           if (isMissingHotelAuthTokenError(error)) {
             onUnauthorized?.();
           }
-          if (isMounted) setRoomsPayload(null);
+          if (isMounted) {
+            setRoomsPayload(null);
+            setRoomsErrorMessage(error.message || "Unable to load available rooms.");
+          }
         } finally {
           if (isMounted) setRoomsLoading(false);
         }
@@ -733,6 +785,7 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
       loadHotelRooms();
     } else {
       setRoomsPayload(null);
+      setRoomsErrorMessage("");
       setRoomsLoading(false);
     }
 
@@ -742,8 +795,8 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   }, [onUnauthorized]);
 
   const hotelDetail = useMemo(
-    () => normalizeHotelDetail(storedDetail, routeHotelId, roomsPayload),
-    [storedDetail, routeHotelId, roomsPayload],
+    () => normalizeHotelDetail(storedDetail, routeHotelId, roomsPayload, roomsErrorMessage),
+    [storedDetail, routeHotelId, roomsPayload, roomsErrorMessage],
   );
 
   return (

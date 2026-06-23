@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./ReviewPage.module.css";
 
 import { useRouter } from "next/navigation";
@@ -10,8 +10,14 @@ import RoomPriceRow from "./components/roomPriceRow/RoomPriceRow";
 import TravelerDetails from "./components/travelerDetails/TravelerDetails";
 import CancellationPolicy from "./components/cancellationPolicy/CancellationPolicy";
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
+import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
-import { startHotelBooking } from "@/shared/services/hotelSearch";
+import {
+  confirmHotelBooking,
+  HOTEL_SEARCH_SESSION_KEY,
+  refreshHotelSession,
+  startHotelBooking,
+} from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
 const fallbackHotelStartBookingPayload = {
@@ -94,13 +100,110 @@ const fallbackHotelStartBookingPayload = {
 
 const toApiDate = (value) => {
   if (!value) return "";
+  const text = String(value).trim();
+
+  if (["check-in", "check-out"].includes(text.toLowerCase())) {
+    return "";
+  }
+
+  const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+  const [first, second, year] = text.split(/[/-]/);
+  if (first && second && year) {
+    const firstNumber = Number(first);
+    const secondNumber = Number(second);
+    const isMonthFirst = firstNumber <= 12 && secondNumber > 12;
+    const day = isMonthFirst ? second : first;
+    const month = isMonthFirst ? first : second;
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
   const date = new Date(value);
   if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
 
-  const [day, month, year] = String(value).split(/[/-]/);
-  if (day && month && year) return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  return value;
+};
+
+const readStoredHotelSearch = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || depth > 6) return "";
+  if (seen.has(value)) return "";
+  seen.add(value);
+
+  if (!Array.isArray(value) && value[key]) return value[key];
+
+  const entries = Array.isArray(value) ? value : Object.values(value);
+  for (const entry of entries) {
+    const found = findDeepValue(entry, key, depth + 1, seen);
+    if (found) return found;
+  }
+
+  return "";
+};
+
+const pickApiDate = (...values) => {
+  for (const value of values) {
+    const apiDate = toApiDate(value);
+    if (apiDate) return apiDate;
+  }
+
+  return "";
+};
+
+const toRefreshDate = (value) => {
+  const apiDate = toApiDate(value);
+  if (!apiDate) return "";
+
+  const [year, month, day] = String(apiDate).split("-");
+  if (year && month && day) return `${month}/${day}/${year}`;
 
   return value;
+};
+
+const getResponseValue = (response, key) =>
+  response?.[key] ||
+  response?.data?.[key] ||
+  response?.result?.[key] ||
+  response?.data?.result?.[key] ||
+  "";
+
+const formatAmount = (value) => {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount)) return "0";
+
+  return amount.toFixed(2).replace(/\.00$/, "");
+};
+
+const parsePriceChange = (response) => {
+  const message =
+    getResponseValue(response, "Pricemessage") ||
+    response?.data?.priceInfo?.Pricemessage ||
+    response?.priceInfo?.Pricemessage ||
+    "";
+  const oldFare = Number(String(message).match(/OldFare:([^|]+)/i)?.[1]);
+  const newFare = Number(String(message).match(/NewFare:([^|]+)/i)?.[1]);
+
+  if (!Number.isFinite(oldFare) || !Number.isFinite(newFare) || newFare <= oldFare) {
+    return null;
+  }
+
+  return {
+    oldFare,
+    newFare,
+    difference: newFare - oldFare,
+  };
 };
 
 const getOccupancyValue = (occupancy = {}, ...keys) => {
@@ -122,6 +225,76 @@ const normalizeChildAges = (childAges) => {
   }
 
   return [];
+};
+
+const getFirstValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "") || "";
+
+const normalizeRefreshRooms = (rooms, request = {}) => {
+  const roomList = Array.isArray(rooms) && rooms.length ? rooms : [];
+  if (roomList.length) {
+    return roomList.map((room) => ({
+      adults: String(getFirstValue(room.adults, room.numOfAdults, room.NumOfAdults, 1)),
+      children: String(
+        getFirstValue(room.children, room.numOfChildren, room.NumOfChildren, 0),
+      ),
+      childAges: normalizeChildAges(
+        getFirstValue(room.childAges, room.childrenAges, room.ChildAges, []),
+      ),
+    }));
+  }
+
+  return [
+    {
+      adults: String(getFirstValue(request.adults, request.adultCount, 1)),
+      children: String(getFirstValue(request.children, request.childCount, 0)),
+      childAges: normalizeChildAges(request.childAges || request.childrenAges),
+    },
+  ];
+};
+
+const buildRefreshSessionPayload = ({
+  request = {},
+  storedHotelSearch = {},
+  checkInDate,
+  checkOutDate,
+}) => {
+  const searchContext = request.searchContext || {};
+  const sourcePayload = searchContext.initPayload || storedHotelSearch.initPayload || {};
+  const location =
+    searchContext.location ||
+    storedHotelSearch.location ||
+    sourcePayload.location ||
+    {};
+  const geoCode = sourcePayload.geoCode || location.geoCode || request.geoCode || {};
+  const lat = getFirstValue(geoCode.lat, geoCode.latitude, location.lat, location.latitude);
+  const long = getFirstValue(
+    geoCode.long,
+    geoCode.lng,
+    geoCode.longitude,
+    location.long,
+    location.lng,
+    location.longitude,
+  );
+
+  return {
+    geoCode: {
+      lat: lat ? String(lat) : "",
+      long: long ? String(long) : "",
+    },
+    locationId: String(
+      getFirstValue(
+        sourcePayload.locationId,
+        searchContext.locationId,
+        storedHotelSearch.locationId,
+        location.locationId,
+        location.id,
+      ),
+    ),
+    checkIn: toRefreshDate(checkInDate || sourcePayload.checkIn || searchContext.checkIn),
+    checkOut: toRefreshDate(checkOutDate || sourcePayload.checkOut || searchContext.checkOut),
+    rooms: normalizeRefreshRooms(sourcePayload.rooms || searchContext.rooms, request),
+  };
 };
 
 const getCountryCode = (value) => {
@@ -195,6 +368,8 @@ const ReviewPage = () => {
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [priceChange, setPriceChange] = useState(null);
+  const [pendingConfirmPayload, setPendingConfirmPayload] = useState(null);
   const [guestDetails, setGuestDetails] = useState({
     roomGuests: {},
     bookingContact: {},
@@ -219,6 +394,36 @@ const ReviewPage = () => {
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
+  };
+
+  const confirmBooking = async (confirmPayload) => {
+    await confirmHotelBooking(confirmPayload);
+    toast.success("Hotel booking confirmed successfully");
+  };
+
+  const handleAcceptPriceChange = async () => {
+    if (!pendingConfirmPayload || bookingLoading) return;
+
+    setBookingLoading(true);
+
+    try {
+      await confirmBooking({
+        ...pendingConfirmPayload,
+        netAmount: formatAmount(priceChange?.newFare || pendingConfirmPayload.netAmount),
+      });
+      setPriceChange(null);
+      setPendingConfirmPayload(null);
+    } catch (error) {
+      toast.error(error.message || "Unable to confirm hotel booking.");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleRejectPriceChange = () => {
+    setPriceChange(null);
+    setPendingConfirmPayload(null);
+    toast.info("Booking was not confirmed because the fare changed.");
   };
 
   const handleStartBooking = async () => {
@@ -272,8 +477,44 @@ const ReviewPage = () => {
 
     try {
       const firstRoom = selectedRooms[0] || roomList[0] || {};
+      const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
+      const storedHotelSearch = readStoredHotelSearch() || {};
+      const checkInDate = pickApiDate(
+        request.checkInDate,
+        request.checkInRaw,
+        request.checkIn,
+        request.check_in,
+        request.searchContext?.checkIn,
+        request.searchContext?.initPayload?.checkIn,
+        storedHotelSearch.checkIn,
+        storedHotelSearch.initPayload?.checkIn,
+      );
+      const checkOutDate = pickApiDate(
+        request.checkOutDate,
+        request.checkOutRaw,
+        request.checkOut,
+        request.check_out,
+        request.searchContext?.checkOut,
+        request.searchContext?.initPayload?.checkOut,
+        storedHotelSearch.checkOut,
+        storedHotelSearch.initPayload?.checkOut,
+      );
+      const searchTracingKey =
+        findDeepValue(request, "searchTracingKey") ||
+        findDeepValue(storedHotelSearch, "searchTracingKey");
+      const refreshPayload = buildRefreshSessionPayload({
+        request,
+        storedHotelSearch,
+        checkInDate,
+        checkOutDate,
+      });
+      const refreshResponse = await refreshHotelSession(refreshPayload);
+      const refreshedSearchTracingKey =
+        findDeepValue(refreshResponse, "searchTracingKey") ||
+        findDeepValue(refreshResponse, "searchTracingkey");
       const payload = {
         ...fallbackHotelStartBookingPayload,
+        TUI: refreshedSearchTracingKey || searchTracingKey || "",
         ContactInfo: {
           ...fallbackHotelStartBookingPayload.ContactInfo,
           Title: contact.title,
@@ -311,25 +552,67 @@ const ReviewPage = () => {
             })),
           };
         }),
-        NetAmount: String(Math.round(totalAmount || firstRoom.netAmount || 0)),
+        NetAmount: selectedNetAmount,
         SearchId: request.searchId || request.SearchId || fallbackHotelStartBookingPayload.SearchId,
         RecommendationId:
           firstRoom.recommendationId ||
           request.recommendationId ||
           fallbackHotelStartBookingPayload.RecommendationId,
         HotelCode: hotel.id || request.hotelId || fallbackHotelStartBookingPayload.HotelCode,
-        CheckInDate: toApiDate(request.checkIn || request.check_in),
-        CheckOutDate: toApiDate(request.checkOut || request.check_out),
+        CheckInDate: checkInDate,
+        CheckOutDate: checkOutDate,
       };
 
-      await startHotelBooking(payload);
-      toast.success("Hotel booking started successfully");
+      const startBookingResponse = await startHotelBooking(payload);
+      const priceChangeInfo = parsePriceChange(startBookingResponse);
+      const confirmPayload = {
+        transactionId: String(
+          getResponseValue(startBookingResponse, "TransactionID") ||
+            getResponseValue(startBookingResponse, "transactionId") ||
+            "",
+        ),
+        netAmount: String(
+          payload.NetAmount ||
+            getResponseValue(startBookingResponse, "NetAmount") ||
+            getResponseValue(startBookingResponse, "netAmount") ||
+            "",
+        ),
+        merchantId:
+          getResponseValue(startBookingResponse, "merchantId") ||
+          getResponseValue(startBookingResponse, "MerchantId") ||
+          "",
+        TUI:
+          getResponseValue(startBookingResponse, "TUI") ||
+          getResponseValue(startBookingResponse, "tui") ||
+          payload.TUI ||
+          "",
+      };
+
+      if (priceChangeInfo) {
+        setPriceChange(priceChangeInfo);
+        setPendingConfirmPayload({
+          ...confirmPayload,
+          netAmount: formatAmount(priceChangeInfo.newFare),
+        });
+        return;
+      }
+
+      await confirmBooking(confirmPayload);
     } catch (error) {
       toast.error(error.message || "Unable to start hotel booking.");
     } finally {
       setBookingLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleSummaryBookNow = () => {
+      handleStartBooking();
+    };
+
+    window.addEventListener("hotel-start-booking", handleSummaryBookNow);
+    return () => window.removeEventListener("hotel-start-booking", handleSummaryBookNow);
+  }, [handleStartBooking]);
 
   const getQuantity = (id) => {
     const room = roomList.find((r) => r.id === id);
@@ -499,6 +782,12 @@ const ReviewPage = () => {
           {bookingLoading ? "LOADING..." : "CONTINUE"}
         </button>
       </div>
+      <PriceChangeModal
+        priceChange={priceChange}
+        loading={bookingLoading}
+        onCancel={handleRejectPriceChange}
+        onConfirm={handleAcceptPriceChange}
+      />
     </div>
   );
 };

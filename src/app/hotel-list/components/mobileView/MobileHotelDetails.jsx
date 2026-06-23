@@ -19,7 +19,7 @@ import {
   getStaySummary,
   getHotelsFromMessage,
   getHotelDetailUrl,
-  getHotelDetailsPayload,
+  getHotelDetailsRequest,
   isHotelTerminalPayload,
   normalizeHotelCard,
   shouldApplyHotelResults,
@@ -58,7 +58,7 @@ const MobileHotelDetails = () => {
   const handleBookNow = async (hotel) => {
     if (!hotel) return;
 
-    const payload = getHotelDetailsPayload(hotel);
+    const payload = getHotelDetailsRequest(hotel, searchParams);
 
     if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
