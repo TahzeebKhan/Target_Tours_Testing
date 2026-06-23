@@ -194,6 +194,16 @@
   color: #000033;
 }
 
+.bookBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.bookBtn:disabled:hover {
+  background-color: #000033;
+  color: #ffffff;
+}
+
 .help {
   display: flex;
   flex-direction: column;

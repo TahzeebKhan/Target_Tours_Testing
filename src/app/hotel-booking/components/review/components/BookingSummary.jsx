@@ -34,10 +34,11 @@ const BookingSummary = ({
   roomList,
   onRemove,
 }) => {
-  const { bookingSession } = useRoom();
+  const { bookingSession, bookingLoading } = useRoom();
   const request = bookingSession?.request || {};
 
   const handleBookNow = () => {
+    if (bookingLoading) return;
     if (typeof window === "undefined") return;
     window.dispatchEvent(new Event("hotel-start-booking"));
   };
@@ -182,8 +183,12 @@ const BookingSummary = ({
         </div>
 
         {/* CTA */}
-        <button className={styles.bookBtn} onClick={handleBookNow}>
-          BOOK NOW
+        <button
+          className={styles.bookBtn}
+          onClick={handleBookNow}
+          disabled={bookingLoading}
+        >
+          {bookingLoading ? "LOADING..." : "BOOK NOW"}
         </button>
 
         <div className={styles.help}>

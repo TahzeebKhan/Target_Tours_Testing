@@ -365,16 +365,23 @@ const buildGuestCode = (occupancies = [], guests = []) => {
 };
 
 const ReviewPage = () => {
+  const router = useRouter();
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
-  const [bookingLoading, setBookingLoading] = useState(false);
   const [priceChange, setPriceChange] = useState(null);
   const [pendingConfirmPayload, setPendingConfirmPayload] = useState(null);
   const [guestDetails, setGuestDetails] = useState({
     roomGuests: {},
     bookingContact: {},
   });
-  const { roomList, increaseRoom, decreaseRoom, bookingSession } = useRoom();
+  const {
+    roomList,
+    increaseRoom,
+    decreaseRoom,
+    bookingSession,
+    bookingLoading,
+    setBookingLoading,
+  } = useRoom();
   const hotel = bookingSession?.hotel || {};
   const request = bookingSession?.request || {};
   const selectedRooms = useMemo(
@@ -397,8 +404,12 @@ const ReviewPage = () => {
   };
 
   const confirmBooking = async (confirmPayload) => {
-    await confirmHotelBooking(confirmPayload);
+    const res = await confirmHotelBooking(confirmPayload);
     toast.success("Hotel booking confirmed successfully");
+    const bookingId = res?.booking?.booking_id || res?.booking_id || res?.data?.booking?.booking_id;
+    if (bookingId) {
+      router.push(`/hotel-booking-success?booking_id=${bookingId}`);
+    }
   };
 
   const handleAcceptPriceChange = async () => {
