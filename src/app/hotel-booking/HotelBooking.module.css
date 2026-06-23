@@ -7,11 +7,14 @@
   margin-bottom: 73px;
 }
 .sideBarDesktop{
+  position: sticky;
+  top: 88px;
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 24px;
   overflow-y: auto;
-  max-height: calc(100vh - 147px);
+  max-height: calc(100vh - 112px);
 }
 .childrenWrapper {
   max-width: 1280px;
@@ -40,6 +43,11 @@
   .childrenWrapper {
     display: flex;
     flex-direction: column-reverse;
+  }
+  .sideBarDesktop {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
