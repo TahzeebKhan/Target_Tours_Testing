@@ -48,9 +48,11 @@ const BookingSummary = ({
       const quantity = Number(room.quantity || 0);
       const nights = Number(room.nights || request.nights || 1);
       const offer = getNumber(room.pricePerNight || room.netAmount);
+      const published = getNumber(room.publishedRate) || offer;
       const tax = getNumber(room.taxPerNight);
 
-      totals.base += offer * quantity * nights;
+      totals.base += published * quantity * nights;
+      totals.discount += Math.max(0, published - offer) * quantity * nights;
       totals.taxes += tax * quantity * nights;
       totals.total += offer * quantity * nights + tax * quantity * nights;
       totals.nights = Math.max(totals.nights, nights);
@@ -153,13 +155,13 @@ const BookingSummary = ({
           {summary.discount > 0 && (
             <div className={styles.row}>
               <span className={styles.rowTitle}>Discount</span>
-              <span className={styles.discount}>{formatCurrency(summary.discount)}</span>
+              <span className={styles.discount}>-{formatCurrency(summary.discount)}</span>
             </div>
           )}
           {summary.couponDiscount > 0 && (
             <div className={styles.row}>
               <span className={styles.rowTitle}>Coupon Discount</span>
-              <span className={styles.discount}>{formatCurrency(summary.couponDiscount)}</span>
+              <span className={styles.discount}>-{formatCurrency(summary.couponDiscount)}</span>
             </div>
           )}
           {summary.taxes > 0 && (

@@ -1,8 +1,12 @@
 "use client";
 import React from "react";
 import styles from "./BookingSummary.module.css";
-import { Delete, Trash, Trash2, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const formatCurrency = (value) =>
+  `₹ ${Number(value || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+  })}`;
 
 const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
   const router = useRouter();
@@ -11,9 +15,23 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
     onBookNow?.();
     router.push("/hotel-booking");
   };
-  const basePrice = roomList.reduce(
-    (sum, r) => sum + r.pricePerNight * r.quantity * r.nights,
-    0
+  const summary = roomList.reduce(
+    (totals, room) => {
+      const quantity = Number(room.quantity || 0);
+      const nights = Number(room.nights || 1);
+      const offer = Number(room.pricePerNight || room.netAmount || 0);
+      const published = Number(room.publishedRate || 0) || offer;
+      const tax = Number(room.taxPerNight || 0);
+
+      totals.base += published * quantity * nights;
+      totals.discount += Math.max(0, published - offer) * quantity * nights;
+      totals.taxes += tax * quantity * nights;
+      totals.total += offer * quantity * nights + tax * quantity * nights;
+      totals.nights = Math.max(totals.nights, nights);
+
+      return totals;
+    },
+    { base: 0, discount: 0, taxes: 0, total: 0, nights: 1 },
   );
 
   return (
@@ -46,10 +64,10 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
 
               <div className={styles.roomRight}>
                 <span>
-                  ₹{room.pricePerNight} × {room.quantity} Room × {room.nights}{" "}
+                  {formatCurrency(room.pricePerNight)} × {room.quantity} Room × {room.nights}{" "}
                   Nights
                 </span>
-                <span className={styles.price}>₹ {roomTotal.toFixed(2)}</span>
+                <span className={styles.price}>{formatCurrency(roomTotal)}</span>
               </div>
             </div>
           );
@@ -61,26 +79,26 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
       <div className={styles.priceBreakup}>
         <div className={styles.row}>
           <span className={styles.rowTitle}>Base Price</span>
-          <span className={styles.basePrice}>₹ 64,126</span>
+          <span className={styles.basePrice}>{formatCurrency(summary.base)}</span>
         </div>
-        <div className={styles.row}>
-          <span className={styles.rowTitle}>Discount</span>
-          <span className={styles.discount}>-₹5538.56</span>
-        </div>
-        <div className={styles.row}>
-          <span className={styles.rowTitle}>Coupon Discount</span>
-          <span className={styles.discount}>-₹5538.56</span>
-        </div>
-        <div className={styles.row}>
-          <span className={styles.rowTitle}>Taxes & Fees</span>
-          <span className={styles.taxes}>₹2,819</span>
-        </div>
+        {summary.discount > 0 && (
+          <div className={styles.row}>
+            <span className={styles.rowTitle}>Discount</span>
+            <span className={styles.discount}>-{formatCurrency(summary.discount)}</span>
+          </div>
+        )}
+        {summary.taxes > 0 && (
+          <div className={styles.row}>
+            <span className={styles.rowTitle}>Taxes & Fees</span>
+            <span className={styles.taxes}>{formatCurrency(summary.taxes)}</span>
+          </div>
+        )}
       </div>
 
       {/* Total */}
       <div className={styles.total}>
         <span>Total Amount</span>
-        <strong>₹ {basePrice.toFixed(2)}</strong>
+        <strong>{formatCurrency(summary.total)}</strong>
       </div>
 
       {/* CTA */}
