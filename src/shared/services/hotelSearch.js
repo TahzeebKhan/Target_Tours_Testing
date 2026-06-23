@@ -277,7 +277,6 @@ export const startHotelBooking = async (payload = {}) => {
     cache: "no-store",
     body: JSON.stringify({
       ...payload,
-      ...(getAuthToken() ? { token: getAuthToken() } : {}),
       domain: payload.domain || getDomain(),
     }),
   });
@@ -334,6 +333,29 @@ export const confirmHotelBooking = async (payload = {}) => {
 
   if (!response.ok) {
     throw createApiError(data, "Hotel booking confirmation failed");
+  }
+
+  return data;
+};
+
+export const retrieveHotelBookingDetails = async (bookingId) => {
+  const url = new URL("/api/hotel-search/retrieve-booking-details", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      booking_id: bookingId,
+      domain: getDomain(),
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel booking details retrieval failed");
   }
 
   return data;

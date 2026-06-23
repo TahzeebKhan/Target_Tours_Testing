@@ -11,6 +11,7 @@ import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
 const layout = ({ children }) => {
   const router = useRouter();
   const [bookingSession, setBookingSession] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [roomList, setRoomList] = useState([
     {
       id: "deluxe_ac_room",
@@ -87,7 +88,15 @@ const layout = ({ children }) => {
   const isCorporate = false;
   return (
     <RoomProvider
-      value={{ roomList, increaseRoom, decreaseRoom, removeRoom, bookingSession }}
+      value={{
+        roomList,
+        increaseRoom,
+        decreaseRoom,
+        removeRoom,
+        bookingSession,
+        bookingLoading,
+        setBookingLoading,
+      }}
     >
       <section className={styles.contentWrapper}>
         <div className={styles.navbarWrapper}>
@@ -123,7 +132,7 @@ const layout = ({ children }) => {
             setSideBarOpen={setSideBarOpen}
           />
         </div>
-        <div className={styles.tripDetailsContainer}>
+        <div className={tripDetailsContainer}>
           <div className={styles.tripDetailsHeader}>
             <img
               onClick={() => {
@@ -153,7 +162,17 @@ const layout = ({ children }) => {
             </div>
 
             {/* RIGHT */}
-            <button className={styles.continueBtn}>CONTINUE PAYMENT</button>
+            <button
+              className={styles.continueBtn}
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new Event("hotel-start-booking"));
+                }
+              }}
+              disabled={bookingLoading}
+            >
+              {bookingLoading ? "LOADING..." : "CONTINUE PAYMENT"}
+            </button>
           </div>
         </div>
       </div>
