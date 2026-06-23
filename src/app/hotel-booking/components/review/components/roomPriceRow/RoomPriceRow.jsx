@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import styles from "./RoomPriceRow.module.css";
 
 export default function RoomPriceRow({
@@ -35,7 +34,8 @@ export default function RoomPriceRow({
             <button
               className={styles.btn}
               onClick={onDecrease}
-              disabled={quantity <= 1}
+              disabled
+              aria-label="Decrease room quantity disabled"
             >
               <svg
                 width="11"
@@ -53,7 +53,12 @@ export default function RoomPriceRow({
 
             <span className={styles.count}>{quantity}</span>
 
-            <button className={styles.btn} onClick={onIncrease}>
+            <button
+              className={styles.btn}
+              onClick={onIncrease}
+              disabled
+              aria-label="Increase room quantity disabled"
+            >
               <svg
                 width="13"
                 height="13"

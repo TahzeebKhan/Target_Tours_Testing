@@ -138,9 +138,7 @@ const TourHeroSection = () => {
                 ? "session channel does not match URL channel"
                 : !searchContext?.initPayload
                   ? "missing initPayload in sessionStorage"
-                  : searchContext?.initResponse
-                    ? "initResponse already exists in sessionStorage"
-                    : "";
+                  : "";
 
             if (initSkipReason) {
               console.log("[Hotel timing] init API skipped", {
@@ -161,6 +159,15 @@ const TourHeroSection = () => {
               initRequestStartRef.current = initStartedAt;
               firstSocketResponseRef.current = false;
               socketResponseCountRef.current = 0;
+              window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+              safeSetSessionStorage(
+                HOTEL_SEARCH_SESSION_KEY,
+                JSON.stringify({
+                  ...searchContext,
+                  initResponse: null,
+                  initStatus: "pending",
+                }),
+              );
 
               console.log("[Hotel timing] init API started", {
                 channel: hotelSearchChannel,

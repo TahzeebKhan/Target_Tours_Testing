@@ -312,11 +312,10 @@ const getDialCode = (value) => {
   return CountryCodes.find((country) => country.code === value)?.dial_code || value;
 };
 
-const buildGuestCode = (occupancies = [], guests = []) => {
+const buildGuestCode = (occupancies = []) => {
   const occupancyList = Array.isArray(occupancies) ? occupancies : [];
-  let adultAgeIndex = 0;
 
-  if (!occupancyList.length) return `|1|1:A:${"25" || guests[0]?.age || "25"}|`;
+  if (!occupancyList.length) return "|1|1:A:25|";
 
   return occupancyList
     .map((occupancy, index) => {
@@ -339,12 +338,7 @@ const buildGuestCode = (occupancies = [], guests = []) => {
       const segments = [];
 
       if (adultCount > 0) {
-        const adultAges = Array.from({ length: adultCount }, () => {
-          const age = guests[adultAgeIndex]?.age || "25";
-          adultAgeIndex += 1;
-          return age;
-        }).join(":");
-
+        const adultAges = Array.from({ length: adultCount }, () => "25").join(":");
         segments.push(`|${occupancyId}|${adultCount}:A:${adultAges}|`);
       }
 
@@ -390,7 +384,11 @@ const ReviewPage = () => {
   );
   const visibleRooms = roomList.length ? roomList : [];
   const totalAmount = selectedRooms.reduce(
-    (sum, room) => sum + Number(room.pricePerNight || 0) * Number(room.quantity || 0) * Number(room.nights || 1),
+    (sum, room) =>
+      sum +
+      (Number(room.pricePerNight || 0) + Number(room.taxPerNight || 0)) *
+        Number(room.quantity || 0) *
+        Number(room.nights || 1),
     0,
   );
   const nights = selectedRooms[0]?.nights || request.nights || 1;
@@ -456,6 +454,7 @@ const ReviewPage = () => {
             !guest.firstName ||
             !guest.lastName ||
             !guest.gender ||
+            !guest.passengerType ||
             !guest.age,
         )
       );
@@ -545,7 +544,7 @@ const ReviewPage = () => {
 
           return {
             RoomId: room.roomId || room.id || "",
-            GuestCode: buildGuestCode(room.occupancies, guests),
+            GuestCode: buildGuestCode(room.occupancies),
             SupplierName: room.supplierName || "",
             RoomGroupId: room.roomGroupId || room.id || "",
             Guests: guests.map((guest, guestIndex) => ({
@@ -556,8 +555,8 @@ const ReviewPage = () => {
               MiddleName: guest.middleName || "",
               LastName: guest.lastName,
               MobileNo: guest.mobile || contact.mobile,
-              PaxType: "A",
-              Age: guest.age,
+              PaxType: guest.passengerType || "A",
+              Age: guest.passengerType === "A" ? guest.age || "25" : guest.age,
               Email: guest.email || contact.email,
               Pan: "",
             })),

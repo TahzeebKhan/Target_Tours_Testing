@@ -65,9 +65,35 @@
   vertical-align: middle;
 }
 
+.cardActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .collapse {
+  border: none;
+  background: transparent;
+  color: #000033;
   font-size: 22px;
+  line-height: 1;
   cursor: pointer;
+  padding: 0;
+}
+
+.removeGuest {
+  border: none;
+  background: transparent;
+  color: #d92d20;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.removeGuest:hover {
+  color: #b42318;
 }
 
 /* Section title */
