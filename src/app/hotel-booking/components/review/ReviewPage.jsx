@@ -12,6 +12,7 @@ import CancellationPolicy from "./components/cancellationPolicy/CancellationPoli
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import { useRoom } from "@/app/context/RoomContext";
 import { startHotelBooking } from "@/shared/services/hotelSearch";
+import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
 const fallbackHotelStartBookingPayload = {
   TUI: "cc6a2275-d39c-43ce-a57e-316e3f6b4070",
@@ -123,10 +124,26 @@ const normalizeChildAges = (childAges) => {
   return [];
 };
 
-const buildGuestCode = (occupancies = []) => {
-  const occupancyList = Array.isArray(occupancies) ? occupancies : [];
+const getCountryCode = (value) => {
+  if (!value) return "";
+  if (String(value).startsWith("+")) {
+    return CountryCodes.find((country) => country.dial_code === value)?.code || value;
+  }
 
-  if (!occupancyList.length) return "|1|1:A:25|";
+  return value;
+};
+
+const getDialCode = (value) => {
+  if (!value) return "";
+  if (String(value).startsWith("+")) return value;
+  return CountryCodes.find((country) => country.code === value)?.dial_code || value;
+};
+
+const buildGuestCode = (occupancies = [], guests = []) => {
+  const occupancyList = Array.isArray(occupancies) ? occupancies : [];
+  let adultAgeIndex = 0;
+
+  if (!occupancyList.length) return `|1|1:A:${guests[0]?.age || "25"}|`;
 
   return occupancyList
     .map((occupancy, index) => {
@@ -149,7 +166,13 @@ const buildGuestCode = (occupancies = []) => {
       const segments = [];
 
       if (adultCount > 0) {
-        segments.push(`|${occupancyId}|${adultCount}:A:${Array.from({ length: adultCount }, () => "25").join(":")}|`);
+        const adultAges = Array.from({ length: adultCount }, () => {
+          const age = guests[adultAgeIndex]?.age || "25";
+          adultAgeIndex += 1;
+          return age;
+        }).join(":");
+
+        segments.push(`|${occupancyId}|${adultCount}:A:${adultAges}|`);
       }
 
       if (childCount > 0) {
@@ -212,7 +235,12 @@ const ReviewPage = () => {
       return (
         !guests.length ||
         guests.some(
-          (guest) => !guest.title || !guest.firstName || !guest.lastName || !guest.gender,
+          (guest) =>
+            !guest.title ||
+            !guest.firstName ||
+            !guest.lastName ||
+            !guest.gender ||
+            !guest.age,
         )
       );
     });
@@ -257,15 +285,15 @@ const ReviewPage = () => {
           State: contact.state,
           City: contact.city,
           PIN: contact.pin,
-          CountryCode: contact.countryCode,
-          MobileCountryCode: firstTraveler.countryCode || contact.countryCode,
+          CountryCode: getCountryCode(contact.countryCode),
+          MobileCountryCode: getDialCode(firstTraveler.countryCode || contact.countryCode),
         },
         Rooms: selectedRooms.map((room) => {
           const guests = roomGuests[room.id] || [];
 
           return {
             RoomId: room.roomId || room.id || "",
-            GuestCode: room.guestCode || buildGuestCode(room.occupancies),
+            GuestCode: buildGuestCode(room.occupancies, guests),
             SupplierName: room.supplierName || "",
             RoomGroupId: room.roomGroupId || room.id || "",
             Guests: guests.map((guest, guestIndex) => ({
@@ -273,11 +301,11 @@ const ReviewPage = () => {
               Operation: "U",
               Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
               FirstName: guest.firstName,
-              MiddleName: "",
+              MiddleName: guest.middleName || "",
               LastName: guest.lastName,
               MobileNo: guest.mobile || contact.mobile,
               PaxType: "A",
-              Age: guest.age || "25",
+              Age: guest.age,
               Email: guest.email || contact.email,
               Pan: "",
             })),
@@ -393,7 +421,7 @@ const ReviewPage = () => {
         </div>
 
         <div
-          className={`${styles.expandWrap} ${
+          className={`${styles.expandWrap} ${styles.guestDetailsWrap} ${
             openTab === "guestDetails" ? styles.expandOpen : ""
           }`}
         >
