@@ -94,7 +94,14 @@ export default function FlightFilters() {
 
   const getSlotPrice = (bucket, uiSlot) => {
     const key = slotKeyMap[uiSlot];
-    const slots = apiFilterData?.[bucket] || {};
+    const fallbackBuckets = {
+      return_departure_slots: "departure_slots",
+      return_arrival_slots: "arrival_slots",
+    };
+    const slots =
+      apiFilterData?.[bucket] ||
+      apiFilterData?.[fallbackBuckets[bucket]] ||
+      {};
     const rawValue =
       slots?.[key] ??
       slots?.[key?.replace("_", "")] ??

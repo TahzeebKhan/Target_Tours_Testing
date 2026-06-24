@@ -55,7 +55,7 @@ const parseCurrencyValue = (value) => {
 };
 
 const FlightsPageClient = () => {
-  const { tripType, committedRequest } = useTripType();
+  const { tripType, committedRequest, searchRefreshToken: contextSearchRefreshToken } = useTripType();
   const { filters, setApiFilterData } = useFlightFilters();
   const urlSearchParams = useSearchParams();
 
@@ -123,12 +123,16 @@ const FlightsPageClient = () => {
     () => JSON.stringify(baseSearchParams),
     [baseSearchParams]
   );
+  const combinedRefreshToken = useMemo(
+    () => `${searchRefreshToken}:${contextSearchRefreshToken || 0}`,
+    [contextSearchRefreshToken, searchRefreshToken],
+  );
 
   useEffect(() => {
     setCurrentPage(1);
     setAggregatedMappedData(null);
     isLoadingMoreRef.current = false;
-  }, [baseSearchKey]);
+  }, [baseSearchKey, combinedRefreshToken]);
 
   const {
     data,
@@ -141,7 +145,7 @@ const FlightsPageClient = () => {
     params: searchParams,
     enabled: Boolean(tripType && hasCommittedSearch),
     filterTrigger: apiFilters,
-    refreshTrigger: searchRefreshToken,
+    refreshTrigger: combinedRefreshToken,
   });
 
   const {
@@ -371,6 +375,14 @@ const FlightsPageClient = () => {
       price_min: Number.isFinite(priceMin) ? priceMin : undefined,
       price_max: Number.isFinite(priceMax) ? priceMax : undefined,
     };
+
+    if (!mergedFilterData.return_departure_slots && mergedFilterData.departure_slots) {
+      mergedFilterData.return_departure_slots = mergedFilterData.departure_slots;
+    }
+
+    if (!mergedFilterData.return_arrival_slots && mergedFilterData.arrival_slots) {
+      mergedFilterData.return_arrival_slots = mergedFilterData.arrival_slots;
+    }
 
     const hasValidSlots =
       mergedFilterData &&
