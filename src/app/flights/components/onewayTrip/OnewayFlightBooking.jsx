@@ -36,7 +36,7 @@ const OnewayFlightBooking = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { committedSearches } = useTripType();
+  const { committedSearches, refreshFlightSearch, setStartDate } = useTripType();
   const { from, to } = committedSearches.oneway;
   // track which flight's details are open (by id) so only that item expands
   const [openId, setOpenId] = useState(null);
@@ -327,11 +327,14 @@ const OnewayFlightBooking = ({
   };
 
   const handleDateSelect = (dateKey) => {
+    setStartDate(dateKey);
     const nextParams = new URLSearchParams(searchParams?.toString() || "");
     nextParams.set("start", dateKey);
     nextParams.set("tripType", "oneway");
+    nextParams.set("searchToken", String(Date.now()));
     nextParams.delete("end");
     router.replace(`/flights?${nextParams.toString()}`, { scroll: false });
+    window.setTimeout(refreshFlightSearch, 50);
   };
   return (
     <>

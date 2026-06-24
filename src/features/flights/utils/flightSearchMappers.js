@@ -889,6 +889,20 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
     leg?.fare?.total,
     leg?.fare?.totalFare
   );
+  const grossFareAmount = readNumber(
+    leg?.grossFare,
+    leg?.gross_fare,
+    leg?.fare?.grossFare,
+    leg?.fare?.gross_fare,
+    leg?.fare?.gross
+  );
+  const taxAmount = readNumber(
+    leg?.tax,
+    leg?.Tax,
+    leg?.fare?.tax,
+    leg?.fare?.Tax
+  );
+  const displayAmount = pickFirst(grossFareAmount, amount);
   const index = pickFirst(
     leg?.Index,
     leg?.index,
@@ -999,13 +1013,22 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
       arrivalTerminal,
       segments,
       connections: pickFirst(leg?.Connections, leg?.connections),
+      refundable: pickFirst(leg?.refundable, leg?.isRefundable, leg?.Refundable),
+      seats: pickFirst(leg?.seats, leg?.Seats, leg?.seat, leg?.availableSeats),
     },
     booking: {
       provider: pickFirst(leg?.provider, leg?.Provider),
-      amount,
+      amount: displayAmount,
       index,
       orderId,
       tui,
+    },
+    fare: {
+      amount,
+      grossFareAmount,
+      taxAmount,
+      displayAmount,
+      totalFare: formatCurrency(displayAmount),
     },
     fallbackLabel,
   };
@@ -1029,6 +1052,7 @@ const buildRoundCard = (flight, index, options = {}) => {
     legs[0] ||
     flight?.outbound ||
     (onwardLeg && {
+      ...onwardLeg,
       segments: toArray(onwardLeg?.segments),
       departure_date: onwardLeg?.departure,
       departure: onwardLeg?.departure,
@@ -1131,6 +1155,7 @@ const buildRoundCard = (flight, index, options = {}) => {
     legs[1] ||
     flight?.inbound ||
     (returnLeg && {
+      ...returnLeg,
       segments: toArray(returnLeg?.segments),
       departure_date: returnLeg?.departure,
       departure: returnLeg?.departure,
@@ -1286,19 +1311,34 @@ const buildRoundCard = (flight, index, options = {}) => {
     )
   );
 
+  const outboundAmount = readNumber(
+    outbound?.fare?.displayAmount,
+    outbound?.booking?.amount
+  );
+  const inboundAmount = readNumber(
+    inbound?.fare?.displayAmount,
+    inbound?.booking?.amount
+  );
+  const calculatedTotalFareAmount =
+    outboundAmount !== null && inboundAmount !== null
+      ? outboundAmount + inboundAmount
+      : null;
   const totalFareAmount =
     readNumber(
       flight?.fare?.total,
       flight?.fare?.totalFare,
+      flight?.grossFare,
+      flight?.gross_fare,
       flight?.price?.total,
-      flight?.price,
       flight?.total,
-      flight?.amount
-    ) || 322000;
+      flight?.amount,
+      calculatedTotalFareAmount,
+      flight?.price
+    );
 
   const perAdult =
     readNumber(flight?.fare?.pricePerAdult, flight?.price?.per_adult, flight?.pricePerAdult) ||
-    Math.round(totalFareAmount / Math.max(adults, 1));
+    (totalFareAmount !== null ? Math.round(totalFareAmount / Math.max(adults, 1)) : null);
   const sharedTripTui = pickFirst(
     responseBookingMeta.tui,
     flight?.TUI,
@@ -1424,6 +1464,7 @@ const buildRoundCard = (flight, index, options = {}) => {
           duration: outbound.duration,
           stops: outbound.stops,
           details: outbound.details,
+          fare: outbound.fare,
         },
       },
       return: {
@@ -1441,6 +1482,7 @@ const buildRoundCard = (flight, index, options = {}) => {
           duration: inbound.duration,
           stops: inbound.stops,
           details: inbound.details,
+          fare: inbound.fare,
         },
       },
       fare,
@@ -1514,6 +1556,57 @@ const toRoundOrMultiItem = (item) => ({
   inbound: item.inbound,
 });
 
+const hasGroupedRoundTripLegs = (flight) =>
+  Array.isArray(flight?.onward) ||
+  Array.isArray(flight?.return) ||
+  Array.isArray(flight?.outbound) ||
+  Array.isArray(flight?.inbound);
+
+const normalizeGroupedRoundTripFlights = (flights = []) =>
+  flights.flatMap((flight, groupIndex) => {
+    if (!hasGroupedRoundTripLegs(flight)) return [flight];
+
+    const onwardLegs = [
+      ...toArray(flight?.onward),
+      ...toArray(flight?.outbound),
+    ];
+    const returnLegs = [
+      ...toArray(flight?.return),
+      ...toArray(flight?.inbound),
+    ];
+    const maxLength = Math.max(onwardLegs.length, returnLegs.length);
+
+    if (!maxLength) return [flight];
+
+    return Array.from({ length: maxLength }, (_, legIndex) => {
+      const onwardLeg = onwardLegs[legIndex] || onwardLegs[0] || {};
+      const returnLeg = returnLegs[legIndex] || returnLegs[0] || {};
+
+      return {
+        ...flight,
+        id: pickFirst(
+          flight?.id,
+          flight?.recommendationId,
+          flight?.search_key,
+          `round-group-${groupIndex + 1}`
+        ) + `-${legIndex + 1}`,
+        onward: {
+          ...onwardLeg,
+          fallbackFrom: flight?.trip?.origin || flight?.origin || flight?.from,
+          fallbackTo: flight?.trip?.destination || flight?.destination || flight?.to,
+          provider: pickFirst(onwardLeg?.provider, flight?.provider),
+        },
+        return: {
+          ...returnLeg,
+          fallbackFrom: flight?.trip?.destination || flight?.destination || flight?.to,
+          fallbackTo: flight?.trip?.origin || flight?.origin || flight?.from,
+          provider: pickFirst(returnLeg?.provider, flight?.provider),
+        },
+        legs: undefined,
+      };
+    });
+  });
+
 const buildMultiCard = (flight, index, options = {}) => {
   const { legs } = flight || {};
   if (Array.isArray(legs) && legs.length >= 2) {
@@ -1549,9 +1642,13 @@ export const mapFlightSearchResponse = ({
     Array.isArray(payload)
       ? payload
       : getFirstArrayAtPaths(payload, [
+          ["data", "result", "flights"],
+          ["data", "result", "results"],
           ["data", "flights"],
           ["data", "results"],
           ["data", "itineraries"],
+          ["result", "flights"],
+          ["result", "results"],
           ["flights"],
           ["results"],
           ["itineraries"],
@@ -1588,7 +1685,8 @@ export const mapFlightSearchResponse = ({
   }
 
   if (tripType === "round") {
-    const roundMapped = flights.map((flight, index) =>
+    const normalizedRoundFlights = normalizeGroupedRoundTripFlights(flights);
+    const roundMapped = normalizedRoundFlights.map((flight, index) =>
       buildRoundCard(flight, index, {
         adults,
         fallbackCabinClass: travelClass,
@@ -1683,7 +1781,7 @@ export const buildSearchParams = ({
 
   if (tripType === "round") {
     base.return_date = normalizeDateParam(
-      endDate || urlParams.return_date || ""
+      endDate || urlParams.return_date || urlParams.end || ""
     );
   }
 

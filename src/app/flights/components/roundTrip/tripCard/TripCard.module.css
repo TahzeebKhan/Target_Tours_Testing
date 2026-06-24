@@ -3,6 +3,249 @@
   flex-direction: column;
   gap: 24px;
 }
+.roundTripShell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 116px;
+}
+.roundTripColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.roundColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.roundColumnTitle {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #edf0f4;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #000033;
+}
+.roundColumnTitle small {
+  flex: 0 0 auto;
+  color: #737373;
+  font-size: 12px;
+  font-weight: 500;
+}
+.roundColumnHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 78px;
+  gap: 10px;
+  padding: 12px 18px;
+  background: #f8fafc;
+  border-bottom: 1px solid #edf0f4;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #8290a3;
+}
+.roundOptionList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 14px;
+}
+.roundOptionCard {
+  background: #ffffff;
+  border: 1px solid transparent;
+  padding: 16px 16px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.roundOptionCard:hover {
+  box-shadow: 0px 1px 18.6px 0px #00000017;
+}
+.selectedRoundOption {
+  border-color: #000033;
+}
+.roundOptionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.radioMark {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #c7cbd1;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  position: relative;
+}
+.selectedRoundOption .radioMark::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #000033;
+}
+.roundOptionFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.footerLeft,
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.footerRight {
+  margin-left: auto;
+}
+.inlineDetailsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+}
+.refundableBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #d8dce2;
+  border-radius: 6px;
+  color: #4c4c4c;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+.seatBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #000000;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.seatBadge svg {
+  color: #f4bd00;
+  stroke: currentColor;
+}
+.legFare {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  color: #000000;
+  font-family: var(--font-inter);
+  white-space: nowrap;
+}
+.legFare strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+.legFare span {
+  font-size: 10px;
+}
+.selectionBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) auto auto;
+  gap: 22px;
+  align-items: center;
+  padding: 16px max(22px, calc((100vw - 1440px) / 2 + 22px));
+  margin-top: 0;
+  background: #000033;
+  color: #ffffff;
+  box-shadow: 0 -8px 22px #0000001f;
+}
+.selectionLeg {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-family: var(--font-inter);
+}
+.selectionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #cfd5e6;
+}
+.selectionLeg strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+}
+.selectionLeg span:not(.selectionLabel) {
+  font-size: 18px;
+  font-weight: 500;
+}
+.selectionLeg small,
+.selectionFare small {
+  color: #cfd5e6;
+  font-size: 11px;
+}
+.selectionDivider {
+  width: 1px;
+  min-height: 58px;
+  background: #ffffff4d;
+}
+.selectionFare {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  font-family: var(--font-inter);
+}
+.selectionFare span {
+  color: #cfd5e6;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.selectionFare strong {
+  font-size: 24px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.bookNowBtn {
+  min-width: 140px;
+  height: 42px;
+  border: none;
+  background: #fcc800;
+  color: #000033;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.bookNowBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 .card {
   display: flex;
   background-color: #ffffff;
@@ -315,6 +558,22 @@
   }
 }
 @media (max-width: 1200px) {
+  .roundTripColumns {
+    grid-template-columns: 1fr;
+  }
+  .selectionBar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .selectionDivider {
+    display: none;
+  }
+  .selectionFare {
+    justify-items: start;
+  }
+  .bookNowBtn {
+    width: 100%;
+  }
   .departTimeContainer,
   .returnContainer {
     max-width: unset;
