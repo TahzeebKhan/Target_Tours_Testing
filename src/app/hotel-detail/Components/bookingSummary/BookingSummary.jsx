@@ -8,7 +8,33 @@ const formatCurrency = (value) =>
     maximumFractionDigits: 2,
   })}`;
 
-const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
+const getRoomTotal = (room) => {
+  const quantity = Number(room.quantity || 0);
+  const nights = Number(room.nights || 1);
+  const offer = Number(room.pricePerNight || room.netAmount || 0);
+  const tax = Number(room.taxPerNight || 0);
+  const rateIncludesTax = Boolean(room.rateIncludesTax);
+
+  return (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
+};
+
+const getDisplayDate = (value, fallback = "Check-in") => {
+  if (!value || ["check-in", "check-out"].includes(String(value).toLowerCase())) {
+    return fallback;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const BookingSummary = ({ roomList, checkInDate, nights = 1, onRemove, onBookNow }) => {
   const router = useRouter();
 
   const handleDelete = () => {
@@ -22,17 +48,20 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
       const offer = Number(room.pricePerNight || room.netAmount || 0);
       const published = Number(room.publishedRate || 0) || offer;
       const tax = Number(room.taxPerNight || 0);
+      const rateIncludesTax = Boolean(room.rateIncludesTax);
 
       totals.base += published * quantity * nights;
       totals.discount += Math.max(0, published - offer) * quantity * nights;
       totals.taxes += tax * quantity * nights;
-      totals.total += offer * quantity * nights + tax * quantity * nights;
+      totals.total += (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
       totals.nights = Math.max(totals.nights, nights);
 
       return totals;
     },
     { base: 0, discount: 0, taxes: 0, total: 0, nights: 1 },
   );
+  const displayNights = summary.nights || nights || 1;
+  const displayCheckInDate = getDisplayDate(checkInDate);
 
   return (
     <aside className={styles.wrapper}>
@@ -40,7 +69,10 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
       <div className={styles.header}>
         <h2>BOOKING SUMMARY</h2>
         <p>
-          <span>2 night</span> starting from <span>Tue 30 Dec, 2025</span>
+          <span>
+            {displayNights} night{Number(displayNights) === 1 ? "" : "s"}
+          </span>{" "}
+          starting from <span>{displayCheckInDate}</span>
         </p>
       </div>
 
@@ -48,7 +80,7 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
       {/* Rooms */}
       <div className={styles.roomSection}>
         {roomList.map((room) => {
-          const roomTotal = room.pricePerNight * room.quantity * room.nights;
+          const roomTotal = getRoomTotal(room);
 
           return (
             <div key={room.id} className={styles.roomItem}>
@@ -65,7 +97,7 @@ const BookingSummary = ({ roomList, onRemove, onBookNow }) => {
               <div className={styles.roomRight}>
                 <span>
                   {formatCurrency(room.pricePerNight)} × {room.quantity} Room × {room.nights}{" "}
-                  Nights
+                  Night{Number(room.nights) === 1 ? "" : "s"}
                 </span>
                 <span className={styles.price}>{formatCurrency(roomTotal)}</span>
               </div>

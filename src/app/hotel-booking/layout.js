@@ -8,6 +8,15 @@ import { useRouter } from "next/navigation";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
 import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
 
+const getRoomTotal = (room) => {
+  const quantity = Number(room.quantity || 0);
+  const nights = Number(room.nights || 1);
+  const price = Number(room.pricePerNight || 0);
+  const tax = Number(room.taxPerNight || 0);
+
+  return (price + (room.rateIncludesTax ? 0 : tax)) * quantity * nights;
+};
+
 const layout = ({ children }) => {
   const router = useRouter();
   const bookingUrlRef = useRef("");
@@ -157,11 +166,7 @@ const layout = ({ children }) => {
     );
   };
   const totalAmount = roomList.reduce(
-    (sum, room) =>
-      sum +
-      (Number(room.pricePerNight || 0) + Number(room.taxPerNight || 0)) *
-        Number(room.quantity || 0) *
-        Number(room.nights || 1),
+    (sum, room) => sum + getRoomTotal(room),
     0,
   );
   const isCorporate = false;

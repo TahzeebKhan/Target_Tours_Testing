@@ -12,8 +12,11 @@ const HotelGridView = ({
   isLoading = false,
   staySummary = "1 night, 1 guest",
   loadingHotelDetailsId = "",
+  locationLabel = "this location",
+  showEmptyState = false,
 }) => {
   const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
+  const shouldShowEmptyState = showEmptyState && !isLoading && !tourData.length;
 
   return (
     <motion.div
@@ -50,6 +53,22 @@ const HotelGridView = ({
             </div>
           </div>
         ))}
+      {shouldShowEmptyState && (
+        <div className={styles.emptyState}>
+          <img
+            className={styles.emptyStateImage}
+            src="/images/CouldntFind.svg"
+            alt="No hotels found"
+          />
+          <div className={styles.emptyStateText}>
+            <h3>No hotels found for {locationLabel}</h3>
+            <p>
+              Try a nearby area, adjust your travel dates, or change the guest
+              count to see more stays.
+            </p>
+          </div>
+        </div>
+      )}
       {tourData.map((item, index) => (
         <div
           key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}

@@ -60,6 +60,24 @@ const getFirstValue = (...values) =>
       !isPlaceholderDate(value),
   ) || "";
 
+const getNightCount = (checkInValue, checkOutValue) => {
+  const checkInDate = new Date(checkInValue);
+  const checkOutDate = new Date(checkOutValue);
+
+  if (
+    Number.isNaN(checkInDate.getTime()) ||
+    Number.isNaN(checkOutDate.getTime()) ||
+    checkOutDate <= checkInDate
+  ) {
+    return 1;
+  }
+
+  return Math.max(
+    1,
+    Math.round((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)),
+  );
+};
+
 const Page = () => {
   const { hotelDetail, roomsLoading } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
@@ -134,6 +152,7 @@ const Page = () => {
     storedHotelSearch.children ||
     storedHotelSearch.initPayload?.rooms?.[0]?.children ||
     0;
+  const nights = getNightCount(apiCheckIn, apiCheckOut);
   const selectedRooms = roomList.filter((room) => room.quantity > 0);
 
   const saveBookingSession = () => {
@@ -156,6 +175,7 @@ const Page = () => {
         checkOutDate: apiCheckOut,
         checkIn,
         checkOut,
+        nights,
         rooms,
         adults,
         children,
@@ -190,9 +210,10 @@ const Page = () => {
           pricePerNight: parseCurrencyNumber(room.price?.offer),
           publishedRate: Number(room.price?.actualAmount) || parseCurrencyNumber(room.price?.actual),
           taxPerNight: Number(room.price?.taxAmount) || 0,
+          rateIncludesTax: Boolean(room.price?.rateIncludesTax),
           quantity: 0,
           maxQuantity: Number(room.availability) || 1,
-          nights: 1,
+          nights,
           roomId: room.roomId,
           roomGroupId: room.roomGroupId,
           recommendationId: room.recommendationId,
@@ -204,7 +225,7 @@ const Page = () => {
         };
       }),
     );
-  }, [hotelDetail?.rooms]);
+  }, [hotelDetail?.rooms, nights]);
   const removeRoom = (id) => {
     setRoomList((prev) => {
       const nextRooms = prev.map((room) =>
@@ -316,6 +337,8 @@ const Page = () => {
           >
             <BookingSummary
               roomList={selectedRooms}
+              checkInDate={apiCheckIn}
+              nights={nights}
               onRemove={removeRoom}
               onBookNow={saveBookingSession}
             />

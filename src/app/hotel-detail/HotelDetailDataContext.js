@@ -249,6 +249,134 @@ const getTaxValue = (...sources) =>
     return total + Number(source || 0);
   }, 0);
 
+const isSameAmount = (left, right) => {
+  const leftAmount = getCurrencyNumber(left);
+  const rightAmount = getCurrencyNumber(right);
+
+  return leftAmount > 0 && rightAmount > 0 && Math.abs(leftAmount - rightAmount) < 0.01;
+};
+
+const normalizeGalleryTitle = (...values) =>
+  values.find((value) => value !== undefined && value !== null && String(value).trim()) ||
+  "";
+
+const normalizeGalleryItem = (value, fallbackTitle = "", depth = 0) => {
+  if (!value || depth > 3) return null;
+
+  if (typeof value === "string") {
+    if (/^https?:\/\//.test(value) || value.startsWith("/")) {
+      return {
+        image: value,
+        title: fallbackTitle,
+      };
+    }
+
+    return null;
+  }
+
+  if (typeof value !== "object") return null;
+
+  const image =
+    value.url ||
+    value.src ||
+    value.image ||
+    value.imageUrl ||
+    value.heroImage ||
+    value.thumbnail ||
+    value.links?.["1000px"]?.href ||
+    value.links?.["350px"]?.href ||
+    "";
+
+  if (!image) return null;
+
+  const title = normalizeGalleryTitle(
+    value.caption,
+    value.title,
+    value.name,
+    value.label,
+    value.category,
+    value.roomType,
+    value.type,
+    fallbackTitle,
+  );
+
+  return {
+    image,
+    title: String(title || "").trim(),
+  };
+};
+
+const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet()) => {
+  if (!value || items.length >= 20 || depth > 6) return items;
+
+  if (typeof value === "string") {
+    const item = normalizeGalleryItem(value);
+    if (item) items.push(item);
+    return items;
+  }
+
+  if (typeof value !== "object" || seen.has(value)) return items;
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectGalleryItems(item, items, depth + 1, seen));
+    return items;
+  }
+
+  const currentItem = normalizeGalleryItem(value);
+  if (currentItem) items.push(currentItem);
+
+  [
+    value.images,
+    value.galleryImages,
+    value.photos,
+    value.media,
+    value.hotelImages,
+    value.room,
+    value.roomGroup,
+    value.details,
+    value.hotel,
+  ].forEach((candidate) => collectGalleryItems(candidate, items, depth + 1, seen));
+
+  return items;
+};
+
+const extractGalleryImages = (stored = {}, routeHotelId = "") => {
+  const detailsPayload = stored?.details || stored || {};
+  const data = detailsPayload.data || detailsPayload;
+  const foundHotel = findFirstObject(data, (item) => item.name && (item.address || item.heroImage));
+  const hotel = {
+    ...(stored?.hotel?.raw || {}),
+    ...(foundHotel || {}),
+    ...(stored?.hotel || {}),
+  };
+
+  const galleryItems = [
+    ...collectGalleryItems(data),
+    ...collectGalleryItems(hotel),
+  ].filter((item) => item?.image);
+  const uniqueItems = [];
+  const seenImages = new Set();
+
+  galleryItems.forEach((item) => {
+    if (seenImages.has(item.image)) return;
+    seenImages.add(item.image);
+    uniqueItems.push(item);
+  });
+
+  if (!uniqueItems.length) {
+    return [
+      { image: FALLBACK_IMAGES[0], title: "Lobby" },
+      { image: FALLBACK_IMAGES[1], title: "Room" },
+      { image: FALLBACK_IMAGES[2], title: "Bathroom" },
+      { image: FALLBACK_IMAGES[3], title: "Dining" },
+      { image: FALLBACK_IMAGES[4], title: "Exterior" },
+    ];
+  }
+
+  return uniqueItems.slice(0, 12);
+};
+
 const normalizeFacilities = (facilities = []) =>
   facilities
     .map((facility) =>
@@ -360,6 +488,17 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       recommendation.taxes,
       recommendation.fees,
     );
+    const totalRate = getFirst(
+      room.totalRate,
+      roomDetail.totalRate,
+      room.recommendationMeta?.totalRate,
+      recommendation.totalRate,
+      recommendation.recommendationMeta?.totalRate,
+      room.rate?.totalRate,
+      roomDetail.rate?.totalRate,
+      recommendation.rate?.totalRate,
+    );
+    const rateIncludesTax = Boolean(taxes && isSameAmount(roomPrice, totalRate));
     const publishedRate = getFirst(
       room.publishedRate,
       roomDetail.publishedRate,
@@ -465,6 +604,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         actualAmount: getCurrencyNumber(publishedRate),
         offerAmount: getCurrencyNumber(roomPrice),
         taxAmount: getCurrencyNumber(taxes),
+        rateIncludesTax,
         nights: "per night",
         taxes: taxes ? `+ ${formatCurrency(taxes)} Taxes & fees` : "",
         bookWith: "₹ 0",
@@ -654,13 +794,8 @@ const normalizeHotelDetail = (
     ...(foundHotel || {}),
     ...(stored?.hotel || {}),
   };
-  const images = [
-    hotel.heroImage,
-    hotel.image,
-    ...collectImages(data),
-    ...collectImages(hotel),
-  ].filter(Boolean);
-  const uniqueImages = [...new Set(images)].slice(0, 12);
+  const galleryImages = extractGalleryImages(stored, routeHotelId);
+  const uniqueImages = galleryImages.map((item) => item.image);
   const facilities = normalizeFacilities(
     collectFacilities(data),
   );
@@ -690,6 +825,7 @@ const normalizeHotelDetail = (
     reviews,
     ratingBars,
     scoreDetails,
+    galleryImages,
     request: stored?.request || {},
   };
 };
@@ -731,6 +867,7 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
             request,
             hotel: {},
             details,
+            galleryImages: extractGalleryImages({ request, hotel: {}, details }, hotelId),
           };
 
           writeStoredHotelDetail(nextStoredDetail);

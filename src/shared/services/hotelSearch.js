@@ -321,7 +321,6 @@ export const confirmHotelBooking = async (payload = {}) => {
     cache: "no-store",
     body: JSON.stringify({
       ...payload,
-      ...(getAuthToken() ? { token: getAuthToken() } : {}),
       domain: payload.domain || getDomain(),
     }),
   });

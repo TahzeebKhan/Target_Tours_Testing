@@ -14,8 +14,11 @@ import BookingFooter from './bookingFooter/BookingFooter'
 import PriceSummary from './priceSummary/PriceSummary'
 import { AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { useHotelDetailData } from '../../HotelDetailDataContext'
+import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch'
 
 const HotelDetaislMobileView = () => {
+    const { hotelDetail } = useHotelDetailData();
     const [showPriceSummary, setShowPriceSummary] = useState(false);
     const [activeTab, setActiveTab] = useState("Description");
     const sectionRefs = {
@@ -27,6 +30,29 @@ const HotelDetaislMobileView = () => {
     };
     const router = useRouter();
     const hotelGallery = () => {
+        if (typeof window !== "undefined") {
+            try {
+                const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
+                const stored = raw ? JSON.parse(raw) : {};
+                window.sessionStorage.setItem(
+                    HOTEL_DETAILS_KEY,
+                    JSON.stringify({
+                        ...stored,
+                        galleryImages:
+                            hotelDetail?.galleryImages?.length
+                              ? hotelDetail.galleryImages
+                              : (hotelDetail?.images || stored?.galleryImages || []).map(
+                                  (item, index) =>
+                                    typeof item === "string"
+                                      ? { image: item, title: `Photo ${index + 1}` }
+                                      : item,
+                                ),
+                    }),
+                );
+            } catch {
+                // Ignore storage failures and still navigate.
+            }
+        }
         router.push('/hotel-gallery');
     }
 
@@ -43,7 +69,7 @@ const HotelDetaislMobileView = () => {
         <div className={styles.HotelDetaislMobileViewWrapper}>
             <div className={styles.HotelDetaislMobileViewContainer}>
                 <div className={styles.HotelDetaislMobileViewImageContainer}>
-                    <img className={styles.hotleImg} src="/images/hotelArt1.png" alt="" />
+                    <img className={styles.hotleImg} src={hotelDetail?.images?.[0] || "/images/hotelArt1.png"} alt="" />
 
                     <button className={styles.viewGalleryBtn} onClick={hotelGallery}>
                         <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
