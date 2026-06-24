@@ -312,50 +312,35 @@ const getDialCode = (value) => {
   return CountryCodes.find((country) => country.code === value)?.dial_code || value;
 };
 
-const buildGuestCode = (occupancies = []) => {
+const buildGuestCode = (occupancies = [], guests = []) => {
   const occupancyList = Array.isArray(occupancies) ? occupancies : [];
+  const occupancy = occupancyList[0] || {};
+  const occupancyId =
+    getOccupancyValue(occupancy, "occupancyId", "OccupancyID", "occupancyID", "id") ||
+    1;
+  const adultGuests = guests.filter(
+    (guest) => String(guest.PaxType || guest.passengerType || "A").toUpperCase() === "A",
+  );
+  const childGuests = guests.filter(
+    (guest) => String(guest.PaxType || guest.passengerType || "").toUpperCase() === "C",
+  );
+  const sections = [];
 
-  if (!occupancyList.length) return "|1|1:A:25|";
+  if (adultGuests.length > 0) {
+    const adultAges = Array.from({ length: adultGuests.length }, () => "25").join(":");
+    sections.push(`${adultGuests.length}:A:${adultAges}`);
+  }
 
-  return occupancyList
-    .map((occupancy, index) => {
-      const occupancyId =
-        getOccupancyValue(occupancy, "occupancyId", "OccupancyID", "occupancyID", "id") ||
-        index + 1;
-      const adultCount = Number(
-        getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") ||
-          0,
-      );
-      const childCount = Number(
-        getOccupancyValue(
-          occupancy,
-          "numOfChildren",
-          "NumOfChildren",
-          "children",
-          "childCount",
-        ) || 0,
-      );
-      const segments = [];
+  if (childGuests.length > 0) {
+    const childAges = childGuests
+      .map((guest) => String(guest.Age || guest.age || "0"))
+      .join(":");
+    sections.push(`${childGuests.length}:C:${childAges}`);
+  }
 
-      if (adultCount > 0) {
-        const adultAges = Array.from({ length: adultCount }, () => "25").join(":");
-        segments.push(`|${occupancyId}|${adultCount}:A:${adultAges}|`);
-      }
-
-      if (childCount > 0) {
-        const childAges = normalizeChildAges(
-          getOccupancyValue(occupancy, "childAges", "ChildAges", "childrenAges"),
-        );
-        const ages = Array.from({ length: childCount }, (_, childIndex) =>
-          String(childAges[childIndex] || "0"),
-        ).join(":");
-
-        segments.push(`|${occupancyId}|${childCount}:C:${ages}|`);
-      }
-
-      return segments.join("");
-    })
-    .join("");
+  return sections.length
+    ? `|${occupancyId}|${sections.join("|")}|`
+    : `|${occupancyId}|1:A:25|`;
 };
 
 const ReviewPage = () => {
@@ -544,7 +529,7 @@ const ReviewPage = () => {
 
           return {
             RoomId: room.roomId || room.id || "",
-            GuestCode: buildGuestCode(room.occupancies),
+            GuestCode: buildGuestCode(room.occupancies, guests),
             SupplierName: room.supplierName || "",
             RoomGroupId: room.roomGroupId || room.id || "",
             Guests: guests.map((guest, guestIndex) => ({

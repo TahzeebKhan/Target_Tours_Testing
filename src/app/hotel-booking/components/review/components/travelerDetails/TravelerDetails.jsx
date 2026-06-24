@@ -74,6 +74,42 @@ const COUNTRY_OPTIONS = [...CountryCodes]
 
 const fallbackRooms = [{ id: "default-room", title: "Room" }];
 
+const getOccupancyGuestCount = (occupancy = {}) =>
+  Number(
+    occupancy.numOfAdults ||
+      occupancy.NumOfAdults ||
+      occupancy.adults ||
+      occupancy.adultCount ||
+      0,
+  ) +
+  Number(
+    occupancy.numOfChildren ||
+      occupancy.NumOfChildren ||
+      occupancy.children ||
+      occupancy.childCount ||
+      0,
+  );
+
+const getRoomGuestLimit = (room = {}) => {
+  const occupancyTotal = Array.isArray(room.occupancies)
+    ? room.occupancies.reduce(
+        (total, occupancy) => total + getOccupancyGuestCount(occupancy),
+        0,
+      )
+    : 0;
+  const quantity = Math.max(1, Number(room.quantity || 1));
+  const explicitLimit = Number(
+    room.maxGuestAllowed || room.maxGuests || room.guestCapacity || 0,
+  );
+  const limit = explicitLimit
+    ? explicitLimit * quantity
+    : occupancyTotal
+      ? occupancyTotal * quantity
+      : 0;
+
+  return limit || Math.max(1, quantity);
+};
+
 const CountryCodeDropdown = ({ value, onChange, required }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUp, setOpenUp] = useState(false);
@@ -318,11 +354,13 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
         onChange?.({ roomGuests, bookingContact });
     }, [roomGuests, bookingContact, onChange]);
 
-    // ➕ Add Traveler
-    const addTraveler = (roomId) => {
+    const addTraveler = (roomId, maxGuests = Infinity) => {
         setRoomGuests(prev => ({
             ...prev,
-            [roomId]: [...(prev[roomId] || []), createTraveler()],
+            [roomId]:
+                (prev[roomId] || []).length >= maxGuests
+                    ? (prev[roomId] || [])
+                    : [...(prev[roomId] || []), createTraveler()],
         }));
     };
 
@@ -362,16 +400,26 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     return (
       <div className={styles.wrapper}>
         {/* Traveler Cards */}
-        {(rooms.length ? rooms : fallbackRooms).map((room) => (
+        {(rooms.length ? rooms : fallbackRooms).map((room) => {
+          const travelers = roomGuests[room.id] || [createTraveler()];
+          const maxGuests = getRoomGuestLimit(room);
+          const canAddGuest = travelers.length < maxGuests;
+
+          return (
           <div key={room.id}>
             <div
-              className={styles.addTraveler}
-              onClick={() => addTraveler(room.id)}
+              className={`${styles.addTraveler} ${
+                !canAddGuest ? styles.addTravelerDisabled : ""
+              }`}
+              onClick={() => {
+                if (canAddGuest) addTraveler(room.id, maxGuests);
+              }}
             >
               +Add Guest for {room.title}
+              {!canAddGuest ? ` (${maxGuests} guest limit)` : ""}
             </div>
 
-            {(roomGuests[room.id] || [createTraveler()]).map(
+            {travelers.map(
               (traveler, index) => {
                 const guestKey = `${room.id}-${index}`;
                 const isCollapsed = Boolean(collapsedGuests[guestKey]);
@@ -613,7 +661,8 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
               },
             )}
           </div>
-        ))}
+          );
+        })}
 
         {/* Booking Details */}
         <div className={styles.card}>

@@ -170,24 +170,39 @@ const Page = () => {
     if (!hotelDetail?.rooms?.length) return;
 
     setRoomList(
-      hotelDetail.rooms.map((room) => ({
-        id: room.id,
-        title: room.title,
-        image: room.image?.[0]?.img || "/images/hotelArt1.png",
-        pricePerNight: parseCurrencyNumber(room.price?.offer),
-        publishedRate: Number(room.price?.actualAmount) || parseCurrencyNumber(room.price?.actual),
-        taxPerNight: Number(room.price?.taxAmount) || 0,
-        quantity: 0,
-        maxQuantity: Number(room.availability) || 1,
-        nights: 1,
-        roomId: room.roomId,
-        roomGroupId: room.roomGroupId,
-        recommendationId: room.recommendationId,
-        supplierName: room.supplierName,
-        guestCode: room.guestCode,
-        occupancies: room.occupancies,
-        netAmount: parseCurrencyNumber(room.price?.offer),
-      })),
+      hotelDetail.rooms.map((room) => {
+        const occupancyGuestCount = Array.isArray(room.occupancies)
+          ? room.occupancies.reduce(
+              (total, occupancy) =>
+                total +
+                Number(occupancy.numOfAdults || occupancy.NumOfAdults || 0) +
+                Number(occupancy.numOfChildren || occupancy.NumOfChildren || 0),
+              0,
+            )
+          : 0;
+        const displayedGuestCount =
+          Number(String(room.persons || "").match(/\d+/)?.[0]) || 0;
+
+        return {
+          id: room.id,
+          title: room.title,
+          image: room.image?.[0]?.img || "/images/hotelArt1.png",
+          pricePerNight: parseCurrencyNumber(room.price?.offer),
+          publishedRate: Number(room.price?.actualAmount) || parseCurrencyNumber(room.price?.actual),
+          taxPerNight: Number(room.price?.taxAmount) || 0,
+          quantity: 0,
+          maxQuantity: Number(room.availability) || 1,
+          nights: 1,
+          roomId: room.roomId,
+          roomGroupId: room.roomGroupId,
+          recommendationId: room.recommendationId,
+          supplierName: room.supplierName,
+          guestCode: room.guestCode,
+          occupancies: room.occupancies,
+          maxGuestAllowed: displayedGuestCount || occupancyGuestCount || 1,
+          netAmount: parseCurrencyNumber(room.price?.offer),
+        };
+      }),
     );
   }, [hotelDetail?.rooms]);
   const removeRoom = (id) => {

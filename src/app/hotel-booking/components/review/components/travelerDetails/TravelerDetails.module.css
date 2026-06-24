@@ -21,6 +21,11 @@
   margin-bottom: 20px;
 }
 
+.addTravelerDisabled {
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
 /* Card */
 .card {
   border: 1px solid #e4e6e8;
