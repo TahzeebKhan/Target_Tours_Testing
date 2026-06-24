@@ -343,6 +343,15 @@ const buildGuestCode = (occupancies = [], guests = []) => {
     : `|${occupancyId}|1:A:25|`;
 };
 
+const getRoomTotal = (room) => {
+  const quantity = Number(room.quantity || 0);
+  const nights = Number(room.nights || 1);
+  const price = Number(room.pricePerNight || 0);
+  const tax = Number(room.taxPerNight || 0);
+
+  return (price + (room.rateIncludesTax ? 0 : tax)) * quantity * nights;
+};
+
 const ReviewPage = () => {
   const router = useRouter();
   // 👇 default open = flight
@@ -369,11 +378,7 @@ const ReviewPage = () => {
   );
   const visibleRooms = roomList.length ? roomList : [];
   const totalAmount = selectedRooms.reduce(
-    (sum, room) =>
-      sum +
-      (Number(room.pricePerNight || 0) + Number(room.taxPerNight || 0)) *
-        Number(room.quantity || 0) *
-        Number(room.nights || 1),
+    (sum, room) => sum + getRoomTotal(room),
     0,
   );
   const nights = selectedRooms[0]?.nights || request.nights || 1;

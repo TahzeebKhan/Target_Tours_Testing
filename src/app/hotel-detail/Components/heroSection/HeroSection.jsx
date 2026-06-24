@@ -51,7 +51,7 @@ const HeroSection = ({ liked, onLike }) => {
           </div>
         </div>
       </div>
-      <HotelGallery images={hotelDetail?.images} />
+      <HotelGallery images={hotelDetail?.galleryImages || hotelDetail?.images} />
     </div>
   );
 };

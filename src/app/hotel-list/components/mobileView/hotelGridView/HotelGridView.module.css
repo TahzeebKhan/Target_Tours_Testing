@@ -10,6 +10,44 @@
     gap: 24px;
 }
 
+.emptyState {
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 18px;
+    background: #FFFFFF;
+    border: 1px solid #E6E8EF;
+}
+
+.emptyStateImage {
+    width: 150px;
+    max-width: 42%;
+    flex: 0 0 150px;
+}
+
+.emptyStateText {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.emptyStateText h3 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.15;
+    color: #000033;
+}
+
+.emptyStateText p {
+    font-family: var(--font-inter);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4A5565;
+}
+
 .cardItemHeader {
     width: 100%;
     display: flex;
@@ -376,6 +414,15 @@
         display: grid;
         grid-template-columns: repeat(1, 1fr);
         gap: 24px;
+    }
+    .emptyState {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .emptyStateImage {
+        width: 140px;
+        max-width: 100%;
+        flex-basis: auto;
     }
     .bookNowBtn {
 max-width: 210px;

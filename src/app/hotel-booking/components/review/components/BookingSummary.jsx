@@ -13,6 +13,16 @@ const formatCurrency = (value) =>
     maximumFractionDigits: 2,
   })}`;
 
+const getRoomTotal = (room, fallbackNights = 1) => {
+  const quantity = Number(room.quantity || 0);
+  const nights = Number(room.nights || fallbackNights || 1);
+  const offer = getNumber(room.pricePerNight || room.netAmount);
+  const tax = getNumber(room.taxPerNight);
+  const rateIncludesTax = Boolean(room.rateIncludesTax);
+
+  return (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
+};
+
 const getDisplayDate = (value, fallback = "Check-in") => {
   if (!value || ["check-in", "check-out"].includes(String(value).toLowerCase())) {
     return fallback;
@@ -50,11 +60,12 @@ const BookingSummary = ({
       const offer = getNumber(room.pricePerNight || room.netAmount);
       const published = getNumber(room.publishedRate) || offer;
       const tax = getNumber(room.taxPerNight);
+      const rateIncludesTax = Boolean(room.rateIncludesTax);
 
       totals.base += published * quantity * nights;
       totals.discount += Math.max(0, published - offer) * quantity * nights;
       totals.taxes += tax * quantity * nights;
-      totals.total += offer * quantity * nights + tax * quantity * nights;
+      totals.total += (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
       totals.nights = Math.max(totals.nights, nights);
 
       return totals;
@@ -119,7 +130,7 @@ const BookingSummary = ({
             const quantity = Number(room.quantity || 0);
             const roomNights = Number(room.nights || nights || 1);
             const roomPrice = getNumber(room.pricePerNight || room.netAmount);
-            const roomTotal = roomPrice * quantity * roomNights;
+            const roomTotal = getRoomTotal(room, nights);
 
             return (
               <div key={room.id} className={styles.roomItem}>

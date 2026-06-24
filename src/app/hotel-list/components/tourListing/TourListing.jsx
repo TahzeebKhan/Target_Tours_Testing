@@ -628,6 +628,36 @@ const HotelFacilities = ({ facilities = [] }) => {
   );
 };
 
+const getSearchLocationLabel = (searchParams) => {
+  const rawLocation =
+    searchParams.get("city") ||
+    searchParams.get("location") ||
+    searchParams.get("destination") ||
+    searchParams.get("whereTo") ||
+    "";
+
+  return rawLocation
+    ? rawLocation.replace(/\+/g, " ").replace(/\s+/g, " ").trim()
+    : "this location";
+};
+
+const EmptyHotelState = ({ locationLabel }) => (
+  <div className={styles.emptyState}>
+    <img
+      className={styles.emptyStateImage}
+      src="/images/CouldntFind.svg"
+      alt="No hotels found"
+    />
+    <div className={styles.emptyStateText}>
+      <h3>No hotels found for {locationLabel || "this location"}</h3>
+      <p>
+        We could not find stays for this search. Try a nearby area, different
+        dates, or update your rooms and guests.
+      </p>
+    </div>
+  </div>
+);
+
 const normalizeHotelBenefits = (hotel = {}) => {
   const benefits = [];
 
@@ -824,6 +854,10 @@ const TourListing = () => {
     viewportHeight: 0,
   });
   const staySummary = useMemo(() => getStaySummary(searchParams), [searchParams]);
+  const searchLocationLabel = useMemo(
+    () => getSearchLocationLabel(searchParams),
+    [searchParams],
+  );
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
@@ -1097,6 +1131,8 @@ const TourListing = () => {
         : [...prev, id],
     );
   };
+  const showEmptyState =
+    !isHotelLoading && !displayHotels.length && Boolean(hotelSearchChannel || hotelResultSource);
 
   return (
     <>
@@ -1109,7 +1145,11 @@ const TourListing = () => {
           setSort={setSortType}
         />
 
-          {viewType === "grid" && (
+          {showEmptyState && (
+            <EmptyHotelState locationLabel={searchLocationLabel} />
+          )}
+
+          {viewType === "grid" && !showEmptyState && (
             <motion.div
               className={styles.gridWrapper}
               key="grid"
@@ -1245,7 +1285,7 @@ const TourListing = () => {
             // </div>
           )}
 
-          {viewType === "list" && (
+          {viewType === "list" && !showEmptyState && (
             <motion.div
               className={styles.ListViewWrapper}
               key="list"

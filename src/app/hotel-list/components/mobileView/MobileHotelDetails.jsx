@@ -30,11 +30,25 @@ import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
 
+const getSearchLocationLabel = (searchParams) => {
+    const rawLocation =
+        searchParams.get("city") ||
+        searchParams.get("location") ||
+        searchParams.get("destination") ||
+        searchParams.get("whereTo") ||
+        "";
+
+    return rawLocation
+        ? rawLocation.replace(/\+/g, " ").replace(/\s+/g, " ").trim()
+        : "this location";
+};
+
 const MobileHotelDetails = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const hotelSearchChannel = searchParams.get("channel") || "";
     const staySummary = getStaySummary(searchParams);
+    const searchLocationLabel = getSearchLocationLabel(searchParams);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   /* ✅ REQUIRED STATES */
@@ -260,6 +274,8 @@ const MobileHotelDetails = () => {
                         isLoading={isHotelLoading}
                         staySummary={staySummary}
                         loadingHotelDetailsId={loadingHotelDetailsId}
+                        locationLabel={searchLocationLabel}
+                        showEmptyState={Boolean(hotelSearchChannel)}
                     />
             </ResultsBottomSheet>
             {showAuthModal && authView === "login" && (

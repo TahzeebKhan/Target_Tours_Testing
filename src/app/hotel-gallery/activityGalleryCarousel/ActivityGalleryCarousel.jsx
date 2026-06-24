@@ -24,7 +24,72 @@ const useIsMobile = (breakpoint = 600) => {
   return isMobile;
 };
 
-const ActivityGalleryCarousel = () => {
+const FALLBACK_IMAGES = [
+  {
+    id: 1,
+    title: "Kitchen",
+    image: "/gallery/kitchen1.png",
+  },
+  {
+    id: 2,
+    title: "Bathroom",
+    image: "/gallery/bathroom2.png",
+  },
+  {
+    id: 3,
+    title: "Bedroom",
+    image: "/gallery/bedroom1.png",
+  },
+  {
+    id: 4,
+    title: "Living Room",
+    image: "/gallery/livingRoom2.png",
+  },
+  {
+    id: 5,
+    title: "Exterior",
+    image: "/gallery/Exterior.png",
+  },
+  {
+    id: 6,
+    title: "Activity",
+    image: "/gallery/Activity.png",
+  },
+  {
+    id: 7,
+    title: "Luxury Yacht Experience",
+    image: "/gallery/item6.png",
+  },
+  {
+    id: 8,
+    title: "Luxury Yacht Experience",
+    image: "/gallery/item6.png",
+  },
+  {
+    id: 9,
+    title: "Luxury Yacht Experience",
+    image: "/gallery/item6.png",
+  },
+];
+
+const normalizeImages = (images = FALLBACK_IMAGES) =>
+  (Array.isArray(images) ? images : FALLBACK_IMAGES)
+    .map((item, index) =>
+      typeof item === "string"
+        ? {
+            id: `gallery-image-${index}`,
+            title: `Photo ${index + 1}`,
+            image: item,
+          }
+        : {
+            id: item?.id || `gallery-image-${index}`,
+            title: item?.title || `Photo ${index + 1}`,
+            image: item?.image || item?.url || "",
+          },
+    )
+    .filter((item) => item.image);
+
+const ActivityGalleryCarousel = ({ images = FALLBACK_IMAGES, disableNavigation = false }) => {
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -40,54 +105,7 @@ const ActivityGalleryCarousel = () => {
     swiperRef?.slideNext();
   };
 
-  
-const images = [
-        {
-            "id": 1,
-            "title": "Kitchen",
-            "image": "/gallery/kitchen1.png"
-        },
-        {
-            "id": 2,
-            "title": "Bathroom",
-            "image": "/gallery/bathroom2.png"
-        },
-        {
-            "id": 3,
-            "title": "Bedroom",
-            "image": "/gallery/bedroom1.png"
-        },
-        {
-            "id": 4,
-            "title": "Living Room",
-            "image": "/gallery/livingRoom2.png"
-        },
-        {
-            "id": 5,
-            "title": "Exterior",
-            "image": "/gallery/Exterior.png"
-        },
-        {
-            "id": 6,
-            "title": "Activity",
-            "image": "/gallery/Activity.png"
-        },
-        {
-            "id": 7,
-            "title": "Luxury Yacht Experience",
-            "image": "/gallery/item6.png"
-        },
-        {
-            "id": 8,
-            "title": "Luxury Yacht Experience",
-            "image": "/gallery/item6.png"
-        },
-        {
-            "id": 9,
-            "title": "Luxury Yacht Experience",
-            "image": "/gallery/item6.png"
-        }
-    ]
+  const slides = normalizeImages(images);
   const isMobile = useIsMobile(600);
   const router = useRouter();
   const toSlug = (text) => text.toLowerCase().replace(/\s+/g, "-");
@@ -98,12 +116,14 @@ const images = [
       {isMobile ? (
         /* ================= MOBILE VIEW (NO SWIPER) ================= */
         <div className={styles.mobileGrid}>
-          {images.map((image) => (
+          {slides.map((image) => (
             <div
               key={image.id}
               className={styles.mobileItem}
-              onClick={() =>
-                router.push(`/hotel-gallery/${toSlug(image.title)}`)
+              onClick={
+                disableNavigation
+                  ? undefined
+                  : () => router.push(`/hotel-gallery/${toSlug(image.title)}`)
               }
             >
               <img src={image.image} alt={image.title} />
@@ -133,7 +153,7 @@ const images = [
                 }
               }
             >
-              {images.map((image) => (
+              {slides.map((image) => (
                 <SwiperSlide key={image.id} className={styles.slide}>
                   <div className={styles.carouselItem}>
                     <img src={image.image} alt={image.title} />
