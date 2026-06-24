@@ -27,6 +27,8 @@ padding-top: 73px;
 .rightSidebar {
     margin-top: 79px;
     align-self: start;
+     position: sticky;
+    top: 150px;
 }
 
 .summarySidebar {
