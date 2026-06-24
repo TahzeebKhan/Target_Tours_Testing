@@ -26,8 +26,36 @@ const getHotelSearchHeaders = () => {
 };
 
 const getApiMessage = (data) => {
+  if (typeof data === "string") return data;
+
+  const findMessage = (value, depth = 0, seen = new WeakSet()) => {
+    if (!value || depth > 6) return "";
+    if (typeof value === "string") return value;
+    if (typeof value !== "object") return "";
+    if (seen.has(value)) return "";
+    seen.add(value);
+
+    if (typeof value.message === "string" && value.message.trim()) {
+      return value.message;
+    }
+
+    if (typeof value.error === "string" && value.error.trim()) {
+      return value.error;
+    }
+
+    const entries = Array.isArray(value) ? value : Object.values(value);
+    for (const entry of entries) {
+      const message = findMessage(entry, depth + 1, seen);
+      if (message) return message;
+    }
+
+    return "";
+  };
+
   const candidates = [
+    data?.error?.message,
     data?.error,
+    data?.message,
     data?.data?.rooms,
     data?.rooms,
     data?.data?.content,
@@ -35,11 +63,11 @@ const getApiMessage = (data) => {
     data?.data,
     data,
   ];
-  const messageSource = candidates.find(
-    (item) => item && typeof item === "object" && item.message,
-  );
+  const message = candidates
+    .map((item) => findMessage(item))
+    .find(Boolean);
 
-  return messageSource?.message || "";
+  return message || "";
 };
 
 const createApiError = (data, fallbackMessage) => {
@@ -262,6 +290,27 @@ export const fetchHotelRooms = async ({
 
   if (!response.ok) {
     throw createApiError(data, "Hotel rooms failed");
+  }
+
+  return data;
+};
+
+export const changeHotelAvailability = async (payload = {}) => {
+  const response = await fetch("/api/hotel-search/changehotelavailability", {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      domain: payload.domain || getDomain(),
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel availability check failed");
   }
 
   return data;

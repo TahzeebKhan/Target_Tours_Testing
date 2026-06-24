@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./HotelDetailLayout.module.css";
 import DescriptionComponent from "./Components/descriptionComponent/DescriptionComponent";
 import Amenities from "./Components/amenities/Amenities";
@@ -15,6 +15,7 @@ import {
   HOTEL_BOOKING_SESSION_KEY,
   HOTEL_SEARCH_SESSION_KEY,
 } from "@/shared/services/hotelSearch";
+import { toast } from "react-toastify";
 
 const parseCurrencyNumber = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
@@ -78,84 +79,322 @@ const getNightCount = (checkInValue, checkOutValue) => {
   );
 };
 
+const toHotelAvailabilityDate = (value) => {
+  if (!value || isPlaceholderDate(value)) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${month}/${day}/${year}`;
+};
+
+const getLocationGeoCode = (...sources) => {
+  const lat = getFirstValue(
+    ...sources.flatMap((source) => [source?.lat, source?.latitude]),
+  );
+  const long = getFirstValue(
+    ...sources.flatMap((source) => [
+      source?.long,
+      source?.lng,
+      source?.longitude,
+    ]),
+  );
+
+  return {
+    lat: lat ? String(lat) : "",
+    long: long ? String(long) : "",
+  };
+};
+
+const normalizeChildAges = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    return value
+      .split(/[:,|]/)
+      .map((age) => age.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const buildAvailabilityRooms = ({
+  roomCount,
+  adults,
+  children,
+  sourceRooms = [],
+}) => {
+  const count = Math.max(1, Number(roomCount) || 1);
+  const totalAdults = Math.max(count, Number(adults) || 1);
+  const totalChildren = Math.max(0, Number(children) || 0);
+  const baseAdults = Math.floor(totalAdults / count);
+  const extraAdults = totalAdults % count;
+  const baseChildren = Math.floor(totalChildren / count);
+  const extraChildren = totalChildren % count;
+
+  return Array.from({ length: count }, (_, index) => {
+    const sourceRoom = sourceRooms[index] || sourceRooms[0] || {};
+
+    return {
+      adults: String(baseAdults + (index < extraAdults ? 1 : 0)),
+      children: String(baseChildren + (index < extraChildren ? 1 : 0)),
+      childAges: normalizeChildAges(
+        sourceRoom.childAges || sourceRoom.childrenAges || sourceRoom.ChildAges,
+      ),
+    };
+  });
+};
+
+const buildHotelAvailabilityPayload = ({
+  hotelDetail,
+  storedHotelSearch,
+  selection,
+}) => {
+  const searchRequest = hotelDetail?.request || {};
+  const sourcePayload =
+    searchRequest.searchContext?.initPayload || storedHotelSearch.initPayload || {};
+  const location =
+    searchRequest.searchContext?.location ||
+    storedHotelSearch.location ||
+    sourcePayload.location ||
+    {};
+  const sourceLocations = Array.isArray(sourcePayload.locations)
+    ? sourcePayload.locations
+    : [];
+  const sourceRooms = Array.isArray(sourcePayload.rooms) ? sourcePayload.rooms : [];
+  const requestRooms = Array.isArray(searchRequest.searchContext?.rooms)
+    ? searchRequest.searchContext.rooms
+    : [];
+  const locationPayload =
+    sourceLocations[0] ||
+    location.raw ||
+    (location.id || location.locationId || location.label
+      ? {
+          id: location.locationId || location.id || "",
+          name: location.label || location.value || storedHotelSearch.city || "",
+          fullName:
+            location.detail ||
+            location.label ||
+            location.value ||
+            storedHotelSearch.city ||
+            "",
+          code: null,
+          type: location.type || "city",
+          city: null,
+          state: location.state || "",
+          country: location.country || "IN",
+          score: 0,
+          referenceId: null,
+        }
+      : null);
+  const sourceGeoCode =
+    sourcePayload.geoCode ||
+    location.geoCode ||
+    locationPayload?.coordinates ||
+    searchRequest.geoCode ||
+    {};
+  const geoCode = getLocationGeoCode(sourceGeoCode, location, locationPayload?.coordinates);
+
+  return {
+    ...(locationPayload ? { locations: [locationPayload] } : {}),
+    ...(geoCode.lat && geoCode.long ? { geoCode } : {}),
+    locationId: String(
+      getFirstValue(
+        sourcePayload.locationId,
+        searchRequest.searchContext?.locationId,
+        storedHotelSearch.locationId,
+        location.locationId,
+        location.id,
+        locationPayload?.id,
+      ),
+    ),
+    currency: sourcePayload.currency || "INR",
+    culture: sourcePayload.culture || "en-US",
+    checkIn: toHotelAvailabilityDate(selection.checkIn),
+    checkOut: toHotelAvailabilityDate(selection.checkOut),
+    rooms: buildAvailabilityRooms({
+      roomCount: selection.rooms,
+      adults: selection.adults,
+      children: selection.children,
+      sourceRooms: sourceRooms.length ? sourceRooms : requestRooms,
+    }),
+    hotelId: String(getFirstValue(searchRequest.hotelId, hotelDetail?.id)),
+    priceProvider: String(
+      getFirstValue(searchRequest.priceProvider, sourcePayload.priceProvider),
+    ),
+  };
+};
+
+const getAvailabilitySearchId = (response) =>
+  getFirstValue(
+    response?.data?.searchId,
+    response?.data?.content?.searchId,
+    response?.content?.searchId,
+    response?.searchId,
+    response?.data?.error?.details?.searchId,
+    response?.error?.details?.searchId,
+  );
+
+const updateHotelDetailUrlParams = (selection, response) => {
+  if (typeof window === "undefined") return;
+
+  const url = new URL(window.location.href);
+  const searchId = getAvailabilitySearchId(response);
+
+  url.searchParams.set("checkIn", selection.checkIn);
+  url.searchParams.set("checkOut", selection.checkOut);
+  url.searchParams.set("rooms", String(selection.rooms));
+  url.searchParams.set("adults", String(selection.adults));
+  url.searchParams.set("children", String(selection.children));
+
+  if (searchId) {
+    url.searchParams.set("searchId", searchId);
+  }
+
+  window.history.replaceState(window.history.state, "", url.toString());
+};
+
+const DEFAULT_ROOM_LIST = [
+  {
+    id: "deluxe_ac_room",
+    title: "Deluxe Private AC Room with Ensuite Bathroom",
+    image: "/images/hotelArt1.png",
+    pricePerNight: 1397.86,
+    quantity: 1,
+    maxQuantity: 5,
+    nights: 8,
+  },
+  {
+    id: "premium_ac_room",
+    title: "Premium Private AC Room with Ensuite Bathroom",
+    image: "/images/hotelArt1.png",
+    pricePerNight: 1397.86,
+    quantity: 1,
+    maxQuantity: 5,
+    nights: 8,
+  },
+];
+
 const Page = () => {
-  const { hotelDetail, roomsLoading } = useHotelDetailData();
+  const { hotelDetail, roomsLoading, refreshHotelAvailability } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
   const [showSummary, setShowSummary] = useState(false);
-  const [roomList, setRoomList] = useState([
-    {
-      id: "deluxe_ac_room",
-      title: "Deluxe Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 8,
-    },
-    {
-      id: "premium_ac_room",
-      title: "Premium Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 8,
-    },
-  ]);
-  const searchRequest = hotelDetail?.request || {};
-  const storedHotelSearch = readStoredHotelSearch() || {};
-  const urlCheckIn = getSearchParamValue("checkIn");
-  const urlCheckOut = getSearchParamValue("checkOut");
-  const apiCheckIn = getFirstValue(
-    urlCheckIn,
-    searchRequest.checkInDate,
-    searchRequest.checkInRaw,
-    searchRequest.checkIn,
-    searchRequest.check_in,
-    storedHotelSearch.checkIn,
-    storedHotelSearch.initPayload?.checkIn,
+  const [availabilityChecking, setAvailabilityChecking] = useState(false);
+  const [selectionOverride, setSelectionOverride] = useState(null);
+  const [roomList, setRoomList] = useState(DEFAULT_ROOM_LIST);
+  const descriptionRef = useRef(null);
+  const amenitiesRef = useRef(null);
+  const roomsRef = useRef(null);
+  const reviewsRef = useRef(null);
+  const policyRef = useRef(null);
+  const searchRequest = useMemo(() => hotelDetail?.request || {}, [hotelDetail?.request]);
+  const storedHotelSearch = useMemo(() => readStoredHotelSearch() || {}, []);
+  const urlSearchValues = useMemo(
+    () => ({
+      checkIn: getSearchParamValue("checkIn"),
+      checkOut: getSearchParamValue("checkOut"),
+      rooms: getSearchParamValue("rooms"),
+      adults: getSearchParamValue("adults"),
+      children: getSearchParamValue("children"),
+    }),
+    [],
   );
-  const apiCheckOut = getFirstValue(
-    urlCheckOut,
-    searchRequest.checkOutDate,
-    searchRequest.checkOutRaw,
-    searchRequest.checkOut,
-    searchRequest.check_out,
-    storedHotelSearch.checkOut,
-    storedHotelSearch.initPayload?.checkOut,
+  const apiCheckIn = useMemo(
+    () =>
+      getFirstValue(
+        urlSearchValues.checkIn,
+        searchRequest.checkInDate,
+        searchRequest.checkInRaw,
+        searchRequest.checkIn,
+        searchRequest.check_in,
+        storedHotelSearch.checkIn,
+        storedHotelSearch.initPayload?.checkIn,
+      ),
+    [searchRequest, storedHotelSearch, urlSearchValues.checkIn],
   );
-  const checkIn = formatDisplayDate(
-    apiCheckIn,
-    "Check-in",
-  );
-  const checkOut = formatDisplayDate(
-    apiCheckOut,
-    "Check-out",
+  const apiCheckOut = useMemo(
+    () =>
+      getFirstValue(
+        urlSearchValues.checkOut,
+        searchRequest.checkOutDate,
+        searchRequest.checkOutRaw,
+        searchRequest.checkOut,
+        searchRequest.check_out,
+        storedHotelSearch.checkOut,
+        storedHotelSearch.initPayload?.checkOut,
+      ),
+    [searchRequest, storedHotelSearch, urlSearchValues.checkOut],
   );
   const rooms =
-    getSearchParamValue("rooms") ||
+    urlSearchValues.rooms ||
     searchRequest.rooms ||
     searchRequest.roomCount ||
     storedHotelSearch.rooms ||
     1;
   const adults =
-    getSearchParamValue("adults") ||
+    urlSearchValues.adults ||
     searchRequest.adults ||
     searchRequest.adultCount ||
     storedHotelSearch.adults ||
     storedHotelSearch.initPayload?.rooms?.[0]?.adults ||
     1;
   const children =
-    getSearchParamValue("children") ||
+    urlSearchValues.children ||
     searchRequest.children ||
     searchRequest.childCount ||
     storedHotelSearch.children ||
     storedHotelSearch.initPayload?.rooms?.[0]?.children ||
     0;
-  const nights = getNightCount(apiCheckIn, apiCheckOut);
-  const selectedRooms = roomList.filter((room) => room.quantity > 0);
+  const effectiveSelection = useMemo(
+    () => ({
+      checkIn: selectionOverride?.checkIn || apiCheckIn,
+      checkOut: selectionOverride?.checkOut || apiCheckOut,
+      rooms: selectionOverride?.rooms || rooms,
+      adults: selectionOverride?.adults || adults,
+      children: selectionOverride?.children || children,
+    }),
+    [adults, apiCheckIn, apiCheckOut, children, rooms, selectionOverride],
+  );
+  const {
+    checkIn: effectiveCheckIn,
+    checkOut: effectiveCheckOut,
+    rooms: effectiveRooms,
+    adults: effectiveAdults,
+    children: effectiveChildren,
+  } = effectiveSelection;
+  const effectiveCheckInDisplay = useMemo(
+    () => formatDisplayDate(effectiveCheckIn, "Check-in"),
+    [effectiveCheckIn],
+  );
+  const effectiveCheckOutDisplay = useMemo(
+    () => formatDisplayDate(effectiveCheckOut, "Check-out"),
+    [effectiveCheckOut],
+  );
+  const nights = useMemo(
+    () => getNightCount(effectiveCheckIn, effectiveCheckOut),
+    [effectiveCheckIn, effectiveCheckOut],
+  );
+  const selectedRooms = useMemo(
+    () => roomList.filter((room) => room.quantity > 0),
+    [roomList],
+  );
+  const sectionRefs = useMemo(
+    () => ({
+      Description: descriptionRef,
+      Amenities: amenitiesRef,
+      Rooms: roomsRef,
+      Reviews: reviewsRef,
+      "HOTEL POLICY": policyRef,
+    }),
+    [],
+  );
+  const tabs = useMemo(() => Object.keys(sectionRefs), [sectionRefs]);
 
-  const saveBookingSession = () => {
+  const saveBookingSession = useCallback(() => {
     if (typeof window === "undefined") return;
 
     const payload = {
@@ -171,20 +410,92 @@ const Page = () => {
         ...searchRequest,
         searchContext: storedHotelSearch,
         initResponse: storedHotelSearch.initResponse,
-        checkInDate: apiCheckIn,
-        checkOutDate: apiCheckOut,
-        checkIn,
-        checkOut,
+        checkInDate: effectiveCheckIn,
+        checkOutDate: effectiveCheckOut,
+        checkIn: effectiveCheckInDisplay,
+        checkOut: effectiveCheckOutDisplay,
         nights,
-        rooms,
-        adults,
-        children,
+        rooms: effectiveRooms,
+        adults: effectiveAdults,
+        children: effectiveChildren,
       },
       rooms: selectedRooms,
     };
 
     window.sessionStorage.setItem(HOTEL_BOOKING_SESSION_KEY, JSON.stringify(payload));
-  };
+  }, [
+    effectiveAdults,
+    effectiveCheckIn,
+    effectiveCheckInDisplay,
+    effectiveCheckOut,
+    effectiveCheckOutDisplay,
+    effectiveChildren,
+    effectiveRooms,
+    hotelDetail,
+    nights,
+    searchRequest,
+    selectedRooms,
+    storedHotelSearch,
+  ]);
+
+  const handleSelectRoom = useCallback(async (selection) => {
+    if (!selection?.checkIn || !selection?.checkOut) {
+      toast.error("Please select check-in and check-out dates.");
+      return;
+    }
+
+    const nextSelection = {
+      checkIn: selection.checkIn,
+      checkOut: selection.checkOut,
+      rooms: Number(selection.rooms) || 1,
+      adults: Number(selection.adults) || 1,
+      children: Number(selection.children) || 0,
+    };
+    const payload = buildHotelAvailabilityPayload({
+      hotelDetail,
+      storedHotelSearch,
+      selection: nextSelection,
+    });
+
+    if (!payload.hotelId || !payload.priceProvider || !payload.checkIn || !payload.checkOut) {
+      toast.error("Missing hotel details needed to check availability.");
+      return;
+    }
+
+    setAvailabilityChecking(true);
+    setSelectionOverride(nextSelection);
+    setShowSummary(false);
+    updateHotelDetailUrlParams(nextSelection);
+
+    try {
+      const response = await refreshHotelAvailability(payload);
+
+      updateHotelDetailUrlParams(nextSelection, response);
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(
+          HOTEL_SEARCH_SESSION_KEY,
+          JSON.stringify({
+            ...storedHotelSearch,
+            checkIn: nextSelection.checkIn,
+            checkOut: nextSelection.checkOut,
+            rooms: nextSelection.rooms,
+            adults: nextSelection.adults,
+            children: nextSelection.children,
+            initPayload: {
+              ...(storedHotelSearch.initPayload || {}),
+              ...payload,
+            },
+            availabilityResponse: response,
+          }),
+        );
+      }
+    } catch (error) {
+      toast.error(error.message || "Unable to check hotel availability.");
+    } finally {
+      setAvailabilityChecking(false);
+    }
+  }, [hotelDetail, refreshHotelAvailability, storedHotelSearch]);
 
   useEffect(() => {
     if (!hotelDetail?.rooms?.length) return;
@@ -226,7 +537,7 @@ const Page = () => {
       }),
     );
   }, [hotelDetail?.rooms, nights]);
-  const removeRoom = (id) => {
+  const removeRoom = useCallback((id) => {
     setRoomList((prev) => {
       const nextRooms = prev.map((room) =>
         room.id === id ? { ...room, quantity: 0 } : room,
@@ -235,8 +546,8 @@ const Page = () => {
       setShowSummary(nextRooms.some((room) => room.quantity > 0));
       return nextRooms;
     });
-  };
-  const handleRoomQuantityChange = (id, quantity) => {
+  }, []);
+  const handleRoomQuantityChange = useCallback((id, quantity) => {
     setRoomList((prev) => {
       const nextRooms = prev.map((room) =>
         room.id === id ? { ...room, quantity } : room,
@@ -245,23 +556,16 @@ const Page = () => {
       setShowSummary(nextRooms.some((room) => room.quantity > 0));
       return nextRooms;
     });
-  };
-  const sectionRefs = {
-    Description: useRef(null),
-    Amenities: useRef(null),
-    Rooms: useRef(null),
-    Reviews: useRef(null),
-    "HOTEL POLICY": useRef(null),
-  };
+  }, []);
 
-  const handleTabChange = (tab) => {
+  const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
 
     sectionRefs[tab]?.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
-  };
+  }, [sectionRefs]);
 
 
 
@@ -286,7 +590,7 @@ const Page = () => {
         onChange={setActiveTab}
       /> */}
       <Tabs
-        tabs={Object.keys(sectionRefs)}
+        tabs={tabs}
         activeTab={activeTab}
         onChange={handleTabChange}
       />
@@ -320,12 +624,13 @@ const Page = () => {
             }`}
           >
             <RoomSelectionCard
-              onBookNow={() => setShowSummary(true)}
-              checkIn={apiCheckIn}
-              checkOut={apiCheckOut}
-              rooms={rooms}
-              adults={adults}
-              children={children}
+              onBookNow={handleSelectRoom}
+              checkingAvailability={availabilityChecking || roomsLoading}
+              checkIn={effectiveCheckIn}
+              checkOut={effectiveCheckOut}
+              rooms={effectiveRooms}
+              adults={effectiveAdults}
+              children={effectiveChildren}
             />
           </div>
 
@@ -337,7 +642,7 @@ const Page = () => {
           >
             <BookingSummary
               roomList={selectedRooms}
-              checkInDate={apiCheckIn}
+              checkInDate={effectiveCheckIn}
               nights={nights}
               onRemove={removeRoom}
               onBookNow={saveBookingSession}

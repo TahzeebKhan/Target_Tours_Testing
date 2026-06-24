@@ -34,6 +34,7 @@ const toInputDate = (value) => {
 
 export default function RoomSelectionCard({
     onBookNow,
+    checkingAvailability = false,
     checkIn = "Check-in",
     checkOut = "Check-out",
     rooms = 1,
@@ -136,6 +137,16 @@ export default function RoomSelectionCard({
     const totalGuests =
         Number(guestState.adults || 0) + Number(guestState.children || 0);
 
+    const handleSelectRoom = () => {
+        onBookNow?.({
+            checkIn: startDate,
+            checkOut: endDate,
+            rooms: Number(guestState.room) || 1,
+            adults: Number(guestState.adults) || 1,
+            children: Number(guestState.children) || 0,
+        });
+    };
+
     return (
         <div className={styles.card} ref={cardRef}>
             <div className={styles.innerBox}>
@@ -229,7 +240,14 @@ export default function RoomSelectionCard({
             )}
 
             {/* Button */}
-            <button className={styles.selectBtn} onClick={onBookNow}>SELECT ROOM</button>
+            <button
+                className={styles.selectBtn}
+                type="button"
+                onClick={handleSelectRoom}
+                disabled={checkingAvailability}
+            >
+                {checkingAvailability ? "CHECKING..." : "SELECT ROOM"}
+            </button>
         </div>
     );
 }
