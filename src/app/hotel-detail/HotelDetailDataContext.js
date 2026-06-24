@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   HOTEL_DETAILS_KEY,
+  changeHotelAvailability,
   fetchHotelDetails,
   fetchHotelRooms,
   isMissingHotelAuthTokenError,
@@ -22,6 +30,7 @@ const HotelDetailDataContext = createContext({
   hotelDetail: null,
   loading: true,
   roomsLoading: false,
+  refreshHotelAvailability: async () => null,
 });
 
 const readStoredHotelDetail = () => {
@@ -838,6 +847,30 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   const [loading, setLoading] = useState(true);
   const [roomsLoading, setRoomsLoading] = useState(false);
 
+  const refreshHotelAvailability = useCallback(
+    async (payload) => {
+      setRoomsLoading(true);
+
+      try {
+        const response = await changeHotelAvailability(payload);
+        setRoomsPayload(response);
+        setRoomsErrorMessage("");
+        return response;
+      } catch (error) {
+        console.error("Hotel availability check failed:", error);
+        if (isMissingHotelAuthTokenError(error)) {
+          onUnauthorized?.();
+        }
+        setRoomsPayload(null);
+        setRoomsErrorMessage(error.message || "Unable to check hotel availability.");
+        throw error;
+      } finally {
+        setRoomsLoading(false);
+      }
+    },
+    [onUnauthorized],
+  );
+
   useEffect(() => {
     let isMounted = true;
     const params = new URLSearchParams(window.location.search);
@@ -935,9 +968,18 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
     () => normalizeHotelDetail(storedDetail, routeHotelId, roomsPayload, roomsErrorMessage),
     [storedDetail, routeHotelId, roomsPayload, roomsErrorMessage],
   );
+  const contextValue = useMemo(
+    () => ({
+      hotelDetail,
+      loading,
+      roomsLoading,
+      refreshHotelAvailability,
+    }),
+    [hotelDetail, loading, refreshHotelAvailability, roomsLoading],
+  );
 
   return (
-    <HotelDetailDataContext.Provider value={{ hotelDetail, loading, roomsLoading }}>
+    <HotelDetailDataContext.Provider value={contextValue}>
       {children}
     </HotelDetailDataContext.Provider>
   );
