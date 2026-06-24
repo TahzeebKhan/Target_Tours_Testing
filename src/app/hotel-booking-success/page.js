@@ -8,6 +8,7 @@ import {
 } from "@/shared/services/hotelSearch";
 import styles from "./page.module.css";
 import BrandLogo from "@/shared/components/BrandLogo";
+import Navbar from "../flight-booking-details/Navbar";
 
 const pickFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
@@ -236,14 +237,12 @@ function HotelBookingSuccessContent() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <BrandLogo
-          onClick={() => router.push("/")}
-          style={{ cursor: "pointer" }}
-          fallbackSrc="/Logo.svg"
-          alt="Target Tours Logo"
-        />
-      </header>
+     
+         <div className={styles.navbarWrapper}>
+          <Navbar />
+        </div>
+  
+       
       <div className={styles.backgroundPanel} />
       <section className={styles.card}>
         {loading ? (

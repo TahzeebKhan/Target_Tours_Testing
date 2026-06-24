@@ -1,4 +1,4 @@
-.page {
+/* .page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -9,7 +9,7 @@
   background:
     linear-gradient(180deg, rgba(0, 0, 51, 0.06) 0%, rgba(247, 248, 252, 0) 38%),
     #f7f8fb;
-}
+} */
 
 .header {
   width: 100%;
@@ -21,13 +21,13 @@
   z-index: 10;
 }
 
-.backgroundPanel {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 51, 0.05) 0%, rgba(255, 255, 255, 0) 28%),
-    linear-gradient(180deg, #000033 0, #000033 90px, transparent 90px);
-  pointer-events: none;
+.contentWrapper {
+  padding-top: 64px;
+  padding-bottom: 40px;
+  background-color: #f9f9f9;
+}
+.navbarWrapper {
+  margin-bottom: 73px;
 }
 
 .card {
@@ -40,6 +40,11 @@
   position: relative;
   z-index: 1;
   border-radius: 4px;
+  margin: auto;
+}
+
+.backgroundPanel{
+  margin: auto;
 }
 
 .loaderContainer,
