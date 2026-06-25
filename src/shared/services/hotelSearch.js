@@ -345,6 +345,8 @@ export const refreshHotelSession = async (payload = {}) => {
   const response = await fetch(url.toString(), {
     method: "POST",
     headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
     body: JSON.stringify({
       ...payload,
       domain: payload.domain || getDomain(),

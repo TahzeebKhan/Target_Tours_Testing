@@ -91,6 +91,40 @@ const MobileItinerary = dynamic(
   () => import("./customIternaryComponents/MobileItinerary"),
   { loading: () => null, ssr: false },
 );
+
+const normalizeHotelRoomPayloads = (guestState = {}) => {
+  const roomCount = Math.max(1, Number(guestState.room || guestState.rooms?.length || 1));
+  const sourceRooms = Array.isArray(guestState.rooms) ? guestState.rooms : [];
+
+  return Array.from({ length: roomCount }, (_, index) => {
+    const sourceRoom =
+      sourceRooms[index] ||
+      (index === 0
+        ? {
+            adults: guestState.adults,
+            children: guestState.children,
+            childAges: guestState.childAges,
+          }
+        : {});
+    const children = Math.max(0, Number(sourceRoom.children || 0));
+    const childAges = Array.isArray(sourceRoom.childAges)
+      ? sourceRoom.childAges.slice(0, children).map((age) => String(age))
+      : [];
+
+    return {
+      adults: String(Math.max(1, Number(sourceRoom.adults || 1))),
+      children: String(children),
+      childAges,
+    };
+  });
+};
+
+const getHotelRoomTotals = (rooms = []) => ({
+  adults: rooms.reduce((sum, room) => sum + Number(room.adults || 0), 0),
+  children: rooms.reduce((sum, room) => sum + Number(room.children || 0), 0),
+});
+
+const MAX_MULTI_CITY_ROUTES = 4;
 const SuggestionBox = dynamic(() => import("./SuggestionBox"), {
   loading: () => null,
   ssr: false,
@@ -268,6 +302,8 @@ const HomePage = ({
     room: 1,
     adults: 1,
     children: 0,
+    childAges: [],
+    rooms: [{ adults: 1, children: 0, childAges: [] }],
     pets: 0,
   });
   const [passengers, setPassengers] = useState({
@@ -278,8 +314,10 @@ const HomePage = ({
   });
   const [showDestinationSearch, setShowDestinationSearch] = useState(false);
 
+  const hotelRoomPayloadsForSummary = normalizeHotelRoomPayloads(hotelGuestOpen);
+  const hotelRoomTotalsForSummary = getHotelRoomTotals(hotelRoomPayloadsForSummary);
   const hotelGuestCount =
-    Number(hotelGuestOpen.adults || 0) + Number(hotelGuestOpen.children || 0);
+    hotelRoomTotalsForSummary.adults + hotelRoomTotalsForSummary.children;
   const hotelRoomCount = Number(hotelGuestOpen.room || 1);
   const totalPassengers =
     passengers.adult + passengers.child + passengers.infant;
@@ -560,7 +598,22 @@ const HomePage = ({
   };
 
   const addMultiLeg = () => {
-    setMultiCity((prev) => [...prev, { from: "", to: "", date: "" }]);
+    setMultiCity((prev) => {
+      if (prev.length >= MAX_MULTI_CITY_ROUTES) {
+        toast.error(`You can add up to ${MAX_MULTI_CITY_ROUTES} routes.`);
+        return prev;
+      }
+
+      return [...prev, { from: "", to: "", departureDate: "" }];
+    });
+    setFlightDates((prev) => {
+      if (prev.multi.length >= MAX_MULTI_CITY_ROUTES) return prev;
+
+      return {
+        ...prev,
+        multi: [...prev.multi, { date: "" }],
+      };
+    });
   };
 
   const updateMultiLeg = (index, field, value) => {
@@ -571,8 +624,15 @@ const HomePage = ({
 
   const removeMultiLeg = (index) => {
     setMultiCity((prev) =>
-      prev.length > 1 ? prev.filter((_, i) => i !== index) : prev,
+      prev.length > 2 ? prev.filter((_, i) => i !== index) : prev,
     );
+    setFlightDates((prev) => ({
+      ...prev,
+      multi:
+        prev.multi.length > 2
+          ? prev.multi.filter((_, i) => i !== index)
+          : prev.multi,
+    }));
   };
 
   useEffect(() => {
@@ -893,6 +953,11 @@ const HomePage = ({
       updated[index] = { date };
       return { ...prev, multi: updated };
     });
+    setMultiCity((prev) =>
+      prev.map((leg, legIndex) =>
+        legIndex === index ? { ...leg, departureDate: date } : leg,
+      ),
+    );
   };
 
   const handleDateClick = (date) => {
@@ -1053,7 +1118,14 @@ const HomePage = ({
 
     if (bookingType === "flight") {
       if (finalTripType === "multi") {
-        const searchLegs = multiFlights || multiCity;
+        const searchLegs = (multiFlights || multiCity).map((leg, index) => ({
+          ...leg,
+          departureDate:
+            leg.departureDate ||
+            leg.date ||
+            flightDates.multi?.[index]?.date ||
+            "",
+        }));
         const incompleteLegIndex = searchLegs?.findIndex(
           (leg) => !leg?.from || !leg?.to || !leg?.departureDate,
         );
@@ -1120,6 +1192,23 @@ const HomePage = ({
       return;
     }
 
+    if (bookingType === "hotel") {
+      const roomPayloads = normalizeHotelRoomPayloads(hotelGuestOpen);
+      const hasMissingChildAge = roomPayloads.some((room) => {
+        const children = Number(room.children || 0);
+        return (
+          children > 0 &&
+          (room.childAges.length < children ||
+            room.childAges.slice(0, children).some((age) => !age))
+        );
+      });
+
+      if (hasMissingChildAge) {
+        toast.error("Select age for each child.");
+        return;
+      }
+    }
+
     if (bookingType === "holiday" && (!from || !to || !holidayStartDate)) {
       if (!from) {
         toast.error(getValidationMessage("holidayFrom"));
@@ -1158,7 +1247,14 @@ const HomePage = ({
     if (bookingType === "flight") {
       // MULTI CITY
       if (finalTripType === "multi") {
-        const searchLegs = multiFlights || multiCity;
+        const searchLegs = (multiFlights || multiCity).map((leg, index) => ({
+          ...leg,
+          departureDate:
+            leg.departureDate ||
+            leg.date ||
+            flightDates.multi?.[index]?.date ||
+            "",
+        }));
         const hasInvalidLeg = searchLegs.some((leg) =>
           leg?.from &&
           leg?.to &&
@@ -1270,9 +1366,11 @@ const HomePage = ({
           locationId: toCode,
           geoCode: {},
         };
-        const adults = Math.max(1, Number(hotelGuestOpen?.adults || 1));
-        const children = Math.max(0, Number(hotelGuestOpen?.children || 0));
-        const rooms = Math.max(1, Number(hotelGuestOpen?.room || 1));
+        const roomPayloads = normalizeHotelRoomPayloads(hotelGuestOpen);
+        const roomTotals = getHotelRoomTotals(roomPayloads);
+        const adults = roomTotals.adults;
+        const children = roomTotals.children;
+        const rooms = roomPayloads.length;
         const geoCode = {
           lat: Number(hotelLocation?.geoCode?.lat),
           long: Number(hotelLocation?.geoCode?.long),
@@ -1296,6 +1394,7 @@ const HomePage = ({
           ...(hasGeoCode ? { coordinates: geoCode } : {}),
         };
         const initPayload = {
+          domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
           locations: [locationPayload],
           channel,
           ...(hasGeoCode ? { geoCode } : {}),
@@ -1304,13 +1403,7 @@ const HomePage = ({
           culture: "en-US",
           checkIn: formatHotelApiDate(hotelStartDate),
           checkOut: formatHotelApiDate(hotelEndDate),
-          rooms: [
-            {
-              adults: String(adults),
-              children: String(children),
-              childAges: [],
-            },
-          ],
+          rooms: roomPayloads,
           agentCode: "14005",
           destinationCountryCode: hotelLocation?.country || "IN",
           nationality: "IN",
@@ -1355,6 +1448,12 @@ const HomePage = ({
           adults: String(adults),
           children: String(children),
         });
+
+        const flatChildAges = roomPayloads.flatMap((room) => room.childAges);
+
+        if (flatChildAges.length) {
+          params.set("childAges", flatChildAges.join(","));
+        }
 
         if (hotelLocation?.locationId || toCode) {
           params.set("locationId", hotelLocation?.locationId || toCode);
@@ -2344,6 +2443,19 @@ const HomePage = ({
                             </div>
                           );
                         })}
+                        <div className={styles.multiCityActions}>
+                          <button
+                            type="button"
+                            className={styles.addMultiCityBtn}
+                            onClick={addMultiLeg}
+                            disabled={multiCity.length >= MAX_MULTI_CITY_ROUTES}
+                          >
+                            + Add another city
+                          </button>
+                          <span className={styles.multiCityLimit}>
+                            {multiCity.length}/{MAX_MULTI_CITY_ROUTES} routes
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
