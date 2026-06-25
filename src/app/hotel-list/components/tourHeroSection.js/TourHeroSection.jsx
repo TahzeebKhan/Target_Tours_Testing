@@ -45,7 +45,6 @@ const syncHotelSearchIdToUrl = (hotelSearchId) => {
   url.searchParams.set("hotelSearchId", hotelSearchId);
   window.history.replaceState(window.history.state, "", url.toString());
 };
-
 const parseChildAgesParam = (value = "") =>
   String(value || "")
     .split(",")
