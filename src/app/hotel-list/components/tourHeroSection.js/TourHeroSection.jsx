@@ -36,6 +36,56 @@ const safeSetSessionStorage = (key, value) => {
   }
 };
 
+const parseChildAgesParam = (value = "") =>
+  String(value || "")
+    .split(",")
+    .map((age) => age.trim())
+    .filter(Boolean);
+
+const normalizeHotelRoomPayloads = (guestState = {}) => {
+  const roomCount = Math.max(1, Number(guestState.room || guestState.rooms?.length || 1));
+  const sourceRooms = Array.isArray(guestState.rooms) ? guestState.rooms : [];
+
+  return Array.from({ length: roomCount }, (_, index) => {
+    const sourceRoom =
+      sourceRooms[index] ||
+      (index === 0
+        ? {
+            adults: guestState.adults,
+            children: guestState.children,
+            childAges: guestState.childAges,
+          }
+        : {});
+    const children = Math.max(0, Number(sourceRoom.children || 0));
+    const childAges = Array.isArray(sourceRoom.childAges)
+      ? sourceRoom.childAges.slice(0, children).map((age) => String(age))
+      : [];
+
+    return {
+      adults: String(Math.max(1, Number(sourceRoom.adults || 1))),
+      children: String(children),
+      childAges,
+    };
+  });
+};
+
+const getHotelRoomTotals = (rooms = []) => ({
+  adults: rooms.reduce((sum, room) => sum + Number(room.adults || 0), 0),
+  children: rooms.reduce((sum, room) => sum + Number(room.children || 0), 0),
+});
+
+const readStoredHotelRooms = () => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed?.initPayload?.rooms) ? parsed.initPayload.rooms : [];
+  } catch {
+    return [];
+  }
+};
+
 const TourHeroSection = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -64,19 +114,37 @@ const TourHeroSection = () => {
 
   // Ye lines add karein:
   const [travellerOpen, setTravellerOpen] = useState(false);
-  const [hotelGuestOpen, setHotelGuestOpen] = useState({
-    room: Number(searchParams.get("rooms") || 1),
-    adults: Number(searchParams.get("adults") || 1),
-    children: Number(searchParams.get("children") || 0),
-    pets: 0,
+  const [hotelGuestOpen, setHotelGuestOpen] = useState(() => {
+    const storedRooms = readStoredHotelRooms();
+    const fallbackRooms = normalizeHotelRoomPayloads({
+      room: Number(searchParams.get("rooms") || 1),
+      adults: Number(searchParams.get("adults") || 1),
+      children: Number(searchParams.get("children") || 0),
+      childAges: parseChildAgesParam(searchParams.get("childAges")),
+    });
+    const rooms = storedRooms.length ? normalizeHotelRoomPayloads({ rooms: storedRooms }) : fallbackRooms;
+    const totals = getHotelRoomTotals(rooms);
+
+    return {
+      room: rooms.length,
+      adults: totals.adults,
+      children: totals.children,
+      childAges: rooms.flatMap((room) => room.childAges),
+      rooms,
+      pets: 0,
+    };
   });
 
   const [travelClass, setTravelClass] = useState("Economy");
 
   // Ye line bhi add karein:
+  const hotelRoomPayloadsForSummary = normalizeHotelRoomPayloads(hotelGuestOpen);
+  const hotelRoomTotalsForSummary = getHotelRoomTotals(hotelRoomPayloadsForSummary);
   const totalHotelGuests =
-    hotelGuestOpen.adults + hotelGuestOpen.children + hotelGuestOpen.pets;
-  const totalHotelRooms = hotelGuestOpen.room;
+    hotelRoomTotalsForSummary.adults +
+    hotelRoomTotalsForSummary.children +
+    Number(hotelGuestOpen.pets || 0);
+  const totalHotelRooms = hotelRoomPayloadsForSummary.length;
 
   // Truncate function:
   const truncate = (str, maxLength) => {
@@ -435,6 +503,21 @@ const TourHeroSection = () => {
       return;
     }
 
+    const selectedRoomPayloads = normalizeHotelRoomPayloads(hotelGuestOpen);
+    const hasMissingChildAge = selectedRoomPayloads.some((room) => {
+      const children = Number(room.children || 0);
+      return (
+        children > 0 &&
+        (room.childAges.length < children ||
+          room.childAges.slice(0, children).some((age) => !age))
+      );
+    });
+
+    if (hasMissingChildAge) {
+      toast.error("Select age for each child.");
+      return;
+    }
+
     setSearchSubmitting(true);
 
     try {
@@ -458,9 +541,11 @@ const TourHeroSection = () => {
         locationId: toCode,
         geoCode: {},
       };
-      const adults = Math.max(1, Number(hotelGuestOpen?.adults || 1));
-      const children = Math.max(0, Number(hotelGuestOpen?.children || 0));
-      const rooms = Math.max(1, Number(hotelGuestOpen?.room || 1));
+      const roomPayloads = normalizeHotelRoomPayloads(hotelGuestOpen);
+      const roomTotals = getHotelRoomTotals(roomPayloads);
+      const adults = roomTotals.adults;
+      const children = roomTotals.children;
+      const rooms = roomPayloads.length;
       const geoCode = {
         lat: Number(hotelLocation?.geoCode?.lat),
         long: Number(hotelLocation?.geoCode?.long),
@@ -485,6 +570,7 @@ const TourHeroSection = () => {
         ...(hasGeoCode ? { coordinates: geoCode } : {}),
       };
       const initPayload = {
+        domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
         locations: [locationPayload],
         channel,
         ...(hasGeoCode ? { geoCode } : {}),
@@ -493,13 +579,7 @@ const TourHeroSection = () => {
         culture: "en-US",
         checkIn: formatHotelApiDate(hotelStartDate),
         checkOut: formatHotelApiDate(hotelEndDate),
-        rooms: [
-          {
-            adults: String(adults),
-            children: String(children),
-            childAges: [],
-          },
-        ],
+        rooms: roomPayloads,
         agentCode: "14005",
         destinationCountryCode: hotelLocation?.country || "IN",
         nationality: "IN",
@@ -544,6 +624,12 @@ const TourHeroSection = () => {
         adults: String(adults),
         children: String(children),
       });
+
+      const flatChildAges = roomPayloads.flatMap((room) => room.childAges);
+
+      if (flatChildAges.length) {
+        params.set("childAges", flatChildAges.join(","));
+      }
 
       if (hotelLocation?.locationId || toCode) {
         params.set("locationId", hotelLocation?.locationId || toCode);

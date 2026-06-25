@@ -41,6 +41,12 @@ const buildFlightsUrl = (path, params = {}) => {
     if (value === undefined || value === null || value === "") return;
 
     if (Array.isArray(value)) {
+      const hasObjectItems = value.some((item) => item && typeof item === "object");
+      if (hasObjectItems) {
+        url.searchParams.set(key, JSON.stringify(value));
+        return;
+      }
+
       value.forEach((item) => {
         if (item !== undefined && item !== null && item !== "") {
           url.searchParams.append(key, String(item));
@@ -107,7 +113,43 @@ const normalizeCabinClass = (value) => {
   return map[normalized] || "E";
 };
 
+const normalizeSocketTrip = (trip = {}) => {
+  const origin = String(trip.origin || trip.from || "").toUpperCase().trim();
+  const destination = String(trip.destination || trip.to || "").toUpperCase().trim();
+  const departureDate =
+    trip.departure_date || trip.departureDate || trip.date || "";
+
+  if (!origin || !destination || !departureDate) return null;
+
+  return {
+    origin,
+    destination,
+    departure_date: departureDate,
+    ...(trip.return_date || trip.returnDate
+      ? { return_date: trip.return_date || trip.returnDate }
+      : {}),
+  };
+};
+
+const parseTripsParam = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 const buildSocketTrips = (params = {}) => {
+  const providedTrips = parseTripsParam(params.Trips || params.trips)
+    .map(normalizeSocketTrip)
+    .filter(Boolean);
+
+  if (providedTrips.length > 0) return providedTrips;
+
   const origin = params.origin || "";
   const destination = params.destination || "";
   const departureDate = params.departure_date || "";
@@ -136,30 +178,38 @@ const buildSocketTrips = (params = {}) => {
   ];
 };
 
-const buildSocketSearchPayload = (params = {}, channel) => ({
-  channel,
-  domain: params.domain || getDomain(),
-  fareType: String(params.fareType || params.fare_type || "ON").toUpperCase(),
-  return_date: params.return_date || params.end || params.returnDate || "",
-  Trips: buildSocketTrips(params),
-  adults: Number(params.adults ?? 1),
-  children: Number(params.children ?? 0),
-  infants: Number(params.infants ?? 0),
-  cabin_class: normalizeCabinClass(params.cabin_class),
-  page: Number(params.page || 1),
-  limit: Number(params.limit || 20),
-  ...(params.provider ? { provider: params.provider } : {}),
-  ...(params.stops !== undefined && params.stops !== "" ? { stops: params.stops } : {}),
-  ...(params.airlines ? { airlines: params.airlines } : {}),
-  ...(params.aircrafts ? { aircrafts: params.aircrafts } : {}),
-  ...(params.min_price !== undefined ? { min_price: params.min_price } : {}),
-  ...(params.max_price !== undefined ? { max_price: params.max_price } : {}),
-  ...(params.departure_slots ? { departure_slots: params.departure_slots } : {}),
-  ...(params.arrival_slots ? { arrival_slots: params.arrival_slots } : {}),
-  ...(params.sort_by ? { sort_by: params.sort_by } : {}),
-  ...(params.IsSeniorCitizen ? { IsSeniorCitizen: true } : {}),
-  ...(params.IsStudentFare ? { IsStudentFare: true } : {}),
-});
+const buildSocketSearchPayload = (params = {}, channel) => {
+  const fareType = String(
+    params.fareType ||
+      params.fare_type ||
+      (params.tripType === "multi" ? "DM" : "ON")
+  ).toUpperCase();
+
+  return {
+    channel,
+    domain: params.domain || getDomain(),
+    fareType,
+    return_date: params.return_date || params.end || params.returnDate || "",
+    Trips: buildSocketTrips({ ...params, fareType }),
+    adults: Number(params.adults ?? 1),
+    children: Number(params.children ?? 0),
+    infants: Number(params.infants ?? 0),
+    cabin_class: normalizeCabinClass(params.cabin_class),
+    page: Number(params.page || 1),
+    limit: Number(params.limit || 20),
+    ...(params.provider ? { provider: params.provider } : {}),
+    ...(params.stops !== undefined && params.stops !== "" ? { stops: params.stops } : {}),
+    ...(params.airlines ? { airlines: params.airlines } : {}),
+    ...(params.aircrafts ? { aircrafts: params.aircrafts } : {}),
+    ...(params.min_price !== undefined ? { min_price: params.min_price } : {}),
+    ...(params.max_price !== undefined ? { max_price: params.max_price } : {}),
+    ...(params.departure_slots ? { departure_slots: params.departure_slots } : {}),
+    ...(params.arrival_slots ? { arrival_slots: params.arrival_slots } : {}),
+    ...(params.sort_by ? { sort_by: params.sort_by } : {}),
+    ...(params.IsSeniorCitizen ? { IsSeniorCitizen: true } : {}),
+    ...(params.IsStudentFare ? { IsStudentFare: true } : {}),
+  };
+};
 
 const parseMaybeJson = (value) => {
   if (typeof value !== "string") return value;
