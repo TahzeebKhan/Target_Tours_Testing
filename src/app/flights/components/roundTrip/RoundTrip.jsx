@@ -619,7 +619,7 @@ const RoundTrip = ({
   isLoading = false,
   isRefreshing = false,
 }) => {
-  const { committedSearches, handleSearch } = useTripType();
+  const { committedSearches, refreshFlightSearch, setStartDate } = useTripType();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [openSort, setOpenSort] = useState(false);
@@ -740,10 +740,13 @@ const RoundTrip = ({
     setSortBy(filters.sortBy === targetSortBy ? null : targetSortBy);
   };
   const handleDateSelect = (dateKey) => {
+    setStartDate(dateKey);
     const nextParams = new URLSearchParams(searchParams?.toString() || "");
     nextParams.set("start", dateKey);
     nextParams.set("tripType", "round");
+    nextParams.set("searchToken", String(Date.now()));
     router.replace(`/flights?${nextParams.toString()}`, { scroll: false });
+    window.setTimeout(refreshFlightSearch, 50);
   };
   const hasNoData =
     hasSearched &&

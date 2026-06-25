@@ -176,6 +176,8 @@ export function TripTypeProvider({ children }) {
     fareTypes: getFareTypesFromParams(getParam),
   });
   const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
+  const [searchRefreshToken, setSearchRefreshToken] = useState(0);
+  const refreshFlightSearch = () => setSearchRefreshToken(Date.now());
 
   // Effect to update state when URL params change (e.g. on navigation)
   useEffect(() => {
@@ -359,6 +361,7 @@ export function TripTypeProvider({ children }) {
     nextParams.set("children", String(passengers?.child ?? 0));
     nextParams.set("infants", String(passengers?.infant ?? 0));
     nextParams.set("travelClass", travelClass);
+    nextParams.set("searchToken", String(Date.now()));
     if (selectedFareTypes.includes(SENIOR_CITIZEN_FARE)) {
       nextParams.set("IsSeniorCitizen", "true");
     } else {
@@ -371,6 +374,7 @@ export function TripTypeProvider({ children }) {
     }
     nextParams.delete("page");
 
+    refreshFlightSearch();
     router.push(`/flights?${nextParams.toString()}`);
 
     // Force a fresh API request on every Search click, even with same params.
@@ -411,6 +415,8 @@ export function TripTypeProvider({ children }) {
         committedRequest,
         handleSearch,
         isSearchSubmitting,
+        searchRefreshToken,
+        refreshFlightSearch,
       }}
     >
       {children}

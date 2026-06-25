@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { Armchair } from "lucide-react";
 
 const TripCard = ({
   tripCardsData,
@@ -34,6 +35,10 @@ const TripCard = ({
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
   const [pendingFareFlight, setPendingFareFlight] = useState(null);
+  const [selectedDepartId, setSelectedDepartId] = useState(null);
+  const [selectedReturnId, setSelectedReturnId] = useState(null);
+  const [fareModalFlight, setFareModalFlight] = useState(null);
+  const [detailFlight, setDetailFlight] = useState(null);
 
   const flightResults = [
     {
@@ -134,6 +139,69 @@ const TripCard = ({
   ];
   const [isMobile, setIsMobile] = useState(false);
 
+  const selectedDepart =
+    tripCardsData.find((item) => item.id === selectedDepartId) ||
+    tripCardsData[0] ||
+    null;
+  const selectedReturn =
+    tripCardsData.find((item) => item.id === selectedReturnId) ||
+    selectedDepart ||
+    null;
+
+  const selectedDepartAmount =
+    selectedDepart?.depart?.flight?.fare?.displayAmount ??
+    selectedDepart?.booking?.priceRequest?.Trips?.[0]?.Amount ??
+    null;
+  const selectedReturnAmount =
+    selectedReturn?.return?.flight?.fare?.displayAmount ??
+    selectedReturn?.booking?.priceRequest?.Trips?.[1]?.Amount ??
+    selectedReturn?.booking?.priceRequest?.Trips?.[0]?.Amount ??
+    null;
+  const selectedTotalAmount =
+    Number.isFinite(Number(selectedDepartAmount)) &&
+    Number.isFinite(Number(selectedReturnAmount))
+      ? Number(selectedDepartAmount) + Number(selectedReturnAmount)
+      : null;
+  const formatCurrencyLabel = (value) => {
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return "N/A";
+
+    return `₹ ${new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(amount)}`;
+  };
+
+  const selectedRoundTrip =
+    selectedDepart && selectedReturn
+      ? {
+          ...selectedDepart,
+          id: `${selectedDepart.id}-${selectedReturn.id}-selected`,
+          return: selectedReturn.return,
+          fare: {
+            ...selectedDepart.fare,
+            totalFare:
+              selectedTotalAmount !== null
+                ? formatCurrencyLabel(selectedTotalAmount)
+                : selectedDepart.fare?.totalFare,
+            pricePerAdult:
+              selectedTotalAmount !== null
+                ? formatCurrencyLabel(selectedTotalAmount)
+                : selectedDepart.fare?.pricePerAdult,
+          },
+          booking: {
+            ...selectedDepart.booking,
+            priceRequest: {
+              ...(selectedDepart.booking?.priceRequest || {}),
+              Trips: [
+                selectedDepart.booking?.priceRequest?.Trips?.[0],
+                selectedReturn.booking?.priceRequest?.Trips?.[1] ||
+                  selectedReturn.booking?.priceRequest?.Trips?.[0],
+              ].filter(Boolean),
+            },
+          },
+        }
+      : null;
+
   const buildFlightInfoPayload = (flight) => {
     const priceRequest = flight?.booking?.priceRequest || {};
 
@@ -156,6 +224,7 @@ const TripCard = ({
 
     const isClosing = openId === flightId;
     setOpenId(isClosing ? null : flightId);
+    setDetailFlight(isClosing ? null : flight);
     if (isClosing || flightInfoData[flightId] || loadingFlightInfoId === flightId) return;
 
     const payload = buildFlightInfoPayload(flight);
@@ -206,6 +275,7 @@ const TripCard = ({
           webSettingsResponse,
         },
       }));
+      setFareModalFlight(flight);
       setSelectedFlightId(flight?.id ?? null);
       setFareModalOpen(flight?.id ?? null);
     } catch (error) {
@@ -261,176 +331,270 @@ const TripCard = ({
     openFareModal(flightToOpen);
   }, [authLoading, isLoggedIn, pendingFareFlight]);
 
+  useEffect(() => {
+    if (!tripCardsData.length) return;
+
+    setSelectedDepartId((current) => current || tripCardsData[0]?.id || null);
+    setSelectedReturnId((current) => current || tripCardsData[0]?.id || null);
+  }, [tripCardsData]);
+
+  const renderLegOption = (item, type) => {
+    const isDepart = type === "depart";
+    const leg = isDepart ? item.depart : item.return;
+    const seats = Number(leg.flight?.details?.seats);
+    const hasSeatCount = Number.isFinite(seats) && seats > 0;
+    const isRefundable = Boolean(leg.flight?.details?.refundable);
+    const selectedPeer = isDepart ? selectedReturn : selectedDepart;
+    const detailItem = isDepart
+      ? {
+          ...item,
+          id: `${item.id}-${selectedPeer?.id || "return"}-details`,
+          return: selectedPeer?.return || item.return,
+          booking: {
+            ...item.booking,
+            priceRequest: {
+              ...(item.booking?.priceRequest || {}),
+              Trips: [
+                item.booking?.priceRequest?.Trips?.[0],
+                selectedPeer?.booking?.priceRequest?.Trips?.[1] ||
+                  selectedPeer?.booking?.priceRequest?.Trips?.[0],
+              ].filter(Boolean),
+            },
+          },
+        }
+      : {
+          ...(selectedPeer || item),
+          id: `${selectedPeer?.id || "depart"}-${item.id}-details`,
+          return: item.return,
+          booking: {
+            ...(selectedPeer?.booking || item.booking),
+            priceRequest: {
+              ...((selectedPeer?.booking || item.booking)?.priceRequest || {}),
+              Trips: [
+                selectedPeer?.booking?.priceRequest?.Trips?.[0] ||
+                  item.booking?.priceRequest?.Trips?.[0],
+                item.booking?.priceRequest?.Trips?.[1] ||
+                  item.booking?.priceRequest?.Trips?.[0],
+              ].filter(Boolean),
+            },
+          },
+        };
+    const isSelected = isDepart
+      ? selectedDepartId === item.id
+      : selectedReturnId === item.id;
+    const onSelect = () =>
+      isDepart ? setSelectedDepartId(item.id) : setSelectedReturnId(item.id);
+
+    return (
+      <div
+        key={`${type}-${item.id}`}
+        className={`${styles.roundOptionCard} ${
+          isSelected ? styles.selectedRoundOption : ""
+        }`}
+        onClick={onSelect}
+      >
+        <div className={styles.roundOptionTop}>
+          <div className={styles.HeadingCont}>
+            <img
+              src={resolveAirlineLogo(leg.airline)}
+              alt={leg.airline.name}
+            />
+            <h3 className={styles.ariLineName}>
+              {leg.airline.name}
+              <span className={styles.ariLineNumber}>({leg.airline.code})</span>
+            </h3>
+          </div>
+          <span className={styles.radioMark} />
+        </div>
+
+        <div className={styles.departureDetails}>
+          <div className={styles.departTextHeading}>
+            <h3>{isDepart ? "Departure" : "Return"}</h3>
+            <span>{leg.date}</span>
+          </div>
+          <div className={styles.departTimeContainer}>
+            <FlightTimingDetail flight={leg.flight} />
+          </div>
+        </div>
+
+        <div className={styles.roundOptionFooter}>
+          <div className={styles.footerLeft}>
+            <button
+              type="button"
+              className={styles.inlineDetailsBtn}
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleDetails(detailItem);
+              }}
+            >
+              See Details
+              <svg
+                className={`${styles.downArrow} ${
+                  openId === detailItem.id ? styles.rotate : ""
+                }`}
+                width="8"
+                height="5"
+                viewBox="0 0 8 5"
+              >
+                <path
+                  d="M3.55967 4.01408L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357Z"
+                  fill="#000033"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className={styles.footerRight}>
+            {isRefundable && <span className={styles.refundableBadge}>R</span>}
+            {hasSeatCount && (
+              <span className={styles.seatBadge}>
+                <Armchair size={20} strokeWidth={2.2} />
+                {seats} Left
+              </span>
+            )}
+            <div className={styles.legFare}>
+              <strong>
+                {leg.flight?.fare?.totalFare || item.fare.pricePerAdult}
+              </strong>
+              <span>/ADULT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className={styles.cardPairent}>
-        {tripCardsData.map((item, index) => (
-          <div key={item.id}>
-            <div
-              className={`${styles.card} ${
-                openId === item.id ? styles.cardOpen : ""
-              }`}
-            >
-              <div className={styles.cardLeftMainCont}>
-                <div className={styles.cardLeft}>
-                  {/* DEPART */}
-                  <div className={styles.departContainer}>
-                    <div className={styles.HeadingCont}>
-                      <img
-                        src={resolveAirlineLogo(item.depart.airline)}
-                        alt={item.depart.airline.name}
-                      />
-                      <h3 className={styles.ariLineName}>
-                        {item.depart.airline.name}
-                        <span className={styles.ariLineNumber}>
-                          ({item.depart.airline.code})
-                        </span>
-                      </h3>
-                    </div>
-
-                    <div className={styles.departureDetails}>
-                      <div className={styles.departTextHeading}>
-                        <h3>Depart</h3>
-                        <span>{item.depart.date}</span>
-                      </div>
-                      <div className={styles.departTimeContainer}>
-                        <FlightTimingDetail flight={item.depart.flight} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* RETURN */}
-                  <div className={styles.returnContainer}>
-                    <div className={styles.HeadingCont}>
-                      <img
-                        src={resolveAirlineLogo(item.return.airline)}
-                        alt={item.return.airline.name}
-                      />
-                      <h3 className={styles.ariLineName}>
-                        {item.return.airline.name}
-                        <span className={styles.ariLineNumber}>
-                          ({item.return.airline.code})
-                        </span>
-                      </h3>
-                    </div>
-
-                    <div className={styles.departureDetails}>
-                      <div className={styles.departTextHeading}>
-                        <h3>Return</h3>
-                        <span>{item.return.date}</span>
-                      </div>
-                      <div className={styles.departTimeContainer}>
-                        <FlightTimingDetail flight={item.return.flight} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SEE DETAILS */}
-                <div
-                  className={styles.seeDetailsBtn}
-                  onClick={() => toggleDetails(item)}
-                >
-                  See Details
-                  <svg
-                    className={`${styles.downArrow} ${
-                      openId === item.id ? styles.rotate : ""
-                    }`}
-                    width="8"
-                    height="5"
-                    viewBox="0 0 8 5"
-                  >
-                    <path
-                      d="M3.55967 4.01408L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0.0482881 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357Z"
-                      fill="#000033"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              {/* RIGHT FARE */}
-              <div className={styles.cardRight}>
-                <div
-                  className={styles.seeDetailsBtn}
-                  onClick={() => toggleDetails(item)}
-                >
-                  See Details
-                  <svg
-                    className={`${styles.downArrow} ${
-                      openId === item.id ? styles.rotate : ""
-                    }`}
-                    width="8"
-                    height="5"
-                    viewBox="0 0 8 5"
-                  >
-                    <path
-                      d="M3.55967 4.01408L0.141737 0.847416C0.0494254 0.755116 0.0022032 0.639094 6.98646e-05 0.49935C-0.00207458 0.359606 0.0451476 0.241444 0.141737 0.144866C0.238314 0.0482881 0.355403 0 0.493003 0C0.630603 0 0.747692 0.0482881 0.84427 0.144866L3.55967 2.86027L6.27507 0.144866C6.36737 0.0525659 6.48339 0.0053437 6.62314 0.00319926C6.76287 0.00106593 6.88102 0.0482881 6.9776 0.144866C7.07419 0.241444 7.12249 0.358539 7.12249 0.49615C7.12249 0.63375 7.07419 0.750838 6.9776 0.847416L3.98145 3.84357Z"
-                      fill="#000033"
-                    />
-                  </svg>
-                </div>
-                <div className={styles.fareDetails}>
-                  <div className={styles.totalFare}>
-                    <span className={styles.fareText}>
-                      {item.fare.totalFare}
-                    </span>
-                    <button
-                      disabled={prefetchingFlightId === item.id}
-                      onClick={() => {
-                        handleViewFares(item);
-                      }}
-                      className={styles.viewBtn}
-                    >
-                      {prefetchingFlightId === item.id ? "LOADING..." : "VIEW FARES"}
-                    </button>
-                  </div>
-                  <div className={styles.fareAmount}>
-                    <span className={styles.fare}>
-                      {item.fare.pricePerAdult}
-                      <span className={styles.adult}> /ADULT</span>
-                    </span>
-                    <div className={styles.dot}></div>
-                    <span className={styles.economy}>
-                      {item.fare.cabinClass}
-                    </span>
-                  </div>
-                </div>
-              </div>
+      <div className={styles.roundTripShell}>
+        <div className={styles.roundTripColumns}>
+          <section className={styles.roundColumn}>
+            <div className={styles.roundColumnTitle}>
+              <span>
+                {selectedDepart?.depart?.flight?.departure?.city || "Departure"} to{" "}
+                {selectedDepart?.depart?.flight?.arrival?.city || "Arrival"}
+              </span>
+              <small>{selectedDepart?.depart?.date || ""}</small>
             </div>
-
-            {/* EXPANDABLE */}
-            <div
-              className={`${styles.expandWrap} ${
-                openId === item.id ? styles.open : ""
-              }`}
-            >
-              <RoundTripExpendable
-                flightData={item}
-                flightInfoData={flightInfoData[item.id]}
-                isFlightInfoLoading={loadingFlightInfoId === item.id}
-              />
+            <div className={styles.roundColumnHeader}>
+              <span>Departure</span>
+              <span>Duration</span>
+              <span>Arrival</span>
+              <span>Price</span>
             </div>
+            <div className={styles.roundOptionList}>
+              {tripCardsData.map((item) => renderLegOption(item, "depart"))}
+            </div>
+          </section>
 
-            {index === 2 && (
-              <div className={styles.offerBannerWrap}>
-                <OfferBanner />
-              </div>
-            )}
+          <section className={styles.roundColumn}>
+            <div className={styles.roundColumnTitle}>
+              <span>
+                {selectedReturn?.return?.flight?.departure?.city || "Return"} to{" "}
+                {selectedReturn?.return?.flight?.arrival?.city || "Arrival"}
+              </span>
+              <small>{selectedReturn?.return?.date || ""}</small>
+            </div>
+            <div className={styles.roundColumnHeader}>
+              <span>Departure</span>
+              <span>Duration</span>
+              <span>Arrival</span>
+              <span>Price</span>
+            </div>
+            <div className={styles.roundOptionList}>
+              {tripCardsData.map((item) => renderLegOption(item, "return"))}
+            </div>
+          </section>
+        </div>
+
+        <div
+          className={`${styles.expandWrap} ${
+            detailFlight && openId === detailFlight.id ? styles.open : ""
+          }`}
+        >
+          {detailFlight && (
+            <RoundTripExpendable
+              flightData={detailFlight}
+              flightInfoData={flightInfoData[detailFlight.id]}
+              isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
+            />
+          )}
+        </div>
+
+        {tripCardsData.length > 2 && (
+          <div className={styles.offerBannerWrap}>
+            <OfferBanner />
           </div>
-        ))}
+        )}
+
+        {selectedRoundTrip && (
+          <div className={styles.selectionBar}>
+            <div className={styles.selectionLeg}>
+              <span className={styles.selectionLabel}>Departure</span>
+              <strong>{selectedRoundTrip.depart.airline.name}</strong>
+              <span>
+                {selectedRoundTrip.depart.flight.departure.time} →{" "}
+                {selectedRoundTrip.depart.flight.arrival.time}
+              </span>
+              <small>
+                {selectedRoundTrip.depart.flight.departure.city} to{" "}
+                {selectedRoundTrip.depart.flight.arrival.city}
+              </small>
+            </div>
+            <div className={styles.selectionDivider} />
+            <div className={styles.selectionLeg}>
+              <span className={styles.selectionLabel}>Return</span>
+              <strong>{selectedRoundTrip.return.airline.name}</strong>
+              <span>
+                {selectedRoundTrip.return.flight.departure.time} →{" "}
+                {selectedRoundTrip.return.flight.arrival.time}
+              </span>
+              <small>
+                {selectedRoundTrip.return.flight.departure.city} to{" "}
+                {selectedRoundTrip.return.flight.arrival.city}
+              </small>
+            </div>
+            <div className={styles.selectionFare}>
+              <span>Total amount</span>
+              <strong>{selectedRoundTrip.fare.totalFare}</strong>
+              <small>Taxes may apply</small>
+            </div>
+            <button
+              type="button"
+              disabled={prefetchingFlightId === selectedRoundTrip.id}
+              onClick={() => handleViewFares(selectedRoundTrip)}
+              className={styles.bookNowBtn}
+            >
+              {prefetchingFlightId === selectedRoundTrip.id ? "Loading..." : "Book Now"}
+            </button>
+          </div>
+        )}
       </div>
 
       {isMobileViewport ? (
         <MobileFareComparisonModalRoundTrip
           isOpen={fareModalOpen}
-          onClose={() => setFareModalOpen(false)}
-          flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
+          onClose={() => {
+            setFareModalOpen(false);
+            setFareModalFlight(null);
+          }}
+          flightData={
+            fareModalFlight ||
+            tripCardsData.find((item) => item.id === fareModalOpen) ||
+            null
+          }
         />
       ) : (
         <FareComparisonModalRoundTrip
           isOpen={fareModalOpen}
-          onClose={() => setFareModalOpen(false)}
-          flightData={tripCardsData.find((item) => item.id === fareModalOpen) || null}
+          onClose={() => {
+            setFareModalOpen(false);
+            setFareModalFlight(null);
+          }}
+          flightData={
+            fareModalFlight ||
+            tripCardsData.find((item) => item.id === fareModalOpen) ||
+            null
+          }
           prefetchedData={prefetchedFareData[fareModalOpen] || null}
         />
       )}
