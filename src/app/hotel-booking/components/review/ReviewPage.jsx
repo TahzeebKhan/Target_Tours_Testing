@@ -253,6 +253,55 @@ const normalizeRefreshRooms = (rooms, request = {}) => {
   ];
 };
 
+const normalizeRefreshLocation = ({ sourcePayload = {}, searchContext = {}, storedHotelSearch = {}, location = {}, lat, long }) => {
+  const sourceLocation =
+    (Array.isArray(sourcePayload.locations) && sourcePayload.locations[0]) ||
+    (Array.isArray(searchContext.locations) && searchContext.locations[0]) ||
+    (Array.isArray(storedHotelSearch.locations) && storedHotelSearch.locations[0]) ||
+    sourcePayload.location ||
+    searchContext.location ||
+    storedHotelSearch.location ||
+    location ||
+    {};
+  const hasCoordinates = lat !== "" && long !== "";
+
+  return {
+    id: String(
+      getFirstValue(
+        sourceLocation.id,
+        sourceLocation.locationId,
+        sourcePayload.locationId,
+        searchContext.locationId,
+        storedHotelSearch.locationId,
+      ),
+    ),
+    name: getFirstValue(sourceLocation.name, sourceLocation.label, sourceLocation.value),
+    fullName: getFirstValue(
+      sourceLocation.fullName,
+      sourceLocation.full_name,
+      sourceLocation.detail,
+      sourceLocation.name,
+      sourceLocation.label,
+      sourceLocation.value,
+    ),
+    code: sourceLocation.code ?? null,
+    type: getFirstValue(sourceLocation.type, "city"),
+    city: sourceLocation.city ?? null,
+    state: sourceLocation.state ?? null,
+    country: getFirstValue(sourceLocation.country, sourcePayload.destinationCountryCode, "IN"),
+    score: Number(sourceLocation.score || 0),
+    referenceId: sourceLocation.referenceId ?? null,
+    ...(hasCoordinates
+      ? {
+          coordinates: {
+            lat: Number(lat),
+            long: Number(long),
+          },
+        }
+      : {}),
+  };
+};
+
 const buildRefreshSessionPayload = ({
   request = {},
   storedHotelSearch = {},
@@ -276,24 +325,54 @@ const buildRefreshSessionPayload = ({
     location.lng,
     location.longitude,
   );
+  const resolvedLocation = normalizeRefreshLocation({
+    sourcePayload,
+    searchContext,
+    storedHotelSearch,
+    location,
+    lat,
+    long,
+  });
+  const locationId = String(
+    getFirstValue(
+      sourcePayload.locationId,
+      searchContext.locationId,
+      storedHotelSearch.locationId,
+      resolvedLocation.id,
+      location.locationId,
+      location.id,
+    ),
+  );
+  const resolvedGeoCode = {
+    lat: lat !== "" ? Number(lat) : "",
+    long: long !== "" ? Number(long) : "",
+  };
 
   return {
-    geoCode: {
-      lat: lat ? String(lat) : "",
-      long: long ? String(long) : "",
-    },
-    locationId: String(
-      getFirstValue(
-        sourcePayload.locationId,
-        searchContext.locationId,
-        storedHotelSearch.locationId,
-        location.locationId,
-        location.id,
-      ),
-    ),
+    domain: getFirstValue(sourcePayload.domain, process.env.NEXT_PUBLIC_DOMAIN, "localhost:1337"),
+    locations: [resolvedLocation],
+    channel: getFirstValue(sourcePayload.channel, searchContext.channel, storedHotelSearch.channel),
+    geoCode: resolvedGeoCode,
+    locationId,
+    currency: getFirstValue(sourcePayload.currency, "INR"),
+    culture: getFirstValue(sourcePayload.culture, "en-US"),
     checkIn: toRefreshDate(checkInDate || sourcePayload.checkIn || searchContext.checkIn),
     checkOut: toRefreshDate(checkOutDate || sourcePayload.checkOut || searchContext.checkOut),
     rooms: normalizeRefreshRooms(sourcePayload.rooms || searchContext.rooms, request),
+    agentCode: getFirstValue(sourcePayload.agentCode, "14005"),
+    destinationCountryCode: getFirstValue(
+      sourcePayload.destinationCountryCode,
+      resolvedLocation.country,
+      "IN",
+    ),
+    nationality: getFirstValue(sourcePayload.nationality, "IN"),
+    countryOfResidence: getFirstValue(sourcePayload.countryOfResidence, "IN"),
+    channelId: getFirstValue(sourcePayload.channelId, "b2bIndiaDeals"),
+    affiliateRegion: getFirstValue(sourcePayload.affiliateRegion, "B2B_India"),
+    segmentId: getFirstValue(sourcePayload.segmentId, ""),
+    companyId: getFirstValue(sourcePayload.companyId, "1"),
+    gstPercentage: Number(sourcePayload.gstPercentage || 0),
+    tdsPercentage: Number(sourcePayload.tdsPercentage || 0),
   };
 };
 
@@ -312,18 +391,38 @@ const getDialCode = (value) => {
   return CountryCodes.find((country) => country.code === value)?.dial_code || value;
 };
 
-const buildGuestCode = (occupancies = [], guests = []) => {
+const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 0) => {
   const occupancyList = Array.isArray(occupancies) ? occupancies : [];
-  const occupancy = occupancyList[0] || {};
-  const occupancyId =
-    getOccupancyValue(occupancy, "occupancyId", "OccupancyID", "occupancyID", "id") ||
-    1;
   const adultGuests = guests.filter(
     (guest) => String(guest.PaxType || guest.passengerType || "A").toUpperCase() === "A",
   );
   const childGuests = guests.filter(
     (guest) => String(guest.PaxType || guest.passengerType || "").toUpperCase() === "C",
   );
+  const matchedOccupancy = occupancyList.find((occupancy) => {
+    const adults = Number(
+      getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") || 0,
+    );
+    const children = Number(
+      getOccupancyValue(
+        occupancy,
+        "numOfChildren",
+        "NumOfChildren",
+        "children",
+        "childCount",
+      ) || 0,
+    );
+
+    return adults === adultGuests.length && children === childGuests.length;
+  });
+  const occupancy =
+    matchedOccupancy ||
+    occupancyList[Math.max(0, Number(fallbackOccupancyIndex) || 0)] ||
+    occupancyList[0] ||
+    {};
+  const occupancyId =
+    getOccupancyValue(occupancy, "occupancyId", "OccupancyID", "occupancyID", "id") ||
+    Math.max(1, Number(fallbackOccupancyIndex || 0) + 1);
   const sections = [];
 
   if (adultGuests.length > 0) {
@@ -508,10 +607,28 @@ const ReviewPage = () => {
         checkInDate,
         checkOutDate,
       });
+      const missingChildAge = (refreshPayload.rooms || []).some((room) => {
+        const children = Number(room.children || 0);
+        const childAges = Array.isArray(room.childAges) ? room.childAges : [];
+
+        return children > 0 && (
+          childAges.length < children || childAges.slice(0, children).some((age) => !age)
+        );
+      });
+
+      if (missingChildAge) {
+        toast.error("Select age for each child.");
+        return;
+      }
+
       const refreshResponse = await refreshHotelSession(refreshPayload);
       const refreshedSearchTracingKey =
         findDeepValue(refreshResponse, "searchTracingKey") ||
         findDeepValue(refreshResponse, "searchTracingkey");
+      const refreshedSearchId =
+        findDeepValue(refreshResponse, "searchId") ||
+        findDeepValue(refreshResponse, "SearchId") ||
+        findDeepValue(refreshResponse, "search_id");
       const payload = {
         ...fallbackHotelStartBookingPayload,
         TUI: refreshedSearchTracingKey || searchTracingKey || "",
@@ -529,12 +646,12 @@ const ReviewPage = () => {
           CountryCode: getCountryCode(contact.countryCode),
           MobileCountryCode: getDialCode(firstTraveler.countryCode || contact.countryCode),
         },
-        Rooms: selectedRooms.map((room) => {
+        Rooms: selectedRooms.map((room, roomIndex) => {
           const guests = roomGuests[room.id] || [];
 
           return {
             RoomId: room.roomId || room.id || "",
-            GuestCode: buildGuestCode(room.occupancies, guests),
+            GuestCode: buildGuestCode(room.occupancies, guests, roomIndex),
             SupplierName: room.supplierName || "",
             RoomGroupId: room.roomGroupId || room.id || "",
             Guests: guests.map((guest, guestIndex) => ({
@@ -553,7 +670,11 @@ const ReviewPage = () => {
           };
         }),
         NetAmount: selectedNetAmount,
-        SearchId: request.searchId || request.SearchId || fallbackHotelStartBookingPayload.SearchId,
+        SearchId:
+          refreshedSearchId ||
+          request.searchId ||
+          request.SearchId ||
+          fallbackHotelStartBookingPayload.SearchId,
         RecommendationId:
           firstRoom.recommendationId ||
           request.recommendationId ||

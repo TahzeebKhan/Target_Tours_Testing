@@ -171,7 +171,7 @@ const buildDatewiseFareParams = ({
     .trim();
   const departure_date = normalizeDate(startDate);
   const return_date = normalizeDate(endDate);
-  const fareType = tripType === "round" ? "RT" : "ON";
+  const fareType = tripType === "multi" ? "DM" : tripType === "round" ? "RT" : "ON";
 
   return {
     fareType,

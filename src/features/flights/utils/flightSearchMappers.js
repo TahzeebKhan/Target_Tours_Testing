@@ -310,6 +310,41 @@ const normalizeDateParam = (value) => {
   return date.toISOString().slice(0, 10);
 };
 
+const buildMultiCityTripsFromParams = (urlParams = {}) => {
+  const trips = [];
+
+  for (let index = 0; index < 4; index += 1) {
+    const origin = deriveAirportCode(
+      urlParams[`from${index}`] ||
+        urlParams[`origin${index}`] ||
+        urlParams[`source${index}`] ||
+        ""
+    );
+    const destination = deriveAirportCode(
+      urlParams[`to${index}`] ||
+        urlParams[`destination${index}`] ||
+        urlParams[`dest${index}`] ||
+        ""
+    );
+    const departureDate = normalizeDateParam(
+      urlParams[`date${index}`] ||
+        urlParams[`departure_date${index}`] ||
+        urlParams[`departureDate${index}`] ||
+        ""
+    );
+
+    if (origin && destination && departureDate) {
+      trips.push({
+        origin,
+        destination,
+        departure_date: departureDate,
+      });
+    }
+  }
+
+  return trips;
+};
+
 const getDefaultDomain = () => process.env.NEXT_PUBLIC_DOMAIN;
 const SLOT_KEY_MAP = {
   before6: "before_6am",
@@ -1879,7 +1914,17 @@ export const buildSearchParams = ({
     base.sort_by = resolvedSortBy;
   }
   base.domain = urlParams.domain || getDefaultDomain();
-  base.fareType = tripType === "round" ? "RT" : "ON";
+  base.fareType = tripType === "multi" ? "DM" : tripType === "round" ? "RT" : "ON";
+
+  if (tripType === "multi") {
+    const multiTrips = buildMultiCityTripsFromParams(urlParams);
+    if (multiTrips.length > 0) {
+      base.Trips = multiTrips;
+      base.origin = multiTrips[0].origin;
+      base.destination = multiTrips[0].destination;
+      base.departure_date = multiTrips[0].departure_date;
+    }
+  }
 
   return base;
 };
