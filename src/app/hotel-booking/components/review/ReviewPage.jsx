@@ -808,7 +808,6 @@ const ReviewPage = () => {
       const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
-       console.log("storedHotelResults",storedHotelResults)
       const checkInDate = pickApiDate(
         request.checkInDate,
         request.checkInRaw,
@@ -841,14 +840,11 @@ const ReviewPage = () => {
         initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
         searchContext: request.searchContext,
       };
-       console.log("initSearchContext",initSearchContext)
       const hotelInitData = getHotelInitData({
         request,
         storedHotelSearch,
         storedHotelResults,
       });
-      console.log("hotelInitData",hotelInitData)
-
       const searchTracingKey = getFirstValue(
         hotelInitData.searchTracingKey,
         hotelInitData.searchTracingkey,
