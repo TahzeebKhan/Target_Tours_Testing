@@ -97,7 +97,7 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
         },
     ];
 
-    const shouldFetchSuggestions = debouncedSearch.length >= 1;
+    const shouldFetchSuggestions = debouncedSearch.length >= 2;
 
     const { data: apiSuggestions = [] } = useQuery({
         queryKey: [...AIRPORT_SUGGESTIONS_QUERY_KEY, debouncedSearch.toLowerCase()],

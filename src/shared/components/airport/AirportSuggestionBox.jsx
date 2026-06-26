@@ -30,7 +30,7 @@ const AirportSuggestionBox = ({
   boxRef,
   query,
   onSelect,
-  minChars = 1,
+  minChars = 2,
   recentType = "flight",
   field = "",
 }) => {

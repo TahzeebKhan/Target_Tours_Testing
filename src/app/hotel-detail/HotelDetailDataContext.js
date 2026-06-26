@@ -58,6 +58,7 @@ const getDetailRequestFromParams = (params) => {
   const request = {
     hotelId: params.get("hotelId") || "",
     searchId: params.get("searchId") || "",
+    hotelSearchId: params.get("hotelSearchId") || params.get("hotelsearchid") || "",
     priceProvider: params.get("priceProvider") || "",
     checkIn: params.get("checkIn") || "",
     checkOut: params.get("checkOut") || "",
@@ -952,7 +953,10 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
     }
 
     const hasRoomsRequest =
-      roomsRequest?.searchId && roomsRequest?.hotelId && roomsRequest?.priceProvider;
+      roomsRequest?.searchId &&
+      roomsRequest?.hotelSearchId &&
+      roomsRequest?.hotelId &&
+      roomsRequest?.priceProvider;
 
     if (hasRoomsRequest) {
       const loadHotelRooms = async () => {

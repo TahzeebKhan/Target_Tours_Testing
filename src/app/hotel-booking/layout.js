@@ -6,7 +6,11 @@ import BookingSummary from "./components/review/components/BookingSummary";
 import { RoomProvider } from "../context/RoomContext";
 import { useRouter } from "next/navigation";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
-import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
+import {
+  clearHotelBookingSession,
+  getHotelBookingSessionExpiry,
+  readHotelBookingSession,
+} from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
@@ -27,6 +31,7 @@ const layout = ({ children }) => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const sessionExpiresAt = getHotelBookingSessionExpiry(bookingSession);
   const [roomList, setRoomList] = useState([
     {
       id: "deluxe_ac_room",
@@ -53,18 +58,20 @@ const layout = ({ children }) => {
   }, [roomList]);
 
   useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
-      const session = raw ? JSON.parse(raw) : null;
+    const session = readHotelBookingSession();
 
-      if (session?.rooms?.length) {
-        setBookingSession(session);
-        setRoomList(session.rooms);
-      }
-    } catch {
+    if (session?.rooms?.length) {
+      setBookingSession(session);
+      setRoomList(session.rooms);
+    } else {
       setBookingSession(null);
     }
   }, []);
+
+  const expireHotelBookingSession = () => {
+    clearHotelBookingSession();
+    setBookingSession(null);
+  };
 
   const [sidebarOpen, setSideBarOpen] = useState(false);
   const getSelectedRoomCount = (rooms = []) =>
@@ -199,7 +206,14 @@ const layout = ({ children }) => {
     >
       <section className={styles.contentWrapper}>
         <div className={styles.navbarWrapper}>
-          <Navbar />
+          <Navbar
+            sessionExpiresAt={sessionExpiresAt}
+            onSessionExpired={expireHotelBookingSession}
+            sessionExpiredMessage="Your hotel booking session has expired. Please search again to continue."
+            sessionExpiredSubText="Search again to refresh rates and availability."
+            sessionExpiredActionLabel="SEARCH HOTELS"
+            sessionExpiredRedirectPath="/"
+          />
         </div>
         <div className={styles.childrenWrapper}>
           {children}

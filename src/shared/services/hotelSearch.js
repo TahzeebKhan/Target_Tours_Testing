@@ -5,6 +5,10 @@ export const HOTEL_SEARCH_RESULTS_KEY = "hotelSearchResults";
 export const HOTEL_SEARCH_RESULTS_EVENT = "hotel-search-results";
 export const HOTEL_DETAILS_KEY = "hotelDetails";
 export const HOTEL_BOOKING_SESSION_KEY = "hotelBookingSession";
+export const HOTEL_BOOKING_SESSION_DURATION_MS = 20 * 60 * 1000;
+
+let inMemoryHotelBookingSession = null;
+let hotelBookingSessionExpiryTimer = null;
 
 const normalizeBaseUrl = () => {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
@@ -15,6 +19,130 @@ const normalizeBaseUrl = () => {
 const getDomain = () => process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
 
 const getAuthToken = () => Cookies.get("auth_token") || "";
+
+const removeStoredHotelBookingSession = () => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(HOTEL_BOOKING_SESSION_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+const clearHotelBookingSessionExpiryTimer = () => {
+  if (typeof window === "undefined" || !hotelBookingSessionExpiryTimer) return;
+
+  window.clearTimeout(hotelBookingSessionExpiryTimer);
+  hotelBookingSessionExpiryTimer = null;
+};
+
+export const clearHotelBookingSession = () => {
+  inMemoryHotelBookingSession = null;
+  clearHotelBookingSessionExpiryTimer();
+  removeStoredHotelBookingSession();
+};
+
+const scheduleHotelBookingSessionExpiry = (expiresAt) => {
+  if (typeof window === "undefined") return;
+
+  clearHotelBookingSessionExpiryTimer();
+
+  const remainingMs = Number(expiresAt) - Date.now();
+  if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+    clearHotelBookingSession();
+    return;
+  }
+
+  hotelBookingSessionExpiryTimer = window.setTimeout(() => {
+    clearHotelBookingSession();
+  }, remainingMs);
+};
+
+const storeHotelBookingSession = (value) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(HOTEL_BOOKING_SESSION_KEY, JSON.stringify(value));
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+export const getHotelBookingSessionExpiry = (session) => {
+  const expiry = Number(session?.hotelBookingSessionExpiresAt);
+  return Number.isFinite(expiry) && expiry > 0 ? expiry : null;
+};
+
+export const isHotelBookingSessionExpired = (session, now = Date.now()) => {
+  const expiry = getHotelBookingSessionExpiry(session);
+  return Boolean(expiry && now >= expiry);
+};
+
+export const withHotelBookingSessionExpiry = (value) => {
+  if (!value) return value;
+
+  const startedAt = Number(value.hotelBookingSessionStartedAt) || Date.now();
+  const expiresAt =
+    Number(value.hotelBookingSessionExpiresAt) ||
+    startedAt + HOTEL_BOOKING_SESSION_DURATION_MS;
+
+  return {
+    ...value,
+    hotelBookingSessionStartedAt: startedAt,
+    hotelBookingSessionExpiresAt: expiresAt,
+  };
+};
+
+export const writeHotelBookingSession = (value) => {
+  if (!value) {
+    clearHotelBookingSession();
+    return;
+  }
+
+  const nextValue = withHotelBookingSessionExpiry(value);
+  if (isHotelBookingSessionExpired(nextValue)) {
+    clearHotelBookingSession();
+    return;
+  }
+
+  inMemoryHotelBookingSession = nextValue;
+  storeHotelBookingSession(nextValue);
+  scheduleHotelBookingSessionExpiry(nextValue.hotelBookingSessionExpiresAt);
+};
+
+export const readHotelBookingSession = () => {
+  if (inMemoryHotelBookingSession) {
+    if (isHotelBookingSessionExpired(inMemoryHotelBookingSession)) {
+      clearHotelBookingSession();
+      return null;
+    }
+
+    return inMemoryHotelBookingSession;
+  }
+
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (isHotelBookingSessionExpired(parsed)) {
+      clearHotelBookingSession();
+      return null;
+    }
+
+    inMemoryHotelBookingSession = parsed || null;
+    if (inMemoryHotelBookingSession) {
+      scheduleHotelBookingSessionExpiry(
+        inMemoryHotelBookingSession.hotelBookingSessionExpiresAt,
+      );
+    }
+    return inMemoryHotelBookingSession;
+  } catch {
+    return null;
+  }
+};
 
 const getHotelSearchHeaders = () => {
   const token = getAuthToken();
@@ -175,7 +303,7 @@ const normalizeHotelLocation = (item = {}, index = 0) => {
 
 export const fetchHotelSearchSuggestions = async (query) => {
   const q = String(query || "").trim();
-  if (!q) return [];
+  if (q.length < 2) return [];
 
   const url = new URL("/api/hotel-search/searchSuggestions", normalizeBaseUrl());
   url.searchParams.set("query", q);
@@ -238,6 +366,7 @@ export const initHotelSearch = async (payload) => {
 
 export const fetchHotelDetails = async ({
   searchId,
+  hotelSearchId,
   hotelId,
   priceProvider,
 }) => {
@@ -251,6 +380,7 @@ export const fetchHotelDetails = async ({
     body: JSON.stringify({
       domain: getDomain(),
       searchId,
+      hotelSearchId,
       hotelId,
       priceProvider,
     }),
@@ -267,6 +397,7 @@ export const fetchHotelDetails = async ({
 
 export const fetchHotelRooms = async ({
   searchId,
+  hotelSearchId,
   hotelId,
   priceProvider,
 }) => {
@@ -281,6 +412,7 @@ export const fetchHotelRooms = async ({
     body: JSON.stringify({
       domain: getDomain(),
       searchId,
+      hotelSearchId,
       hotelId,
       priceProvider,
     }),

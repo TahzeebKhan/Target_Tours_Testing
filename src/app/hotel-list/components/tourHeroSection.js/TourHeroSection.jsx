@@ -36,6 +36,16 @@ const safeSetSessionStorage = (key, value) => {
   }
 };
 
+const syncHotelSearchIdToUrl = (hotelSearchId) => {
+  if (typeof window === "undefined" || !hotelSearchId) return;
+
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("hotelSearchId") === hotelSearchId) return;
+
+  url.searchParams.set("hotelSearchId", hotelSearchId);
+  window.history.replaceState(window.history.state, "", url.toString());
+};
+
 const parseChildAgesParam = (value = "") =>
   String(value || "")
     .split(",")
@@ -155,6 +165,7 @@ const TourHeroSection = () => {
   const fromWrapperRef = useRef(null);
   const fromSuggestionRef = useRef(null);
   const [showFromSuggestion, setShowFromSuggestion] = useState(false);
+  const [debouncedFromSuggestionQuery, setDebouncedFromSuggestionQuery] = useState("");
   const toWrapperRef = useRef(null);
   const toSuggestionRef = useRef(null);
 
@@ -165,14 +176,22 @@ const TourHeroSection = () => {
   const firstSocketResponseRef = useRef(false);
   const socketResponseCountRef = useRef(0);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedFromSuggestionQuery(from.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [from]);
+
   const { data: hotelSuggestions = [] } = useQuery({
     queryKey: [
       "hotel-list-search-suggestions",
-      from,
+      debouncedFromSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
-    queryFn: () => fetchHotelSearchSuggestions(from),
-    enabled: showFromSuggestion && from.trim().length > 0,
+    queryFn: () => fetchHotelSearchSuggestions(debouncedFromSuggestionQuery),
+    enabled: showFromSuggestion && debouncedFromSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -250,10 +269,32 @@ const TourHeroSection = () => {
                 response: initResponse,
               });
 
+              const latestStoredSearch = window.sessionStorage.getItem(
+                HOTEL_SEARCH_SESSION_KEY,
+              );
+              let latestSearchContext = searchContext;
+
+              try {
+                latestSearchContext = latestStoredSearch
+                  ? JSON.parse(latestStoredSearch)
+                  : searchContext;
+              } catch {
+                latestSearchContext = searchContext;
+              }
+ console.log("latestSearchContext",latestSearchContext)
+              const hotelSearchId =
+                latestSearchContext?.hotelSearchId ||
+                initResponse?.hotelSearchId ||
+                initResponse?.hotel_search_id ||
+                initResponse?.hotel_search_key ||
+                "";
+
+              syncHotelSearchIdToUrl(hotelSearchId);
               safeSetSessionStorage(
                 HOTEL_SEARCH_SESSION_KEY,
                 JSON.stringify({
-                  ...searchContext,
+                  ...latestSearchContext,
+                  hotelSearchId,
                   initResponse,
                   initStatus: "complete",
                 }),
@@ -300,6 +341,16 @@ const TourHeroSection = () => {
               payload?.data?.content?.type ||
               "UNKNOWN";
             const content = payload?.data?.content || payload?.data || payload;
+            const socketHotelSearchId =
+              content?.hotelSearchId ||
+              content?.hotel_search_id ||
+              content?.hotel_search_key ||
+              payload?.hotelSearchId ||
+              payload?.hotel_search_id ||
+              payload?.hotel_search_key ||
+              "";
+
+            syncHotelSearchIdToUrl(socketHotelSearchId);
             const hotelCount =
               content?.mergedHotels?.length ||
               content?.curatedHotels?.length ||
@@ -338,6 +389,14 @@ const TourHeroSection = () => {
               }
 
               if (!searchContext?.channel || searchContext.channel === hotelSearchChannel) {
+                const hotelSearchId =
+                  content.hotelSearchId ||
+                  content.hotel_search_id ||
+                  content.hotel_search_key ||
+                  searchContext?.hotelSearchId ||
+                  "";
+
+                syncHotelSearchIdToUrl(hotelSearchId);
                 safeSetSessionStorage(
                   HOTEL_SEARCH_SESSION_KEY,
                   JSON.stringify({
@@ -347,6 +406,7 @@ const TourHeroSection = () => {
                     initResponse: content,
                     initStatus: "complete",
                     searchId: content.init.searchId || searchContext?.searchId || "",
+                    hotelSearchId,
                     searchTracingKey:
                       content.init.searchTracingKey ||
                       searchContext?.searchTracingKey ||

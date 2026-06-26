@@ -1,0 +1,174 @@
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 18px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid transparent;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: 0 1px 18.6px 0 #00000017;
+}
+
+.cardSelected {
+  border-color: #000033;
+  background: #f5f7ff;
+}
+
+.cardOpen {
+  border-color: #e5e7f0;
+  border-bottom-color: transparent;
+}
+
+.flightPanel {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  padding: 14px;
+  border: 0.5px solid #e4e6e8;
+}
+
+.airline {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.airline img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+}
+
+.airline span {
+  display: block;
+  font-family: var(--font-inter);
+}
+
+.airlineName {
+  font-size: 14px;
+  line-height: 18px;
+  color: #000000;
+}
+
+.flightNo {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 16px;
+  color: #737373;
+}
+
+.farePanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.farePanel strong {
+  font-family: var(--font-inter);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 600;
+  color: #000000;
+}
+
+.farePanel button {
+  height: 42px;
+  min-width: 138px;
+  border: none;
+  background: #000033;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.farePanel button:hover {
+  background: #fcc800;
+  color: #000033;
+}
+
+.farePanel span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  white-space: nowrap;
+  color: #000000;
+}
+
+.farePanel small {
+  font-size: 10px;
+}
+
+.farePanel i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #737373;
+}
+
+.farePanel em {
+  font-size: 12px;
+  font-style: normal;
+  color: #208ef5;
+}
+
+.detailsBtn {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: #000033;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 300;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.detailsBtn svg {
+  transition: transform 0.25s ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+.expandWrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.expandWrap.open {
+  max-height: 900px;
+}
+
+@media (max-width: 900px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .flightPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .farePanel {
+    align-items: flex-start;
+  }
+}

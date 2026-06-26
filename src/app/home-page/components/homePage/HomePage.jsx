@@ -353,6 +353,8 @@ const HomePage = ({
 
   const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
   const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
+  const [debouncedFromSuggestionQuery, setDebouncedFromSuggestionQuery] = useState("");
+  const [debouncedToSuggestionQuery, setDebouncedToSuggestionQuery] = useState("");
   const fromInputRef = useRef(null);
   const toInputRef = useRef(null);
   const nonFlightStartDateRef = useRef(null);
@@ -365,6 +367,8 @@ const HomePage = ({
   const multiInputRefs = useRef([]);
   const multiSuggestionRefs = useRef([]);
   const [isMobile, setIsMobile] = useState(false);
+
+
 
   useEffect(() => {
     const checkScreen = () => {
@@ -423,7 +427,6 @@ const HomePage = ({
       setToSuggestionsOpen(false);
       return;
     }
-
     const displayValue = getSuggestionDisplayValue(sugg);
     const iataCode = sugg?.iataCode || sugg?.code || "";
 
@@ -460,6 +463,15 @@ const HomePage = ({
   const [fromCode, setFromCode] = useState("");
   const [toCode, setToCode] = useState("");
   const [selectedHotelLocation, setSelectedHotelLocation] = useState(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedFromSuggestionQuery(from.trim());
+      setDebouncedToSuggestionQuery(to.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [from, to]);
 
   const [multiCity, setMultiCity] = useState([
     { from: "", to: "" },
@@ -528,15 +540,18 @@ const HomePage = ({
     queryKey: [
       "holiday-package-suggestions",
       "from",
-      from,
+      debouncedFromSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
     queryFn: () =>
       fetchHolidayPackageSuggestions({
-        term: from,
+        term: debouncedFromSuggestionQuery,
         type: "from",
       }),
-    enabled: bookingType === "holiday" && fromSuggestionsOpen && from.trim().length > 0,
+    enabled:
+      bookingType === "holiday" &&
+      fromSuggestionsOpen &&
+      debouncedFromSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
   const {
@@ -545,15 +560,18 @@ const HomePage = ({
     queryKey: [
       "holiday-package-suggestions",
       "to",
-      to,
+      debouncedToSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
     queryFn: () =>
       fetchHolidayPackageSuggestions({
-        term: to,
+        term: debouncedToSuggestionQuery,
         type: "to",
       }),
-    enabled: bookingType === "holiday" && toSuggestionsOpen && to.trim().length > 0,
+    enabled:
+      bookingType === "holiday" &&
+      toSuggestionsOpen &&
+      debouncedToSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
   const {
@@ -561,11 +579,14 @@ const HomePage = ({
   } = useQuery({
     queryKey: [
       "hotel-search-suggestions",
-      to,
+      debouncedToSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
-    queryFn: () => fetchHotelSearchSuggestions(to),
-    enabled: bookingType === "hotel" && toSuggestionsOpen && to.trim().length > 0,
+    queryFn: () => fetchHotelSearchSuggestions(debouncedToSuggestionQuery),
+    enabled:
+      bookingType === "hotel" &&
+      toSuggestionsOpen &&
+      debouncedToSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
   const holidayFromSuggestions = normalizeHolidaySuggestions(

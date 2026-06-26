@@ -55,7 +55,25 @@ export default function FlightFilters() {
   const isMinTooltipAtEdge = minPricePercent < 8;
   const isMaxTooltipAtEdge = maxPricePercent > 92;
   const formatPrice = (value) => `Rs. ${Number(value).toLocaleString("en-IN")}`;
-  const activeRoute = committedSearches?.[tripType] || committedSearches?.oneway || {};
+  const activeFilterRouteText =
+    apiFilterData?.route || apiFilterData?.meta?.route || "";
+  const activeFilterRouteParts = String(activeFilterRouteText)
+    .split(/\s*(?:->|→)\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const activeFilterTrip = apiFilterData?.trip || {};
+  const activeRoute =
+    activeFilterRouteParts.length >= 2
+      ? {
+          from: activeFilterRouteParts[0],
+          to: activeFilterRouteParts[1],
+        }
+      : activeFilterTrip.origin && activeFilterTrip.destination
+        ? {
+            from: activeFilterTrip.origin,
+            to: activeFilterTrip.destination,
+          }
+        : committedSearches?.[tripType] || committedSearches?.oneway || {};
 
   const getRouteLabel = (value, fallback) => {
     const raw = String(value || "").trim();

@@ -191,25 +191,36 @@ const TourHeroSection = () => {
 
   const [fromSuggestionsOpen, setFromSuggestionsOpen] = useState(false);
   const [toSuggestionsOpen, setToSuggestionsOpen] = useState(false);
+  const [debouncedFromSuggestionQuery, setDebouncedFromSuggestionQuery] = useState("");
+  const [debouncedToSuggestionQuery, setDebouncedToSuggestionQuery] = useState("");
 
   const fromInputRef = useRef(null);
   const toInputRef = useRef(null);
   const fromSuggestionRef = useRef(null);
   const toSuggestionRef = useRef(null);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedFromSuggestionQuery(from.trim());
+      setDebouncedToSuggestionQuery(to.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [from, to]);
+
   const { data: fromSuggestionResponse } = useQuery({
     queryKey: [
       "tour-list-package-suggestions",
       "from",
-      from,
+      debouncedFromSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
     queryFn: () =>
       fetchHolidayPackageSuggestions({
-        term: from,
+        term: debouncedFromSuggestionQuery,
         type: "from",
       }),
-    enabled: fromSuggestionsOpen && from.trim().length > 0,
+    enabled: fromSuggestionsOpen && debouncedFromSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -217,15 +228,15 @@ const TourHeroSection = () => {
     queryKey: [
       "tour-list-package-suggestions",
       "to",
-      to,
+      debouncedToSuggestionQuery,
       process.env.NEXT_PUBLIC_DOMAIN,
     ],
     queryFn: () =>
       fetchHolidayPackageSuggestions({
-        term: to,
+        term: debouncedToSuggestionQuery,
         type: "to",
       }),
-    enabled: toSuggestionsOpen && to.trim().length > 0,
+    enabled: toSuggestionsOpen && debouncedToSuggestionQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
 

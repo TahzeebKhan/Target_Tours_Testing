@@ -40,6 +40,25 @@ const appendUniqueById = (existing = [], incoming = []) => {
   return merged;
 };
 
+const mergeMultiRouteResults = (previous = {}, incoming = {}) => {
+  const merged = { ...(previous || {}) };
+
+  Object.entries(incoming || {}).forEach(([routeKey, routeData]) => {
+    const current = merged[routeKey] || {};
+    merged[routeKey] = {
+      ...current,
+      ...routeData,
+      multi: appendUniqueById(current.multi, routeData?.multi),
+      multiTripCards: appendUniqueById(
+        current.multiTripCards,
+        routeData?.multiTripCards,
+      ),
+    };
+  });
+
+  return merged;
+};
+
 const getTripCount = (mapped, tripType) => {
   if (!mapped) return 0;
   if (tripType === "oneway") return mapped.oneway?.length || 0;
@@ -260,6 +279,10 @@ const FlightsPageClient = () => {
         roundTripCards: appendUniqueById(prev.roundTripCards, mappedPageData.roundTripCards),
         multi: appendUniqueById(prev.multi, mappedPageData.multi),
         multiTripCards: appendUniqueById(prev.multiTripCards, mappedPageData.multiTripCards),
+        multiRouteResults: mergeMultiRouteResults(
+          prev.multiRouteResults,
+          mappedPageData.multiRouteResults,
+        ),
       };
 
       const total = Number(
@@ -283,6 +306,7 @@ const FlightsPageClient = () => {
     roundTripCards: [],
     multi: [],
     multiTripCards: [],
+    multiRouteResults: {},
     pagination: { from: 0, to: 0, total: 0 },
     sortHighlights: null,
   };
@@ -497,6 +521,7 @@ const FlightsPageClient = () => {
         <MultiCityTrip
           flightData={mappedData.multi}
           tripCards={mappedData.multiTripCards}
+          routeResults={mappedData.multiRouteResults}
           datewiseFareTiles={resolvedDatewiseFareTiles}
           selectedDepartureDate={request.startDate}
           pagination={mappedData.pagination}

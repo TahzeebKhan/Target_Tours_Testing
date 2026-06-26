@@ -1,7 +1,7 @@
 "use client";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MultiCityTrip.module.css";
-import TripCard from "./tripCard/TripCard";
+import MultiCityFlightCard from "./MultiCityFlightCard";
 import OfferBanner from "../offerComponent/OfferBanner";
 import DatePriceSlider from "../DatePriceSlider";
 import { useTripType } from "../../TripTypeContext";
@@ -21,6 +21,7 @@ import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 const MultiCityTrip = ({
   flightData = [],
   tripCards = [],
+  routeResults = {},
   datewiseFareTiles = [],
   pagination = null,
   sortHighlights = null,
@@ -28,7 +29,7 @@ const MultiCityTrip = ({
   isLoading = false,
   isRefreshing = false,
 }) => {
-  const { committedSearches, handleSearch } = useTripType();
+  const { committedSearches, multiSegments } = useTripType();
   const [openSort, setOpenSort] = useState(false);
   const sortTriggerRef = useRef(null);
   const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
@@ -41,6 +42,7 @@ const MultiCityTrip = ({
     selectDeparture,
     resetFilters,
     setSortBy,
+    setApiFilterData,
   } = useFlightFilters();
   const quickSort = filters.sortBy === "lowest"
     ? "cheapest"
@@ -49,7 +51,12 @@ const MultiCityTrip = ({
       : "";
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const [fareModalOpen, setFareModalOpen] = useState(null);
-  const [selectedFlightId, setSelectedFlightId] = useState(null);
+  const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
+  const [selectedRouteFlights, setSelectedRouteFlights] = useState({});
+  const [routeSort, setRouteSort] = useState({
+    key: "",
+    direction: "asc",
+  });
 
   const openFareModal = async (flight) => {
     const searchTui =
@@ -436,19 +443,241 @@ const MultiCityTrip = ({
   const fastestHighlightedFlight = resolveByHighlight(sortHighlights?.fastest);
   const cheapestFlight = cheapestHighlightedFlight || cheapestFallback;
   const fastestFlight = fastestHighlightedFlight || fastestFallback;
-  const visibleFlights = resolvedFlightResults;
-  const visibleTripCards = resolvedTripCards;
+  const normalizeRouteKey = (value = "") =>
+    String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, " ")
+      .replace(/\s*->\s*/g, " -> ");
+  const routeSegments = useMemo(() => {
+    const completedSegments = (multiSegments || [])
+      .filter((segment) => segment?.from && segment?.to)
+      .map((segment, index) => ({
+        ...segment,
+        index,
+      }));
+
+    if (completedSegments.length) return completedSegments;
+
+    return [
+      {
+        index: 0,
+        from: from || "Jakarta (CGK)",
+        to: to || "Singapore (SIN)",
+        date: "",
+      },
+    ];
+  }, [from, multiSegments, to]);
+  const routeLabel = (value = "") => String(value || "").trim() || "Select city";
+  const routeShortLabel = (value = "") => {
+    const text = routeLabel(value);
+    const code = text.match(/\(([^)]+)\)/)?.[1];
+    return code || text.split(",")[0] || text;
+  };
+  const activeRoute =
+    routeSegments[selectedRouteIndex] || routeSegments[0] || {};
+  const activeRouteKey = normalizeRouteKey(
+    `${routeShortLabel(activeRoute.from)} -> ${routeShortLabel(activeRoute.to)}`
+  );
+  const activeRouteResult =
+    routeResults?.[activeRouteKey] ||
+    Object.entries(routeResults || {}).find(([routeKey, routeData]) => {
+      const candidates = [
+        routeKey,
+        routeData?.route,
+        routeData?.meta?.route,
+        routeData?.trip?.origin && routeData?.trip?.destination
+          ? `${routeData.trip.origin} -> ${routeData.trip.destination}`
+          : "",
+      ];
+
+      return candidates.some(
+        (candidate) => normalizeRouteKey(candidate) === activeRouteKey
+      );
+    })?.[1] ||
+    null;
+  useEffect(() => {
+    if (!activeRouteResult) return;
+
+    const routeMeta = activeRouteResult.meta || {};
+    const routeFilters = activeRouteResult.filters || {};
+    const toRouteArray = (primary, fallback) =>
+      Array.isArray(primary)
+        ? primary
+        : Array.isArray(fallback)
+          ? fallback
+          : [];
+    const readRoutePrice = (...values) => {
+      for (const value of values) {
+        const number = Number(value);
+        if (Number.isFinite(number)) return number;
+      }
+      return undefined;
+    };
+    const nextFilterData = {
+      ...routeFilters,
+      route: activeRouteResult.route || activeRouteKey,
+      trip: activeRouteResult.trip || null,
+      meta: routeMeta,
+      aircrafts: toRouteArray(activeRouteResult.aircrafts, routeFilters.aircrafts),
+      airlines: toRouteArray(activeRouteResult.airlines, routeFilters.airlines),
+      price_min: readRoutePrice(
+        routeMeta.price_min,
+        routeFilters.price_min,
+        routeFilters.min_price
+      ),
+      price_max: readRoutePrice(
+        routeMeta.price_max,
+        routeFilters.price_max,
+        routeFilters.max_price
+      ),
+    };
+
+    if (!nextFilterData.return_departure_slots && nextFilterData.departure_slots) {
+      nextFilterData.return_departure_slots = nextFilterData.departure_slots;
+    }
+    if (!nextFilterData.return_arrival_slots && nextFilterData.arrival_slots) {
+      nextFilterData.return_arrival_slots = nextFilterData.arrival_slots;
+    }
+
+    setApiFilterData(nextFilterData);
+  }, [activeRouteKey, activeRouteResult, setApiFilterData]);
+  const visibleFlights =
+    activeRouteResult?.multi?.length > 0
+      ? activeRouteResult.multi
+      : selectedRouteIndex === 0
+        ? resolvedFlightResults
+        : [];
+  const visibleTripCards =
+    activeRouteResult?.multiTripCards?.length > 0
+      ? activeRouteResult.multiTripCards
+      : selectedRouteIndex === 0
+        ? resolvedTripCards
+        : [];
+  const parseTimeToMinutes = (value = "") => {
+    const match = String(value || "").match(/(\d{1,2}):(\d{2})/);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+
+    return Number(match[1]) * 60 + Number(match[2]);
+  };
+  const parseMoney = (value = "") => {
+    const amount = Number(String(value || "").replace(/[^\d.]/g, ""));
+    return Number.isFinite(amount) ? amount : Number.MAX_SAFE_INTEGER;
+  };
+  const getCardSortValue = (card, key) => {
+    const flight = card?.depart?.flight || {};
+    const airline = card?.depart?.airline || {};
+
+    if (key === "airline") return String(airline.name || "").toLowerCase();
+    if (key === "departure") return parseTimeToMinutes(flight.departure?.time);
+    if (key === "duration") {
+      return (
+        Number(flight.duration?.hours || 0) * 60 +
+        Number(flight.duration?.minutes || 0)
+      );
+    }
+    if (key === "arrival") return parseTimeToMinutes(flight.arrival?.time);
+    if (key === "price") return parseMoney(card?.fare?.totalFare);
+
+    return 0;
+  };
+  const sortedTripCards = useMemo(() => {
+    if (!routeSort.key) return visibleTripCards;
+
+    return [...visibleTripCards].sort((left, right) => {
+      const leftValue = getCardSortValue(left, routeSort.key);
+      const rightValue = getCardSortValue(right, routeSort.key);
+      const result =
+        typeof leftValue === "string"
+          ? leftValue.localeCompare(String(rightValue))
+          : Number(leftValue) - Number(rightValue);
+
+      return routeSort.direction === "asc" ? result : -result;
+    });
+  }, [routeSort.direction, routeSort.key, visibleTripCards]);
+  const handleRouteSort = (key) => {
+    setRouteSort((prev) => ({
+      key,
+      direction:
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+  const activeSortHighlights =
+    activeRouteResult?.sortHighlights || sortHighlights || null;
+  const selectedCards = routeSegments
+    .map((segment, index) => ({
+      segment,
+      card: selectedRouteFlights[index],
+    }))
+    .filter((item) => item.card);
+  const selectedTotal = selectedCards.reduce((total, item) => {
+    const fare = String(item.card?.fare?.totalFare || "").replace(/[^\d.]/g, "");
+    const amount = Number(fare);
+    return total + (Number.isFinite(amount) ? amount : 0);
+  }, 0);
+  const selectedForActiveRoute = selectedRouteFlights[selectedRouteIndex];
+  const isSelectionComplete = routeSegments.every((_, index) => selectedRouteFlights[index]);
+  const formatRouteDate = (value = "") => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+  const formatSelectedTotal = (value) =>
+    `₹ ${Number(value || 0).toLocaleString("en-IN", {
+      maximumFractionDigits: 0,
+    })}`;
+  const getCardFlight = (card = {}) => card?.depart?.flight || card?.outbound || {};
+  const getCardAirline = (card = {}) => card?.depart?.airline || {};
+  const getCardPrice = (card = {}) =>
+    card?.fare?.totalFare || card?.fare?.pricePerAdult || "";
+  const handleSelectTripCard = (card) => {
+    setSelectedRouteFlights((prev) => ({
+      ...prev,
+      [selectedRouteIndex]: card,
+    }));
+  };
+  const handleNextRoute = () => {
+    if (!selectedForActiveRoute) return;
+
+    const nextUnselectedIndex = routeSegments.findIndex(
+      (_, index) => index > selectedRouteIndex && !selectedRouteFlights[index],
+    );
+    const firstUnselectedIndex = routeSegments.findIndex(
+      (_, index) => !selectedRouteFlights[index],
+    );
+
+    if (nextUnselectedIndex >= 0 || firstUnselectedIndex >= 0) {
+      setSelectedRouteIndex(
+        nextUnselectedIndex >= 0 ? nextUnselectedIndex : firstUnselectedIndex,
+      );
+      return;
+    }
+
+    setFareModalOpen(selectedForActiveRoute.id);
+  };
+  const sortColumns = [
+    { key: "airline", label: "Airline" },
+    { key: "departure", label: "Departure" },
+    { key: "duration", label: "Duration" },
+    { key: "arrival", label: "Arrival" },
+    { key: "price", label: "Price" },
+  ];
   const cheapestMeta = {
-    price: sortHighlights?.cheapest?.priceLabel || "N/A",
-    duration: sortHighlights?.cheapest?.durationLabel || "N/A",
+    price: activeSortHighlights?.cheapest?.priceLabel || "N/A",
+    duration: activeSortHighlights?.cheapest?.durationLabel || "N/A",
   };
   const fastestMeta = {
-    price: sortHighlights?.fastest?.priceLabel || "N/A",
-    duration: sortHighlights?.fastest?.durationLabel || "N/A",
+    price: activeSortHighlights?.fastest?.priceLabel || "N/A",
+    duration: activeSortHighlights?.fastest?.durationLabel || "N/A",
   };
-  const resultsText = pagination
-    ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
-    : "Showing 1-10 of 100 results";
+  const totalResults = Number(pagination?.total || 0);
+  const resultsText = `Total ${totalResults} result${totalResults === 1 ? "" : "s"}`;
   const applyQuickSort = (type) => {
     const targetSortBy = type === "cheapest" ? "lowest" : "shortest";
     setSortBy(filters.sortBy === targetSortBy ? null : targetSortBy);
@@ -465,8 +694,8 @@ const MultiCityTrip = ({
       <section className={styles.container}>
         <div className={styles.FlightBookingTextContainer}>
           <h2 className={styles.heading}>
-            Flight from <span>{from || "Jakarta (CGK)"}</span> to{" "}
-            <span>{to || "Singapore (SIN)"}</span>
+            Flight from <span>{routeLabel(activeRoute.from)}</span> to{" "}
+            <span>{routeLabel(activeRoute.to)}</span>
           </h2>
           <div className={styles.subTextContainer}>
             <span className={styles.priceInfo}>
@@ -531,15 +760,68 @@ const MultiCityTrip = ({
             </div>
           </div>
         </div>
+        <div className={styles.routeTabsWrap}>
+          {routeSegments.map((segment, index) => {
+            const selectedCard = selectedRouteFlights[index];
+            return (
+              <button
+                key={`${segment.from}-${segment.to}-${index}`}
+                className={`${styles.routeTab} ${
+                  selectedRouteIndex === index ? styles.routeTabActive : ""
+                } ${selectedCard ? styles.routeTabComplete : ""}`}
+                type="button"
+                onClick={() => setSelectedRouteIndex(index)}
+              >
+                <span className={styles.routeTabStatus}>
+                  {selectedCard ? "✓" : index + 1}
+                </span>
+                <span className={styles.routeTabText}>
+                  {routeShortLabel(segment.from)} → {routeShortLabel(segment.to)}
+                </span>
+                <span className={styles.routeTabDate}>
+                  {formatRouteDate(segment.date) || "Select Flight"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className={styles.routeSortBand}>
+          <div className={styles.routeSortHeader}>
+            {sortColumns.map((column) => (
+              <button
+                key={column.key}
+                type="button"
+                className={`${styles.routeSortCell} ${
+                  routeSort.key === column.key ? styles.routeSortCellActive : ""
+                }`}
+                onClick={() => handleRouteSort(column.key)}
+              >
+                <span className={styles.routeSortLabel}>{column.label}</span>
+                <span className={styles.routeSortArrow}>
+                  {routeSort.key === column.key
+                    ? routeSort.direction === "asc"
+                      ? "↑"
+                      : "↓"
+                    : "↓↑"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className={styles.tripCardsContainer}>
           {showLoadingState ? (
             <FlightSearchLoader />
           ) : hasNoData ? (
             <FlightNoResults />
           ) : (
-            visibleTripCards.map((card, index) => (
+            sortedTripCards.map((card, index) => (
               <div key={card.id || index}>
-                <TripCard cardData={card} setFareModalOpen={setFareModalOpen} />
+                <MultiCityFlightCard
+                  cardData={card}
+                  isSelected={selectedForActiveRoute?.id === card.id}
+                  onSelect={handleSelectTripCard}
+                  actionLabel="SELECT FLIGHT"
+                />
                 {index === 2 && <OfferBanner />}
               </div>
             ))
@@ -552,6 +834,62 @@ const MultiCityTrip = ({
             flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           />
         }
+        {selectedCards.length > 0 && (
+          <div className={styles.selectedFlightBar}>
+            <div className={styles.selectedSegments}>
+              {routeSegments.map((segment, index) => {
+                const card = selectedRouteFlights[index];
+                const cardFlight = getCardFlight(card);
+                const airline = getCardAirline(card);
+                const price = getCardPrice(card);
+
+                return (
+                  <button
+                    key={`selected-${segment.from}-${index}`}
+                    className={`${styles.selectedSegment} ${
+                      selectedRouteIndex === index ? styles.selectedSegmentActive : ""
+                    }`}
+                    type="button"
+                    onClick={() => setSelectedRouteIndex(index)}
+                  >
+                    <span className={styles.selectedLogo}>
+                      {card?.depart?.airline?.logo ? (
+                        <img src={card.depart.airline.logo} alt="" />
+                      ) : (
+                        index + 1
+                      )}
+                    </span>
+                    <span>
+                      <strong>
+                        {routeShortLabel(segment.from)} → {routeShortLabel(segment.to)}
+                      </strong>
+                      <small>
+                        {card
+                          ? `${airline?.code || ""} ${cardFlight?.departure?.time || ""}`
+                          : "Select flight"}
+                      </small>
+                      {price ? (
+                        <span className={styles.selectedSegmentPrice}>{price}</span>
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className={styles.selectedTotal}>
+              <span>Total flight cost</span>
+              <strong>{formatSelectedTotal(selectedTotal)}</strong>
+            </div>
+            <button
+              className={styles.nextFlightBtn}
+              type="button"
+              disabled={!selectedForActiveRoute}
+              onClick={handleNextRoute}
+            >
+              {isSelectionComplete ? "VIEW FARES" : "NEXT FLIGHT"}
+            </button>
+          </div>
+        )}
       </section>
 
       <section className={styles.isMobileView}>
@@ -680,7 +1018,6 @@ const MultiCityTrip = ({
             isOpen={fareModalOpen}
             onClose={() => {
               setFareModalOpen(null);
-              setSelectedFlightId(null);
             }}
             flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
           />

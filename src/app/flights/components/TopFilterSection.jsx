@@ -1120,14 +1120,24 @@ const TopFilterSection = ({
                             )}
 
                             {isLastSegment && (
-                              <div
-                                className={`${styles.searchBtn} ${
-                                  isSearchSubmitting ? styles.searchBtnLoading : ""
-                                }`}
-                                onClick={handleSearch}
-                                aria-disabled={isSearchSubmitting}
-                              >
-                                {renderSearchButtonContent()}
+                              <div className={styles.multiCityInlineActions}>
+                                <button
+                                  type="button"
+                                  className={styles.addMultiCityBtn}
+                                  onClick={addMultiSegment}
+                                  disabled={multiSegments.length >= MAX_MULTI_CITY_ROUTES}
+                                >
+                                  + ADD CITY
+                                </button>
+                                <div
+                                  className={`${styles.searchBtn} ${
+                                    isSearchSubmitting ? styles.searchBtnLoading : ""
+                                  }`}
+                                  onClick={handleSearch}
+                                  aria-disabled={isSearchSubmitting}
+                                >
+                                  {renderSearchButtonContent()}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -1137,14 +1147,6 @@ const TopFilterSection = ({
                         className={styles.multiCityActions}
                         style={{ pointerEvents: "auto" }}
                       >
-                        <button
-                          type="button"
-                          className={styles.addMultiCityBtn}
-                          onClick={addMultiSegment}
-                          disabled={multiSegments.length >= MAX_MULTI_CITY_ROUTES}
-                        >
-                          + ADD ANOTHER CITY
-                        </button>
                         <span className={styles.multiCityLimit}>
                           {multiSegments.length}/{MAX_MULTI_CITY_ROUTES} ROUTES
                         </span>
