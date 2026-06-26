@@ -14,8 +14,8 @@ import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
 import {
   confirmHotelBooking,
+  HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
-  refreshHotelSession,
   startHotelBooking,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
@@ -137,6 +137,17 @@ const readStoredHotelSearch = () => {
   }
 };
 
+const readStoredHotelResults = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || depth > 6) return "";
   if (seen.has(value)) return "";
@@ -151,6 +162,45 @@ const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
   }
 
   return "";
+};
+
+const findFirstDeepValue = (value, keys = []) => {
+  for (const key of keys) {
+    const found = findDeepValue(value, key);
+    if (found) return found;
+  }
+
+  return "";
+};
+
+const getHotelInitData = ({
+  request = {},
+  storedHotelSearch = {},
+  storedHotelResults = {},
+}) => {
+  const candidates = [
+    storedHotelResults.data?.init,
+    storedHotelResults.data?.content?.init,
+    storedHotelResults.content?.init,
+    storedHotelResults.init,
+    request.init,
+    request.searchContext?.init,
+    storedHotelSearch.init,
+    request.initResponse?.init,
+    request.initResponse?.data?.init,
+    request.initResponse?.content?.init,
+    request.initResponse?.data?.content?.init,
+    request.searchContext?.initResponse?.init,
+    request.searchContext?.initResponse?.data?.init,
+    request.searchContext?.initResponse?.content?.init,
+    request.searchContext?.initResponse?.data?.content?.init,
+    storedHotelSearch.initResponse?.init,
+    storedHotelSearch.initResponse?.data?.init,
+    storedHotelSearch.initResponse?.content?.init,
+    storedHotelSearch.initResponse?.data?.content?.init,
+  ];
+
+  return candidates.find((item) => item && typeof item === "object") || {};
 };
 
 const pickApiDate = (...values) => {
@@ -578,6 +628,7 @@ const ReviewPage = () => {
       const firstRoom = selectedRooms[0] || roomList[0] || {};
       const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
       const storedHotelSearch = readStoredHotelSearch() || {};
+      const storedHotelResults = readStoredHotelResults() || {};
       const checkInDate = pickApiDate(
         request.checkInDate,
         request.checkInRaw,
@@ -598,16 +649,54 @@ const ReviewPage = () => {
         storedHotelSearch.checkOut,
         storedHotelSearch.initPayload?.checkOut,
       );
-      const searchTracingKey =
-        findDeepValue(request, "searchTracingKey") ||
-        findDeepValue(storedHotelSearch, "searchTracingKey");
-      const refreshPayload = buildRefreshSessionPayload({
+      const initSearchContext = {
+        request,
+        storedHotelSearch,
+        init: request.init || storedHotelSearch.init,
+        initResponse:
+          request.initResponse ||
+          request.searchContext?.initResponse ||
+          storedHotelSearch.initResponse,
+        hotelSearchResults: storedHotelResults,
+        initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
+        searchContext: request.searchContext,
+      };
+      const hotelInitData = getHotelInitData({
+        request,
+        storedHotelSearch,
+        storedHotelResults,
+      });
+      const searchTracingKey = getFirstValue(
+        hotelInitData.searchTracingKey,
+        hotelInitData.searchTracingkey,
+        hotelInitData.search_tracing_key,
+        findFirstDeepValue(initSearchContext, [
+          "searchTracingKey",
+          "searchTracingkey",
+          "search_tracing_key",
+          "searchTracing",
+          "searchtracing",
+        ]),
+      );
+      const searchId = getFirstValue(
+        firstRoom.roomsSearchId,
+        request.roomsSearchId,
+        hotelInitData.searchId,
+        hotelInitData.SearchId,
+        hotelInitData.search_id,
+        findFirstDeepValue(initSearchContext, [
+          "searchId",
+          "SearchId",
+          "search_id",
+        ]),
+      );
+      const initPayload = buildRefreshSessionPayload({
         request,
         storedHotelSearch,
         checkInDate,
         checkOutDate,
       });
-      const missingChildAge = (refreshPayload.rooms || []).some((room) => {
+      const missingChildAge = (initPayload.rooms || []).some((room) => {
         const children = Number(room.children || 0);
         const childAges = Array.isArray(room.childAges) ? room.childAges : [];
 
@@ -621,17 +710,14 @@ const ReviewPage = () => {
         return;
       }
 
-      const refreshResponse = await refreshHotelSession(refreshPayload);
-      const refreshedSearchTracingKey =
-        findDeepValue(refreshResponse, "searchTracingKey") ||
-        findDeepValue(refreshResponse, "searchTracingkey");
-      const refreshedSearchId =
-        findDeepValue(refreshResponse, "searchId") ||
-        findDeepValue(refreshResponse, "SearchId") ||
-        findDeepValue(refreshResponse, "search_id");
+      if (!searchTracingKey || !searchId) {
+        toast.error("Hotel search session is missing. Please search again.");
+        return;
+      }
+
       const payload = {
         ...fallbackHotelStartBookingPayload,
-        TUI: refreshedSearchTracingKey || searchTracingKey || "",
+        TUI: searchTracingKey || "",
         ContactInfo: {
           ...fallbackHotelStartBookingPayload.ContactInfo,
           Title: contact.title,
@@ -670,11 +756,7 @@ const ReviewPage = () => {
           };
         }),
         NetAmount: selectedNetAmount,
-        SearchId:
-          refreshedSearchId ||
-          request.searchId ||
-          request.SearchId ||
-          fallbackHotelStartBookingPayload.SearchId,
+        SearchId: searchId,
         RecommendationId:
           firstRoom.recommendationId ||
           request.recommendationId ||

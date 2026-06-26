@@ -410,6 +410,16 @@ const Page = () => {
         ...searchRequest,
         searchContext: storedHotelSearch,
         initResponse: storedHotelSearch.initResponse,
+        roomsSearchId:
+          selectedRooms[0]?.roomsSearchId ||
+          hotelDetail?.roomsSearchId ||
+          searchRequest.roomsSearchId ||
+          "",
+        roomsSearchTracingKey:
+          selectedRooms[0]?.roomsSearchTracingKey ||
+          hotelDetail?.roomsSearchTracingKey ||
+          searchRequest.roomsSearchTracingKey ||
+          "",
         checkInDate: effectiveCheckIn,
         checkOutDate: effectiveCheckOut,
         checkIn: effectiveCheckInDisplay,
@@ -530,13 +540,16 @@ const Page = () => {
           recommendationId: room.recommendationId,
           supplierName: room.supplierName,
           guestCode: room.guestCode,
+          roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
+          roomsSearchTracingKey:
+            room.roomsSearchTracingKey || hotelDetail?.roomsSearchTracingKey || "",
           occupancies: room.occupancies,
           maxGuestAllowed: displayedGuestCount || occupancyGuestCount || 1,
           netAmount: parseCurrencyNumber(room.price?.offer),
         };
       }),
     );
-  }, [hotelDetail?.rooms, nights]);
+  }, [hotelDetail?.rooms, hotelDetail?.roomsSearchId, hotelDetail?.roomsSearchTracingKey, nights]);
   const removeRoom = useCallback((id) => {
     setRoomList((prev) => {
       const nextRooms = prev.map((room) =>
