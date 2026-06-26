@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./ReviewPage.module.css";
 
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import TravelInsuranceOption from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/travelInsuranceOption/TravelInsuranceOption";
 import CancellationPenalty from "@/app/flight-booking-details/components/passengerDetails/fareDetailsExpandable/component/cancellationPenalty/CancellationPenalty";
@@ -14,10 +13,12 @@ import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
 import { useAuth } from "@/app/context/AuthContext";
 import {
-  confirmHotelBooking,
   HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
   startHotelBooking,
+  HotelPaymentStart,
+  getHotelPaymentGateways,
+  writePendingHotelConfirmBooking,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
@@ -230,11 +231,111 @@ const getResponseValue = (response, key) =>
   response?.data?.result?.[key] ||
   "";
 
+const gatewayMeta = {
+  phonepe: {
+    label: "PhonePe",
+    image: "/images/phonepeLogo.png",
+  },
+  razorpay: {
+    label: "Razorpay",
+    image: "/images/razorpay-icon.png",
+  },
+};
+
+const normalizeGateway = (gateway) => {
+  const value =
+    typeof gateway === "string"
+      ? gateway
+      : gateway?.code ||
+        gateway?.name ||
+        gateway?.gateway ||
+        gateway?.payment_gateway ||
+        gateway?.paymentGateway ||
+        "";
+
+  return String(value || "").trim().toLowerCase();
+};
+
+const normalizeGatewayList = (payload) => {
+  const data = payload?.data || payload || {};
+  const gateways = Array.isArray(data?.available_gateways)
+    ? data.available_gateways
+    : Array.isArray(data?.gateways)
+      ? data.gateways
+      : Array.isArray(data)
+        ? data
+        : [];
+  const availableGateways = gateways.map(normalizeGateway).filter(Boolean);
+
+  return {
+    defaultGateway: normalizeGateway(
+      data?.default_gateway ||
+        data?.defaultGateway ||
+        availableGateways.find((gateway) => gateway === "phonepe") ||
+        availableGateways[0],
+    ),
+    availableGateways,
+  };
+};
+
+const formatGatewayLabel = (gateway) =>
+  gatewayMeta[gateway]?.label ||
+  String(gateway || "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const getHotelPaymentReturnUrl = () => {
+  if (process.env.NEXT_PUBLIC_HOTEL_PAYMENT_REDIRECT_URL) {
+    return process.env.NEXT_PUBLIC_HOTEL_PAYMENT_REDIRECT_URL;
+  }
+
+  if (process.env.NEXT_PUBLIC_PAYMENT_REDIRECT_URL) {
+    return process.env.NEXT_PUBLIC_PAYMENT_REDIRECT_URL;
+  }
+
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/hotel-booking-success`;
+  }
+
+  return "";
+};
+
+const getPaymentRedirectUrl = (response) =>
+  getFirstValue(
+    response?.redirectUrl,
+    response?.redirect_url,
+    response?.paymentUrl,
+    response?.payment_url,
+    response?.url,
+    response?.data?.redirectUrl,
+    response?.data?.redirect_url,
+    response?.data?.paymentUrl,
+    response?.data?.payment_url,
+    response?.data?.url,
+    response?.data?.instrumentResponse?.redirectInfo?.url,
+    response?.instrumentResponse?.redirectInfo?.url,
+  );
+
+const getPaymentMerchantOrderId = (response) =>
+  getFirstValue(
+    response?.merchantOrderId,
+    response?.merchant_order_id,
+    response?.data?.merchantOrderId,
+    response?.data?.merchant_order_id,
+    response?.data?.payment?.merchantOrderId,
+    response?.payment?.merchantOrderId,
+  );
+
 const formatAmount = (value) => {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount)) return "0";
 
   return amount.toFixed(2).replace(/\.00$/, "");
+};
+
+const toAmountNumber = (value) => {
+  const amount = Number(value || 0);
+  return Number.isFinite(amount) ? Number(amount.toFixed(2)) : 0;
 };
 
 const parsePriceChange = (response) => {
@@ -503,11 +604,15 @@ const getRoomTotal = (room) => {
 };
 
 const ReviewPage = () => {
-  const router = useRouter();
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
   const [priceChange, setPriceChange] = useState(null);
   const [pendingConfirmPayload, setPendingConfirmPayload] = useState(null);
+  const [pendingPaymentPayload, setPendingPaymentPayload] = useState(null);
+  const [paymentGateways, setPaymentGateways] = useState(["phonepe"]);
+  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("phonepe");
+  const [paymentGatewaysLoading, setPaymentGatewaysLoading] = useState(false);
+  const [paymentGatewaysError, setPaymentGatewaysError] = useState("");
   const [guestDetails, setGuestDetails] = useState({
     roomGuests: {},
     bookingContact: {},
@@ -543,27 +648,86 @@ const ReviewPage = () => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
 
-  const confirmBooking = async (confirmPayload) => {
-    const res = await confirmHotelBooking(confirmPayload);
-    toast.success("Hotel booking confirmed successfully");
-    const bookingId = res?.booking?.booking_id || res?.booking_id || res?.data?.booking?.booking_id;
-    if (bookingId) {
-      router.push(`/hotel-booking-success?booking_id=${bookingId}`);
+  const redirectToHotelPayment = (paymentResponse, confirmPayload) => {
+    const redirectUrl = getPaymentRedirectUrl(paymentResponse);
+    if (!redirectUrl) {
+      throw new Error("Payment redirect URL is missing.");
     }
+
+    writePendingHotelConfirmBooking({
+      confirmPayload,
+      merchantOrderId: confirmPayload.merchant_order_id,
+      paymentResponse,
+      createdAt: Date.now(),
+    });
+
+    // window.location.assign(redirectUrl);
+    window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
+  useEffect(() => {
+    let isActive = true;
+
+    const loadPaymentGateways = async () => {
+      const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+
+      setPaymentGatewaysLoading(true);
+      setPaymentGatewaysError("");
+      try {
+        const response = await getHotelPaymentGateways({ domain });
+        if (!isActive) return;
+
+        const { availableGateways, defaultGateway } = normalizeGatewayList(response);
+        const nextGateways = availableGateways.length ? availableGateways : ["phonepe"];
+        const nextSelectedGateway =
+          defaultGateway && nextGateways.includes(defaultGateway)
+            ? defaultGateway
+            : nextGateways[0];
+
+        setPaymentGateways(nextGateways);
+        setSelectedPaymentGateway((current) =>
+          current && nextGateways.includes(current) ? current : nextSelectedGateway,
+        );
+      } catch (error) {
+        if (!isActive) return;
+
+        setPaymentGateways(["phonepe"]);
+        setSelectedPaymentGateway((current) => current || "phonepe");
+        setPaymentGatewaysError(error.message || "Unable to load payment gateways.");
+      } finally {
+        if (isActive) setPaymentGatewaysLoading(false);
+      }
+    };
+
+    loadPaymentGateways();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   const handleAcceptPriceChange = async () => {
-    if (!pendingConfirmPayload || bookingLoading) return;
+    if (!pendingConfirmPayload || !pendingPaymentPayload || bookingLoading) return;
 
     setBookingLoading(true);
 
     try {
-      await confirmBooking({
-        ...pendingConfirmPayload,
-        netAmount: formatAmount(priceChange?.newFare || pendingConfirmPayload.netAmount),
+      const nextAmount = formatAmount(priceChange?.newFare || pendingConfirmPayload.netAmount);
+      const paymentResponse = await HotelPaymentStart({
+        ...pendingPaymentPayload,
+        NetAmount: toAmountNumber(nextAmount),
+        amount: toAmountNumber(nextAmount),
       });
+      const merchantOrderId = getPaymentMerchantOrderId(paymentResponse);
+      redirectToHotelPayment(paymentResponse, {
+        ...pendingConfirmPayload,
+        netAmount: nextAmount,
+        merchant_order_id: merchantOrderId,
+      });
+
       setPriceChange(null);
       setPendingConfirmPayload(null);
+      setPendingPaymentPayload(null);
     } catch (error) {
       toast.error(error.message || "Unable to confirm hotel booking.");
     } finally {
@@ -574,12 +738,18 @@ const ReviewPage = () => {
   const handleRejectPriceChange = () => {
     setPriceChange(null);
     setPendingConfirmPayload(null);
+    setPendingPaymentPayload(null);
     toast.info("Booking was not confirmed because the fare changed.");
   };
 
   const handleStartBooking = async () => {
     if (bookingLoading) return;
     if (authLoading) return;
+    if (paymentGatewaysLoading) return;
+    if (!selectedPaymentGateway) {
+      toast.error("Please select a payment option.");
+      return;
+    }
     if (!isLoggedIn) {
       openLoginModal?.();
       return;
@@ -807,27 +977,39 @@ const ReviewPage = () => {
 
       const startBookingResponse = await startHotelBooking(payload);
       const priceChangeInfo = parsePriceChange(startBookingResponse);
+      const paymentTui =
+        getResponseValue(startBookingResponse, "TUI") ||
+        getResponseValue(startBookingResponse, "tui") ||
+        payload.TUI ||
+        "";
+      const transactionId = String(
+        getResponseValue(startBookingResponse, "TransactionID") ||
+          getResponseValue(startBookingResponse, "transactionId") ||
+          "",
+      );
+      const netAmount = formatAmount(
+        payload.NetAmount ||
+          getResponseValue(startBookingResponse, "NetAmount") ||
+          getResponseValue(startBookingResponse, "netAmount") ||
+          "",
+      );
+      const hotelPayment = {
+        domain: "localhost:1337",
+        booking_type: "hotel",
+        payment_gateway: selectedPaymentGateway || "phonepe",
+        payment_mode: selectedPaymentGateway || "phonepe",
+        TUI: paymentTui,
+        TransactionID: transactionId,
+        NetAmount: toAmountNumber(netAmount),
+        amount: toAmountNumber(netAmount),
+        redirectUrl: getHotelPaymentReturnUrl(),
+        message: "Hotel booking payment",
+      };
       const confirmPayload = {
-        transactionId: String(
-          getResponseValue(startBookingResponse, "TransactionID") ||
-            getResponseValue(startBookingResponse, "transactionId") ||
-            "",
-        ),
-        netAmount: String(
-          payload.NetAmount ||
-            getResponseValue(startBookingResponse, "NetAmount") ||
-            getResponseValue(startBookingResponse, "netAmount") ||
-            "",
-        ),
-        merchantId:
-          getResponseValue(startBookingResponse, "merchantId") ||
-          getResponseValue(startBookingResponse, "MerchantId") ||
-          "",
-        TUI:
-          getResponseValue(startBookingResponse, "TUI") ||
-          getResponseValue(startBookingResponse, "tui") ||
-          payload.TUI ||
-          "",
+        transactionId,
+        netAmount,
+        merchant_order_id: "",
+        TUI: paymentTui,
       };
 
       if (priceChangeInfo) {
@@ -836,10 +1018,24 @@ const ReviewPage = () => {
           ...confirmPayload,
           netAmount: formatAmount(priceChangeInfo.newFare),
         });
+        setPendingPaymentPayload({
+          ...hotelPayment,
+          NetAmount: toAmountNumber(priceChangeInfo.newFare),
+          amount: toAmountNumber(priceChangeInfo.newFare),
+        });
         return;
       }
 
-      await confirmBooking(confirmPayload);
+      const hotelPaymentResponse = await HotelPaymentStart(hotelPayment);
+
+      console.log("hotelPaymentResponse", hotelPaymentResponse);
+
+      const finalConfirmPayload = {
+        ...confirmPayload,
+        merchant_order_id: getPaymentMerchantOrderId(hotelPaymentResponse),
+      };
+
+      redirectToHotelPayment(hotelPaymentResponse, finalConfirmPayload);
     } catch (error) {
       toast.error(error.message || "Unable to start hotel booking.");
     } finally {
@@ -1012,13 +1208,49 @@ const ReviewPage = () => {
           <HotelPolicy />
         </div>
       </div>
+
+      <div className={styles.paymentBox}>
+        <h3 className={styles.paymentTitle}>PAY WITH</h3>
+        {paymentGatewaysLoading && (
+          <p className={styles.paymentMessage}>Loading payment options...</p>
+        )}
+        {paymentGatewaysError && (
+          <p className={styles.paymentError}>{paymentGatewaysError}</p>
+        )}
+        <div className={styles.paymentOptions}>
+          {paymentGateways.map((gateway) => (
+            <button
+              type="button"
+              key={gateway}
+              className={`${styles.paymentOption} ${
+                selectedPaymentGateway === gateway ? styles.paymentOptionActive : ""
+              }`}
+              onClick={() => setSelectedPaymentGateway(gateway)}
+              aria-pressed={selectedPaymentGateway === gateway}
+            >
+              <span className={styles.paymentRadio} aria-hidden="true" />
+              <span className={styles.paymentImageWrap}>
+                {gatewayMeta[gateway]?.image ? (
+                  <img src={gatewayMeta[gateway].image} alt="" />
+                ) : (
+                  <span className={styles.paymentGatewayBadge}>
+                    {formatGatewayLabel(gateway).slice(0, 2)}
+                  </span>
+                )}
+              </span>
+              <span className={styles.paymentLabel}>{formatGatewayLabel(gateway)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div
         // onClick={() => setCurrentStep(3)}
         className={styles.continueButtonContainer}
       >
         <button
           className={styles.continueButton}
-          disabled={bookingLoading}
+          disabled={bookingLoading || paymentGatewaysLoading || !selectedPaymentGateway}
           onClick={handleStartBooking}
         >
           {bookingLoading ? "LOADING..." : "CONTINUE"}

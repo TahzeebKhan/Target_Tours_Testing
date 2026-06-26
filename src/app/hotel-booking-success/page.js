@@ -3,8 +3,11 @@
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  confirmHotelBooking,
   retrieveHotelBookingDetails,
   clearHotelBookingSession,
+  clearPendingHotelConfirmBooking,
+  readPendingHotelConfirmBooking,
   readHotelBookingSession,
 } from "@/shared/services/hotelSearch";
 import styles from "./page.module.css";
@@ -13,6 +16,77 @@ import Navbar from "../flight-booking-details/Navbar";
 
 const pickFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
+
+const getMerchantOrderIdFromParams = (searchParams) =>
+  pickFirst(
+    searchParams.get("merchant_order_id"),
+    searchParams.get("merchantOrderId"),
+    searchParams.get("merchantId"),
+    searchParams.get("merchant_id"),
+    searchParams.get("orderId"),
+    searchParams.get("order_id"),
+    searchParams.get("transactionId"),
+    searchParams.get("transaction_id"),
+  );
+
+const getResponseValue = (response, ...keys) => {
+  const sources = [
+    response,
+    response?.data,
+    response?.booking,
+    response?.data?.booking,
+    response?.payment,
+    response?.data?.payment,
+  ];
+
+  for (const source of sources) {
+    if (!source || typeof source !== "object") continue;
+
+    for (const key of keys) {
+      if (source[key] !== undefined && source[key] !== null && source[key] !== "") {
+        return source[key];
+      }
+    }
+  }
+
+  return "";
+};
+
+const buildRetrieveBookingRequest = ({ source = {}, fallback = {} }) => ({
+  booking_id: pickFirst(
+    getResponseValue(
+      source,
+      "booking_id",
+      "bookingId",
+      "BookingConfirmationId",
+      "bookingConfirmationId",
+      "merchant_order_id",
+      "merchantOrderId",
+    ),
+    fallback.booking_id,
+    fallback.bookingId,
+    fallback.merchant_order_id,
+    fallback.merchantOrderId,
+  ),
+  TUI: pickFirst(
+    getResponseValue(source, "TUI", "tui"),
+    fallback.TUI,
+    fallback.tui,
+  ),
+  ReferenceNumber: pickFirst(
+    getResponseValue(
+      source,
+      "ReferenceNumber",
+      "referenceNumber",
+      "TransactionID",
+      "transactionId",
+    ),
+    fallback.ReferenceNumber,
+    fallback.referenceNumber,
+    fallback.TransactionID,
+    fallback.transactionId,
+  ),
+});
 
 const formatCurrency = (value) => {
   const amount =
@@ -37,6 +111,56 @@ const formatDate = (value) => {
   return String(value || "N/A");
 };
 
+const toNumber = (value) => {
+  const amount =
+    typeof value === "string" ? Number(value.replace(/[^\d.-]/g, "")) : Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+};
+
+const toList = (value) => (Array.isArray(value) ? value : []);
+
+const buildHotelAddress = (hotelInfo = {}) => {
+  const address = hotelInfo.HotelAddress || hotelInfo.hotelAddress || {};
+
+  return [
+    address.AddressLine1,
+    address.AddressLine2,
+    address.City,
+    address.State,
+    address.Country,
+    address.ZIP,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};
+
+const normalizeRetrieveRooms = (rooms = [], fallbackRooms = []) => {
+  if (!Array.isArray(rooms) || !rooms.length) return fallbackRooms;
+
+  return rooms.map((room) => {
+    const rates = toList(room.RoomRates);
+    const rate = rates[0] || {};
+
+    return {
+      id: room.RoomId || room.ID || room.id || room.Name,
+      title: room.Name || room.name || room.title || "Room",
+      quantity: 1,
+      pricePerNight: toNumber(rate.TotalRate || room.TotalRate || room.pricePerNight),
+      baseFare: toNumber(rate.BaseRate || rate.TotalRate || room.BaseRate),
+      tax: toNumber(rate.Tax?.Amount || rate.tax?.amount || room.Tax?.Amount),
+      adults: toNumber(room.NumberOfAdults || room.adults),
+      children: toNumber(room.NumberOfChildren || room.children),
+      capacity: room.Capacity || room.capacity || "",
+      refundable: room.Refundable || room.refundable || "",
+      supplierConfirmationNumber:
+        room.SupplierConfirmationNumber || room.HotelConfirmationNumber || "",
+      guests: toList(room.Guests),
+      inclusions: toList(room.RoomInclusions).map((item) => item.name).filter(Boolean),
+      policies: toList(room.RoomPolicies).map((item) => item.name).filter(Boolean),
+    };
+  });
+};
+
 function HotelBookingSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -47,6 +171,19 @@ function HotelBookingSuccessContent() {
 
   const bookingId = useMemo(() => {
     return searchParams.get("booking_id") || "";
+  }, [searchParams]);
+
+  const merchantOrderId = useMemo(() => {
+    if (typeof window === "undefined") return "";
+
+    const pendingBooking = readPendingHotelConfirmBooking();
+
+    return (
+      getMerchantOrderIdFromParams(searchParams) ||
+      pendingBooking?.merchantOrderId ||
+      pendingBooking?.confirmPayload?.merchant_order_id ||
+      ""
+    );
   }, [searchParams]);
 
   useEffect(() => {
@@ -63,9 +200,11 @@ function HotelBookingSuccessContent() {
   useEffect(() => {
     let isActive = true;
 
-    const fetchBookingDetails = async () => {
-      if (!bookingId) {
-        setError("Booking ID is missing.");
+    const loadBookingDetails = async () => {
+      const pendingBooking = readPendingHotelConfirmBooking();
+
+      if (!bookingId && !merchantOrderId && !pendingBooking?.confirmPayload) {
+        setError("Payment details are missing. Please start the booking again.");
         setLoading(false);
         return;
       }
@@ -73,7 +212,48 @@ function HotelBookingSuccessContent() {
       setLoading(true);
       setError("");
       try {
-        const data = await retrieveHotelBookingDetails(bookingId);
+        let data;
+
+        if (bookingId) {
+          data = await retrieveHotelBookingDetails({
+            booking_id: bookingId,
+            TUI: searchParams.get("TUI") || searchParams.get("tui") || "",
+            ReferenceNumber:
+              searchParams.get("ReferenceNumber") ||
+              searchParams.get("referenceNumber") ||
+              searchParams.get("TransactionID") ||
+              searchParams.get("transactionId") ||
+              "",
+          });
+        } else {
+          const confirmPayload = {
+            ...(pendingBooking?.confirmPayload || {}),
+            merchant_order_id:
+              merchantOrderId ||
+              pendingBooking?.merchantOrderId ||
+              pendingBooking?.confirmPayload?.merchant_order_id ||
+              "",
+          };
+
+          if (!confirmPayload.merchant_order_id) {
+            throw new Error("Merchant order ID is missing from the payment response.");
+          }
+
+          const confirmResponse = await confirmHotelBooking(confirmPayload);
+          const retrieveRequest = buildRetrieveBookingRequest({
+            source: confirmResponse,
+            fallback: confirmPayload,
+          });
+
+          if (retrieveRequest.booking_id && retrieveRequest.TUI && retrieveRequest.ReferenceNumber) {
+            data = await retrieveHotelBookingDetails(retrieveRequest);
+          } else {
+            data = confirmResponse;
+          }
+
+          clearPendingHotelConfirmBooking();
+        }
+
         if (!isActive) return;
         setBookingResponse(data);
       } catch (err) {
@@ -87,51 +267,53 @@ function HotelBookingSuccessContent() {
       }
     };
 
-    fetchBookingDetails();
+    loadBookingDetails();
 
     return () => {
       isActive = false;
     };
-  }, [bookingId]);
+  }, [bookingId, merchantOrderId]);
 
   const details = useMemo(() => {
     const apiData = bookingResponse || {};
-    const apiBooking = apiData.booking || apiData.data?.booking || apiData.data || {};
+    const retrieveData =
+      apiData?.data?.HotelInfo || apiData?.data?.Rooms
+        ? apiData.data
+        : apiData?.HotelInfo || apiData?.Rooms
+          ? apiData
+          : apiData.data || apiData;
+    const apiBooking = retrieveData.booking || apiData.booking || apiData.data?.booking || {};
+    const statusMeta = retrieveData.status_meta || apiData.status_meta || apiData.data?.status_meta || {};
+    const hotelInfo = retrieveData.HotelInfo || retrieveData.hotelInfo || {};
+    const contactInfo = retrieveData.ContactInfo || retrieveData.contactInfo || {};
 
     // Fallbacks from session storage
     const sessionHotel = sessionData?.hotel || {};
     const sessionRequest = sessionData?.request || {};
     const sessionRooms = sessionData?.rooms || [];
+    const normalizedRooms = normalizeRetrieveRooms(retrieveData.Rooms, sessionRooms);
 
     // Guest details extraction
-    let guests = [];
-    if (apiBooking.guests && Array.isArray(apiBooking.guests)) {
-      guests = apiBooking.guests;
-    } else if (apiBooking.Rooms && Array.isArray(apiBooking.Rooms)) {
-      guests = apiBooking.Rooms.flatMap(r => r.Guests || []);
-    } else if (sessionData?.Rooms && Array.isArray(sessionData.Rooms)) {
-      guests = sessionData.Rooms.flatMap(r => r.Guests || []);
-    } else if (sessionData?.rooms && Array.isArray(sessionData.rooms)) {
-      // Local session rooms might have guests if mapped during review
-      guests = sessionData.rooms.flatMap(r => r.guests || []);
-    }
+    const guests = normalizedRooms.flatMap((room) => room.guests || []);
 
     // Try to count adults/children
-    const adultCount = pickFirst(sessionRequest.adults, sessionRequest.adultCount, 1);
-    const childCount = pickFirst(sessionRequest.children, sessionRequest.childCount, 0);
+    const adultCount =
+      normalizedRooms.reduce((sum, room) => sum + toNumber(room.adults), 0) ||
+      pickFirst(retrieveData.PaxCount, sessionRequest.adults, sessionRequest.adultCount, 1);
+    const childCount =
+      normalizedRooms.reduce((sum, room) => sum + toNumber(room.children), 0) ||
+      pickFirst(sessionRequest.children, sessionRequest.childCount, 0);
 
     // Date formatting helper
     const checkIn = pickFirst(
-      apiBooking.check_in,
-      apiBooking.checkIn,
-      apiBooking.CheckInDate,
+      retrieveData.CheckInDate,
+      retrieveData.checkInDate,
       sessionRequest.checkInDate,
       sessionRequest.checkIn
     );
     const checkOut = pickFirst(
-      apiBooking.check_out,
-      apiBooking.checkOut,
-      apiBooking.CheckOutDate,
+      retrieveData.CheckOutDate,
+      retrieveData.checkOutDate,
       sessionRequest.checkOutDate,
       sessionRequest.checkOut
     );
@@ -148,87 +330,108 @@ function HotelBookingSuccessContent() {
       nights = sessionRooms[0].nights;
     }
 
-    // Total price estimation
+    const roomBaseFare = normalizedRooms.reduce((sum, room) => sum + toNumber(room.baseFare), 0);
+    const roomTaxes = normalizedRooms.reduce((sum, room) => sum + toNumber(room.tax), 0);
+    const fallbackAmount = sessionRooms.reduce(
+      (sum, r) =>
+        sum +
+        (Number(r.pricePerNight || 0) + Number(r.taxPerNight || 0)) *
+          Number(r.quantity || 0) *
+          Number(r.nights || 1),
+      0,
+    );
     const amount = pickFirst(
-      apiBooking.net_amount,
-      apiBooking.netAmount,
-      apiBooking.amount,
-      apiBooking.total_amount,
-      apiBooking.totalAmount,
+      retrieveData.NetFare,
+      retrieveData.netFare,
+      retrieveData.Amount,
+      retrieveData.amount,
+      roomBaseFare + roomTaxes || "",
       sessionData?.NetAmount,
-      sessionRooms.reduce((sum, r) => sum + (Number(r.pricePerNight || 0) + Number(r.taxPerNight || 0)) * Number(r.quantity || 0) * Number(r.nights || 1), 0)
+      fallbackAmount,
     );
 
-    const baseFare = sessionRooms.reduce((sum, r) => sum + Number(r.pricePerNight || 0) * Number(r.quantity || 0) * Number(r.nights || 1), 0);
-    const taxes = sessionRooms.reduce((sum, r) => sum + Number(r.taxPerNight || 0) * Number(r.quantity || 0) * Number(r.nights || 1), 0);
-
     return {
-      bookingId: bookingId,
+      bookingId: pickFirst(
+        bookingId,
+        apiBooking.booking_id,
+        apiBooking.bookingId,
+        retrieveData.BookingConfirmationId,
+        retrieveData.HotelConfirmationNumber,
+        retrieveData.booking_id,
+        retrieveData.bookingId,
+        "N/A"
+      ),
       providerReference: pickFirst(
         apiBooking.provider_reference,
         apiBooking.providerReference,
-        apiBooking.reference,
-        apiBooking.providerRef,
+        retrieveData.ReferenceNumber,
+        retrieveData.TransactionId,
+        retrieveData.TransactionID,
         "N/A"
       ),
       hotelName: pickFirst(
-        apiBooking.hotel_name,
-        apiBooking.hotelName,
-        apiBooking.hotel?.name,
+        hotelInfo.Name,
+        hotelInfo.name,
         sessionHotel.name,
         "Hotel Booking"
       ),
       hotelAddress: pickFirst(
-        apiBooking.hotel_address,
-        apiBooking.hotelAddress,
-        apiBooking.hotel?.address,
+        buildHotelAddress(hotelInfo),
         sessionHotel.address,
         ""
       ),
       hotelImage: pickFirst(
-        apiBooking.hotel_image,
-        apiBooking.hotelImage,
-        apiBooking.hotel?.image,
+        hotelInfo.heroimage,
+        hotelInfo.heroImage,
+        hotelInfo.image,
         sessionHotel.image,
         "/images/hotelArt1.png"
       ),
       hotelRating: pickFirst(
-        apiBooking.hotel_rating,
-        apiBooking.hotelRating,
-        apiBooking.hotel?.rating,
+        hotelInfo.StarRating,
+        hotelInfo.starRating,
         sessionHotel.rating,
         0
       ),
       checkInDate: checkIn,
       checkOutDate: checkOut,
       nights,
-      roomsCount: sessionRooms.reduce((sum, r) => sum + Number(r.quantity || 0), 0) || 1,
-      rooms: sessionRooms,
+      checkInTime: retrieveData.CheckInTime || "",
+      checkOutTime: retrieveData.CheckOutTime || "",
+      roomsCount: normalizedRooms.length || 1,
+      rooms: normalizedRooms,
       guests,
       adultCount,
       childCount,
       status: pickFirst(
-        apiBooking.status,
-        apiBooking.booking_status,
-        apiBooking.bookingStatus,
+        statusMeta.booking_status,
+        statusMeta.payment_status,
+        statusMeta.akbar_status_label,
+        retrieveData.BookingStatus,
+        retrieveData.CurrentStatus,
+        retrieveData.PaymentStatus,
         "CONFIRMED"
       ),
+      paymentStatus: pickFirst(statusMeta.payment_status, retrieveData.PaymentStatus, "SUCCESS"),
       amount,
-      baseFare: baseFare || Number(amount) * 0.88, // fallback math if session cleared
-      taxes: taxes || Number(amount) * 0.12, // fallback math if session cleared
-      contact: pickFirst(
-        apiBooking.contact_info,
-        apiBooking.contactInfo,
-        apiBooking.ContactInfo,
-        sessionData?.ContactInfo,
-        {}
-      ),
+      baseFare: roomBaseFare || Number(amount) - roomTaxes || Number(amount) * 0.88,
+      taxes: roomTaxes || Number(amount) * 0.12,
+      grossFare: retrieveData.GrossFare || "",
+      contact: Object.keys(contactInfo).length ? contactInfo : sessionData?.ContactInfo || {},
+      facilities: toList(retrieveData.HotelFacilities).map((item) => item.name).filter(Boolean),
+      moreInfo: toList(retrieveData.MoreInfo).filter((item) => item.Description),
+      issuedDate: retrieveData.IssuedDate || "",
+      hotelConfirmationNumber: retrieveData.HotelConfirmationNumber || "",
+      supplierConfirmationNumber:
+        normalizedRooms.find((room) => room.supplierConfirmationNumber)
+          ?.supplierConfirmationNumber || "",
     };
   }, [bookingResponse, sessionData, bookingId]);
 
   const handleDone = () => {
     if (typeof window !== "undefined") {
       clearHotelBookingSession();
+      clearPendingHotelConfirmBooking();
     }
     router.push("/");
   };
@@ -259,8 +462,10 @@ function HotelBookingSuccessContent() {
             <p className={styles.subtitle}>{error}</p>
             <div className={styles.infoGrid} style={{ marginTop: "20px", marginBottom: "20px" }}>
               <div>
-                <span>Booking ID Requested</span>
-                <strong style={{ color: "#b42318" }}>{bookingId}</strong>
+                <span>{bookingId ? "Booking ID Requested" : "Merchant Order ID"}</span>
+                <strong style={{ color: "#b42318" }}>
+                  {bookingId || merchantOrderId || "N/A"}
+                </strong>
               </div>
             </div>
             <div className={styles.actions}>
@@ -304,18 +509,20 @@ function HotelBookingSuccessContent() {
                   {details.hotelAddress && <p className={styles.address}>{details.hotelAddress}</p>}
 
                   <div className={styles.stayDates}>
-                    <div className={styles.dateBlock}>
-                      <span className={styles.dateLabel}>Check-In</span>
-                      <strong className={styles.dateVal}>{formatDate(details.checkInDate)}</strong>
-                    </div>
+	                    <div className={styles.dateBlock}>
+	                      <span className={styles.dateLabel}>Check-In</span>
+	                      <strong className={styles.dateVal}>{formatDate(details.checkInDate)}</strong>
+	                      {details.checkInTime && <span className={styles.dateTime}>{details.checkInTime}</span>}
+	                    </div>
                     <div className={styles.dateDivider}>
                       <span className={styles.nightsBadge}>{details.nights} {details.nights === 1 ? 'Night' : 'Nights'}</span>
                       <div className={styles.dividerLine}></div>
                     </div>
-                    <div className={styles.dateBlock}>
-                      <span className={styles.dateLabel}>Check-Out</span>
-                      <strong className={styles.dateVal}>{formatDate(details.checkOutDate)}</strong>
-                    </div>
+	                    <div className={styles.dateBlock}>
+	                      <span className={styles.dateLabel}>Check-Out</span>
+	                      <strong className={styles.dateVal}>{formatDate(details.checkOutDate)}</strong>
+	                      {details.checkOutTime && <span className={styles.dateTime}>{details.checkOutTime}</span>}
+	                    </div>
                   </div>
                 </div>
               </div>
@@ -328,11 +535,17 @@ function HotelBookingSuccessContent() {
                     <span>Room Charges ({details.nights} {details.nights === 1 ? 'night' : 'nights'})</span>
                     <strong>{formatCurrency(details.baseFare)}</strong>
                   </div>
-                  <div>
-                    <span>Taxes & Service Fees</span>
-                    <strong>{formatCurrency(details.taxes)}</strong>
-                  </div>
-                </div>
+	                  <div>
+	                    <span>Taxes & Service Fees</span>
+	                    <strong>{formatCurrency(details.taxes)}</strong>
+	                  </div>
+	                  {details.grossFare && (
+	                    <div>
+	                      <span>Gross Fare</span>
+	                      <strong>{formatCurrency(details.grossFare)}</strong>
+	                    </div>
+	                  )}
+	                </div>
                 <div className={styles.totalLine}>
                   <span>Total Amount Paid</span>
                   <strong>{formatCurrency(details.amount)}</strong>
@@ -353,15 +566,31 @@ function HotelBookingSuccessContent() {
                 <span>Provider Reference</span>
                 <strong>{details.providerReference}</strong>
               </div>
-              <div>
-                <span>Status</span>
-                <strong className={styles.statusColor}>{details.status}</strong>
-              </div>
-              <div>
-                <span>Rooms / Capacity</span>
-                <strong>{details.roomsCount} {details.roomsCount === 1 ? 'Room' : 'Rooms'} ({details.adultCount} ADT, {details.childCount} CHD)</strong>
-              </div>
-            </div>
+	              <div>
+	                <span>Status</span>
+	                <strong className={styles.statusColor}>{details.status}</strong>
+	              </div>
+	              <div>
+	                <span>Payment Status</span>
+	                <strong className={styles.statusColor}>{details.paymentStatus}</strong>
+	              </div>
+	              <div>
+	                <span>Rooms / Capacity</span>
+	                <strong>{details.roomsCount} {details.roomsCount === 1 ? 'Room' : 'Rooms'} ({details.adultCount} ADT, {details.childCount} CHD)</strong>
+	              </div>
+	              {(details.supplierConfirmationNumber || details.hotelConfirmationNumber) && (
+	                <div>
+	                  <span>Confirmation No.</span>
+	                  <strong>{details.supplierConfirmationNumber || details.hotelConfirmationNumber}</strong>
+	                </div>
+	              )}
+	              {details.issuedDate && (
+	                <div>
+	                  <span>Issued Date</span>
+	                  <strong>{details.issuedDate}</strong>
+	                </div>
+	              )}
+	            </div>
 
             {/* Room Details & Guests */}
             {details.rooms && details.rooms.length > 0 && (
@@ -370,17 +599,51 @@ function HotelBookingSuccessContent() {
                   <h3>Rooms Reserved</h3>
                 </div>
                 <div className={styles.roomsList}>
-                  {details.rooms.map((room, idx) => (
-                    <div key={idx} className={styles.roomRow}>
-                      <div className={styles.roomMain}>
-                        <strong>{room.title}</strong>
-                        <span>Qty: {room.quantity} | ₹ {Number(room.pricePerNight).toFixed(2)} per night</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+	                  {details.rooms.map((room, idx) => (
+	                    <div key={idx} className={styles.roomRow}>
+	                      <div className={styles.roomMain}>
+	                        <strong>{room.title}</strong>
+	                        <span>
+	                          Qty: {room.quantity} | {room.adults || 0} ADT, {room.children || 0} CHD | {formatCurrency(room.pricePerNight)}
+	                        </span>
+	                        {room.inclusions?.length > 0 && (
+	                          <span>{room.inclusions.join(" • ")}</span>
+	                        )}
+	                      </div>
+	                    </div>
+	                  ))}
+	                </div>
+	              </>
+	            )}
+
+	            {details.facilities?.length > 0 && (
+	              <>
+	                <div className={styles.sectionHeader}>
+	                  <h3>Hotel Facilities</h3>
+	                </div>
+	                <div className={styles.chipList}>
+	                  {details.facilities.slice(0, 18).map((facility, idx) => (
+	                    <span key={`${facility}-${idx}`}>{facility}</span>
+	                  ))}
+	                </div>
+	              </>
+	            )}
+
+	            {details.moreInfo?.length > 0 && (
+	              <>
+	                <div className={styles.sectionHeader}>
+	                  <h3>Important Information</h3>
+	                </div>
+	                <div className={styles.policyList}>
+	                  {details.moreInfo.slice(0, 8).map((item, idx) => (
+	                    <div key={`${item.Name}-${idx}`}>
+	                      <strong>{item.Name || item.Code || "Policy"}</strong>
+	                      <span>{item.Description}</span>
+	                    </div>
+	                  ))}
+	                </div>
+	              </>
+	            )}
 
             {/* Guest details if available */}
             {details.guests && details.guests.length > 0 && (
