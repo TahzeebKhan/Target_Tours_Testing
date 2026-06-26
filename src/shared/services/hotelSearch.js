@@ -5,6 +5,7 @@ export const HOTEL_SEARCH_RESULTS_KEY = "hotelSearchResults";
 export const HOTEL_SEARCH_RESULTS_EVENT = "hotel-search-results";
 export const HOTEL_DETAILS_KEY = "hotelDetails";
 export const HOTEL_BOOKING_SESSION_KEY = "hotelBookingSession";
+export const HOTEL_PENDING_CONFIRM_BOOKING_KEY = "hotelPendingConfirmBooking";
 export const HOTEL_BOOKING_SESSION_DURATION_MS = 20 * 60 * 1000;
 
 let inMemoryHotelBookingSession = null;
@@ -141,6 +142,42 @@ export const readHotelBookingSession = () => {
     return inMemoryHotelBookingSession;
   } catch {
     return null;
+  }
+};
+
+export const writePendingHotelConfirmBooking = (value) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    const serializedValue = JSON.stringify(value);
+    window.sessionStorage.setItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY, serializedValue);
+    window.localStorage.setItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY, serializedValue);
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+export const readPendingHotelConfirmBooking = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw =
+      window.sessionStorage.getItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY) ||
+      window.localStorage.getItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const clearPendingHotelConfirmBooking = () => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY);
+    window.localStorage.removeItem(HOTEL_PENDING_CONFIRM_BOOKING_KEY);
+  } catch {
+    // Ignore storage failures.
   }
 };
 
@@ -471,6 +508,59 @@ export const startHotelBooking = async (payload = {}) => {
   return data;
 };
 
+export const getHotelPaymentGateways = async ({ domain } = {}) => {
+  const url = new URL("/api/payment-gateways", normalizeBaseUrl());
+  url.searchParams.set("domain", domain || getDomain());
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Unable to load payment gateways");
+  }
+
+  return data;
+};
+
+export const HotelPaymentStart = async (payload = {}) => {
+  const paymentGateway = String(
+    payload.payment_gateway || payload.payment_mode || "phonepe",
+  )
+    .trim()
+    .toLowerCase();
+  const url = new URL(
+    `/api/payment-gateways/${paymentGateway}/pay`,
+    normalizeBaseUrl(),
+  );
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      domain: payload.domain || getDomain(),
+      payment_gateway: paymentGateway,
+      payment_mode: paymentGateway,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel booking Payment failed");
+  }
+
+  return data;
+};
+
 export const refreshHotelSession = async (payload = {}) => {
   const url = new URL("/api/hotel-search/refresh-session", normalizeBaseUrl());
 
@@ -517,8 +607,26 @@ export const confirmHotelBooking = async (payload = {}) => {
   return data;
 };
 
-export const retrieveHotelBookingDetails = async (bookingId) => {
+export const retrieveHotelBookingDetails = async (request = {}) => {
   const url = new URL("/api/hotel-search/retrieve-booking-details", normalizeBaseUrl());
+  const payload =
+    typeof request === "string"
+      ? { booking_id: request }
+      : {
+          booking_id:
+            request.booking_id ||
+            request.bookingId ||
+            request.bookingConfirmationId ||
+            request.merchantOrderId ||
+            "",
+          TUI: request.TUI || request.tui || "",
+          ReferenceNumber:
+            request.ReferenceNumber ||
+            request.referenceNumber ||
+            request.TransactionID ||
+            request.transactionId ||
+            "",
+        };
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -526,7 +634,7 @@ export const retrieveHotelBookingDetails = async (bookingId) => {
     credentials: "include",
     cache: "no-store",
     body: JSON.stringify({
-      booking_id: bookingId,
+      ...payload,
       domain: getDomain(),
     }),
   });
