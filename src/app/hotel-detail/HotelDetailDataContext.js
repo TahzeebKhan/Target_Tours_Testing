@@ -101,6 +101,32 @@ const getApiFailureMessage = (payload) => {
   return failure?.message || "";
 };
 
+const getRoomsResponseSearchId = (payload = {}) =>
+  getFirst(
+    payload?.data?.searchId,
+    payload?.data?.SearchId,
+    payload?.data?.search_id,
+    payload?.data?.content?.searchId,
+    payload?.data?.content?.SearchId,
+    payload?.content?.searchId,
+    payload?.content?.SearchId,
+    payload?.searchId,
+    payload?.SearchId,
+    payload?.search_id,
+  );
+
+const getRoomsResponseSearchTracingKey = (payload = {}) =>
+  getFirst(
+    payload?.data?.searchTracingKey,
+    payload?.data?.searchTracingkey,
+    payload?.data?.search_tracing_key,
+    payload?.data?.content?.searchTracingKey,
+    payload?.content?.searchTracingKey,
+    payload?.searchTracingKey,
+    payload?.searchTracingkey,
+    payload?.search_tracing_key,
+  );
+
 const findFirstObject = (value, predicate, depth = 0, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || depth > 6) return null;
   if (seen.has(value)) return null;
@@ -473,6 +499,8 @@ const normalizeRooms = (data = {}, hotel = {}) => {
   const rooms = getRecommendationRooms(data);
   const images = collectImages(data).length ? collectImages(data) : FALLBACK_IMAGES;
   const fallbackPrice = getRateValue(hotel);
+  const roomsSearchId = getRoomsResponseSearchId(data);
+  const roomsSearchTracingKey = getRoomsResponseSearchTracingKey(data);
 
   if (!rooms.length) {
     return [];
@@ -567,6 +595,8 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       recommendationId: room.recommendationId || recommendation.recommendationId || "",
       supplierName: room.providerName || recommendation.providerName || "",
       guestCode: room.guestCode || room.GuestCode || "",
+      roomsSearchId,
+      roomsSearchTracingKey,
       occupancies,
       raw: room,
       image: (roomImages.length ? roomImages : images).map((img) => ({ img })),
@@ -830,6 +860,8 @@ const normalizeHotelDetail = (
     amenities: facilities,
     policies: normalizePolicies(data, hotel),
     rooms: roomsPayload ? normalizeRooms(roomsPayload, { ...hotel, facilities }) : [],
+    roomsSearchId: roomsPayload ? getRoomsResponseSearchId(roomsPayload) : "",
+    roomsSearchTracingKey: roomsPayload ? getRoomsResponseSearchTracingKey(roomsPayload) : "",
     roomsErrorMessage: roomsErrorMessage || (roomsPayload ? getApiFailureMessage(roomsPayload) : ""),
     reviews,
     ratingBars,
