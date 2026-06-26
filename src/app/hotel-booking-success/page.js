@@ -4,7 +4,8 @@ import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   retrieveHotelBookingDetails,
-  HOTEL_BOOKING_SESSION_KEY,
+  clearHotelBookingSession,
+  readHotelBookingSession,
 } from "@/shared/services/hotelSearch";
 import styles from "./page.module.css";
 import BrandLogo from "@/shared/components/BrandLogo";
@@ -52,10 +53,7 @@ function HotelBookingSuccessContent() {
     // Load local booking session for fallback details
     if (typeof window !== "undefined") {
       try {
-        const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
-        if (raw) {
-          setSessionData(JSON.parse(raw));
-        }
+        setSessionData(readHotelBookingSession());
       } catch (err) {
         console.error("Failed to load hotel booking session data", err);
       }
@@ -230,7 +228,7 @@ function HotelBookingSuccessContent() {
 
   const handleDone = () => {
     if (typeof window !== "undefined") {
-      window.sessionStorage.removeItem(HOTEL_BOOKING_SESSION_KEY);
+      clearHotelBookingSession();
     }
     router.push("/");
   };

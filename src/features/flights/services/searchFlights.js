@@ -257,8 +257,22 @@ const findFirstArrayAtPaths = (source, paths) => {
   return [];
 };
 
+const findFirstItemsAtPaths = (source, paths) => {
+  for (const path of paths) {
+    let current = source;
+    for (const key of path) {
+      current = current?.[key];
+    }
+
+    if (Array.isArray(current)) return current;
+    if (current && typeof current === "object") return [current];
+  }
+
+  return [];
+};
+
 const getFlightItems = (payload) =>
-  findFirstArrayAtPaths(payload, [
+  findFirstItemsAtPaths(payload, [
     ["data", "result", "flights"],
     ["data", "result", "results"],
     ["data", "flights"],
@@ -291,6 +305,50 @@ const getPayloadType = (payload) =>
       "",
   ).toUpperCase();
 
+const normalizeRouteKey = (value = "") =>
+  String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ")
+    .replace(/\s*(?:->|→)\s*/g, " -> ");
+
+const getPayloadResultData = (payload) => {
+  const payloadData = payload?.data || payload || {};
+  return payloadData?.result && typeof payloadData.result === "object"
+    ? payloadData.result
+    : payloadData;
+};
+
+const getPayloadRouteKey = (payload) => {
+  const resultData = getPayloadResultData(payload);
+  const routeText =
+    resultData?.route ||
+    resultData?.meta?.route ||
+    payload?.route ||
+    payload?.data?.route ||
+    payload?.data?.meta?.route ||
+    "";
+
+  if (routeText) return normalizeRouteKey(routeText);
+
+  const origin =
+    resultData?.trip?.origin ||
+    resultData?.origin ||
+    payload?.origin ||
+    payload?.data?.origin ||
+    "";
+  const destination =
+    resultData?.trip?.destination ||
+    resultData?.destination ||
+    payload?.destination ||
+    payload?.data?.destination ||
+    "";
+
+  return origin && destination
+    ? normalizeRouteKey(`${origin} -> ${destination}`)
+    : "";
+};
+
 const isFlightSearchError = (payload) =>
   Boolean(payload?.error || payload?.data?.error) ||
   ["ERROR", "FLIGHT_SEARCH_ERROR", "SEARCH_ERROR"].includes(getPayloadType(payload));
@@ -314,13 +372,32 @@ const getApiMessage = (payload) =>
 
 const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
   const flights = [];
+  const tripResults = {};
   const seen = new Set();
   let latestPayload = initResponse || {};
 
   chunks.forEach((chunk) => {
     latestPayload = chunk || latestPayload;
-    getFlightItems(chunk).forEach((flight, index) => {
-      const key = String(
+    const routeKey = getPayloadRouteKey(chunk);
+    const chunkFlights = getFlightItems(chunk);
+
+    if (routeKey && !tripResults[routeKey]) {
+      const resultData = getPayloadResultData(chunk);
+      tripResults[routeKey] = {
+        route: resultData?.route || resultData?.meta?.route || routeKey,
+        trip: resultData?.trip || null,
+        meta: resultData?.meta || {},
+        cheapest: resultData?.cheapest || null,
+        fastest: resultData?.fastest || null,
+        filters: resultData?.filters || null,
+        aircrafts: resultData?.aircrafts || resultData?.filters?.aircrafts || [],
+        airlines: resultData?.airlines || resultData?.filters?.airlines || [],
+        flights: [],
+      };
+    }
+
+    chunkFlights.forEach((flight, index) => {
+      const flightKey = String(
         flight?.id ||
           flight?.flightId ||
           flight?.resultIndex ||
@@ -329,18 +406,19 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
           JSON.stringify(flight).slice(0, 500) ||
           index,
       );
+      const key = `${routeKey || "ALL"}:${flightKey}`;
 
       if (seen.has(key)) return;
       seen.add(key);
       flights.push(flight);
+      if (routeKey) {
+        tripResults[routeKey].flights.push(flight);
+      }
     });
   });
 
   const payloadData = latestPayload?.data || latestPayload || {};
-  const resultData =
-    payloadData?.result && typeof payloadData.result === "object"
-      ? payloadData.result
-      : payloadData;
+  const resultData = getPayloadResultData(latestPayload);
   const pagination = {
     page: Number(params.page || 1),
     limit: Number(params.limit || 20),
@@ -358,6 +436,7 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
       ...resultData,
       flights,
       results: flights,
+      tripResults,
       pagination,
       filters: resultData?.filters || payloadData?.filters || latestPayload?.filters,
       meta: {

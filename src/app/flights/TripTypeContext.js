@@ -508,14 +508,7 @@ export function TripTypeProvider({ children }) {
     }
     nextParams.delete("page");
 
-    refreshFlightSearch();
     router.push(`/flights?${nextParams.toString()}`);
-
-    // Force a fresh API request on every Search click, even with same params.
-    queryClient.invalidateQueries({
-      queryKey: ["search-flights"],
-      refetchType: "active",
-    });
 
     window.setTimeout(() => {
       setIsSearchSubmitting(false);

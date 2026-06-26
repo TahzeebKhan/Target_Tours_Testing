@@ -22,6 +22,15 @@ const getFirstArrayAtPaths = (obj, paths) => {
   return [];
 };
 
+const getFirstItemsAtPaths = (obj, paths) => {
+  for (const path of paths) {
+    const value = path.length ? getByPath(obj, path) : obj;
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === "object") return [value];
+  }
+  return [];
+};
+
 const readNumber = (...values) => {
   for (const value of values) {
     if (value === undefined || value === null || value === "") continue;
@@ -1660,6 +1669,56 @@ const buildMultiCard = (flight, index, options = {}) => {
   return buildRoundCard(flight, index, options);
 };
 
+const normalizeRouteKey = (value = "") =>
+  String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ")
+    .replace(/\s*(?:->|→)\s*/g, " -> ");
+
+const buildMappedMultiRouteResult = ({
+  routePayload,
+  routeKey,
+  adults,
+  travelClass,
+  returnDate,
+  responseBookingMeta,
+}) => {
+  const routeFlights = getFirstItemsAtPaths(routePayload || {}, [
+    ["flights"],
+    ["results"],
+    ["data", "flights"],
+    ["data", "results"],
+  ]);
+  const routeText = routePayload?.route || routePayload?.meta?.route || routeKey || "";
+  const [fallbackFrom, fallbackTo] = String(routeText).split(/\s*->\s*/);
+  const mapped = routeFlights.map((flight, index) =>
+    buildMultiCard(flight, index, {
+      adults,
+      fallbackCabinClass: travelClass,
+      returnDate,
+      fallbackFrom: fallbackFrom || "Jakarta (CGK)",
+      fallbackTo: fallbackTo || "Singapore (SIN)",
+      responseBookingMeta,
+    })
+  );
+
+  return {
+    route: routeText,
+    trip: routePayload?.trip || null,
+    meta: routePayload?.meta || {},
+    filters: routePayload?.filters || null,
+    aircrafts: routePayload?.aircrafts || routePayload?.filters?.aircrafts || [],
+    airlines: routePayload?.airlines || routePayload?.filters?.airlines || [],
+    sortHighlights: {
+      cheapest: extractSortHighlight(routePayload, "cheapest"),
+      fastest: extractSortHighlight(routePayload, "fastest"),
+    },
+    multi: mapped.map(toRoundOrMultiItem),
+    multiTripCards: mapped.map((item) => item.tripCard),
+  };
+};
+
 export const mapFlightSearchResponse = ({
   response,
   tripType,
@@ -1759,6 +1818,28 @@ export const mapFlightSearchResponse = ({
     );
     const multiItems = multiMapped.map(toRoundOrMultiItem);
     const multiTripCards = multiMapped.map((item) => item.tripCard);
+    const rawTripResults =
+      payload?.tripResults ||
+      payload?.data?.tripResults ||
+      payload?.result?.tripResults ||
+      {};
+    const multiRouteResults = Object.entries(rawTripResults).reduce(
+      (acc, [routeKey, routePayload]) => {
+        const normalizedKey = normalizeRouteKey(routeKey || routePayload?.route);
+        if (!normalizedKey) return acc;
+
+        acc[normalizedKey] = buildMappedMultiRouteResult({
+          routePayload,
+          routeKey: normalizedKey,
+          adults,
+          travelClass,
+          returnDate,
+          responseBookingMeta,
+        });
+        return acc;
+      },
+      {},
+    );
 
     return {
       oneway: [],
@@ -1766,6 +1847,7 @@ export const mapFlightSearchResponse = ({
       roundTripCards: [],
       multi: multiItems,
       multiTripCards,
+      multiRouteResults,
       pagination,
       raw: payload,
       sortHighlights,

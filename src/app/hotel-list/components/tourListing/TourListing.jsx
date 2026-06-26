@@ -126,16 +126,37 @@ const getHotelSearchMeta = (...sources) => {
   for (const source of sources) {
     if (!source || typeof source !== "object") continue;
 
-    const searchId =
-      source.searchId ||
-      source.search_id ||
-      source.hotelSearchId ||
-      source.hotel_search_id;
-    const requestId = source.requestId || source.request_id;
-    const hotelSearchKey = source.hotel_search_key || source.hotelSearchKey;
+    const candidates = [
+      source,
+      source.init,
+      source.data?.init,
+      source.content?.init,
+      source.data?.content?.init,
+    ].filter(Boolean);
+    const findMetaValue = (...keys) => {
+      for (const item of candidates) {
+        for (const key of keys) {
+          if (item?.[key]) return item[key];
+        }
+      }
 
-    if (searchId || requestId || hotelSearchKey) {
-      return { searchId, requestId, hotelSearchKey };
+      return "";
+    };
+    const searchId = findMetaValue("searchId", "search_id");
+    const hotelSearchId =
+      findMetaValue(
+        "hotelSearchId",
+        "hotel_search_id",
+        "HotelSearchId",
+        "hotelSearchID",
+        "hotel_search_key",
+        "hotelSearchKey",
+      );
+    const requestId = findMetaValue("requestId", "request_id");
+    const hotelSearchKey = findMetaValue("hotel_search_key", "hotelSearchKey");
+
+    if (searchId || hotelSearchId || requestId || hotelSearchKey) {
+      return { searchId, hotelSearchId, requestId, hotelSearchKey };
     }
   }
 
@@ -414,10 +435,19 @@ export const getHotelDetailsPayload = (hotel = {}) => ({
   searchId: String(
     hotel.searchId ||
       hotel.search_id ||
-      hotel.hotelSearchId ||
-      hotel.hotel_search_id ||
       hotel.raw?.searchId ||
       hotel.raw?.search_id ||
+      "",
+  ).trim(),
+  hotelSearchId: String(
+    hotel.hotelSearchId ||
+      hotel.hotel_search_id ||
+      hotel.HotelSearchId ||
+      hotel.hotelSearchID ||
+      hotel.raw?.hotelSearchId ||
+      hotel.raw?.hotel_search_id ||
+      hotel.raw?.HotelSearchId ||
+      hotel.raw?.hotelSearchID ||
       "",
   ).trim(),
   hotelId: String(
@@ -461,6 +491,12 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
       `${hotel.name || "hotel"}-${index}`,
     hotelId: hotelId ? String(hotelId) : "",
     searchId: hotel.searchId || hotel.search_id || "",
+    hotelSearchId:
+      hotel.hotelSearchId ||
+      hotel.hotel_search_id ||
+      hotel.HotelSearchId ||
+      hotel.hotelSearchID ||
+      "",
     priceProvider: priceProvider ? String(priceProvider) : "",
     image: getHotelImage(hotel),
     route: addressParts.join(", ") || "Address not available",
@@ -506,6 +542,7 @@ const INITIAL_VIRTUAL_ITEM_COUNT = 24;
 export const getHotelDetailUrl = ({
   hotelId,
   searchId,
+  hotelSearchId,
   priceProvider,
   checkIn,
   checkOut,
@@ -513,6 +550,7 @@ export const getHotelDetailUrl = ({
   const params = new URLSearchParams();
   params.set("hotelId", hotelId || "");
   params.set("searchId", searchId || "");
+  if (hotelSearchId) params.set("hotelSearchId", hotelSearchId);
   params.set("priceProvider", priceProvider || "");
   if (checkIn) params.set("checkIn", checkIn);
   if (checkOut) params.set("checkOut", checkOut);
@@ -769,6 +807,17 @@ const readStoredHotelSearch = () => {
   }
 };
 
+const readStoredHotelResults = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || depth > 7) return "";
   if (seen.has(value)) return "";
@@ -787,7 +836,11 @@ const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
 
 const getSearchParam = (searchParams, ...keys) => {
   for (const key of keys) {
-    const value = searchParams?.get?.(key);
+    const value =
+      searchParams?.get?.(key) ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get(key)
+        : "");
     if (value) return value;
   }
 
@@ -796,6 +849,7 @@ const getSearchParam = (searchParams, ...keys) => {
 
 export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
   const storedHotelSearch = readStoredHotelSearch() || {};
+  const storedHotelResults = readStoredHotelResults() || {};
   const payload = getHotelDetailsPayload(hotel);
 
   return {
@@ -805,6 +859,28 @@ export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
       getSearchParam(searchParams, "searchId", "searchid") ||
       findDeepValue(storedHotelSearch, "searchId") ||
       findDeepValue(storedHotelSearch, "search_id"),
+    hotelSearchId:
+      payload.hotelSearchId ||
+      getSearchParam(
+        searchParams,
+        "hotelSearchId",
+        "hotelsearchid",
+        "hotel_search_id",
+        "hotel_search_key",
+        "hotelSearchKey",
+      ) ||
+      findDeepValue(hotel, "hotelSearchId") ||
+      findDeepValue(hotel, "hotel_search_id") ||
+      findDeepValue(hotel, "hotel_search_key") ||
+      findDeepValue(hotel, "hotelSearchKey") ||
+      findDeepValue(storedHotelSearch, "hotelSearchId") ||
+      findDeepValue(storedHotelSearch, "hotel_search_id") ||
+      findDeepValue(storedHotelSearch, "hotel_search_key") ||
+      findDeepValue(storedHotelSearch, "hotelSearchKey") ||
+      findDeepValue(storedHotelResults, "hotelSearchId") ||
+      findDeepValue(storedHotelResults, "hotel_search_id") ||
+      findDeepValue(storedHotelResults, "hotel_search_key") ||
+      findDeepValue(storedHotelResults, "hotelSearchKey"),
     hotelId:
       payload.hotelId ||
       String(
@@ -899,8 +975,9 @@ const TourListing = () => {
     if (!hotel) return;
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
+     console.log("payload",payload)
 
-    if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
+    if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
       return;
     }
@@ -948,6 +1025,8 @@ const TourListing = () => {
       const withSearchMeta = (hotel) => ({
         ...hotel,
         searchId: hotel.searchId || hotel.search_id || meta.searchId,
+        hotelSearchId:
+          hotel.hotelSearchId || hotel.hotel_search_id || meta.hotelSearchId,
         requestId: hotel.requestId || hotel.request_id || meta.requestId,
         hotelSearchKey:
           hotel.hotelSearchKey || hotel.hotel_search_key || meta.hotelSearchKey,

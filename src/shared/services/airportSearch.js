@@ -37,7 +37,7 @@ const toSuggestion = (airport = {}) => {
 
 export const fetchAirportSuggestions = async (query) => {
   const q = String(query || "").trim();
-  if (!q) return [];
+  if (q.length < 2) return [];
 
   const url = new URL("/api/airports/search", normalizeBaseUrl());
   url.searchParams.set("q", q);

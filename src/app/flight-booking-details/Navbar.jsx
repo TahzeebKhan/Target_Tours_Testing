@@ -27,7 +27,14 @@ const removeBookingFallbackFromUrl = () => {
   window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 };
 
-const Navbar = () => {
+const Navbar = ({
+  sessionExpiresAt: sessionExpiresAtOverride = null,
+  onSessionExpired,
+  sessionExpiredMessage = "Your flight booking session has expired. Please search again to continue.",
+  sessionExpiredSubText = "Search again to refresh fares and availability.",
+  sessionExpiredActionLabel = "SEARCH FLIGHTS",
+  sessionExpiredRedirectPath = "/flights",
+}) => {
   const { isLoggedIn, profile: userProfile, user } = useAuth();
   const flightBooking = useOptionalFlightBooking();
   const bookingSession = flightBooking?.bookingSession || null;
@@ -39,7 +46,8 @@ const Navbar = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [remainingMs, setRemainingMs] = useState(0);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
-  const sessionExpiresAt = getFlightBookingSessionExpiry(bookingSession);
+  const sessionExpiresAt =
+    sessionExpiresAtOverride || getFlightBookingSessionExpiry(bookingSession);
 
   useEffect(() => {
     setIsMounted(true);
@@ -56,9 +64,13 @@ const Navbar = () => {
       setRemainingMs(nextRemainingMs);
 
       if (nextRemainingMs <= 0) {
-        clearFlightBookingSession();
-        removeBookingFallbackFromUrl();
-        setBookingSession?.(null);
+        if (sessionExpiresAtOverride) {
+          onSessionExpired?.();
+        } else {
+          clearFlightBookingSession();
+          removeBookingFallbackFromUrl();
+          setBookingSession?.(null);
+        }
         setIsSessionExpiredModalOpen(true);
       }
     };
@@ -67,11 +79,11 @@ const Navbar = () => {
     const timer = window.setInterval(updateRemainingTime, 1000);
 
     return () => window.clearInterval(timer);
-  }, [router, sessionExpiresAt, setBookingSession]);
+  }, [onSessionExpired, sessionExpiresAt, sessionExpiresAtOverride, setBookingSession]);
 
   const handleSessionExpiredClose = () => {
     setIsSessionExpiredModalOpen(false);
-    router.replace("/flights");
+    router.replace(sessionExpiredRedirectPath);
   };
   const displayName =
     userProfile?.display_name ||
@@ -86,9 +98,9 @@ const Navbar = () => {
     <>
       <SessionExpiredModal
         isOpen={isSessionExpiredModalOpen}
-        message="Your flight booking session has expired. Please search again to continue."
-        subText="Search again to refresh fares and availability."
-        actionLabel="SEARCH FLIGHTS"
+        message={sessionExpiredMessage}
+        subText={sessionExpiredSubText}
+        actionLabel={sessionExpiredActionLabel}
         onClose={handleSessionExpiredClose}
       />
       {" "}

@@ -190,10 +190,13 @@ export const fetchTours = async ({ pageParam = 1, queryKey }) => {
 };
 
 export const fetchHolidayPackageSuggestions = async ({ term = "", type = "" }) => {
+    const q = String(term || "").trim();
+    if (q.length < 2) return [];
+
     const response = await api.get("/api/holiday-packages/suggestions", {
         params: {
             domain: process.env.NEXT_PUBLIC_DOMAIN,
-            term,
+            term: q,
             type,
         },
     });

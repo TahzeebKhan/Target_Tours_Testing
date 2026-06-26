@@ -73,7 +73,7 @@ export default function HolidayLocationSheet({
     };
   }, []);
 
-  const shouldFetchSuggestions = debouncedSearch.length >= 1;
+  const shouldFetchSuggestions = debouncedSearch.length >= 2;
 
   const { data: suggestionResponse } = useQuery({
     queryKey: [

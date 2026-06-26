@@ -12,8 +12,8 @@ import BookingSummary from "./Components/bookingSummary/BookingSummary";
 import Tabs from "./Components/tabs/Tabs";
 import { useHotelDetailData } from "./HotelDetailDataContext";
 import {
-  HOTEL_BOOKING_SESSION_KEY,
   HOTEL_SEARCH_SESSION_KEY,
+  writeHotelBookingSession,
 } from "@/shared/services/hotelSearch";
 import { toast } from "react-toastify";
 
@@ -240,6 +240,7 @@ const getAvailabilitySearchId = (response) =>
   );
 
 const updateHotelDetailUrlParams = (selection, response) => {
+   console.log("idd",response)
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
@@ -410,6 +411,11 @@ const Page = () => {
         ...searchRequest,
         searchContext: storedHotelSearch,
         initResponse: storedHotelSearch.initResponse,
+        hotelSearchId: getFirstValue(
+          searchRequest.hotelSearchId,
+          storedHotelSearch.hotelSearchId,
+          storedHotelSearch.hotel_search_id,
+        ),
         roomsSearchId:
           selectedRooms[0]?.roomsSearchId ||
           hotelDetail?.roomsSearchId ||
@@ -432,7 +438,7 @@ const Page = () => {
       rooms: selectedRooms,
     };
 
-    window.sessionStorage.setItem(HOTEL_BOOKING_SESSION_KEY, JSON.stringify(payload));
+    writeHotelBookingSession(payload);
   }, [
     effectiveAdults,
     effectiveCheckIn,

@@ -637,6 +637,7 @@ const ReviewPage = () => {
       const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
+       console.log("storedHotelResults",storedHotelResults)
       const checkInDate = pickApiDate(
         request.checkInDate,
         request.checkInRaw,
@@ -669,11 +670,14 @@ const ReviewPage = () => {
         initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
         searchContext: request.searchContext,
       };
+       console.log("initSearchContext",initSearchContext)
       const hotelInitData = getHotelInitData({
         request,
         storedHotelSearch,
         storedHotelResults,
       });
+      console.log("hotelInitData",hotelInitData)
+
       const searchTracingKey = getFirstValue(
         hotelInitData.searchTracingKey,
         hotelInitData.searchTracingkey,
@@ -696,6 +700,32 @@ const ReviewPage = () => {
           "searchId",
           "SearchId",
           "search_id",
+        ]),
+      );
+      const hotelSearchId = getFirstValue(
+        firstRoom.hotelSearchId,
+        firstRoom.hotel_search_id,
+        firstRoom.hotel_search_key,
+        firstRoom.hotelSearchKey,
+        request.hotelSearchId,
+        request.hotel_search_id,
+        request.hotel_search_key,
+        request.hotelSearchKey,
+        hotel.hotelSearchId,
+        hotel.hotel_search_id,
+        hotel.hotel_search_key,
+        hotel.hotelSearchKey,
+        hotelInitData.hotelSearchId,
+        hotelInitData.hotel_search_id,
+        hotelInitData.hotel_search_key,
+        hotelInitData.hotelSearchKey,
+        findFirstDeepValue(initSearchContext, [
+          "hotelSearchId",
+          "HotelSearchId",
+          "hotel_search_id",
+          "hotelSearchID",
+          "hotel_search_key",
+          "hotelSearchKey",
         ]),
       );
       const initPayload = buildRefreshSessionPayload({
@@ -765,6 +795,7 @@ const ReviewPage = () => {
         }),
         NetAmount: selectedNetAmount,
         SearchId: searchId,
+        hotelSearchId,
         RecommendationId:
           firstRoom.recommendationId ||
           request.recommendationId ||

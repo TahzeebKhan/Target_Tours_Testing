@@ -74,7 +74,7 @@ const MobileHotelDetails = () => {
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
 
-    if (!payload.searchId || !payload.hotelId || !payload.priceProvider) {
+    if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
       return;
     }
@@ -137,6 +137,8 @@ const MobileHotelDetails = () => {
       const withSearchMeta = (hotel) => ({
         ...hotel,
         searchId: hotel.searchId || hotel.search_id || meta.searchId,
+        hotelSearchId:
+          hotel.hotelSearchId || hotel.hotel_search_id || meta.hotelSearchId,
         requestId: hotel.requestId || hotel.request_id || meta.requestId,
         hotelSearchKey:
           hotel.hotelSearchKey || hotel.hotel_search_key || meta.hotelSearchKey,
