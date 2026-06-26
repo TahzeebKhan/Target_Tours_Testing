@@ -43,6 +43,10 @@ const DEFAULT_FLIGHT_SEARCH = {
 
 const SENIOR_CITIZEN_FARE = "SENIOR CITIZEN";
 const STUDENT_FARE = "STUDENT";
+const MAX_MULTI_CITY_ROUTES = 4;
+const MIN_MULTI_CITY_ROUTES = 2;
+
+const EMPTY_MULTI_SEGMENT = { from: "", to: "", date: "" };
 
 const parseCodeFromLabel = (label = "") => {
   const match = String(label || "").match(/\(([^)]+)\)/);
@@ -106,6 +110,51 @@ const getFareTypesFromParams = (getParam) => {
   return [];
 };
 
+const normalizeMultiSegments = (segments = []) => {
+  const normalized = segments
+    .slice(0, MAX_MULTI_CITY_ROUTES)
+    .map((segment) => ({
+      from: String(segment?.from || "").trim(),
+      to: String(segment?.to || "").trim(),
+      date: String(segment?.date || "").trim(),
+    }));
+
+  while (normalized.length < MIN_MULTI_CITY_ROUTES) {
+    normalized.push({ ...EMPTY_MULTI_SEGMENT });
+  }
+
+  return normalized;
+};
+
+const getMultiSegmentsFromParams = (getParam, fallbackRoute, fallbackDate) => {
+  const segments = [];
+
+  for (let index = 0; index < MAX_MULTI_CITY_ROUTES; index += 1) {
+    const segment = {
+      from: getParam(`from${index}`),
+      to: getParam(`to${index}`),
+      date: getParam(`date${index}`),
+    };
+
+    if (segment.from || segment.to || segment.date) {
+      segments.push(segment);
+    }
+  }
+
+  if (segments.length > 0) {
+    return normalizeMultiSegments(segments);
+  }
+
+  return normalizeMultiSegments([
+    {
+      from: fallbackRoute?.from || DEFAULT_FLIGHT_SEARCH.from,
+      to: fallbackRoute?.to || DEFAULT_FLIGHT_SEARCH.to,
+      date: fallbackDate || DEFAULT_FLIGHT_SEARCH.startDate,
+    },
+    { ...EMPTY_MULTI_SEGMENT },
+  ]);
+};
+
 /**
  * Provider
  */
@@ -120,18 +169,27 @@ export function TripTypeProvider({ children }) {
   const [tripType, setTripType] = useState(
     getParam("tripType") || DEFAULT_FLIGHT_SEARCH.tripType
   );
+  const initialFromParam = getParam("from") || getParam("from0");
+  const initialToParam = getParam("to") || getParam("to0");
+  const initialStartParam = getParam("start") || getParam("date0");
   const initialRoute = getSyncedRoute({
-    from: getParam("from") || DEFAULT_FLIGHT_SEARCH.from,
-    to: getParam("to") || DEFAULT_FLIGHT_SEARCH.to,
-    fromCode: getParam("origin") || DEFAULT_FLIGHT_SEARCH.fromCode,
-    toCode: getParam("destination") || DEFAULT_FLIGHT_SEARCH.toCode,
+    from: initialFromParam || DEFAULT_FLIGHT_SEARCH.from,
+    to: initialToParam || DEFAULT_FLIGHT_SEARCH.to,
+    fromCode:
+      getParam("origin") ||
+      parseCodeFromLabel(initialFromParam) ||
+      DEFAULT_FLIGHT_SEARCH.fromCode,
+    toCode:
+      getParam("destination") ||
+      parseCodeFromLabel(initialToParam) ||
+      DEFAULT_FLIGHT_SEARCH.toCode,
   });
   const [from, setFrom] = useState(initialRoute.from);
   const [to, setTo] = useState(initialRoute.to);
   const [fromCode, setFromCode] = useState(initialRoute.fromCode);
   const [toCode, setToCode] = useState(initialRoute.toCode);
   const [startDate, setStartDate] = useState(
-    getParam("start") || DEFAULT_FLIGHT_SEARCH.startDate
+    initialStartParam || DEFAULT_FLIGHT_SEARCH.startDate
   );
   const [endDate, setEndDate] = useState(getParam("end") || null);
   const [passengers, setPassengers] = useState({
@@ -141,6 +199,13 @@ export function TripTypeProvider({ children }) {
   });
   const [travelClass, setTravelClass] = useState(
     getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass
+  );
+  const [multiSegments, setMultiSegments] = useState(() =>
+    getMultiSegmentsFromParams(
+      getParam,
+      initialRoute,
+      initialStartParam || DEFAULT_FLIGHT_SEARCH.startDate
+    )
   );
   const [selectedFareTypes, setSelectedFareTypes] = useState(() =>
     getFareTypesFromParams(getParam)
@@ -182,11 +247,11 @@ export function TripTypeProvider({ children }) {
   // Effect to update state when URL params change (e.g. on navigation)
   useEffect(() => {
     const pTripType = getParam("tripType");
-    const pFrom = getParam("from");
-    const pTo = getParam("to");
-    const pOrigin = getParam("origin");
-    const pDestination = getParam("destination");
-    const pStart = getParam("start");
+    const pFrom = getParam("from") || getParam("from0");
+    const pTo = getParam("to") || getParam("to0");
+    const pOrigin = getParam("origin") || parseCodeFromLabel(pFrom);
+    const pDestination = getParam("destination") || parseCodeFromLabel(pTo);
+    const pStart = getParam("start") || getParam("date0");
     const pEnd = getParam("end");
     const pAdults = Number(
       getParam("adults") || DEFAULT_FLIGHT_SEARCH.passengers.adult
@@ -196,9 +261,13 @@ export function TripTypeProvider({ children }) {
     const pTravelClass =
       getParam("travelClass") || DEFAULT_FLIGHT_SEARCH.travelClass;
     const pFareTypes = getFareTypesFromParams(getParam);
+    const hasIndexedMultiSearch = Boolean(
+      (getParam("from0") || getParam("origin0")) &&
+      (getParam("to0") || getParam("destination0")) &&
+      getParam("date0")
+    );
     const hasSearchDetails = Boolean(
-      (pFrom || pOrigin) &&
-      (pTo || pDestination)
+      ((pFrom || pOrigin) && (pTo || pDestination)) || hasIndexedMultiSearch
     );
     const syncedRoute = getSyncedRoute({
       from: pFrom || DEFAULT_FLIGHT_SEARCH.from,
@@ -221,6 +290,7 @@ export function TripTypeProvider({ children }) {
       infant: pInfants,
     });
     setTravelClass(pTravelClass);
+    setMultiSegments(getMultiSegmentsFromParams(getParam, syncedRoute, pStart));
     setSelectedFareTypes(pFareTypes);
 
     setCommittedSearches(prev => ({
@@ -286,10 +356,57 @@ export function TripTypeProvider({ children }) {
       fromCode,
       toCode,
     });
-    const fallbackFrom = syncedRoute.from || DEFAULT_FLIGHT_SEARCH.from;
-    const fallbackTo = syncedRoute.to || DEFAULT_FLIGHT_SEARCH.to;
-    const normalizedFromCode = syncedRoute.fromCode;
-    const normalizedToCode = syncedRoute.toCode;
+    let fallbackFrom = syncedRoute.from || DEFAULT_FLIGHT_SEARCH.from;
+    let fallbackTo = syncedRoute.to || DEFAULT_FLIGHT_SEARCH.to;
+    let normalizedFromCode = syncedRoute.fromCode;
+    let normalizedToCode = syncedRoute.toCode;
+    let searchStartDate = startDate;
+    const normalizedMultiSegments = normalizeMultiSegments(multiSegments);
+
+    if (tripType === "multi") {
+      const partialSegment = normalizedMultiSegments.find((segment) => {
+        const hasAnyField = Boolean(segment.from || segment.to || segment.date);
+        const hasAllFields = Boolean(segment.from && segment.to && segment.date);
+        return hasAnyField && !hasAllFields;
+      });
+      const completedSegments = normalizedMultiSegments.filter(
+        (segment) => segment.from && segment.to && segment.date
+      );
+
+      if (partialSegment || completedSegments.length < MIN_MULTI_CITY_ROUTES) {
+        setIsSearchSubmitting(false);
+        toast.error("Please add departure, destination and date for at least 2 routes.");
+        return;
+      }
+
+      const duplicateSegment = completedSegments.find((segment) =>
+        isSamePlace(
+          segment.from,
+          segment.to,
+          parseCodeFromLabel(segment.from),
+          parseCodeFromLabel(segment.to)
+        )
+      );
+
+      if (duplicateSegment) {
+        setIsSearchSubmitting(false);
+        toast.error("Departure and destination cannot be the same.");
+        return;
+      }
+
+      const firstSegment = completedSegments[0];
+      const firstRoute = getSyncedRoute({
+        from: firstSegment.from,
+        to: firstSegment.to,
+        fromCode: parseCodeFromLabel(firstSegment.from),
+        toCode: parseCodeFromLabel(firstSegment.to),
+      });
+      fallbackFrom = firstRoute.from || firstSegment.from;
+      fallbackTo = firstRoute.to || firstSegment.to;
+      normalizedFromCode = firstRoute.fromCode || parseCodeFromLabel(firstSegment.from);
+      normalizedToCode = firstRoute.toCode || parseCodeFromLabel(firstSegment.to);
+      searchStartDate = firstSegment.date;
+    }
 
     if (isSamePlace(fallbackFrom, fallbackTo, normalizedFromCode, normalizedToCode)) {
       setIsSearchSubmitting(false);
@@ -301,7 +418,7 @@ export function TripTypeProvider({ children }) {
       await saveRecentFlightSearch({
         origin: normalizedFromCode || fallbackFrom,
         destination: normalizedToCode || fallbackTo,
-        departureDate: startDate,
+        departureDate: searchStartDate,
         returnDate: tripType === "round" ? endDate : null,
       });
       queryClient.invalidateQueries({
@@ -321,7 +438,7 @@ export function TripTypeProvider({ children }) {
       to: fallbackTo,
       fromCode: normalizedFromCode,
       toCode: normalizedToCode,
-      startDate,
+      startDate: searchStartDate,
       endDate,
       passengers,
       travelClass,
@@ -345,8 +462,8 @@ export function TripTypeProvider({ children }) {
       nextParams.delete("destination");
     }
 
-    if (startDate) {
-      nextParams.set("start", startDate);
+    if (searchStartDate) {
+      nextParams.set("start", searchStartDate);
     } else {
       nextParams.delete("start");
     }
@@ -355,6 +472,23 @@ export function TripTypeProvider({ children }) {
       nextParams.set("end", endDate);
     } else {
       nextParams.delete("end");
+    }
+
+    for (let index = 0; index < MAX_MULTI_CITY_ROUTES; index += 1) {
+      nextParams.delete(`from${index}`);
+      nextParams.delete(`to${index}`);
+      nextParams.delete(`date${index}`);
+    }
+
+    if (tripType === "multi") {
+      normalizedMultiSegments
+        .filter((segment) => segment.from && segment.to && segment.date)
+        .slice(0, MAX_MULTI_CITY_ROUTES)
+        .forEach((segment, index) => {
+          nextParams.set(`from${index}`, segment.from);
+          nextParams.set(`to${index}`, segment.to);
+          nextParams.set(`date${index}`, segment.date);
+        });
     }
 
     nextParams.set("adults", String(passengers?.adult ?? 1));
@@ -407,6 +541,8 @@ export function TripTypeProvider({ children }) {
         setEndDate,
         passengers,
         setPassengers,
+        multiSegments,
+        setMultiSegments,
         travelClass,
         setTravelClass,
         selectedFareTypes,

@@ -31,6 +31,7 @@ const passengerTypes = [
   "SENIOR CITIZEN",
   "STUDENT"
 ];
+const MAX_MULTI_CITY_ROUTES = 4;
 
 const PencilIcon = () => {
   return (
@@ -92,6 +93,8 @@ const TopFilterSection = ({
     setToCode,
     passengers,
     setPassengers,
+    multiSegments,
+    setMultiSegments,
     travelClass,
     setTravelClass,
     startDate,
@@ -133,11 +136,6 @@ const TopFilterSection = ({
     );
 
   const [bookingType, setBookingType] = useState("flight");
-  const [multiSegments, setMultiSegments] = useState([
-    { from: "", to: "", date: "" },
-    { from: "", to: "", date: "" },
-  ]);
-
   const recentSearches = [
     {
       label: "CHENNAI, INDIA",
@@ -167,8 +165,6 @@ const TopFilterSection = ({
 
   const departureRef = useRef(null);
   const returnRef = useRef(null);
-  const multiDateRef1 = useRef(null);
-  const multiDateRef0 = useRef(null);
 
   const [travellerOpen, setTravellerOpen] = useState(false);
   const travellerRef = useRef(null);
@@ -332,22 +328,18 @@ const TopFilterSection = ({
     );
   };
 
-  const openMultiDatePicker1 = () => {
-    const input = multiDateRef1.current;
-    if (!input) return;
-
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-    } else {
-      input.focus();
-      input.click();
-    }
+  const addMultiSegment = () => {
+    setMultiSegments((prev) => {
+      if (prev.length >= MAX_MULTI_CITY_ROUTES) return prev;
+      return [...prev, { from: "", to: "", date: "" }];
+    });
   };
 
-  const openMultiDatePicker0 = () => {
-    const input = multiDateRef0.current;
-    if (!input) return;
-    input.showPicker?.() || input.focus();
+  const removeMultiSegment = (index) => {
+    setMultiSegments((prev) => {
+      if (prev.length <= 2) return prev;
+      return prev.filter((_, segmentIndex) => segmentIndex !== index);
+    });
   };
 
   useEffect(() => {
@@ -962,177 +954,200 @@ const TopFilterSection = ({
                       className={`${styles.serarchingContBottom} ${styles.multiSearch} ${
                         styles.flightSearchFormWrapper
                       } ${styles.formVisible} ${
-                        openCalendarFor === "multi-1"
+                        String(openCalendarFor || "").startsWith("multi-")
                           ? styles.calendarActiveForm
                           : ""
                       }`}
                       style={{ pointerEvents: "none" }}
                     >
-                      {/* First row is now handled by the unified block above. 
-                          We use paddingTop to space the second row. */}
+                      {multiSegments.slice(1).map((segment, offset) => {
+                        const segmentIndex = offset + 1;
+                        const isLastSegment =
+                          segmentIndex === multiSegments.length - 1;
 
-                      <div
-                        className={`${styles.serarchingContBottom} ${
-                          styles.bottomRowAnimate
-                        } ${
-                          tripType === "multi"
-                            ? styles.animateIn
-                            : styles.animateOut
-                        }
-                        
-                         ${
-                           tripType === "multi"
-                             ? styles.multiCitySerarchingContBottom
-                             : ""
-                         }`}
-                        style={{ pointerEvents: "auto" }}
-                      >
-                        <div
-                          className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.bottomRowFirstBtn}`}
-                        >
-                          <div className={styles.lable}>From</div>
-                          <input
-                            ref={fromInputRef}
-                            type="text"
-                            className={styles.contant}
-                            placeholder="Departure"
-                            value={multiSegments[1].from}
-                            onFocus={() => {
-                              setFromSuggestionsOpen(true);
-                              setActiveMultiFromIndex(1);
-                            }}
-                            onClick={() => {
-                              setFromSuggestionsOpen(true);
-                              setActiveMultiFromIndex(1);
-                            }}
-                            onChange={(e) => {
-                              updateSegment(1, "from", e.target.value);
-                              setFromSuggestionsOpen(true);
-                              setActiveMultiFromIndex(1);
-                            }}
-                          />
-
-                          {fromSuggestionsOpen &&
-                            activeMultiFromIndex === 1 && (
-                              <AirportSuggestionBox
-                                boxRef={fromSuggestionRef}
-                                query={multiSegments[1].from}
-                                fallbackSuggestions={recentSearches}
-                                field="from"
-                                onSelect={(s) => selectSuggestion(s, "from")}
-                              />
-                            )}
-
+                        return (
                           <div
-                            className={`${styles.arrowbox} ${styles.arrowbox3} ${styles.arrowboxBottomRow} `}
-                            onClick={() => {
-                              const { from, to } = multiSegments[1];
-                              updateSegment(1, "from", to);
-                              updateSegment(1, "to", from);
-                            }}
+                            key={`multi-segment-${segmentIndex}`}
+                            className={`${styles.serarchingContBottom} ${
+                              styles.bottomRowAnimate
+                            } ${styles.animateIn} ${styles.multiCitySerarchingContBottom}`}
+                            style={{ pointerEvents: "auto" }}
                           >
-                            <ArrowLeftRight
-                              size={16}
-                              className={styles.arrowIcon}
-                            />
-                          </div>
-                        </div>
-
-                        <div
-                          style={{ zIndex: "-999" }}
-                          className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.toBtn}`}
-                        >
-                          <div className={styles.lable}>To</div>
-                          <input
-                            type="text"
-                            className={styles.contant}
-                            placeholder="Destination"
-                            value={multiSegments[1].to}
-                            onFocus={() => {
-                              setToSuggestionsOpen(true);
-                              setActiveMultiToIndex(1);
-                            }}
-                            onClick={() => {
-                              setToSuggestionsOpen(true);
-                              setActiveMultiToIndex(1);
-                            }}
-                            onChange={(e) => {
-                              updateSegment(1, "to", e.target.value);
-                              setToSuggestionsOpen(true);
-                              setActiveMultiToIndex(1);
-                            }}
-                          />
-
-                          {toSuggestionsOpen && activeMultiToIndex === 1 && (
-                            <AirportSuggestionBox
-                              boxRef={toSuggestionRef}
-                              query={multiSegments[1].to}
-                              fallbackSuggestions={recentSearches}
-                              field="to"
-                              onSelect={(s) => selectSuggestion(s, "to")}
-                            />
-                          )}
-                        </div>
-
-                        <div
-                          className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.calendarAnchor}`}
-                        >
-                          <div className={styles.lable}>Departure Date</div>
-                          {openCalendarFor === "multi-1" && (
-                            <DateCalendarModal
-                              mode="oneway"
-                              onClose={() => {
-                                setOpenCalendarFor(null);
-                                setActiveMultiIndex(null);
-                              }}
+                            <div
+                              className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.bottomRowFirstBtn}`}
                             >
-                              <div ref={calendarRef}>
-                                <CalendarMonths
-                                  startDate={null}
-                                  endDate={null}
-                                  onDateClick={handleDateClick}
-                                  price={true}
-                                  faresByDate={datewiseFaresByDate}
+                              <div className={styles.lable}>From</div>
+                              <input
+                                type="text"
+                                className={styles.contant}
+                                placeholder="Departure"
+                                value={segment.from}
+                                onFocus={() => {
+                                  setFromSuggestionsOpen(true);
+                                  setActiveMultiFromIndex(segmentIndex);
+                                }}
+                                onClick={() => {
+                                  setFromSuggestionsOpen(true);
+                                  setActiveMultiFromIndex(segmentIndex);
+                                }}
+                                onChange={(e) => {
+                                  updateSegment(segmentIndex, "from", e.target.value);
+                                  setFromSuggestionsOpen(true);
+                                  setActiveMultiFromIndex(segmentIndex);
+                                }}
+                              />
+
+                              {fromSuggestionsOpen &&
+                                activeMultiFromIndex === segmentIndex && (
+                                  <AirportSuggestionBox
+                                    boxRef={fromSuggestionRef}
+                                    query={segment.from}
+                                    fallbackSuggestions={recentSearches}
+                                    field="from"
+                                    onSelect={(s) => selectSuggestion(s, "from")}
+                                  />
+                                )}
+
+                              <div
+                                className={`${styles.arrowbox} ${styles.arrowbox3} ${styles.arrowboxBottomRow}`}
+                                onClick={() => {
+                                  const { from: rowFrom, to: rowTo } = segment;
+                                  updateSegment(segmentIndex, "from", rowTo);
+                                  updateSegment(segmentIndex, "to", rowFrom);
+                                }}
+                              >
+                                <ArrowLeftRight
+                                  size={16}
+                                  className={styles.arrowIcon}
                                 />
                               </div>
-                            </DateCalendarModal>
-                          )}
+                            </div>
 
-                          <div
-                            className={styles.dateInputWrapper}
-                            onClick={() => {
-                              setCalendarTripType("oneway");
-                              setActiveMultiIndex(1);
-                              setOpenCalendarFor("multi-1");
-                            }}
-                          >
-                            <input
-                              type="text"
-                              readOnly
-                              className={styles.contant}
-                              placeholder="ADD DATE"
-                              value={formatDate(multiSegments[1].date)}
-                            />
-                            <button
-                              type="button"
-                              aria-label="Open departure date picker"
-                              className={styles.calendarIcon}
-                              onClick={openMultiDatePicker0}
+                            <div
+                              className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.toBtn}`}
                             >
-                              {/* SAME SVG – unchanged */}
-                              <CalendarSVG />
-                            </button>
+                              <div className={styles.lable}>To</div>
+                              <input
+                                type="text"
+                                className={styles.contant}
+                                placeholder="Destination"
+                                value={segment.to}
+                                onFocus={() => {
+                                  setToSuggestionsOpen(true);
+                                  setActiveMultiToIndex(segmentIndex);
+                                }}
+                                onClick={() => {
+                                  setToSuggestionsOpen(true);
+                                  setActiveMultiToIndex(segmentIndex);
+                                }}
+                                onChange={(e) => {
+                                  updateSegment(segmentIndex, "to", e.target.value);
+                                  setToSuggestionsOpen(true);
+                                  setActiveMultiToIndex(segmentIndex);
+                                }}
+                              />
+
+                              {toSuggestionsOpen &&
+                                activeMultiToIndex === segmentIndex && (
+                                  <AirportSuggestionBox
+                                    boxRef={toSuggestionRef}
+                                    query={segment.to}
+                                    fallbackSuggestions={recentSearches}
+                                    field="to"
+                                    onSelect={(s) => selectSuggestion(s, "to")}
+                                  />
+                                )}
+                            </div>
+
+                            <div
+                              className={`${styles.fromBtn} ${styles.fromBtn3} ${styles.calendarAnchor}`}
+                            >
+                              <div className={styles.lable}>Departure Date</div>
+                              {openCalendarFor === `multi-${segmentIndex}` && (
+                                <DateCalendarModal
+                                  mode="oneway"
+                                  onClose={() => {
+                                    setOpenCalendarFor(null);
+                                    setActiveMultiIndex(null);
+                                  }}
+                                >
+                                  <div ref={calendarRef}>
+                                    <CalendarMonths
+                                      startDate={null}
+                                      endDate={null}
+                                      onDateClick={handleDateClick}
+                                      price={true}
+                                      faresByDate={datewiseFaresByDate}
+                                    />
+                                  </div>
+                                </DateCalendarModal>
+                              )}
+
+                              <div
+                                className={styles.dateInputWrapper}
+                                onClick={() => {
+                                  setCalendarTripType("oneway");
+                                  setActiveMultiIndex(segmentIndex);
+                                  setOpenCalendarFor(`multi-${segmentIndex}`);
+                                }}
+                              >
+                                <input
+                                  type="text"
+                                  readOnly
+                                  className={styles.contant}
+                                  placeholder="ADD DATE"
+                                  value={formatDate(segment.date)}
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open departure date picker"
+                                  className={styles.calendarIcon}
+                                >
+                                  <CalendarSVG />
+                                </button>
+                              </div>
+                            </div>
+
+                            {multiSegments.length > 2 && (
+                              <button
+                                type="button"
+                                className={styles.removeMultiCityBtn}
+                                onClick={() => removeMultiSegment(segmentIndex)}
+                                aria-label={`Remove route ${segmentIndex + 1}`}
+                              >
+                                x
+                              </button>
+                            )}
+
+                            {isLastSegment && (
+                              <div
+                                className={`${styles.searchBtn} ${
+                                  isSearchSubmitting ? styles.searchBtnLoading : ""
+                                }`}
+                                onClick={handleSearch}
+                                aria-disabled={isSearchSubmitting}
+                              >
+                                {renderSearchButtonContent()}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                        <div
-                          className={`${styles.searchBtn} ${
-                            isSearchSubmitting ? styles.searchBtnLoading : ""
-                          }`}
-                          onClick={handleSearch}
-                          aria-disabled={isSearchSubmitting}
+                        );
+                      })}
+                      <div
+                        className={styles.multiCityActions}
+                        style={{ pointerEvents: "auto" }}
+                      >
+                        <button
+                          type="button"
+                          className={styles.addMultiCityBtn}
+                          onClick={addMultiSegment}
+                          disabled={multiSegments.length >= MAX_MULTI_CITY_ROUTES}
                         >
-                          {renderSearchButtonContent()}
-                        </div>
+                          + ADD ANOTHER CITY
+                        </button>
+                        <span className={styles.multiCityLimit}>
+                          {multiSegments.length}/{MAX_MULTI_CITY_ROUTES} ROUTES
+                        </span>
                       </div>
                     </div>
                   </>

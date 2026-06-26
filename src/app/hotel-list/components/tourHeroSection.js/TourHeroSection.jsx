@@ -197,6 +197,7 @@ const TourHeroSection = () => {
 
             try {
               searchContext = storedSearch ? JSON.parse(storedSearch) : null;
+               console.log("searchContext",searchContext)
             } catch {
               searchContext = null;
             }
@@ -322,6 +323,37 @@ const TourHeroSection = () => {
                 hotelCount,
                 elapsedFromInitMs,
               });
+            }
+
+            if (socketType === "HOTEL_INIT_COMPLETE" && content?.init) {
+              const storedSearch = window.sessionStorage.getItem(
+                HOTEL_SEARCH_SESSION_KEY,
+              );
+              let searchContext = null;
+
+              try {
+                searchContext = storedSearch ? JSON.parse(storedSearch) : null;
+              } catch {
+                searchContext = null;
+              }
+
+              if (!searchContext?.channel || searchContext.channel === hotelSearchChannel) {
+                safeSetSessionStorage(
+                  HOTEL_SEARCH_SESSION_KEY,
+                  JSON.stringify({
+                    ...(searchContext || {}),
+                    channel: searchContext?.channel || hotelSearchChannel,
+                    init: content.init,
+                    initResponse: content,
+                    initStatus: "complete",
+                    searchId: content.init.searchId || searchContext?.searchId || "",
+                    searchTracingKey:
+                      content.init.searchTracingKey ||
+                      searchContext?.searchTracingKey ||
+                      "",
+                  }),
+                );
+              }
             }
 
             const cachedPayload = window.sessionStorage.getItem(

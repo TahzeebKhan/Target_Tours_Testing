@@ -5,17 +5,18 @@ import {
   CountryFlagIcon,
 } from "@/app/profile/components/profileSection/CountryName";
 
-const createTraveler = () => ({
+const createTraveler = (overrides = {}) => ({
     title: "Mr",
     firstName: "Mukul",
     middleName: "Kumar",
     lastName: "Mishra",
     gender: "male",
     passengerType: "A",
-    age: "",
+    age: "25",
     countryCode: "IN",
     mobile: "8532907106",
     email: "mukul.mishra@webninjaz.com",
+    ...overrides,
 });
 const states = [
   "Andhra Pradesh",
@@ -74,25 +75,130 @@ const COUNTRY_OPTIONS = [...CountryCodes]
 
 const fallbackRooms = [{ id: "default-room", title: "Room" }];
 
-const getOccupancyGuestCount = (occupancy = {}) =>
-  Number(
-    occupancy.numOfAdults ||
-      occupancy.NumOfAdults ||
-      occupancy.adults ||
-      occupancy.adultCount ||
-      0,
-  ) +
-  Number(
-    occupancy.numOfChildren ||
-      occupancy.NumOfChildren ||
-      occupancy.children ||
-      occupancy.childCount ||
-      0,
+const getFirstValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "") || "";
+
+const toNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const normalizeChildAges = (value) => {
+  if (Array.isArray(value)) return value.map((age) => String(age)).filter(Boolean);
+  if (typeof value === "string") {
+    return value
+      .split(/[:,|]/)
+      .map((age) => age.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const getChildAgesFromGuestCode = (guestCode = "") => {
+  const childSection = String(guestCode || "").match(/\|(\d+):C:([^|]+)/i);
+  if (!childSection) return [];
+
+  return childSection[2]
+    .split(":")
+    .map((age) => age.trim())
+    .filter(Boolean);
+};
+
+const getOccupancyAdultCount = (occupancy = {}) =>
+  toNumber(
+    getFirstValue(
+      occupancy.numOfAdults,
+      occupancy.NumOfAdults,
+      occupancy.adults,
+      occupancy.adultCount,
+    ),
   );
 
-const getRoomGuestLimit = (room = {}) => {
-  const occupancyTotal = Array.isArray(room.occupancies)
-    ? room.occupancies.reduce(
+const getOccupancyChildCount = (occupancy = {}) =>
+  toNumber(
+    getFirstValue(
+      occupancy.numOfChildren,
+      occupancy.NumOfChildren,
+      occupancy.children,
+      occupancy.childCount,
+    ),
+  );
+
+const getOccupancyChildAges = (occupancy = {}, room = {}) =>
+  normalizeChildAges(
+    getFirstValue(
+      occupancy.childAges,
+      occupancy.childrenAges,
+      occupancy.ChildAges,
+      occupancy.child_ages,
+      occupancy.ages,
+      room.childAges,
+      room.childrenAges,
+      room.ChildAges,
+    ),
+  );
+
+const getRoomOccupancies = (room = {}, roomIndex = 0) => {
+  if (!Array.isArray(room.occupancies) || !room.occupancies.length) {
+    return [];
+  }
+
+  if (room.occupancies.length === 1) {
+    return room.occupancies;
+  }
+
+  return [room.occupancies[roomIndex] || room.occupancies[0]];
+};
+
+const buildTravelersFromRoom = (room = {}, roomIndex = 0) => {
+  const assignedOccupancies = getRoomOccupancies(room, roomIndex);
+  const sourceOccupancies = assignedOccupancies.length
+    ? assignedOccupancies
+    : [
+        {
+          numOfAdults: getFirstValue(room.adults, room.numOfAdults, room.NumOfAdults, 1),
+          numOfChildren: getFirstValue(room.children, room.numOfChildren, room.NumOfChildren, 0),
+          childAges: room.childAges || room.childrenAges || room.ChildAges || [],
+        },
+      ];
+  const fallbackChildAges = getChildAgesFromGuestCode(room.guestCode || room.GuestCode);
+
+  const travelers = sourceOccupancies.flatMap((occupancy) => {
+    const adults = Math.max(0, getOccupancyAdultCount(occupancy));
+    const children = Math.max(0, getOccupancyChildCount(occupancy));
+    const childAges = getOccupancyChildAges(occupancy, room);
+    const resolvedChildAges = childAges.length ? childAges : fallbackChildAges;
+
+    return [
+      ...Array.from({ length: adults }, () => createTraveler({ passengerType: "A", age: "25" })),
+      ...Array.from({ length: children }, (_, childIndex) =>
+        createTraveler({
+          passengerType: "C",
+          age: String(resolvedChildAges[childIndex] || ""),
+        }),
+      ),
+    ];
+  });
+
+  return travelers.length ? travelers : [createTraveler()];
+};
+
+const mergeTravelers = (current = [], expected = []) =>
+  expected.map((traveler, index) => ({
+    ...traveler,
+    ...(current[index] || {}),
+    passengerType: traveler.passengerType,
+    age: traveler.passengerType === "C" ? traveler.age : current[index]?.age || traveler.age,
+  }));
+
+const getOccupancyGuestCount = (occupancy = {}) =>
+  getOccupancyAdultCount(occupancy) + getOccupancyChildCount(occupancy);
+
+const getRoomGuestLimit = (room = {}, roomIndex = 0) => {
+  const assignedOccupancies = getRoomOccupancies(room, roomIndex);
+  const occupancyTotal = assignedOccupancies.length
+    ? assignedOccupancies.reduce(
         (total, occupancy) => total + getOccupancyGuestCount(occupancy),
         0,
       )
@@ -327,14 +433,25 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
             const activeRooms = rooms.length ? rooms : fallbackRooms;
             let hasChanges = false;
 
-            activeRooms.forEach(room => {
-                if (prev[room.id]?.length) {
-                    next[room.id] = prev[room.id];
+            activeRooms.forEach((room, roomIndex) => {
+                const expectedGuests = buildTravelersFromRoom(room, roomIndex);
+                const currentGuests = prev[room.id] || [];
+
+                if (
+                    currentGuests.length === expectedGuests.length &&
+                    currentGuests.every(
+                        (guest, index) =>
+                            guest.passengerType === expectedGuests[index].passengerType &&
+                            (expectedGuests[index].passengerType !== "C" ||
+                                String(guest.age || "") === String(expectedGuests[index].age || "")),
+                    )
+                ) {
+                    next[room.id] = currentGuests;
                     return;
                 }
 
                 hasChanges = true;
-                next[room.id] = [createTraveler()];
+                next[room.id] = mergeTravelers(currentGuests, expectedGuests);
             });
 
             const prevKeys = Object.keys(prev);
@@ -354,13 +471,18 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
         onChange?.({ roomGuests, bookingContact });
     }, [roomGuests, bookingContact, onChange]);
 
-    const addTraveler = (roomId, maxGuests = Infinity) => {
+    const addTraveler = (room, roomIndex = 0, maxGuests = Infinity) => {
+        const roomId = room.id;
         setRoomGuests(prev => ({
             ...prev,
             [roomId]:
                 (prev[roomId] || []).length >= maxGuests
                     ? (prev[roomId] || [])
-                    : [...(prev[roomId] || []), createTraveler()],
+                    : [
+                        ...(prev[roomId] || []),
+                        buildTravelersFromRoom(room, roomIndex)[(prev[roomId] || []).length] ||
+                          createTraveler(),
+                      ],
         }));
     };
 
@@ -400,9 +522,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     return (
       <div className={styles.wrapper}>
         {/* Traveler Cards */}
-        {(rooms.length ? rooms : fallbackRooms).map((room) => {
+        {(rooms.length ? rooms : fallbackRooms).map((room, roomIndex) => {
           const travelers = roomGuests[room.id] || [createTraveler()];
-          const maxGuests = getRoomGuestLimit(room);
+          const maxGuests = getRoomGuestLimit(room, roomIndex);
           const canAddGuest = travelers.length < maxGuests;
 
           return (
@@ -412,7 +534,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 !canAddGuest ? styles.addTravelerDisabled : ""
               }`}
               onClick={() => {
-                if (canAddGuest) addTraveler(room.id, maxGuests);
+                if (canAddGuest) addTraveler(room, roomIndex, maxGuests);
               }}
             >
               +Add Guest for {room.title}
