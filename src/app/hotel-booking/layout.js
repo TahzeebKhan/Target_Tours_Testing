@@ -7,6 +7,8 @@ import { RoomProvider } from "../context/RoomContext";
 import { useRouter } from "next/navigation";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
 import { HOTEL_BOOKING_SESSION_KEY } from "@/shared/services/hotelSearch";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const getRoomTotal = (room) => {
   const quantity = Number(room.quantity || 0);
@@ -23,6 +25,8 @@ const layout = ({ children }) => {
   const roomListRef = useRef([]);
   const [bookingSession, setBookingSession] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const [roomList, setRoomList] = useState([
     {
       id: "deluxe_ac_room",
@@ -158,6 +162,16 @@ const layout = ({ children }) => {
     setSideBarOpen(false);
   };
 
+  const openLoginModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
+
   const decreaseRoom = (id) => {
     setRoomList((prev) =>
       prev
@@ -180,6 +194,7 @@ const layout = ({ children }) => {
         bookingSession,
         bookingLoading,
         setBookingLoading,
+        openLoginModal,
       }}
     >
       <section className={styles.contentWrapper}>
@@ -258,6 +273,12 @@ const layout = ({ children }) => {
           </div>
         </div>
       </div>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </RoomProvider>
   );
 };

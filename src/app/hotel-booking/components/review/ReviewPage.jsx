@@ -12,6 +12,7 @@ import CancellationPolicy from "./components/cancellationPolicy/CancellationPoli
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
+import { useAuth } from "@/app/context/AuthContext";
 import {
   confirmHotelBooking,
   HOTEL_SEARCH_RESULTS_KEY,
@@ -518,7 +519,9 @@ const ReviewPage = () => {
     bookingSession,
     bookingLoading,
     setBookingLoading,
+    openLoginModal,
   } = useRoom();
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const hotel = bookingSession?.hotel || {};
   const request = bookingSession?.request || {};
   const selectedRooms = useMemo(
@@ -576,6 +579,11 @@ const ReviewPage = () => {
 
   const handleStartBooking = async () => {
     if (bookingLoading) return;
+    if (authLoading) return;
+    if (!isLoggedIn) {
+      openLoginModal?.();
+      return;
+    }
 
     const roomGuests = guestDetails.roomGuests || {};
     const firstRoomGuests = roomGuests[selectedRooms[0]?.id] || [];
