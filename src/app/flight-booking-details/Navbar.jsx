@@ -4,7 +4,6 @@ import styles from "./Navbar.module.css";
 import { useAuth } from "../context/AuthContext";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
 import BrandLogo from "@/shared/components/BrandLogo";
 import { useOptionalFlightBooking } from "./FlightBookingContext";
 import {
@@ -29,15 +28,12 @@ const removeBookingFallbackFromUrl = () => {
 };
 
 const Navbar = () => {
-  const { isLoggedIn, profile: userProfile } = useAuth();
+  const { isLoggedIn, profile: userProfile, user } = useAuth();
   const flightBooking = useOptionalFlightBooking();
   const bookingSession = flightBooking?.bookingSession || null;
   const setBookingSession = flightBooking?.setBookingSession;
 
-  const hasToken = !!Cookies.get("auth_token");
-  const [isLoggedInCookie, setIsLoggedInCookie] = useState(hasToken);
   const router = useRouter();
-  const [showLogin, setShowLogin] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const profileBtnRef = useRef(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -77,6 +73,14 @@ const Navbar = () => {
     setIsSessionExpiredModalOpen(false);
     router.replace("/flights");
   };
+  const displayName =
+    userProfile?.display_name ||
+    userProfile?.full_name ||
+    user?.display_name ||
+    user?.full_name ||
+    user?.name ||
+    user?.email?.split("@")[0] ||
+    "User";
 
   return (
     <>
@@ -115,7 +119,7 @@ const Navbar = () => {
                   Download the App
                 </button>
 
-                {!isLoggedInCookie ? (
+                {!isLoggedIn ? (
                   <button
                     className={styles.signInBtn}
                     onClick={() => router.push("/?openLogin=true")}
@@ -130,7 +134,7 @@ const Navbar = () => {
                       className={`${styles.glass_button} ${styles.logggedInBtn}`}
                       type="button"
                     >
-                      Hi, {userProfile?.display_name || "User"}
+                      Hi, {displayName}
                     </button>
 
                     {showProfileModal && (
