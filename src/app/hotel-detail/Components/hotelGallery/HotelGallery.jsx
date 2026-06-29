@@ -11,10 +11,12 @@ const FALLBACK_IMAGES = [
     "/images/hotelArt4.png",
 ];
 
+const isRemoteImage = (image = "") => /^https?:\/\//.test(String(image || ""));
+
 const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
 
      const router = useRouter();
-     const galleryImages = (Array.isArray(images) && images.length ? images : FALLBACK_IMAGES).map(
+     const normalizedImages = (Array.isArray(images) && images.length ? images : FALLBACK_IMAGES).map(
         (item, index) =>
           typeof item === "string"
             ? { image: item, title: `Photo ${index + 1}` }
@@ -28,8 +30,10 @@ const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
                   `Photo ${index + 1}`,
               },
       );
-       console.log("gallary",galleryImages)
-    
+     const remoteImages = normalizedImages.filter((item) => isRemoteImage(item.image));
+     const localImages = normalizedImages.filter((item) => !isRemoteImage(item.image));
+     const galleryImages = remoteImages.length ? [...remoteImages, ...localImages] : normalizedImages;
+
         const goToGallery = () => {
             if (typeof window !== "undefined") {
                 try {

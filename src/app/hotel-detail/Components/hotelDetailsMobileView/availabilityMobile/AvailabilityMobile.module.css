@@ -16,12 +16,46 @@
 
 }
 
+.cardRight{
+    display: flex;
+    gap:20px;
+}
+.emptyState {
+    border: 1px solid #E4E6E8;
+    color: #4A5565;
+    font-family: var(--font-inter);
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 16px;
+}
+
+.selectionMeta,
+.validationMessage {
+    border: 1px solid #E4E6E8;
+    font-family: var(--font-inter);
+    font-size: 12px;
+    line-height: 1.35;
+    padding: 10px 12px;
+}
+
+.selectionMeta {
+    color: #4A5565;
+    background: #FFFFFF;
+}
+
+.validationMessage {
+    color: #B42318;
+    background: #FFF4F2;
+    border-color: #FDA29B;
+}
+
 .Card {
     padding: 12px;
     border: 1px solid #E4E6E8;
     display: flex;
     gap: 12px;
     margin-bottom: 16px;
+    justify-content: space-between;
 
 }
 
@@ -81,6 +115,7 @@
     flex-direction: column;
     gap: 26px;
     align-items: flex-end;
+    min-width: 100px;
 }
 
 .priceTop {
@@ -181,6 +216,13 @@
     height: 32px;
     border: 1px solid #000033;
     color: #000033;
+}
+
+.btn:disabled,
+.addRoomBtn:disabled,
+.disabledBtn {
+    cursor: not-allowed;
+    opacity: 0.45;
 }
 .priceBottom{
     width: 100%;

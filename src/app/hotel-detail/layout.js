@@ -11,11 +11,46 @@ import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishli
 import { HotelDetailDataProvider } from "./HotelDetailDataContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { HOTEL_DETAILS_KEY } from "@/shared/services/hotelSearch";
+
+const readStoredHotelId = () => {
+  if (typeof window === "undefined") return "";
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    return String(
+      parsed?.request?.hotelId ||
+        parsed?.hotel?.hotelId ||
+        parsed?.hotel?.id ||
+        parsed?.hotel?.raw?.hotelId ||
+        parsed?.hotel?.raw?.id ||
+        "",
+    ).trim();
+  } catch {
+    return "";
+  }
+};
+
+const readCurrentHotelId = () => {
+  if (typeof window === "undefined") return "";
+
+  const params = new URLSearchParams(window.location.search);
+
+  return String(
+    params.get("hotelId") ||
+      params.get("hotelid") ||
+      readStoredHotelId() ||
+      "",
+  ).trim();
+};
 
 const Layout = ({ children }) => {
   const [liked, setLiked] = useState(false);
 
   const [wishlists, setWishlists] = useState([]);
+  const [wishlistHotelId, setWishlistHotelId] = useState("");
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -32,12 +67,15 @@ const Layout = ({ children }) => {
   };
 
   const handleWishlistClick = () => {
+    setWishlistHotelId(readCurrentHotelId());
+
     if (!wishlists.length) {
       setIsCreateWishlistOpen(true);
     } else {
       setIsSaveWishlistOpen(true);
     }
   };
+
   return (
     <HotelDetailDataProvider onUnauthorized={openLoginModal}>
       <div className={styles.navBar}>
@@ -71,12 +109,14 @@ const Layout = ({ children }) => {
           setIsSaveWishlistOpen(true);
         }}
         type="hotel"
-        ids={[]}
+        ids={wishlistHotelId ? [wishlistHotelId] : []}
       />
 
       <SaveToWishlistModal
         isOpen={isSaveWishlistOpen}
         wishlists={wishlists}
+        type="hotel"
+        ids={wishlistHotelId ? [wishlistHotelId] : []}
         onClose={() => setIsSaveWishlistOpen(false)}
         onCreateNew={() => {
           setIsSaveWishlistOpen(false);

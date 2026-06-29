@@ -65,6 +65,17 @@ const CreateWishlistModal = ({
     }
   }, [handleClose, isOpen, token, router]);
 
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   const { mutate, isLoading } = useMutation({
     mutationFn: createWishlist,
     onSuccess: (data) => {

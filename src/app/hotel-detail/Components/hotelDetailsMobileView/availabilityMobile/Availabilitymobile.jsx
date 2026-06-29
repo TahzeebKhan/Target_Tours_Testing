@@ -1,92 +1,149 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import styles from './AvailabilityMobile.module.css'
+import { useHotelDetailData } from '../../../HotelDetailDataContext'
 
-const Availabilitymobile = () => {
+const FALLBACK_ROOM_IMAGE = "/images/hotelArt1.png";
 
+const getRoomImage = (room) => {
+    if (Array.isArray(room?.image)) {
+        const firstImage = room.image.find((item) => item?.img || item?.image);
+        return firstImage?.img || firstImage?.image || FALLBACK_ROOM_IMAGE;
+    }
 
-    // 🔑 qty per room
-    const [roomQty, setRoomQty] = useState({});
+    return room?.image || FALLBACK_ROOM_IMAGE;
+};
+
+const getFacilityText = (item) => {
+    if (!item) return "";
+    if (typeof item === "string") return item;
+
+    return item.text || item.name || item.label || item.description || item.value || "";
+};
+
+const normalizeFeatureItems = (items = []) =>
+    items
+        .map((item) => ({
+            icon: item?.icon || "/icons/greenTick.svg",
+            text: String(getFacilityText(item)).trim(),
+        }))
+        .filter((item) => item.text);
+
+const getRoomFeatureItems = (room) => {
+    const facilities = normalizeFeatureItems([
+        ...(Array.isArray(room?.featuresLeft) ? room.featuresLeft : []),
+        ...(Array.isArray(room?.facilities) ? room.facilities : []),
+        ...(Array.isArray(room?.raw?.facilities) ? room.raw.facilities : []),
+        ...(Array.isArray(room?.raw?.amenities) ? room.raw.amenities : []),
+        ...(Array.isArray(room?.raw?.room?.facilities) ? room.raw.room.facilities : []),
+        ...(Array.isArray(room?.raw?.room?.amenities) ? room.raw.room.amenities : []),
+    ]);
+    const benefits = normalizeFeatureItems([
+        ...(Array.isArray(room?.benefits) ? room.benefits : []),
+        room?.cancellation,
+    ]);
+    const seen = new Set();
+
+    return [...facilities, ...benefits]
+        .filter((item) => {
+            const key = item.text.replace(/[^a-z0-9]/gi, "").toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        })
+        .slice(0, 6);
+};
+
+const Availabilitymobile = ({
+    maxRooms = 1,
+    requiredGuests = 1,
+    selectedRoomQty = {},
+    selectedRoomCount = 0,
+    selectedGuestCapacity = 0,
+    validationMessage = "",
+    onSelectionMessage,
+    onRoomQtyChange,
+}) => {
+    const { hotelDetail, roomsLoading } = useHotelDetailData();
+    const maxRoomCount = Math.max(1, Number(maxRooms || 1));
+    const isAtMaxRooms = selectedRoomCount >= maxRoomCount;
 
     const handleAddRoom = (id) => {
-        setRoomQty((prev) => ({ ...prev, [id]: 1 }));
+        if (isAtMaxRooms) {
+            onSelectionMessage?.(`You searched for ${maxRoomCount} room${maxRoomCount === 1 ? "" : "s"} only.`);
+            return;
+        }
+
+        onSelectionMessage?.("");
+        onRoomQtyChange?.((prev) => ({ ...prev, [id]: 1 }));
     };
 
     const increase = (id) => {
-        setRoomQty((prev) => ({ ...prev, [id]: prev[id] + 1 }));
+        if (isAtMaxRooms) {
+            onSelectionMessage?.(`You searched for ${maxRoomCount} room${maxRoomCount === 1 ? "" : "s"} only.`);
+            return;
+        }
+
+        onSelectionMessage?.("");
+        onRoomQtyChange?.((prev) => ({ ...prev, [id]: Number(prev[id] || 0) + 1 }));
     };
 
     const decrease = (id) => {
-        setRoomQty((prev) =>
-            prev[id] > 1 ? { ...prev, [id]: prev[id] - 1 } : prev
-        );
+        onSelectionMessage?.("");
+        onRoomQtyChange?.((prev) => {
+            const current = Number(prev[id] || 0);
+
+            if (current <= 1) {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            }
+
+            return { ...prev, [id]: current - 1 };
+        });
     };
 
-    const rooms = [
-        {
-            id: 1,
-            image: "/images/hotelImage1.png",
-            title: "Deluxe Private AC Room with Ensuite Bathroom",
-            beds: "2 Single bed",
-            persons: "2 persons",
-            price: "₹ 66,945",
-            nights: "x 5 night",
-            taxes: "+ ₹ 226 Taxes & fees",
-            features: [
-                { icon: "/icons/arrows-expand.svg", text: "30 m2" },
-                { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-                { icon: "/icons/greenTick.svg", text: "Breakfast" },
-                { icon: "/icons/bedIcon.svg", text: "1 King Bed" },
-                { icon: "/icons/greenTick.svg", text: "Valley View" },
-                { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-            ],
-        },
-        {
-            id: 2,
-            image: "/images/hotelImage2.png",
-            title: "Deluxe Private AC Room with Ensuite Bathroom",
-            beds: "2 Single bed",
-            persons: "2 persons",
-            price: "₹ 66,945",
-            nights: "x 5 night",
-            taxes: "+ ₹ 226 Taxes & fees",
-            features: [
-                { icon: "/icons/arrows-expand.svg", text: "28 m2" },
-                { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-                { icon: "/icons/greenTick.svg", text: "Breakfast Included" },
-                { icon: "/icons/bedIcon.svg", text: "1 Queen Bed" },
-                { icon: "/icons/greenTick.svg", text: "City View" },
-                { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-            ],
-        },
-        {
-            id: 2,
-            image: "/images/hotelImage3.png",
-            title: "Deluxe Private AC Room with Ensuite Bathroom",
-            beds: "2 Single bed",
-            persons: "2 persons",
-            price: "₹ 66,945",
-            nights: "x 5 night",
-            taxes: "+ ₹ 226 Taxes & fees",
-            features: [
-                { icon: "/icons/arrows-expand.svg", text: "28 m2" },
-                { icon: "/icons/no-smoking.svg", text: "No Smoking" },
-                { icon: "/icons/greenTick.svg", text: "Breakfast Included" },
-                { icon: "/icons/bedIcon.svg", text: "1 Queen Bed" },
-                { icon: "/icons/greenTick.svg", text: "City View" },
-                { icon: "/icons/greenTick.svg", text: "Free Wifi" },
-            ],
-        },
-    ];
+    const rooms = useMemo(
+        () =>
+        
+            (hotelDetail?.rooms || []).map((room, index) => ({
+                id: room?.id || `${room?.title || "room"}-${index}`,
+                image: getRoomImage(room),
+                title: room?.title || "Room",
+                beds: room?.beds || "Room",
+                persons: room?.persons || "Guests",
+                price: room?.price?.offer || "₹ 0",
+                nights: room?.price?.nights || "per night",
+                taxes: room?.price?.taxes || "",
+                features: getRoomFeatureItems(room),
+            })),
+        [hotelDetail?.rooms],
+    );
 
     return (
         <div className={styles.availabilityMobileWrapper}>
             <div className={styles.availabilityMobileContainer}>
                 <h2 className={styles.availabilityMobileTitle}>Availability</h2>
+                {(validationMessage || selectedRoomCount > 0) && (
+                    <div className={validationMessage ? styles.validationMessage : styles.selectionMeta}>
+                        {validationMessage ||
+                            `${selectedRoomCount}/${maxRoomCount} room${maxRoomCount === 1 ? "" : "s"} selected • Capacity ${selectedGuestCapacity}/${requiredGuests} guest${requiredGuests === 1 ? "" : "s"}`}
+                    </div>
+                )}
 
                 <div className={styles.availabilityMobileCardContainer}>
+                    {roomsLoading && !rooms.length && (
+                        <div className={styles.emptyState}>Loading room availability...</div>
+                    )}
+
+                    {!roomsLoading && !rooms.length && (
+                        <div className={styles.emptyState}>No rooms available</div>
+                    )}
+
                     {rooms.map((room) => {
-                        const qty = roomQty[room.id];
+                        const qty = selectedRoomQty[room.id];
+                        const disableAdd = !qty && isAtMaxRooms;
+                        const disableIncrease = isAtMaxRooms;
 
                         return (
                             <div className={styles.Card} key={room.id}>
@@ -118,6 +175,7 @@ const Availabilitymobile = () => {
                                         <div className={styles.featureSec}>
                                             <ul className={styles.featureList}>
                                                 {room.features.map((item, idx) => (
+                                                   
                                                     <li key={idx}>
                                                         <div className={styles.iconCont}>
                                                             <img src={item.icon} alt={item.text} />
@@ -130,9 +188,10 @@ const Availabilitymobile = () => {
                                     </div>
                                 </div>
 
-                                <div className={styles.br}></div>
 
                                 <div className={styles.cardRight}>
+
+                                <div className={styles.br}></div>
                                     <div className={styles.priceContainer}>
                                         <div className={styles.priceTop}>
                                             <span className={styles.price}>{room.price}</span>
@@ -143,7 +202,8 @@ const Availabilitymobile = () => {
                                         <div className={styles.priceBottom}>
                                             {!qty ? (
                                                 <button
-                                                    className={styles.addRoomBtn}
+                                                    className={`${styles.addRoomBtn} ${disableAdd ? styles.disabledBtn : ""}`}
+                                                    disabled={disableAdd}
                                                     onClick={() => handleAddRoom(room.id)}
                                                 >
                                                     ADD ROOM
@@ -158,7 +218,8 @@ const Availabilitymobile = () => {
                                                     </button>
                                                     <span className={styles.count}>{qty}</span>
                                                     <button
-                                                        className={styles.btn}
+                                                        className={`${styles.btn} ${disableIncrease ? styles.disabledBtn : ""}`}
+                                                        disabled={disableIncrease}
                                                         onClick={() => increase(room.id)}
                                                     >
                                                         +

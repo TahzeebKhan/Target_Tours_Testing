@@ -4,8 +4,8 @@ import React from "react";
 import styles from "./PriceChangeModal.module.css";
 
 const formatCurrency = (value) =>
-  `₹ ${Number(value || 0).toLocaleString("en-IN", {
-    maximumFractionDigits: 2,
+  `₹ ${Math.round(Number(value || 0)).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
   })}`;
 
 const PriceChangeModal = ({

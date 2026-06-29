@@ -6,7 +6,7 @@ import SortBySheet from "./SortBySheet";
 const MIN_VH = 0;    // fully open
 const MAX_VH = 65;   // closed
 
-const ResultsBottomSheet = ({ children }) => {
+const ResultsBottomSheet = ({ children, resultsCount = 0, isLoading = false }) => {
   const [openSort, setOpenSort] = useState(false);
   const sheetRef = useRef(null);
   const startY = useRef(0);
@@ -71,7 +71,9 @@ const ResultsBottomSheet = ({ children }) => {
             <div className={styles.handle}></div>
           </div>
           <div className={styles.filterContainer}>
-            <span className={styles.resultsText}>500 Results</span>
+            <span className={styles.resultsText}>
+              {isLoading ? "Loading results" : `${resultsCount} Result${resultsCount === 1 ? "" : "s"}`}
+            </span>
             <div className={styles.FilterSorfCont}>
               <div className={styles.sortByText} onClick={() => setOpenSort(true)}>Sort by
                 <img src="/icons/DownArrows.svg" alt="" />
