@@ -109,7 +109,7 @@ const TourHeroSection = () => {
   const [departureDate, setDepartureDate] = useState(
     searchParams.get("checkIn") || "",
   );
-  const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
+  const [guestRoomCount, setGuestRoomCount] = useState("CHECK ROOMS");
   const departureRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 

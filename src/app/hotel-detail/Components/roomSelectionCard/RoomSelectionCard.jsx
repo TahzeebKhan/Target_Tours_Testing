@@ -2,7 +2,7 @@
 
 import styles from "./RoomSelectionCard.module.css";
 import { CalendarDays } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import HotelCalendarMonths from "@/shared/components/hotelCalendar/HotelCalendarMonths";
 import HotelDropDown from "@/shared/components/hotelDropDown/HotelDropDown";
 
@@ -40,6 +40,7 @@ export default function RoomSelectionCard({
     rooms = 1,
     adults = 1,
     children = 0,
+    initialPassengers = null,
 }) {
     const cardRef = useRef(null);
     const checkInRef = useRef(null);
@@ -50,12 +51,64 @@ export default function RoomSelectionCard({
     const [showCalendar, setShowCalendar] = useState(false);
     const [activeDateField, setActiveDateField] = useState("checkIn");
     const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
-    const [guestState, setGuestState] = useState({
-        room: Number(rooms) || 1,
-        adults: Number(adults) || 1,
-        children: Number(children) || 0,
-        pets: 0,
-    });
+    const normalizeGuestState = useCallback((passengers = {}) => {
+        const sourceRooms = Array.isArray(passengers.rooms) ? passengers.rooms : [];
+        const roomCount = Math.max(
+            1,
+            Number(passengers.room || sourceRooms.length || rooms || 1),
+        );
+        const totalAdults = Math.max(roomCount, Number(passengers.adults || adults || 1));
+        const totalChildren = Math.max(0, Number(passengers.children || children || 0));
+        const baseAdults = Math.floor(totalAdults / roomCount);
+        const extraAdults = totalAdults % roomCount;
+        const baseChildren = Math.floor(totalChildren / roomCount);
+        const extraChildren = totalChildren % roomCount;
+        const fallbackChildAges = Array.isArray(passengers.childAges)
+            ? passengers.childAges.map((age) => String(age || ""))
+            : [];
+        let childAgeCursor = 0;
+        const normalizedRooms = Array.from({ length: roomCount }, (_, index) => {
+            const sourceRoom = sourceRooms[index] || {};
+            const childCount = sourceRooms[index]
+                ? Number(sourceRoom.children || 0)
+                : baseChildren + (index < extraChildren ? 1 : 0);
+            const adultCount = sourceRooms[index]
+                ? Number(sourceRoom.adults || 1)
+                : baseAdults + (index < extraAdults ? 1 : 0);
+            const directChildAges = Array.isArray(sourceRoom.childAges)
+                ? sourceRoom.childAges.map((age) => String(age || "")).slice(0, childCount)
+                : [];
+            const childAges = directChildAges.length
+                ? directChildAges
+                : fallbackChildAges.slice(childAgeCursor, childAgeCursor + childCount);
+
+            childAgeCursor += childCount;
+
+            return {
+                adults: adultCount,
+                children: childCount,
+                childAges,
+            };
+        });
+
+        return {
+            room: roomCount,
+            adults: totalAdults,
+            children: totalChildren,
+            childAges: normalizedRooms.flatMap((room) => room.childAges),
+            rooms: normalizedRooms,
+            pets: Number(passengers.pets || 0),
+        };
+    }, [adults, children, rooms]);
+
+    const [guestState, setGuestState] = useState(() =>
+        normalizeGuestState(initialPassengers || {
+            room: Number(rooms) || 1,
+            adults: Number(adults) || 1,
+            children: Number(children) || 0,
+            pets: 0,
+        }),
+    );
 
     useEffect(() => {
         setStartDate(toInputDate(checkIn));
@@ -63,13 +116,17 @@ export default function RoomSelectionCard({
     }, [checkIn, checkOut]);
 
     useEffect(() => {
-        setGuestState((prev) => ({
-            ...prev,
-            room: Number(rooms) || 1,
-            adults: Number(adults) || 1,
-            children: Number(children) || 0,
-        }));
-    }, [rooms, adults, children]);
+        setGuestState(
+            normalizeGuestState(
+                initialPassengers || {
+                    room: Number(rooms) || 1,
+                    adults: Number(adults) || 1,
+                    children: Number(children) || 0,
+                    pets: 0,
+                },
+            ),
+        );
+    }, [initialPassengers, normalizeGuestState, rooms, adults, children]);
 
     const openCalendar = (field) => {
         setActiveDateField(field);
@@ -138,12 +195,19 @@ export default function RoomSelectionCard({
         Number(guestState.adults || 0) + Number(guestState.children || 0);
 
     const handleSelectRoom = () => {
+        const roomDetails = Array.isArray(guestState.rooms) ? guestState.rooms : [];
+        const childAges = roomDetails.flatMap((room) =>
+            Array.isArray(room.childAges) ? room.childAges : [],
+        );
+
         onBookNow?.({
             checkIn: startDate,
             checkOut: endDate,
             rooms: Number(guestState.room) || 1,
             adults: Number(guestState.adults) || 1,
             children: Number(guestState.children) || 0,
+            childAges,
+            roomDetails,
         });
     };
 
@@ -246,7 +310,7 @@ export default function RoomSelectionCard({
                 onClick={handleSelectRoom}
                 disabled={checkingAvailability}
             >
-                {checkingAvailability ? "CHECKING..." : "SELECT ROOM"}
+                {checkingAvailability ? "CHECKING..." : "CHECK ROOM"}
             </button>
         </div>
     );

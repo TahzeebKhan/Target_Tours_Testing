@@ -1,10 +1,8 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './MobileHotelDetails.module.css'
 import { Pencil } from 'lucide-react'
 import MapSection from '../mapSection/MapSection'
-import StickyHeader from './ResultsBottomSheet'
-import ResultsStickyBar from './ResultsBottomSheet'
 import ResultsBottomSheet from './ResultsBottomSheet'
 import HotelGridView from './hotelGridView/HotelGridView'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -43,17 +41,54 @@ const getSearchLocationLabel = (searchParams) => {
         : "this location";
 };
 
+const formatMobileDate = (dateValue) => {
+  if (!dateValue) return "Add date";
+
+  const date = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateValue;
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getNumericSearchParam = (searchParams, key, fallback = 0) => {
+  const value = Number(searchParams.get(key));
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+};
+
+const pluralize = (count, label) =>
+  `${count} ${label}${count === 1 ? "" : "s"}`;
+
 const MobileHotelDetails = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const hotelSearchChannel = searchParams.get("channel") || "";
     const staySummary = getStaySummary(searchParams);
     const searchLocationLabel = getSearchLocationLabel(searchParams);
+    const searchSummary = useMemo(() => {
+      const rooms = Math.max(1, getNumericSearchParam(searchParams, "rooms", 1));
+      const adults = getNumericSearchParam(searchParams, "adults", 1);
+      const children = getNumericSearchParam(searchParams, "children", 0);
+      const guests = Math.max(1, adults + children);
+
+      return {
+        city: searchLocationLabel === "this location" ? "Hotel stay" : searchLocationLabel,
+        checkIn: formatMobileDate(
+          searchParams.get("checkIn") || searchParams.get("checkin"),
+        ),
+        roomsLabel: pluralize(rooms, "Room"),
+        guestsLabel: pluralize(guests, "Guest"),
+      };
+    }, [searchLocationLabel, searchParams]);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   /* ✅ REQUIRED STATES */
   const [likedTours, setLikedTours] = useState([]);
   const [hotelResults, setHotelResults] = useState([]);
+  const [totalHotelResults, setTotalHotelResults] = useState(0);
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -70,7 +105,7 @@ const MobileHotelDetails = () => {
   };
 
   const handleBookNow = async (hotel) => {
-    if (!hotel) return;
+    if (!hotel || loadingHotelDetailsId) return;
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
 
@@ -121,6 +156,7 @@ const MobileHotelDetails = () => {
     if (!isMobileViewport) {
       normalizeRunRef.current += 1;
       setHotelResults([]);
+      setTotalHotelResults(0);
       setIsHotelLoading(false);
       hotelResultSourceRef.current = "";
       return;
@@ -128,12 +164,14 @@ const MobileHotelDetails = () => {
 
     normalizeRunRef.current += 1;
     setHotelResults([]);
+    setTotalHotelResults(0);
     setIsHotelLoading(Boolean(hotelSearchChannel));
     hotelResultSourceRef.current = "";
 
     const normalizeHotelsInBatches = (hotels, meta = {}) => {
       const runId = normalizeRunRef.current + 1;
       normalizeRunRef.current = runId;
+      setTotalHotelResults(hotels.length);
       const withSearchMeta = (hotel) => ({
         ...hotel,
         searchId: hotel.searchId || hotel.search_id || meta.searchId,
@@ -242,23 +280,18 @@ const MobileHotelDetails = () => {
                         className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
                     >
                         <div className={styles.TripCardHeaderDetails}>
-                            <p className={styles.TripCardHeaderDetailsItemText}>New Delhi</p>
-                            {/* <span className={styles.TripCardHeaderDetailsItemCode}>
-                (DEL)
-              </span> */}
-
-                            {/* <img src="/icons/right-arrow.svg" alt="" /> */}
-                            <div className={styles.minDash}>-</div>
-                            <p className={styles.TripCardHeaderDetailsItemText}>Goa</p>
+                          <p className={styles.TripCardHeaderDetailsItemText}>
+                            {searchSummary.city}
+                          </p>
                         </div>
 
                         <div className={styles.TripCardHeaderBookingDate}>
-                            <p>Wed, 03 Dec</p>
+                            <p>{searchSummary.checkIn}</p>
                             <p>
-                                <span className={styles.navDot}></span>1 Traveller
+                                <span className={styles.navDot}></span>{searchSummary.guestsLabel}
                             </p>
                             <p>
-                                <span className={styles.navDot}></span>Economy
+                                <span className={styles.navDot}></span>{searchSummary.roomsLabel}
                             </p>
                         </div>
                     </div>
@@ -267,7 +300,10 @@ const MobileHotelDetails = () => {
             </div>
 
             <MapSection />
-            <ResultsBottomSheet>
+            <ResultsBottomSheet
+              resultsCount={totalHotelResults || displayHotels.length}
+              isLoading={isHotelLoading}
+            >
                     <HotelGridView
                         tourData={displayHotels}
                         likedTours={likedTours}

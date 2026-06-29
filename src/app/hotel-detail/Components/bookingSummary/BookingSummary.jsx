@@ -4,8 +4,8 @@ import styles from "./BookingSummary.module.css";
 import { useRouter } from "next/navigation";
 
 const formatCurrency = (value) =>
-  `₹ ${Number(value || 0).toLocaleString("en-IN", {
-    maximumFractionDigits: 2,
+  `₹ ${Math.round(Number(value || 0)).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
   })}`;
 
 const getRoomTotal = (room) => {
@@ -34,11 +34,22 @@ const getDisplayDate = (value, fallback = "Check-in") => {
   });
 };
 
-const BookingSummary = ({ roomList, checkInDate, nights = 1, onRemove, onBookNow }) => {
+const BookingSummary = ({
+  roomList,
+  checkInDate,
+  nights = 1,
+  onRemove,
+  onBookNow,
+  bookingLoading = false,
+}) => {
   const router = useRouter();
 
   const handleDelete = () => {
-    onBookNow?.();
+    if (bookingLoading) return;
+
+    const shouldContinue = onBookNow?.();
+    if (shouldContinue === false) return;
+
     router.push("/hotel-booking");
   };
   const summary = roomList.reduce(
@@ -89,8 +100,13 @@ const BookingSummary = ({ roomList, checkInDate, nights = 1, onRemove, onBookNow
                 <img
                   src="/icons/trash.svg"
                   alt="delete"
-                  onClick={() => onRemove(room.id)}
-                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    if (!bookingLoading) onRemove(room.id);
+                  }}
+                  style={{
+                    cursor: bookingLoading ? "not-allowed" : "pointer",
+                    opacity: bookingLoading ? 0.5 : 1,
+                  }}
                 />
               </div>
 
@@ -134,8 +150,12 @@ const BookingSummary = ({ roomList, checkInDate, nights = 1, onRemove, onBookNow
       </div>
 
       {/* CTA */}
-      <button className={styles.bookBtn} onClick={handleDelete}>
-        BOOK NOW
+      <button
+        className={styles.bookBtn}
+        disabled={bookingLoading}
+        onClick={handleDelete}
+      >
+        {bookingLoading ? "LOADING..." : "BOOK NOW"}
       </button>
 
       <div className={styles.help}>

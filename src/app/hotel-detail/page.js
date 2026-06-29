@@ -135,19 +135,42 @@ const buildAvailabilityRooms = ({
   const extraAdults = totalAdults % count;
   const baseChildren = Math.floor(totalChildren / count);
   const extraChildren = totalChildren % count;
+  const sourceChildAges = sourceRooms.flatMap((room) =>
+    normalizeChildAges(room.childAges || room.childrenAges || room.ChildAges),
+  );
+  let childAgeCursor = 0;
 
   return Array.from({ length: count }, (_, index) => {
     const sourceRoom = sourceRooms[index] || sourceRooms[0] || {};
+    const roomChildren = baseChildren + (index < extraChildren ? 1 : 0);
+    const directChildAges = normalizeChildAges(
+      sourceRoom.childAges || sourceRoom.childrenAges || sourceRoom.ChildAges,
+    );
+    const childAges = directChildAges.length
+      ? directChildAges.slice(0, roomChildren)
+      : sourceChildAges.slice(childAgeCursor, childAgeCursor + roomChildren);
+
+    childAgeCursor += roomChildren;
 
     return {
       adults: String(baseAdults + (index < extraAdults ? 1 : 0)),
-      children: String(baseChildren + (index < extraChildren ? 1 : 0)),
-      childAges: normalizeChildAges(
-        sourceRoom.childAges || sourceRoom.childrenAges || sourceRoom.ChildAges,
-      ),
+      children: String(roomChildren),
+      childAges,
     };
   });
 };
+
+const buildAvailabilitySignature = (selection = {}) =>
+  JSON.stringify({
+    checkIn: selection.checkIn || "",
+    checkOut: selection.checkOut || "",
+    rooms: Number(selection.rooms) || 1,
+    adults: Number(selection.adults) || 1,
+    children: Number(selection.children) || 0,
+    childAges: Array.isArray(selection.childAges)
+      ? selection.childAges.map((age) => String(age || ""))
+      : [],
+  });
 
 const buildHotelAvailabilityPayload = ({
   hotelDetail,
@@ -220,7 +243,12 @@ const buildHotelAvailabilityPayload = ({
       roomCount: selection.rooms,
       adults: selection.adults,
       children: selection.children,
-      sourceRooms: sourceRooms.length ? sourceRooms : requestRooms,
+      sourceRooms:
+        Array.isArray(selection.roomDetails) && selection.roomDetails.length
+          ? selection.roomDetails
+          : sourceRooms.length
+            ? sourceRooms
+            : requestRooms,
     }),
     hotelId: String(getFirstValue(searchRequest.hotelId, hotelDetail?.id)),
     priceProvider: String(
@@ -240,7 +268,6 @@ const getAvailabilitySearchId = (response) =>
   );
 
 const updateHotelDetailUrlParams = (selection, response) => {
-   console.log("idd",response)
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
@@ -251,6 +278,9 @@ const updateHotelDetailUrlParams = (selection, response) => {
   url.searchParams.set("rooms", String(selection.rooms));
   url.searchParams.set("adults", String(selection.adults));
   url.searchParams.set("children", String(selection.children));
+  if (Array.isArray(selection.childAges)) {
+    url.searchParams.set("childAges", selection.childAges.join(","));
+  }
 
   if (searchId) {
     url.searchParams.set("searchId", searchId);
@@ -285,6 +315,7 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState("Description");
   const [showSummary, setShowSummary] = useState(false);
   const [availabilityChecking, setAvailabilityChecking] = useState(false);
+  const [bookingActionLoading, setBookingActionLoading] = useState(false);
   const [selectionOverride, setSelectionOverride] = useState(null);
   const [roomList, setRoomList] = useState(DEFAULT_ROOM_LIST);
   const descriptionRef = useRef(null);
@@ -301,6 +332,7 @@ const Page = () => {
       rooms: getSearchParamValue("rooms"),
       adults: getSearchParamValue("adults"),
       children: getSearchParamValue("children"),
+      childAges: getSearchParamValue("childAges"),
     }),
     [],
   );
@@ -350,6 +382,64 @@ const Page = () => {
     storedHotelSearch.children ||
     storedHotelSearch.initPayload?.rooms?.[0]?.children ||
     0;
+  const initialGuestState = useMemo(() => {
+    const storedRooms = Array.isArray(storedHotelSearch.initPayload?.rooms)
+      ? storedHotelSearch.initPayload.rooms
+      : Array.isArray(searchRequest.searchContext?.rooms)
+        ? searchRequest.searchContext.rooms
+        : [];
+    const knownChildAges = normalizeChildAges(
+      urlSearchValues.childAges ||
+        searchRequest.childAges ||
+        searchRequest.childrenAges ||
+        storedHotelSearch.childAges ||
+        storedHotelSearch.childrenAges,
+    );
+    const roomCount = Number(
+      urlSearchValues.rooms ||
+        searchRequest.rooms ||
+        storedHotelSearch.rooms ||
+        storedRooms.length ||
+        1,
+    );
+    const adultCount = Number(
+      urlSearchValues.adults ||
+        searchRequest.adults ||
+        storedHotelSearch.adults ||
+        storedRooms.reduce((sum, room) => sum + Number(room.adults || room.numOfAdults || 0), 0) ||
+        1,
+    );
+    const childCount = Number(
+      urlSearchValues.children ||
+        searchRequest.children ||
+        storedHotelSearch.children ||
+        storedRooms.reduce(
+          (sum, room) => sum + Number(room.children || room.numOfChildren || 0),
+          0,
+        ) ||
+        0,
+    );
+    const sourceRooms = storedRooms.length
+      ? storedRooms
+      : childCount > 0
+        ? [{ adults: adultCount, children: childCount, childAges: knownChildAges }]
+        : [];
+    const normalizedRooms = buildAvailabilityRooms({
+      roomCount,
+      adults: adultCount,
+      children: childCount,
+      sourceRooms,
+    });
+
+    return {
+      room: normalizedRooms.length,
+      adults: adultCount,
+      children: childCount,
+      childAges: normalizedRooms.flatMap((room) => room.childAges || []),
+      rooms: normalizedRooms,
+      pets: Number(storedHotelSearch.pets || searchRequest.pets || 0),
+    };
+  }, [searchRequest, storedHotelSearch, urlSearchValues]);
   const effectiveSelection = useMemo(
     () => ({
       checkIn: selectionOverride?.checkIn || apiCheckIn,
@@ -357,8 +447,10 @@ const Page = () => {
       rooms: selectionOverride?.rooms || rooms,
       adults: selectionOverride?.adults || adults,
       children: selectionOverride?.children || children,
+      childAges: selectionOverride?.childAges || initialGuestState.childAges || [],
+      roomDetails: selectionOverride?.roomDetails || initialGuestState.rooms || [],
     }),
-    [adults, apiCheckIn, apiCheckOut, children, rooms, selectionOverride],
+    [adults, apiCheckIn, apiCheckOut, children, initialGuestState, rooms, selectionOverride],
   );
   const {
     checkIn: effectiveCheckIn,
@@ -380,8 +472,43 @@ const Page = () => {
     [effectiveCheckIn, effectiveCheckOut],
   );
   const selectedRooms = useMemo(
-    () => roomList.filter((room) => room.quantity > 0),
+    () => {
+      const maxRooms = Math.max(1, Number(effectiveRooms) || 1);
+      let remainingRooms = maxRooms;
+
+      return roomList.reduce((rooms, room) => {
+        if (remainingRooms <= 0) return rooms;
+
+        const quantity = Math.min(Number(room.quantity || 0), remainingRooms);
+        if (quantity <= 0) return rooms;
+
+        remainingRooms -= quantity;
+        rooms.push({ ...room, quantity });
+        return rooms;
+      }, []);
+    },
+    [effectiveRooms, roomList],
+  );
+  const selectedRoomQuantities = useMemo(
+    () =>
+      roomList.reduce((quantities, room) => {
+        quantities[room.id] = Number(room.quantity || 0);
+        return quantities;
+      }, {}),
     [roomList],
+  );
+  const maxSelectableRoomCount = Math.max(1, Number(effectiveRooms) || 1);
+  const isBookingActionLoading =
+    availabilityChecking || roomsLoading || bookingActionLoading;
+  const lastAvailabilitySignatureRef = useRef(
+    buildAvailabilitySignature({
+      checkIn: apiCheckIn,
+      checkOut: apiCheckOut,
+      rooms,
+      adults,
+      children,
+      childAges: initialGuestState.childAges,
+    }),
   );
   const sectionRefs = useMemo(
     () => ({
@@ -434,6 +561,8 @@ const Page = () => {
         rooms: effectiveRooms,
         adults: effectiveAdults,
         children: effectiveChildren,
+        childAges: effectiveSelection.childAges,
+        roomDetails: effectiveSelection.roomDetails,
       },
       rooms: selectedRooms,
     };
@@ -447,6 +576,7 @@ const Page = () => {
     effectiveCheckOutDisplay,
     effectiveChildren,
     effectiveRooms,
+    effectiveSelection,
     hotelDetail,
     nights,
     searchRequest,
@@ -454,7 +584,17 @@ const Page = () => {
     storedHotelSearch,
   ]);
 
+  const handleBookNow = useCallback(() => {
+    if (isBookingActionLoading) return false;
+
+    setBookingActionLoading(true);
+    saveBookingSession();
+    return true;
+  }, [isBookingActionLoading, saveBookingSession]);
+
   const handleSelectRoom = useCallback(async (selection) => {
+    if (isBookingActionLoading) return;
+
     if (!selection?.checkIn || !selection?.checkOut) {
       toast.error("Please select check-in and check-out dates.");
       return;
@@ -466,7 +606,15 @@ const Page = () => {
       rooms: Number(selection.rooms) || 1,
       adults: Number(selection.adults) || 1,
       children: Number(selection.children) || 0,
+      childAges: Array.isArray(selection.childAges) ? selection.childAges : [],
+      roomDetails: Array.isArray(selection.roomDetails) ? selection.roomDetails : [],
     };
+    const nextSignature = buildAvailabilitySignature(nextSelection);
+
+    if (nextSignature === lastAvailabilitySignatureRef.current) {
+      return;
+    }
+
     const payload = buildHotelAvailabilityPayload({
       hotelDetail,
       storedHotelSearch,
@@ -486,6 +634,7 @@ const Page = () => {
     try {
       const response = await refreshHotelAvailability(payload);
 
+      lastAvailabilitySignatureRef.current = nextSignature;
       updateHotelDetailUrlParams(nextSelection, response);
 
       if (typeof window !== "undefined") {
@@ -498,6 +647,7 @@ const Page = () => {
             rooms: nextSelection.rooms,
             adults: nextSelection.adults,
             children: nextSelection.children,
+            childAges: nextSelection.childAges,
             initPayload: {
               ...(storedHotelSearch.initPayload || {}),
               ...payload,
@@ -511,7 +661,7 @@ const Page = () => {
     } finally {
       setAvailabilityChecking(false);
     }
-  }, [hotelDetail, refreshHotelAvailability, storedHotelSearch]);
+  }, [hotelDetail, isBookingActionLoading, refreshHotelAvailability, storedHotelSearch]);
 
   useEffect(() => {
     if (!hotelDetail?.rooms?.length) return;
@@ -568,14 +718,24 @@ const Page = () => {
   }, []);
   const handleRoomQuantityChange = useCallback((id, quantity) => {
     setRoomList((prev) => {
+      const requestedQuantity = Math.max(0, Number(quantity) || 0);
+      const otherRoomTotal = prev.reduce(
+        (total, room) =>
+          room.id === id ? total : total + Number(room.quantity || 0),
+        0,
+      );
+      const allowedQuantity = Math.min(
+        requestedQuantity,
+        Math.max(0, maxSelectableRoomCount - otherRoomTotal),
+      );
       const nextRooms = prev.map((room) =>
-        room.id === id ? { ...room, quantity } : room,
+        room.id === id ? { ...room, quantity: allowedQuantity } : room,
       );
 
       setShowSummary(nextRooms.some((room) => room.quantity > 0));
       return nextRooms;
     });
-  }, []);
+  }, [maxSelectableRoomCount]);
 
   const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
@@ -627,6 +787,9 @@ const Page = () => {
               rooms={hotelDetail?.rooms || []}
               loading={roomsLoading}
               errorMessage={hotelDetail?.roomsErrorMessage}
+              actionDisabled={isBookingActionLoading}
+              roomQuantities={selectedRoomQuantities}
+              maxSelectableRooms={maxSelectableRoomCount}
               onRoomQuantityChange={handleRoomQuantityChange}
             />
           </section>
@@ -650,6 +813,7 @@ const Page = () => {
               rooms={effectiveRooms}
               adults={effectiveAdults}
               children={effectiveChildren}
+              initialPassengers={initialGuestState}
             />
           </div>
 
@@ -664,7 +828,8 @@ const Page = () => {
               checkInDate={effectiveCheckIn}
               nights={nights}
               onRemove={removeRoom}
-              onBookNow={saveBookingSession}
+              onBookNow={handleBookNow}
+              bookingLoading={isBookingActionLoading}
             />
           </div>
         </div>

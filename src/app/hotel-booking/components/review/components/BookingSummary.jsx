@@ -9,8 +9,8 @@ const getNumber = (value) => {
 };
 
 const formatCurrency = (value) =>
-  `₹ ${Number(value || 0).toLocaleString("en-IN", {
-    maximumFractionDigits: 2,
+  `₹ ${Math.round(Number(value || 0)).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
   })}`;
 
 const getRoomTotal = (room, fallbackNights = 1) => {

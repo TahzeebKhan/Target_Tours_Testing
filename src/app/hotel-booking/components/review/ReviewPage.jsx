@@ -662,7 +662,11 @@ const ReviewPage = () => {
     });
 
     // window.location.assign(redirectUrl);
-    window.open(redirectUrl, "_blank", "noopener,noreferrer");
+
+    // Forces the top-level window to redirect, clearing any iframe/modal glitches
+window.top.location.href = redirectUrl;
+
+    // window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {

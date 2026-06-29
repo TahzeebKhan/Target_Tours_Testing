@@ -292,7 +292,7 @@ const HomePage = ({
   const [travellerDestination, setTravellerDestination] =
     useState("SELECT DESTINATION");
   const [travellerCount, setTravellerCount] = useState("1 TRAVELLER");
-  const [guestRoomCount, setGuestRoomCount] = useState("SELECT ROOMS");
+  const [guestRoomCount, setGuestRoomCount] = useState("CHECK ROOMS");
   const [hotelGuestRoomCount, setHotelGuestRoomCount] =
     useState("GUESTS & ROOMS");
   const [travellerOpen, setTravellerOpen] = useState(false);

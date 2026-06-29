@@ -5,13 +5,26 @@ import { Check, Search, SlidersHorizontal, X } from "lucide-react";
 import styles from "./HotelSwapModal.module.css";
 import CustomDropdown from "./CustomDropdown";
 
+const ratingToStars = {
+  Excellent: 5,
+  Good: 4,
+  Average: 3,
+  Poor: 2,
+  Terrible: 1,
+};
+
+const getRatingScore = (ratingLabel, fallbackRating = "") => {
+  const normalizedLabel = String(ratingLabel || "").trim();
+  return ratingToStars[normalizedLabel] || fallbackRating;
+};
+
 const HOTEL_SWAP_OPTIONS = [
   {
     name: "Banyan Cove Beach Resort - Deluxe Ocean View",
     image: "/images/hotel1.png",
     price: "₹ 6,945",
     oldPrice: "₹66,945",
-    rating: "5.0",
+    ratingLabel: "Excellent",
     reviews: "1,260 reviews",
   },
   {
@@ -19,7 +32,7 @@ const HOTEL_SWAP_OPTIONS = [
     image: "/images/hotelImage1.png",
     price: "₹ 3,945",
     oldPrice: "₹66,945",
-    rating: "5.0",
+    ratingLabel: "Excellent",
     reviews: "1,260 reviews",
   },
   {
@@ -27,7 +40,7 @@ const HOTEL_SWAP_OPTIONS = [
     image: "/images/hotelImage2.png",
     price: "₹ 9,945",
     oldPrice: "₹66,945",
-    rating: "5.0",
+    ratingLabel: "Excellent",
     reviews: "1,260 reviews",
   },
   {
@@ -35,7 +48,7 @@ const HOTEL_SWAP_OPTIONS = [
     image: "/images/hotelImage3.png",
     price: "₹ 2,945",
     oldPrice: "₹66,945",
-    rating: "5.0",
+    ratingLabel: "Excellent",
     reviews: "1,260 reviews",
   },
 ];
@@ -220,11 +233,13 @@ export default function HotelSwapModal({
                       <div className={styles.hotelRatingValue}>
 
                      
-                      <p className={styles.hotelRatingText}>Excellent</p>
+                      <p className={styles.hotelRatingText}>
+                        {hotel.ratingLabel}
+                      </p>
                       <span>{hotel.reviews}</span>
                        </div>
                       <div className={styles.hotelRate}>
-                      {hotel.rating}
+                      {getRatingScore(hotel.ratingLabel, hotel.rating)}
                       </div>
                     </div>
                     <p>
