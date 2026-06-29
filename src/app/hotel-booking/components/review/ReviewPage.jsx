@@ -18,7 +18,6 @@ import {
   startHotelBooking,
   HotelPaymentStart,
   getHotelPaymentGateways,
-  refreshHotelSession,
   writePendingHotelConfirmBooking,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
@@ -808,6 +807,7 @@ const ReviewPage = () => {
       const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
+       console.log("storedHotelResults",storedHotelResults)
       const checkInDate = pickApiDate(
         request.checkInDate,
         request.checkInRaw,
@@ -840,11 +840,14 @@ const ReviewPage = () => {
         initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
         searchContext: request.searchContext,
       };
+       console.log("initSearchContext",initSearchContext)
       const hotelInitData = getHotelInitData({
         request,
         storedHotelSearch,
         storedHotelResults,
       });
+      console.log("hotelInitData",hotelInitData)
+
       const searchTracingKey = getFirstValue(
         hotelInitData.searchTracingKey,
         hotelInitData.searchTracingkey,
@@ -915,31 +918,14 @@ const ReviewPage = () => {
         return;
       }
 
-      const refreshResponse =
-        initPayload.rooms?.length > 0 ? await refreshHotelSession(initPayload) : null;
-      const refreshedSearchTracingKey =
-        findDeepValue(refreshResponse, "searchTracingKey") ||
-        findDeepValue(refreshResponse, "searchTracingkey") ||
-        findDeepValue(refreshResponse, "search_tracing_key");
-      const refreshedSearchId =
-        findDeepValue(refreshResponse, "searchId") ||
-        findDeepValue(refreshResponse, "SearchId") ||
-        findDeepValue(refreshResponse, "search_id");
-      const resolvedSearchTracingKey = refreshedSearchTracingKey || searchTracingKey;
-      const resolvedSearchId =
-        refreshedSearchId ||
-        searchId ||
-        request.searchId ||
-        request.SearchId ||
-        fallbackHotelStartBookingPayload.SearchId;
-
-      if (!resolvedSearchTracingKey || !resolvedSearchId) {
+      if (!searchTracingKey || !searchId) {
         toast.error("Hotel search session is missing. Please search again.");
         return;
       }
+
       const payload = {
         ...fallbackHotelStartBookingPayload,
-        TUI: resolvedSearchTracingKey || "",
+        TUI: searchTracingKey || "",
         ContactInfo: {
           ...fallbackHotelStartBookingPayload.ContactInfo,
           Title: contact.title,
@@ -978,7 +964,7 @@ const ReviewPage = () => {
           };
         }),
         NetAmount: selectedNetAmount,
-        SearchId: resolvedSearchId,
+        SearchId: searchId,
         hotelSearchId,
         RecommendationId:
           firstRoom.recommendationId ||
