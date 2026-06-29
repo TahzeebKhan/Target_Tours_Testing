@@ -1,14 +1,16 @@
 .section {
-  --navy: #000033;
   width: 100%;
-  padding: 82px 24px 96px;
-  background: #f9f9f9;
-  color: #1a1a1a;
+  padding: 80px 24px;
+  background: #F9FAFB;
+  color: #050826;
+  box-sizing: border-box;
 }
 
 .container {
-  width: min(1460px, 100%);
+  max-width: 1440px;
   margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .anchorSection,
@@ -18,220 +20,291 @@
 
 .heading {
   margin: 0;
-  color: var(--navy);
- font-family: Antic Didone;
-font-weight: 400;
-font-style: Regular;
-font-size: 32px;
-leading-trim: NONE;
-line-height: 40px;
-letter-spacing: 0px;
-vertical-align: middle;
-
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #050826;
 }
 
 .subheading {
   margin: 10px 0 0;
-  color: #1a1a1a;
-font-family: Inter;
-font-weight: 300;
-font-style: Light;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 16px;
-letter-spacing: 0%;
-vertical-align: middle;
-color:#000000;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #767676;
 }
 
+/* INCLUSIONS & EXCLUSIONS TABLE */
 .listGrid {
   margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(64px, 9vw, 170px);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border: 1px solid #E4E6E8;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #FFFFFF;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.listGrid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.listGrid > div:first-child {
+  border-right: 1px solid #E4E6E8;
 }
 
 .listTitle {
-  margin: 0 0 30px;
-  color: #000;
-font-family: Inter;
-font-weight: 700;
-font-style: Bold;
-font-size: 20px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-text-transform: uppercase;
-
+  margin: 0;
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E4E6E8;
+  padding: 14px 20px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #050826;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .itemList {
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
   list-style: none;
 }
 
 .item {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  align-items: start;
-  gap: 16px;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E4E6E8;
   color: #434343;
-font-family: Inter;
-font-weight: 300;
-font-style: Light;
-font-size: 16px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: -2%;
-vertical-align: middle;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
 
+.item:last-child {
+  border-bottom: none;
 }
 
 .icon {
   width: 18px;
   height: 18px;
-  margin-top: 1px;
   object-fit: contain;
-  padding: 2px;
 }
 
 .empty {
   margin: 0;
-  color: #6d6d73;
-  font: 300 15px/1.5 var(--font-inter);
+  padding: 20px;
+  color: #767676;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 15px;
 }
 
+/* TOUR POLICY TABLE */
 .policyGrid {
   margin-top: 80px;
   display: grid;
-  grid-template-columns: minmax(340px, 580px) minmax(460px, 1fr);
+  grid-template-columns: 100%; /* Spans full width! */
   align-items: start;
-  gap: clamp(70px, 8vw, 150px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .policyTitle {
   margin: 0 0 36px;
-  color: var(--navy);
- font-family: Antic Didone;
-font-weight: 400;
-font-style: Regular;
-font-size: 32px;
-leading-trim: NONE;
-line-height: 40px;
-letter-spacing: 0px;
-vertical-align: middle;
-
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #050826;
 }
 
 .policyBlocks {
   display: grid;
-  gap: 32px;
+  grid-template-columns: 250px 1fr;
+  gap: 0;
+  border: 1px solid #E4E6E8;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #FFFFFF;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Add headers to the Policy Grid */
+.policyBlocks::before {
+  content: "Policy";
+  grid-column: 1;
+  grid-row: 1;
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E4E6E8;
+  border-right: 1px solid #E4E6E8;
+  padding: 14px 24px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #050826;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.policyBlocks::after {
+  content: "Details";
+  grid-column: 2;
+  grid-row: 1;
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E4E6E8;
+  padding: 14px 24px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #050826;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.policyBlock {
+  display: contents; /* Skips wrapper so h3 and policyText align directly to grid columns */
 }
 
 .policyBlock h3 {
-  margin: 0 0 16px;
-  color: #000;
-font-family: Inter;
-font-weight: 700;
-font-style: Bold;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-text-transform: uppercase;
-
-  text-transform: uppercase;
+  grid-column: 1;
+  margin: 0;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E4E6E8;
+  border-right: 1px solid #E4E6E8;
+  padding: 24px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #050826;
+  line-height: 1.4;
+  text-transform: capitalize;
 }
 
 .policyText {
+  grid-column: 2;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E4E6E8;
+  padding: 24px;
   color: #434343;
-  font-family: Inter;
-font-weight: 300;
-font-style: Light;
-font-size: 16px;
-leading-trim: NONE;
-line-height: 160%;
-letter-spacing: -2%;
-vertical-align: middle;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
 
+.policyBlock:last-of-type h3,
+.policyBlock:last-of-type .policyText {
+  border-bottom: none;
 }
 
 .policyText p {
   margin: 0 0 10px;
 }
 
+.policyText p:last-child {
+  margin-bottom: 0;
+}
+
 .policyText ul,
 .policyText ol {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 20px;
 }
 
 .policyText li {
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .policyText strong,
 .policyText b {
-  font-weight: 700;
+  font-weight: 600;
+  color: #050826;
 }
 
+/* Hide Policy Image on Desktop */
 .imageWrap {
-  width: 100%;
+  display: none !important;
 }
 
-.policyImage {
-  display: block;
-  width: 100%;
-  height: min(36vw, 560px);
-  min-height: 430px;
-  object-fit: cover;
-  object-position: center;
-}
-
+/* RESPONSIVE DESIGN */
 @media (max-width: 980px) {
   .section {
-    padding-top: 68px;
+    padding: 60px 16px;
   }
 
-  .listGrid,
-  .policyGrid {
+  .listGrid {
     grid-template-columns: 1fr;
-    gap: 48px;
   }
 
-  .policyGrid {
-    margin-top: 84px;
+  .listGrid > div:first-child {
+    border-right: none;
+    border-bottom: 1px solid #E4E6E8;
   }
 
-  .policyImage {
-    height: auto;
-    min-height: 0;
-    aspect-ratio: 16 / 10;
+  .item:last-child {
+    border-bottom: 1px solid #E4E6E8;
+  }
+  
+  .listGrid > div:last-child .item:last-child {
+    border-bottom: none;
+  }
+
+  .policyBlocks {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide pseudo table headers in stacked layout */
+  .policyBlocks::before,
+  .policyBlocks::after {
+    display: none;
+  }
+
+  .policyBlock h3 {
+    grid-column: 1;
+    background-color: #F8F9FA;
+    border-right: none;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  .policyText {
+    grid-column: 1;
+    padding: 16px;
+    border-bottom: 1px solid #E4E6E8;
   }
 }
 
 @media (max-width: 600px) {
   .section {
-    padding: 54px 18px 72px;
+    padding: 48px 12px;
   }
 
-  .listGrid {
-    margin-top: 38px;
+  .heading {
+    font-size: 26px;
+  }
+
+  .policyTitle {
+    font-size: 26px;
   }
 
   .item {
-    grid-template-columns: 20px minmax(0, 1fr);
-    gap: 12px;
     font-size: 14px;
+    padding: 12px 14px;
   }
 
-  .listTitle {
-    font-size: 18px;
+  .policyText {
+    font-size: 14px;
   }
 }

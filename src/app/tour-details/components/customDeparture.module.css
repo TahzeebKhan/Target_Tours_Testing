@@ -1,304 +1,556 @@
 .section {
-  padding: 72px 24px;
-  background: #0b1017;
-  color: #fff;
+  padding: 80px 24px;
+  background: #F9FAFB;
+  color: #050826;
   scroll-margin-top: 76px;
+  box-sizing: border-box;
 }
 
 .content {
-  max-width: 1180px;
+  max-width: 1440px;
   margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .title {
   margin: 0;
-  font-family: Antic Didone;
-font-weight: 400;
-font-style: Regular;
-font-size: 56px;
-line-height: 100%;
-letter-spacing: 0%;
-
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 42px;
+  line-height: 1.2;
+  color: #050826;
+  text-align: center;
 }
 
 .subtitle {
-  margin: 12px 0 30px;
-font-family: Inter;
-font-size: 16px;
-line-height: 150%;
-letter-spacing: 0%;
-color:#9CA3AF;
-}
-
-.months {
-  display: grid;
-  gap: 14px;
-}
-
-.monthCard {
-  border: 1px solid #263147;
-  background: #0f1930;
-}
-
-.monthHeader {
-  width: 100%;
-  min-height: 78px;
-  padding: 16px 18px;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  text-align: left;
-  cursor: pointer;
-}
-
-.monthHeader strong {
-  display: block;
- font-family: Antic Didone;
-font-size: 22px;
-line-height: 100%;
-letter-spacing: 0%;
-
-}
-
-.monthHeader small {
-  display: block;
-  font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 13px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-color:#9CA3AF;
-margin-top: 4px;
-}
-
-.chevron {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #d5ad37;
-  border-radius: 50%;
-  color: #f5c92e;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
+  margin: 12px 0 40px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #767676;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .departureBody {
-  padding: 22px;
-  border-top: 1px solid #263147;
+  margin-top: 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+  grid-template-columns: 1fr 437px;
+  gap: 32px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Dedicated Calendar Card (Left) */
+.calendarCard {
+  background: #FFFFFF;
+  border: 1px solid #E4E6E8;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Month Tabs Selector inside Calendar Card */
+.tabsContainer {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid #E4E6E8;
+  padding-bottom: 24px;
+}
+
+.tabButton {
+  flex: 1;
+  background-color: #F4F5F6;
+  color: #767676;
+  border: 1px solid #E4E6E8;
+  border-radius: 6px;
+  padding: 14px 10px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.tabButton:hover {
+  background-color: #EAECF0;
+  border-color: #C4C4C4;
+}
+
+.tabButton.activeTab {
+  background-color: #050826 !important;
+  color: #FFFFFF !important;
+  border-color: #050826 !important;
+}
+
+.calendarPanel {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .calendarHeader {
-  display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .calendarHeader p {
+  order: 1;
+  flex-grow: 1;
   margin: 0;
-  text-align: center;
   font-family: "Antic Didone", serif;
-  font-size: 18px;
+  font-size: 26px;
+  font-weight: 400;
+  color: #050826;
+  text-align: left;
 }
 
 .calendarHeader small {
   display: block;
-  font-family: inherit;
-  font-size: 12px;
-  color: #9ca3af;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  color: #767676;
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 .calendarHeader button {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #d5ad37;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #E4E6E8;
   border-radius: 50%;
-  background: transparent;
-  color: #f5c92e;
-  font-size: 22px;
+  background: #FFFFFF;
+  color: #050826;
+  font-size: 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.weekdays,
-.calendarGrid {
+.calendarHeader button:hover {
+  background-color: #050826;
+  color: #FFFFFF;
+  border-color: #050826;
+}
+
+.calendarHeader button[aria-label="Previous month"] {
+  order: 2;
+  margin-right: 8px;
+}
+
+.calendarHeader button[aria-label="Next month"] {
+  order: 3;
+}
+
+.weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .weekdays span {
-  padding: 10px 4px;
-  text-align: center;
-  font-family: Inter;
-font-weight: 700;
-font-style: Bold;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 8%;
-text-transform: uppercase;
-color:#FBBF24;
+  padding: 8px 4px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #767676;
+  text-transform: uppercase;
 }
 
 .calendarGrid {
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #E4E6E8;
+  border: 1px solid #E4E6E8;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .day {
-  padding: 14px 4px;
-  border: 1px solid #172239;
-  background: #0b111c;
-  color: #fff;
+  aspect-ratio: 1.25;
+  padding: 12px 4px;
+  background: #FFFFFF;
+  color: #050826;
+  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 3px;
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-inter), sans-serif;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.day:hover:not(.muted):not(.selected) {
+  background: #F4F5F6;
+}
+
+.day span {
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .day small {
-  color: #C9A84C;
-font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-
+  color: #767676;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.day:hover,
 .selected {
-  background: #0b3a82;
+  background: #050826 !important;
+  color: #FFFFFF !important;
+}
+
+.selected small {
+  color: #FFFFFF !important;
 }
 
 .muted {
-  opacity: .55;
+  background: #FAFAFA;
+  color: #C4C4C4;
+  cursor: not-allowed;
 }
 
+.muted small {
+  color: #C4C4C4;
+}
+
+/* Dedicated Trip details Card (Right) */
 .tripCard {
-  padding: 22px;
-  border: 1px solid #263147;
-  background: #0d172c;
+  padding: 32px;
+  border: 1px solid #E4E6E8;
+  background: #FFFFFF;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: fit-content;
+  box-sizing: border-box;
+  width: 100%;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.03);
 }
 
-.tripLabel {
-  margin: 0 0 18px;
-  color: #aeb5c1;
+.tripDateRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tripDateText {
+  margin: 0;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: #050826;
+  line-height: 1.3;
+}
+
+.nightsBadge {
+  font-family: var(--font-inter), sans-serif;
   font-size: 13px;
+  font-weight: 500;
+  color: #767676;
 }
 
-.tripDate {
-  margin: 10px 0;
-  font-family: "Antic Didone", serif;
-  font-size: 17px;
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
 }
 
-.nights {
+.priceLabel {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  color: #767676;
+  font-weight: 500;
+}
+
+.priceValue {
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #050826;
+}
+
+.priceValue small {
+  font-size: 13px;
+  font-weight: 400;
+  color: #767676;
+  margin-left: 4px;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+
+.statusBadge {
+  background-color: #EBF8F5;
+  color: #00875A;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 13px;
   display: inline-block;
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: #080e17;
-  color: #bec4cf;
-  font-size: 11px;
 }
 
-.breakdown {
-  margin-top: 18px;
-  padding: 16px 0;
-  border-top: 1px solid #263147;
-  border-bottom: 1px solid #263147;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  font-size: 12px;
-  color: #d1d5db;
-}
-
-.breakdown p {
-  margin: 0 0 5px;
-  color: #aeb5c1;
-}
-
-.breakdown button,
-.detailsButton {
-  width: fit-content;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid currentColor;
-  background: transparent;
-  color: #aeb5c1;
-  cursor: pointer;
-}
-
-.total {
-  padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  color: #aeb5c1;
-  font-size: 12px;
-}
-
-.total strong {
-  color: #d6b442;
-  font-family: "Antic Didone", serif;
-  font-size: 30px;
+.statusText {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  color: #767676;
   font-weight: 400;
 }
 
 .bookButton {
   width: 100%;
-  padding: 15px;
+  padding: 14px;
   border: 0;
-  background: #d4b24d;
-  color: #050505;
-  font-weight: 700;
+  border-radius: 6px;
+  background: #050826;
+  color: #FFFFFF;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+.bookButton:hover {
+  background: #111827;
 }
 
 .detailsButton {
-  margin-top: 10px;
-  font-size: 11px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #C4C4C4;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #050826;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  margin-top: -8px; /* brings buttons closer together */
 }
 
-@media (max-width: 900px) {
+.detailsButton:hover {
+  background: #F4F5F6;
+  border-color: #050826;
+}
+
+/* RESPONSIVE DESIGN & BREAKPOINT FIXES */
+
+@media (max-width: 1100px) {
   .departureBody {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
-
+  
   .title {
-    font-size: 38px;
+    font-size: 34px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .section {
-    padding: 48px 14px;
+    padding: 48px 16px;
+  }
+
+  .calendarCard {
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .tabsContainer {
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+
+  .tabButton {
+    padding: 12px 6px;
+    font-size: 12px;
+  }
+  
+  .calendarHeader p {
+    font-size: 22px;
+  }
+  
+  .weekdays span {
+    font-size: 12px;
+  }
+  
+  .day span {
+    font-size: 15px;
+  }
+  
+  .day small {
+    font-size: 10px;
+  }
+}
+
+/* Critical responsive fix at 645px to prevent grid overflow */
+@media (max-width: 645px) {
+  .section {
+    padding: 32px 12px;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
   }
 
   .departureBody {
-    padding: 12px;
+    margin-top: 16px;
+    gap: 20px;
+  }
+
+  .calendarCard {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+
+  .tabsContainer {
+    gap: 6px;
+    padding-bottom: 12px;
+  }
+
+  .tabButton {
+    padding: 10px 4px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .calendarHeader p {
+    font-size: 20px;
+  }
+
+  .calendarHeader button {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .weekdays span {
+    font-size: 11px;
+    padding: 6px 0;
   }
 
   .day {
-    min-height: 50px;
+    padding: 8px 2px;
+    aspect-ratio: 1.15;
+  }
+
+  .day span {
+    font-size: 14px;
+  }
+
+  .day small {
+    font-size: 9px;
+    letter-spacing: -0.2px;
+  }
+
+  .total strong {
+    font-size: 22px;
+  }
+}
+
+/* Extra small screen layout adjustments */
+@media (max-width: 400px) {
+  .section {
+    padding: 24px 8px;
+  }
+
+  .calendarCard {
+    padding: 12px 8px;
+    gap: 12px;
+  }
+  
+  .tabsContainer {
+    gap: 4px;
+    padding-bottom: 8px;
+  }
+  
+  .tabButton {
+    padding: 8px 2px;
+    font-size: 10px;
+  }
+
+  .calendarHeader p {
+    font-size: 18px;
+  }
+
+  .weekdays span {
+    font-size: 10px;
+  }
+
+  .day {
+    padding: 6px 1px;
+    aspect-ratio: 1.1;
+  }
+
+  .day span {
+    font-size: 12px;
   }
 
   .day small {
     font-size: 8px;
-  }
-
-  .title {
-    font-size: 34px;
+    letter-spacing: -0.5px;
   }
 }

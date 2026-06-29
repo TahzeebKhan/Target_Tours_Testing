@@ -66,110 +66,100 @@ const CustomDeparture = ({ data, onBook }) => {
   return (
     <section id="custom-departures" className={styles.section}>
       <div className={styles.content}>
-        <h2 className={styles.title}>Upcoming Departures</h2>
+        <h2 className={styles.title}>Choose Your Journey</h2>
         <p className={styles.subtitle}>
-          Select your preferred departure date across three months. Availability
-          is updated in real-time.
+          Pick your perfect departure date—then let us take care of the rest.
         </p>
 
-        <div className={styles.months}>
-          {MONTHS.map((month) => {
-            const isOpen = openMonth === month.name;
+        <div className={styles.departureBody}>
+          {/* Calendar Card (Left) */}
+          <div className={styles.calendarCard}>
+            {/* Month Tabs Selector inside Calendar Card */}
+            <div className={styles.tabsContainer}>
+              {MONTHS.map((month) => {
+                const isActive = openMonth === month.name;
+                return (
+                  <button
+                    key={month.name}
+                    type="button"
+                    className={`${styles.tabButton} ${isActive ? styles.activeTab : ""}`}
+                    onClick={() => setOpenMonth(month.name)}
+                  >
+                    {month.name}
+                  </button>
+                );
+              })}
+            </div>
 
-            return (
-              <article className={styles.monthCard} key={month.name}>
-                <button
-                  type="button"
-                  className={styles.monthHeader}
-                  aria-expanded={isOpen}
-                  onClick={() => setOpenMonth(isOpen ? "" : month.name)}
-                >
-                  <span>
-                    <strong>{month.name}</strong>
-                    <small>Starting From ₹{formatPrice(packagePrice || month.price)}</small>
-                  </span>
-                  <span className={styles.chevron}>{isOpen ? "⌃" : "⌄"}</span>
-                </button>
+            <div className={styles.calendarPanel}>
+              <div className={styles.calendarHeader}>
+                <button type="button" aria-label="Previous month">‹</button>
+                <p>{activeMonth.name}<small>{year}</small></p>
+                <button type="button" aria-label="Next month">›</button>
+              </div>
 
-                {isOpen && (
-                  <div className={styles.departureBody}>
-                    <div className={styles.calendarPanel}>
-                      <div className={styles.calendarHeader}>
-                        <button type="button" aria-label="Previous month">‹</button>
-                        <p>{month.name}<small>{year}</small></p>
-                        <button type="button" aria-label="Next month">›</button>
-                      </div>
+              <div className={styles.weekdays}>
+                {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
+                  <span key={day}>{day}</span>
+                ))}
+              </div>
 
-                      <div className={styles.weekdays}>
-                        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-                          <span key={day}>{day}</span>
-                        ))}
-                      </div>
+              <div className={styles.calendarGrid}>
+                {calendarDays.map(({ date, muted }) => {
+                  const time = date.getTime();
+                  const selectedTime = selectedDate.getTime();
+                  const inRange = time >= selectedTime && time <= returnDate.getTime();
 
-                      <div className={styles.calendarGrid}>
-                        {calendarDays.map(({ date, muted }) => {
-                          const time = date.getTime();
-                          const selectedTime = selectedDate.getTime();
-                          const inRange = time >= selectedTime && time <= returnDate.getTime();
+                  return (
+                    <button
+                      type="button"
+                      key={date.toISOString()}
+                      className={`${styles.day} ${muted ? styles.muted : ""} ${
+                        inRange ? styles.selected : ""
+                      }`}
+                      onClick={() => {
+                        if (!muted) setSelectedDate(date);
+                      }}
+                    >
+                      <span>{date.getDate()}</span>
+                      <small>₹{formatPrice(dailyPrice)}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-                          return (
-                            <button
-                              type="button"
-                              key={date.toISOString()}
-                              className={`${styles.day} ${muted ? styles.muted : ""} ${
-                                inRange ? styles.selected : ""
-                              }`}
-                              onClick={() => {
-                                if (!muted) setSelectedDate(date);
-                              }}
-                            >
-                              <span>{date.getDate()}</span>
-                              <small>₹{formatPrice(dailyPrice)}</small>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+          {/* Trip Details Card (Right) */}
+          <aside className={styles.tripCard}>
+            <div className={styles.tripDateRow}>
+              <p className={styles.tripDateText}>
+                {formatTripDate(selectedDate)} → {formatTripDate(returnDate)}
+              </p>
+              <span className={styles.nightsBadge}>{duration} Days / {duration - 1} Nights</span>
+            </div>
 
-                    <aside className={styles.tripCard}>
-                      <p className={styles.tripLabel}>Your Trip</p>
-                      <p className={styles.tripDate}>🛫 {formatTripDate(selectedDate)}</p>
-                      <span className={styles.nights}>{duration} nights</span>
-                      <p className={styles.tripDate}>🛬 {formatTripDate(returnDate)}</p>
+            <div className={styles.priceRow}>
+              <span className={styles.priceLabel}>From</span>
+              <span className={styles.priceValue}>
+                ₹{formatPrice(total)} <small>per person</small>
+              </span>
+            </div>
 
-                      <div className={styles.breakdown}>
-                        <p>Price breakdown</p>
-                        {[0, 1, 2, 3].map((offset) => {
-                          const date = new Date(selectedDate);
-                          date.setDate(date.getDate() + offset);
-                          return (
-                            <span key={offset}>
-                              {formatTripDate(date).replace(` ${year}`, "")} - ₹{formatPrice(dailyPrice)}
-                            </span>
-                          );
-                        })}
-                        {duration > 4 && <button type="button">+ {duration - 4} more nights</button>}
-                      </div>
+            <div className={styles.statusRow}>
+              <span className={styles.statusBadge}>Available</span>
+              <span className={styles.statusText}>Limited spots remaining</span>
+            </div>
 
-                      <div className={styles.total}>
-                        <span>Total ({duration} nights)</span>
-                        <strong>₹{formatPrice(total)}</strong>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={styles.bookButton}
-                        onClick={() => onBook?.({ departureDate: selectedDate, returnDate, price: total })}
-                      >
-                        Book Now →
-                      </button>
-                      <button type="button" className={styles.detailsButton}>View Full Details</button>
-                    </aside>
-                  </div>
-                )}
-              </article>
-            );
-          })}
+            <button
+              type="button"
+              className={styles.bookButton}
+              onClick={() => onBook?.({ departureDate: selectedDate, returnDate, price: total })}
+            >
+              SPEAK TO AN AGENT
+            </button>
+            <button type="button" className={styles.detailsButton}>Submit Inquiry</button>
+          </aside>
         </div>
       </div>
     </section>
