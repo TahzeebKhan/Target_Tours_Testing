@@ -508,6 +508,7 @@ export function TripTypeProvider({ children }) {
     }
     nextParams.delete("page");
 
+    refreshFlightSearch();
     router.push(`/flights?${nextParams.toString()}`);
 
     window.setTimeout(() => {
