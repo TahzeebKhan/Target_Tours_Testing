@@ -96,7 +96,7 @@ const readStoredHotelRooms = () => {
   }
 };
 
-const TourHeroSection = () => {
+const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const searchedCity = searchParams.get("city") || "";
@@ -731,7 +731,7 @@ const TourHeroSection = () => {
       setTo(searchContext.city);
       setToCode(hotelLocation?.locationId || toCode || "");
       setSelectedHotelLocation(hotelLocation);
-      router.push(`/hotel-list?${params.toString()}`);
+      router.push(`${resultsPath}?${params.toString()}`);
     } catch (error) {
       setSearchSubmitting(false);
       toast.error(error.message || "Unable to start hotel search.");

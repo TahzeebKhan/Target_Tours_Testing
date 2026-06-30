@@ -48,6 +48,7 @@
     position: static;
     max-height: none;
     overflow-y: visible;
+    width: 100%;
   }
 }
 

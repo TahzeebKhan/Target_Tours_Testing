@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TourListing.module.css";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import SearchResults from "../searchResult/SearchResults";
+import SearchResults from "../components/searchResult/SearchResults";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import {
@@ -245,7 +245,7 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/hotelList/hotelCardImg.png";
+  return typeof image === "string" && image ? image : "/images/hotelImg.png";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
@@ -538,6 +538,49 @@ const LIST_ROW_HEIGHT = 310;
 const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
+
+const STATIC_HOTEL_RESULTS = [
+  {
+    id: "static-grand-alpine",
+    name: "Grand Alpine Retreat",
+    address: "12 Lakeview Road",
+    city: "Banff",
+    country: "Canada",
+    image: "/hotelList/hotelCardImg.png",
+    price: 66945,
+    rating: 5,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeCancellation: true,
+    freeBreakfast: true,
+    propertyType: "Hotel",
+  },
+  {
+    id: "static-mountain-hideaway",
+    name: "Mountain Hideaway Inn",
+    address: "456 Summit Road",
+    city: "Canmore",
+    country: "Canada",
+    image: "/hotelList/nextTrip1.png",
+    price: 55300,
+    rating: 4,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeCancellation: true,
+    propertyType: "Resort",
+  },
+  {
+    id: "static-sunny-coast",
+    name: "Sunny Coast Resort",
+    address: "123 Ocean Drive",
+    city: "Vancouver",
+    country: "Canada",
+    image: "/hotelList/nextTrip2.png",
+    price: 85500,
+    rating: 4,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeBreakfast: true,
+    propertyType: "Resort",
+  },
+];
 
 export const getHotelDetailUrl = ({
   hotelId,
@@ -1406,9 +1449,21 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     };
   }, [hotelSearchChannel]);
 
+  const staticHotelResults = useMemo(
+    () =>
+      STATIC_HOTEL_RESULTS.map((hotel, index) =>
+        normalizeHotelCard(hotel, index),
+      ),
+    [],
+  );
+  const sourceHotels = useMemo(
+    () => (hotelResults.length ? hotelResults : staticHotelResults),
+    [hotelResults, staticHotelResults],
+  );
+
   const sortedHotels = useMemo(
-    () => sortHotels(hotelResults, sortType),
-    [hotelResults, sortType],
+    () => sortHotels(sourceHotels, sortType),
+    [sourceHotels, sortType],
   );
 
   const displayHotels = useMemo(
@@ -1421,10 +1476,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
   useEffect(() => {
     onDataLoaded?.({
-      counts: buildHotelFilterCounts(hotelResults),
-      total: totalHotelResults || hotelResults.length,
+      counts: buildHotelFilterCounts(sourceHotels),
+      total: totalHotelResults || sourceHotels.length,
     });
-  }, [hotelResults, onDataLoaded, totalHotelResults]);
+  }, [onDataLoaded, sourceHotels, totalHotelResults]);
 
   useEffect(() => {
     const updateScrollState = () => {
@@ -1517,7 +1572,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
         <SearchResults
           viewType={viewType}
           setViewType={setViewType}
-          totalResults={totalHotelResults || displayHotels.length}
+          totalResults={totalHotelResults || sourceHotels.length}
           sort={sortType}
           setSort={setSortType}
         />
@@ -1525,6 +1580,9 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
           {showEmptyState && (
             <EmptyHotelState locationLabel={searchLocationLabel} />
           )}
+
+
+          {/* =================card view==================================================================== */}
 
           {viewType === "grid" && !showEmptyState && (
             <motion.div
@@ -1603,6 +1661,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                       <div className={styles.ListViewCardTextTop}>
                         <div className={styles.topTextHead}>
                           <div className={styles.rating}>
+                           
                             {[...Array(5)].map((_, index) => (
                               <img
                                 key={index}
@@ -1614,6 +1673,9 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                                 alt="star"
                               />
                             ))}
+                             <div className={styles.ReviewCount}>
+                              <span>4.5</span>
+                               (128 reviews)</div>
                           </div>
                           <h2>{item.title}</h2>
 
@@ -1627,8 +1689,8 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                       </div>
                     </div>
 
-                    <div className={styles.ListViewCardTextBottom}>
-                      <div className={styles.priceContainer}>
+                    <div className={styles.cardViewCardTextBottom}>
+                      <div className={styles.cardpriceContainer}>
                         {item.hasPrice ? (
                           <>
                             <div className={styles.priceSec}>{item.price}</div>
@@ -1661,6 +1723,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
             </motion.div>
             // </div>
           )}
+{/* =====================================================list view===================================== */}
 
           {viewType === "list" && !showEmptyState && (
             <motion.div

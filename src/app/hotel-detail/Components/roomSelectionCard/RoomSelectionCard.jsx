@@ -210,9 +210,16 @@ export default function RoomSelectionCard({
             roomDetails,
         });
     };
+     const [toggleShow, setToggleShow]= useState(true)
+      const handleToggleShow =()=>{
+        setToggleShow(!toggleShow)
+      }
 
     return (
-        <div className={styles.card} ref={cardRef}>
+        <>
+       
+      {toggleShow &&   <div className={styles.card} ref={cardRef}>
+
             <div className={styles.innerBox}>
                 {/* Dates */}
                 <div className={styles.datesRow}>
@@ -293,6 +300,11 @@ export default function RoomSelectionCard({
                 </div>
             </div>
 
+
+
+
+      
+
             {showCalendar && (
                 <div className={styles.calendarDropdown} ref={calendarRef}>
                     <HotelCalendarMonths
@@ -312,6 +324,14 @@ export default function RoomSelectionCard({
             >
                 {checkingAvailability ? "CHECKING..." : "CHECK ROOM"}
             </button>
-        </div>
+        </div>}
+        <button
+        className={styles.selectBtn}
+         type="button"
+         onClick={handleToggleShow}
+         >CHECK ROOM</button>
+      
+
+         </>
     );
 }
