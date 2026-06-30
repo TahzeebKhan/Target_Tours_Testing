@@ -15,6 +15,7 @@ import {
   HOTEL_SEARCH_SESSION_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
+  HOTEL_LAST_SEARCH_URL_KEY,
   createHotelSearchChannel,
   fetchHotelSearchSuggestions,
   initHotelSearch,
@@ -36,14 +37,35 @@ const safeSetSessionStorage = (key, value) => {
   }
 };
 
-const syncHotelSearchIdToUrl = (hotelSearchId) => {
-  if (typeof window === "undefined" || !hotelSearchId) return;
+const rememberHotelSearchUrl = (url) => {
+  if (typeof window === "undefined" || !url) return;
+
+  try {
+    window.localStorage.setItem(HOTEL_LAST_SEARCH_URL_KEY, url);
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+const syncHotelSearchMetaToUrl = ({ searchId, hotelSearchId } = {}) => {
+  if (typeof window === "undefined" || (!searchId && !hotelSearchId)) return;
 
   const url = new URL(window.location.href);
-  if (url.searchParams.get("hotelSearchId") === hotelSearchId) return;
+  let didChange = false;
 
-  url.searchParams.set("hotelSearchId", hotelSearchId);
-  window.history.replaceState(window.history.state, "", url.toString());
+  if (searchId && url.searchParams.get("searchId") !== searchId) {
+    url.searchParams.set("searchId", searchId);
+    didChange = true;
+  }
+
+  if (hotelSearchId && url.searchParams.get("hotelSearchId") !== hotelSearchId) {
+    url.searchParams.set("hotelSearchId", hotelSearchId);
+    didChange = true;
+  }
+
+  if (didChange) {
+    window.history.replaceState(window.history.state, "", url.toString());
+  }
 };
 
 const parseChildAgesParam = (value = "") =>
@@ -79,10 +101,103 @@ const normalizeHotelRoomPayloads = (guestState = {}) => {
   });
 };
 
+const normalizeHotelApiDateFromUrl = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${month}/${day}/${year}`;
+};
+
 const getHotelRoomTotals = (rooms = []) => ({
   adults: rooms.reduce((sum, room) => sum + Number(room.adults || 0), 0),
   children: rooms.reduce((sum, room) => sum + Number(room.children || 0), 0),
 });
+
+const createHotelSearchContextFromUrl = (channel) => {
+  if (typeof window === "undefined" || !channel) return null;
+
+  const params = new URLSearchParams(window.location.search);
+  const city = params.get("city") || params.get("location") || "";
+  const checkIn = params.get("checkIn") || params.get("checkin") || "";
+  const checkOut = params.get("checkOut") || params.get("checkout") || "";
+  if (!city || !checkIn || !checkOut) return null;
+
+  const rooms = normalizeHotelRoomPayloads({
+    room: Number(params.get("rooms") || 1),
+    adults: Number(params.get("adults") || 1),
+    children: Number(params.get("children") || 0),
+    childAges: parseChildAgesParam(params.get("childAges")),
+  });
+  const totals = getHotelRoomTotals(rooms);
+  const locationId = params.get("locationId") || "";
+  const location = {
+    id: locationId,
+    locationId,
+    label: city,
+    value: city,
+    detail: city,
+    country: params.get("country") || "IN",
+    type: "city",
+    geoCode: {},
+  };
+  const locationPayload = {
+    id: locationId,
+    name: city,
+    fullName: city,
+    code: null,
+    type: "city",
+    city: null,
+    state: params.get("state") || "",
+    country: params.get("country") || "IN",
+    score: 0,
+    referenceId: null,
+  };
+  const initPayload = {
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    locations: [locationPayload],
+    channel,
+    locationId,
+    currency: "INR",
+    culture: "en-US",
+    checkIn: normalizeHotelApiDateFromUrl(checkIn),
+    checkOut: normalizeHotelApiDateFromUrl(checkOut),
+    rooms,
+    agentCode: "14005",
+    destinationCountryCode: location.country,
+    nationality: "IN",
+    countryOfResidence: "IN",
+    channelId: "b2bIndiaDeals",
+    affiliateRegion: "B2B_India",
+    segmentId: "",
+    companyId: "1",
+    gstPercentage: 0,
+    tdsPercentage: 0,
+  };
+
+  return {
+    channel,
+    initPayload,
+    city,
+    checkIn,
+    checkOut,
+    rooms: rooms.length,
+    adults: totals.adults,
+    children: totals.children,
+    location,
+    searchId: params.get("searchId") || "",
+    hotelSearchId: params.get("hotelSearchId") || "",
+  };
+};
+
+const syncHotelSearchIdToUrl = (hotelSearchId) => {
+  syncHotelSearchMetaToUrl({ hotelSearchId });
+};
 
 const readStoredHotelRooms = () => {
   if (typeof window === "undefined") return [];
@@ -221,6 +336,26 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
               searchContext = null;
             }
 
+            if (
+              (!searchContext ||
+                searchContext.channel !== hotelSearchChannel ||
+                !searchContext.initPayload) &&
+              typeof window !== "undefined"
+            ) {
+              const urlSearchContext = createHotelSearchContextFromUrl(hotelSearchChannel);
+              if (urlSearchContext?.initPayload) {
+                searchContext = {
+                  ...urlSearchContext,
+                  initResponse: null,
+                  initStatus: "pending",
+                };
+                safeSetSessionStorage(
+                  HOTEL_SEARCH_SESSION_KEY,
+                  JSON.stringify(searchContext),
+                );
+              }
+            }
+
             const initSkipReason =
               searchContext?.channel !== hotelSearchChannel
                 ? "session channel does not match URL channel"
@@ -288,12 +423,22 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
                 initResponse?.hotel_search_id ||
                 initResponse?.hotel_search_key ||
                 "";
+              const searchId =
+                latestSearchContext?.searchId ||
+                initResponse?.searchId ||
+                initResponse?.search_id ||
+                initResponse?.data?.searchId ||
+                initResponse?.data?.search_id ||
+                initResponse?.init?.searchId ||
+                initResponse?.init?.search_id ||
+                "";
 
-              syncHotelSearchIdToUrl(hotelSearchId);
+              syncHotelSearchMetaToUrl({ searchId, hotelSearchId });
               safeSetSessionStorage(
                 HOTEL_SEARCH_SESSION_KEY,
                 JSON.stringify({
                   ...latestSearchContext,
+                  searchId,
                   hotelSearchId,
                   initResponse,
                   initStatus: "complete",
@@ -349,8 +494,19 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
               payload?.hotel_search_id ||
               payload?.hotel_search_key ||
               "";
+            const socketSearchId =
+              content?.searchId ||
+              content?.search_id ||
+              content?.init?.searchId ||
+              content?.init?.search_id ||
+              payload?.searchId ||
+              payload?.search_id ||
+              "";
 
-            syncHotelSearchIdToUrl(socketHotelSearchId);
+            syncHotelSearchMetaToUrl({
+              searchId: socketSearchId,
+              hotelSearchId: socketHotelSearchId,
+            });
             const hotelCount =
               content?.mergedHotels?.length ||
               content?.curatedHotels?.length ||
@@ -395,8 +551,9 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
                   content.hotel_search_key ||
                   searchContext?.hotelSearchId ||
                   "";
+                const searchId = content.init.searchId || searchContext?.searchId || "";
 
-                syncHotelSearchIdToUrl(hotelSearchId);
+                syncHotelSearchMetaToUrl({ searchId, hotelSearchId });
                 safeSetSessionStorage(
                   HOTEL_SEARCH_SESSION_KEY,
                   JSON.stringify({
@@ -405,7 +562,7 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
                     init: content.init,
                     initResponse: content,
                     initStatus: "complete",
-                    searchId: content.init.searchId || searchContext?.searchId || "",
+                    searchId,
                     hotelSearchId,
                     searchTracingKey:
                       content.init.searchTracingKey ||
@@ -726,12 +883,20 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
       if (hotelLocation?.locationId || toCode) {
         params.set("locationId", hotelLocation?.locationId || toCode);
       }
+      if (hotelLocation?.country) {
+        params.set("country", hotelLocation.country);
+      }
+      if (hotelLocation?.state) {
+        params.set("state", hotelLocation.state);
+      }
 
       setFrom(searchContext.city);
       setTo(searchContext.city);
       setToCode(hotelLocation?.locationId || toCode || "");
       setSelectedHotelLocation(hotelLocation);
-      router.push(`${resultsPath}?${params.toString()}`);
+      const resultsUrl = `${resultsPath}?${params.toString()}`;
+      rememberHotelSearchUrl(resultsUrl);
+      router.push(resultsUrl);
     } catch (error) {
       setSearchSubmitting(false);
       toast.error(error.message || "Unable to start hotel search.");
@@ -929,10 +1094,10 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
           </div>
         </div>
       </div>
-      <div className={styles.textcontainer}>
+      {/* <div className={styles.textcontainer}>
         <p className={styles.para}>Showing Stays in</p>
         <h2 className={styles.heading}>{searchedCity || "CANADA"}</h2>
-      </div>
+      </div> */}
     </section>
   );
 };

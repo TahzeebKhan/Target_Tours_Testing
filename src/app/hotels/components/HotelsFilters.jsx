@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ListFilter, Search, X } from "lucide-react";
 import styles from "./HotelsFilters.module.css";
+import { useHotelsContext } from "../context/HotelsContext";
 
 const DEFAULT_PRICE_RANGE = [0, 25000];
 
@@ -157,21 +158,229 @@ const PRICE_BUCKETS = [
   { key: "17000+", label: "₹17000+", min: 17000, max: null },
 ];
 
+const API_FILTER_SECTION_CONFIG = {
+  PriceGroup: {
+    key: "price",
+    title: "PRICE PER NIGHT",
+  },
+  StarRating: {
+    key: "starCategory",
+    title: "STAR CATEGORY",
+  },
+  Facilities: {
+    key: "hotelAmenities",
+    title: "HOTEL AMENITIES",
+    searchable: true,
+    searchPlaceholder: "Search amenities",
+  },
+  HotelChain: {
+    key: "hotelChains",
+    title: "HOTEL CHAINS",
+    searchable: true,
+    searchPlaceholder: "Search hotel chains",
+  },
+  PropertyType: {
+    key: "propertyType",
+    title: "PROPERTY TYPE",
+  },
+  Attraction: {
+    key: "attractions",
+    title: "POPULAR LANDMARKS",
+    searchable: true,
+    searchPlaceholder: "Search landmarks",
+  },
+};
+
+const FILTER_GROUP_ALIASES = {
+  suggested: ["suggested", "suggestedForYou", "suggested_for_you"],
+  priceBuckets: ["priceBuckets", "price_buckets", "pricePerNight", "price_per_night", "priceRanges", "price_ranges", "PriceGroup"],
+  starCategory: ["starCategory", "star_category", "stars", "starRating", "star_rating", "hotelStars"],
+  guestRating: ["guestRating", "guest_rating", "ratings", "rating"],
+  propertyType: ["propertyType", "property_type", "propertyTypes", "property_types"],
+  roomViews: ["roomViews", "room_views", "views", "roomView"],
+  roomAmenities: ["roomAmenities", "room_amenities", "roomFacilities", "room_facilities"],
+  hotelAmenities: ["hotelAmenities", "hotel_amenities", "amenities", "facilities"],
+  houseRules: ["houseRules", "house_rules", "rules"],
+  flexibleCheckIn: ["flexibleCheckIn", "flexible_check_in", "checkInOptions", "check_in_options"],
+  hotelChains: ["hotelChains", "hotel_chains", "chains", "brands"],
+};
+
 const toCount = (value) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
 };
 
-const getCount = (filterData, group, key) =>
-  toCount(
-    filterData?.[group]?.[key] ??
-      filterData?.[group]?.[String(key).toLowerCase()] ??
-      filterData?.[key],
+const normalizeFilterKey = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "");
+
+const getApiFilterList = (filterData) => {
+  if (Array.isArray(filterData?.filters)) return filterData.filters;
+  if (Array.isArray(filterData?.data?.filters)) return filterData.data.filters;
+  if (Array.isArray(filterData?.filterData?.filters)) return filterData.filterData.filters;
+  if (Array.isArray(filterData)) return filterData;
+  return [];
+};
+
+const getApiFilterByCategory = (filterData, category) =>
+  getApiFilterList(filterData).find(
+    (item) => normalizeFilterKey(item?.category) === normalizeFilterKey(category),
   );
+
+const getFilterRoot = (filterData) =>
+  filterData?.filterData || filterData?.filters || filterData?.data || filterData || {};
+
+const getFilterGroup = (filterData, group) => {
+  if (group === "priceBuckets") {
+    const priceFilter = getApiFilterByCategory(filterData, "PriceGroup");
+    if (priceFilter?.options) return priceFilter.options;
+  }
+
+  const root = getFilterRoot(filterData);
+  const aliases = FILTER_GROUP_ALIASES[group] || [group];
+
+  for (const alias of aliases) {
+    const apiFilter = getApiFilterByCategory(filterData, alias);
+    if (apiFilter?.options) return apiFilter.options;
+    if (root?.[alias] !== undefined) return root[alias];
+  }
+
+  return root?.[group];
+};
+
+const getOptionCount = (option) =>
+  option?.count ??
+  option?.total ??
+  option?.totalCount ??
+  option?.hotelCount ??
+  option?.doc_count ??
+  option?.value ??
+  0;
+
+const getArrayCount = (list, key, label) => {
+  if (!Array.isArray(list)) return 0;
+
+  const wanted = new Set([
+    normalizeFilterKey(key),
+    normalizeFilterKey(label),
+  ]);
+
+  const option = list.find((item) => {
+    const values = [
+      item?.key,
+      item?.id,
+      item?.code,
+      item?.value,
+      item?.name,
+      item?.label,
+      item?.title,
+      item?.range,
+    ];
+
+    return values.some((value) => wanted.has(normalizeFilterKey(value)));
+  });
+
+  return toCount(getOptionCount(option));
+};
+
+const getCount = (filterData, group, key, label = key) => {
+  if (group === "suggested") {
+    if (key === "fiveStar") return getArrayCount(getFilterGroup(filterData, "starCategory"), "5", "5 Star");
+    if (key === "fourStar") return getArrayCount(getFilterGroup(filterData, "starCategory"), "4", "4 Star");
+    if (key === "breakfastIncluded") {
+      return getArrayCount(getFilterGroup(filterData, "hotelAmenities"), "Breakfast", "Breakfast");
+    }
+  }
+
+  const groupData = getFilterGroup(filterData, group);
+
+  if (Array.isArray(groupData)) return getArrayCount(groupData, key, label);
+
+  return toCount(
+    groupData?.[key] ??
+      groupData?.[String(key).toLowerCase()] ??
+      groupData?.[normalizeFilterKey(key)] ??
+      groupData?.[label] ??
+      getFilterRoot(filterData)?.[key],
+  );
+};
 
 const getRangeNumber = (value, fallback) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+};
+
+const getApiOptionKey = (option = {}, category = "") => {
+  if (category === "PriceGroup") {
+    const min = Number(option.min || 0);
+    const max = Number(option.max);
+
+    if (Number.isFinite(max) && max >= 0) return `${min}-${max}`;
+    return `${min}+`;
+  }
+
+  if (["Facilities", "HotelChain", "Attraction"].includes(category)) {
+    return String(option.label || option.value || "").trim();
+  }
+
+  return String(option.value || option.key || option.label || "").trim();
+};
+
+const mapApiOption = (option = {}, category = "") => ({
+  key: getApiOptionKey(option, category),
+  label: option.label || String(option.value || ""),
+  count: toCount(option.count),
+  value: option.value,
+  min: option.min,
+  max: option.max,
+  apiCategory: category,
+});
+
+const getApiFilterSections = (filterData) =>
+  getApiFilterList(filterData)
+    .map((filter) => {
+      const config = API_FILTER_SECTION_CONFIG[filter?.category];
+      const options = Array.isArray(filter?.options)
+        ? filter.options
+            .map((option) => mapApiOption(option, filter.category))
+            .filter((option) => option.key && option.label)
+        : [];
+
+      if (!config || !options.length) return null;
+
+      return {
+        ...config,
+        apiCategory: filter.category,
+        options,
+      };
+    })
+    .filter(Boolean);
+
+const getPriceRange = (filterData) => {
+  const root = getFilterRoot(filterData);
+  const price = root.price || root.priceRange || root.price_range || {};
+  const buckets = getFilterGroup(filterData, "priceBuckets");
+  const bucketPrices = Array.isArray(buckets)
+    ? buckets.flatMap((bucket) => [
+        bucket?.min,
+        bucket?.minimum,
+        bucket?.from,
+        bucket?.max,
+        bucket?.maximum,
+        bucket?.to,
+      ])
+    : [];
+
+  const prices = bucketPrices
+    .map(Number)
+    .filter((price) => Number.isFinite(price) && price >= 0);
+
+  return {
+    min: getRangeNumber(price.min ?? price.minimum ?? root.price_min ?? root.minPrice, prices.length ? Math.min(...prices) : DEFAULT_PRICE_RANGE[0]),
+    max: getRangeNumber(price.max ?? price.maximum ?? root.price_max ?? root.maxPrice, prices.length ? Math.max(...prices) : DEFAULT_PRICE_RANGE[1]),
+  };
 };
 
 const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
@@ -183,14 +392,25 @@ const getStarText = (sectionKey, optionKey) => {
   return Number.isFinite(starCount) ? "★".repeat(starCount) : "";
 };
 
-export default function HotelsFilters({ filterData, onApply, onReset }) {
+export default function HotelsFilters() {
+  const { filterData, setAppliedFilters, resetFilters: resetAppliedFilters } =
+    useHotelsContext();
   const [selectedFilters, setSelectedFilters] = useState({});
   const [budget, setBudget] = useState(DEFAULT_PRICE_RANGE);
   const [budgetTouched, setBudgetTouched] = useState(false);
   const [searchTerms, setSearchTerms] = useState({});
+  const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
+  const apiPriceSection = apiSections.find((section) => section.key === "price");
+  const apiSectionKeys = new Set(apiSections.map((section) => section.key));
+  const fallbackSections = HOTEL_FILTER_SECTIONS.slice(1).filter(
+    (section) => !apiSectionKeys.has(section.key),
+  );
+  const renderedSections = [
+    ...apiSections.filter((section) => section.key !== "price"),
+    ...fallbackSections,
+  ];
 
-  const minPrice = getRangeNumber(filterData?.price?.min ?? filterData?.price_min, DEFAULT_PRICE_RANGE[0]);
-  const maxPrice = getRangeNumber(filterData?.price?.max ?? filterData?.price_max, DEFAULT_PRICE_RANGE[1]);
+  const { min: minPrice, max: maxPrice } = getPriceRange(filterData);
   const safeBudget = [
     Math.min(Math.max(budget[0], minPrice), maxPrice),
     Math.min(Math.max(budget[1], minPrice), maxPrice),
@@ -203,11 +423,13 @@ export default function HotelsFilters({ filterData, onApply, onReset }) {
 
   const selectedChips = useMemo(() => {
     const chips = [];
+    const chipSections = [...HOTEL_FILTER_SECTIONS, ...apiSections];
+    if (apiPriceSection) chipSections.push(apiPriceSection);
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
       Object.entries(values || {}).forEach(([key, isSelected]) => {
         if (!isSelected) return;
-        const section = HOTEL_FILTER_SECTIONS.find((item) => item.key === group);
+        const section = chipSections.find((item) => item.key === group);
         const option =
           section?.options.find((item) => item.key === key) ||
           PRICE_BUCKETS.find((item) => item.key === key);
@@ -220,16 +442,31 @@ export default function HotelsFilters({ filterData, onApply, onReset }) {
     });
 
     return chips;
-  }, [selectedFilters]);
+  }, [apiPriceSection, apiSections, selectedFilters]);
+
+  const buildAppliedFilters = (filters, { includeBudget = false } = {}) => ({
+    ...filters,
+    ...((budgetTouched || includeBudget) && {
+      budget: {
+        min: safeBudget[0],
+        max: safeBudget[1],
+      },
+    }),
+  });
 
   const toggleFilter = (group, key) => {
-    setSelectedFilters((prev) => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [key]: !prev[group]?.[key],
-      },
-    }));
+    setSelectedFilters((prev) => {
+      const nextFilters = {
+        ...prev,
+        [group]: {
+          ...prev[group],
+          [key]: !prev[group]?.[key],
+        },
+      };
+
+      setAppliedFilters(buildAppliedFilters(nextFilters));
+      return nextFilters;
+    });
   };
 
   const resetFilters = () => {
@@ -237,19 +474,11 @@ export default function HotelsFilters({ filterData, onApply, onReset }) {
     setBudget([minPrice, maxPrice]);
     setBudgetTouched(false);
     setSearchTerms({});
-    onReset?.();
+    resetAppliedFilters();
   };
 
   const applyFilters = ({ includeBudget = false } = {}) => {
-    onApply?.({
-      ...selectedFilters,
-      ...((budgetTouched || includeBudget) && {
-        budget: {
-          min: safeBudget[0],
-          max: safeBudget[1],
-        },
-      }),
-    });
+    setAppliedFilters(buildAppliedFilters(selectedFilters, { includeBudget }));
   };
 
   return (
@@ -325,12 +554,12 @@ export default function HotelsFilters({ filterData, onApply, onReset }) {
 
       <section className={styles.section}>
         <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
-        {PRICE_BUCKETS.map((bucket) => (
+        {(apiPriceSection?.options || PRICE_BUCKETS).map((bucket) => (
           <CheckboxRow
             key={bucket.key}
             checked={!!selectedFilters.price?.[bucket.key]}
             label={bucket.label}
-            count={getCount(filterData, "priceBuckets", bucket.key)}
+            count={bucket.count ?? getCount(filterData, "priceBuckets", bucket.key, bucket.label)}
             onChange={() => toggleFilter("price", bucket.key)}
           />
         ))}
@@ -378,7 +607,7 @@ export default function HotelsFilters({ filterData, onApply, onReset }) {
         </button>
       </section>
 
-      {HOTEL_FILTER_SECTIONS.slice(1).map((section) => (
+      {renderedSections.map((section) => (
         <div key={section.key}>
           <div className={styles.border} />
           <FilterSection
@@ -445,7 +674,7 @@ function FilterSection({
           checked={!!selectedFilters[section.key]?.[option.key]}
           label={option.label}
           stars={getStarText(section.key, option.key)}
-          count={getCount(filterData, section.key, option.key)}
+          count={option.count ?? getCount(filterData, section.key, option.key, option.label)}
           onChange={() => onToggle(section.key, option.key)}
         />
       ))}

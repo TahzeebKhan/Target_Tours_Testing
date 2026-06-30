@@ -1,6 +1,8 @@
 .tourContent {
-  --hotel-hero-sticky-offset: 342px;
+  --hotel-hero-sticky-offset: 200px;
   width: 100%;
+  height: calc(100vh - var(--hotel-hero-sticky-offset));
+  overflow: hidden;
   background-color: #F9F9F9;
   position: relative;
   /* z-index: -1; */
@@ -11,16 +13,27 @@
   width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 356px 1fr;
+  grid-template-columns: 356px minmax(0, 1fr);
   gap: 24px;
-  padding: 42px 0px 24px 0px;
+  padding: 42px 24px 24px;
   align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tourFilters {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .tourResults {
-  min-height: calc(100vh - var(--hotel-hero-sticky-offset));
-  position: sticky;
-  top: var(--hotel-hero-sticky-offset);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
   align-self: start;
 }
 
@@ -29,9 +42,10 @@
 }
 
 @media (max-width: 1400px) {
-  /* .tourLayout {
-    grid-template-columns: 1fr minmax(0, 600px);
-  } */
+  .tourLayout {
+    /* grid-template-columns: 1fr minmax(0, 600px); */
+      grid-template-columns: 300px minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 1331px) {
@@ -58,7 +72,7 @@
   }
 
   .tourLayout {
-    padding-left: 24px;
+    padding-inline: 24px;
   }
 }
 
@@ -70,7 +84,7 @@
 
 @media (max-width: 1024px) {
 .tourLayout {
-    grid-template-columns: 1fr minmax(0, 375px);
+    grid-template-columns: 320px minmax(0, 1fr);
   }
 }
 
@@ -81,24 +95,37 @@
   }
 
   .tourLayout {
-    grid-template-columns: 1fr minmax(0, 360px);
-    padding-left: 16px;
+    grid-template-columns: 300px minmax(0, 1fr);
+    padding-inline: 16px;
   }
 }
 @media (max-width: 831px) {
   .tourLayout {
-    grid-template-columns: 1fr minmax(0, 321px);
-    padding-left: 16px;
+    grid-template-columns: 280px minmax(0, 1fr);
+    padding-inline: 16px;
   }
 }
 @media (max-width: 768px) {
+  .tourContent {
+    height: auto;
+    overflow: visible;
+  }
+
   .tourListSectionWrappper {
     display: none;
   }
   .tourListSectionMobileView{
     display: flex;
   }
+  .tourLayout {
+    height: auto;
+    overflow: visible;
+  }
+  .tourFilters {
+    overflow: visible;
+  }
   .tourResults {
-    position: static;
+    height: auto;
+    overflow: visible;
   }
 }

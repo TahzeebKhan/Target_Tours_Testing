@@ -210,15 +210,8 @@ export default function RoomSelectionCard({
             roomDetails,
         });
     };
-     const [toggleShow, setToggleShow]= useState(true)
-      const handleToggleShow =()=>{
-        setToggleShow(!toggleShow)
-      }
-
     return (
-        <>
-       
-      {toggleShow &&   <div className={styles.card} ref={cardRef}>
+        <div className={styles.card} ref={cardRef}>
 
             <div className={styles.innerBox}>
                 {/* Dates */}
@@ -324,14 +317,6 @@ export default function RoomSelectionCard({
             >
                 {checkingAvailability ? "CHECKING..." : "CHECK ROOM"}
             </button>
-        </div>}
-        <button
-        className={styles.selectBtn}
-         type="button"
-         onClick={handleToggleShow}
-         >CHECK ROOM</button>
-      
-
-         </>
+        </div>
     );
 }

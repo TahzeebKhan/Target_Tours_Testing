@@ -314,6 +314,7 @@ const Page = () => {
   const { hotelDetail, roomsLoading, refreshHotelAvailability } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
   const [showSummary, setShowSummary] = useState(false);
+  const [showRoomSearchCard, setShowRoomSearchCard] = useState(true);
   const [availabilityChecking, setAvailabilityChecking] = useState(false);
   const [bookingActionLoading, setBookingActionLoading] = useState(false);
   const [selectionOverride, setSelectionOverride] = useState(null);
@@ -746,6 +747,22 @@ const Page = () => {
     });
   }, [sectionRefs]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia("(max-width: 1280px)");
+    const syncRoomSearchCard = () => {
+      setShowRoomSearchCard(!mediaQuery.matches);
+    };
+
+    syncRoomSearchCard();
+    mediaQuery.addEventListener("change", syncRoomSearchCard);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncRoomSearchCard);
+    };
+  }, []);
+
 
 
 
@@ -798,11 +815,22 @@ const Page = () => {
         <div
           className={`${styles.rightSidebar} ${
             showSummary ? styles.summarySidebar : ""
+          } ${
+            showRoomSearchCard ? styles.roomSearchOpen : styles.roomSearchClosed
           }`}
         >
+          {!showSummary && (
+            <button
+              className={styles.roomSearchToggle}
+              type="button"
+              onClick={() => setShowRoomSearchCard((prev) => !prev)}
+            >
+              {showRoomSearchCard ? "Hide room search" : "Check room"}
+            </button>
+          )}
           <div
             className={`${styles.roomWrapper} ${
-              showSummary ? styles.hide : ""
+              showSummary || !showRoomSearchCard ? styles.hide : ""
             }`}
           >
             <RoomSelectionCard

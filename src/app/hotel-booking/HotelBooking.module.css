@@ -42,7 +42,7 @@
 @media (max-width: 1246px) {
   .childrenWrapper {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
   .sideBarDesktop {
     position: static;

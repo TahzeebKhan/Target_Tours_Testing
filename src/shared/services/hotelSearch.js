@@ -3,9 +3,12 @@ import Cookies from "js-cookie";
 export const HOTEL_SEARCH_SESSION_KEY = "hotelSearchContext";
 export const HOTEL_SEARCH_RESULTS_KEY = "hotelSearchResults";
 export const HOTEL_SEARCH_RESULTS_EVENT = "hotel-search-results";
+export const HOTEL_LAST_SEARCH_URL_KEY = "hotelLastSearchUrl";
 export const HOTEL_DETAILS_KEY = "hotelDetails";
 export const HOTEL_BOOKING_SESSION_KEY = "hotelBookingSession";
 export const HOTEL_PENDING_CONFIRM_BOOKING_KEY = "hotelPendingConfirmBooking";
+export const HOTEL_BOOKING_STATUS_KEY = "hotelBookingStatus";
+export const HOTEL_BOOKING_STATUS_EVENT = "hotel-booking-status";
 export const HOTEL_BOOKING_SESSION_DURATION_MS = 20 * 60 * 1000;
 
 let inMemoryHotelBookingSession = null;
@@ -108,6 +111,11 @@ export const writeHotelBookingSession = (value) => {
   }
 
   inMemoryHotelBookingSession = nextValue;
+  try {
+    window.localStorage.removeItem(HOTEL_BOOKING_STATUS_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
   storeHotelBookingSession(nextValue);
   scheduleHotelBookingSessionExpiry(nextValue.hotelBookingSessionExpiresAt);
 };
@@ -179,6 +187,96 @@ export const clearPendingHotelConfirmBooking = () => {
   } catch {
     // Ignore storage failures.
   }
+};
+
+const emitHotelBookingStatus = (status) => {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent(HOTEL_BOOKING_STATUS_EVENT, { detail: status }),
+  );
+};
+
+export const readHotelBookingStatus = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(HOTEL_BOOKING_STATUS_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (isHotelBookingSessionExpired(parsed)) {
+      window.localStorage.removeItem(HOTEL_BOOKING_STATUS_KEY);
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+export const writeHotelBookingStatus = (value = {}) => {
+  if (typeof window === "undefined") return null;
+
+  const nextValue = withHotelBookingSessionExpiry({
+    ...value,
+    updatedAt: Date.now(),
+  });
+
+  try {
+    window.localStorage.setItem(HOTEL_BOOKING_STATUS_KEY, JSON.stringify(nextValue));
+  } catch {
+    // Ignore storage failures.
+  }
+
+  emitHotelBookingStatus(nextValue);
+  return nextValue;
+};
+
+export const markHotelBookingPaymentStarted = (value = {}) =>
+  writeHotelBookingStatus({
+    ...value,
+    status: "payment_started",
+  });
+
+export const markHotelBookingSubmitStarted = (value = {}) => {
+  if (typeof window === "undefined") return null;
+
+  const nextValue = withHotelBookingSessionExpiry({
+    ...value,
+    status: "submit_started",
+    updatedAt: Date.now(),
+  });
+
+  try {
+    window.localStorage.setItem(HOTEL_BOOKING_STATUS_KEY, JSON.stringify(nextValue));
+  } catch {
+    // Ignore storage failures.
+  }
+
+  return nextValue;
+};
+
+export const markHotelBookingConfirmed = (value = {}) => {
+  const status = writeHotelBookingStatus({
+    ...value,
+    status: "confirmed",
+  });
+
+  clearHotelBookingSession();
+  return status;
+};
+
+export const clearHotelBookingStatus = () => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(HOTEL_BOOKING_STATUS_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+
+  emitHotelBookingStatus(null);
 };
 
 const getHotelSearchHeaders = () => {
@@ -406,6 +504,7 @@ export const fetchHotelDetails = async ({
   hotelSearchId,
   hotelId,
   priceProvider,
+  signal,
 }) => {
   const url = new URL("/api/hotel-search/hotel-details", normalizeBaseUrl());
 
@@ -414,6 +513,7 @@ export const fetchHotelDetails = async ({
     headers: getHotelSearchHeaders(),
     credentials: "include",
     cache: "no-store",
+    signal,
     body: JSON.stringify({
       domain: getDomain(),
       searchId,
@@ -430,6 +530,40 @@ export const fetchHotelDetails = async ({
   }
 
   return data;
+};
+
+export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = {}) => {
+  const id = String(searchId || "").trim();
+  if (!id) {
+    throw new Error("Hotel search ID is required to load filters.");
+  }
+
+  const url = new URL(
+    `/api/hotels/search/result/${encodeURIComponent(id)}/filterdata`,
+    normalizeBaseUrl(),
+  );
+  url.searchParams.set("domain", getDomain());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    signal,
+    body: JSON.stringify({
+      ...payload,
+      domain: payload.domain || getDomain(),
+      searchId: payload.searchId || id,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel filter data failed");
+  }
+
+  return data?.data?.filterData || data?.data?.filters || data?.filterData || data?.filters || data?.data || data;
 };
 
 export const fetchHotelRooms = async ({

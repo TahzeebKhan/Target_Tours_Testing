@@ -7,14 +7,17 @@ const SearchResults = ({
   viewType,
   setViewType,
   totalResults = 100,
+  locationLabel = "this location",
   sort,
   setSort,
 }) => {
+  const placeName = locationLabel || "this location";
+
   return (
     <div className={styles.searchResultsContainer}>
       <div className={styles.searchResultsLeft}>
-        <div>
-           Total  <span>{totalResults}</span> results
+        <div className={styles.result}>
+             <span>{totalResults}</span> Properties in {placeName}
         </div>
       </div>
 

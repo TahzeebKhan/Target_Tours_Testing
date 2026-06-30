@@ -12,10 +12,12 @@ import {
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
+  fetchHotelFilterData,
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { useHotelsContext } from "../context/HotelsContext";
 
 const parseSocketValue = (value) => {
   if (typeof value !== "string") return value;
@@ -235,6 +237,7 @@ export const getHotelsFromMessage = (payload = {}) => {
 };
 
 export const getHotelImage = (hotel = {}) => {
+  console.log("hotel",hotel)
   const image =
     hotel.image ||
     hotel.imageUrl ||
@@ -245,7 +248,7 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/images/hotelImg.png";
+  return typeof image === "string" && image ? image : "/images/hotelImg.jpg";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
@@ -631,6 +634,24 @@ const incrementCount = (target, group, key) => {
 };
 
 const hasText = (hotel, ...needles) => {
+  const normalizeText = (value) => String(value || "").toLowerCase();
+  const raw = hotel.raw || {};
+  const rawFacilities = Array.isArray(raw.facilities)
+    ? raw.facilities
+    : Array.isArray(raw.amenities)
+      ? raw.amenities
+      : [];
+  const rawFacilityText = rawFacilities
+    .map((facility) =>
+      typeof facility === "string"
+        ? facility
+        : facility?.name ||
+          facility?.facilityName ||
+          facility?.label ||
+          facility?.description ||
+          "",
+    )
+    .filter(Boolean);
   const text = [
     hotel.title,
     hotel.route,
@@ -638,6 +659,14 @@ const hasText = (hotel, ...needles) => {
     hotel.raw?.type,
     hotel.raw?.chainName,
     hotel.raw?.brandName,
+    hotel.raw?.hotelChain,
+    hotel.raw?.chain,
+    hotel.raw?.name,
+    hotel.raw?.hotelName,
+    hotel.raw?.address,
+    hotel.raw?.city,
+    hotel.raw?.locality,
+    ...rawFacilityText,
     ...(hotel.facilities || []).map((facility) => facility.name),
     ...(hotel.benefits || []),
   ]
@@ -645,7 +674,7 @@ const hasText = (hotel, ...needles) => {
     .join(" ")
     .toLowerCase();
 
-  return needles.some((needle) => text.includes(needle));
+  return needles.some((needle) => text.includes(normalizeText(needle)));
 };
 
 const buildHotelFilterCounts = (hotels = []) => {
@@ -763,6 +792,19 @@ const PRICE_FILTER_BUCKETS = {
   "17000+": [17000, Infinity],
 };
 
+const getPriceFilterRange = (key) => {
+  if (PRICE_FILTER_BUCKETS[key]) return PRICE_FILTER_BUCKETS[key];
+
+  const value = String(key || "").trim();
+  const plusMatch = value.match(/^(\d+(?:\.\d+)?)\+$/);
+  if (plusMatch) return [Number(plusMatch[1]), Infinity];
+
+  const rangeMatch = value.match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/);
+  if (rangeMatch) return [Number(rangeMatch[1]), Number(rangeMatch[2])];
+
+  return [];
+};
+
 const TEXT_FILTER_NEEDLES = {
   suggested: {
     lastMinuteDeals: ["deal", "discount"],
@@ -842,10 +884,15 @@ const TEXT_FILTER_NEEDLES = {
     accor: ["accor"],
     taj: ["taj"],
   },
+  attractions: {},
 };
 
 const matchesAnyTextFilter = (hotel, group, keys) =>
   keys.some((key) => {
+    if (group === "suggested" && ["fiveStar", "fourStar"].includes(key)) {
+      return true;
+    }
+
     const needles = TEXT_FILTER_NEEDLES[group]?.[key] || [key];
     return hasText(hotel, ...needles);
   });
@@ -865,7 +912,7 @@ const matchesHotelFilters = (hotel, filters = {}) => {
 
   if (hasSelectedValues(filters.price)) {
     const matchesPrice = selectedKeys(filters.price).some((key) => {
-      const [min, max] = PRICE_FILTER_BUCKETS[key] || [];
+      const [min, max] = getPriceFilterRange(key);
       return price !== null && price >= min && price < max;
     });
     if (!matchesPrice) return false;
@@ -884,6 +931,9 @@ const matchesHotelFilters = (hotel, filters = {}) => {
     );
     if (!matchesGuestRating) return false;
   }
+
+  if (filters.suggested?.fiveStar && Math.round(rating) !== 5) return false;
+  if (filters.suggested?.fourStar && Math.round(rating) !== 4) return false;
 
   return Object.keys(TEXT_FILTER_NEEDLES).every((group) => {
     if (!hasSelectedValues(filters[group])) return true;
@@ -1230,7 +1280,16 @@ export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
   };
 };
 
-const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
+const TourListing = () => {
+  const {
+    appliedFilters,
+    setDisplayHotels,
+    setFilterData,
+    setHotels,
+    setIsLoading,
+    setMeta,
+    setTotalResults,
+  } = useHotelsContext();
   const searchParams = useSearchParams();
   const hotelSearchChannel = searchParams.get("channel") || "";
   const [likedTours, setLikedTours] = useState([]);
@@ -1242,6 +1301,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const [wishlists, setWishlists] = useState([]); // fetch later from backend
   const [selectedTourId, setSelectedTourId] = useState(null);
   const [hotelResults, setHotelResults] = useState([]);
+  const [apiFilterData, setApiFilterData] = useState(null);
   const [totalHotelResults, setTotalHotelResults] = useState(0);
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
   const [hotelResultSource, setHotelResultSource] = useState("");
@@ -1252,15 +1312,61 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const [scrollState, setScrollState] = useState({
     scrollY: 0,
     viewportHeight: 0,
+    viewportWidth: 0,
   });
   const staySummary = useMemo(() => getStaySummary(searchParams), [searchParams]);
+  const searchIdFromUrl =
+    searchParams.get("searchId") ||
+    searchParams.get("searchid") ||
+    searchParams.get("SearchId") ||
+    "";
+  const activeSearchId = useMemo(() => {
+    if (searchIdFromUrl) return searchIdFromUrl;
+
+    const hotelSearchId = hotelResults.find((hotel) => hotel.searchId)?.searchId;
+    if (hotelSearchId) return hotelSearchId;
+
+    const storedHotelSearch = readStoredHotelSearch() || {};
+    const storedHotelResults = readStoredHotelResults() || {};
+
+    return (
+      findDeepValue(storedHotelSearch, "searchId") ||
+      findDeepValue(storedHotelSearch, "search_id") ||
+      findDeepValue(storedHotelResults, "searchId") ||
+      findDeepValue(storedHotelResults, "search_id") ||
+      ""
+    );
+  }, [hotelResults, searchIdFromUrl]);
   const searchLocationLabel = useMemo(
     () => getSearchLocationLabel(searchParams),
     [searchParams],
   );
+  const filterDataPayload = useMemo(
+    () => ({
+      searchId: activeSearchId,
+      hotelSearchId:
+        searchParams.get("hotelSearchId") ||
+        searchParams.get("hotelsearchid") ||
+        "",
+      city: searchParams.get("city") || "",
+      checkIn: searchParams.get("checkIn") || "",
+      checkOut: searchParams.get("checkOut") || "",
+      channel: hotelSearchChannel,
+      rooms: searchParams.get("rooms") || "",
+      adults: searchParams.get("adults") || "",
+      children: searchParams.get("children") || "",
+      childAges: searchParams.get("childAges") || "",
+      locationId: searchParams.get("locationId") || "",
+      country: searchParams.get("country") || "",
+      state: searchParams.get("state") || "",
+    }),
+    [activeSearchId, hotelSearchChannel, searchParams],
+  );
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
+  const hotelDetailsAbortRef = useRef(null);
+  const hotelDetailsRequestRef = useRef(0);
 
   const handleHeartClick = (hotel) => {
     const hotelId = getHotelDetailsPayload(hotel).hotelId;
@@ -1287,6 +1393,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     setIsSaveWishlistOpen(true);
   };
   const router = useRouter();
+
+  const getHotelLoadingKey = (hotel = {}) =>
+    getHotelDetailsPayload(hotel).hotelId || hotel?.id || "";
+
   const openLoginModal = () => {
     setAuthView("login");
     setShowAuthModal(true);
@@ -1298,20 +1408,36 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   };
 
   const handleBookNow = async (hotel) => {
-    if (!hotel || loadingHotelDetailsId) return;
+    if (!hotel) return;
+
+    hotelDetailsAbortRef.current?.abort();
+
+    const controller = new AbortController();
+    const requestId = hotelDetailsRequestRef.current + 1;
+    hotelDetailsRequestRef.current = requestId;
+    hotelDetailsAbortRef.current = controller;
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
-     console.log("payload",payload)
+    const loadingKey = getHotelLoadingKey(hotel);
 
     if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
+      if (hotelDetailsRequestRef.current === requestId) {
+        setLoadingHotelDetailsId("");
+      }
       return;
     }
 
-    setLoadingHotelDetailsId(hotel.id);
+    setLoadingHotelDetailsId(loadingKey);
 
     try {
-      const details = await fetchHotelDetails(payload);
+      const details = await fetchHotelDetails({
+        ...payload,
+        signal: controller.signal,
+      });
+
+      if (hotelDetailsRequestRef.current !== requestId) return;
+
       window.sessionStorage.setItem(
         HOTEL_DETAILS_KEY,
         JSON.stringify({
@@ -1322,12 +1448,19 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
       );
       router.push(getHotelDetailUrl(payload));
     } catch (error) {
+      if (error?.name === "AbortError") return;
+
+      if (hotelDetailsRequestRef.current !== requestId) return;
+
       console.error("Hotel details request failed:", error);
       if (isMissingHotelAuthTokenError(error)) {
         openLoginModal();
       }
     } finally {
-      setLoadingHotelDetailsId("");
+      if (hotelDetailsRequestRef.current === requestId) {
+        setLoadingHotelDetailsId("");
+        hotelDetailsAbortRef.current = null;
+      }
     }
   };
   const toggleExpand = (id) => {
@@ -1449,6 +1582,31 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     };
   }, [hotelSearchChannel]);
 
+  useEffect(() => {
+    if (!activeSearchId) {
+      setApiFilterData(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    fetchHotelFilterData(activeSearchId, {
+      signal: controller.signal,
+      payload: filterDataPayload,
+    })
+      .then((data) => {
+        setApiFilterData(data || null);
+      })
+      .catch((error) => {
+        if (error?.name === "AbortError") return;
+
+        console.error("Hotel filter data request failed:", error);
+        setApiFilterData(null);
+      });
+
+    return () => controller.abort();
+  }, [activeSearchId, filterDataPayload]);
+
   const staticHotelResults = useMemo(
     () =>
       STATIC_HOTEL_RESULTS.map((hotel, index) =>
@@ -1456,9 +1614,13 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
       ),
     [],
   );
+  const hasActiveHotelSearch = Boolean(hotelSearchChannel);
   const sourceHotels = useMemo(
-    () => (hotelResults.length ? hotelResults : staticHotelResults),
-    [hotelResults, staticHotelResults],
+    () =>
+      hotelResults.length || hasActiveHotelSearch
+        ? hotelResults
+        : staticHotelResults,
+    [hasActiveHotelSearch, hotelResults, staticHotelResults],
   );
 
   const sortedHotels = useMemo(
@@ -1469,50 +1631,98 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const displayHotels = useMemo(
     () =>
       sortedHotels.filter((hotel) =>
-        matchesHotelFilters(hotel, activeFilters),
+        matchesHotelFilters(hotel, appliedFilters),
       ),
-    [activeFilters, sortedHotels],
+    [appliedFilters, sortedHotels],
   );
 
   useEffect(() => {
-    onDataLoaded?.({
-      counts: buildHotelFilterCounts(sourceHotels),
-      total: totalHotelResults || sourceHotels.length,
+    setFilterData(apiFilterData || buildHotelFilterCounts(sourceHotels));
+    setHotels(hotelResults);
+    setMeta({
+      channel: hotelSearchChannel,
+      searchId: activeSearchId,
+      source: hotelResultSource,
+      hasApiResults: hotelResults.length > 0,
     });
-  }, [onDataLoaded, sourceHotels, totalHotelResults]);
+    setTotalResults(totalHotelResults || sourceHotels.length);
+  }, [
+    hotelResultSource,
+    hotelResults,
+    hotelSearchChannel,
+    activeSearchId,
+    apiFilterData,
+    setFilterData,
+    setHotels,
+    setMeta,
+    setTotalResults,
+    sourceHotels,
+    totalHotelResults,
+  ]);
+
+  useEffect(() => {
+    setDisplayHotels(displayHotels);
+  }, [displayHotels, setDisplayHotels]);
+
+  useEffect(() => {
+    setIsLoading(isHotelLoading);
+  }, [isHotelLoading, setIsLoading]);
+
+  useEffect(
+    () => () => {
+      hotelDetailsAbortRef.current?.abort();
+    },
+    [],
+  );
 
   useEffect(() => {
     const updateScrollState = () => {
+      const scrollContainer = listSectionRef.current;
+
       setScrollState({
-        scrollY: window.scrollY || window.pageYOffset || 0,
-        viewportHeight: window.innerHeight || 0,
+        scrollY:
+          scrollContainer?.scrollTop ||
+          window.scrollY ||
+          window.pageYOffset ||
+          0,
+        viewportHeight:
+          scrollContainer?.clientHeight || window.innerHeight || 0,
+        viewportWidth: window.innerWidth || 0,
       });
     };
 
+    const scrollContainer = listSectionRef.current;
+
     updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
+    scrollContainer?.addEventListener("scroll", updateScrollState, {
+      passive: true,
+    });
     window.addEventListener("resize", updateScrollState);
 
     return () => {
-      window.removeEventListener("scroll", updateScrollState);
+      scrollContainer?.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.scrollTo({ top: 0, behavior: "auto" });
+    listSectionRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [sortType, viewType, hotelSearchChannel]);
 
   const virtualWindow = useMemo(() => {
     const itemCount = displayHotels.length;
-    const columns = viewType === "grid" ? 2 : 1;
+    const columns =
+      viewType === "grid"
+        ? scrollState.viewportWidth > 1180
+          ? 3
+          : scrollState.viewportWidth > 991
+            ? 2
+            : 1
+        : 1;
     const rowHeight = viewType === "grid" ? GRID_ROW_HEIGHT : LIST_ROW_HEIGHT;
     const totalRows = Math.ceil(itemCount / columns);
-    const listTop =
-      listSectionRef.current?.getBoundingClientRect().top + scrollState.scrollY ||
-      0;
-    const scrollTop = Math.max(0, scrollState.scrollY - listTop);
+    const scrollTop = Math.max(0, scrollState.scrollY);
     const viewportHeight = scrollState.viewportHeight || 900;
 
     if (!itemCount || !listSectionRef.current) {
@@ -1573,6 +1783,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
           viewType={viewType}
           setViewType={setViewType}
           totalResults={totalHotelResults || sourceHotels.length}
+          locationLabel={searchLocationLabel}
           sort={sortType}
           setSort={setSortType}
         />
@@ -1709,10 +1920,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
                       <button
                         className={styles.bookNowBtn}
-                        disabled={Boolean(loadingHotelDetailsId)}
+                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
                         onClick={() => handleBookNow(item)}
                       >
-                        {loadingHotelDetailsId === item.id
+                        {loadingHotelDetailsId === getHotelLoadingKey(item)
                           ? "LOADING"
                           : "SEE AVAILABILITY"}
                       </button>
@@ -1854,10 +2065,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
                       <button
                         className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
-                        disabled={Boolean(loadingHotelDetailsId)}
+                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
                         onClick={() => handleBookNow(item)}
                       >
-                        {loadingHotelDetailsId === item.id
+                        {loadingHotelDetailsId === getHotelLoadingKey(item)
                           ? "LOADING"
                           : "SEE AVAILABILITY"}
                       </button>

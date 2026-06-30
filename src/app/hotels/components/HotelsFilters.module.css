@@ -347,7 +347,7 @@ color:#111827;
 
 .starText {
   flex-shrink: 0;
-  min-width: 64px;
+  min-width: 50px;
   color: #000033;
   font-size: 14px;
   letter-spacing: 2px;
@@ -402,10 +402,12 @@ color:#111827;
   outline: none;
   background: transparent;
   color: #111827;
-  font-family: var(--font-inter);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1;
+  font-family: Inter;
+font-style: Regular;
+font-size: 13px;
+line-height: 100%;
+letter-spacing: 0%;
+color:#6B7280;
 }
 
 .SearchField input::placeholder {
@@ -464,7 +466,7 @@ color:#111827;
   min-width: 0;
   height: 50px;
   display: grid;
-  grid-template-columns: minmax(68px, 1fr) minmax(42px, auto);
+  grid-template-columns: minmax(55px, 1fr) minmax(42px, auto);
   align-items: center;
   gap: 8px;
   padding: 0 12px;
@@ -474,8 +476,14 @@ color:#111827;
 
 .budgetInput span {
   color: #6b7280;
-  font-size: 13px;
-  line-height: 1.2;
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+
 }
 
 .budgetInput input {
@@ -485,9 +493,15 @@ color:#111827;
   outline: none;
   background: transparent;
   color: #111827;
-  font-family: var(--font-inter);
-  font-size: 14px;
-  text-align: right;
+  font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 13px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+text-align: right;
+
 }
 
 .budgetInput input::-webkit-outer-spin-button,
@@ -703,6 +717,7 @@ color:#111827;
   font-size: 14px;
   color: #000000;
 }
+
 
 @media (max-width: 630px) {
   .reset {

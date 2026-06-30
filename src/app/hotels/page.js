@@ -1,25 +1,42 @@
 
 "use client"
-import React, { Suspense, useCallback, useState } from "react";
+import React, { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./layout.module.css";
 import TourHeroSection from "../hotel-list/components/tourHeroSection.js/TourHeroSection";
 import TourListing from "./components/TourListing";
 
 import MobileHotelDetails from "../hotel-list/components/mobileView/MobileHotelDetails";
 import HotelsFilters from "./components/HotelsFilters"
+import { HotelsProvider } from "./context/HotelsContext";
+import { HOTEL_LAST_SEARCH_URL_KEY } from "@/shared/services/hotelSearch";
 
-const HotelList = () => {
-  const [filterData, setFilterData] = useState(null);
-  const [appliedFilters, setAppliedFilters] = useState({});
+const RestoreHotelSearchUrl = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleDataLoaded = useCallback((meta) => {
-    if (meta?.counts) {
-      setFilterData(meta.counts);
+  useEffect(() => {
+    if (searchParams.toString() || typeof window === "undefined") return;
+
+    try {
+      const lastSearchUrl = window.localStorage.getItem(HOTEL_LAST_SEARCH_URL_KEY);
+      if (lastSearchUrl?.startsWith("/hotels?")) {
+        router.replace(lastSearchUrl);
+      }
+    } catch {
+      // Ignore storage failures.
     }
-  }, []);
+  }, [router, searchParams]);
 
+  return null;
+};
+
+const HotelListContent = () => {
   return (
     <>
+      <Suspense fallback={null}>
+        <RestoreHotelSearchUrl />
+      </Suspense>
       {/* HERO SECTION (Image + Search) */}
       <div className={styles.tourListSectionWrappper}>
         <Suspense fallback={<div>Loading...</div>}>
@@ -32,21 +49,14 @@ const HotelList = () => {
             {/* LEFT: FILTERS */}
             <aside className={styles.tourFilters}>
               <Suspense fallback={null}>
-                <HotelsFilters
-                  filterData={filterData}
-                  onApply={setAppliedFilters}
-                  onReset={() => setAppliedFilters({})}
-                />
+                <HotelsFilters />
               </Suspense>
             </aside>
 
             {/* RIGHT: RESULTS GRID */}
             <div className={styles.tourResults}>
               <Suspense fallback={null}>
-                <TourListing
-                  activeFilters={appliedFilters}
-                  onDataLoaded={handleDataLoaded}
-                />
+                <TourListing />
               </Suspense>
             </div>
           </div>
@@ -60,5 +70,11 @@ const HotelList = () => {
     </>
   );
 };
+
+const HotelList = () => (
+  <HotelsProvider>
+    <HotelListContent />
+  </HotelsProvider>
+);
 
 export default HotelList;
