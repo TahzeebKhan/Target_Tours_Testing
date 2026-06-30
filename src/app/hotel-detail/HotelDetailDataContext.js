@@ -236,8 +236,8 @@ const normalizeRating = (rating) => {
 const formatCurrency = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
   if (!Number.isFinite(numericValue)) return "₹ --";
-  return `₹ ${numericValue.toLocaleString("en-IN", {
-    maximumFractionDigits: 2,
+  return `₹ ${Math.round(numericValue).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
   })}`;
 };
 
@@ -386,8 +386,23 @@ const extractGalleryImages = (stored = {}, routeHotelId = "") => {
     ...(foundHotel || {}),
     ...(stored?.hotel || {}),
   };
+  const preferredGalleryItems = [
+    data.galleryImages,
+    data.hotelImages,
+    data.photos,
+    data.media,
+    foundHotel?.galleryImages,
+    foundHotel?.hotelImages,
+    foundHotel?.photos,
+    foundHotel?.media,
+    hotel.galleryImages,
+    hotel.hotelImages,
+    hotel.photos,
+    hotel.media,
+  ].flatMap((item) => collectGalleryItems(item));
 
   const galleryItems = [
+    ...preferredGalleryItems,
     ...collectGalleryItems(data),
     ...collectGalleryItems(hotel),
   ].filter((item) => item?.image);
@@ -496,6 +511,91 @@ const getRoomFeatureTexts = (room = {}, recommendation = {}) => {
     }));
 };
 
+const formatPolicyText = (value) => {
+  const text = String(value || "").trim();
+  const normalizedText = text.replace(/[\s_-]+/g, "").toLowerCase();
+
+  if (normalizedText === "nonrefundable") return "Non refundable";
+  if (normalizedText === "refundable") return "Refundable";
+
+  return text;
+};
+
+const getPolicyTextKey = (value) =>
+  formatPolicyText(value).replace(/[^a-z0-9]/gi, "").toLowerCase();
+
+const uniqueTexts = (items = []) => {
+  const seen = new Set();
+
+  return items
+    .map(formatPolicyText)
+    .filter(Boolean)
+    .filter((item) => {
+      const key = getPolicyTextKey(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+};
+
+const normalizeTextItems = (value) => {
+  if (!value) return [];
+
+  if (typeof value === "string") return [value];
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => normalizeTextItems(item));
+  }
+
+  if (typeof value !== "object") return [];
+
+  const text = getFirst(
+    value.text,
+    value.description,
+    value.desc,
+    value.value,
+    value.name,
+    value.label,
+  );
+  const type = getFirst(value.type, value.title, value.category);
+
+  if (text && type && text !== type) return [`${type}: ${text}`];
+  if (text) return [text];
+  if (type) return [type];
+
+  return [];
+};
+
+const getRoomPolicyTexts = (room = {}, roomDetail = {}, recommendation = {}, isRefundable = false) => {
+  const policies = [
+    room.policies,
+    roomDetail.policies,
+    recommendation.policies,
+    room.cancellationPolicies,
+    roomDetail.cancellationPolicies,
+    recommendation.cancellationPolicies,
+    room.cancellationPolicy,
+    roomDetail.cancellationPolicy,
+    recommendation.cancellationPolicy,
+  ].flatMap((item) => normalizeTextItems(item));
+
+  const includes = [
+    room.includes,
+    roomDetail.includes,
+    recommendation.includes,
+  ].flatMap((item) => normalizeTextItems(item).map((text) => `Includes: ${text}`));
+
+  const rateRules = [
+    getFirst(room.refundability, roomDetail.refundability, recommendation.refundability),
+    getFirst(room.boardBasis?.description, roomDetail.boardBasis?.description),
+    room.needsPriceCheck ? "Price check required before booking" : "",
+    room.payAtHotel ? "Pay at hotel" : "",
+    isRefundable ? "Refundable" : "Non refundable",
+  ];
+
+  return uniqueTexts([...policies, ...includes, ...rateRules]);
+};
+
 const normalizeRooms = (data = {}, hotel = {}) => {
   const rooms = getRecommendationRooms(data);
   const images = collectImages(data).length ? collectImages(data) : FALLBACK_IMAGES;
@@ -580,15 +680,24 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         hotel.freeCancellation ||
         hotel.isRefundable,
     );
+    const sourceRoomId = getFirst(
+      room.id,
+      room.roomGroupId,
+      roomDetail.id,
+      room.roomId,
+      roomDetail.roomId,
+      recommendationId,
+      "room",
+    );
+    const uiRoomId = [
+      sourceRoomId,
+      recommendationIndex ?? index,
+      roomIndex ?? 0,
+      index,
+    ].join("-");
 
     return {
-      id:
-        room.id ||
-        room.roomGroupId ||
-        roomDetail.id ||
-        room.roomId ||
-        roomDetail.roomId ||
-        `${recommendationId || "recommendation"}-${recommendationIndex ?? index}-${roomIndex ?? 0}`,
+      id: uiRoomId,
       title: roomTitle,
       availability: Number(room.availability || roomDetail.availability || 1),
       roomId: room.roomId || roomDetail.roomId || roomDetail.id || "",
@@ -625,13 +734,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         "Guests",
       ),
       featuresLeft: getRoomFeatureTexts(roomDetail, recommendation, hotel),
-      benefits: [
-        room.boardBasis?.description || roomDetail.boardBasis?.description || "",
-        room.providerName ? `Provider: ${room.providerName}` : "",
-        room.needsPriceCheck ? "Price check required before booking" : "",
-        room.payAtHotel ? "Pay at hotel" : "",
-        isRefundable ? "Refundable" : "Non refundable",
-      ].filter(Boolean),
+      benefits: getRoomPolicyTexts(room, roomDetail, recommendation, isRefundable),
       cancellation: isRefundable ? "Refundable booking" : "Non refundable booking",
       rating: {
         label: "Excellent",

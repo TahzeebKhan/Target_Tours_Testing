@@ -1550,6 +1550,7 @@
 @media (max-width: 895px) {
   .tabsLayout{
     min-height: 100%;
+     width: 100%;
   }
   .glass_panel {
     display: none;

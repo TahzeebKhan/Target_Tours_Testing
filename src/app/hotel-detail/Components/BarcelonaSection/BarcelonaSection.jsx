@@ -6,8 +6,10 @@ import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 
-const BarcelonaSection = () => {
+const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
   const [activeTab, setActiveTab] = useState("All");
+  const headingCity = city || "this area";
+  const wishlistIds = currentHotelId ? [currentHotelId] : [];
 
   // 🔥 wishlist state
   const [wishlists, setWishlists] = useState([]);
@@ -25,7 +27,7 @@ const BarcelonaSection = () => {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={styles.heading}>Similar Hotels in Barcelona</h2>
+        <h2 className={styles.heading}>Similar Hotels in {headingCity}</h2>
 
         <div className={styles.expCarousel}>
           <ExpCarousel
@@ -45,7 +47,7 @@ const BarcelonaSection = () => {
           setIsSaveWishlistOpen(true);
         }}
         type="hotel"
-        ids={[]}
+        ids={wishlistIds}
       />
 
       <SaveToWishlistModal
@@ -56,6 +58,8 @@ const BarcelonaSection = () => {
           setIsSaveWishlistOpen(false);
           setIsCreateWishlistOpen(true);
         }}
+        type="hotel"
+        ids={wishlistIds}
       />
     </>
   );

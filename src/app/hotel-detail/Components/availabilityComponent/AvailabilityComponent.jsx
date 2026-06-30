@@ -6,6 +6,19 @@ import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 
+const ratingToStars = {
+  excellent: 5,
+  good: 4,
+  average: 3,
+  poor: 2,
+  terrible: 1,
+};
+
+const getRatingScore = (rating = {}) => {
+  const ratingLabel = String(rating.label || "").trim().toLowerCase();
+  return ratingToStars[ratingLabel] || rating.score || "";
+};
+
 const AvailabilitySkeleton = () => (
   <div className={styles.skeletonList} aria-label="Loading available rooms">
     {[0, 1].map((item) => (
@@ -43,12 +56,38 @@ const AvailabilityComponent = ({
   rooms = [],
   loading = false,
   errorMessage = "",
+  actionDisabled = false,
+  roomQuantities = {},
+  maxSelectableRooms = Infinity,
   onRoomQuantityChange,
 }) => {
   const swiperRefs = useRef({});
   const [roomQty, setRoomQty] = useState({});
+  const [expandedFeatureRooms, setExpandedFeatureRooms] = useState({});
+
+  const toggleFeatureExpansion = (roomId) => {
+    if (actionDisabled) return;
+
+    setExpandedFeatureRooms((prev) => ({
+      ...prev,
+      [roomId]: !prev[roomId],
+    }));
+  };
+
   const increase = (id, maxQty = Infinity) => {
-    const nextQty = Math.min((roomQty[id] || 0) + 1, maxQty);
+    if (actionDisabled) return;
+
+    const currentQtyMap = Object.keys(roomQuantities).length
+      ? roomQuantities
+      : roomQty;
+    const selectedRoomTotal = Object.values(currentQtyMap).reduce(
+      (total, quantity) => total + Number(quantity || 0),
+      0,
+    );
+
+    if (selectedRoomTotal >= maxSelectableRooms) return;
+
+    const nextQty = Math.min((currentQtyMap[id] || 0) + 1, maxQty);
 
     setRoomQty((prev) => ({
       ...prev,
@@ -58,7 +97,12 @@ const AvailabilityComponent = ({
   };
 
   const decrease = (id) => {
-    const nextQty = (roomQty[id] || 0) - 1;
+    if (actionDisabled) return;
+
+    const currentQtyMap = Object.keys(roomQuantities).length
+      ? roomQuantities
+      : roomQty;
+    const nextQty = (currentQtyMap[id] || 0) - 1;
 
     setRoomQty((prev) => {
       if (nextQty <= 0) {
@@ -72,6 +116,7 @@ const AvailabilityComponent = ({
     onRoomQuantityChange?.(id, Math.max(nextQty, 0));
   };
   const handleAddRoom = (id, maxQty) => {
+    if (actionDisabled) return;
     increase(id, maxQty);
   };
 
@@ -92,7 +137,16 @@ const AvailabilityComponent = ({
         const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
         const benefits = Array.isArray(room.benefits) ? room.benefits : [];
         const maxQty = Math.max(0, Number(room.availability) || 0);
-        const qty = roomQty[room.id] || 0;
+        const qty = roomQuantities[room.id] ?? roomQty[room.id] ?? 0;
+        const selectedRoomTotal = Object.values(
+          Object.keys(roomQuantities).length ? roomQuantities : roomQty,
+        ).reduce((total, quantity) => total + Number(quantity || 0), 0);
+        const hasReachedRoomLimit = selectedRoomTotal >= maxSelectableRooms;
+        const isFeatureExpanded = Boolean(expandedFeatureRooms[room.id]);
+        const visibleFeatures = features.slice(
+          0,
+          isFeatureExpanded ? features.length : 10,
+        );
 
         return (
           <div key={room.id} className={styles.CardSection}>
@@ -113,6 +167,7 @@ const AvailabilityComponent = ({
               <div className={styles.btns}>
                 <button
                   className={styles.leftBtn}
+                  disabled={actionDisabled}
                   onClick={() => swiperRefs.current[room.id]?.slidePrev()}
                 >
                   <img src="/icons/left.svg" alt="" />
@@ -120,6 +175,7 @@ const AvailabilityComponent = ({
 
                 <button
                   className={styles.rightBtn}
+                  disabled={actionDisabled}
                   onClick={() => swiperRefs.current[room.id]?.slideNext()}
                 >
                   <img src="/icons/right.svg" alt="" />
@@ -146,16 +202,29 @@ const AvailabilityComponent = ({
                 {/* FEATURES */}
                 <div className={styles.featureSec}>
                   {features.length ? (
-                    <ul className={styles.featureList}>
-                      {features.map((item, idx) => (
-                        <li key={idx}>
-                          <div className={styles.iconCont}>
-                            <img src={item.icon} alt="" />
-                          </div>
-                          {item.text}
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      <ul className={styles.featureList}>
+                        {visibleFeatures.map((item, idx) => (
+                          <li key={idx}>
+                            <div className={styles.iconCont}>
+                              <img src={item.icon} alt="" />
+                            </div>
+                            {item.text}
+                          </li>
+                        ))}
+                        {features.length > 10 && (
+                        <button
+                          className={styles.showMoreBtn}
+                          disabled={actionDisabled}
+                          onClick={() => toggleFeatureExpansion(room.id)}
+                        >
+                          {isFeatureExpanded ? "...Show Less" : "...Show More"}
+                        </button>
+                      )}
+                      </ul>
+
+                      
+                    </>
                   ) : (
                     <p className={styles.statusText}>No facilities available</p>
                   )}
@@ -180,7 +249,10 @@ const AvailabilityComponent = ({
                   </div>
 
                   <div className={styles.btnCont}>
-                    <button className={styles.moreDetailsBtn}>
+                    <button
+                      className={styles.moreDetailsBtn}
+                      disabled={actionDisabled}
+                    >
                       More Details
                     </button>
                   </div>
@@ -201,7 +273,9 @@ const AvailabilityComponent = ({
                         {room.rating.reviews}
                       </span>
                     </div>
-                    <div className={styles.ratting}>{room.rating.score}</div>
+                    <div className={styles.ratting}>
+                      {getRatingScore(room.rating)}
+                    </div>
                   </div>
 
                   <div className={styles.priceContainer}>
@@ -229,7 +303,7 @@ const AvailabilityComponent = ({
                     className={`${styles.addRoomBtn} ${
                       qty > 0 ? styles.fadeOut : styles.fadeIn
                     }`}
-                    disabled={maxQty <= 0}
+                    disabled={actionDisabled || maxQty <= 0 || hasReachedRoomLimit}
                     onClick={() => handleAddRoom(room.id, maxQty)}
                   >
                     ADD ROOM
@@ -242,6 +316,7 @@ const AvailabilityComponent = ({
                   >
                     <button
                       className={styles.btn}
+                      disabled={actionDisabled}
                       onClick={(e) => {
                         e.stopPropagation();
                         decrease(room.id);
@@ -263,7 +338,7 @@ const AvailabilityComponent = ({
                     <span className={styles.count}>{qty}</span>
                     <button
                       className={styles.btn}
-                      disabled={qty >= maxQty}
+                      disabled={actionDisabled || qty >= maxQty || hasReachedRoomLimit}
                       onClick={(e) => {
                         e.stopPropagation();
                         increase(room.id, maxQty);

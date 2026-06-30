@@ -938,8 +938,10 @@ const TourListing = () => {
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
 
-  const handleHeartClick = (tourId) => {
-    setSelectedTourId(tourId);
+  const handleHeartClick = (hotel) => {
+    const hotelId = getHotelDetailsPayload(hotel).hotelId;
+
+    setSelectedTourId(hotelId || hotel?.id || null);
 
     if (!wishlists.length) {
       setIsCreateWishlistOpen(true);
@@ -972,7 +974,7 @@ const TourListing = () => {
   };
 
   const handleBookNow = async (hotel) => {
-    if (!hotel) return;
+    if (!hotel || loadingHotelDetailsId) return;
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
      console.log("payload",payload)
@@ -1295,7 +1297,7 @@ const TourListing = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleLike(item.id); // change icon
-                          handleHeartClick(item.id); // open modal
+                          handleHeartClick(item); // open modal
                         }}
                       />
                     </div>
@@ -1349,7 +1351,7 @@ const TourListing = () => {
 
                       <button
                         className={styles.bookNowBtn}
-                        disabled={loadingHotelDetailsId === item.id}
+                        disabled={Boolean(loadingHotelDetailsId)}
                         onClick={() => handleBookNow(item)}
                       >
                         {loadingHotelDetailsId === item.id
@@ -1432,7 +1434,7 @@ const TourListing = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleLike(item.id); // change icon
-                          handleHeartClick(item.id); // open modal
+                          handleHeartClick(item); // open modal
                         }}
                       />
                     </div>
@@ -1493,7 +1495,7 @@ const TourListing = () => {
 
                       <button
                         className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
-                        disabled={loadingHotelDetailsId === item.id}
+                        disabled={Boolean(loadingHotelDetailsId)}
                         onClick={() => handleBookNow(item)}
                       >
                         {loadingHotelDetailsId === item.id
@@ -1514,13 +1516,15 @@ const TourListing = () => {
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={handleCreateWishlist}
         type="hotel"
-        ids={[]}
+        ids={selectedTourId ? [selectedTourId] : []}
       />
 
       <SaveToWishlistModal
         onCreateNew={() => setIsCreateWishlistOpen(true)}
         isOpen={isSaveWishlistOpen}
         wishlists={wishlists}
+        type="hotel"
+        ids={selectedTourId ? [selectedTourId] : []}
         onClose={() => setIsSaveWishlistOpen(false)}
       />
       {showAuthModal && authView === "login" && (

@@ -7,22 +7,36 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
-export const fetchUserWishlists = async () => {
+export const fetchUserWishlists = async (type = "package") => {
   const token = Cookies.get("auth_token");
+  const wishlistType = type || "package";
 
   if (!token) return {};
 
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/package?limit=50&page=1`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user-wishlist/${encodeURIComponent(wishlistType)}?limit=50&page=1`,
     {
       headers: { Authorization: `Bearer ${token}` },
     },
   );
 
-  return res.data?.data?.package || {};
+  return res.data?.data?.[wishlistType] || {};
 };
 
-const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew }) => {
+const getWishlistItemId = (item = {}) =>
+  item.hotelId || item.hotel_id || item.id || item.documentId || "";
+
+const getWishlistItemTitle = (item = {}) =>
+  item.title || item.name || item.hotelName || item.list_name || "Saved item";
+
+const getWishlistItemImage = (item = {}) =>
+  item?.main_image?.formats?.small?.url ||
+  item?.main_image?.url ||
+  item?.image ||
+  item?.thumbnail ||
+  "";
+
+const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew, type = "package" }) => {
   const router = useRouter();
   const token = Cookies.get("auth_token");
 
@@ -34,9 +48,20 @@ const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew }) => {
     }
   }, [isOpen, token, router, onClose]);
 
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["user-wishlists"],
-    queryFn: fetchUserWishlists,
+    queryKey: ["user-wishlists", type],
+    queryFn: () => fetchUserWishlists(type),
     enabled: isOpen && !!token, // ✅ double safety
   });
 
@@ -64,38 +89,48 @@ const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew }) => {
         {!isLoading && isEmpty && (
           <div className={styles.emptyState}>
             <h3>You have no wishlists</h3>
-            <p>Create one to start saving your favourite packages.</p>
+            <p>Create one to start saving your favourite {type === "hotel" ? "hotels" : "packages"}.</p>
           </div>
         )}
 
         {!isLoading && !isEmpty && (
           <div className={styles.grid}>
             {wishlistGroups.map(([wishlistName, group]) =>
-              group.data.map((pkg) => {
-                const imageUrl =
-                  pkg?.main_image?.formats?.small?.url || pkg?.main_image?.url;
+              group.data.map((item) => {
+                const itemId = getWishlistItemId(item);
+                const imageUrl = getWishlistItemImage(item);
+                const title = getWishlistItemTitle(item);
 
                 return (
                   <div
-                    key={pkg.id}
+                    key={itemId || `${wishlistName}-${title}`}
                     className={styles.card}
                     onClick={() => {
                       onClose(); // close modal
-                      router.push(`/tour-details?id=${pkg.id}`);
+                      if (type === "hotel") {
+                        if (itemId) router.push(`/hotel-detail?hotelId=${itemId}`);
+                        return;
+                      }
+
+                      router.push(`/tour-details?id=${itemId}`);
                     }}
                   >
                     <div className={styles.imagePlaceholder}>
                       {imageUrl ? (
                         <img
-                          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`}
-                          alt={pkg.title}
+                          src={
+                            imageUrl.startsWith("http")
+                              ? imageUrl
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`
+                          }
+                          alt={title}
                         />
                       ) : (
                         <img src="/icons/heartOutline.svg" alt="" />
                       )}
                     </div>
 
-                    <h4>{pkg.title}</h4>
+                    <h4>{title}</h4>
                     <span>{wishlistName}</span>
                   </div>
                 );

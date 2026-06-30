@@ -17,6 +17,7 @@ const HotelGridView = ({
 }) => {
   const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
   const shouldShowEmptyState = showEmptyState && !isLoading && !tourData.length;
+  const isDetailsLoading = Boolean(loadingHotelDetailsId);
 
   return (
     <motion.div
@@ -167,7 +168,7 @@ const HotelGridView = ({
 
               <button
                 className={styles.bookNowBtn}
-                disabled={loadingHotelDetailsId === item.id}
+                disabled={isDetailsLoading}
                 onClick={() => handleBookNow(item)}
               >
                 {loadingHotelDetailsId === item.id

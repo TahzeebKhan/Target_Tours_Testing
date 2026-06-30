@@ -298,6 +298,13 @@
     transition: all 0.3s ease-in-out;
 }
 
+.bookNowBtn:disabled {
+    background-color: #4a4a70;
+    color: #FFFFFF;
+    cursor: not-allowed;
+    opacity: 0.72;
+}
+
 .skeletonCard {
     pointer-events: none;
 }
@@ -378,6 +385,7 @@
     0% {
         background-position: 120% 0;
     }
+
     100% {
         background-position: -120% 0;
     }
@@ -415,17 +423,20 @@
         grid-template-columns: repeat(1, 1fr);
         gap: 24px;
     }
+
     .emptyState {
         flex-direction: column;
         align-items: flex-start;
     }
+
     .emptyStateImage {
         width: 140px;
         max-width: 100%;
         flex-basis: auto;
     }
+
     .bookNowBtn {
-max-width: 210px;
+        max-width: 210px;
         padding: 12px 24px;
     }
 
@@ -436,4 +447,79 @@ max-width: 210px;
         max-width: 145px;
         padding: 12px 6px;
     }
+}
+
+@media (max-width: 540px) {
+  :global(.ResultsBottomSheet_content__x_vjU):not(.gridWrapper) {
+    padding: 16px 16px;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .gridWrapper {
+    width: 100%;
+    grid-template-columns: repeat(1, 1fr);
+    overflow: hidden;
+    box-sizing: border-box;
+    gap: 32px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .gridCard {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    contain-intrinsic-size: auto;
+    margin: 0;
+  }
+
+  .gridCardImage,
+  .ListViewCardImage {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  .gridCardImage > img,
+  img.ListViewCardImage {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ListViewCardTextBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .priceSec {
+    font-size: 22px;
+    text-align: left;
+    line-height: 1.1;
+  }
+
+  .totalPrice span {
+    font-size: 11px;
+    letter-spacing: normal;
+  }
+
+  .bookNowBtn {
+    max-width: 100%;
+    width: auto;
+    font-size: 13px;
+    padding: 10px 16px;
+    height: auto;
+    flex: none;
+    text-align: center;
+  }
 }
