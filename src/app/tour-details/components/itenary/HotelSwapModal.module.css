@@ -693,3 +693,37 @@ color:#0604B2;
     transform: translateX(0);
   }
 }
+
+@media (max-width: 768px) {
+  .hotelModal {
+    width: 100%;
+    min-width: 100%;
+  }
+  .hotelFilters {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .hotelOptionCard {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+  .hotelOptionImage {
+    width: 100%;
+    max-width: 400px;
+  }
+  .hotelOptionPrice {
+    justify-items: center;
+    text-align: center;
+  }
+  .hotelRating {
+    justify-content: center;
+  }
+  .hotelTax {
+    text-align: center;
+  }
+  .hotelAmenities {
+    justify-content: center;
+  }
+}
+

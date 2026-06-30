@@ -126,7 +126,8 @@ vertical-align: middle;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 10px;
   color: #1a1a1a;
   font-family: Inter;
@@ -185,7 +186,7 @@ vertical-align: middle;
 
 .flightTimeline {
   display: grid;
-  grid-template-columns: minmax(64px, 1fr) minmax(120px, 150px) minmax(64px, 1fr);
+  grid-template-columns: minmax(50px, 1fr) minmax(80px, 150px) minmax(50px, 1fr);
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -406,11 +407,20 @@ vertical-align: middle;
 
 .cardHeader {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
   justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
+  align-items: flex-start;
+  padding: 24px;
+  width: 100%;
+  background: #ffffff;
   border-bottom: 1px solid #e7e7ec;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  padding-right: 32px;
+  gap: 45px;
 }
 
 .cardHeaderCollapsed {
@@ -420,8 +430,29 @@ vertical-align: middle;
 .dayMeta {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
   margin-bottom: 4px;
+}
+
+.dayMetaLeft,
+.dayMetaRight {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.metaInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 9px;
+  color: #71717b;
+  line-height: 14.63px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
 }
 
 .dayBadge {
@@ -941,10 +972,29 @@ color:#000000;
   font: 400 9px/1.4 var(--font-inter);
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1399px) {
+  .stickyColumn {
+    max-width: 500px;
+    flex: 0 0 500px;
+  }
+}
+
+@media (max-width: 1199px) {
   .layout {
+    display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
     gap: 22px;
+  }
+
+  .stickyColumn {
+    max-width: none;
+    flex: none;
+  }
+
+  .mapCard {
+    height: 480px;
+    min-height: 480px;
+    max-width: none;
   }
 
   .cardBody {
@@ -961,7 +1011,7 @@ color:#000000;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 850px) {
   .section {
     padding: 0 18px 64px;
     scroll-margin-top: 110px;
@@ -1008,7 +1058,39 @@ color:#000000;
   }
 }
 
+@media (max-width: 576px) {
+  .flightCard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .flightAirline {
+    justify-content: center;
+  }
+
+  .dayMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .dayMetaRight {
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+}
+
 @media (max-width: 480px) {
+  .itineraryHeading h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .flightTimeline {
+    gap: 6px;
+    grid-template-columns: minmax(45px, 1fr) minmax(70px, 150px) minmax(45px, 1fr);
+  }
+
   .dayAside {
     display: flex;
   }
@@ -1035,3 +1117,33 @@ color:#000000;
     padding-right: 0;
   }
 }
+
+@media (max-width: 400px) {
+  .section {
+    padding: 0 16px 64px;
+  }
+
+  .headingSticky {
+    margin: 0 -16px 28px;
+  }
+
+  .itineraryHeading {
+    width: calc(100% - 32px);
+  }
+
+  .cardHeader {
+    padding: 16px;
+  }
+
+  .headerContent {
+    padding-right: 0;
+    gap: 12px;
+  }
+
+  .cardHeader p {
+    font-style: normal;
+    font-size: 11px;
+    line-height: 140%;
+  }
+}
+
