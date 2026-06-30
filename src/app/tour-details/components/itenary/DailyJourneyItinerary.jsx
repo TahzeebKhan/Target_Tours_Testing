@@ -6,6 +6,7 @@ import {
   ChevronDown,
   MapPin,
   Plane,
+  Hotel,
 } from "lucide-react";
 import {
   GoogleMap,
@@ -553,6 +554,18 @@ const DayCard = ({ day, index }) => {
   const dayImage = getDayImage(day, index);
   const cardBodyId = `itinerary-day-${index + 1}-body`;
 
+  const airline = getTransportText(
+    flightTransport,
+    ["airline", "airline_name", "carrier"],
+    "Indigo",
+  );
+  const flightNumber = getTransportText(
+    flightTransport,
+    ["flight_number", "flightNo", "number"],
+    "6E - 541",
+  );
+  const hotelName = hotel?.name || "Curated Luxury Hotel";
+
   return (
     <article className={styles.dayCard} id={`itinerary-day-${index + 1}`}>
       <header
@@ -560,15 +573,33 @@ const DayCard = ({ day, index }) => {
           !isOpen ? styles.cardHeaderCollapsed : ""
         }`}
       >
-        <div>
+        <div className={styles.headerContent}>
           <div className={styles.dayMeta}>
-            <span className={styles.dayBadge}>
-              Day {day?.day_number || index + 1}
-            </span>
-            <span className={styles.location}>
-              <MapPin size={12} />
-              {city}
-            </span>
+            <div className={styles.dayMetaLeft}>
+              <span className={styles.dayBadge}>
+                Day {day?.day_number || index + 1}
+              </span>
+              <span className={styles.location}>
+                <MapPin size={12} />
+                {city}
+              </span>
+            </div>
+            {(flightTransport || hotel) && (
+              <div className={styles.dayMetaRight}>
+                {flightTransport && (
+                  <span className={styles.metaInfo}>
+                    <Plane size={12} />
+                    Flight {airline}-{flightNumber}
+                  </span>
+                )}
+                {hotel && (
+                  <span className={styles.metaInfo}>
+                    <Hotel size={12} />
+                    Hotel {hotelName}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <h3>{day?.title || `${city} | Discover The Destination`}</h3>
           <p>
