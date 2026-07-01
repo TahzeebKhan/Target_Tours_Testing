@@ -233,31 +233,31 @@ const TourDetailsClient = () => {
       <div ref={itineraryRef}>
         <DailyJourneyItinerary data={displayTourDetails} />
       </div>
-  
+
 
 
       <UpcomingDepartures data={displayTourDetails} />
       <CustomDeparture data={displayTourDetails} />
 
-          <PolicySection data={displayTourDetails} />
+      <PolicySection data={displayTourDetails} />
       <TripHighlights data={displayTourDetails} />
 
 
       <div className={styles.priceBarContainer}>
         <PriceBar data={displayTourDetails} />
       </div>
-{/*
+      {/*
      <div ref={itineraryRef}>
         <ArrivalToronto data={displayTourDetails} />
       </div>  */}
 
-      <InfoStrip data={displayTourDetails} />
       <div id="stays">
         <WhereWillYouStay data={displayTourDetails} />
       </div>
+      <InfoStrip data={displayTourDetails} />
 
 
-            {/* <Overview data={displayTourDetails} /> */}
+      {/* <Overview data={displayTourDetails} /> */}
       {/* <BetweenMajesticPeaks data={displayTourDetails} /> */}
 
       <Testimonial data={displayTourDetails} />

@@ -589,13 +589,16 @@ const DayCard = ({ day, index }) => {
                 {flightTransport && (
                   <span className={styles.metaInfo}>
                     <Plane size={12} />
-                    Flight {airline}-{flightNumber}
+                    Flight ({airline.trim()}-{flightNumber.replace(/\s+/g, "")})
                   </span>
+                )}
+                {flightTransport && hotel && (
+                  <span className={styles.metaSeparator}>•</span>
                 )}
                 {hotel && (
                   <span className={styles.metaInfo}>
                     <Hotel size={12} />
-                    Hotel {hotelName}
+                    Hotel ({hotelName})
                   </span>
                 )}
               </div>

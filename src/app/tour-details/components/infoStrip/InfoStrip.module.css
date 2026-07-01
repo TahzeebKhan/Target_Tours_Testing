@@ -197,10 +197,20 @@
 }
 
 @media (max-width: 400px) {
-    .pareContainer{
-        gap: 16px;
+    .infoStrip {
+        padding: 0px 16px 24px 16px !important;
     }
-    .title{
+    .pareContainer {
+        flex-direction: column;
+        gap: 24px;
+    }
+    .pareContainer .infoItem {
+        width: 100%;
+    }
+    .containerPhoneView {
+        gap: 24px;
+    }
+    .title {
         font-size: 16px;
     }
 }

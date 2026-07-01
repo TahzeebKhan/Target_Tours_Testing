@@ -1,5 +1,5 @@
 .section {
-  padding: 80px 24px;
+  padding: 0px 200px 100px;
   background: #F9FAFB;
   color: #050826;
   scroll-margin-top: 76px;
@@ -7,7 +7,7 @@
 }
 
 .content {
-  max-width: 1440px;
+  max-width: 1520px;
   margin: 0 auto;
   box-sizing: border-box;
   width: 100%;
@@ -383,7 +383,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
-  margin-top: -8px; /* brings buttons closer together */
+  margin-top: -8px;
+  /* brings buttons closer together */
 }
 
 .detailsButton:hover {
@@ -393,20 +394,45 @@
 
 /* RESPONSIVE DESIGN & BREAKPOINT FIXES */
 
-@media (max-width: 1100px) {
+@media (max-width: 1440px) {
+  .section {
+    padding: 0px 80px 100px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .section {
+    padding: 0px 40px 100px;
+  }
+}
+
+@media (max-width: 1000px) {
   .departureBody {
     grid-template-columns: 1fr;
     gap: 28px;
   }
-  
+
   .title {
     font-size: 34px;
   }
+
+  .tripCard {
+    padding: 12px 16px;
+  }
 }
+
+
+@media (max-width: 885px) {
+  .section {
+    padding: 0px 60px 40px 60px;
+
+  }
+}
+
 
 @media (max-width: 768px) {
   .section {
-    padding: 48px 16px;
+    padding: 0px 16px 64px;
   }
 
   .calendarCard {
@@ -423,34 +449,46 @@
     padding: 12px 6px;
     font-size: 12px;
   }
-  
+
   .calendarHeader p {
     font-size: 22px;
   }
-  
+
   .weekdays span {
     font-size: 12px;
   }
-  
+
   .day span {
     font-size: 15px;
   }
-  
+
   .day small {
     font-size: 10px;
   }
 }
 
-/* Critical responsive fix at 645px to prevent grid overflow */
-@media (max-width: 645px) {
+@media (max-width: 885px) {
   .section {
-    padding: 32px 12px;
+    padding: 0px 32px 40px 32px;
   }
-  
+}
+
+@media (max-width: 529px) {
+  .section {
+    padding: 0px 16px 40px 16px;
+  }
+}
+
+/* Critical responsive fix at 645px to prevent grid overflow */
+@media (max-width: 600px) {
+  /* .section {
+    padding: 0px 12px 16px 12px;
+  } */
+
   .title {
     font-size: 28px;
   }
-  
+
   .subtitle {
     font-size: 14px;
     margin-bottom: 24px;
@@ -514,19 +552,19 @@
 /* Extra small screen layout adjustments */
 @media (max-width: 400px) {
   .section {
-    padding: 24px 8px;
+    padding: 0px 16px 24px 16px !important;
   }
 
   .calendarCard {
     padding: 12px 8px;
     gap: 12px;
   }
-  
+
   .tabsContainer {
     gap: 4px;
     padding-bottom: 8px;
   }
-  
+
   .tabButton {
     padding: 8px 2px;
     font-size: 10px;

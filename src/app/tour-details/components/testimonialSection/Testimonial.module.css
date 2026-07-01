@@ -1,5 +1,5 @@
 .section {
-    padding: 60px 20px 80px 20px;
+    padding: 60px 200px;
     scroll-margin-top: 76px;
 }
 
@@ -61,15 +61,15 @@
     border: 0;
     background: transparent;
     color: #000033;
-   font-family: Inter;
-font-weight: 300;
-font-style: Light;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: -2%;
-text-align: center;
-text-transform: uppercase;
+    font-family: Inter;
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: -2%;
+    text-align: center;
+    text-transform: uppercase;
     cursor: pointer;
     transition: color 220ms ease;
 }
@@ -216,7 +216,17 @@ text-transform: uppercase;
 
 }
 
+@media (max-width: 1440px) {
+    .section {
+        padding: 60px 80px;
+    }
+}
+
 @media (max-width: 1200px) {
+    .section {
+        padding: 60px 40px;
+    }
+
     .heading {
         font-size: 40px;
     }
@@ -229,6 +239,13 @@ text-transform: uppercase;
     }
 }
 
+@media (max-width: 885px) {
+    .section {
+        padding: 0px 60px 40px 60px;
+    }
+}
+
+
 @media (max-width: 768px) {
     .heading {
         font-size: 32px;
@@ -239,7 +256,7 @@ text-transform: uppercase;
     }
 
     .section {
-        padding: 20px;
+        padding: 10px 32px 40px 32px;
     }
 
     .reviewSourceTabs {
@@ -254,7 +271,11 @@ text-transform: uppercase;
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 529px) {
+    .section {
+        padding: 15px 16px 40px 16px;
+    }
+
     .testimonialCard {
         max-width: 324px;
         width: 100%;
@@ -266,12 +287,8 @@ text-transform: uppercase;
         font-size: 12px;
     }
 
-    .section {
-        padding: 20px 16px;
-    }
-
     .slide {
-        width: 324px;
+        width: min(324px, calc(100vw - 64px)) !important;
     }
 
     .profileIcon {
@@ -285,10 +302,13 @@ text-transform: uppercase;
 }
 
 @media (max-width: 400px) {
+    .section {
+        padding: 0px 16px 24px 16px !important;
+    }
+
     .heading {
         font-size: 28px;
     }
-
 }
 
 @media (max-width: 375px) {
@@ -298,7 +318,6 @@ text-transform: uppercase;
     }
 
     .slide {
-        width: 300px;
+        width: min(300px, calc(100vw - 64px)) !important;
     }
-
 }

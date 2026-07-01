@@ -1,12 +1,14 @@
 .section {
-    padding: 80px 20px 60px 20px;
+    padding: 0px 200px 60px 200px;
     background-color: #F9F9F9;
 }
-.container{
+
+.container {
     max-width: 1520px;
     width: 100%;
     margin: 0 auto;
 }
+
 .heading {
     font-family: Antic Didone;
     font-weight: 400;
@@ -14,11 +16,24 @@
     font-size: 42px;
     line-height: 1.19;
     text-transform: capitalize;
+}
 
+.carousel {
+    margin-top: 40px;
 }
 
 
+@media (max-width: 1440px) {
+    .section {
+        padding: 0px 80px 60px 80px;
+    }
+}
+
 @media (max-width: 1200px) {
+    .section {
+        padding: 0px 40px 60px 40px;
+    }
+
     .heading {
         font-size: 40px;
     }
@@ -31,32 +46,45 @@
     }
 }
 
+@media (max-width: 885px) {
+    .section {
+        padding: 0px 60px 40px 60px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .section {
+        padding: 0px 32px 40px 32px;
+    }
+}
+
+@media (max-width: 529px) {
+    .section {
+        padding: 0px 16px 40px 16px;
+    }
+}
+
 @media (max-width: 768px) {
     .heading {
         font-size: 32px;
     }
-    .container{
+
+    .container {
         gap: 24px;
     }
-    .section{
-        padding: 20px 16px;
-    }
-    .carousel{
+
+    .carousel {
         margin-top: 24px;
     }
 }
 
-@media (max-width: 520px) {
-   
-    
-
-
-
-}
-
 @media (max-width: 400px) {
+    .section {
+        padding: 0px 16px 24px 16px !important;
+    }
+
     .heading {
         font-size: 28px;
     }
-
 }
