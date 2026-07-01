@@ -10,6 +10,7 @@ const HotelSearchMobile = ({
   styles,
   to,
   setTo,
+  onHotelSelect,
   handleSearch,
   checkIn,
   setCheckIn,
@@ -69,7 +70,11 @@ const HotelSearchMobile = ({
           <FromLocationSheet
             onClose={() => setOpenTo(false)}
             inputType="Where to"
-            onSelectCity={(value) => setTo(value)}
+            suggestionType="hotel"
+            onSelectCity={(value, item) => {
+              setTo(value);
+              onHotelSelect?.(item?.hotelLocation || item);
+            }}
           />
         )}
 

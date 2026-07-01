@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./ReviewPage.module.css";
 
 import { toast } from "react-toastify";
@@ -17,7 +18,10 @@ import {
   HOTEL_SEARCH_SESSION_KEY,
   startHotelBooking,
   HotelPaymentStart,
+  clearHotelBookingStatus,
   getHotelPaymentGateways,
+  markHotelBookingPaymentStarted,
+  markHotelBookingSubmitStarted,
   writePendingHotelConfirmBooking,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
@@ -382,6 +386,53 @@ const normalizeChildAges = (childAges) => {
 const getFirstValue = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "") || "";
 
+const isPlaceholderText = (value) =>
+  ["check-in", "check-out", "hotel", "address not available"].includes(
+    String(value || "").trim().toLowerCase(),
+  );
+
+const getDisplayValue = (...values) => {
+  for (const value of values) {
+    if (value === undefined || value === null) continue;
+    const text = String(value).trim();
+    if (text && !isPlaceholderText(text)) return text;
+  }
+
+  return "";
+};
+
+const formatBookingDisplayDate = (value, fallback) => {
+  const apiDate = toApiDate(value);
+  if (!apiDate) return fallback;
+
+  const date = new Date(`${apiDate}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value || fallback;
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getNightCountFromDates = (checkInValue, checkOutValue) => {
+  const checkInDate = toApiDate(checkInValue);
+  const checkOutDate = toApiDate(checkOutValue);
+  if (!checkInDate || !checkOutDate) return 0;
+
+  const start = new Date(`${checkInDate}T00:00:00`);
+  const end = new Date(`${checkOutDate}T00:00:00`);
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    end <= start
+  ) {
+    return 0;
+  }
+
+  return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+};
+
 const normalizeRefreshRooms = (rooms, request = {}) => {
   const roomList = Array.isArray(rooms) && rooms.length ? rooms : [];
   if (roomList.length) {
@@ -594,9 +645,9 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
     : `|${occupancyId}|1:A:25|`;
 };
 
-const getRoomTotal = (room) => {
+const getRoomTotal = (room, fallbackNights = 1) => {
   const quantity = Number(room.quantity || 0);
-  const nights = Number(room.nights || 1);
+  const nights = Number(fallbackNights || room.nights || 1);
   const price = Number(room.pricePerNight || 0);
   const tax = Number(room.taxPerNight || 0);
 
@@ -604,6 +655,7 @@ const getRoomTotal = (room) => {
 };
 
 const ReviewPage = () => {
+  const router = useRouter();
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
   const [priceChange, setPriceChange] = useState(null);
@@ -624,6 +676,7 @@ const ReviewPage = () => {
     bookingSession,
     bookingLoading,
     setBookingLoading,
+    hotelBookingStatus,
     openLoginModal,
   } = useRoom();
   const { isLoggedIn, loading: authLoading } = useAuth();
@@ -634,11 +687,81 @@ const ReviewPage = () => {
     [roomList],
   );
   const visibleRooms = roomList.length ? roomList : [];
+  const checkInSource = getFirstValue(
+    request.checkInDate,
+    request.checkInRaw,
+    request.checkIn,
+    request.check_in,
+    request.searchContext?.checkIn,
+    request.searchContext?.initPayload?.checkIn,
+    bookingSession?.checkIn,
+  );
+  const checkOutSource = getFirstValue(
+    request.checkOutDate,
+    request.checkOutRaw,
+    request.checkOut,
+    request.check_out,
+    request.searchContext?.checkOut,
+    request.searchContext?.initPayload?.checkOut,
+    bookingSession?.checkOut,
+  );
+  const dateDerivedNights = getNightCountFromDates(checkInSource, checkOutSource);
+  const nights =
+    dateDerivedNights ||
+    request.nights ||
+    request.searchContext?.nights ||
+    (bookingSession ? selectedRooms[0]?.nights : "") ||
+    1;
+  const hotelName =
+    getDisplayValue(
+      hotel.name,
+      hotel.hotelName,
+      hotel.title,
+      hotel.raw?.name,
+      hotel.raw?.hotelName,
+      hotel.raw?.HotelName,
+      hotel.raw?.Name,
+      hotel.HotelName,
+      hotel.Name,
+      request.hotelName,
+      request.HotelName,
+      request.searchContext?.hotel?.name,
+    ) || "Hotel";
+  const hotelAddress =
+    getDisplayValue(
+      hotel.address,
+      hotel.Address,
+      hotel.route,
+      hotel.locationName,
+      hotel.LocationName,
+      hotel.location,
+      hotel.Location,
+      hotel.city,
+      hotel.CityName,
+      hotel.raw?.address,
+      hotel.raw?.Address,
+      hotel.raw?.route,
+      hotel.raw?.locationName,
+      hotel.raw?.LocationName,
+      hotel.raw?.location,
+      hotel.raw?.Location,
+      hotel.raw?.city,
+      hotel.raw?.CityName,
+      request.address,
+      request.Address,
+      request.locationName,
+      request.LocationName,
+      request.searchContext?.location?.detail,
+      request.searchContext?.location?.fullName,
+      request.searchContext?.location?.name,
+      request.searchContext?.city,
+    ) || "Address not available";
+  const checkInDisplay = formatBookingDisplayDate(checkInSource, "Check-in");
+  const checkOutDisplay = formatBookingDisplayDate(checkOutSource, "Check-out");
   const totalAmount = selectedRooms.reduce(
-    (sum, room) => sum + getRoomTotal(room),
+    (sum, room) => sum + getRoomTotal(room, nights),
     0,
   );
-  const nights = selectedRooms[0]?.nights || request.nights || 1;
 
   const handleGuestDetailsChange = useCallback((value) => {
     setGuestDetails(value);
@@ -660,14 +783,23 @@ const ReviewPage = () => {
       paymentResponse,
       createdAt: Date.now(),
     });
+    markHotelBookingPaymentStarted({
+      merchantOrderId: confirmPayload.merchant_order_id,
+      TUI: confirmPayload.TUI,
+      transactionId: confirmPayload.transactionId,
+    });
 
     // window.location.assign(redirectUrl);
 
     // Forces the top-level window to redirect, clearing any iframe/modal glitches
-window.top.location.href = redirectUrl;
+// window.top.location.href = redirectUrl;
 
-    // window.open(redirectUrl, "_blank", "noopener,noreferrer");
+    window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
+
+
+
+
 
   useEffect(() => {
     let isActive = true;
@@ -733,6 +865,7 @@ window.top.location.href = redirectUrl;
       setPendingConfirmPayload(null);
       setPendingPaymentPayload(null);
     } catch (error) {
+      clearHotelBookingStatus();
       toast.error(error.message || "Unable to confirm hotel booking.");
     } finally {
       setBookingLoading(false);
@@ -740,6 +873,7 @@ window.top.location.href = redirectUrl;
   };
 
   const handleRejectPriceChange = () => {
+    clearHotelBookingStatus();
     setPriceChange(null);
     setPendingConfirmPayload(null);
     setPendingPaymentPayload(null);
@@ -748,6 +882,10 @@ window.top.location.href = redirectUrl;
 
   const handleStartBooking = async () => {
     if (bookingLoading) return;
+    if (hotelBookingStatus) {
+      toast.info("Payment is already in progress for this hotel booking.");
+      return;
+    }
     if (authLoading) return;
     if (paymentGatewaysLoading) return;
     if (!selectedPaymentGateway) {
@@ -804,6 +942,9 @@ window.top.location.href = redirectUrl;
       return;
     }
 
+    markHotelBookingSubmitStarted({
+      TUI: bookingSession?.request?.TUI || bookingSession?.request?.tui || "",
+    });
     setBookingLoading(true);
 
     try {
@@ -1041,6 +1182,7 @@ window.top.location.href = redirectUrl;
 
       redirectToHotelPayment(hotelPaymentResponse, finalConfirmPayload);
     } catch (error) {
+      clearHotelBookingStatus();
       toast.error(error.message || "Unable to start hotel booking.");
     } finally {
       setBookingLoading(false);
@@ -1061,6 +1203,43 @@ window.top.location.href = redirectUrl;
     return room?.quantity || 0;
   };
 
+  if (hotelBookingStatus) {
+    const isConfirmed = hotelBookingStatus.status === "confirmed";
+    const isPreparing = hotelBookingStatus.status === "submit_started";
+
+    return (
+      <div className={styles.container}>
+        <div className={styles.hotelContainer}>
+          <div className={styles.hotelTopContainer}>
+            <div className={styles.hotelTextContainer}>
+              <div className={styles.hotelNameAndLocation}>
+                <h3>{isConfirmed ? "Hotel Booking Confirmed" : "Payment In Progress"}</h3>
+                <div className={styles.locationAndRating}>
+                  <span className={styles.hotelAddress}>
+                    {isConfirmed
+                      ? "This checkout session is closed because the booking has already been confirmed."
+                      : isPreparing
+                        ? "This checkout session is locked because another tab is already preparing payment."
+                        : "This checkout session is locked because payment has already been opened in another tab."}
+                  </span>
+                </div>
+              </div>
+              <div className={styles.checkinOutContainer}>
+                <button
+                  type="button"
+                  className={styles.paymentOption}
+                  onClick={() => router.push("/")}
+                >
+                  Back to home
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {/* HEADER */}
@@ -1074,10 +1253,10 @@ window.top.location.href = redirectUrl;
           </div>
           <div className={styles.hotelTextContainer}>
             <div className={styles.hotelNameAndLocation}>
-              <h3>{hotel.name || "Hotel"}</h3>
+              <h3>{hotelName}</h3>
               <div className={styles.locationAndRating}>
                 <img src="/icons/blackAddress.svg" alt="" />
-                <span className={styles.hotelAddress}>{hotel.address || "Address not available"}</span>
+                <span className={styles.hotelAddress}>{hotelAddress}</span>
                 <div className={styles.ratingSection}>
                   <div className={styles.stars}>
                     <img src="/icons/tetimonialStart.svg" alt="" />
@@ -1096,7 +1275,7 @@ window.top.location.href = redirectUrl;
                 <span className={styles.checkinText}>check in</span>
                 <div className={styles.dateAndTimeContainer}>
                   <span className={styles.dateAndTime}>
-                    {request.checkIn || "Check-in"} | <span className={styles.time}>1:00 PM</span>
+                    {checkInDisplay} | <span className={styles.time}>1:00 PM</span>
                   </span>
                 </div>
               </div>
@@ -1105,7 +1284,7 @@ window.top.location.href = redirectUrl;
                 <span className={styles.checkinText}>check Out</span>
                 <div className={styles.dateAndTimeContainer}>
                   <span className={styles.dateAndTime}>
-                    {request.checkOut || "Check-out"} | <span className={styles.time}>1:00 PM</span>
+                    {checkOutDisplay} | <span className={styles.time}>1:00 PM</span>
                   </span>
                 </div>
               </div>
@@ -1248,18 +1427,6 @@ window.top.location.href = redirectUrl;
         </div>
       </div>
 
-      <div
-        // onClick={() => setCurrentStep(3)}
-        className={styles.continueButtonContainer}
-      >
-        <button
-          className={styles.continueButton}
-          disabled={bookingLoading || paymentGatewaysLoading || !selectedPaymentGateway}
-          onClick={handleStartBooking}
-        >
-          {bookingLoading ? "LOADING..." : "CONTINUE"}
-        </button>
-      </div>
       <PriceChangeModal
         priceChange={priceChange}
         loading={bookingLoading}

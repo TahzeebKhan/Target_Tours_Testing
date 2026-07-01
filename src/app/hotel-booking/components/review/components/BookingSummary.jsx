@@ -15,12 +15,56 @@ const formatCurrency = (value) =>
 
 const getRoomTotal = (room, fallbackNights = 1) => {
   const quantity = Number(room.quantity || 0);
-  const nights = Number(room.nights || fallbackNights || 1);
+  const nights = Number(fallbackNights || room.nights || 1);
   const offer = getNumber(room.pricePerNight || room.netAmount);
   const tax = getNumber(room.taxPerNight);
   const rateIncludesTax = Boolean(room.rateIncludesTax);
 
   return (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
+};
+
+const toApiDate = (value) => {
+  if (!value) return "";
+  const text = String(value).trim();
+
+  if (["check-in", "check-out"].includes(text.toLowerCase())) return "";
+
+  const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+  const [first, second, year] = text.split(/[/-]/);
+  if (first && second && year) {
+    const firstNumber = Number(first);
+    const secondNumber = Number(second);
+    const isMonthFirst = firstNumber <= 12 && secondNumber > 12;
+    const day = isMonthFirst ? second : first;
+    const month = isMonthFirst ? first : second;
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+
+  return "";
+};
+
+const getNightCountFromDates = (checkInValue, checkOutValue) => {
+  const checkInDate = toApiDate(checkInValue);
+  const checkOutDate = toApiDate(checkOutValue);
+  if (!checkInDate || !checkOutDate) return 0;
+
+  const start = new Date(`${checkInDate}T00:00:00`);
+  const end = new Date(`${checkOutDate}T00:00:00`);
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    end <= start
+  ) {
+    return 0;
+  }
+
+  return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
 };
 
 const getDisplayDate = (value, fallback = "Check-in") => {
@@ -44,11 +88,27 @@ const BookingSummary = ({
   roomList,
   onRemove,
 }) => {
-  const { bookingSession, bookingLoading } = useRoom();
+  const { bookingSession, bookingLoading, hotelBookingStatus } = useRoom();
   const request = bookingSession?.request || {};
+  const checkInSource =
+    request.checkInDate ||
+    request.checkInRaw ||
+    request.checkIn ||
+    request.check_in ||
+    request.searchContext?.checkIn ||
+    request.searchContext?.initPayload?.checkIn;
+  const checkOutSource =
+    request.checkOutDate ||
+    request.checkOutRaw ||
+    request.checkOut ||
+    request.check_out ||
+    request.searchContext?.checkOut ||
+    request.searchContext?.initPayload?.checkOut;
+  const dateDerivedNights = getNightCountFromDates(checkInSource, checkOutSource);
+  const fallbackNights = dateDerivedNights || request.nights || 1;
 
   const handleBookNow = () => {
-    if (bookingLoading) return;
+    if (bookingLoading || hotelBookingStatus) return;
     if (typeof window === "undefined") return;
     window.dispatchEvent(new Event("hotel-start-booking"));
   };
@@ -56,7 +116,9 @@ const BookingSummary = ({
   const summary = selectedRooms.reduce(
     (totals, room) => {
       const quantity = Number(room.quantity || 0);
-      const nights = Number(room.nights || request.nights || 1);
+      const nights = Number(
+        dateDerivedNights || request.nights || (bookingSession ? room.nights : "") || 1,
+      );
       const offer = getNumber(room.pricePerNight || room.netAmount);
       const published = getNumber(room.publishedRate) || offer;
       const tax = getNumber(room.taxPerNight);
@@ -76,13 +138,11 @@ const BookingSummary = ({
       couponDiscount: getNumber(request.couponDiscount),
       taxes: 0,
       total: 0,
-      nights: 1,
+      nights: fallbackNights,
     },
   );
-  const nights = summary.nights || request.nights || 1;
-  const checkInDate = getDisplayDate(
-    request.checkInDate || request.checkInRaw || request.checkIn || request.check_in,
-  );
+  const nights = summary.nights || fallbackNights;
+  const checkInDate = getDisplayDate(checkInSource);
 
   return (
     <>
@@ -196,9 +256,13 @@ const BookingSummary = ({
         <button
           className={styles.bookBtn}
           onClick={handleBookNow}
-          disabled={bookingLoading}
+          disabled={bookingLoading || Boolean(hotelBookingStatus)}
         >
-          {bookingLoading ? "LOADING..." : "BOOK NOW"}
+          {hotelBookingStatus
+            ? "PAYMENT IN PROGRESS"
+            : bookingLoading
+              ? "LOADING..."
+              : "BOOK NOW"}
         </button>
 
         <div className={styles.help}>

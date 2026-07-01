@@ -5,6 +5,7 @@
   margin-top: 16px;
   /* justify-content: space-between; */
   max-width: 1056px;
+  max-height: 375px;
 }
 
 .imagesNestedCarousel {

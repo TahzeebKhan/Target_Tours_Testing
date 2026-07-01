@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TourListing.module.css";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import SearchResults from "../searchResult/SearchResults";
+import { toast } from "react-toastify";
+import SearchResults from "../components/searchResult/SearchResults";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import {
@@ -12,10 +13,12 @@ import {
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
+  fetchHotelFilterData,
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import { useHotelsContext } from "../context/HotelsContext";
 
 const parseSocketValue = (value) => {
   if (typeof value !== "string") return value;
@@ -142,7 +145,7 @@ const getHotelSearchMeta = (...sources) => {
 
       return "";
     };
-    const searchId = findMetaValue("searchId", "search_id");
+    const searchId = findMetaValue("searchId", "search_id", "searchid");
     const hotelSearchId =
       findMetaValue(
         "hotelSearchId",
@@ -235,6 +238,7 @@ export const getHotelsFromMessage = (payload = {}) => {
 };
 
 export const getHotelImage = (hotel = {}) => {
+  console.log("hotel",hotel)
   const image =
     hotel.image ||
     hotel.imageUrl ||
@@ -245,7 +249,7 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/hotelList/hotelCardImg.png";
+  return typeof image === "string" && image ? image : "/images/hotelImg.jpg";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
@@ -535,6 +539,85 @@ export const isHotelTerminalPayload = (payload = {}) => {
   );
 };
 
+const getHotelSocketType = (payload = {}) => {
+  const data = getMessageData(payload);
+  const content = getMessageContent(payload);
+
+  return payload?.type || data?.type || content?.type || "";
+};
+
+const getInitCompleteSearchMeta = (payload = {}) => {
+  if (getHotelSocketType(payload) !== "HOTEL_INIT_COMPLETE") {
+    return { searchId: "", hotelSearchId: "" };
+  }
+
+  const data = getMessageData(payload);
+  const content = getMessageContent(payload);
+  const init = content?.init || data?.init || payload?.init || {};
+  const searchId =
+    init.searchId ||
+    init.search_id ||
+    init.searchid ||
+    content?.searchId ||
+    content?.search_id ||
+    content?.searchid ||
+    data?.searchId ||
+    data?.search_id ||
+    data?.searchid ||
+    "";
+  const hotelSearchId =
+    content?.hotelSearchId ||
+    content?.hotel_search_id ||
+    content?.hotel_search_key ||
+    data?.hotelSearchId ||
+    data?.hotel_search_id ||
+    data?.hotel_search_key ||
+    "";
+
+  return { searchId, hotelSearchId };
+};
+
+const getHotelFailureMessage = (payload = {}) => {
+  const findMessage = (value, depth = 0, seen = new WeakSet()) => {
+    const parsedValue = parseSocketValue(value);
+
+    if (!parsedValue || depth > 6) return "";
+    if (typeof parsedValue === "string") return parsedValue;
+    if (typeof parsedValue !== "object") return "";
+    if (seen.has(parsedValue)) return "";
+    seen.add(parsedValue);
+
+    if (typeof parsedValue.message === "string" && parsedValue.message.trim()) {
+      return parsedValue.message;
+    }
+
+    const entries = Array.isArray(parsedValue)
+      ? parsedValue
+      : Object.values(parsedValue);
+
+    for (const entry of entries) {
+      const message = findMessage(entry, depth + 1, seen);
+      if (message) return message;
+    }
+
+    return "";
+  };
+
+  const candidates = [payload, getMessageData(payload), getMessageContent(payload)];
+  const hasFailure = candidates.some((item) => {
+    const parsedItem = parseSocketValue(item);
+
+    return (
+      String(parsedItem?.status || "").toLowerCase() === "failure" ||
+      String(parsedItem?.code || "") === "1216"
+    );
+  });
+
+  if (!hasFailure) return "";
+
+  return candidates.map((item) => findMessage(item)).find(Boolean) || "";
+};
+
 const skeletonCards = Array.from({ length: 6 }, (_, index) => index);
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
@@ -542,6 +625,49 @@ const LIST_ROW_HEIGHT = 310;
 const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
+
+const STATIC_HOTEL_RESULTS = [
+  {
+    id: "static-grand-alpine",
+    name: "Grand Alpine Retreat",
+    address: "12 Lakeview Road",
+    city: "Banff",
+    country: "Canada",
+    image: "/hotelList/hotelCardImg.png",
+    price: 66945,
+    rating: 5,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeCancellation: true,
+    freeBreakfast: true,
+    propertyType: "Hotel",
+  },
+  {
+    id: "static-mountain-hideaway",
+    name: "Mountain Hideaway Inn",
+    address: "456 Summit Road",
+    city: "Canmore",
+    country: "Canada",
+    image: "/hotelList/nextTrip1.png",
+    price: 55300,
+    rating: 4,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeCancellation: true,
+    propertyType: "Resort",
+  },
+  {
+    id: "static-sunny-coast",
+    name: "Sunny Coast Resort",
+    address: "123 Ocean Drive",
+    city: "Vancouver",
+    country: "Canada",
+    image: "/hotelList/nextTrip2.png",
+    price: 85500,
+    rating: 4,
+    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
+    freeBreakfast: true,
+    propertyType: "Resort",
+  },
+];
 
 export const getHotelDetailUrl = ({
   hotelId,
@@ -592,6 +718,24 @@ const incrementCount = (target, group, key) => {
 };
 
 const hasText = (hotel, ...needles) => {
+  const normalizeText = (value) => String(value || "").toLowerCase();
+  const raw = hotel.raw || {};
+  const rawFacilities = Array.isArray(raw.facilities)
+    ? raw.facilities
+    : Array.isArray(raw.amenities)
+      ? raw.amenities
+      : [];
+  const rawFacilityText = rawFacilities
+    .map((facility) =>
+      typeof facility === "string"
+        ? facility
+        : facility?.name ||
+          facility?.facilityName ||
+          facility?.label ||
+          facility?.description ||
+          "",
+    )
+    .filter(Boolean);
   const text = [
     hotel.title,
     hotel.route,
@@ -599,6 +743,14 @@ const hasText = (hotel, ...needles) => {
     hotel.raw?.type,
     hotel.raw?.chainName,
     hotel.raw?.brandName,
+    hotel.raw?.hotelChain,
+    hotel.raw?.chain,
+    hotel.raw?.name,
+    hotel.raw?.hotelName,
+    hotel.raw?.address,
+    hotel.raw?.city,
+    hotel.raw?.locality,
+    ...rawFacilityText,
     ...(hotel.facilities || []).map((facility) => facility.name),
     ...(hotel.benefits || []),
   ]
@@ -606,7 +758,7 @@ const hasText = (hotel, ...needles) => {
     .join(" ")
     .toLowerCase();
 
-  return needles.some((needle) => text.includes(needle));
+  return needles.some((needle) => text.includes(normalizeText(needle)));
 };
 
 const buildHotelFilterCounts = (hotels = []) => {
@@ -724,6 +876,19 @@ const PRICE_FILTER_BUCKETS = {
   "17000+": [17000, Infinity],
 };
 
+const getPriceFilterRange = (key) => {
+  if (PRICE_FILTER_BUCKETS[key]) return PRICE_FILTER_BUCKETS[key];
+
+  const value = String(key || "").trim();
+  const plusMatch = value.match(/^(\d+(?:\.\d+)?)\+$/);
+  if (plusMatch) return [Number(plusMatch[1]), Infinity];
+
+  const rangeMatch = value.match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/);
+  if (rangeMatch) return [Number(rangeMatch[1]), Number(rangeMatch[2])];
+
+  return [];
+};
+
 const TEXT_FILTER_NEEDLES = {
   suggested: {
     lastMinuteDeals: ["deal", "discount"],
@@ -803,10 +968,15 @@ const TEXT_FILTER_NEEDLES = {
     accor: ["accor"],
     taj: ["taj"],
   },
+  attractions: {},
 };
 
 const matchesAnyTextFilter = (hotel, group, keys) =>
   keys.some((key) => {
+    if (group === "suggested" && ["fiveStar", "fourStar"].includes(key)) {
+      return true;
+    }
+
     const needles = TEXT_FILTER_NEEDLES[group]?.[key] || [key];
     return hasText(hotel, ...needles);
   });
@@ -814,6 +984,11 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
 const matchesHotelFilters = (hotel, filters = {}) => {
   const price = getHotelPriceNumber(hotel);
   const rating = Number(hotel.rating || 0);
+  const hotelSearchText = String(filters.hotelSearchText || "").trim();
+
+  if (hotelSearchText && !hasText(hotel, hotelSearchText)) {
+    return false;
+  }
 
   if (
     filters.budget &&
@@ -826,7 +1001,7 @@ const matchesHotelFilters = (hotel, filters = {}) => {
 
   if (hasSelectedValues(filters.price)) {
     const matchesPrice = selectedKeys(filters.price).some((key) => {
-      const [min, max] = PRICE_FILTER_BUCKETS[key] || [];
+      const [min, max] = getPriceFilterRange(key);
       return price !== null && price >= min && price < max;
     });
     if (!matchesPrice) return false;
@@ -845,6 +1020,9 @@ const matchesHotelFilters = (hotel, filters = {}) => {
     );
     if (!matchesGuestRating) return false;
   }
+
+  if (filters.suggested?.fiveStar && Math.round(rating) !== 5) return false;
+  if (filters.suggested?.fourStar && Math.round(rating) !== 4) return false;
 
   return Object.keys(TEXT_FILTER_NEEDLES).every((group) => {
     if (!hasSelectedValues(filters[group])) return true;
@@ -1003,7 +1181,7 @@ export const HotelBenefits = ({ benefits = [], classes = styles }) => {
       {benefits.map((benefit) => (
         <li key={benefit}>
           <div className={classes.tickCont}>
-            <img src="/icons/checkIcon.svg" alt="" />
+            <img src="/icons/hotelCheck.svg" alt="" />
           </div>
           {benefit}
         </li>
@@ -1191,7 +1369,16 @@ export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
   };
 };
 
-const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
+const TourListing = () => {
+  const {
+    appliedFilters,
+    setDisplayHotels,
+    setFilterData,
+    setHotels,
+    setIsLoading,
+    setMeta,
+    setTotalResults,
+  } = useHotelsContext();
   const searchParams = useSearchParams();
   const hotelSearchChannel = searchParams.get("channel") || "";
   const [likedTours, setLikedTours] = useState([]);
@@ -1203,9 +1390,16 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const [wishlists, setWishlists] = useState([]); // fetch later from backend
   const [selectedTourId, setSelectedTourId] = useState(null);
   const [hotelResults, setHotelResults] = useState([]);
+  const [apiFilterData, setApiFilterData] = useState(null);
   const [totalHotelResults, setTotalHotelResults] = useState(0);
   const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
   const [hotelResultSource, setHotelResultSource] = useState("");
+  const [socketSearchMeta, setSocketSearchMeta] = useState({
+    searchId: "",
+    hotelSearchId: "",
+  });
+  const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
+  const [isFilterLoading, setIsFilterLoading] = useState(Boolean(hotelSearchChannel));
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -1213,15 +1407,64 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const [scrollState, setScrollState] = useState({
     scrollY: 0,
     viewportHeight: 0,
+    viewportWidth: 0,
   });
   const staySummary = useMemo(() => getStaySummary(searchParams), [searchParams]);
+  const searchIdFromUrl =
+    searchParams.get("searchId") ||
+    searchParams.get("searchid") ||
+    searchParams.get("SearchId") ||
+    "";
+  const activeSearchId = useMemo(() => {
+    if (hotelSearchChannel) return socketSearchMeta.searchId || "";
+
+    if (searchIdFromUrl) return searchIdFromUrl;
+
+    const hotelSearchId = hotelResults.find((hotel) => hotel.searchId)?.searchId;
+    if (hotelSearchId) return hotelSearchId;
+
+    const storedHotelSearch = readStoredHotelSearch() || {};
+    const storedHotelResults = readStoredHotelResults() || {};
+
+    return (
+      findDeepValue(storedHotelSearch, "searchId") ||
+      findDeepValue(storedHotelSearch, "search_id") ||
+      findDeepValue(storedHotelResults, "searchId") ||
+      findDeepValue(storedHotelResults, "search_id") ||
+      ""
+    );
+  }, [hotelResults, hotelSearchChannel, searchIdFromUrl, socketSearchMeta.searchId]);
   const searchLocationLabel = useMemo(
     () => getSearchLocationLabel(searchParams),
     [searchParams],
   );
+  const filterDataPayload = useMemo(
+    () => ({
+      searchId: activeSearchId,
+      hotelSearchId:
+        socketSearchMeta.hotelSearchId ||
+        searchParams.get("hotelSearchId") ||
+        searchParams.get("hotelsearchid") ||
+        "",
+      city: searchParams.get("city") || "",
+      checkIn: searchParams.get("checkIn") || "",
+      checkOut: searchParams.get("checkOut") || "",
+      channel: hotelSearchChannel,
+      rooms: searchParams.get("rooms") || "",
+      adults: searchParams.get("adults") || "",
+      children: searchParams.get("children") || "",
+      childAges: searchParams.get("childAges") || "",
+      locationId: searchParams.get("locationId") || "",
+      country: searchParams.get("country") || "",
+      state: searchParams.get("state") || "",
+    }),
+    [activeSearchId, hotelSearchChannel, searchParams, socketSearchMeta.hotelSearchId],
+  );
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
+  const hotelDetailsAbortRef = useRef(null);
+  const hotelDetailsRequestRef = useRef(0);
 
   const handleHeartClick = (hotel) => {
     const hotelId = getHotelDetailsPayload(hotel).hotelId;
@@ -1248,6 +1491,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     setIsSaveWishlistOpen(true);
   };
   const router = useRouter();
+
+  const getHotelLoadingKey = (hotel = {}) =>
+    getHotelDetailsPayload(hotel).hotelId || hotel?.id || "";
+
   const openLoginModal = () => {
     setAuthView("login");
     setShowAuthModal(true);
@@ -1259,20 +1506,36 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   };
 
   const handleBookNow = async (hotel) => {
-    if (!hotel || loadingHotelDetailsId) return;
+    if (!hotel) return;
+
+    hotelDetailsAbortRef.current?.abort();
+
+    const controller = new AbortController();
+    const requestId = hotelDetailsRequestRef.current + 1;
+    hotelDetailsRequestRef.current = requestId;
+    hotelDetailsAbortRef.current = controller;
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
-     console.log("payload",payload)
+    const loadingKey = getHotelLoadingKey(hotel);
 
     if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
       console.warn("Missing hotel details payload fields:", payload);
+      if (hotelDetailsRequestRef.current === requestId) {
+        setLoadingHotelDetailsId("");
+      }
       return;
     }
 
-    setLoadingHotelDetailsId(hotel.id);
+    setLoadingHotelDetailsId(loadingKey);
 
     try {
-      const details = await fetchHotelDetails(payload);
+      const details = await fetchHotelDetails({
+        ...payload,
+        signal: controller.signal,
+      });
+
+      if (hotelDetailsRequestRef.current !== requestId) return;
+
       window.sessionStorage.setItem(
         HOTEL_DETAILS_KEY,
         JSON.stringify({
@@ -1283,12 +1546,19 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
       );
       router.push(getHotelDetailUrl(payload));
     } catch (error) {
+      if (error?.name === "AbortError") return;
+
+      if (hotelDetailsRequestRef.current !== requestId) return;
+
       console.error("Hotel details request failed:", error);
       if (isMissingHotelAuthTokenError(error)) {
         openLoginModal();
       }
     } finally {
-      setLoadingHotelDetailsId("");
+      if (hotelDetailsRequestRef.current === requestId) {
+        setLoadingHotelDetailsId("");
+        hotelDetailsAbortRef.current = null;
+      }
     }
   };
   const toggleExpand = (id) => {
@@ -1303,6 +1573,9 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     setTotalHotelResults(0);
     setIsHotelLoading(Boolean(hotelSearchChannel));
     setHotelResultSource("");
+    setSocketSearchMeta({ searchId: "", hotelSearchId: "" });
+    setHasMergedHotelResponse(false);
+    setIsFilterLoading(Boolean(hotelSearchChannel));
     hotelResultSourceRef.current = "";
 
     const normalizeHotelsInBatches = (hotels, meta = {}) => {
@@ -1351,12 +1624,77 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
       window.setTimeout(appendNextBatch, 0);
     };
 
-    const applyHotelResults = (payload) => {
+    const applyHotelResults = (payload, { fromCache = false } = {}) => {
       if (payload?.channel && payload.channel !== hotelSearchChannel) {
         return;
       }
 
+      const initCompleteMeta = getInitCompleteSearchMeta(payload);
+      if (initCompleteMeta.searchId && !fromCache) {
+        setSocketSearchMeta({
+          searchId: initCompleteMeta.searchId,
+          hotelSearchId: initCompleteMeta.hotelSearchId,
+        });
+      }
+
+      const payloadMeta = getHotelSearchMeta(
+        getMessageContent(payload),
+        getMessageData(payload),
+        payload,
+      );
+
+      if (
+        (payloadMeta.searchId || payloadMeta.hotelSearchId) &&
+        (!fromCache || !hotelSearchChannel)
+      ) {
+        setSocketSearchMeta((prev) => ({
+          searchId: payloadMeta.searchId || prev.searchId,
+          hotelSearchId: payloadMeta.hotelSearchId || prev.hotelSearchId,
+        }));
+      }
+
+      const failureMessage = getHotelFailureMessage(payload);
+      if (failureMessage) {
+        setIsHotelLoading(false);
+        toast.error(failureMessage, { toastId: "hotel-search-result-failure" });
+        return;
+      }
+
       const nextResults = getHotelsFromMessage(payload);
+      if (nextResults.source === "merged" && (!fromCache || !hotelSearchChannel)) {
+        setHasMergedHotelResponse(true);
+      }
+
+      const firstResultWithMeta = nextResults.hotels.find(
+        (hotel) =>
+          hotel?.searchId ||
+          hotel?.search_id ||
+          hotel?.hotelSearchId ||
+          hotel?.hotel_search_id,
+      );
+      const resultMeta = {
+        searchId:
+          nextResults.meta?.searchId ||
+          firstResultWithMeta?.searchId ||
+          firstResultWithMeta?.search_id ||
+          "",
+        hotelSearchId:
+          nextResults.meta?.hotelSearchId ||
+          firstResultWithMeta?.hotelSearchId ||
+          firstResultWithMeta?.hotel_search_id ||
+          "",
+      };
+
+      if (
+        (resultMeta.searchId || resultMeta.hotelSearchId) &&
+        (!fromCache || !hotelSearchChannel)
+      ) {
+        setSocketSearchMeta((prev) => ({
+          searchId: resultMeta.searchId || prev.searchId,
+          hotelSearchId: resultMeta.hotelSearchId || prev.hotelSearchId,
+        }));
+      }
+
       console.log("Hotel result source:", {
         source: nextResults.source,
         count: nextResults.hotels.length,
@@ -1397,7 +1735,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
       try {
         const cachedPayload = JSON.parse(cachedResults);
         if (!hotelSearchChannel || cachedPayload?.channel === hotelSearchChannel) {
-          applyHotelResults(cachedPayload);
+          applyHotelResults(cachedPayload, { fromCache: true });
         }
       } catch {
         // Ignore stale malformed session data.
@@ -1410,58 +1748,160 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     };
   }, [hotelSearchChannel]);
 
+  useEffect(() => {
+    if (hotelSearchChannel && !hasMergedHotelResponse) {
+      setIsFilterLoading(true);
+      setApiFilterData(null);
+      return;
+    }
+
+    if (!activeSearchId) {
+      setIsFilterLoading(Boolean(hotelSearchChannel));
+      setApiFilterData(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsFilterLoading(true);
+
+    fetchHotelFilterData(activeSearchId, {
+      signal: controller.signal,
+      payload: filterDataPayload,
+    })
+      .then((data) => {
+        setApiFilterData(data || null);
+        setIsFilterLoading(false);
+      })
+      .catch((error) => {
+        if (error?.name === "AbortError") return;
+
+        console.error("Hotel filter data request failed:", error);
+        toast.error(error.message || "Unable to load hotel filters.");
+        setApiFilterData(null);
+        setIsFilterLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [activeSearchId, filterDataPayload, hasMergedHotelResponse, hotelSearchChannel]);
+
+  const staticHotelResults = useMemo(
+    () =>
+      STATIC_HOTEL_RESULTS.map((hotel, index) =>
+        normalizeHotelCard(hotel, index),
+      ),
+    [],
+  );
+  const hasActiveHotelSearch = Boolean(hotelSearchChannel);
+  const sourceHotels = useMemo(
+    () =>
+      hotelResults.length || hasActiveHotelSearch
+        ? hotelResults
+        : staticHotelResults,
+    [hasActiveHotelSearch, hotelResults, staticHotelResults],
+  );
+
   const sortedHotels = useMemo(
-    () => sortHotels(hotelResults, sortType),
-    [hotelResults, sortType],
+    () => sortHotels(sourceHotels, sortType),
+    [sourceHotels, sortType],
   );
 
   const displayHotels = useMemo(
     () =>
       sortedHotels.filter((hotel) =>
-        matchesHotelFilters(hotel, activeFilters),
+        matchesHotelFilters(hotel, appliedFilters),
       ),
-    [activeFilters, sortedHotels],
+    [appliedFilters, sortedHotels],
   );
 
   useEffect(() => {
-    onDataLoaded?.({
-      counts: buildHotelFilterCounts(hotelResults),
-      total: totalHotelResults || hotelResults.length,
+    setFilterData(apiFilterData || null);
+    setHotels(hotelResults);
+    setMeta({
+      channel: hotelSearchChannel,
+      searchId: activeSearchId,
+      source: hotelResultSource,
+      hasApiResults: hotelResults.length > 0,
+      isFilterLoading,
     });
-  }, [hotelResults, onDataLoaded, totalHotelResults]);
+    setTotalResults(displayHotels.length);
+  }, [
+    displayHotels.length,
+    hotelResultSource,
+    hotelResults,
+    hotelSearchChannel,
+    activeSearchId,
+    apiFilterData,
+    isFilterLoading,
+    setFilterData,
+    setHotels,
+    setMeta,
+    setTotalResults,
+    sourceHotels,
+  ]);
+
+  useEffect(() => {
+    setDisplayHotels(displayHotels);
+  }, [displayHotels, setDisplayHotels]);
+
+  useEffect(() => {
+    setIsLoading(isHotelLoading);
+  }, [isHotelLoading, setIsLoading]);
+
+  useEffect(
+    () => () => {
+      hotelDetailsAbortRef.current?.abort();
+    },
+    [],
+  );
 
   useEffect(() => {
     const updateScrollState = () => {
+      const scrollContainer = listSectionRef.current;
+
       setScrollState({
-        scrollY: window.scrollY || window.pageYOffset || 0,
-        viewportHeight: window.innerHeight || 0,
+        scrollY:
+          scrollContainer?.scrollTop ||
+          window.scrollY ||
+          window.pageYOffset ||
+          0,
+        viewportHeight:
+          scrollContainer?.clientHeight || window.innerHeight || 0,
+        viewportWidth: window.innerWidth || 0,
       });
     };
 
+    const scrollContainer = listSectionRef.current;
+
     updateScrollState();
-    window.addEventListener("scroll", updateScrollState, { passive: true });
+    scrollContainer?.addEventListener("scroll", updateScrollState, {
+      passive: true,
+    });
     window.addEventListener("resize", updateScrollState);
 
     return () => {
-      window.removeEventListener("scroll", updateScrollState);
+      scrollContainer?.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.scrollTo({ top: 0, behavior: "auto" });
+    listSectionRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [sortType, viewType, hotelSearchChannel]);
 
   const virtualWindow = useMemo(() => {
     const itemCount = displayHotels.length;
-    const columns = viewType === "grid" ? 2 : 1;
+    const columns =
+      viewType === "grid"
+        ? scrollState.viewportWidth > 1180
+          ? 3
+          : scrollState.viewportWidth > 991
+            ? 2
+            : 1
+        : 1;
     const rowHeight = viewType === "grid" ? GRID_ROW_HEIGHT : LIST_ROW_HEIGHT;
     const totalRows = Math.ceil(itemCount / columns);
-    const listTop =
-      listSectionRef.current?.getBoundingClientRect().top + scrollState.scrollY ||
-      0;
-    const scrollTop = Math.max(0, scrollState.scrollY - listTop);
+    const scrollTop = Math.max(0, scrollState.scrollY);
     const viewportHeight = scrollState.viewportHeight || 900;
 
     if (!itemCount || !listSectionRef.current) {
@@ -1521,7 +1961,8 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
         <SearchResults
           viewType={viewType}
           setViewType={setViewType}
-          totalResults={totalHotelResults || displayHotels.length}
+          totalResults={displayHotels.length}
+          locationLabel={searchLocationLabel}
           sort={sortType}
           setSort={setSortType}
         />
@@ -1529,6 +1970,9 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
           {showEmptyState && (
             <EmptyHotelState locationLabel={searchLocationLabel} />
           )}
+
+
+          {/* =================card view==================================================================== */}
 
           {viewType === "grid" && !showEmptyState && (
             <motion.div
@@ -1607,6 +2051,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                       <div className={styles.ListViewCardTextTop}>
                         <div className={styles.topTextHead}>
                           <div className={styles.rating}>
+                           
                             {[...Array(5)].map((_, index) => (
                               <img
                                 key={index}
@@ -1618,11 +2063,14 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                                 alt="star"
                               />
                             ))}
+                             <div className={styles.ReviewCount}>
+                              <span>4.5</span>
+                               (128 reviews)</div>
                           </div>
                           <h2>{item.title}</h2>
 
                           <div className={styles.topTextHeadAddress}>
-                            <img src="/icons/blackAddress.svg" alt="" />
+                            <img src="/icons/location.svg" alt="" />
                             <span>{item.route}</span>
                           </div>
                         </div>
@@ -1631,8 +2079,8 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                       </div>
                     </div>
 
-                    <div className={styles.ListViewCardTextBottom}>
-                      <div className={styles.priceContainer}>
+                    <div className={styles.cardViewCardTextBottom}>
+                      <div className={styles.cardpriceContainer}>
                         {item.hasPrice ? (
                           <>
                             <div className={styles.priceSec}>{item.price}</div>
@@ -1650,11 +2098,11 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                       </div>
 
                       <button
-                        className={styles.bookNowBtn}
-                        disabled={Boolean(loadingHotelDetailsId)}
+                        className={`${ styles.bookNowBtn} ${styles.bookNowBtn2}`}
+                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
                         onClick={() => handleBookNow(item)}
                       >
-                        {loadingHotelDetailsId === item.id
+                        {loadingHotelDetailsId === getHotelLoadingKey(item)
                           ? "LOADING"
                           : "SEE AVAILABILITY"}
                       </button>
@@ -1665,6 +2113,7 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
             </motion.div>
             // </div>
           )}
+{/* =====================================================list view===================================== */}
 
           {viewType === "list" && !showEmptyState && (
             <motion.div
@@ -1756,11 +2205,16 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
                                 alt="star"
                               />
                             ))}
+                              <div className={styles.ReviewCount}>
+                            <span>4.5</span>
+                            (128 reviews)
+                          </div>
                           </div>
                           <h2>{item.title}</h2>
+                        
 
                           <div className={styles.topTextHeadAddress}>
-                            <img src="/icons/blackAddress.svg" alt="" />
+                            <img src="/icons/location.svg" alt="" />
                             <span>{item.route}</span>
                           </div>
                         </div>
@@ -1795,10 +2249,10 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
                       <button
                         className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
-                        disabled={Boolean(loadingHotelDetailsId)}
+                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
                         onClick={() => handleBookNow(item)}
                       >
-                        {loadingHotelDetailsId === item.id
+                        {loadingHotelDetailsId === getHotelLoadingKey(item)
                           ? "LOADING"
                           : "SEE AVAILABILITY"}
                       </button>

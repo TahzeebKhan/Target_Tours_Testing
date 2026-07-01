@@ -210,9 +210,9 @@ export default function RoomSelectionCard({
             roomDetails,
         });
     };
-
     return (
         <div className={styles.card} ref={cardRef}>
+
             <div className={styles.innerBox}>
                 {/* Dates */}
                 <div className={styles.datesRow}>
@@ -292,6 +292,11 @@ export default function RoomSelectionCard({
                     />
                 </div>
             </div>
+
+
+
+
+      
 
             {showCalendar && (
                 <div className={styles.calendarDropdown} ref={calendarRef}>

@@ -27,6 +27,7 @@ import { fetchHolidayPackageSuggestions } from "@/shared/services/tourPackage";
 import {
   HOTEL_SEARCH_SESSION_KEY,
   HOTEL_SEARCH_RESULTS_KEY,
+  HOTEL_LAST_SEARCH_URL_KEY,
   createHotelSearchChannel,
   fetchHotelSearchSuggestions,
 } from "@/shared/services/hotelSearch";
@@ -1479,8 +1480,22 @@ const HomePage = ({
         if (hotelLocation?.locationId || toCode) {
           params.set("locationId", hotelLocation?.locationId || toCode);
         }
+        if (hotelLocation?.country) {
+          params.set("country", hotelLocation.country);
+        }
+        if (hotelLocation?.state) {
+          params.set("state", hotelLocation.state);
+        }
 
-        router.push(`/hotel-list?${params.toString()}`);
+        const resultsUrl = `/hotels?${params.toString()}`;
+        if (typeof window !== "undefined") {
+          try {
+            window.localStorage.setItem(HOTEL_LAST_SEARCH_URL_KEY, resultsUrl);
+          } catch {
+            // Ignore storage failures.
+          }
+        }
+        router.push(resultsUrl);
       } catch (error) {
         setSearchSubmitting(false);
         toast.error(error.message || "Unable to start hotel search.");
@@ -3030,6 +3045,10 @@ const HomePage = ({
               setTo(value);
               setToCode("");
               setSelectedHotelLocation(null);
+            }}
+            onHotelSelect={(location) => {
+              setSelectedHotelLocation(location || null);
+              setToCode(location?.locationId || location?.id || "");
             }}
             checkIn={hotelStartDate}
             setCheckIn={setHotelStartDate}
