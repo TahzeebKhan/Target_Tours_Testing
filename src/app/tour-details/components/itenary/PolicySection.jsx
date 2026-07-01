@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useId } from "react";
+import { ChevronDown } from "lucide-react";
 import styles from "./PolicySection.module.css";
 
 const FALLBACK_ITEMS = [
@@ -89,7 +90,7 @@ const getPolicyImage = (data) =>
   ) || "/tourBooking/glacier.jpg";
 
 const PolicyList = ({ icon, items, title }) => (
-  <div>
+  <div className={styles.listCard}>
     <h3 className={styles.listTitle}>{title}</h3>
     {items.length ? (
       <ul className={styles.itemList}>
@@ -105,6 +106,40 @@ const PolicyList = ({ icon, items, title }) => (
     )}
   </div>
 );
+
+const PolicyBlock = ({ policy, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const contentId = useId();
+
+  return (
+    <article className={styles.policyCard}>
+      <button
+        type="button"
+        className={styles.policyHeader}
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+      >
+        <h3>{policy.title.replace(/:$/, "")}</h3>
+        <ChevronDown
+          size={18}
+          className={`${styles.policyChevron} ${isOpen ? styles.chevronOpen : ""}`}
+        />
+      </button>
+      <div
+        id={contentId}
+        className={`${styles.policyContent} ${
+          isOpen ? styles.policyContentOpen : styles.policyContentCollapsed
+        }`}
+      >
+        <div
+          className={styles.policyText}
+          dangerouslySetInnerHTML={{ __html: policy.description }}
+        />
+      </div>
+    </article>
+  );
+};
 
 const PolicySection = ({ data }) => {
   const inclusions = parseListFromDescription(data?.inclusions);
@@ -142,22 +177,40 @@ const PolicySection = ({ data }) => {
         </div>
 
         <div className={styles.policyGrid} id="tour-policy">
-          <div>
-            <h2 className={styles.policyTitle}>Tour Policy</h2>
-            <div className={styles.policyBlocks}>
-              {policies.map((policy, index) => (
-                <article
-                  className={styles.policyBlock}
-                  key={`${policy.title}-${index}`}
-                >
-                  <h3>{policy.title}</h3>
-                  <div
-                    className={styles.policyText}
-                    dangerouslySetInnerHTML={{ __html: policy.description }}
-                  />
-                </article>
-              ))}
-            </div>
+          <h2 className={styles.policyTitle}>Tour Policy</h2>
+          
+          <div className={styles.tableWrapper}>
+            <table className={styles.policyTable}>
+              <thead>
+                <tr>
+                  <th className={styles.policyTh}>Policy</th>
+                  <th className={styles.detailsTh}>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {policies.map((policy, index) => (
+                  <tr key={`table-${policy.title}-${index}`}>
+                    <td className={styles.policyNameCol}>
+                      {policy.title.replace(/:$/, "")}
+                    </td>
+                    <td 
+                      className={styles.policyDescCol}
+                      dangerouslySetInnerHTML={{ __html: policy.description }}
+                    />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.policyBlocks}>
+            {policies.map((policy, index) => (
+              <PolicyBlock
+                key={`accordion-${policy.title}-${index}`}
+                policy={policy}
+                defaultOpen={index === 0}
+              />
+            ))}
           </div>
 
           <div className={styles.imageWrap}>

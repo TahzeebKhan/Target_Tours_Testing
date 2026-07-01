@@ -1,7 +1,8 @@
-.section{
-    padding: 0 20px 80px 20px;
+.section {
+    padding: 0 200px 80px;
 }
-.container{
+
+.container {
     margin: 0 auto;
     max-width: 1520px;
     width: 100%;
@@ -139,7 +140,16 @@
     width: 482px !important;
 }
 
+@media (max-width: 1440px) {
+    .section {
+        padding: 0 80px 80px;
+    }
+}
+
 @media (max-width: 1200px) {
+    .section {
+        padding: 0 40px 80px;
+    }
     .heading {
         font-size: 40px;
     }
@@ -171,21 +181,20 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 529px) {
+    .section {
+        padding: 0px 16px 40px 16px;
+    }
     .card{
         max-width: 310px;
         width: 100%;
     }
     .slide{
-        width: 310px !important;
+        width: min(310px, calc(100vw - 64px)) !important;
     }
     .cardSubHeading{
         font-size: 12px;
     }
-    
-
-
-
 }
 
 @media (max-width: 400px) {

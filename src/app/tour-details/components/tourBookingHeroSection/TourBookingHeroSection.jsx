@@ -60,7 +60,8 @@ const TourBookingHeroSection = ({ data, onViewItinerary, onSignIn }) => {
         </Link>
         <div className={styles.topActions}>
           <button type="button" className={styles.downloadButton}>
-            Download The App
+            <span className={styles.labelDesktop}>Download The App</span>
+            <span className={styles.labelMobile}>App</span>
           </button>
           <button
             type="button"
@@ -107,22 +108,23 @@ const TourBookingHeroSection = ({ data, onViewItinerary, onSignIn }) => {
 
 
           <div className={styles.statsContParent}>
-
-          <div className={styles.statsPanel} aria-label="Tour summary">
-            <div>
-              <strong>{days}</strong>
-              <span>Days</span>
-            </div>
-            <div>
-              <strong>{destinations}</strong>
-              <span>Destinations</span>
-            </div>
-            <div>
-              <strong>{maxGuests}</strong>
-              <span>Guests (Max)</span>
+            <div className={styles.statsPanel} aria-label="Tour summary">
+              <div>
+                <strong>{days}</strong>
+                <span>Days</span>
+              </div>
+              <div>
+                <strong>{destinations}</strong>
+                <span className={styles.labelDesktop}>Destinations</span>
+                <span className={styles.labelMobile}>Dest</span>
+              </div>
+              <div>
+                <strong>{maxGuests}</strong>
+                <span className={styles.labelDesktop}>Guests (Max)</span>
+                <span className={styles.labelMobile}>Max</span>
+              </div>
             </div>
           </div>
-             </div>
         </div>
       </div>
     </section>
