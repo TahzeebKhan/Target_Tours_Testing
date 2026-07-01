@@ -15,7 +15,8 @@
   display: grid;
   grid-template-columns: 356px minmax(0, 1fr);
   gap: 24px;
-  padding: 42px 24px 24px;
+  padding: 24px 0px 0px;
+
   align-items: stretch;
   height: 100%;
   min-height: 0;
@@ -41,10 +42,18 @@
   display: none;
 }
 
+@media (max-width: 1500px) {
+    .tourLayout {
+      grid-template-columns: 300px minmax(0, 1fr);
+    padding: 24px 20px 20px;
+    }
+}
+
 @media (max-width: 1400px) {
   .tourLayout {
     /* grid-template-columns: 1fr minmax(0, 600px); */
       grid-template-columns: 300px minmax(0, 1fr);
+  padding: 42px 40px 40px;
   }
 }
 

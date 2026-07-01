@@ -337,12 +337,17 @@ const createApiError = (data, fallbackMessage) => {
   const apiError = data?.error || {};
   const error = new Error(getApiMessage(data) || fallbackMessage);
 
-  error.status = apiError.status;
+  error.status = apiError.status || data?.status;
+  error.code = apiError.code || data?.code;
   error.name = apiError.name || error.name;
   error.details = apiError.details || {};
 
   return error;
 };
+
+const isApiFailure = (data) =>
+  String(data?.status || data?.error?.status || "").toLowerCase() === "failure" ||
+  String(data?.code || data?.error?.code || "") === "1216";
 
 export const isMissingHotelAuthTokenError = (error) =>
   Number(error?.status) === 401 &&
@@ -544,6 +549,7 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
   );
   url.searchParams.set("domain", getDomain());
 
+try{
   const response = await fetch(url.toString(), {
     method: "POST",
     headers: getHotelSearchHeaders(),
@@ -559,11 +565,18 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+  if (!response.ok || isApiFailure(data)) {
     throw createApiError(data, "Hotel filter data failed");
   }
 
   return data?.data?.filterData || data?.data?.filters || data?.filterData || data?.filters || data?.data || data;
+  } catch (error) {
+    // Log the error or perform any necessary cleanup here
+    console.error("Error fetching hotel filter data:", error);
+    
+    // Re-throw the error so the calling function knows it failed
+    throw error;
+  }
 };
 
 export const fetchHotelRooms = async ({

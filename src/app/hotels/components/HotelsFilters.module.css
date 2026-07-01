@@ -5,6 +5,7 @@
   padding: 0 16px;
   font-family: var(--font-inter);
   color: #111827;
+  height: 100%;
 }
 
 /* Header */
@@ -363,6 +364,100 @@ color:#111827;
   text-align: right;
 }
 
+.seeMoreButton {
+  margin-top: 2px;
+  padding: 4px 0 0;
+  border: none;
+  background: transparent;
+  color: #000033;
+  cursor: pointer;
+  font-family: Inter;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.seeMoreButton:hover {
+  text-decoration: underline;
+}
+
+.emptyFilters {
+  margin: 0;
+  color: #6b7280;
+  font-family: Inter;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.filterLoadingHeader,
+.filterLoadingSearch,
+.filterLoadingBox,
+.filterLoadingLabel,
+.filterLoadingCount {
+  position: relative;
+  overflow: hidden;
+  background: #eef1f5;
+}
+
+.filterLoadingHeader::after,
+.filterLoadingSearch::after,
+.filterLoadingBox::after,
+.filterLoadingLabel::after,
+.filterLoadingCount::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, #ffffffa8, transparent);
+  animation: filterShimmer 1.25s infinite;
+}
+
+.filterLoadingHeader {
+  width: 130px;
+  height: 14px;
+  margin-bottom: 12px;
+}
+
+.filterLoadingSearch {
+  width: 100%;
+  height: 44px;
+  margin-bottom: 14px;
+}
+
+.filterLoadingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filterLoadingBox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex: 0 0 16px;
+}
+
+.filterLoadingLabel {
+  height: 13px;
+  flex: 1;
+}
+
+.filterLoadingCount {
+  width: 28px;
+  height: 13px;
+  flex: 0 0 28px;
+}
+
+@keyframes filterShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Departure section grid */
 .departureGrid {
   display: grid;
@@ -421,6 +516,23 @@ color:#6B7280;
 /* For Safari/Webkit browsers */
 .SearchField input::-moz-selection {
   background: transparent;
+}
+
+.searchClearButton {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #40608c;
+  cursor: pointer;
+  font-family: Inter;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mapCard {

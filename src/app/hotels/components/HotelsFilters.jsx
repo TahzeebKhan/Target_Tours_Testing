@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ListFilter, Search, X } from "lucide-react";
 import styles from "./HotelsFilters.module.css";
 import { useHotelsContext } from "../context/HotelsContext";
 
 const DEFAULT_PRICE_RANGE = [0, 25000];
+const HOTEL_FILTER_MEMORY_KEY = "hotelSidebarFilters";
+const FILTER_OPTION_PREVIEW_LIMIT = 15;
 
 const HOTEL_FILTER_SECTIONS = [
   {
@@ -392,23 +394,107 @@ const getStarText = (sectionKey, optionKey) => {
   return Number.isFinite(starCount) ? "★".repeat(starCount) : "";
 };
 
+const getFilterSearchKey = () => {
+  if (typeof window === "undefined") return "";
+
+  const params = new URLSearchParams(window.location.search);
+  [
+    "searchId",
+    "searchid",
+    "SearchId",
+    "hotelSearchId",
+    "hotelsearchid",
+    "HotelSearchId",
+  ].forEach((key) => params.delete(key));
+
+  return Array.from(params.entries())
+    .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+};
+
+const readStoredFilterMemory = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_FILTER_MEMORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (!parsed || parsed.searchKey !== getFilterSearchKey()) return null;
+
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const writeStoredFilterMemory = (value) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      HOTEL_FILTER_MEMORY_KEY,
+      JSON.stringify({
+        ...value,
+        searchKey: getFilterSearchKey(),
+      }),
+    );
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+const clearStoredFilterMemory = () => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.removeItem(HOTEL_FILTER_MEMORY_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+const getStoredBudget = (memory) => {
+  if (!Array.isArray(memory?.budget) || memory.budget.length !== 2) {
+    return DEFAULT_PRICE_RANGE;
+  }
+
+  const budget = memory.budget.map(Number);
+  return budget.every(Number.isFinite) ? budget : DEFAULT_PRICE_RANGE;
+};
+
 export default function HotelsFilters() {
-  const { filterData, setAppliedFilters, resetFilters: resetAppliedFilters } =
+  const {
+    filterData,
+    isLoading,
+    meta,
+    setAppliedFilters,
+    resetFilters: resetAppliedFilters,
+  } =
     useHotelsContext();
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [budget, setBudget] = useState(DEFAULT_PRICE_RANGE);
-  const [budgetTouched, setBudgetTouched] = useState(false);
-  const [searchTerms, setSearchTerms] = useState({});
+  const filterMemoryRef = useRef(readStoredFilterMemory());
+  const hasRestoredFiltersRef = useRef(false);
+  const [selectedFilters, setSelectedFilters] = useState(
+    filterMemoryRef.current?.selectedFilters || {},
+  );
+  const [budget, setBudget] = useState(getStoredBudget(filterMemoryRef.current));
+  const [budgetTouched, setBudgetTouched] = useState(
+    Boolean(filterMemoryRef.current?.budgetTouched),
+  );
+  const [searchTerms, setSearchTerms] = useState(
+    filterMemoryRef.current?.searchTerms || {},
+  );
+  const [hotelSearchText, setHotelSearchText] = useState(
+    filterMemoryRef.current?.hotelSearchText || "",
+  );
+  const [expandedSections, setExpandedSections] = useState(
+    filterMemoryRef.current?.expandedSections || {},
+  );
   const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
   const apiPriceSection = apiSections.find((section) => section.key === "price");
-  const apiSectionKeys = new Set(apiSections.map((section) => section.key));
-  const fallbackSections = HOTEL_FILTER_SECTIONS.slice(1).filter(
-    (section) => !apiSectionKeys.has(section.key),
-  );
-  const renderedSections = [
-    ...apiSections.filter((section) => section.key !== "price"),
-    ...fallbackSections,
-  ];
+  const renderedSections = apiSections.filter((section) => section.key !== "price");
+  const hasApiFilters = apiSections.length > 0;
+  const isFilterLoading = !hasApiFilters && (meta?.isFilterLoading || isLoading);
 
   const { min: minPrice, max: maxPrice } = getPriceRange(filterData);
   const safeBudget = [
@@ -417,14 +503,16 @@ export default function HotelsFilters() {
   ];
 
   useEffect(() => {
+    if (budgetTouched) return;
+
     setBudget([minPrice, maxPrice]);
-    setBudgetTouched(false);
-  }, [maxPrice, minPrice]);
+  }, [budgetTouched, maxPrice, minPrice]);
 
   const selectedChips = useMemo(() => {
     const chips = [];
-    const chipSections = [...HOTEL_FILTER_SECTIONS, ...apiSections];
-    if (apiPriceSection) chipSections.push(apiPriceSection);
+    const chipSections = apiPriceSection
+      ? [...apiSections, apiPriceSection]
+      : apiSections;
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
       Object.entries(values || {}).forEach(([key, isSelected]) => {
@@ -446,6 +534,9 @@ export default function HotelsFilters() {
 
   const buildAppliedFilters = (filters, { includeBudget = false } = {}) => ({
     ...filters,
+    ...(hotelSearchText.trim() && {
+      hotelSearchText: hotelSearchText.trim(),
+    }),
     ...((budgetTouched || includeBudget) && {
       budget: {
         min: safeBudget[0],
@@ -453,6 +544,37 @@ export default function HotelsFilters() {
       },
     }),
   });
+
+  useEffect(() => {
+    if (hasRestoredFiltersRef.current) return;
+    hasRestoredFiltersRef.current = true;
+
+    const memory = filterMemoryRef.current;
+    if (!memory) return;
+
+    setAppliedFilters(
+      memory.appliedFilters ||
+        buildAppliedFilters(memory.selectedFilters || {}, {
+          includeBudget: Boolean(memory.budgetTouched),
+        }),
+    );
+  }, [setAppliedFilters]);
+
+  useEffect(() => {
+    writeStoredFilterMemory({
+      selectedFilters,
+      budget: safeBudget,
+      budgetTouched,
+      hotelSearchText,
+      searchTerms,
+      expandedSections,
+      appliedFilters: buildAppliedFilters(selectedFilters),
+    });
+  }, [budgetTouched, expandedSections, hotelSearchText, safeBudget, searchTerms, selectedFilters]);
+
+  useEffect(() => {
+    setAppliedFilters(buildAppliedFilters(selectedFilters));
+  }, [hotelSearchText]);
 
   const toggleFilter = (group, key) => {
     setSelectedFilters((prev) => {
@@ -473,7 +595,10 @@ export default function HotelsFilters() {
     setSelectedFilters({});
     setBudget([minPrice, maxPrice]);
     setBudgetTouched(false);
+    setHotelSearchText("");
     setSearchTerms({});
+    setExpandedSections({});
+    clearStoredFilterMemory();
     resetAppliedFilters();
   };
 
@@ -535,77 +660,93 @@ export default function HotelsFilters() {
         <h4 className={styles.sectionTitle}>SEARCH HOTELS</h4>
         <div className={styles.SearchField}>
           <Search size={18} />
-          <input type="search" placeholder="Search locality / hotel name" />
-        </div>
-      </section>
-
-      <div className={styles.border} />
-
-      <FilterSection
-        section={HOTEL_FILTER_SECTIONS[0]}
-        filterData={filterData}
-        selectedFilters={selectedFilters}
-        searchTerms={searchTerms}
-        setSearchTerms={setSearchTerms}
-        onToggle={toggleFilter}
-      />
-
-      <div className={styles.border} />
-
-      <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
-        {(apiPriceSection?.options || PRICE_BUCKETS).map((bucket) => (
-          <CheckboxRow
-            key={bucket.key}
-            checked={!!selectedFilters.price?.[bucket.key]}
-            label={bucket.label}
-            count={bucket.count ?? getCount(filterData, "priceBuckets", bucket.key, bucket.label)}
-            onChange={() => toggleFilter("price", bucket.key)}
+          <input
+            type="search"
+            placeholder="Search locality / hotel name"
+            value={hotelSearchText}
+            onChange={(event) => setHotelSearchText(event.target.value)}
           />
-        ))}
+          {hotelSearchText && (
+            <button
+              type="button"
+              className={styles.searchClearButton}
+              onClick={() => setHotelSearchText("")}
+              aria-label="Clear hotel search"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </section>
 
       <div className={styles.border} />
 
-      <section className={styles.section}>
-        <h4 className={styles.sectionTitle}>YOUR BUDGET</h4>
-        <div className={styles.budgetGrid}>
-          <label className={styles.budgetInput}>
-            <span>Min Price</span>
-            <input
-              type="number"
-              min={minPrice}
-              max={safeBudget[1]}
-              value={safeBudget[0]}
-              onChange={(event) => {
-                setBudgetTouched(true);
-                setBudget([Math.min(Number(event.target.value), safeBudget[1]), safeBudget[1]]);
-              }}
-            />
-          </label>
-          <label className={styles.budgetInput}>
-            <span>Max Price</span>
-            <input
-              type="number"
-              min={safeBudget[0]}
-              max={maxPrice}
-              value={safeBudget[1]}
-              onChange={(event) => {
-                setBudgetTouched(true);
-                setBudget([safeBudget[0], Math.max(Number(event.target.value), safeBudget[0])]);
-              }}
-            />
-          </label>
-        </div>
-        
-        <button
-          type="button"
-          className={styles.budgetSubmit}
-          onClick={() => applyFilters({ includeBudget: true })}
-        >
-          SUBMIT
-        </button>
-      </section>
+      {isFilterLoading && <FilterLoadingState />}
+
+      {!isFilterLoading && !hasApiFilters && (
+        <section className={styles.section}>
+          <p className={styles.emptyFilters}>No filters available.</p>
+        </section>
+      )}
+
+      {apiPriceSection && (
+        <>
+          <section className={styles.section}>
+            <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
+            {apiPriceSection.options.map((bucket) => (
+              <CheckboxRow
+                key={bucket.key}
+                checked={!!selectedFilters.price?.[bucket.key]}
+                label={bucket.label}
+                count={bucket.count ?? getCount(filterData, "priceBuckets", bucket.key, bucket.label)}
+                onChange={() => toggleFilter("price", bucket.key)}
+              />
+            ))}
+          </section>
+
+          <div className={styles.border} />
+
+          <section className={styles.section}>
+            <h4 className={styles.sectionTitle}>YOUR BUDGET</h4>
+            <div className={styles.budgetGrid}>
+              <label className={styles.budgetInput}>
+                <span>Min Price</span>
+                <input
+                  type="number"
+                  min={minPrice}
+                  max={safeBudget[1]}
+                  value={safeBudget[0]}
+                  onChange={(event) => {
+                    setBudgetTouched(true);
+                    setBudget([Math.min(Number(event.target.value), safeBudget[1]), safeBudget[1]]);
+                  }}
+                />
+              </label>
+              <label className={styles.budgetInput}>
+                <span>Max Price</span>
+                <input
+                  type="number"
+                  min={safeBudget[0]}
+                  max={maxPrice}
+                  value={safeBudget[1]}
+                  onChange={(event) => {
+                    setBudgetTouched(true);
+                    setBudget([safeBudget[0], Math.max(Number(event.target.value), safeBudget[0])]);
+                  }}
+                />
+              </label>
+            </div>
+            
+            <button
+              type="button"
+              className={styles.budgetSubmit}
+              onClick={() => applyFilters({ includeBudget: true })}
+            >
+              SUBMIT
+            </button>
+          </section>
+        </>
+      )}
 
       {renderedSections.map((section) => (
         <div key={section.key}>
@@ -616,6 +757,13 @@ export default function HotelsFilters() {
             selectedFilters={selectedFilters}
             searchTerms={searchTerms}
             setSearchTerms={setSearchTerms}
+            isExpanded={!!expandedSections[section.key]}
+            onExpandedChange={(nextValue) =>
+              setExpandedSections((prev) => ({
+                ...prev,
+                [section.key]: nextValue,
+              }))
+            }
             onToggle={toggleFilter}
           />
         </div>
@@ -639,6 +787,8 @@ function FilterSection({
   selectedFilters,
   searchTerms,
   setSearchTerms,
+  isExpanded,
+  onExpandedChange,
   onToggle,
 }) {
   const searchTerm = searchTerms[section.key] || "";
@@ -648,6 +798,12 @@ function FilterSection({
         option.label.toLowerCase().includes(normalizedSearch),
       )
     : section.options;
+  const shouldLimitOptions =
+    !normalizedSearch && visibleOptions.length > FILTER_OPTION_PREVIEW_LIMIT;
+  const displayedOptions =
+    shouldLimitOptions && !isExpanded
+      ? visibleOptions.slice(0, FILTER_OPTION_PREVIEW_LIMIT)
+      : visibleOptions;
 
   return (
     <section className={styles.section}>
@@ -668,7 +824,7 @@ function FilterSection({
           />
         </div>
       )}
-      {visibleOptions.map((option) => (
+      {displayedOptions.map((option) => (
         <CheckboxRow
           key={option.key}
           checked={!!selectedFilters[section.key]?.[option.key]}
@@ -677,6 +833,31 @@ function FilterSection({
           count={option.count ?? getCount(filterData, section.key, option.key, option.label)}
           onChange={() => onToggle(section.key, option.key)}
         />
+      ))}
+      {shouldLimitOptions && (
+        <button
+          type="button"
+          className={styles.seeMoreButton}
+          onClick={() => onExpandedChange(!isExpanded)}
+        >
+          {isExpanded ? "SEE LESS" : `SEE MORE (${visibleOptions.length - FILTER_OPTION_PREVIEW_LIMIT})`}
+        </button>
+      )}
+    </section>
+  );
+}
+
+function FilterLoadingState() {
+  return (
+    <section className={styles.section}>
+      <div className={styles.filterLoadingHeader}></div>
+      <div className={styles.filterLoadingSearch}></div>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={`filter-loading-${index}`} className={styles.filterLoadingRow}>
+          <span className={styles.filterLoadingBox}></span>
+          <span className={styles.filterLoadingLabel}></span>
+          <span className={styles.filterLoadingCount}></span>
+        </div>
       ))}
     </section>
   );

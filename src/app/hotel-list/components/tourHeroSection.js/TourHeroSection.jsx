@@ -425,12 +425,16 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
                 "";
               const searchId =
                 latestSearchContext?.searchId ||
+                latestSearchContext?.searchid ||
                 initResponse?.searchId ||
                 initResponse?.search_id ||
+                initResponse?.searchid ||
                 initResponse?.data?.searchId ||
                 initResponse?.data?.search_id ||
+                initResponse?.data?.searchid ||
                 initResponse?.init?.searchId ||
                 initResponse?.init?.search_id ||
+                initResponse?.init?.searchid ||
                 "";
 
               syncHotelSearchMetaToUrl({ searchId, hotelSearchId });
@@ -497,10 +501,13 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
             const socketSearchId =
               content?.searchId ||
               content?.search_id ||
+              content?.searchid ||
               content?.init?.searchId ||
               content?.init?.search_id ||
+              content?.init?.searchid ||
               payload?.searchId ||
               payload?.search_id ||
+              payload?.searchid ||
               "";
 
             syncHotelSearchMetaToUrl({
@@ -551,7 +558,14 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
                   content.hotel_search_key ||
                   searchContext?.hotelSearchId ||
                   "";
-                const searchId = content.init.searchId || searchContext?.searchId || "";
+                const searchId =
+                  content.init.searchId ||
+                  content.init.search_id ||
+                  content.init.searchid ||
+                  searchContext?.searchId ||
+                  searchContext?.search_id ||
+                  searchContext?.searchid ||
+                  "";
 
                 syncHotelSearchMetaToUrl({ searchId, hotelSearchId });
                 safeSetSessionStorage(

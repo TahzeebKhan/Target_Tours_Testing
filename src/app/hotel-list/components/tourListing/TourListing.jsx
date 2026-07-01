@@ -312,9 +312,13 @@ export const formatHotelPrice = (hotel = {}) => {
 
   if (price === null || price === undefined || price === "") return "₹ --";
 
-  const numericPrice = Number(price);
-  if (!Number.isNaN(numericPrice)) {
-    return `₹ ${numericPrice.toLocaleString("en-IN")}`;
+  const numericPrice =
+    typeof price === "string"
+      ? Number(price.replace(/[^\d.-]/g, ""))
+      : Number(price);
+
+  if (Number.isFinite(numericPrice)) {
+    return `₹ ${Math.round(numericPrice).toLocaleString("en-IN")}`;
   }
 
   return String(price).startsWith("₹") ? String(price) : `₹ ${price}`;
