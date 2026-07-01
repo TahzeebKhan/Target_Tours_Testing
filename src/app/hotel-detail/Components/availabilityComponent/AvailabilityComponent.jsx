@@ -5,6 +5,7 @@ import React, { useRef, useState } from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
+import { ChevronDown } from "lucide-react";
 
 const ratingToStars = {
   excellent: 5,
@@ -17,6 +18,41 @@ const ratingToStars = {
 const getRatingScore = (rating = {}) => {
   const ratingLabel = String(rating.label || "").trim().toLowerCase();
   return ratingToStars[ratingLabel] || rating.score || "";
+};
+
+const getRoomUnitCount = (room = {}) =>
+  Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+const getTrimmedText = (text = "", limit = 16) => {
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+
+  if (words.length <= limit) return text;
+
+  return `${words.slice(0, limit).join(" ")}...`;
+};
+
+const getImageSrc = (image = {}) => {
+  if (!image) return "";
+  if (typeof image === "string") return image;
+
+  return image.img || image.image || image.url || image.src || "";
+};
+
+const getImageList = (...imageGroups) =>
+  imageGroups
+    .flatMap((group) => (Array.isArray(group) ? group : [group]))
+    .map((image) => ({ img: getImageSrc(image) }))
+    .filter((image) => image.img);
+
+const getComboHeaderTitle = (comboRoom = {}, comboDetailRows = []) => {
+  const detailTitles = comboDetailRows
+    .map((detailRoom) => String(detailRoom.title || "").trim())
+    .filter(Boolean);
+  const uniqueDetailTitles = [...new Set(detailTitles)];
+
+  if (!uniqueDetailTitles.length) return comboRoom.title;
+
+  return `${comboRoom.title} - ${uniqueDetailTitles.join(" + ")}`;
 };
 
 const AvailabilitySkeleton = () => (
@@ -64,6 +100,20 @@ const AvailabilityComponent = ({
   const swiperRefs = useRef({});
   const [roomQty, setRoomQty] = useState({});
   const [expandedFeatureRooms, setExpandedFeatureRooms] = useState({});
+  const [expandedComboRooms, setExpandedComboRooms] = useState({});
+
+  const roomUnitMap = rooms.reduce((unitMap, room) => {
+    unitMap[room.id] = getRoomUnitCount(room);
+    return unitMap;
+  }, {});
+  const getSelectedUnitTotal = (quantityMap) =>
+    Object.entries(quantityMap).reduce(
+      (total, [roomId, quantity]) =>
+        total + Number(quantity || 0) * (roomUnitMap[roomId] || 1),
+      0,
+    );
+  const comboRooms = rooms.filter((room) => Boolean(room.isCombo));
+  const firstComboRoomId = comboRooms[0]?.id || "";
 
   const toggleFeatureExpansion = (roomId) => {
     if (actionDisabled) return;
@@ -74,20 +124,31 @@ const AvailabilityComponent = ({
     }));
   };
 
-  const increase = (id, maxQty = Infinity) => {
+  const toggleComboExpansion = (roomId) => {
+    if (actionDisabled) return;
+
+    setExpandedComboRooms((prev) => ({
+      ...prev,
+      [roomId]: !prev[roomId],
+    }));
+  };
+
+  const increase = (id, maxQty = Infinity, unitCount = 1) => {
     if (actionDisabled) return;
 
     const currentQtyMap = Object.keys(roomQuantities).length
       ? roomQuantities
       : roomQty;
-    const selectedRoomTotal = Object.values(currentQtyMap).reduce(
-      (total, quantity) => total + Number(quantity || 0),
-      0,
+    const currentQty = Number(currentQtyMap[id] || 0);
+    const selectedRoomTotal = getSelectedUnitTotal(currentQtyMap);
+    const selectedOtherTotal = selectedRoomTotal - currentQty * unitCount;
+    const allowedByRoomLimit = Math.floor(
+      Math.max(0, maxSelectableRooms - selectedOtherTotal) / unitCount,
     );
 
-    if (selectedRoomTotal >= maxSelectableRooms) return;
+    if (allowedByRoomLimit <= currentQty) return;
 
-    const nextQty = Math.min((currentQtyMap[id] || 0) + 1, maxQty);
+    const nextQty = Math.min(currentQty + 1, maxQty, allowedByRoomLimit);
 
     setRoomQty((prev) => ({
       ...prev,
@@ -115,9 +176,9 @@ const AvailabilityComponent = ({
     });
     onRoomQuantityChange?.(id, Math.max(nextQty, 0));
   };
-  const handleAddRoom = (id, maxQty) => {
+  const handleAddRoom = (id, maxQty, unitCount = 1) => {
     if (actionDisabled) return;
-    increase(id, maxQty);
+    increase(id, maxQty, unitCount);
   };
 
   return (
@@ -136,17 +197,214 @@ const AvailabilityComponent = ({
         const roomImages = Array.isArray(room.image) ? room.image : [];
         const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
         const benefits = Array.isArray(room.benefits) ? room.benefits : [];
-        const maxQty = Math.max(0, Number(room.availability) || 0);
+        const isCombo = Boolean(room.isCombo);
+        const roomUnitCount = getRoomUnitCount(room);
+        const maxQty = isCombo ? 1 : Math.max(0, Number(room.availability) || 0);
         const qty = roomQuantities[room.id] ?? roomQty[room.id] ?? 0;
-        const selectedRoomTotal = Object.values(
-          Object.keys(roomQuantities).length ? roomQuantities : roomQty,
-        ).reduce((total, quantity) => total + Number(quantity || 0), 0);
-        const hasReachedRoomLimit = selectedRoomTotal >= maxSelectableRooms;
+        const quantityMap = Object.keys(roomQuantities).length ? roomQuantities : roomQty;
+        const selectedRoomTotal = getSelectedUnitTotal(quantityMap);
+        const selectedOtherTotal = selectedRoomTotal - Number(qty || 0) * roomUnitCount;
+        const remainingUnits = Math.max(0, maxSelectableRooms - selectedOtherTotal);
+        const hasReachedRoomLimit = remainingUnits < roomUnitCount;
         const isFeatureExpanded = Boolean(expandedFeatureRooms[room.id]);
         const visibleFeatures = features.slice(
           0,
           isFeatureExpanded ? features.length : 10,
         );
+
+        if (isCombo && room.id !== firstComboRoomId) {
+          return null;
+        }
+
+        if (isCombo) {
+          return (
+            <div key="combo-room-list" className={styles.comboSection}>
+              {comboRooms.map((comboRoom, comboIndex) => {
+                const comboQty = roomQuantities[comboRoom.id] ?? roomQty[comboRoom.id] ?? 0;
+                const comboUnitCount = getRoomUnitCount(comboRoom);
+                const comboSelectedOtherTotal =
+                  selectedRoomTotal - Number(comboQty || 0) * comboUnitCount;
+                const comboLimitReached =
+                  Math.max(0, maxSelectableRooms - comboSelectedOtherTotal) < comboUnitCount;
+                const isExpanded = expandedComboRooms[comboRoom.id] ?? comboIndex === 0;
+                const comboDetailRows = Array.isArray(comboRoom.comboRooms)
+                  ? comboRoom.comboRooms
+                  : [];
+                const comboImages = Array.isArray(comboRoom.image) ? comboRoom.image : [];
+                const comboHeaderTitle = getComboHeaderTitle(comboRoom, comboDetailRows);
+
+                return (
+                  <div key={comboRoom.id} className={styles.comboOfferCard}>
+                    <div className={styles.comboOfferSummary}>
+                      <h3 className={styles.comboOfferTitle}>{comboHeaderTitle}</h3>
+
+                      <div className={styles.comboOfferActions}>
+                        <div className={styles.comboOfferPrice}>
+                          <div className={styles.price}>
+                            <span className={styles.actualPrice}>
+                              {comboRoom.price.actual}
+                            </span>
+                            <span className={styles.offerPrice}>
+                              {comboRoom.price.offer}
+                            </span>
+                          </div>
+                          <span className={styles.comboOfferTaxes}>
+                            {comboRoom.price.taxes} {comboRoom.price.nights}
+                          </span>
+                        </div>
+
+                        <button
+                          className={styles.comboSelectBtn}
+                          disabled={actionDisabled || comboQty <= 0 && comboLimitReached}
+                          onClick={() => handleAddRoom(comboRoom.id, 1, comboUnitCount)}
+                        >
+                          {comboQty > 0 ? "Selected Combo" : "Select Combo"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`${styles.comboToggleBtn} ${
+                            isExpanded ? styles.comboToggleOpen : ""
+                          }`}
+                          disabled={actionDisabled}
+                          onClick={() => toggleComboExpansion(comboRoom.id)}
+                          aria-label={isExpanded ? "Hide combo details" : "Show combo details"}
+                        >
+                          <ChevronDown size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className={styles.comboOfferDetails}>
+                        {comboDetailRows.map((detailRoom, detailIndex) => {
+                          const detailRoomImages = getImageList(detailRoom.image);
+                          const detailImages = detailRoomImages.length
+                            ? detailRoomImages
+                            : getImageList(comboImages);
+                          const detailFeatures = Array.isArray(detailRoom.featuresLeft)
+                            ? detailRoom.featuresLeft.slice(0, 6)
+                            : [];
+                          const detailBenefits = Array.isArray(detailRoom.benefits)
+                            ? detailRoom.benefits.slice(0, 4)
+                            : [];
+
+                          return (
+                            <div
+                              key={detailRoom.id || `${comboRoom.id}-${detailIndex}`}
+                              className={styles.comboInlineRoom}
+                            >
+                              <div
+                                className={styles.comboInlineImage}
+                                style={{ position: "relative" }}
+                              >
+                                {detailImages.length ? (
+                                  <>
+                                    <Swiper
+                                      modules={[Navigation]}
+                                      onSwiper={(swiper) => {
+                                        swiperRefs.current[
+                                          `${comboRoom.id}-${detailIndex}`
+                                        ] = swiper;
+                                      }}
+                                      slidesPerView={1}
+                                      style={{ height: "100%" }}
+                                    >
+                                      {detailImages.map((item, imageIndex) => (
+                                        <SwiperSlide
+                                          key={`${comboRoom.id}-${detailIndex}-image-${imageIndex}`}
+                                          className={styles.slide}
+                                          style={{ height: "100%" }}
+                                        >
+                                          <img src={item.img} alt="" />
+                                        </SwiperSlide>
+                                      ))}
+                                    </Swiper>
+
+                                    {detailImages.length > 1 && (
+                                      <div className={styles.btns}>
+                                        <button
+                                          className={styles.leftBtn}
+                                          disabled={actionDisabled}
+                                          onClick={() =>
+                                            swiperRefs.current[
+                                              `${comboRoom.id}-${detailIndex}`
+                                            ]?.slidePrev()
+                                          }
+                                        >
+                                          <img src="/icons/left.svg" alt="" />
+                                        </button>
+
+                                        <button
+                                          className={styles.rightBtn}
+                                          disabled={actionDisabled}
+                                          onClick={() =>
+                                            swiperRefs.current[
+                                              `${comboRoom.id}-${detailIndex}`
+                                            ]?.slideNext()
+                                          }
+                                        >
+                                          <img src="/icons/right.svg" alt="" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </>
+                                ) : null}
+                              </div>
+
+                              <div className={styles.comboInlineContent}>
+                                <h4>{detailRoom.title}</h4>
+                                <div className={styles.comboInlineMeta}>
+                                  <span>{detailRoom.beds}</span>
+                                  <span>{detailRoom.persons}</span>
+                                </div>
+
+                                <ul className={styles.comboFeatureList}>
+                                  {detailFeatures.map((item, idx) => (
+                                    <li key={idx}>
+                                      <img src={item.icon} alt="" />
+                                      <span>{getTrimmedText(item.text)}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              <div className={styles.comboInlinePerks}>
+                                <ul>
+                                  {detailBenefits.slice(0, 3).map((benefit, idx) => (
+                                    <li key={idx}>
+                                      <span>•</span>
+                                      <span>{getTrimmedText(benefit, 18)}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+
+                                <div className={styles.comboFooter}>
+                                  <div className={styles.comboCancellation}>
+                                    <img src="/icons/hotelCheck.svg" alt="" />
+                                    <span>{comboRoom.cancellation}</span>
+                                    </div>
+
+                                  <button
+                                    type="button"
+                                    className={styles.moreDetailsBtn}
+                                    disabled={actionDisabled}
+                                  >
+                                    More Details
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
 
         return (
           <div key={room.id} className={styles.CardSection}>
@@ -304,7 +562,7 @@ const AvailabilityComponent = ({
                       qty > 0 ? styles.fadeOut : styles.fadeIn
                     }`}
                     disabled={actionDisabled || maxQty <= 0 || hasReachedRoomLimit}
-                    onClick={() => handleAddRoom(room.id, maxQty)}
+                    onClick={() => handleAddRoom(room.id, maxQty, roomUnitCount)}
                   >
                     ADD ROOM
                   </button>
@@ -341,7 +599,7 @@ const AvailabilityComponent = ({
                       disabled={actionDisabled || qty >= maxQty || hasReachedRoomLimit}
                       onClick={(e) => {
                         e.stopPropagation();
-                        increase(room.id, maxQty);
+                        increase(room.id, maxQty, roomUnitCount);
                       }}
                     >
                       <svg

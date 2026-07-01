@@ -144,6 +144,14 @@ const getRoomOccupancies = (room = {}, roomIndex = 0) => {
     return [];
   }
 
+  const selectedRoomCount =
+    Math.max(1, Number(room.quantity || 1)) *
+    Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+  if (selectedRoomCount > 1) {
+    return room.occupancies.slice(0, selectedRoomCount);
+  }
+
   if (room.occupancies.length === 1) {
     return room.occupancies;
   }

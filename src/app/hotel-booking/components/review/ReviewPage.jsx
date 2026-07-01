@@ -602,7 +602,7 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
   const childGuests = guests.filter(
     (guest) => String(guest.PaxType || guest.passengerType || "").toUpperCase() === "C",
   );
-  const matchedOccupancy = occupancyList.find((occupancy) => {
+  const occupancyMatchesGuests = (occupancy = {}) => {
     const adults = Number(
       getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") || 0,
     );
@@ -617,10 +617,14 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
     );
 
     return adults === adultGuests.length && children === childGuests.length;
-  });
+  };
+  const indexedOccupancy =
+    occupancyList[Math.max(0, Number(fallbackOccupancyIndex) || 0)] || null;
+  const matchedOccupancy = occupancyList.find(occupancyMatchesGuests);
   const occupancy =
-    matchedOccupancy ||
-    occupancyList[Math.max(0, Number(fallbackOccupancyIndex) || 0)] ||
+    (indexedOccupancy && occupancyMatchesGuests(indexedOccupancy)
+      ? indexedOccupancy
+      : matchedOccupancy) ||
     occupancyList[0] ||
     {};
   const occupancyId =
@@ -644,6 +648,123 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
     ? `|${occupancyId}|${sections.join("|")}|`
     : `|${occupancyId}|1:A:25|`;
 };
+
+const getOccupancyGuestCount = (occupancy = {}) =>
+  Number(
+    getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") || 0,
+  ) +
+  Number(
+    getOccupancyValue(
+      occupancy,
+      "numOfChildren",
+      "NumOfChildren",
+      "children",
+      "childCount",
+    ) || 0,
+  );
+
+const splitGuestsByOccupancy = (occupancies = [], guests = [], roomEntryCount = 1) => {
+  if (!Array.isArray(occupancies) || !occupancies.length) {
+    return Array.from({ length: roomEntryCount }, (_, index) =>
+      index === 0 ? guests : [],
+    );
+  }
+
+  let guestCursor = 0;
+
+  return Array.from({ length: roomEntryCount }, (_, index) => {
+    const occupancy = occupancies[index] || occupancies[0] || {};
+    const guestCount = Math.max(1, getOccupancyGuestCount(occupancy));
+    const roomGuests = guests.slice(guestCursor, guestCursor + guestCount);
+
+    guestCursor += guestCount;
+
+    return roomGuests.length ? roomGuests : guests.slice(0, guestCount);
+  });
+};
+
+const getRoomApiValue = (room = {}, detailRoom = {}, rawDetailRoom = {}, key, fallback = "") =>
+  getFirstValue(
+    detailRoom[key],
+    rawDetailRoom[key],
+    rawDetailRoom.room?.[key],
+    room[key],
+    room.raw?.[key],
+    room.raw?.room?.[key],
+    fallback,
+  );
+
+const getRoomApiId = (room = {}, detailRoom = {}, rawDetailRoom = {}, fallback = "") =>
+  getFirstValue(
+    rawDetailRoom.roomId,
+    rawDetailRoom.RoomId,
+    rawDetailRoom.room?.roomId,
+    rawDetailRoom.room?.RoomId,
+    rawDetailRoom.room?.id,
+    rawDetailRoom.id,
+    detailRoom.roomId,
+    detailRoom.RoomId,
+    room.roomId,
+    room.RoomId,
+    fallback,
+  );
+
+const getComboDetailRoomForEntry = (comboDetailRows = [], entryIndex = 0) => {
+  let coveredEntries = 0;
+
+  return (
+    comboDetailRows.find((comboRoom) => {
+      coveredEntries += Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+      return entryIndex < coveredEntries;
+    }) || {}
+  );
+};
+
+const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {}) =>
+  selectedRooms.flatMap((room, roomIndex) => {
+    const guests = roomGuests[room.id] || [];
+    const roomUnits = Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+    const quantity = Math.max(1, Number(room.quantity || 1));
+    const roomEntryCount = roomUnits * quantity;
+    const comboDetailRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+    const occupancies = Array.isArray(room.occupancies) ? room.occupancies : [];
+    const guestGroups = splitGuestsByOccupancy(occupancies, guests, roomEntryCount);
+
+    return Array.from({ length: roomEntryCount }, (_, entryIndex) => {
+      const detailRoom = getComboDetailRoomForEntry(comboDetailRows, entryIndex);
+      const rawDetailRoom = detailRoom.raw || {};
+      const entryGuests = guestGroups[entryIndex] || guests;
+
+      return {
+        RoomId: getRoomApiId(room, detailRoom, rawDetailRoom, room.roomId || room.id || ""),
+        GuestCode: buildGuestCode(occupancies, entryGuests, entryIndex || roomIndex),
+        SupplierName: getFirstValue(
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "supplierName"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "SupplierName"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "providerName"),
+        ),
+        RoomGroupId: getFirstValue(
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "roomGroupId"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "RoomGroupId"),
+          room.roomGroupId,
+          room.id,
+        ),
+        Guests: entryGuests.map((guest, guestIndex) => ({
+          GuestID: String(guestIndex),
+          Operation: "U",
+          Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
+          FirstName: guest.firstName,
+          MiddleName: guest.middleName || "",
+          LastName: guest.lastName,
+          MobileNo: guest.mobile || contact.mobile,
+          PaxType: guest.passengerType || "A",
+          Age: guest.passengerType === "A" ? guest.age || "25" : guest.age,
+          Email: guest.email || contact.email,
+          Pan: "",
+        })),
+      };
+    });
+  });
 
 const getRoomTotal = (room, fallbackNights = 1) => {
   const quantity = Number(room.quantity || 0);
@@ -1085,29 +1206,7 @@ const ReviewPage = () => {
           CountryCode: getCountryCode(contact.countryCode),
           MobileCountryCode: getDialCode(firstTraveler.countryCode || contact.countryCode),
         },
-        Rooms: selectedRooms.map((room, roomIndex) => {
-          const guests = roomGuests[room.id] || [];
-
-          return {
-            RoomId: room.roomId || room.id || "",
-            GuestCode: buildGuestCode(room.occupancies, guests, roomIndex),
-            SupplierName: room.supplierName || "",
-            RoomGroupId: room.roomGroupId || room.id || "",
-            Guests: guests.map((guest, guestIndex) => ({
-              GuestID: String(guestIndex),
-              Operation: "U",
-              Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
-              FirstName: guest.firstName,
-              MiddleName: guest.middleName || "",
-              LastName: guest.lastName,
-              MobileNo: guest.mobile || contact.mobile,
-              PaxType: guest.passengerType || "A",
-              Age: guest.passengerType === "A" ? guest.age || "25" : guest.age,
-              Email: guest.email || contact.email,
-              Pan: "",
-            })),
-          };
-        }),
+        Rooms: buildStartBookingRooms(selectedRooms, roomGuests, contact),
         NetAmount: selectedNetAmount,
         SearchId: searchId,
         hotelSearchId,

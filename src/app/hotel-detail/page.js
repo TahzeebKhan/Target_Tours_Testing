@@ -480,11 +480,15 @@ const Page = () => {
       return roomList.reduce((rooms, room) => {
         if (remainingRooms <= 0) return rooms;
 
-        const quantity = Math.min(Number(room.quantity || 0), remainingRooms);
+        const roomUnits = Math.max(1, Number(room.roomUnits || 1));
+        const quantity = Math.min(
+          Number(room.quantity || 0),
+          Math.floor(remainingRooms / roomUnits),
+        );
         if (quantity <= 0) return rooms;
 
-        remainingRooms -= quantity;
-        rooms.push({ ...room, quantity });
+        remainingRooms -= quantity * roomUnits;
+        rooms.push({ ...room, quantity, roomUnits });
         return rooms;
       }, []);
     },
@@ -690,7 +694,11 @@ const Page = () => {
           taxPerNight: Number(room.price?.taxAmount) || 0,
           rateIncludesTax: Boolean(room.price?.rateIncludesTax),
           quantity: 0,
-          maxQuantity: Number(room.availability) || 1,
+          maxQuantity: room.isCombo ? 1 : Number(room.availability) || 1,
+          isCombo: Boolean(room.isCombo),
+          comboRoomCount: Number(room.comboRoomCount) || 1,
+          roomUnits: Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1)),
+          comboRooms: room.comboRooms || [],
           nights,
           roomId: room.roomId,
           roomGroupId: room.roomGroupId,
@@ -701,6 +709,10 @@ const Page = () => {
           roomsSearchTracingKey:
             room.roomsSearchTracingKey || hotelDetail?.roomsSearchTracingKey || "",
           occupancies: room.occupancies,
+          raw: room.raw,
+          rawRecommendation: room.rawRecommendation,
+          rawRoomGroup: room.rawRoomGroup,
+          rawCategoryRooms: room.rawCategoryRooms,
           maxGuestAllowed: displayedGuestCount || occupancyGuestCount || 1,
           netAmount: parseCurrencyNumber(room.price?.offer),
         };
@@ -722,12 +734,16 @@ const Page = () => {
       const requestedQuantity = Math.max(0, Number(quantity) || 0);
       const otherRoomTotal = prev.reduce(
         (total, room) =>
-          room.id === id ? total : total + Number(room.quantity || 0),
+          room.id === id
+            ? total
+            : total + Number(room.quantity || 0) * Math.max(1, Number(room.roomUnits || 1)),
         0,
       );
+      const targetRoom = prev.find((room) => room.id === id);
+      const roomUnits = Math.max(1, Number(targetRoom?.roomUnits || 1));
       const allowedQuantity = Math.min(
         requestedQuantity,
-        Math.max(0, maxSelectableRoomCount - otherRoomTotal),
+        Math.floor(Math.max(0, maxSelectableRoomCount - otherRoomTotal) / roomUnits),
       );
       const nextRooms = prev.map((room) =>
         room.id === id ? { ...room, quantity: allowedQuantity } : room,
@@ -802,6 +818,7 @@ const Page = () => {
           <section ref={sectionRefs.Rooms}>
             <AvailabilityComponent
               rooms={hotelDetail?.rooms || []}
+              roomGroups={hotelDetail?.roomGroups || []}
               loading={roomsLoading}
               errorMessage={hotelDetail?.roomsErrorMessage}
               actionDisabled={isBookingActionLoading}

@@ -436,23 +436,88 @@ const normalizeFacilities = (facilities = []) =>
     .filter(Boolean)
     .filter((facility, index, list) => list.indexOf(facility) === index);
 
+// const getRecommendationRooms = (data = {}) => {
+//   const source = data?.content || data?.data || data;
+
+//   if (Array.isArray(source.roomCategories)) {
+//     return source.roomCategories.map((category, categoryIndex) => {
+//       const categoryRooms = Array.isArray(category.room) ? category.room : [];
+//       const primaryRoom = categoryRooms[0] || category;
+
+//       return {
+//         room: primaryRoom,
+//         recommendation: category,
+//         recommendationIndex: categoryIndex,
+//         roomIndex: 0,
+//         categoryRooms,
+//       };
+//     });
+//   }
+
+//   const directRooms = [
+//     source.roomRates,
+//     source.roomTypes,
+//     source.availableRooms,
+//     source.rates,
+//   ].find(Array.isArray);
+
+//   if (directRooms) return directRooms.map((room) => ({ room }));
+
+//   if (Array.isArray(source.rooms)) {
+//     return source.rooms.map((room) => ({ room }));
+//   }
+
+//   const recommendations = source.rooms?.recommendations || source.recommendations;
+//   if (!Array.isArray(recommendations)) return [];
+//   console.log("recommendations", recommendations);
+
+//   return recommendations.flatMap((recommendation, recommendationIndex) => {
+//     const roomGroup = Array.isArray(recommendation.roomGroup)
+//       ? recommendation.roomGroup
+//       : [];
+
+//     if (!roomGroup.length) {
+//       return [{ room: recommendation, recommendation, recommendationIndex }];
+//     }
+
+//     const isCombo =
+//       roomGroup.length > 1 ||
+//       roomGroup.some((room) => getRoomGroupRoomCount(room) > 1);
+
+//     if (isCombo) {
+//       return [{
+//         room: roomGroup[0],
+//         recommendation,
+//         recommendationIndex,
+//         roomIndex: 0,
+//         comboRoomGroups: roomGroup,
+//       }];
+//     }
+
+//     return roomGroup.map((room, roomIndex) => ({
+//       room,
+//       recommendation,
+//       recommendationIndex,
+//       roomIndex,
+//     }));
+//   });
+// };
+
+
 const getRecommendationRooms = (data = {}) => {
-  const source = data?.content || data?.data || data;
+  const source = data?.content || data?.raw || data?.data || data;
 
-  if (Array.isArray(source.roomCategories)) {
-    return source.roomCategories.flatMap((category, categoryIndex) => {
-      const categoryRooms = Array.isArray(category.room) ? category.room : [];
+  if (Array.isArray(source.recommendations)) {
+    return source.recommendations.map((recommendation, recommendationIndex) => {
+      const roomGroup = Array.isArray(recommendation.roomGroup)
+        ? recommendation.roomGroup
+        : [];
 
-      if (!categoryRooms.length) {
-        return [{ room: category, recommendation: category, recommendationIndex: categoryIndex }];
-      }
-
-      return categoryRooms.map((room, roomIndex) => ({
-        room,
-        recommendation: category,
-        recommendationIndex: categoryIndex,
-        roomIndex,
-      }));
+      return {
+        recommendation,
+        recommendationIndex,
+        roomGroup,
+      };
     });
   }
 
@@ -472,23 +537,32 @@ const getRecommendationRooms = (data = {}) => {
   const recommendations = source.rooms?.recommendations || source.recommendations;
   if (!Array.isArray(recommendations)) return [];
 
-  return recommendations.flatMap((recommendation, recommendationIndex) => {
+  return recommendations.map((recommendation, recommendationIndex) => {
     const roomGroup = Array.isArray(recommendation.roomGroup)
       ? recommendation.roomGroup
       : [];
 
-    if (!roomGroup.length) {
-      return [{ room: recommendation, recommendation, recommendationIndex }];
-    }
-
-    return roomGroup.map((room, roomIndex) => ({
-      room,
+    return {
       recommendation,
       recommendationIndex,
-      roomIndex,
-    }));
+      roomGroup,
+    };
   });
 };
+const getRoomGroupRoomCount = (roomGroupItem = {}) =>
+  Math.max(
+    1,
+    Number(
+      getFirst(
+        roomGroupItem.roomCount,
+        roomGroupItem.RoomCount,
+        roomGroupItem.room_count,
+        roomGroupItem.room?.roomCount,
+        roomGroupItem.room?.RoomCount,
+        roomGroupItem.room?.room_count,
+      ),
+    ) || 1,
+  );
 
 const getRoomFeatureTexts = (room = {}, recommendation = {}) => {
   const roomFacilities = normalizeFacilities(
@@ -597,21 +671,33 @@ const getRoomPolicyTexts = (room = {}, roomDetail = {}, recommendation = {}, isR
 };
 
 const normalizeRooms = (data = {}, hotel = {}) => {
-  const rooms = getRecommendationRooms(data);
+  const roomsGroup = getRecommendationRooms(data);
   const images = collectImages(data).length ? collectImages(data) : FALLBACK_IMAGES;
   const fallbackPrice = getRateValue(hotel);
   const roomsSearchId = getRoomsResponseSearchId(data);
   const roomsSearchTracingKey = getRoomsResponseSearchTracingKey(data);
 
-  if (!rooms.length) {
+  if (!roomsGroup.length) {
     return [];
   }
 
-  return rooms.map(({ room = {}, recommendation = {}, recommendationIndex, roomIndex }, index) => {
-    const roomDetail = room.room && typeof room.room === "object" ? room.room : room;
+  return roomsGroup.map((group = {}, index) => {
+    const recommendation = group.recommendation || {};
+    const roomGroup = Array.isArray(group.roomGroup)
+      ? group.roomGroup
+      : Array.isArray(group.comboRoomGroups)
+        ? group.comboRoomGroups
+        : group.room
+          ? [group.room]
+          : [];
+    const primaryRoomGroup = roomGroup[0] || group.room || recommendation || {};
+    const roomDetail =
+      primaryRoomGroup.room && typeof primaryRoomGroup.room === "object"
+        ? primaryRoomGroup.room
+        : primaryRoomGroup;
     const roomImages = collectImages(roomDetail);
     const roomPrice =
-      getRateValue(room) ||
+      getRateValue(primaryRoomGroup) ||
       getRateValue(roomDetail) ||
       getRateValue(recommendation) ||
       fallbackPrice;
@@ -619,51 +705,56 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       roomDetail.rate?.taxes,
       roomDetail.taxes,
       roomDetail.fees,
-      room.rate?.taxes,
-      room.taxes,
-      room.fees,
+      primaryRoomGroup.rate?.taxes,
+      primaryRoomGroup.taxes,
+      primaryRoomGroup.fees,
       recommendation.rate?.taxes,
       recommendation.taxes,
       recommendation.fees,
     );
     const totalRate = getFirst(
-      room.totalRate,
+      primaryRoomGroup.totalRate,
       roomDetail.totalRate,
-      room.recommendationMeta?.totalRate,
+      primaryRoomGroup.recommendationMeta?.totalRate,
       recommendation.totalRate,
       recommendation.recommendationMeta?.totalRate,
-      room.rate?.totalRate,
+      primaryRoomGroup.rate?.totalRate,
       roomDetail.rate?.totalRate,
       recommendation.rate?.totalRate,
     );
     const rateIncludesTax = Boolean(taxes && isSameAmount(roomPrice, totalRate));
     const publishedRate = getFirst(
-      room.publishedRate,
+      primaryRoomGroup.publishedRate,
       roomDetail.publishedRate,
-      room.recommendationMeta?.publishedRate,
+      primaryRoomGroup.recommendationMeta?.publishedRate,
       recommendation.publishedRate,
       recommendation.recommendationMeta?.publishedRate,
       roomPrice,
     );
+    const comboRoomCount = roomGroup.reduce(
+      (total, item) => total + getRoomGroupRoomCount(item),
+      0,
+    );
+    const isCombo = roomGroup.length > 1 || comboRoomCount > 1;
     const roomTitle = getFirst(
       roomDetail.name,
       roomDetail.title,
       roomDetail.roomName,
       roomDetail.standardRoomName,
       roomDetail.description,
-      room.name,
+      primaryRoomGroup.name,
       recommendation.standardRoomName,
       recommendation.name,
       `Room Option ${index + 1}`,
     );
     const recommendationId = getFirst(
-      room.recommendationId,
+      primaryRoomGroup.recommendationId,
       recommendation.id,
       recommendation.recommendationId,
       recommendation.standardRoomId,
     );
-    const occupancies = Array.isArray(room.occupancies)
-      ? room.occupancies
+    const occupancies = Array.isArray(primaryRoomGroup.occupancies)
+      ? primaryRoomGroup.occupancies
       : Array.isArray(roomDetail.occupancies)
         ? roomDetail.occupancies
         : [];
@@ -673,42 +764,127 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       Number(occupancy?.numOfAdults || 0) + Number(occupancy?.numOfChildren || 0);
     const isRefundable = Boolean(
       roomDetail.freeCancellation ||
-        room.freeCancellation ||
+        primaryRoomGroup.freeCancellation ||
         recommendation.freeCancellation ||
-        room.refundable ||
-        room.refundability === "Refundable" ||
+        primaryRoomGroup.refundable ||
+        primaryRoomGroup.refundability === "Refundable" ||
         hotel.freeCancellation ||
         hotel.isRefundable,
     );
     const sourceRoomId = getFirst(
-      room.id,
-      room.roomGroupId,
+      primaryRoomGroup.id,
+      primaryRoomGroup.roomGroupId,
       roomDetail.id,
-      room.roomId,
+      primaryRoomGroup.roomId,
       roomDetail.roomId,
       recommendationId,
       "room",
     );
     const uiRoomId = [
       sourceRoomId,
-      recommendationIndex ?? index,
-      roomIndex ?? 0,
+      group.recommendationIndex ?? index,
+      0,
       index,
     ].join("-");
+    const comboRooms = roomGroup.map((comboRoom, comboIndex) => {
+      const comboRoomDetail =
+        comboRoom.room && typeof comboRoom.room === "object"
+          ? comboRoom.room
+          : comboRoom;
+      const repeatCount = getRoomGroupRoomCount(comboRoom);
+      const comboOccupancies = Array.isArray(comboRoom.occupancies)
+        ? comboRoom.occupancies
+        : [];
+      const comboGuestCount =
+        Number(comboRoomDetail.maxGuestAllowed || 0) ||
+        comboOccupancies.reduce(
+          (total, occupancy) =>
+            total +
+            Number(occupancy?.numOfAdults || occupancy?.NumOfAdults || 0) +
+            Number(occupancy?.numOfChildren || occupancy?.NumOfChildren || 0),
+          0,
+        );
+      const comboTitle = getFirst(
+        comboRoomDetail.name,
+        comboRoomDetail.title,
+        comboRoomDetail.roomName,
+        comboRoomDetail.standardRoomName,
+        comboRoomDetail.description,
+        `Room ${comboIndex + 1}`,
+      );
+      const comboImages = collectImages(comboRoomDetail);
+
+      return {
+        id: `${uiRoomId}-combo-${comboIndex}`,
+        count: repeatCount,
+        roomCount: repeatCount,
+        title: `${repeatCount} x ${comboTitle}`,
+        image: (comboImages.length ? comboImages : roomImages.length ? roomImages : images).map(
+          (img) => ({ img }),
+        ),
+        beds: getFirst(
+          Array.isArray(comboRoomDetail.beds) && comboRoomDetail.beds.length
+            ? comboRoomDetail.beds
+                .map((bed) =>
+                  [bed.count, bed.description || bed.type].filter(Boolean).join(" "),
+                )
+                .join(", ")
+            : "",
+          comboRoomDetail.standardRoomName,
+          comboRoomDetail.bedType,
+          comboRoomDetail.bed,
+          comboRoomDetail.roomType,
+          "Room",
+        ),
+        persons: getFirst(
+          comboRoomDetail.maxGuestAllowed
+            ? `${comboRoomDetail.maxGuestAllowed} Guests`
+            : "",
+          comboGuestCount ? `${comboGuestCount} Guest${comboGuestCount === 1 ? "" : "s"}` : "",
+          comboRoomDetail.persons,
+          comboRoomDetail.occupancy,
+          comboRoomDetail.guests,
+          "Guests",
+        ),
+        featuresLeft: getRoomFeatureTexts(comboRoomDetail, recommendation, hotel),
+        benefits: getRoomPolicyTexts(
+          comboRoom,
+          comboRoomDetail,
+          recommendation,
+          Boolean(
+            comboRoomDetail.freeCancellation ||
+              comboRoom.freeCancellation ||
+              comboRoom.refundable ||
+              comboRoom.refundability === "Refundable" ||
+              isRefundable,
+          ),
+        ),
+        raw: comboRoom,
+      };
+    });
 
     return {
       id: uiRoomId,
-      title: roomTitle,
-      availability: Number(room.availability || roomDetail.availability || 1),
-      roomId: room.roomId || roomDetail.roomId || roomDetail.id || "",
-      roomGroupId: room.roomGroupId || room.id || "",
-      recommendationId: room.recommendationId || recommendation.recommendationId || "",
-      supplierName: room.providerName || recommendation.providerName || "",
-      guestCode: room.guestCode || room.GuestCode || "",
+      title:
+        isCombo
+          ? `${comboRoomCount} Room Combo${isRefundable ? " with Free Cancellation" : ""}`
+          : roomTitle,
+      isCombo,
+      comboRoomCount: comboRoomCount || 1,
+      roomUnits: comboRoomCount || 1,
+      comboRooms,
+      availability: isCombo ? 1 : Number(primaryRoomGroup.availability || roomDetail.availability || 1),
+      roomId: primaryRoomGroup.roomId || roomDetail.roomId || roomDetail.id || "",
+      roomGroupId: primaryRoomGroup.roomGroupId || primaryRoomGroup.id || "",
+      recommendationId: primaryRoomGroup.recommendationId || recommendation.recommendationId || recommendation.id || "",
+      supplierName: primaryRoomGroup.providerName || recommendation.providerName || "",
+      guestCode: primaryRoomGroup.guestCode || primaryRoomGroup.GuestCode || "",
       roomsSearchId,
       roomsSearchTracingKey,
       occupancies,
-      raw: room,
+      raw: primaryRoomGroup,
+      rawRecommendation: recommendation,
+      rawRoomGroup: roomGroup,
       image: (roomImages.length ? roomImages : images).map((img) => ({ img })),
       beds: getFirst(
         Array.isArray(roomDetail.beds) && roomDetail.beds.length
@@ -734,7 +910,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         "Guests",
       ),
       featuresLeft: getRoomFeatureTexts(roomDetail, recommendation, hotel),
-      benefits: getRoomPolicyTexts(room, roomDetail, recommendation, isRefundable),
+      benefits: getRoomPolicyTexts(primaryRoomGroup, roomDetail, recommendation, isRefundable),
       cancellation: isRefundable ? "Refundable booking" : "Non refundable booking",
       rating: {
         label: "Excellent",
@@ -748,7 +924,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         offerAmount: getCurrencyNumber(roomPrice),
         taxAmount: getCurrencyNumber(taxes),
         rateIncludesTax,
-        nights: "per night",
+        nights: isCombo ? `per night for ${comboRoomCount} rooms` : "per night",
         taxes: taxes ? `+ ${formatCurrency(taxes)} Taxes & fees` : "",
         bookWith: "₹ 0",
       },
@@ -964,6 +1140,7 @@ const normalizeHotelDetail = (
     amenities: facilities,
     policies: normalizePolicies(data, hotel),
     rooms: roomsPayload ? normalizeRooms(roomsPayload, { ...hotel, facilities }) : [],
+    roomGroups: roomsPayload ? getRecommendationRooms(roomsPayload) : [],
     roomsSearchId: roomsPayload ? getRoomsResponseSearchId(roomsPayload) : "",
     roomsSearchTracingKey: roomsPayload ? getRoomsResponseSearchTracingKey(roomsPayload) : "",
     roomsErrorMessage: roomsErrorMessage || (roomsPayload ? getApiFailureMessage(roomsPayload) : ""),

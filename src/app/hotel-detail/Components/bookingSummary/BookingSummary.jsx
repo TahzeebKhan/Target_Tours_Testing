@@ -92,6 +92,10 @@ const BookingSummary = ({
       <div className={styles.roomSection}>
         {roomList.map((room) => {
           const roomTotal = getRoomTotal(room);
+          const roomUnits = Math.max(1, Number(room.roomUnits || 1));
+          const roomLabel = room.isCombo
+            ? `${room.quantity} Combo (${roomUnits * Number(room.quantity || 0)} rooms)`
+            : `${room.quantity} Room`;
 
           return (
             <div key={room.id} className={styles.roomItem}>
@@ -112,7 +116,7 @@ const BookingSummary = ({
 
               <div className={styles.roomRight}>
                 <span>
-                  {formatCurrency(room.pricePerNight)} × {room.quantity} Room × {room.nights}{" "}
+                  {formatCurrency(room.pricePerNight)} × {roomLabel} × {room.nights}{" "}
                   Night{Number(room.nights) === 1 ? "" : "s"}
                 </span>
                 <span className={styles.price}>{formatCurrency(roomTotal)}</span>
