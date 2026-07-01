@@ -7,9 +7,12 @@ import { RoomProvider } from "../context/RoomContext";
 import { useRouter } from "next/navigation";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
 import {
+  HOTEL_BOOKING_STATUS_KEY,
+  HOTEL_BOOKING_STATUS_EVENT,
   clearHotelBookingSession,
   getHotelBookingSessionExpiry,
   readHotelBookingSession,
+  readHotelBookingStatus,
 } from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -29,6 +32,7 @@ const layout = ({ children }) => {
   const roomListRef = useRef([]);
   const [bookingSession, setBookingSession] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [hotelBookingStatus, setHotelBookingStatus] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
   const sessionExpiresAt = getHotelBookingSessionExpiry(bookingSession);
@@ -40,7 +44,7 @@ const layout = ({ children }) => {
       pricePerNight: 1397.86,
       quantity: 1,
       maxQuantity: 5,
-      nights: 8,
+      nights: 1,
     },
     {
       id: "premium_ac_room",
@@ -49,7 +53,7 @@ const layout = ({ children }) => {
       pricePerNight: 1397.86,
       quantity: 1,
       maxQuantity: 5,
-      nights: 8,
+      nights: 1,
     },
   ]);
 
@@ -66,6 +70,45 @@ const layout = ({ children }) => {
     } else {
       setBookingSession(null);
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const applyBookingStatus = (status) => {
+      const isClosed =
+        status?.status === "submit_started" ||
+        status?.status === "payment_started" ||
+        status?.status === "confirmed";
+
+      setHotelBookingStatus(isClosed ? status : null);
+      if (isClosed) {
+        clearHotelBookingSession();
+        setBookingSession(null);
+      }
+    };
+
+    applyBookingStatus(readHotelBookingStatus());
+
+    const handleStatusEvent = (event) => {
+      applyBookingStatus(event.detail);
+    };
+    const handleStorageEvent = (event) => {
+      if (event.key !== HOTEL_BOOKING_STATUS_KEY) return;
+
+      try {
+        applyBookingStatus(event.newValue ? JSON.parse(event.newValue) : null);
+      } catch {
+        applyBookingStatus(null);
+      }
+    };
+
+    window.addEventListener(HOTEL_BOOKING_STATUS_EVENT, handleStatusEvent);
+    window.addEventListener("storage", handleStorageEvent);
+    return () => {
+      window.removeEventListener(HOTEL_BOOKING_STATUS_EVENT, handleStatusEvent);
+      window.removeEventListener("storage", handleStorageEvent);
+    };
   }, []);
 
   const expireHotelBookingSession = () => {
@@ -201,6 +244,7 @@ const layout = ({ children }) => {
         bookingSession,
         bookingLoading,
         setBookingLoading,
+        hotelBookingStatus,
         openLoginModal,
       }}
     >
@@ -280,9 +324,13 @@ const layout = ({ children }) => {
                   window.dispatchEvent(new Event("hotel-start-booking"));
                 }
               }}
-              disabled={bookingLoading}
+              disabled={bookingLoading || Boolean(hotelBookingStatus)}
             >
-              {bookingLoading ? "LOADING..." : "CONTINUE PAYMENT"}
+              {hotelBookingStatus
+                ? "PAYMENT IN PROGRESS"
+                : bookingLoading
+                  ? "LOADING..."
+                  : "CONTINUE PAYMENT"}
             </button>
           </div>
         </div>

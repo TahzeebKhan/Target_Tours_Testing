@@ -29,6 +29,7 @@ padding-top: 73px;
     align-self: start;
      position: sticky;
     top: 150px;
+    min-width: 0;
 }
 
 .summarySidebar {
@@ -54,6 +55,19 @@ padding-top: 73px;
     pointer-events: none;
     height: 0;
     overflow: hidden;
+}
+
+.roomSearchToggle {
+    display: none;
+    border: 0;
+    background: #fcc800;
+    color: #000033;
+    font-family: var(--font-inter);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: uppercase;
+    cursor: pointer;
 }
 
 /* BOOKING SUMMARY */
@@ -110,11 +124,57 @@ padding-top: 73px;
 
 }
 
+@media (max-width: 1280px) {
+    .contentWrapper {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+        overflow-x: hidden;
+    }
+
+    .rightSidebar {
+        position: static;
+        margin: 0;
+        width: 100%;
+    }
+
+    .roomSearchToggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 20px;
+        top: 112px;
+        z-index: 2500;
+        min-width: 150px;
+        height: 46px;
+        padding: 0 18px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    }
+
+    .roomWrapper {
+        position: fixed;
+        top: 185px;
+        right: 20px;
+        z-index: 2400;
+        width: min(400px, calc(100vw - 40px));
+        max-height: calc(100vh - 198px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    .roomWrapper.hide {
+        width: min(400px, calc(100vw - 40px));
+        height: 0;
+        overflow: hidden;
+    }
+}
+
 
 @media (max-width: 1040px){
     .contentWrapper{
         gap: 16px;
-        grid-template-columns: 1fr 330px;
+        grid-template-columns: minmax(0, 1fr);
         
     }
     .rightSidebar{
@@ -143,9 +203,6 @@ padding-top: 73px;
         flex-direction: column-reverse;
         margin-top: 24px;
         
-    }
-    .roomWrapper{
-        position: static;
     }
     .summarySidebar{
         position: static;

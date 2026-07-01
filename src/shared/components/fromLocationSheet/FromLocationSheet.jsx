@@ -7,8 +7,14 @@ import {
     AIRPORT_SUGGESTIONS_QUERY_KEY,
     fetchAirportSuggestions,
 } from "@/shared/services/airportSearch";
+import { fetchHotelSearchSuggestions } from "@/shared/services/hotelSearch";
 
-export default function FromLocationSheet({ onClose, inputType, onSelectCity }) {
+export default function FromLocationSheet({
+    onClose,
+    inputType,
+    onSelectCity,
+    suggestionType = "airport",
+}) {
     const [search, setSearch] = useState("");
     const [currentLocation, setCurrentLocation] = useState(false);
 
@@ -99,16 +105,42 @@ export default function FromLocationSheet({ onClose, inputType, onSelectCity }) 
 
     const shouldFetchSuggestions = debouncedSearch.length >= 2;
 
-    const { data: apiSuggestions = [] } = useQuery({
+    const isHotelSuggestions = suggestionType === "hotel";
+
+    const { data: airportSuggestions = [] } = useQuery({
         queryKey: [...AIRPORT_SUGGESTIONS_QUERY_KEY, debouncedSearch.toLowerCase()],
         queryFn: () => fetchAirportSuggestions(debouncedSearch),
-        enabled: shouldFetchSuggestions,
+        enabled: shouldFetchSuggestions && !isHotelSuggestions,
         staleTime: 1000 * 60 * 10,
         gcTime: 1000 * 60 * 30,
         refetchOnWindowFocus: false,
     });
 
-    const apiCities = apiSuggestions.map((item) => ({
+    const { data: hotelSuggestions = [] } = useQuery({
+        queryKey: [
+            "hotel-mobile-search-suggestions",
+            debouncedSearch.toLowerCase(),
+            process.env.NEXT_PUBLIC_DOMAIN,
+        ],
+        queryFn: () => fetchHotelSearchSuggestions(debouncedSearch),
+        enabled: shouldFetchSuggestions && isHotelSuggestions,
+        staleTime: 1000 * 60 * 5,
+        gcTime: 1000 * 60 * 30,
+        refetchOnWindowFocus: false,
+    });
+
+    const apiCities = isHotelSuggestions ? hotelSuggestions.map((item) => ({
+        city: item.label || item.value,
+        airport: item.detail,
+        type: "suggestion",
+        value: item.value || item.label,
+        locationId: item.locationId || item.id,
+        iataCode: item.code,
+        code: item.code || item.locationId || item.id,
+        geoCode: item.geoCode,
+        raw: item.raw,
+        hotelLocation: item,
+    })) : airportSuggestions.map((item) => ({
         city: item.label,
         airport: item.detail,
         type: "suggestion",

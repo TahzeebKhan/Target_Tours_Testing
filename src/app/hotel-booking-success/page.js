@@ -7,6 +7,7 @@ import {
   retrieveHotelBookingDetails,
   clearHotelBookingSession,
   clearPendingHotelConfirmBooking,
+  markHotelBookingConfirmed,
   readPendingHotelConfirmBooking,
   readHotelBookingSession,
 } from "@/shared/services/hotelSearch";
@@ -255,6 +256,10 @@ function HotelBookingSuccessContent() {
         }
 
         if (!isActive) return;
+        markHotelBookingConfirmed({
+          bookingId: bookingId || getResponseValue(data, "booking_id", "bookingId"),
+          merchantOrderId,
+        });
         setBookingResponse(data);
       } catch (err) {
         if (!isActive) return;

@@ -3,14 +3,25 @@
   justify-content: space-between;
   align-items: flex-end;
   position: sticky;
-  top: var(--hotel-hero-sticky-offset, 342px);
+  top: var(--hotel-hero-sticky-offset, 242px);
+  top:0px;
   z-index: 120;
   background-color: #f9f9f9;
   padding: 12px 0;
   margin: -12px 0 0;
   
 }
-
+.result{
+  font-family: Inter;
+font-weight: 500;
+font-style: Medium;
+font-size: 18px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: -2%;
+vertical-align: middle;
+color:#000033;
+}
 .searchResultsContainer::before {
   content: "";
   position: absolute;
@@ -18,7 +29,7 @@
   right: 0;
   bottom: 100%;
   height: 96px;
-  background-color: #f9f9f9;
+  /* background-color: #f9f9f9; */
   pointer-events: none;
   z-index: 0;
 }
