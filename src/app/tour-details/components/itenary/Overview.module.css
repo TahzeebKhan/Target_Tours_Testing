@@ -22,13 +22,14 @@
   display: grid;
   grid-template-columns: minmax(390px, 540px) minmax(0, 1fr);
   align-items: start;
-  gap: clamp(52px, 5.3vw, 100px);
+  gap: 32px;
 }
 
 .imageFrame {
   padding: 11px;
   border: 1px solid #e8e8e8;
   background: #fff;
+  max-width: 519px;
 }
 
 .overviewImage {

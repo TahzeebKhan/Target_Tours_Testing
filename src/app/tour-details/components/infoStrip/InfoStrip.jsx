@@ -60,7 +60,8 @@
 import React from 'react'
 import styles from './InfoStrip.module.css'
 
-const InfoStrip = () => {
+const 
+InfoStrip = () => {
     return (
         <section className={styles.infoStrip}>
             <div className={styles.container}>

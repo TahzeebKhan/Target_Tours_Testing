@@ -20,6 +20,14 @@
     background-color: #FFFFFF;
     height: 481px;
     margin-top: 54px;
+    width: 326px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+    .cardItem {
+        width: 100%;
+    }
 }
 
 .perNight {

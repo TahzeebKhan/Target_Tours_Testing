@@ -1,6 +1,6 @@
 .section {
   width: 100%;
-  padding: 0px 200px 100px;
+  padding: 0px 260px 0px 260px;
   background: #F9FAFB;
   color: #050826;
   box-sizing: border-box;
@@ -32,23 +32,23 @@
   font-family: var(--font-inter), sans-serif;
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.4;
-  color: #767676;
+  line-height: 16px;
+  color: #000000;
 }
 
 /* INCLUSIONS & EXCLUSIONS TABLE */
 .listGrid {
-  margin-top: 40px;
+  margin-top: 30px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  /* gap: 24px; */
   box-sizing: border-box;
   width: 100%;
 }
 
 .listCard {
   border: 1px solid #E4E6E8;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   overflow: hidden;
   background-color: #FFFFFF;
   box-sizing: border-box;
@@ -63,7 +63,8 @@
   padding: 14px 20px;
   font-family: var(--font-inter), sans-serif;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 15px;
+  letter-spacing: 2%;
   color: #050826;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -77,6 +78,18 @@
   list-style: none;
 }
 
+.itemList img {
+  width: 12px;
+  height: 12px;
+}
+
+.itemList {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 100%;
+  letter-spacing: -2%;
+}
+
 .item {
   display: grid;
   grid-template-columns: 18px 1fr;
@@ -86,8 +99,10 @@
   border-bottom: 1px solid #E4E6E8;
   color: #434343;
   font-family: var(--font-inter), sans-serif;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  font-weight: 300;
 }
 
 .item:last-child {
@@ -110,7 +125,7 @@
 
 /* TOUR POLICY TABLE */
 .policyGrid {
-  margin-top: 80px;
+  margin-top: 30px;
   display: grid;
   grid-template-columns: 100%;
   /* Spans full width! */
@@ -150,6 +165,7 @@
   border-radius: 8px;
   overflow: hidden;
   box-sizing: border-box;
+  letter-spacing: 0px;
 }
 
 .policyTh,
@@ -157,9 +173,10 @@
   background-color: #F4F5F6;
   color: #767676;
   font-family: var(--font-inter), sans-serif;
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: 400;
+  font-size: 18px;
   padding: 16px 24px;
+  line-height: 24px;
   border-bottom: 1px solid #E4E6E8;
   text-align: left;
 }
@@ -169,8 +186,10 @@
   border-bottom: 1px solid #E4E6E8;
   vertical-align: top;
   font-family: var(--font-inter), sans-serif;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+
   color: #333333;
 }
 
@@ -179,11 +198,11 @@
 }
 
 .policyNameCol {
-  width: 250px;
-  font-family: "Antic Didone", serif;
+  width: 300px;
+  font-family: "Antic Didone", serif !important;
   font-weight: 400;
   font-size: 18px;
-  color: #050826;
+  color: #000033;
   line-height: 1.3;
 }
 
@@ -199,6 +218,11 @@
 
 .policyDescCol p {
   margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 160%;
+  font-family: 'inter', sans-serif !important;
+  letter-spacing: -2%;
+  font-weight: 300;
 }
 
 .policyDescCol b,

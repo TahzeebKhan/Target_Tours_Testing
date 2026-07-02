@@ -124,9 +124,9 @@ export default function ExpCarousel({ activeTab, slidesData = DEFAULT_SLIDES }) 
             <Swiper
               modules={[Virtual]}
               onSwiper={setSwiperRef}
-              spaceBetween={16}
-              centeredSlides={true} // ✅ center main card
-              slidesPerView={1.1} // ✅ peek effect
+              spaceBetween={32}
+              centeredSlides={false}
+              slidesPerView={"auto"}
               pagination={{ clickable: true }} // ✅ bullets
               navigation={false} // ❌ hide arrows on mobile
               virtual
@@ -154,9 +154,9 @@ export default function ExpCarousel({ activeTab, slidesData = DEFAULT_SLIDES }) 
                   spaceBetween: 16,
                 },
                 1200: {
-                  slidesPerView: 4,
+                  slidesPerView: "auto",
                   centeredSlides: false,
-                  spaceBetween: 30,
+                  spaceBetween: 32,
                 },
               }}
             >
