@@ -18,6 +18,16 @@ import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { Armchair } from "lucide-react";
 
+const cleanCity = (cityStr) => {
+  if (!cityStr) return "";
+  return cityStr.split("(")[0].trim().toUpperCase();
+};
+
+const formatColumnDate = (dateStr) => {
+  if (!dateStr) return "";
+  return dateStr.replace(",", "").toUpperCase();
+};
+
 const TripCard = ({
   tripCardsData,
   fareModalOpen,
@@ -401,19 +411,46 @@ const TripCard = ({
             />
             <h3 className={styles.ariLineName}>
               {leg.airline.name}
-              <span className={styles.ariLineNumber}>({leg.airline.code})</span>
             </h3>
           </div>
           <span className={styles.radioMark} />
         </div>
 
-        <div className={styles.departureDetails}>
-          <div className={styles.departTextHeading}>
-            <h3>{isDepart ? "Departure" : "Return"}</h3>
-            <span>{leg.date}</span>
+        <div className={styles.cardMiddleRow}>
+          {/* Column 1: Departure */}
+          <div className={styles.timeCol}>
+            <div className={styles.largeTime}>{leg.flight.departure.time}</div>
+            <div className={styles.cityText}>{leg.flight.departure.city}</div>
           </div>
-          <div className={styles.departTimeContainer}>
-            <FlightTimingDetail flight={leg.flight} />
+
+          {/* Column 2: Duration */}
+          <div className={styles.durationCol}>
+            <div className={styles.flightAnimation}>
+              <div className={styles.flightDot}></div>
+              <div className={styles.flightLine}></div>
+              <img src="/icons/flightIcon.svg" alt="flight" className={styles.planeIcon} />
+              <div className={styles.flightLine}></div>
+              <div className={styles.flightDot}></div>
+            </div>
+            <div className={styles.durationText}>
+              <span>{leg.flight.duration.hours}h {leg.flight.duration.minutes}m</span>
+              <span className={styles.dotSeparator}>●</span>
+              <span>{leg.flight.stops.type}</span>
+            </div>
+          </div>
+
+          {/* Column 3: Arrival */}
+          <div className={styles.arrivalTimeCol}>
+            <div className={styles.largeTime}>{leg.flight.arrival.time}</div>
+            <div className={styles.cityText}>{leg.flight.arrival.city}</div>
+          </div>
+
+          {/* Column 4: Price */}
+          <div className={styles.priceCol}>
+            <div className={styles.priceText}>
+              {leg.flight?.fare?.totalFare || item.fare.pricePerAdult}
+            </div>
+            <div className={styles.adultText}>/ ADULT</div>
           </div>
         </div>
 
@@ -451,12 +488,6 @@ const TripCard = ({
                 {seats} Left
               </span>
             )}
-            <div className={styles.legFare}>
-              <strong>
-                {leg.flight?.fare?.totalFare || item.fare.pricePerAdult}
-              </strong>
-              <span>/ADULT</span>
-            </div>
           </div>
         </div>
       </div>
@@ -469,17 +500,19 @@ const TripCard = ({
         <div className={styles.roundTripColumns}>
           <section className={styles.roundColumn}>
             <div className={styles.roundColumnTitle}>
-              <span>
-                {selectedDepart?.depart?.flight?.departure?.city || "Departure"} to{" "}
-                {selectedDepart?.depart?.flight?.arrival?.city || "Arrival"}
-              </span>
-              <small>{selectedDepart?.depart?.date || ""}</small>
+              {selectedDepart?.depart?.flight?.departure?.city ? (
+                <span>
+                  {cleanCity(selectedDepart.depart.flight.departure.city)} → {cleanCity(selectedDepart.depart.flight.arrival.city)} . {formatColumnDate(selectedDepart.depart.date)}
+                </span>
+              ) : (
+                <span>DEPARTURE → ARRIVAL</span>
+              )}
             </div>
             <div className={styles.roundColumnHeader}>
-              <span>Departure</span>
-              <span>Duration</span>
-              <span>Arrival</span>
-              <span>Price</span>
+              <span>Departure ↑↓</span>
+              <span>Duration ↑↓</span>
+              <span>Arrival ↑↓</span>
+              <span>Price ↑↓</span>
             </div>
             <div className={styles.roundOptionList}>
               {tripCardsData.map((item) => renderLegOption(item, "depart"))}
@@ -488,17 +521,19 @@ const TripCard = ({
 
           <section className={styles.roundColumn}>
             <div className={styles.roundColumnTitle}>
-              <span>
-                {selectedReturn?.return?.flight?.departure?.city || "Return"} to{" "}
-                {selectedReturn?.return?.flight?.arrival?.city || "Arrival"}
-              </span>
-              <small>{selectedReturn?.return?.date || ""}</small>
+              {selectedReturn?.return?.flight?.departure?.city ? (
+                <span>
+                  {cleanCity(selectedReturn.return.flight.departure.city)} → {cleanCity(selectedReturn.return.flight.arrival.city)} . {formatColumnDate(selectedReturn.return.date)}
+                </span>
+              ) : (
+                <span>RETURN → ARRIVAL</span>
+              )}
             </div>
             <div className={styles.roundColumnHeader}>
-              <span>Departure</span>
-              <span>Duration</span>
-              <span>Arrival</span>
-              <span>Price</span>
+              <span>Departure ↑↓</span>
+              <span>Duration ↑↓</span>
+              <span>Arrival ↑↓</span>
+              <span>Price ↑↓</span>
             </div>
             <div className={styles.roundOptionList}>
               {tripCardsData.map((item) => renderLegOption(item, "return"))}

@@ -176,14 +176,40 @@
   gap: 7px;
 }
 .fareName {
+  display: flex;
+  align-items: center;
   font-family: var(--font-inter);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 14px;
   line-height: 100%;
   letter-spacing: 0%;
-  vertical-align: middle;
   text-transform: uppercase;
-  color: rgba(118, 118, 118, 1);
+  color: #1f2937;
+}
+
+.radioOutline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.selectedFareCard .radioOutline {
+  border-color: #000000;
+  position: relative;
+}
+
+.selectedFareCard .radioOutline::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #000000;
 }
 .price {
   font-family: Antic Didone;
@@ -306,7 +332,7 @@
   right: 0;
   top: 3px;
   padding: 7px 15px;
-  background-color: #000033;
+  background-color: #208ef5;
   font-family: var(--font-inter);
   font-weight: 600;
   font-size: 12px;
@@ -315,7 +341,7 @@
   color: #ffffff;
 }
 .premiumContainer {
-  background: linear-gradient(180deg, #c9e9ff 0%, #ffffff 50%);
+  background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
 }
 
 /* sticky behavior */

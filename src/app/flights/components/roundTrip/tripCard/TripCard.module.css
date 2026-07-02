@@ -3,48 +3,48 @@
   flex-direction: column;
   gap: 24px;
 }
+
 .roundTripShell {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding-bottom: 116px;
 }
+
 .roundTripColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
 }
+
 .roundColumn {
   display: flex;
   flex-direction: column;
   gap: 0;
   min-width: 0;
 }
+
 .roundColumnTitle {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 18px;
-  background: #ffffff;
-  border-bottom: 1px solid #edf0f4;
+  padding: 14px 0 10px;
+  background: transparent;
+  border-bottom: none;
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #000033;
+  color: #4b5563;
 }
-.roundColumnTitle small {
-  flex: 0 0 auto;
-  color: #737373;
-  font-size: 12px;
-  font-weight: 500;
-}
+
 .roundColumnHeader {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 78px;
-  gap: 10px;
-  padding: 12px 18px;
+  grid-template-columns: 1fr 1.8fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 16px;
   background: #f8fafc;
+  border-top: 1px solid #edf0f4;
   border-bottom: 1px solid #edf0f4;
   font-family: var(--font-inter);
   font-size: 11px;
@@ -52,31 +52,43 @@
   text-transform: uppercase;
   color: #8290a3;
 }
+
+.roundColumnHeader span:nth-child(3),
+.roundColumnHeader span:last-child {
+  text-align: right;
+}
+
 .roundOptionList {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding-top: 14px;
 }
+
 .roundOptionCard {
   background: #ffffff;
-  border: 1px solid transparent;
-  padding: 16px 16px 12px;
+  border: 1px solid #e4e6e8;
+  border-radius: 6px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .roundOptionCard:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
 }
+
 .selectedRoundOption {
-  border-color: #000033;
+  border-color: #000000;
 }
+
 .roundOptionTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
+
 .radioMark {
   width: 16px;
   height: 16px;
@@ -84,30 +96,42 @@
   border-radius: 50%;
   flex: 0 0 auto;
   position: relative;
+  background-color: #ffffff;
 }
+
+.selectedRoundOption .radioMark {
+  border-color: #000000;
+}
+
 .selectedRoundOption .radioMark::after {
   content: "";
   position: absolute;
-  inset: 4px;
+  inset: 3px;
   border-radius: 50%;
-  background: #000033;
+  background: #000000;
 }
+
 .roundOptionFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #edf0f4;
 }
+
 .footerLeft,
 .footerRight {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .footerRight {
   margin-left: auto;
 }
+
 .inlineDetailsBtn {
   display: inline-flex;
   align-items: center;
@@ -122,6 +146,7 @@
   color: #000033;
   cursor: pointer;
 }
+
 .refundableBadge {
   display: inline-flex;
   align-items: center;
@@ -136,6 +161,7 @@
   font-weight: 600;
   line-height: 1;
 }
+
 .seatBadge {
   display: inline-flex;
   align-items: center;
@@ -146,10 +172,12 @@
   font-weight: 500;
   white-space: nowrap;
 }
+
 .seatBadge svg {
   color: #f4bd00;
   stroke: currentColor;
 }
+
 .legFare {
   display: flex;
   align-items: flex-end;
@@ -158,13 +186,16 @@
   font-family: var(--font-inter);
   white-space: nowrap;
 }
+
 .legFare strong {
   font-size: 14px;
   font-weight: 700;
 }
+
 .legFare span {
   font-size: 10px;
 }
+
 .selectionBar {
   position: fixed;
   bottom: 0;
@@ -181,18 +212,21 @@
   color: #ffffff;
   box-shadow: 0 -8px 22px #0000001f;
 }
+
 .selectionLeg {
   display: grid;
   gap: 4px;
   min-width: 0;
   font-family: var(--font-inter);
 }
+
 .selectionLabel {
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   color: #cfd5e6;
 }
+
 .selectionLeg strong {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -200,36 +234,43 @@
   font-size: 14px;
   font-weight: 500;
 }
+
 .selectionLeg span:not(.selectionLabel) {
   font-size: 18px;
   font-weight: 500;
 }
+
 .selectionLeg small,
 .selectionFare small {
   color: #cfd5e6;
   font-size: 11px;
 }
+
 .selectionDivider {
   width: 1px;
   min-height: 58px;
   background: #ffffff4d;
 }
+
 .selectionFare {
   display: grid;
   gap: 3px;
   justify-items: end;
   font-family: var(--font-inter);
 }
+
 .selectionFare span {
   color: #cfd5e6;
   font-size: 11px;
   text-transform: uppercase;
 }
+
 .selectionFare strong {
   font-size: 24px;
   font-weight: 500;
   white-space: nowrap;
 }
+
 .bookNowBtn {
   min-width: 140px;
   height: 42px;
@@ -242,10 +283,12 @@
   text-transform: uppercase;
   cursor: pointer;
 }
+
 .bookNowBtn:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 .card {
   display: flex;
   background-color: #ffffff;
@@ -255,15 +298,18 @@
   justify-content: space-between;
   transition: all 0.4s ease;
 }
+
 .card:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
 }
+
 .cardLeft {
   max-width: 835px;
   width: 100%;
   display: flex;
   gap: 16px;
 }
+
 .cardLeftMainCont {
   max-width: 835px;
   width: 100%;
@@ -271,6 +317,7 @@
   flex-direction: column;
   gap: 10px;
 }
+
 .departContainer,
 .returnContainer {
   max-width: 409px;
@@ -279,11 +326,13 @@
   flex-direction: column;
   gap: 14px;
 }
+
 .HeadingCont {
   display: flex;
   gap: 12px;
   align-items: center;
 }
+
 .HeadingCont img {
   width: 30px;
   height: 30px;
@@ -304,6 +353,7 @@
   text-transform: capitalize;
   color: #000000;
 }
+
 .ariLineNumber {
   font-family: Inter;
   font-weight: 400;
@@ -314,16 +364,19 @@
   vertical-align: middle;
   color: #737373;
 }
+
 .departureDetails {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .departTextHeading {
   display: flex;
   gap: 6px;
   align-items: center;
 }
+
 .departTextHeading h3 {
   font-family: var(--font-inter);
   font-weight: 600;
@@ -334,6 +387,7 @@
   text-transform: uppercase;
   color: #000000;
 }
+
 .departTextHeading span {
   font-family: var(--font-inter);
   font-weight: 400;
@@ -343,6 +397,7 @@
   text-transform: uppercase;
   color: #000000;
 }
+
 .departTimeContainer {
   max-width: 409px;
   width: 100%;
@@ -398,6 +453,7 @@
   border: none;
   transition: all 0.45s ease;
 }
+
 .viewBtn:hover {
   background-color: #fcc800;
   color: #000033;
@@ -467,6 +523,7 @@
 .offerBannerWrap {
   margin-top: 24px;
 }
+
 /* ARROW ICON */
 .downArrow {
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
@@ -485,6 +542,7 @@
 .cardOpen {
   box-shadow: none !important;
 }
+
 .expandWrap {
   max-height: 0;
   overflow: hidden;
@@ -504,9 +562,11 @@
   max-height: 600px;
   /* enough for content */
 }
+
 .card {
   border: 1px solid transparent;
 }
+
 .cardOpen {
   border: 1px solid #e5e7f0;
   border-bottom: none;
@@ -521,28 +581,35 @@
 .rotate {
   transform: rotate(180deg);
 }
+
 .cardRight .seeDetailsBtn {
   display: none;
 }
+
 @media (max-width: 1440px) {
   .expandWrap.open {
     max-height: 886px;
   }
 }
+
 @media (max-width: 1383px) {
   .card {
     flex-direction: column;
     padding-right: 16px;
   }
+
   .cardLeft {
     max-width: 100%;
   }
+
   .cardLeftMainCont {
     max-width: 100%;
   }
+
   .departContainer {
     max-width: 100%;
   }
+
   .cardRight {
     justify-content: space-between;
     align-items: flex-end;
@@ -553,34 +620,159 @@
   .cardRight .seeDetailsBtn {
     display: flex;
   }
+
   .cardLeftMainCont .seeDetailsBtn {
     display: none;
   }
 }
+
 @media (max-width: 1200px) {
   .roundTripColumns {
     grid-template-columns: 1fr;
   }
+
   .selectionBar {
     grid-template-columns: 1fr;
     gap: 12px;
   }
+
   .selectionDivider {
     display: none;
   }
+
   .selectionFare {
     justify-items: start;
   }
+
   .bookNowBtn {
     width: 100%;
   }
+
   .departTimeContainer,
   .returnContainer {
     max-width: unset;
   }
 }
+
 @media (max-width: 800px) {
   .cardLeft {
     flex-direction: column;
   }
+}
+
+/* Card Middle Row Styles */
+.cardMiddleRow {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.timeCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.arrivalTimeCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 4px;
+}
+
+.largeTime {
+  font-family: Antic Didone, serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #000000;
+}
+
+.cityText {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.durationCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.flightAnimation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.flightDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.flightLine {
+  flex-grow: 1;
+  border-top: 1.5px dotted #94a3b8;
+  height: 0;
+}
+
+.planeIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.durationText {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dotSeparator {
+  color: #94a3b8;
+  font-size: 6px;
+}
+
+.priceCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+
+.priceText {
+  font-family: var(--font-inter);
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.adultText {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
 }
