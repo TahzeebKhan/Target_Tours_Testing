@@ -491,9 +491,15 @@ const AvailabilityComponent = ({
                 {/* BENEFITS */}
                 <div className={styles.benefitsSec}>
                   <ul className={styles.benefitsList}>
-                    {benefits.map((benefit, idx) => (
-                      <li key={idx}>{benefit}</li>
-                    ))}
+                  <ul className={styles.benefitsList}>
+  {benefits.slice(0, 3).map((benefit, idx) => {
+    const shortText = benefit.length > 50 
+      ? benefit.slice(0, 50) + '...more' 
+      : benefit;
+      
+    return <li key={idx}>{shortText}</li>;
+  })}
+</ul>
                   </ul>
                 </div>
 
@@ -517,10 +523,13 @@ const AvailabilityComponent = ({
                 </div>
               </div>
 
-              <div className={styles.br}></div>
+            
 
               {/* RIGHT */}
+              < div className={styles.brParent}>
+                 <div className={styles.br}></div>
               <div className={styles.cardDetailRight}>
+                 
                 <div className={styles.cardRightTop}>
                   <div className={styles.ExcellentCont}>
                     <div className={styles.ExcellentText}>
@@ -617,6 +626,7 @@ const AvailabilityComponent = ({
                     </button>
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           </div>
