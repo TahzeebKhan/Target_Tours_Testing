@@ -270,7 +270,7 @@ const AvailabilityComponent = ({
                           onClick={() => toggleComboExpansion(comboRoom.id)}
                           aria-label={isExpanded ? "Hide combo details" : "Show combo details"}
                         >
-                          <ChevronDown size={16} />
+                          <img src="images/upArrow.svg"/>
                         </button>
                       </div>
                     </div>
