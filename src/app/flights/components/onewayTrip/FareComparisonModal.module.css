@@ -279,22 +279,26 @@
   align-items: center;
   gap: 6px;
 }
+
 .flightIconStatus {
   width: 20px;
   height: 20px;
   object-fit: cover;
 }
+
 .flightInfoNameDatesContainer {
   display: flex;
   align-items: center;
   gap: 5px;
 }
+
 .smallestDot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background-color: #767676;
 }
+
 .flightInfoNameDates {
   font-family: var(--font-inter);
   font-weight: 400;
@@ -454,7 +458,7 @@
 .inlineFareCards .fareSkeletonCard,
 .inlineFareCards .loadingCard {
   flex: 0 0 calc((100% - 48px) / 3);
-  min-width: 320px;
+  min-width: 326px;
   max-width: 380px;
   padding: 24px;
 }
@@ -474,6 +478,7 @@
 .inlineFareCards .fareActions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
 }
 
 .inlineFareCards .price {
@@ -517,12 +522,10 @@
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(247, 248, 252, 0.85) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(247, 248, 252, 0.85) 50%,
+      rgba(255, 255, 255, 0) 100%);
   animation: fareSkeletonShine 1.35s infinite;
 }
 
@@ -616,12 +619,14 @@
 .fareCardContainer::after {
   content: "";
   position: absolute;
-  inset: -1px; /* slightly outside */
+  inset: -1px;
+  /* slightly outside */
   border: 2px solid #000033;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  border-radius: 0; /* match card if needed */
+  border-radius: 0;
+  /* match card if needed */
 }
 
 /* show border on hover */
@@ -640,17 +645,49 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
+  width: 100%;
 }
 
 .fareName {
+  display: flex;
+  align-items: center;
   font-family: var(--font-inter);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 14px;
   line-height: 18.57px;
   letter-spacing: 0%;
-  vertical-align: middle;
   text-transform: uppercase;
-  color: #767676;
+  color: #1f2937;
+}
+
+.upperHalf {
+  display: flex;
+  gap: 16px;
+}
+
+.radioOutline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.selectedFareCard .radioOutline {
+  border-color: #000000;
+  position: relative;
+}
+
+.selectedFareCard .radioOutline::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #000000;
 }
 
 .price {
@@ -670,6 +707,7 @@
   align-items: center;
   gap: 12px;
   position: relative;
+
 }
 
 .priceInfoTrigger {
@@ -718,12 +756,12 @@
   padding: 9px 12px;
   background: #000033;
   color: #ffffff;
- font-family: Inter;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: -2%;
-text-transform: uppercase;
+  font-family: Inter;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
 
   text-transform: uppercase;
 }
@@ -792,26 +830,28 @@ text-transform: uppercase;
   text-transform: capitalize;
   color: #000033;
 }
-.priceInfoTotal{
-font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
+
+.priceInfoTotal {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
 
 }
-.priceInfoTotal2{
-font-family: Inter;
-font-weight: 600;
-font-style: Semi Bold;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
+
+.priceInfoTotal2 {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
 
 }
 
@@ -915,17 +955,19 @@ vertical-align: middle;
   right: 0;
   top: 10px;
   padding: 7px 15px;
-  background-color: #000033;
+  background: linear-gradient(to left, #00CDFC, #001996);
   font-family: var(--font-inter);
   font-weight: 600;
   font-size: 12px;
   line-height: 1.5;
   letter-spacing: -2%;
   color: #ffffff;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 
 .premiumContainer {
-  background: linear-gradient(180deg, #c9e9ff 0%, #ffffff 50%);
+  background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
 }
 
 .loadingCard {
@@ -1015,6 +1057,7 @@ vertical-align: middle;
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }

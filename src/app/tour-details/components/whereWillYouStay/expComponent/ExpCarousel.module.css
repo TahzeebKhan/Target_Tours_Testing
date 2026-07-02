@@ -399,3 +399,39 @@ justify-content: space-between; */
         padding-right: 10px;
     }
 }
+
+@media (max-width: 1024px) {
+    .popupCard {
+        max-width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+    .popupContent {
+        gap: 30px;
+        padding: 24px;
+    }
+    .popupRight h2 {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .popupContent {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        padding: 16px;
+    }
+    .popupLeft {
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 10;
+    }
+    .popupRight h2 {
+        font-size: 28px;
+    }
+    .popupHeader {
+        padding: 16px 20px;
+    }
+}

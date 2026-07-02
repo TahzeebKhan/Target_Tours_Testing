@@ -582,8 +582,8 @@ const FareComparisonModalRoundTrip = ({
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Unable to continue with this flight right now."
+        error?.message ||
+        "Unable to continue with this flight right now."
       );
     } finally {
       setIsSubmitting(false);
@@ -666,14 +666,14 @@ const FareComparisonModalRoundTrip = ({
   }, [activeFlightNo, flightData]);
   const fares = hasFareOptionItems
     ? buildFareOptions({
-        flightData: fareOptionsFlightData,
-        prefetchedData: {
-          ...(prefetchedData || {}),
-          fareOptionsResponse: fareSourcePayload,
-        },
-        adults: searchParams?.get("adults") || 1,
-        allowFallbackCards: false,
-      })
+      flightData: fareOptionsFlightData,
+      prefetchedData: {
+        ...(prefetchedData || {}),
+        fareOptionsResponse: fareSourcePayload,
+      },
+      adults: searchParams?.get("adults") || 1,
+      allowFallbackCards: false,
+    })
     : [];
   const showEmptyFareOptions =
     hasResolvedFareOptions && !isFareOptionsLoading && fares.length === 0;
@@ -700,9 +700,8 @@ const FareComparisonModalRoundTrip = ({
               <div
                 key={key}
                 onClick={() => setSelected(key)}
-                className={`${styles.toggleBtn} ${
-                  selected === key ? styles.active : ""
-                }`}
+                className={`${styles.toggleBtn} ${selected === key ? styles.active : ""
+                  }`}
               >
                 {seg.label}
               </div>
@@ -805,13 +804,11 @@ const FareComparisonModalRoundTrip = ({
             {fares.map((fare) => (
               <div
                 key={fare.id}
-                className={`${styles.fareCardContainer} ${
-                  fare.isPremium ? styles.premiumContainer : ""
-                } ${
-                  sameFare(selectedFares[selected], fare)
+                className={`${styles.fareCardContainer} ${fare.isPremium ? styles.premiumContainer : ""
+                  } ${sameFare(selectedFares[selected], fare)
                     ? styles.selectedFareCard
                     : ""
-                }`}
+                  }`}
               >
                 {fare.isPremium && (
                   <div className={styles.premiumBadge}>PREMIUM</div>
@@ -819,10 +816,10 @@ const FareComparisonModalRoundTrip = ({
 
                 <div className={styles.fareCard}>
                   <div className={styles.fareHeader}>
+                    <span className={styles.radioOutline}></span>
                     <h3
-                      className={`${styles.fareName} ${
-                        fare.isPremium ? styles.fareNamePremium : ""
-                      }`}
+                      className={`${styles.fareName} ${fare.isPremium ? styles.fareNamePremium : ""
+                        }`}
                     >
                       {fare.name}
                     </h3>

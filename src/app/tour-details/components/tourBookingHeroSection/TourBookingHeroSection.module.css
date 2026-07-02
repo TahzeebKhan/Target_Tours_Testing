@@ -232,6 +232,14 @@ color:#E7E5E4;
   text-transform: uppercase;
 }
 
+.labelDesktop {
+  display: inline;
+}
+
+.labelMobile {
+  display: none !important;
+}
+
 @media (max-width: 1100px) {
   .tourBookingSection {
     min-height: 760px;
@@ -267,13 +275,20 @@ color:#E7E5E4;
   }
 
   .downloadButton {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding-inline: 14px;
+    font-size: 12px;
+    border-radius: 4px;
   }
 
   .signInButton {
     min-height: 34px;
     padding-inline: 18px;
     font-size: 12px;
+    border-radius: 4px;
   }
 
   .heroContainer {
@@ -301,24 +316,47 @@ color:#E7E5E4;
 
   .statsPanel {
     min-height: 82px;
+    width: 100%;
   }
 
   .statsPanel div {
-    padding: 12px 10px;
+    padding: 12px 6px;
+    min-width: 0;
+    flex: 1;
   }
 
   .statsPanel strong {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .statsPanel span {
-    letter-spacing: 1.6px;
+    letter-spacing: 1.2px;
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 450px) {
+  .labelDesktop {
+    display: none !important;
+  }
+  .labelMobile {
+    display: inline !important;
+  }
+  
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .statsContParent {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 16px;
+  }
+
   .header {
-    font-size: 42px;
+    font-size: clamp(26px, 8vw, 36px);
   }
 
   .tags {
@@ -326,12 +364,16 @@ color:#E7E5E4;
     padding: 6px 10px;
   }
 
-  .statsPanel {
-    grid-template-columns: 1fr;
+  .statsPanel div {
+    padding: 10px 4px;
   }
 
-  .statsPanel div + div {
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
-    border-left: 0;
+  .statsPanel strong {
+    font-size: 20px;
+  }
+
+  .statsPanel span {
+    font-size: 8px;
+    letter-spacing: 0.5px;
   }
 }

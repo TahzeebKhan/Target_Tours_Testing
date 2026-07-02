@@ -386,3 +386,37 @@ color:#000000;
     transform: translateX(0);
   }
 }
+
+@media (max-width: 768px) {
+  .flightModal {
+    width: 100%;
+    min-width: 100%;
+  }
+  .flightFilters {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .flightMainRow {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+    gap: 14px;
+  }
+  .flightAirline {
+    flex-direction: column;
+    text-align: center;
+  }
+  .flightPrice {
+    justify-items: center;
+    text-align: center;
+  }
+  .flightMetaRow {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .flightMetaRow button {
+    margin-left: 0;
+  }
+}
+
