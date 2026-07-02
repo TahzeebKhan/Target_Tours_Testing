@@ -716,7 +716,7 @@ const FareComparisonModal = ({
             cancelled = true;
         };
     }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse]);
-    
+
     const performBookNow = useCallback(async (selectedFare) => {
         const basePriceRequest = flightData?.booking?.priceRequest;
         const selectedFareIndex = getSelectedFareIndex(selectedFare);
@@ -863,41 +863,45 @@ const FareComparisonModal = ({
     const flight = getSelectedFlightSummary(flightData, searchParams?.get("start"));
 
     const fareCards = (
-                <div
-                    ref={inline ? fareCardsRef : null}
-                    className={`${styles.fareCards} ${inline ? styles.inlineFareCards : ""}`}
-                >
-                        {showFareSkeleton ? renderLoadingCards(styles) : null}
-                        {showEmptyFareOptions ? (
-                            <div className={styles.emptyFareOptions}>
-                                No fare option available
-                            </div>
-                        ) : null}
-                        {fareOptions.map((fare) => {
-                            const isCurrentFareSubmitting =
-                                isSubmitting && submittingFareId === fare.id;
-                            const priceDetails = getFarePriceDetails(
-                                fare,
-                                searchParams?.get("adults") || 1
-                            );
+        <div
+            ref={inline ? fareCardsRef : null}
+            className={`${styles.fareCards} ${inline ? styles.inlineFareCards : ""}`}
+        >
+            {showFareSkeleton ? renderLoadingCards(styles) : null}
+            {showEmptyFareOptions ? (
+                <div className={styles.emptyFareOptions}>
+                    No fare option available
+                </div>
+            ) : null}
+            {fareOptions.map((fare) => {
+                const isCurrentFareSubmitting =
+                    isSubmitting && submittingFareId === fare.id;
+                const priceDetails = getFarePriceDetails(
+                    fare,
+                    searchParams?.get("adults") || 1
+                );
 
-                            return (
-                        <div
-                            key={fare.id}
-                            className={`${styles.fareCardContainer} ${fare.isPremium ? styles.premiumContainer : ""
-                                }`}
-                        >
+                return (
+                    <div
+                        key={fare.id}
+                        className={`${styles.fareCardContainer} ${fare.isPremium ? styles.premiumContainer : ""
+                            }`}
+                    >
 
-                            {fare.isPremium && (
-                                <div className={styles.premiumBadge}>PREMIUM</div>
-                            )}
+                        {fare.isPremium && (
+                            <div className={styles.premiumBadge}>PREMIUM</div>
+                        )}
 
-                            <div className={styles.fareCard}>
+                        <div className={styles.fareCard}>
 
+                            <div className={styles.upperHalf}>
+                                <span className={styles.radioOutline}></span>
                                 <div className={styles.fareHeader}>
 
 
-                                    <h3 className={styles.fareName}>{fare.name}</h3>
+                                    <h3 className={styles.fareName}>
+                                        {fare.name}
+                                    </h3>
                                     <div className={styles.farePrice}>
                                         <span className={styles.price}>{fare.price}</span>
                                         <div className={styles.priceInfoTrigger} tabIndex={0}>
@@ -932,61 +936,62 @@ const FareComparisonModal = ({
                                     </div>
                                     <span className={styles.pricePerAdult}>{fare.pricePerAdult}  <span className={styles.adult}>/ ADULT</span></span>
                                 </div>
-                                <div className={styles.hr}></div>
+                            </div>
+                            <div className={styles.hr}></div>
 
 
-                                {/* Baggage */}
-                                <div className={styles.featureSection}>
-                                    <div className={styles.featureTitle}>BAGGAGE</div>
-                                    <div className={styles.featureItem}>
-                                        <img src="/icons/bigBag.svg" alt="" />
-                                        <span>{fare.baggage.cabin}</span>
-                                    </div>
-                                    <div className={styles.featureItem}>
-                                        <img src="/icons/bag.svg" alt="" />
-                                        <span>{fare.baggage.checkin}</span>
-                                    </div>
+                            {/* Baggage */}
+                            <div className={styles.featureSection}>
+                                <div className={styles.featureTitle}>BAGGAGE</div>
+                                <div className={styles.featureItem}>
+                                    <img src="/icons/bigBag.svg" alt="" />
+                                    <span>{fare.baggage.cabin}</span>
                                 </div>
-
-                                <div className={styles.hr}></div>
-
-                                {/* Change/Cancellation */}
-                                <div className={styles.featureSection}>
-                                    <div className={styles.featureTitle}>CHANGE / CANCELLATION</div>
-                                    <div className={styles.featureItem}>
-                                        <img src="/icons/change.svg" alt="" />
-                                        <span>{fare.changes.charges}</span>
-                                    </div>
-                                    <div className={styles.featureItem}>
-                                        <img src="/icons/cancellation.svg" alt="" />
-                                        <span>{fare.changes.cancellation}</span>
-                                    </div>
-                                </div>
-
-                                <div className={styles.hr}></div>
-
-                                {/* Add-ons */}
-                                <div className={styles.featureSection}>
-                                    <div className={styles.featureTitle}>ADD-ONS AND SERVICES</div>
-                                    <div className={styles.featureItem}>
-                                        <img src={fare.isPremium ? "/icons/MEAL.svg" : "/icons/change.svg"} alt="" />
-                                        <span>{fare.addons.seats}</span>
-                                    </div>
-                                    <div className={styles.featureItem}>
-                                        <img src={fare.isPremium ? "/icons/couch.svg" : "/icons/cancellation.svg"} alt="" />
-                                        <span>{fare.addons.meals}</span>
-                                    </div>
+                                <div className={styles.featureItem}>
+                                    <img src="/icons/bag.svg" alt="" />
+                                    <span>{fare.baggage.checkin}</span>
                                 </div>
                             </div>
-                            {/* Action Buttons */}
-                            <div className={styles.fareActions}>
-                                {inline && <button className={styles.lockPriceBtn}>LOCK PRICE</button>}
-                                <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isCurrentFareSubmitting ? "LOADING..." : "BOOK NOW"}</button>
+
+                            <div className={styles.hr}></div>
+
+                            {/* Change/Cancellation */}
+                            <div className={styles.featureSection}>
+                                <div className={styles.featureTitle}>CHANGE / CANCELLATION</div>
+                                <div className={styles.featureItem}>
+                                    <img src="/icons/change.svg" alt="" />
+                                    <span>{fare.changes.charges}</span>
+                                </div>
+                                <div className={styles.featureItem}>
+                                    <img src="/icons/cancellation.svg" alt="" />
+                                    <span>{fare.changes.cancellation}</span>
+                                </div>
+                            </div>
+
+                            <div className={styles.hr}></div>
+
+                            {/* Add-ons */}
+                            <div className={styles.featureSection}>
+                                <div className={styles.featureTitle}>ADD-ONS AND SERVICES</div>
+                                <div className={styles.featureItem}>
+                                    <img src={fare.isPremium ? "/icons/MEAL.svg" : "/icons/change.svg"} alt="" />
+                                    <span>{fare.addons.seats}</span>
+                                </div>
+                                <div className={styles.featureItem}>
+                                    <img src={fare.isPremium ? "/icons/couch.svg" : "/icons/cancellation.svg"} alt="" />
+                                    <span>{fare.addons.meals}</span>
+                                </div>
                             </div>
                         </div>
-                            );
-                        })}
-                </div>
+                        {/* Action Buttons */}
+                        <div className={styles.fareActions}>
+                            {inline && <button className={styles.lockPriceBtn}>LOCK PRICE</button>}
+                            <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isCurrentFareSubmitting ? "LOADING..." : "BOOK NOW"}</button>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     );
 
     if (inline) {
@@ -1062,7 +1067,7 @@ const FareComparisonModal = ({
                                 <div className={styles.flightAnimation}>
                                     <div className={styles.flightDotedcontainer}>
                                         <div className={styles.bigDot}></div>
-                                       <img src="/images/popupDash.svg" alt="" />
+                                        <img src="/images/popupDash.svg" alt="" />
                                     </div>
 
                                     <img
@@ -1079,7 +1084,7 @@ const FareComparisonModal = ({
                                         <div className={styles.bigDot}></div>
                                     </div>
                                 </div>
- 
+
                                 <div className={styles.priceContainer}>
                                     <span className={styles.duration}>
                                         {flight.duration.hours}

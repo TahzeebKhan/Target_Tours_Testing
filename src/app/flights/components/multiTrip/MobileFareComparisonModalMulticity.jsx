@@ -210,7 +210,10 @@ const MobileFareComparisonModalMulticity = ({
 
               <div className={styles.fareCard}>
                 <div className={styles.fareHeader}>
-                  <h3 className={styles.fareName}>{fare.name}</h3>
+                  <h3 className={styles.fareName}>
+                    <span className={styles.radioOutline}></span>
+                    {fare.name}
+                  </h3>
                   <div className={styles.farePrice}>
                     <span className={styles.price}>{fare.price}</span>
                     <img src="/icons/Group.svg" alt="" />

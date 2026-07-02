@@ -289,6 +289,7 @@ const FareComparisonModalMulticity = ({ isOpen, onClose, flightData }) => {
                         fare.isPremium ? styles.fareNamePremium : ""
                       }`}
                     >
+                      <span className={styles.radioOutline}></span>
                       {fare.name}
                     </h3>
                     <div className={styles.farePrice}>
