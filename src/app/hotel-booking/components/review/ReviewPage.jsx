@@ -343,15 +343,30 @@ const toAmountNumber = (value) => {
 };
 
 const parsePriceChange = (response) => {
+  const priceCode =
+    getResponseValue(response, "Pricecode") ||
+    getResponseValue(response, "priceCode") ||
+    response?.data?.priceInfo?.Pricecode ||
+    response?.data?.priceInfo?.priceCode ||
+    response?.priceInfo?.Pricecode ||
+    response?.priceInfo?.priceCode ||
+    "";
   const message =
     getResponseValue(response, "Pricemessage") ||
     response?.data?.priceInfo?.Pricemessage ||
     response?.priceInfo?.Pricemessage ||
     "";
   const oldFare = Number(String(message).match(/OldFare:([^|]+)/i)?.[1]);
-  const newFare = Number(String(message).match(/NewFare:([^|]+)/i)?.[1]);
+  const newFare =
+    Number(String(message).match(/NewFare:([^|]+)/i)?.[1]) ||
+    Number(getResponseValue(response, "NetAmount")) ||
+    Number(getResponseValue(response, "netAmount"));
 
-  if (!Number.isFinite(oldFare) || !Number.isFinite(newFare) || newFare <= oldFare) {
+  if (
+    String(priceCode) !== "555" ||
+    !Number.isFinite(oldFare) ||
+    !Number.isFinite(newFare)
+  ) {
     return null;
   }
 
@@ -359,6 +374,7 @@ const parsePriceChange = (response) => {
     oldFare,
     newFare,
     difference: newFare - oldFare,
+    message,
   };
 };
 
@@ -962,10 +978,6 @@ const ReviewPage = () => {
     });
 
     // window.location.assign(redirectUrl);
-
-    // Forces the top-level window to redirect, clearing any iframe/modal glitches
-// window.top.location.href = redirectUrl;
-
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -1020,11 +1032,14 @@ const ReviewPage = () => {
     setBookingLoading(true);
 
     try {
-      const nextAmount = formatAmount(priceChange?.newFare || pendingConfirmPayload.netAmount);
+      const acceptedAmount = toAmountNumber(
+        priceChange?.newFare || pendingConfirmPayload.netAmount,
+      );
+      const nextAmount = formatAmount(acceptedAmount);
       const paymentResponse = await HotelPaymentStart({
         ...pendingPaymentPayload,
-        NetAmount: toAmountNumber(nextAmount),
-        amount: toAmountNumber(nextAmount),
+        NetAmount: acceptedAmount,
+        amount: acceptedAmount,
       });
       const merchantOrderId = getPaymentMerchantOrderId(paymentResponse);
       redirectToHotelPayment(paymentResponse, {
@@ -1321,9 +1336,9 @@ const ReviewPage = () => {
           "",
       );
       const netAmount = formatAmount(
-        payload.NetAmount ||
-          getResponseValue(startBookingResponse, "NetAmount") ||
+        getResponseValue(startBookingResponse, "NetAmount") ||
           getResponseValue(startBookingResponse, "netAmount") ||
+          payload.NetAmount ||
           "",
       );
       const hotelPayment = {
@@ -1346,6 +1361,7 @@ const ReviewPage = () => {
       };
 
       if (priceChangeInfo) {
+        clearHotelBookingStatus();
         setPriceChange(priceChangeInfo);
         setPendingConfirmPayload({
           ...confirmPayload,
