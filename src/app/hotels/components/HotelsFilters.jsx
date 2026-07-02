@@ -193,6 +193,15 @@ const API_FILTER_SECTION_CONFIG = {
   },
 };
 
+const API_FILTER_CATEGORY_ALIASES = {
+  PriceGroup: ["PriceGroup", "priceGroup", "priceGroups", "priceBuckets", "price_ranges", "priceRanges", "price"],
+  StarRating: ["StarRating", "starRating", "star_rating", "stars", "hotelStars", "starCategory"],
+  Facilities: ["Facilities", "facilities", "hotelAmenities", "hotel_amenities", "amenities"],
+  HotelChain: ["HotelChain", "hotelChain", "hotelChains", "hotel_chains", "chains", "brands"],
+  PropertyType: ["PropertyType", "propertyType", "property_type", "propertyTypes", "property_types"],
+  Attraction: ["Attraction", "attraction", "attractions", "nearByAttractions", "nearbyAttractions"],
+};
+
 const FILTER_GROUP_ALIASES = {
   suggested: ["suggested", "suggestedForYou", "suggested_for_you"],
   priceBuckets: ["priceBuckets", "price_buckets", "pricePerNight", "price_per_night", "priceRanges", "price_ranges", "PriceGroup"],
@@ -218,11 +227,74 @@ const normalizeFilterKey = (value) =>
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "");
 
+const getCanonicalApiCategory = (category) => {
+  const normalizedCategory = normalizeFilterKey(category);
+
+  return (
+    Object.entries(API_FILTER_CATEGORY_ALIASES).find(([, aliases]) =>
+      aliases.some((alias) => normalizeFilterKey(alias) === normalizedCategory),
+    )?.[0] || category
+  );
+};
+
+const getApiCategoryConfig = (category) =>
+  API_FILTER_SECTION_CONFIG[getCanonicalApiCategory(category)];
+
+const mapObjectOptions = (options = {}) =>
+  Object.entries(options).map(([key, value]) => {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return {
+        key,
+        label: value.label || value.name || value.title || key,
+        value: value.value ?? value.key ?? key,
+        count: value.count ?? value.total ?? value.totalCount ?? value.hotelCount ?? value.doc_count ?? 0,
+        min: value.min ?? value.minimum ?? value.from,
+        max: value.max ?? value.maximum ?? value.to,
+      };
+    }
+
+    return {
+      key,
+      label: key,
+      value: key,
+      count: value,
+    };
+  });
+
+const normalizeApiOptions = (options) => {
+  if (Array.isArray(options)) return options;
+  if (options && typeof options === "object") return mapObjectOptions(options);
+  return [];
+};
+
+const mapObjectFilters = (filterData = {}) =>
+  Object.entries(filterData)
+    .map(([category, value]) => {
+      const canonicalCategory = getCanonicalApiCategory(category);
+      const options =
+        value && typeof value === "object" && !Array.isArray(value) && value.options
+          ? value.options
+          : value;
+
+      return {
+        category: canonicalCategory,
+        options: normalizeApiOptions(options),
+      };
+    })
+    .filter((filter) => getApiCategoryConfig(filter.category) && filter.options.length);
+
 const getApiFilterList = (filterData) => {
   if (Array.isArray(filterData?.filters)) return filterData.filters;
   if (Array.isArray(filterData?.data?.filters)) return filterData.data.filters;
   if (Array.isArray(filterData?.filterData?.filters)) return filterData.filterData.filters;
   if (Array.isArray(filterData)) return filterData;
+  if (filterData?.filterData && typeof filterData.filterData === "object") {
+    return mapObjectFilters(filterData.filterData);
+  }
+  if (filterData?.data && typeof filterData.data === "object") {
+    return mapObjectFilters(filterData.data);
+  }
+  if (filterData && typeof filterData === "object") return mapObjectFilters(filterData);
   return [];
 };
 
@@ -343,10 +415,12 @@ const mapApiOption = (option = {}, category = "") => ({
 const getApiFilterSections = (filterData) =>
   getApiFilterList(filterData)
     .map((filter) => {
-      const config = API_FILTER_SECTION_CONFIG[filter?.category];
-      const options = Array.isArray(filter?.options)
-        ? filter.options
-            .map((option) => mapApiOption(option, filter.category))
+      const category = getCanonicalApiCategory(filter?.category);
+      const config = getApiCategoryConfig(category);
+      const normalizedOptions = normalizeApiOptions(filter?.options);
+      const options = normalizedOptions.length
+        ? normalizedOptions
+            .map((option) => mapApiOption(option, category))
             .filter((option) => option.key && option.label)
         : [];
 

@@ -185,6 +185,9 @@ export const getHotelsFromMessage = (payload = {}) => {
   const mergedHotels =
     data?.mergedHotels ||
     content?.mergedHotels ||
+    data?.init?.mergedHotels ||
+    content?.init?.mergedHotels ||
+    payload?.init?.mergedHotels ||
     data?.hotels?.mergedHotels ||
     content?.hotels?.mergedHotels ||
     nestedData?.mergedHotels ||
@@ -329,9 +332,93 @@ export const formatHotelPrice = (hotel = {}) => {
 };
 
 export const getHotelRating = (hotel = {}) => {
-  const rating = Number(hotel.starRating || hotel.rating || hotel.stars || 5);
+  const rating = Number(
+    hotel.starRating ||
+      hotel.star_rating ||
+      hotel.stars ||
+      hotel.rate?.starRating ||
+      hotel.rate?.star_rating ||
+      hotel.rating ||
+      5,
+  );
   if (!Number.isFinite(rating)) return 5;
   return Math.max(0, Math.min(5, Math.round(rating)));
+};
+
+const getNumberValue = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+
+    const numericValue = Number(String(value).replace(/[^\d.-]/g, ""));
+    if (Number.isFinite(numericValue)) return numericValue;
+  }
+
+  return null;
+};
+
+const formatRatingScore = (value) => {
+  const rating = getNumberValue(value);
+  if (rating === null) return "-";
+
+  return rating.toFixed(1).replace(/\.0$/, "");
+};
+
+const formatReviewText = (count) => {
+  const reviewCount = getNumberValue(count);
+  if (!reviewCount) return "No reviews yet";
+
+  return `${reviewCount.toLocaleString("en-IN")} review${reviewCount === 1 ? "" : "s"}`;
+};
+
+export const getHotelReviewSummary = (hotel = {}) => {
+  const reviews = Array.isArray(hotel.reviews)
+    ? hotel.reviews
+    : Array.isArray(hotel.raw?.reviews)
+      ? hotel.raw.reviews
+      : [];
+  const firstReview = reviews[0] || {};
+  const reviewSummary =
+    hotel.reviewSummary ||
+    hotel.review_summary ||
+    hotel.guestReview ||
+    hotel.guest_review ||
+    hotel.raw?.reviewSummary ||
+    hotel.raw?.review_summary ||
+    {};
+  const reviewScore = getNumberValue(
+    hotel.reviewRating,
+    hotel.review_rating,
+    hotel.guestRating,
+    hotel.guest_rating,
+    hotel.ratingScore,
+    hotel.rating_score,
+    reviewSummary.rating,
+    reviewSummary.averageRating,
+    reviewSummary.average_rating,
+    firstReview.rating,
+    firstReview.score,
+  );
+  const reviewCount = getNumberValue(
+    hotel.reviewCount,
+    hotel.review_count,
+    hotel.reviewsCount,
+    hotel.reviews_count,
+    hotel.totalReviews,
+    hotel.total_reviews,
+    reviewSummary.count,
+    reviewSummary.reviewCount,
+    reviewSummary.totalReviews,
+    firstReview.count,
+    reviews.length && reviews.some((review) => review.comment || review.review || review.text)
+      ? reviews.length
+      : "",
+  );
+
+  return {
+    score: reviewScore,
+    scoreText: formatRatingScore(reviewScore),
+    text: formatReviewText(reviewCount),
+  };
 };
 
 export const getHotelCoordinates = (hotel = {}) => {
@@ -492,6 +579,9 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
   const hotelId =
     hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode;
   const priceProvider = getHotelPriceProvider(hotel);
+  const reviewSummary = getHotelReviewSummary(hotel);
+  const rating = getHotelRating(hotel);
+  const reviewScore = reviewSummary.score ?? rating;
 
   return {
     id:
@@ -513,7 +603,10 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
     hasPrice,
     facilities: normalizeHotelFacilities(hotel),
     benefits: normalizeHotelBenefits(hotel),
-    rating: getHotelRating(hotel),
+    rating,
+    reviewScore,
+    reviewScoreText: formatRatingScore(reviewScore),
+    reviewText: reviewSummary.text,
     latitude: coordinates?.latitude,
     longitude: coordinates?.longitude,
     raw: hotel,
@@ -575,6 +668,44 @@ const getInitCompleteSearchMeta = (payload = {}) => {
     "";
 
   return { searchId, hotelSearchId };
+};
+
+const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
+  const data = getMessageData(payload);
+  const content = getMessageContent(payload);
+  const firstHotelWithSearchId = hotels.find(
+    (hotel) => hotel?.searchId || hotel?.search_id,
+  );
+  const firstHotelWithHotelSearchId = hotels.find(
+    (hotel) => hotel?.hotelSearchId || hotel?.hotel_search_id,
+  );
+
+  return {
+    searchId:
+      data?.searchId ||
+      data?.search_id ||
+      data?.searchid ||
+      content?.searchId ||
+      content?.search_id ||
+      content?.searchid ||
+      payload?.searchId ||
+      payload?.search_id ||
+      firstHotelWithSearchId?.searchId ||
+      firstHotelWithSearchId?.search_id ||
+      "",
+    hotelSearchId:
+      data?.hotelSearchId ||
+      data?.hotel_search_id ||
+      data?.hotel_search_key ||
+      content?.hotelSearchId ||
+      content?.hotel_search_id ||
+      content?.hotel_search_key ||
+      payload?.hotelSearchId ||
+      payload?.hotel_search_id ||
+      firstHotelWithHotelSearchId?.hotelSearchId ||
+      firstHotelWithHotelSearchId?.hotel_search_id ||
+      "",
+  };
 };
 
 const getHotelFailureMessage = (payload = {}) => {
@@ -1398,6 +1529,10 @@ const TourListing = () => {
     searchId: "",
     hotelSearchId: "",
   });
+  const [mergedFilterSearchMeta, setMergedFilterSearchMeta] = useState({
+    searchId: "",
+    hotelSearchId: "",
+  });
   const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(Boolean(hotelSearchChannel));
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
@@ -1409,6 +1544,27 @@ const TourListing = () => {
     viewportHeight: 0,
     viewportWidth: 0,
   });
+  const searchQueryString = searchParams.toString();
+  const filterSearchParams = useMemo(() => {
+    const params = new URLSearchParams(searchQueryString);
+
+    return {
+      city: params.get("city") || "",
+      checkIn: params.get("checkIn") || "",
+      checkOut: params.get("checkOut") || "",
+      rooms: params.get("rooms") || "",
+      adults: params.get("adults") || "",
+      children: params.get("children") || "",
+      childAges: params.get("childAges") || "",
+      locationId: params.get("locationId") || "",
+      country: params.get("country") || "",
+      state: params.get("state") || "",
+      hotelSearchId:
+        params.get("hotelSearchId") ||
+        params.get("hotelsearchid") ||
+        "",
+    };
+  }, [searchQueryString]);
   const staySummary = useMemo(() => getStaySummary(searchParams), [searchParams]);
   const searchIdFromUrl =
     searchParams.get("searchId") ||
@@ -1416,7 +1572,7 @@ const TourListing = () => {
     searchParams.get("SearchId") ||
     "";
   const activeSearchId = useMemo(() => {
-    if (hotelSearchChannel) return socketSearchMeta.searchId || "";
+    if (socketSearchMeta.searchId) return socketSearchMeta.searchId;
 
     if (searchIdFromUrl) return searchIdFromUrl;
 
@@ -1434,37 +1590,44 @@ const TourListing = () => {
       ""
     );
   }, [hotelResults, hotelSearchChannel, searchIdFromUrl, socketSearchMeta.searchId]);
+  const filterSearchId = hotelSearchChannel
+    ? mergedFilterSearchMeta.searchId
+    : activeSearchId;
+  const filterHotelSearchId = hotelSearchChannel
+    ? mergedFilterSearchMeta.hotelSearchId
+    : socketSearchMeta.hotelSearchId || filterSearchParams.hotelSearchId;
   const searchLocationLabel = useMemo(
     () => getSearchLocationLabel(searchParams),
     [searchParams],
   );
   const filterDataPayload = useMemo(
     () => ({
-      searchId: activeSearchId,
-      hotelSearchId:
-        socketSearchMeta.hotelSearchId ||
-        searchParams.get("hotelSearchId") ||
-        searchParams.get("hotelsearchid") ||
-        "",
-      city: searchParams.get("city") || "",
-      checkIn: searchParams.get("checkIn") || "",
-      checkOut: searchParams.get("checkOut") || "",
+      searchId: filterSearchId,
+      hotelSearchId: filterHotelSearchId,
+      city: filterSearchParams.city,
+      checkIn: filterSearchParams.checkIn,
+      checkOut: filterSearchParams.checkOut,
       channel: hotelSearchChannel,
-      rooms: searchParams.get("rooms") || "",
-      adults: searchParams.get("adults") || "",
-      children: searchParams.get("children") || "",
-      childAges: searchParams.get("childAges") || "",
-      locationId: searchParams.get("locationId") || "",
-      country: searchParams.get("country") || "",
-      state: searchParams.get("state") || "",
+      rooms: filterSearchParams.rooms,
+      adults: filterSearchParams.adults,
+      children: filterSearchParams.children,
+      childAges: filterSearchParams.childAges,
+      locationId: filterSearchParams.locationId,
+      country: filterSearchParams.country,
+      state: filterSearchParams.state,
     }),
-    [activeSearchId, hotelSearchChannel, searchParams, socketSearchMeta.hotelSearchId],
+    [filterHotelSearchId, filterSearchId, filterSearchParams, hotelSearchChannel],
+  );
+  const filterDataRequestKey = useMemo(
+    () => JSON.stringify(filterDataPayload),
+    [filterDataPayload],
   );
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
   const hotelDetailsAbortRef = useRef(null);
   const hotelDetailsRequestRef = useRef(0);
+  const lastFilterRequestKeyRef = useRef("");
 
   const handleHeartClick = (hotel) => {
     const hotelId = getHotelDetailsPayload(hotel).hotelId;
@@ -1574,9 +1737,11 @@ const TourListing = () => {
     setIsHotelLoading(Boolean(hotelSearchChannel));
     setHotelResultSource("");
     setSocketSearchMeta({ searchId: "", hotelSearchId: "" });
+    setMergedFilterSearchMeta({ searchId: "", hotelSearchId: "" });
     setHasMergedHotelResponse(false);
     setIsFilterLoading(Boolean(hotelSearchChannel));
     hotelResultSourceRef.current = "";
+    lastFilterRequestKeyRef.current = "";
 
     const normalizeHotelsInBatches = (hotels, meta = {}) => {
       const runId = normalizeRunRef.current + 1;
@@ -1661,10 +1826,7 @@ const TourListing = () => {
       }
 
       const nextResults = getHotelsFromMessage(payload);
-      if (nextResults.source === "merged" && (!fromCache || !hotelSearchChannel)) {
-        setHasMergedHotelResponse(true);
-      }
-
+      const filterMeta = getFilterSearchMetaFromPayload(payload, nextResults.hotels);
       const firstResultWithMeta = nextResults.hotels.find(
         (hotel) =>
           hotel?.searchId ||
@@ -1674,16 +1836,28 @@ const TourListing = () => {
       );
       const resultMeta = {
         searchId:
-          nextResults.meta?.searchId ||
           firstResultWithMeta?.searchId ||
           firstResultWithMeta?.search_id ||
+          nextResults.meta?.searchId ||
           "",
         hotelSearchId:
-          nextResults.meta?.hotelSearchId ||
           firstResultWithMeta?.hotelSearchId ||
           firstResultWithMeta?.hotel_search_id ||
+          nextResults.meta?.hotelSearchId ||
           "",
       };
+
+      if (
+        (nextResults.source === "merged" ||
+          getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE") &&
+        filterMeta.searchId
+      ) {
+        setMergedFilterSearchMeta({
+          searchId: filterMeta.searchId,
+          hotelSearchId: filterMeta.hotelSearchId,
+        });
+        setHasMergedHotelResponse(true);
+      }
 
       if (
         (resultMeta.searchId || resultMeta.hotelSearchId) &&
@@ -1749,22 +1923,28 @@ const TourListing = () => {
   }, [hotelSearchChannel]);
 
   useEffect(() => {
-    if (hotelSearchChannel && !hasMergedHotelResponse) {
+    if (hotelSearchChannel && !filterSearchId) {
       setIsFilterLoading(true);
       setApiFilterData(null);
       return;
     }
 
-    if (!activeSearchId) {
+    if (!filterSearchId) {
       setIsFilterLoading(Boolean(hotelSearchChannel));
       setApiFilterData(null);
+      lastFilterRequestKeyRef.current = "";
+      return;
+    }
+
+    if (lastFilterRequestKeyRef.current === filterDataRequestKey) {
       return;
     }
 
     const controller = new AbortController();
+    lastFilterRequestKeyRef.current = filterDataRequestKey;
     setIsFilterLoading(true);
 
-    fetchHotelFilterData(activeSearchId, {
+    fetchHotelFilterData(filterSearchId, {
       signal: controller.signal,
       payload: filterDataPayload,
     })
@@ -1778,11 +1958,19 @@ const TourListing = () => {
         console.error("Hotel filter data request failed:", error);
         toast.error(error.message || "Unable to load hotel filters.");
         setApiFilterData(null);
+        if (lastFilterRequestKeyRef.current === filterDataRequestKey) {
+          lastFilterRequestKeyRef.current = "";
+        }
         setIsFilterLoading(false);
       });
 
     return () => controller.abort();
-  }, [activeSearchId, filterDataPayload, hasMergedHotelResponse, hotelSearchChannel]);
+  }, [
+    filterDataPayload,
+    filterDataRequestKey,
+    filterSearchId,
+    hotelSearchChannel,
+  ]);
 
   const staticHotelResults = useMemo(
     () =>
@@ -2064,8 +2252,8 @@ const TourListing = () => {
                               />
                             ))}
                              <div className={styles.ReviewCount}>
-                              <span>4.5</span>
-                               (128 reviews)</div>
+                              <span>{item.reviewScoreText}</span>
+                               ({item.reviewText})</div>
                           </div>
                           <h2>{item.title}</h2>
 
@@ -2103,7 +2291,7 @@ const TourListing = () => {
                         onClick={() => handleBookNow(item)}
                       >
                         {loadingHotelDetailsId === getHotelLoadingKey(item)
-                          ? "LOADING"
+                          ? "LOADING..."
                           : "SEE AVAILABILITY"}
                       </button>
                     </div>
@@ -2206,8 +2394,8 @@ const TourListing = () => {
                               />
                             ))}
                               <div className={styles.ReviewCount}>
-                            <span>4.5</span>
-                            (128 reviews)
+                            <span>{item.reviewScoreText}</span>
+                            ({item.reviewText})
                           </div>
                           </div>
                           <h2>{item.title}</h2>
@@ -2253,7 +2441,7 @@ const TourListing = () => {
                         onClick={() => handleBookNow(item)}
                       >
                         {loadingHotelDetailsId === getHotelLoadingKey(item)
-                          ? "LOADING"
+                          ? "LOADING..."
                           : "SEE AVAILABILITY"}
                       </button>
                     </div>

@@ -277,6 +277,24 @@ const normalizeRating = (rating) => {
   return Math.max(0, Math.min(5, Math.round(numericRating)));
 };
 
+const getNumericValue = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+
+    const numericValue = Number(String(value).replace(/[^\d.-]/g, ""));
+    if (Number.isFinite(numericValue)) return numericValue;
+  }
+
+  return null;
+};
+
+const formatReviewText = (count) => {
+  const reviewCount = getNumericValue(count);
+  if (!reviewCount) return "No reviews yet";
+
+  return `${reviewCount.toLocaleString("en-IN")} review${reviewCount === 1 ? "" : "s"}`;
+};
+
 const formatCurrency = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
   if (!Number.isFinite(numericValue)) return "₹ --";
@@ -1056,6 +1074,52 @@ const normalizeReviewRating = (rating) => {
   return Math.max(1, Math.min(5, Math.round(numericRating)));
 };
 
+const normalizeReviewSummary = (data = {}, hotel = {}) => {
+  const reviews = Array.isArray(data.reviews)
+    ? data.reviews
+    : Array.isArray(hotel.reviews)
+      ? hotel.reviews
+      : [];
+  const firstReview = reviews[0] || {};
+  const summary =
+    data.reviewSummary ||
+    data.review_summary ||
+    hotel.reviewSummary ||
+    hotel.review_summary ||
+    {};
+  const score = getNumericValue(
+    data.reviewRating,
+    data.review_rating,
+    data.guestRating,
+    data.guest_rating,
+    summary.rating,
+    summary.averageRating,
+    summary.average_rating,
+    firstReview.rating,
+    firstReview.score,
+  );
+  const count = getNumericValue(
+    data.reviewCount,
+    data.review_count,
+    data.reviewsCount,
+    data.reviews_count,
+    data.totalReviews,
+    data.total_reviews,
+    summary.count,
+    summary.reviewCount,
+    summary.totalReviews,
+    firstReview.count,
+    reviews.length && reviews.some((review) => review.comment || review.review || review.text)
+      ? reviews.length
+      : "",
+  );
+
+  return {
+    score,
+    text: formatReviewText(count),
+  };
+};
+
 const normalizeReviews = (data = {}, hotel = {}) => {
   const reviewSource =
     data.reviews ||
@@ -1183,15 +1247,29 @@ const normalizeHotelDetail = (
     collectFacilities(data),
   );
   const reviews = normalizeReviews(data, hotel);
+  const reviewSummary = normalizeReviewSummary(data, hotel);
   const ratingBars = normalizeRatingBars(data, reviews);
   const scoreDetails = normalizeScoreDetails(data, hotel);
+  const starRating = normalizeRating(
+    getFirst(
+      hotel.starRating,
+      hotel.star_rating,
+      hotel.rate?.starRating,
+      hotel.rate?.star_rating,
+      data.starRating,
+      data.star_rating,
+      hotel.rating,
+    ),
+  );
 
   return {
     id: String(getFirst(hotel.id, hotel.hotelId, routeHotelId, "")),
     name: getFirst(hotel.name, hotel.title, data.name, "Hotel"),
     address: getFirst(hotel.address, data.address, hotel.route, hotel.locationName, ""),
-    rating: normalizeRating(getFirst(hotel.starRating, hotel.rating, data.starRating)),
-    reviewText: getFirst(data.reviewText, data.reviewsText, "No reviews yet"),
+    rating: starRating,
+    starRating,
+    reviewScore: reviewSummary.score,
+    reviewText: getFirst(data.reviewText, data.reviewsText, reviewSummary.text),
     images: uniqueImages.length ? uniqueImages : FALLBACK_IMAGES,
     description:
       getFirst(
