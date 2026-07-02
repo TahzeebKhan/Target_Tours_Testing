@@ -343,15 +343,30 @@ const toAmountNumber = (value) => {
 };
 
 const parsePriceChange = (response) => {
+  const priceCode =
+    getResponseValue(response, "Pricecode") ||
+    getResponseValue(response, "priceCode") ||
+    response?.data?.priceInfo?.Pricecode ||
+    response?.data?.priceInfo?.priceCode ||
+    response?.priceInfo?.Pricecode ||
+    response?.priceInfo?.priceCode ||
+    "";
   const message =
     getResponseValue(response, "Pricemessage") ||
     response?.data?.priceInfo?.Pricemessage ||
     response?.priceInfo?.Pricemessage ||
     "";
   const oldFare = Number(String(message).match(/OldFare:([^|]+)/i)?.[1]);
-  const newFare = Number(String(message).match(/NewFare:([^|]+)/i)?.[1]);
+  const newFare =
+    Number(String(message).match(/NewFare:([^|]+)/i)?.[1]) ||
+    Number(getResponseValue(response, "NetAmount")) ||
+    Number(getResponseValue(response, "netAmount"));
 
-  if (!Number.isFinite(oldFare) || !Number.isFinite(newFare) || newFare <= oldFare) {
+  if (
+    String(priceCode) !== "555" ||
+    !Number.isFinite(oldFare) ||
+    !Number.isFinite(newFare)
+  ) {
     return null;
   }
 
@@ -359,6 +374,7 @@ const parsePriceChange = (response) => {
     oldFare,
     newFare,
     difference: newFare - oldFare,
+    message,
   };
 };
 
@@ -602,7 +618,7 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
   const childGuests = guests.filter(
     (guest) => String(guest.PaxType || guest.passengerType || "").toUpperCase() === "C",
   );
-  const matchedOccupancy = occupancyList.find((occupancy) => {
+  const occupancyMatchesGuests = (occupancy = {}) => {
     const adults = Number(
       getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") || 0,
     );
@@ -617,10 +633,14 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
     );
 
     return adults === adultGuests.length && children === childGuests.length;
-  });
+  };
+  const indexedOccupancy =
+    occupancyList[Math.max(0, Number(fallbackOccupancyIndex) || 0)] || null;
+  const matchedOccupancy = occupancyList.find(occupancyMatchesGuests);
   const occupancy =
-    matchedOccupancy ||
-    occupancyList[Math.max(0, Number(fallbackOccupancyIndex) || 0)] ||
+    (indexedOccupancy && occupancyMatchesGuests(indexedOccupancy)
+      ? indexedOccupancy
+      : matchedOccupancy) ||
     occupancyList[0] ||
     {};
   const occupancyId =
@@ -645,6 +665,148 @@ const buildGuestCode = (occupancies = [], guests = [], fallbackOccupancyIndex = 
     : `|${occupancyId}|1:A:25|`;
 };
 
+const getOccupancyGuestCount = (occupancy = {}) =>
+  Number(
+    getOccupancyValue(occupancy, "numOfAdults", "NumOfAdults", "adults", "adultCount") || 0,
+  ) +
+  Number(
+    getOccupancyValue(
+      occupancy,
+      "numOfChildren",
+      "NumOfChildren",
+      "children",
+      "childCount",
+    ) || 0,
+  );
+
+const getRoomUnitCount = (room = {}) =>
+  Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+const getComboRoomOccupancies = (room = {}) => {
+  const comboRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+  const fallbackOccupancies = Array.isArray(room.occupancies) ? room.occupancies : [];
+  const expandedOccupancies = comboRows.flatMap((comboRoom) => {
+    const count = Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+    const occupancies = Array.isArray(comboRoom.occupancies) && comboRoom.occupancies.length
+      ? comboRoom.occupancies
+      : fallbackOccupancies;
+    const occupancy = occupancies[0] || fallbackOccupancies[0];
+
+    return Array.from({ length: count }, (_, index) => occupancies[index] || occupancy);
+  }).filter(Boolean);
+
+  if (expandedOccupancies.length) return expandedOccupancies;
+  if (!fallbackOccupancies.length) return [];
+
+  return Array.from(
+    { length: getRoomUnitCount(room) },
+    (_, index) => fallbackOccupancies[index] || fallbackOccupancies[0],
+  );
+};
+
+const splitGuestsByOccupancy = (occupancies = [], guests = [], roomEntryCount = 1) => {
+  if (!Array.isArray(occupancies) || !occupancies.length) {
+    return Array.from({ length: roomEntryCount }, (_, index) =>
+      index === 0 ? guests : [],
+    );
+  }
+
+  let guestCursor = 0;
+
+  return Array.from({ length: roomEntryCount }, (_, index) => {
+    const occupancy = occupancies[index] || occupancies[0] || {};
+    const guestCount = Math.max(1, getOccupancyGuestCount(occupancy));
+    const roomGuests = guests.slice(guestCursor, guestCursor + guestCount);
+
+    guestCursor += guestCount;
+
+    return roomGuests.length ? roomGuests : guests.slice(0, guestCount);
+  });
+};
+
+const getRoomApiValue = (room = {}, detailRoom = {}, rawDetailRoom = {}, key, fallback = "") =>
+  getFirstValue(
+    detailRoom[key],
+    rawDetailRoom[key],
+    rawDetailRoom.room?.[key],
+    room[key],
+    room.raw?.[key],
+    room.raw?.room?.[key],
+    fallback,
+  );
+
+const getRoomApiId = (room = {}, detailRoom = {}, rawDetailRoom = {}, fallback = "") =>
+  getFirstValue(
+    rawDetailRoom.roomId,
+    rawDetailRoom.RoomId,
+    rawDetailRoom.room?.roomId,
+    rawDetailRoom.room?.RoomId,
+    rawDetailRoom.room?.id,
+    rawDetailRoom.id,
+    detailRoom.roomId,
+    detailRoom.RoomId,
+    room.roomId,
+    room.RoomId,
+    fallback,
+  );
+
+const getComboDetailRoomForEntry = (comboDetailRows = [], entryIndex = 0) => {
+  let coveredEntries = 0;
+
+  return (
+    comboDetailRows.find((comboRoom) => {
+      coveredEntries += Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+      return entryIndex < coveredEntries;
+    }) || {}
+  );
+};
+
+const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {}) =>
+  selectedRooms.flatMap((room, roomIndex) => {
+    const guests = roomGuests[room.id] || [];
+    const roomUnits = getRoomUnitCount(room);
+    const quantity = Math.max(1, Number(room.quantity || 1));
+    const roomEntryCount = roomUnits * quantity;
+    const comboDetailRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+    const occupancies = getComboRoomOccupancies(room);
+    const guestGroups = splitGuestsByOccupancy(occupancies, guests, roomEntryCount);
+
+    return Array.from({ length: roomEntryCount }, (_, entryIndex) => {
+      const detailRoom = getComboDetailRoomForEntry(comboDetailRows, entryIndex);
+      const rawDetailRoom = detailRoom.raw || {};
+      const entryGuests = guestGroups[entryIndex] || guests;
+
+      return {
+        RoomId: getRoomApiId(room, detailRoom, rawDetailRoom, room.roomId || room.id || ""),
+        GuestCode: buildGuestCode(occupancies, entryGuests, entryIndex || roomIndex),
+        SupplierName: getFirstValue(
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "supplierName"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "SupplierName"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "providerName"),
+        ),
+        RoomGroupId: getFirstValue(
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "roomGroupId"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "RoomGroupId"),
+          room.roomGroupId,
+          room.id,
+        ),
+        Guests: entryGuests.map((guest, guestIndex) => ({
+          GuestID: String(guestIndex),
+          Operation: "U",
+          Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
+          FirstName: guest.firstName,
+          MiddleName: guest.middleName || "",
+          LastName: guest.lastName,
+          MobileNo: guest.mobile || contact.mobile,
+          PaxType: guest.passengerType || "A",
+          Age: guest.passengerType === "A" ? guest.age || "25" : guest.age,
+          Email: guest.email || contact.email,
+          Pan: "",
+        })),
+      };
+    });
+  });
+
 const getRoomTotal = (room, fallbackNights = 1) => {
   const quantity = Number(room.quantity || 0);
   const nights = Number(fallbackNights || room.nights || 1);
@@ -653,6 +815,32 @@ const getRoomTotal = (room, fallbackNights = 1) => {
 
   return (price + (room.rateIncludesTax ? 0 : tax)) * quantity * nights;
 };
+
+const getRoomDetailAmount = (room = {}) => {
+  const amount = Number(room.pricePerNight || room.netAmount || 0);
+  const tax = Number(room.taxPerNight || 0);
+  return (Number.isFinite(amount) ? amount : 0) + (Number.isFinite(tax) ? tax : 0);
+};
+
+const getComboDetailTotal = (room = {}, fallbackNights = 1) => {
+  const comboRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+  if (!comboRows.length) return 0;
+
+  const detailTotal = comboRows.reduce((total, comboRoom) => {
+    const count = Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+    return total + getRoomDetailAmount(comboRoom) * count;
+  }, 0);
+
+  if (!detailTotal) return 0;
+
+  return detailTotal * Math.max(1, Number(room.quantity || 1)) * Number(fallbackNights || 1);
+};
+
+const getSelectedRoomsNetAmount = (selectedRooms = [], fallbackNights = 1) =>
+  selectedRooms.reduce((total, room) => {
+    const comboDetailTotal = getComboDetailTotal(room, fallbackNights);
+    return total + (comboDetailTotal || getRoomTotal(room, fallbackNights));
+  }, 0);
 
 const ReviewPage = () => {
   const router = useRouter();
@@ -790,10 +978,6 @@ const ReviewPage = () => {
     });
 
     // window.location.assign(redirectUrl);
-
-    // Forces the top-level window to redirect, clearing any iframe/modal glitches
-// window.top.location.href = redirectUrl;
-
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -848,11 +1032,14 @@ const ReviewPage = () => {
     setBookingLoading(true);
 
     try {
-      const nextAmount = formatAmount(priceChange?.newFare || pendingConfirmPayload.netAmount);
+      const acceptedAmount = toAmountNumber(
+        priceChange?.newFare || pendingConfirmPayload.netAmount,
+      );
+      const nextAmount = formatAmount(acceptedAmount);
       const paymentResponse = await HotelPaymentStart({
         ...pendingPaymentPayload,
-        NetAmount: toAmountNumber(nextAmount),
-        amount: toAmountNumber(nextAmount),
+        NetAmount: acceptedAmount,
+        amount: acceptedAmount,
       });
       const merchantOrderId = getPaymentMerchantOrderId(paymentResponse);
       redirectToHotelPayment(paymentResponse, {
@@ -942,14 +1129,11 @@ const ReviewPage = () => {
       return;
     }
 
-    markHotelBookingSubmitStarted({
-      TUI: bookingSession?.request?.TUI || bookingSession?.request?.tui || "",
-    });
-    setBookingLoading(true);
-
     try {
       const firstRoom = selectedRooms[0] || roomList[0] || {};
-      const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
+      const selectedNetAmount = formatAmount(
+        getSelectedRoomsNetAmount(selectedRooms, nights) || totalAmount || firstRoom.netAmount || 0,
+      );
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
        console.log("storedHotelResults",storedHotelResults)
@@ -976,6 +1160,10 @@ const ReviewPage = () => {
       const initSearchContext = {
         request,
         storedHotelSearch,
+        hotel,
+        firstRoom,
+        selectedRooms,
+        roomList,
         init: request.init || storedHotelSearch.init,
         initResponse:
           request.initResponse ||
@@ -994,27 +1182,54 @@ const ReviewPage = () => {
       console.log("hotelInitData",hotelInitData)
 
       const searchTracingKey = getFirstValue(
+        firstRoom.roomsSearchTracingKey,
+        firstRoom.searchTracingKey,
+        firstRoom.raw?.roomsSearchTracingKey,
+        firstRoom.raw?.searchTracingKey,
+        request.roomsSearchTracingKey,
+        request.searchTracingKey,
+        request.TUI,
+        request.tui,
+        bookingSession?.request?.TUI,
+        bookingSession?.request?.tui,
+        storedHotelSearch.roomsSearchTracingKey,
+        storedHotelSearch.searchTracingKey,
+        storedHotelSearch.TUI,
+        storedHotelSearch.tui,
         hotelInitData.searchTracingKey,
         hotelInitData.searchTracingkey,
         hotelInitData.search_tracing_key,
         findFirstDeepValue(initSearchContext, [
+          "roomsSearchTracingKey",
+          "RoomsSearchTracingKey",
           "searchTracingKey",
           "searchTracingkey",
           "search_tracing_key",
           "searchTracing",
           "searchtracing",
+          "TUI",
+          "tui",
         ]),
       );
       const searchId = getFirstValue(
         firstRoom.roomsSearchId,
+        firstRoom.searchId,
+        firstRoom.raw?.roomsSearchId,
+        firstRoom.raw?.searchId,
         request.roomsSearchId,
+        request.searchId,
+        storedHotelSearch.roomsSearchId,
+        storedHotelSearch.searchId,
         hotelInitData.searchId,
         hotelInitData.SearchId,
         hotelInitData.search_id,
         findFirstDeepValue(initSearchContext, [
+          "roomsSearchId",
+          "RoomsSearchId",
           "searchId",
           "SearchId",
           "search_id",
+          "SearchID",
         ]),
       );
       const hotelSearchId = getFirstValue(
@@ -1064,9 +1279,19 @@ const ReviewPage = () => {
       }
 
       if (!searchTracingKey || !searchId) {
-        toast.error("Hotel search session is missing. Please search again.");
+        const missingParts = [
+          !searchTracingKey ? "TUI/search tracing key" : "",
+          !searchId ? "SearchId" : "",
+        ].filter(Boolean);
+
+        toast.error(`Hotel search session is missing ${missingParts.join(" and ")}. Please search again.`);
         return;
       }
+
+      markHotelBookingSubmitStarted({
+        TUI: searchTracingKey,
+      });
+      setBookingLoading(true);
 
       const payload = {
         ...fallbackHotelStartBookingPayload,
@@ -1085,29 +1310,7 @@ const ReviewPage = () => {
           CountryCode: getCountryCode(contact.countryCode),
           MobileCountryCode: getDialCode(firstTraveler.countryCode || contact.countryCode),
         },
-        Rooms: selectedRooms.map((room, roomIndex) => {
-          const guests = roomGuests[room.id] || [];
-
-          return {
-            RoomId: room.roomId || room.id || "",
-            GuestCode: buildGuestCode(room.occupancies, guests, roomIndex),
-            SupplierName: room.supplierName || "",
-            RoomGroupId: room.roomGroupId || room.id || "",
-            Guests: guests.map((guest, guestIndex) => ({
-              GuestID: String(guestIndex),
-              Operation: "U",
-              Title: guest.title || (guest.gender === "female" ? "Ms" : "Mr"),
-              FirstName: guest.firstName,
-              MiddleName: guest.middleName || "",
-              LastName: guest.lastName,
-              MobileNo: guest.mobile || contact.mobile,
-              PaxType: guest.passengerType || "A",
-              Age: guest.passengerType === "A" ? guest.age || "25" : guest.age,
-              Email: guest.email || contact.email,
-              Pan: "",
-            })),
-          };
-        }),
+        Rooms: buildStartBookingRooms(selectedRooms, roomGuests, contact),
         NetAmount: selectedNetAmount,
         SearchId: searchId,
         hotelSearchId,
@@ -1133,9 +1336,9 @@ const ReviewPage = () => {
           "",
       );
       const netAmount = formatAmount(
-        payload.NetAmount ||
-          getResponseValue(startBookingResponse, "NetAmount") ||
+        getResponseValue(startBookingResponse, "NetAmount") ||
           getResponseValue(startBookingResponse, "netAmount") ||
+          payload.NetAmount ||
           "",
       );
       const hotelPayment = {
@@ -1158,6 +1361,7 @@ const ReviewPage = () => {
       };
 
       if (priceChangeInfo) {
+        clearHotelBookingStatus();
         setPriceChange(priceChangeInfo);
         setPendingConfirmPayload({
           ...confirmPayload,

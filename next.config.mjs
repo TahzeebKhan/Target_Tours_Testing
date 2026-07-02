@@ -29,6 +29,11 @@ const nextConfig = {
         hostname: "imgak.mmtcdn.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "image-cdn.didatravel.com",
+        pathname: "/Image/**", // Allows all images under the /Image directory
+      },
     ],
   },
 };

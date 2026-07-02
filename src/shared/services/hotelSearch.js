@@ -549,32 +549,28 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
   );
   url.searchParams.set("domain", getDomain());
 
-try{
-  const response = await fetch(url.toString(), {
-    method: "POST",
-    headers: getHotelSearchHeaders(),
-    credentials: "include",
-    cache: "no-store",
-    signal,
-    body: JSON.stringify({
-      ...payload,
-      domain: payload.domain || getDomain(),
-      searchId: payload.searchId || id,
-    }),
-  });
+  try {
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: getHotelSearchHeaders(),
+      credentials: "include",
+      cache: "no-store",
+      signal,
+      body: JSON.stringify({
+        domain: payload.domain || getDomain(),
+        searchId: payload.searchId || id,
+      }),
+    });
 
-  const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => ({}));
 
-  if (!response.ok || isApiFailure(data)) {
-    throw createApiError(data, "Hotel filter data failed");
-  }
+    if (!response.ok || isApiFailure(data)) {
+      throw createApiError(data, "Hotel filter data failed");
+    }
 
-  return data?.data?.filterData || data?.data?.filters || data?.filterData || data?.filters || data?.data || data;
+    return data?.data?.filterData || data?.data?.filters || data?.filterData || data?.filters || data?.data || data;
   } catch (error) {
-    // Log the error or perform any necessary cleanup here
     console.error("Error fetching hotel filter data:", error);
-    
-    // Re-throw the error so the calling function knows it failed
     throw error;
   }
 };

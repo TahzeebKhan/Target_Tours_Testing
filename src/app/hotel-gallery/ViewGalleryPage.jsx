@@ -15,12 +15,27 @@ const FALLBACK_IMAGES = [
   { image: "/images/hotelArt4.png", title: "Exterior" },
 ];
 
+const normalizeImageUrl = (value = "") => {
+  const rawUrl = String(value || "").trim();
+  if (!rawUrl) return "";
+
+  let url = rawUrl.replace(/\\\//g, "/").replace(/\s/g, "%20");
+
+  try {
+    url = decodeURI(url);
+  } catch {
+    // Keep the original URL if it is not safely decodable.
+  }
+
+  return url.replace(/\s/g, "%20");
+};
+
 const normalizeGalleryItem = (value, index = 0) => {
   if (!value) return null;
 
   if (typeof value === "string") {
     return {
-      image: value,
+      image: normalizeImageUrl(value),
       title: `Photo ${index + 1}`,
     };
   }
@@ -36,10 +51,12 @@ const normalizeGalleryItem = (value, index = 0) => {
     value.imageUrl ||
     "";
 
-  if (!image) return null;
+  const imageUrl = normalizeImageUrl(image);
+
+  if (!imageUrl) return null;
 
   return {
-    image,
+    image: imageUrl,
     title:
       value.title ||
       value.caption ||
@@ -55,8 +72,10 @@ const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
   if (!value || images.length >= 20 || depth > 6) return images;
 
   if (typeof value === "string") {
-    if (/^https?:\/\//.test(value) || value.startsWith("/")) {
-      images.push({ image: value, title: "" });
+    const imageUrl = normalizeImageUrl(value);
+
+    if (/^https?:\/\//.test(imageUrl) || imageUrl.startsWith("/")) {
+      images.push({ image: imageUrl, title: "" });
     }
     return images;
   }

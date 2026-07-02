@@ -15,20 +15,26 @@ const PriceChangeModal = ({
   onConfirm,
 }) => {
   if (!priceChange) return null;
+  const priceDifference = Number(priceChange.difference || 0);
+  const hasIncrease = priceDifference > 0;
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true">
       <div className={styles.modal}>
-        <h3>Price Changed</h3>
+        <h3>Continue with new price?</h3>
         <p>
-          The room price has increased from{" "}
+          The room price has changed from{" "}
           <strong>{formatCurrency(priceChange.oldFare)}</strong> to{" "}
           <strong>{formatCurrency(priceChange.newFare)}</strong>.
         </p>
-        <p className={styles.priceIncrease}>
-          Increase amount: {formatCurrency(priceChange.difference)}
+        <p className={hasIncrease ? styles.priceIncrease : styles.priceDecrease}>
+          {hasIncrease ? "Increase" : "Decrease"} amount:{" "}
+          {formatCurrency(Math.abs(priceDifference))}
         </p>
-        <p>Do you want to confirm your booking with the new price?</p>
+        <p>
+          We will redirect you to the payment page only after you accept this
+          updated price.
+        </p>
         <div className={styles.actions}>
           <button
             type="button"
@@ -44,7 +50,7 @@ const PriceChangeModal = ({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "CONFIRMING..." : "CONFIRM"}
+            {loading ? "REDIRECTING..." : "CONTINUE WITH NEW PRICE"}
           </button>
         </div>
       </div>
