@@ -547,16 +547,25 @@ const Page = () => {
           searchRequest.hotelSearchId,
           storedHotelSearch.hotelSearchId,
           storedHotelSearch.hotel_search_id,
+          getSearchParamValue("hotelSearchId"),
         ),
         roomsSearchId:
           selectedRooms[0]?.roomsSearchId ||
           hotelDetail?.roomsSearchId ||
           searchRequest.roomsSearchId ||
+          searchRequest.searchId ||
+          storedHotelSearch.roomsSearchId ||
+          storedHotelSearch.searchId ||
+          getSearchParamValue("searchId") ||
           "",
         roomsSearchTracingKey:
           selectedRooms[0]?.roomsSearchTracingKey ||
           hotelDetail?.roomsSearchTracingKey ||
           searchRequest.roomsSearchTracingKey ||
+          searchRequest.searchTracingKey ||
+          storedHotelSearch.roomsSearchTracingKey ||
+          storedHotelSearch.searchTracingKey ||
+          getSearchParamValue("searchTracingKey") ||
           "",
         checkInDate: effectiveCheckIn,
         checkOutDate: effectiveCheckOut,
