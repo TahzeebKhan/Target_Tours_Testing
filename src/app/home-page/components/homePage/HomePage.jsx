@@ -1062,7 +1062,6 @@ const HomePage = ({
 
   const normalizeSearchDate = (value) => {
     if (!value) return "";
-    if (typeof value === "string") return value;
 
     const parsedDate = new Date(value);
     if (isNaN(parsedDate.getTime())) return "";
@@ -1084,6 +1083,17 @@ const HomePage = ({
     const year = parsedDate.getFullYear();
 
     return `${month}/${day}/${year}`;
+  };
+
+  const isValidHotelDateRange = (startValue, endValue) => {
+    const startDate = new Date(startValue);
+    const endDate = new Date(endValue);
+
+    return (
+      !Number.isNaN(startDate.getTime()) &&
+      !Number.isNaN(endDate.getTime()) &&
+      endDate > startDate
+    );
   };
 
   const normalizePlaceValue = (value = "") =>
@@ -1211,6 +1221,14 @@ const HomePage = ({
       } else {
         toast.error(getValidationMessage("hotelCheckOut"));
       }
+      return;
+    }
+
+    if (
+      bookingType === "hotel" &&
+      !isValidHotelDateRange(hotelStartDate, hotelEndDate)
+    ) {
+      toast.error("Check-out date must be after check-in date.");
       return;
     }
 
@@ -3056,9 +3074,9 @@ const HomePage = ({
             setCheckOut={setHotelEndDate}
             travellerOpen={travellerOpen}
             setTravellerOpen={setTravellerOpen}
-            totalPassengers={totalPassengers}
-            passengers={passengers}
-            setPassengers={setPassengers}
+            totalPassengers={hotelGuestCount}
+            passengers={hotelGuestOpen}
+            setPassengers={setHotelGuestOpen}
             travelClass={travelClass}
             setTravelClass={setTravelClass}
             truncate={truncate}

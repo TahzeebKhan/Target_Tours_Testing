@@ -673,6 +673,7 @@ const getInitCompleteSearchMeta = (payload = {}) => {
 const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
+  const init = content?.init || data?.init || payload?.init || {};
   const firstHotelWithSearchId = hotels.find(
     (hotel) => hotel?.searchId || hotel?.search_id,
   );
@@ -682,6 +683,9 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
 
   return {
     searchId:
+      init?.searchId ||
+      init?.search_id ||
+      init?.searchid ||
       data?.searchId ||
       data?.search_id ||
       data?.searchid ||
@@ -694,6 +698,9 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
       firstHotelWithSearchId?.search_id ||
       "",
     hotelSearchId:
+      init?.hotelSearchId ||
+      init?.hotel_search_id ||
+      init?.hotel_search_key ||
       data?.hotelSearchId ||
       data?.hotel_search_id ||
       data?.hotel_search_key ||
@@ -1849,13 +1856,18 @@ const TourListing = () => {
 
       if (
         (nextResults.source === "merged" ||
+          getHotelSocketType(payload) === "HOTEL_INIT_RESPONSE" ||
           getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE") &&
         filterMeta.searchId
       ) {
-        setMergedFilterSearchMeta({
-          searchId: filterMeta.searchId,
-          hotelSearchId: filterMeta.hotelSearchId,
-        });
+        setMergedFilterSearchMeta((prev) =>
+          prev.searchId
+            ? prev
+            : {
+                searchId: filterMeta.searchId,
+                hotelSearchId: filterMeta.hotelSearchId,
+              },
+        );
         setHasMergedHotelResponse(true);
       }
 

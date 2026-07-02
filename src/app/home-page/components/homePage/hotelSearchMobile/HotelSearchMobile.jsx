@@ -16,6 +16,8 @@ const HotelSearchMobile = ({
   setCheckIn,
   checkOut,
   setCheckOut,
+  passengers,
+  setPassengers,
   truncate,
 }) => {
   const travellerRef = useRef(null);
@@ -23,15 +25,10 @@ const HotelSearchMobile = ({
   const [openCalendar, setOpenCalendar] = useState(false);
   const [openPassengers, setOpenPassengers] = useState(false);
 
-  // Internal passenger state for Hotel search
-  const [passengers, setPassengers] = useState({
-    adult: 1,
-    children: 0,
-    infant: 0,
-  });
-
-  const totalPassengers =
-    passengers.adult + passengers.children + passengers.infant;
+  const adultCount = Number(passengers?.adult ?? passengers?.adults) || 1;
+  const childCount = Number(passengers?.child ?? passengers?.children) || 0;
+  const roomCount = Number(passengers?.room || passengers?.rooms?.length || 1);
+  const totalPassengers = adultCount + childCount;
 
   const ensureDate = (date) => {
     if (!date) return null;
@@ -48,6 +45,14 @@ const HotelSearchMobile = ({
           year: "numeric",
         })
       : "";
+  };
+
+  const getNextDate = (date) => {
+    const nextDate = ensureDate(date);
+    if (!nextDate) return null;
+
+    nextDate.setDate(nextDate.getDate() + 1);
+    return nextDate;
   };
 
   return (
@@ -114,7 +119,7 @@ const HotelSearchMobile = ({
               {truncate(
                 `${totalPassengers} Guest${
                   totalPassengers > 1 ? "s" : ""
-                }, ${totalPassengers} Room${totalPassengers > 1 ? "s" : ""}`,
+                }, ${roomCount} Room${roomCount > 1 ? "s" : ""}`,
                 17
               )}
             </div>
@@ -148,7 +153,18 @@ const HotelSearchMobile = ({
           selectedReturn={ensureDate(checkOut)}
           onSelectDate={({ departure, returnDate }) => {
             if (departure) setCheckIn(departure);
-            if (returnDate) setCheckOut(returnDate);
+            if (returnDate) {
+              const departureDate = ensureDate(departure || checkIn);
+              const selectedReturnDate = ensureDate(returnDate);
+
+              setCheckOut(
+                departureDate &&
+                  selectedReturnDate &&
+                  selectedReturnDate <= departureDate
+                  ? getNextDate(departureDate)
+                  : returnDate
+              );
+            }
             setOpenCalendar(false);
           }}
         />
