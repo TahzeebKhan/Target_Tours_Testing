@@ -139,24 +139,54 @@ const getOccupancyChildAges = (occupancy = {}, room = {}) =>
     ),
   );
 
+const getRoomUnitCount = (room = {}) =>
+  Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+const getComboRoomOccupancies = (room = {}) => {
+  const comboRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+  const fallbackOccupancies = Array.isArray(room.occupancies) ? room.occupancies : [];
+  const expandedOccupancies = comboRows.flatMap((comboRoom) => {
+    const count = Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+    const occupancies = Array.isArray(comboRoom.occupancies) && comboRoom.occupancies.length
+      ? comboRoom.occupancies
+      : fallbackOccupancies;
+    const occupancy = occupancies[0] || fallbackOccupancies[0];
+
+    return Array.from({ length: count }, (_, index) => occupancies[index] || occupancy);
+  }).filter(Boolean);
+
+  if (expandedOccupancies.length) return expandedOccupancies;
+  if (!fallbackOccupancies.length) return [];
+
+  return Array.from(
+    { length: getRoomUnitCount(room) },
+    (_, index) => fallbackOccupancies[index] || fallbackOccupancies[0],
+  );
+};
+
 const getRoomOccupancies = (room = {}, roomIndex = 0) => {
-  if (!Array.isArray(room.occupancies) || !room.occupancies.length) {
+  const expandedOccupancies = getComboRoomOccupancies(room);
+
+  if (!expandedOccupancies.length) {
     return [];
   }
 
   const selectedRoomCount =
     Math.max(1, Number(room.quantity || 1)) *
-    Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+    getRoomUnitCount(room);
 
   if (selectedRoomCount > 1) {
-    return room.occupancies.slice(0, selectedRoomCount);
+    return Array.from(
+      { length: selectedRoomCount },
+      (_, index) => expandedOccupancies[index] || expandedOccupancies[0],
+    );
   }
 
-  if (room.occupancies.length === 1) {
-    return room.occupancies;
+  if (expandedOccupancies.length === 1) {
+    return expandedOccupancies;
   }
 
-  return [room.occupancies[roomIndex] || room.occupancies[0]];
+  return [expandedOccupancies[roomIndex] || expandedOccupancies[0]];
 };
 
 const buildTravelersFromRoom = (room = {}, roomIndex = 0) => {
@@ -216,12 +246,12 @@ const getRoomGuestLimit = (room = {}, roomIndex = 0) => {
     room.maxGuestAllowed || room.maxGuests || room.guestCapacity || 0,
   );
   const limit = explicitLimit
-    ? explicitLimit * quantity
+    ? explicitLimit * quantity * getRoomUnitCount(room)
     : occupancyTotal
       ? occupancyTotal * quantity
       : 0;
 
-  return limit || Math.max(1, quantity);
+  return limit || Math.max(1, quantity * getRoomUnitCount(room));
 };
 
 const CountryCodeDropdown = ({ value, onChange, required }) => {

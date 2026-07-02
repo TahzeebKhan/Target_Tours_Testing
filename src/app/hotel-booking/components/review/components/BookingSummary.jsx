@@ -23,6 +23,20 @@ const getRoomTotal = (room, fallbackNights = 1) => {
   return (offer + (rateIncludesTax ? 0 : tax)) * quantity * nights;
 };
 
+const getRoomUnitCount = (room = {}) =>
+  Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+const getRoomLabel = (room = {}) => {
+  const quantity = Number(room.quantity || 0);
+  const roomUnits = getRoomUnitCount(room);
+
+  if (room.isCombo) {
+    return `${quantity} Combo (${quantity * roomUnits} rooms)`;
+  }
+
+  return `${quantity} Room${quantity === 1 ? "" : "s"}`;
+};
+
 const toApiDate = (value) => {
   if (!value) return "";
   const text = String(value).trim();
@@ -187,10 +201,10 @@ const BookingSummary = ({
         {/* Rooms */}
         <div className={styles.roomSection}>
           {selectedRooms.map((room) => {
-            const quantity = Number(room.quantity || 0);
             const roomNights = Number(room.nights || nights || 1);
             const roomPrice = getNumber(room.pricePerNight || room.netAmount);
             const roomTotal = getRoomTotal(room, nights);
+            const roomLabel = getRoomLabel(room);
 
             return (
               <div key={room.id} className={styles.roomItem}>
@@ -206,7 +220,7 @@ const BookingSummary = ({
 
                 <div className={styles.roomRight}>
                   <span>
-                    {formatCurrency(roomPrice)} × {quantity} Room × {roomNights}{" "}
+                    {formatCurrency(roomPrice)} × {roomLabel} × {roomNights}{" "}
                     Night{roomNights === 1 ? "" : "s"}
                   </span>
                   <span className={styles.price}>{formatCurrency(roomTotal)}</span>

@@ -102,6 +102,26 @@ const getApiFailureMessage = (payload) => {
   return failure?.message || "";
 };
 
+const findFirstDeepField = (value, keys = [], depth = 0, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || depth > 7 || seen.has(value)) return "";
+  seen.add(value);
+
+  for (const key of keys) {
+    const directValue = value[key];
+    if (directValue !== undefined && directValue !== null && directValue !== "") {
+      return directValue;
+    }
+  }
+
+  const entries = Array.isArray(value) ? value : Object.values(value);
+  for (const entry of entries) {
+    const found = findFirstDeepField(entry, keys, depth + 1, seen);
+    if (found) return found;
+  }
+
+  return "";
+};
+
 const getRoomsResponseSearchId = (payload = {}) =>
   getFirst(
     payload?.data?.searchId,
@@ -114,18 +134,42 @@ const getRoomsResponseSearchId = (payload = {}) =>
     payload?.searchId,
     payload?.SearchId,
     payload?.search_id,
+    findFirstDeepField(payload, [
+      "roomsSearchId",
+      "RoomsSearchId",
+      "searchId",
+      "SearchId",
+      "search_id",
+      "SearchID",
+    ]),
   );
 
 const getRoomsResponseSearchTracingKey = (payload = {}) =>
   getFirst(
     payload?.data?.searchTracingKey,
+    payload?.data?.SearchTracingKey,
     payload?.data?.searchTracingkey,
     payload?.data?.search_tracing_key,
     payload?.data?.content?.searchTracingKey,
+    payload?.data?.content?.SearchTracingKey,
     payload?.content?.searchTracingKey,
+    payload?.content?.SearchTracingKey,
     payload?.searchTracingKey,
+    payload?.SearchTracingKey,
     payload?.searchTracingkey,
     payload?.search_tracing_key,
+    payload?.TUI,
+    payload?.tui,
+    findFirstDeepField(payload, [
+      "roomsSearchTracingKey",
+      "RoomsSearchTracingKey",
+      "searchTracingKey",
+      "SearchTracingKey",
+      "searchTracingkey",
+      "search_tracing_key",
+      "TUI",
+      "tui",
+    ]),
   );
 
 const findFirstObject = (value, predicate, depth = 0, seen = new WeakSet()) => {
@@ -813,6 +857,21 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         `Room ${comboIndex + 1}`,
       );
       const comboImages = collectImages(comboRoomDetail);
+      const comboRoomPrice = getRateValue(comboRoom) || getRateValue(comboRoomDetail) || 0;
+      const comboTaxes = getTaxValue(
+        comboRoomDetail.rate?.taxes,
+        comboRoomDetail.taxes,
+        comboRoomDetail.fees,
+        comboRoom.rate?.taxes,
+        comboRoom.taxes,
+        comboRoom.fees,
+      );
+      const comboPublishedRate = getFirst(
+        comboRoom.publishedRate,
+        comboRoomDetail.publishedRate,
+        comboRoom.recommendationMeta?.publishedRate,
+        comboRoomPrice,
+      );
 
       return {
         id: `${uiRoomId}-combo-${comboIndex}`,
@@ -846,6 +905,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
           comboRoomDetail.guests,
           "Guests",
         ),
+        occupancies: comboOccupancies,
         featuresLeft: getRoomFeatureTexts(comboRoomDetail, recommendation, hotel),
         benefits: getRoomPolicyTexts(
           comboRoom,
@@ -859,6 +919,10 @@ const normalizeRooms = (data = {}, hotel = {}) => {
               isRefundable,
           ),
         ),
+        pricePerNight: getCurrencyNumber(comboRoomPrice),
+        publishedRate: getCurrencyNumber(comboPublishedRate),
+        taxPerNight: getCurrencyNumber(comboTaxes),
+        netAmount: getCurrencyNumber(comboRoomPrice),
         raw: comboRoom,
       };
     });

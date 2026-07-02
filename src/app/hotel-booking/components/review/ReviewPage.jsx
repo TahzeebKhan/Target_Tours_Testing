@@ -663,6 +663,31 @@ const getOccupancyGuestCount = (occupancy = {}) =>
     ) || 0,
   );
 
+const getRoomUnitCount = (room = {}) =>
+  Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+
+const getComboRoomOccupancies = (room = {}) => {
+  const comboRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+  const fallbackOccupancies = Array.isArray(room.occupancies) ? room.occupancies : [];
+  const expandedOccupancies = comboRows.flatMap((comboRoom) => {
+    const count = Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+    const occupancies = Array.isArray(comboRoom.occupancies) && comboRoom.occupancies.length
+      ? comboRoom.occupancies
+      : fallbackOccupancies;
+    const occupancy = occupancies[0] || fallbackOccupancies[0];
+
+    return Array.from({ length: count }, (_, index) => occupancies[index] || occupancy);
+  }).filter(Boolean);
+
+  if (expandedOccupancies.length) return expandedOccupancies;
+  if (!fallbackOccupancies.length) return [];
+
+  return Array.from(
+    { length: getRoomUnitCount(room) },
+    (_, index) => fallbackOccupancies[index] || fallbackOccupancies[0],
+  );
+};
+
 const splitGuestsByOccupancy = (occupancies = [], guests = [], roomEntryCount = 1) => {
   if (!Array.isArray(occupancies) || !occupancies.length) {
     return Array.from({ length: roomEntryCount }, (_, index) =>
@@ -723,11 +748,11 @@ const getComboDetailRoomForEntry = (comboDetailRows = [], entryIndex = 0) => {
 const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {}) =>
   selectedRooms.flatMap((room, roomIndex) => {
     const guests = roomGuests[room.id] || [];
-    const roomUnits = Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
+    const roomUnits = getRoomUnitCount(room);
     const quantity = Math.max(1, Number(room.quantity || 1));
     const roomEntryCount = roomUnits * quantity;
     const comboDetailRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
-    const occupancies = Array.isArray(room.occupancies) ? room.occupancies : [];
+    const occupancies = getComboRoomOccupancies(room);
     const guestGroups = splitGuestsByOccupancy(occupancies, guests, roomEntryCount);
 
     return Array.from({ length: roomEntryCount }, (_, entryIndex) => {
@@ -774,6 +799,32 @@ const getRoomTotal = (room, fallbackNights = 1) => {
 
   return (price + (room.rateIncludesTax ? 0 : tax)) * quantity * nights;
 };
+
+const getRoomDetailAmount = (room = {}) => {
+  const amount = Number(room.pricePerNight || room.netAmount || 0);
+  const tax = Number(room.taxPerNight || 0);
+  return (Number.isFinite(amount) ? amount : 0) + (Number.isFinite(tax) ? tax : 0);
+};
+
+const getComboDetailTotal = (room = {}, fallbackNights = 1) => {
+  const comboRows = Array.isArray(room.comboRooms) ? room.comboRooms : [];
+  if (!comboRows.length) return 0;
+
+  const detailTotal = comboRows.reduce((total, comboRoom) => {
+    const count = Math.max(1, Number(comboRoom.count || comboRoom.roomCount || 1));
+    return total + getRoomDetailAmount(comboRoom) * count;
+  }, 0);
+
+  if (!detailTotal) return 0;
+
+  return detailTotal * Math.max(1, Number(room.quantity || 1)) * Number(fallbackNights || 1);
+};
+
+const getSelectedRoomsNetAmount = (selectedRooms = [], fallbackNights = 1) =>
+  selectedRooms.reduce((total, room) => {
+    const comboDetailTotal = getComboDetailTotal(room, fallbackNights);
+    return total + (comboDetailTotal || getRoomTotal(room, fallbackNights));
+  }, 0);
 
 const ReviewPage = () => {
   const router = useRouter();
@@ -1063,14 +1114,11 @@ const ReviewPage = () => {
       return;
     }
 
-    markHotelBookingSubmitStarted({
-      TUI: bookingSession?.request?.TUI || bookingSession?.request?.tui || "",
-    });
-    setBookingLoading(true);
-
     try {
       const firstRoom = selectedRooms[0] || roomList[0] || {};
-      const selectedNetAmount = formatAmount(totalAmount || firstRoom.netAmount || 0);
+      const selectedNetAmount = formatAmount(
+        getSelectedRoomsNetAmount(selectedRooms, nights) || totalAmount || firstRoom.netAmount || 0,
+      );
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
        console.log("storedHotelResults",storedHotelResults)
@@ -1097,6 +1145,10 @@ const ReviewPage = () => {
       const initSearchContext = {
         request,
         storedHotelSearch,
+        hotel,
+        firstRoom,
+        selectedRooms,
+        roomList,
         init: request.init || storedHotelSearch.init,
         initResponse:
           request.initResponse ||
@@ -1115,27 +1167,54 @@ const ReviewPage = () => {
       console.log("hotelInitData",hotelInitData)
 
       const searchTracingKey = getFirstValue(
+        firstRoom.roomsSearchTracingKey,
+        firstRoom.searchTracingKey,
+        firstRoom.raw?.roomsSearchTracingKey,
+        firstRoom.raw?.searchTracingKey,
+        request.roomsSearchTracingKey,
+        request.searchTracingKey,
+        request.TUI,
+        request.tui,
+        bookingSession?.request?.TUI,
+        bookingSession?.request?.tui,
+        storedHotelSearch.roomsSearchTracingKey,
+        storedHotelSearch.searchTracingKey,
+        storedHotelSearch.TUI,
+        storedHotelSearch.tui,
         hotelInitData.searchTracingKey,
         hotelInitData.searchTracingkey,
         hotelInitData.search_tracing_key,
         findFirstDeepValue(initSearchContext, [
+          "roomsSearchTracingKey",
+          "RoomsSearchTracingKey",
           "searchTracingKey",
           "searchTracingkey",
           "search_tracing_key",
           "searchTracing",
           "searchtracing",
+          "TUI",
+          "tui",
         ]),
       );
       const searchId = getFirstValue(
         firstRoom.roomsSearchId,
+        firstRoom.searchId,
+        firstRoom.raw?.roomsSearchId,
+        firstRoom.raw?.searchId,
         request.roomsSearchId,
+        request.searchId,
+        storedHotelSearch.roomsSearchId,
+        storedHotelSearch.searchId,
         hotelInitData.searchId,
         hotelInitData.SearchId,
         hotelInitData.search_id,
         findFirstDeepValue(initSearchContext, [
+          "roomsSearchId",
+          "RoomsSearchId",
           "searchId",
           "SearchId",
           "search_id",
+          "SearchID",
         ]),
       );
       const hotelSearchId = getFirstValue(
@@ -1185,9 +1264,19 @@ const ReviewPage = () => {
       }
 
       if (!searchTracingKey || !searchId) {
-        toast.error("Hotel search session is missing. Please search again.");
+        const missingParts = [
+          !searchTracingKey ? "TUI/search tracing key" : "",
+          !searchId ? "SearchId" : "",
+        ].filter(Boolean);
+
+        toast.error(`Hotel search session is missing ${missingParts.join(" and ")}. Please search again.`);
         return;
       }
+
+      markHotelBookingSubmitStarted({
+        TUI: searchTracingKey,
+      });
+      setBookingLoading(true);
 
       const payload = {
         ...fallbackHotelStartBookingPayload,
