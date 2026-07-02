@@ -6,7 +6,11 @@ import { useHotelDetailData } from "../../HotelDetailDataContext";
 
 const HeroSection = ({ liked, onLike }) => {
   const { hotelDetail } = useHotelDetailData();
-  const rating = hotelDetail?.rating || 0;
+  const starRating = hotelDetail?.starRating || hotelDetail?.rating || 0;
+  const reviewScore = hotelDetail?.reviewScore || hotelDetail?.rating || 0;
+  const reviewScoreText = reviewScore
+    ? Number(reviewScore).toFixed(1).replace(/\.0$/, "")
+    : "-";
 
   return (
     <div className={styles.HeroSection}>
@@ -22,7 +26,7 @@ const HeroSection = ({ liked, onLike }) => {
                   <img
                     key={`hotel-star-${index}`}
                     src={
-                      index < rating
+                      index < starRating
                         ? "/icons/tetimonialStart.svg"
                         : "/icons/conicstarEmpty.svg"
                     }
@@ -31,7 +35,7 @@ const HeroSection = ({ liked, onLike }) => {
                 ))}
               </div>
               <div className={styles.reviewCount}>
-                {rating || "-"} ({hotelDetail?.reviewText || "No reviews yet"})
+                {reviewScoreText} ({hotelDetail?.reviewText || "No reviews yet"})
               </div>
             </div>
           </div>
