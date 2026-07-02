@@ -571,7 +571,7 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
     return data?.data?.filterData || data?.data?.filters || data?.filterData || data?.filters || data?.data || data;
   } catch (error) {
     console.error("Error fetching hotel filter data:", error);
-
+    throw error;
   }
 };
 
