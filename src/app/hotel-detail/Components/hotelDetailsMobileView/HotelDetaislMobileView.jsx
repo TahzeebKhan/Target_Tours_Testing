@@ -15,7 +15,11 @@ import HotelPriceSummary from './hotelPriceSummary/HotelPriceSummary'
 import { AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useHotelDetailData } from '../../HotelDetailDataContext'
-import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch'
+import {
+    HOTEL_DETAILS_KEY,
+    HOTEL_SEARCH_SESSION_KEY,
+    writeHotelBookingSession,
+} from '@/shared/services/hotelSearch'
 
 const formatCurrency = (value) =>
     `₹ ${Math.round(Number(value || 0)).toLocaleString("en-IN", {
@@ -74,6 +78,25 @@ const getSearchCity = (searchParams, hotelDetail) =>
     hotelDetail?.request?.city ||
     hotelDetail?.city ||
     "";
+
+const parseCurrencyNumber = (value) => {
+    const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
+    return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
+const getFirstValue = (...values) =>
+    values.find((value) => value !== undefined && value !== null && value !== "") || "";
+
+const readStoredHotelSearch = () => {
+    if (typeof window === "undefined") return {};
+
+    try {
+        const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+};
 
 const HotelDetaislMobileView = () => {
     const { hotelDetail } = useHotelDetailData();
@@ -246,6 +269,90 @@ const HotelDetaislMobileView = () => {
         }
 
         setSelectionMessage("");
+        const searchParams = mobileSearchParams || new URLSearchParams();
+        const storedHotelSearch = readStoredHotelSearch();
+        const selectedRooms = selectedRoomEntries.map(({ room, qty }) => ({
+            id: room.id,
+            title: room.title,
+            image: room.image?.[0]?.img || room.image?.[0]?.image || "/images/hotelArt1.png",
+            pricePerNight: parseCurrencyNumber(room.price?.offer),
+            publishedRate: Number(room.price?.actualAmount) || parseCurrencyNumber(room.price?.actual),
+            taxPerNight: Number(room.price?.taxAmount) || 0,
+            rateIncludesTax: Boolean(room.price?.rateIncludesTax),
+            quantity: qty,
+            maxQuantity: room.isCombo ? 1 : Number(room.availability) || 1,
+            isCombo: Boolean(room.isCombo),
+            comboRoomCount: Number(room.comboRoomCount) || 1,
+            roomUnits: Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1)),
+            comboRooms: room.comboRooms || [],
+            nights: searchSummary.nights,
+            roomId: room.roomId,
+            roomGroupId: room.roomGroupId,
+            recommendationId: room.recommendationId,
+            supplierName: room.supplierName,
+            guestCode: room.guestCode,
+            roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
+            roomsSearchTracingKey:
+                room.roomsSearchTracingKey || hotelDetail?.roomsSearchTracingKey || "",
+            occupancies: room.occupancies,
+            raw: room.raw,
+            rawRecommendation: room.rawRecommendation,
+            rawRoomGroup: room.rawRoomGroup,
+            rawCategoryRooms: room.rawCategoryRooms,
+            netAmount: parseCurrencyNumber(room.price?.offer),
+        }));
+
+        writeHotelBookingSession({
+            hotel: {
+                id: hotelDetail?.id || "",
+                name: hotelDetail?.name || "Hotel",
+                address: hotelDetail?.address || "",
+                rating: hotelDetail?.rating || 0,
+                reviewText: hotelDetail?.reviewText || "",
+                image: hotelDetail?.images?.[0] || "/images/hotelArt1.png",
+            },
+            request: {
+                ...(hotelDetail?.request || {}),
+                searchContext: storedHotelSearch,
+                initResponse: storedHotelSearch.initResponse,
+                hotelId: hotelDetail?.id || searchParams.get("hotelId") || "",
+                hotelSearchId: getFirstValue(
+                    hotelDetail?.request?.hotelSearchId,
+                    storedHotelSearch.hotelSearchId,
+                    storedHotelSearch.hotel_search_id,
+                    searchParams.get("hotelSearchId"),
+                ),
+                roomsSearchId: getFirstValue(
+                    selectedRooms[0]?.roomsSearchId,
+                    hotelDetail?.roomsSearchId,
+                    hotelDetail?.request?.roomsSearchId,
+                    hotelDetail?.request?.searchId,
+                    storedHotelSearch.roomsSearchId,
+                    storedHotelSearch.searchId,
+                    searchParams.get("searchId"),
+                ),
+                roomsSearchTracingKey: getFirstValue(
+                    selectedRooms[0]?.roomsSearchTracingKey,
+                    hotelDetail?.roomsSearchTracingKey,
+                    hotelDetail?.request?.roomsSearchTracingKey,
+                    hotelDetail?.request?.searchTracingKey,
+                    storedHotelSearch.roomsSearchTracingKey,
+                    storedHotelSearch.searchTracingKey,
+                    searchParams.get("searchTracingKey"),
+                ),
+                checkInDate: searchParams.get("checkIn") || searchParams.get("checkin") || "",
+                checkOutDate: searchParams.get("checkOut") || searchParams.get("checkout") || "",
+                checkIn: searchParams.get("checkIn") || searchParams.get("checkin") || "",
+                checkOut: searchParams.get("checkOut") || searchParams.get("checkout") || "",
+                nights: searchSummary.nights,
+                rooms: searchSummary.rooms,
+                adults: searchSummary.adults,
+                children: searchSummary.children,
+            },
+            rooms: selectedRooms,
+        });
+
+        router.push("/hotel-booking");
     };
 
     const hotelGallery = () => {

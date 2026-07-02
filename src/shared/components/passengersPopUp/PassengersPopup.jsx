@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./PassengersPopup.module.css";
 
 const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
+  const adultCount = Number(passengers?.adult ?? passengers?.adults) || 1;
   const childCount = Number(passengers?.child ?? passengers?.children) || 0;
 
   const updateCount = (type, delta) => {
@@ -10,6 +11,8 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
       const normalizedType =
         type === "children" && !Object.prototype.hasOwnProperty.call(prev, "children")
           ? "child"
+          : type === "adult" && !Object.prototype.hasOwnProperty.call(prev, "adult")
+            ? "adults"
           : type;
       const currentValue = Number(prev[normalizedType]) || 0;
       const newValue = Math.max(0, currentValue + delta);
@@ -27,6 +30,12 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
       if (Object.prototype.hasOwnProperty.call(next, "child")) {
         next.child = Number(next.child) || 0;
       }
+      if (Object.prototype.hasOwnProperty.call(next, "adult")) {
+        next.adult = Math.max(1, Number(next.adult) || 1);
+      }
+      if (Object.prototype.hasOwnProperty.call(next, "adults")) {
+        next.adults = Math.max(1, Number(next.adults) || 1);
+      }
       if (Object.prototype.hasOwnProperty.call(next, "children")) {
         next.children = Number(next.children) || 0;
       }
@@ -36,7 +45,13 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
   };
   useEffect(() => {
     setPassengers((prev) => ({
-      adult: Number(prev.adult) || 1,
+      ...prev,
+      ...(Object.prototype.hasOwnProperty.call(prev, "adult")
+        ? { adult: Number(prev.adult) || 1 }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(prev, "adults")
+        ? { adults: Number(prev.adults) || 1 }
+        : {}),
       ...(Object.prototype.hasOwnProperty.call(prev, "child")
         ? { child: Number(prev.child) || 0 }
         : {}),
@@ -61,7 +76,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
           <span className={styles.label}>{inputType}</span>
             <div className={styles.inputRow}>
               <div className={styles.selectedDate}>
-                {passengers.adult} Adult, {childCount} Children, {passengers.infant} Infant
+                {adultCount} Adult, {childCount} Children, {passengers.infant} Infant
               </div>
             <img src="/icons/Close.svg" alt="close" onClick={onClose} />
           </div>
@@ -76,7 +91,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
             </div>
             <div className={styles.counter}>
               <button
-                disabled={passengers.adult <= 1}
+                disabled={adultCount <= 1}
                 className={styles.counterBtn}
                 onClick={() => updateCount("adult", -1)}
               >
@@ -93,7 +108,7 @@ const PassengersPopup = ({ passengers, setPassengers, onClose, inputType }) => {
                   />
                 </svg>
               </button>
-              <span className={styles.counterText}>{passengers.adult}</span>
+              <span className={styles.counterText}>{adultCount}</span>
               <button
                 className={styles.counterBtn}
                 onClick={() => updateCount("adult", 1)}
