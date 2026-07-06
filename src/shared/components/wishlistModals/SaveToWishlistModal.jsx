@@ -36,17 +36,26 @@ const getWishlistItemImage = (item = {}) =>
   item?.thumbnail ||
   "";
 
-const SaveToWishlistModal = ({ isOpen, onClose, onCreateNew, type = "package" }) => {
+const SaveToWishlistModal = ({
+  isOpen,
+  onClose,
+  onCreateNew,
+  onAuthRequired,
+  type = "package",
+}) => {
   const router = useRouter();
   const token = Cookies.get("auth_token");
 
-  // 🚨 NOT LOGGED IN → redirect
   useEffect(() => {
     if (isOpen && !token) {
-      onClose?.(); // close modal safely
-      router.push("/?openLogin=true");
+      onClose?.();
+      if (onAuthRequired) {
+        onAuthRequired();
+      } else {
+        router.push("/?openLogin=true");
+      }
     }
-  }, [isOpen, token, router, onClose]);
+  }, [isOpen, token, router, onClose, onAuthRequired]);
 
   useEffect(() => {
     if (!isOpen || typeof document === "undefined") return;

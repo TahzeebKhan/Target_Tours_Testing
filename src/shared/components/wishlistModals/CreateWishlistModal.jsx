@@ -45,6 +45,7 @@ const CreateWishlistModal = ({
   isOpen,
   onClose,
   onCreate,
+  onAuthRequired,
   type,        // 👈 package | hotel | travel_insurance
   ids = [],    // 👈 array of ids from parent
 }) => {
@@ -61,9 +62,13 @@ const CreateWishlistModal = ({
   useEffect(() => {
     if (isOpen && !token) {
       handleClose();
-      router.push("/?openLogin=true");
+      if (onAuthRequired) {
+        onAuthRequired();
+      } else {
+        router.push("/?openLogin=true");
+      }
     }
-  }, [handleClose, isOpen, token, router]);
+  }, [handleClose, isOpen, token, router, onAuthRequired]);
 
   useEffect(() => {
     if (!isOpen || typeof document === "undefined") return;
@@ -89,7 +94,11 @@ const CreateWishlistModal = ({
       console.error("Create wishlist failed:", err?.response?.data || err);
       if (err?.response?.status === 401 || err?.response?.status === 403) {
         handleClose();
-        router.push("/?openLogin=true");
+        if (onAuthRequired) {
+          onAuthRequired();
+        } else {
+          router.push("/?openLogin=true");
+        }
         return;
       }
 

@@ -1,24 +1,36 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
-import { useAuth } from "../context/AuthContext";
+import { getAuthDisplayName, useAuth } from "../context/AuthContext";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import BrandLogo from "@/shared/components/BrandLogo";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 const Navbar = () => {
-  const { isLoggedIn, profile: userProfile } = useAuth();
+  const { isLoggedIn, profile: userProfile, user } = useAuth();
+  const displayName = getAuthDisplayName(userProfile, user);
 
   const hasToken = !!Cookies.get("auth_token");
   const [isLoggedInCookie, setIsLoggedInCookie] = useState(hasToken);
   const router = useRouter();
-  const [showLogin, setShowLogin] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const [showProfileModal, setShowProfileModal] = useState(false);
   const profileBtnRef = useRef(null);
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
   return (
     <>
       {" "}
@@ -50,7 +62,7 @@ const Navbar = () => {
                 {!isLoggedInCookie ? (
                   <button
                     className={styles.signInBtn}
-                    onClick={() => router.push("/?openLogin=true")}
+                    onClick={openAuthModal}
                   >
                     Sign In
                   </button>
@@ -62,7 +74,7 @@ const Navbar = () => {
                       className={`${styles.glass_button} ${styles.logggedInBtn}`}
                       type="button"
                     >
-                      Hi, {userProfile?.display_name || "User"}
+                      Hi, {displayName}
                     </button>
 
                     {showProfileModal && (
@@ -76,15 +88,6 @@ const Navbar = () => {
               </>
             )}
 
-            {/* {!isLoggedIn && (
-              <button
-                onClick={() => router.push("/?openLogin=true")}
-                className={styles.signInBtn}
-              >
-                Sign In
-              </button>
-            )} */}
-
             <button className={styles.hamBurger}>
               <img src="/icons/hamBurger.png" alt="" />
               menu
@@ -92,6 +95,12 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

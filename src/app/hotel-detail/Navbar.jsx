@@ -4,17 +4,35 @@ import styles from "./Navbar.module.css";
 import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
-import { useAuth } from "../context/AuthContext";
+import { getAuthDisplayName, useAuth } from "../context/AuthContext";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 
 const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
   const router = useRouter();
   const [isMounted, setisMounted] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const profileBtnRef = useRef(null);
-  const { isLoggedIn: authLoggedIn, profile: userProfile } = useAuth();
+  const {
+    isLoggedIn: authLoggedIn,
+    profile: userProfile,
+    user,
+  } = useAuth();
   const isUserLoggedIn = isLoggedIn ?? authLoggedIn;
+  const displayName = getAuthDisplayName(userProfile, user);
 
   useEffect(() => setisMounted(true), []);
+
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
 
   return (
     <>
@@ -43,7 +61,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
                 </button>
                 {!isUserLoggedIn ? (
                   <button
-                    onClick={() => router.push("/?openLogin=true")}
+                    onClick={openAuthModal}
                     className={styles.signInBtn}
                   >
                     Sign In
@@ -56,7 +74,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
                       className={`${styles.glass_button} ${styles.logggedInBtn}`}
                       type="button"
                     >
-                      Hi, {userProfile?.display_name || "User"}
+                      Hi, {displayName}
                     </button>
 
                     {showProfileModal && (
@@ -77,6 +95,12 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
           </div>
         </div>
       </div>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

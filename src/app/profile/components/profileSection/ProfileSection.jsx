@@ -279,68 +279,7 @@ const ProfileSection = () => {
       options: countryList,
     },
   ]);
-
-  const corporateMobileFields = [
-    {
-      label: "Hotel Budget for Each Booking",
-      value: profile?.hotel_budget || "₹ 0",
-    },
-    {
-      label: "Flight Budget for Each Booking",
-      value: profile?.flight_budget || "₹ 0",
-    },
-  ];
-
-  const normalizeCountryText = (value) =>
-    String(value || "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s*\([^)]*\)/g, "")
-      .replace(/\s*\[[^\]]*\]/g, "")
-      .replace(/\bthe\b/g, "")
-      .replace(/[^a-z0-9]/g, "");
-
-  const getCountryCodeFromValue = (value) => {
-    const countryValue = String(value || "").trim();
-    if (!countryValue) return "";
-
-    const upperValue = countryValue.toUpperCase();
-    if (/^[A-Z]{2}$/.test(upperValue)) return upperValue;
-
-    const directCode = getNationalityCountryCode(countryValue);
-    if (/^[A-Z]{2}$/.test(directCode)) return directCode;
-
-    const normalizedValue = normalizeCountryText(countryValue);
-    const countryMatch = NationalityList.find(
-      (item) =>
-        normalizeCountryText(item.name) === normalizedValue ||
-        normalizeCountryText(item.nationality) === normalizedValue
-    );
-
-    if (countryMatch?.iso) return countryMatch.iso;
-
-    if (normalizedValue === "usa" || normalizedValue === "unitedstatesofamerica") {
-      return "US";
-    }
-
-    return "";
-  };
-
-  const getCountryDisplayValue = (country, countryCode) => {
-    const countryValue = String(country || "").trim();
-    const code = getCountryCodeFromValue(countryCode || countryValue);
-
-    if (code) {
-      const match = NationalityList.find((item) => item.iso === code);
-      return match?.name || countryValue;
-    }
-
-    if (normalizeCountryText(countryValue) === "usa") return "United States";
-
-    return countryValue;
-  };
-
-  const mapApiToFields = (data) => [
+    const mapApiToFields = (data) => [
     { label: "Full Name", value: data.full_name || "", isEditing: false },
 
     {
@@ -413,6 +352,70 @@ const ProfileSection = () => {
       options: countryList,
     },
   ];
+
+
+  
+  const corporateMobileFields = [
+    {
+      label: "Hotel Budget for Each Booking",
+      value: profile?.hotel_budget || "₹ 0",
+    },
+    {
+      label: "Flight Budget for Each Booking",
+      value: profile?.flight_budget || "₹ 0",
+    },
+  ];
+
+  const normalizeCountryText = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s*\([^)]*\)/g, "")
+      .replace(/\s*\[[^\]]*\]/g, "")
+      .replace(/\bthe\b/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const getCountryCodeFromValue = (value) => {
+    const countryValue = String(value || "").trim();
+    if (!countryValue) return "";
+
+    const upperValue = countryValue.toUpperCase();
+    if (/^[A-Z]{2}$/.test(upperValue)) return upperValue;
+
+    const directCode = getNationalityCountryCode(countryValue);
+    if (/^[A-Z]{2}$/.test(directCode)) return directCode;
+
+    const normalizedValue = normalizeCountryText(countryValue);
+    const countryMatch = NationalityList.find(
+      (item) =>
+        normalizeCountryText(item.name) === normalizedValue ||
+        normalizeCountryText(item.nationality) === normalizedValue
+    );
+
+    if (countryMatch?.iso) return countryMatch.iso;
+
+    if (normalizedValue === "usa" || normalizedValue === "unitedstatesofamerica") {
+      return "US";
+    }
+
+    return "";
+  };
+
+  const getCountryDisplayValue = (country, countryCode) => {
+    const countryValue = String(country || "").trim();
+    const code = getCountryCodeFromValue(countryCode || countryValue);
+
+    if (code) {
+      const match = NationalityList.find((item) => item.iso === code);
+      return match?.name || countryValue;
+    }
+
+    if (normalizeCountryText(countryValue) === "usa") return "United States";
+
+    return countryValue;
+  };
+
+
 
   const [corporateFields, setCorporateFields] = useState({
     hotelBudget: "",

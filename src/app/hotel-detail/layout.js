@@ -88,7 +88,6 @@ const Layout = ({ children }) => {
           <HeroSection
             liked={liked}
             onLike={() => {
-              setLiked(!liked);
               handleWishlistClick();
             }}
           />
@@ -105,11 +104,13 @@ const Layout = ({ children }) => {
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={(name) => {
           setWishlists((prev) => [...prev, { id: Date.now(), name }]);
+          setLiked(true);
           setIsCreateWishlistOpen(false);
           setIsSaveWishlistOpen(true);
         }}
         type="hotel"
         ids={wishlistHotelId ? [wishlistHotelId] : []}
+        onAuthRequired={openLoginModal}
       />
 
       <SaveToWishlistModal
@@ -117,6 +118,7 @@ const Layout = ({ children }) => {
         wishlists={wishlists}
         type="hotel"
         ids={wishlistHotelId ? [wishlistHotelId] : []}
+        onAuthRequired={openLoginModal}
         onClose={() => setIsSaveWishlistOpen(false)}
         onCreateNew={() => {
           setIsSaveWishlistOpen(false);

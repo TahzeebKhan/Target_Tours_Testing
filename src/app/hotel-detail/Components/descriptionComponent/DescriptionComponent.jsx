@@ -1,65 +1,3 @@
-// "use client";
-// import React, { useState } from "react";
-// import styles from "./DescriptionComponent.module.css";
-
-// const CHAR_LIMIT = 489;
-
-// const DescriptionComponent = () => {
-//   const [expanded, setExpanded] = useState(false);
-
-//   const paragraphs = [
-//     "Hotel size 200 rooms , Arranged over 6 floors. Barcelonia elegance with 6-star service. Simply elegant in all respects, this beautiful Parisian property offers a wonderful location that enhances your stay. Enjoy spacious rooms with great amenities and 6-star service from a superb team dedicated to making you feel like a VIP.",
-
-//     "The Peninsula Spa has 8 treatment rooms including couples treatment rooms. The palace's spa offers hot stone massages and treatments such as aromatherapy. Other on-site facilities include a steam room and a sauna.",
-
-//     "Pets. Pets stay for free (dogs and cats only, 1 total, up to 5 kg per pet. Service animals welcome",
-
-//     "Special check-in instructions. Front desk staff will greet guests on arrival at the property"
-//   ];
-
-//   let usedChars = 0;
-
-//   return (
-//     <div className={styles.DescriptionSection}>
-//       <h2 className={styles.heading}>Description</h2>
-
-//       <div className={styles.paraCont}>
-//         {paragraphs.map((para, idx) => {
-//           if (expanded) {
-//             return <p key={idx}>{para}</p>;
-//           }
-
-//           if (usedChars >= CHAR_LIMIT) return null;
-
-//           const remainingChars = CHAR_LIMIT - usedChars;
-
-//           if (para.length <= remainingChars) {
-//             usedChars += para.length;
-//             return <p key={idx}>{para}</p>;
-//           }
-
-//           const truncated = para.slice(0, remainingChars);
-//           usedChars = CHAR_LIMIT;
-
-//           return <p key={idx}>{truncated}...</p>;
-//         })}
-//       </div>
-
-//       {paragraphs.join("").length > CHAR_LIMIT && (
-//         <button
-//           className={styles.seeMoreBtn}
-//           onClick={() => setExpanded(!expanded)}
-//         >
-//           {expanded ? "See less" : "See more"}
-//         </button>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default DescriptionComponent;
-
-
 "use client";
 import React, { useState, useEffect } from "react";
 import styles from "./DescriptionComponent.module.css";
@@ -68,22 +6,30 @@ const DescriptionComponent = ({ description }) => {
   const [expanded, setExpanded] = useState(false);
   const [charLimit, setCharLimit] = useState(null);
 
-  const paragraphs = String(description || "Hotel details are being updated.")
+  const fullText = String(description || "Hotel details are being updated.").trim();
+
+  // 1. Check total word count from the raw text
+  const words = fullText.split(/\s+/).filter(Boolean);
+  const isLongText = words.length > 100; // Only truncate if total text > 100 words
+
+  // 2. Split into clean paragraphs for rendering
+  const paragraphs = fullText
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 
-  // 🔹 screen-size based char limit
+  // 3. Screen-size based character limit
   useEffect(() => {
     const updateLimit = () => {
       const width = window.innerWidth;
 
-      
-        if (width <= 640) setCharLimit(489);
-      else if(width<=1920){
-        setCharLimit(730)
+      if (width <= 640) {
+        setCharLimit(489);
+      } else if (width <= 1920) {
+        setCharLimit(730);
+      } else {
+        setCharLimit(null); // desktop → no truncate
       }
-      else setCharLimit(null); // desktop → no truncate
     };
 
     updateLimit();
@@ -93,7 +39,11 @@ const DescriptionComponent = ({ description }) => {
 
   let usedChars = 0;
 
-  const shouldTruncate = charLimit !== null && !expanded;
+  // Truncate ONLY if:
+  // - It's not expanded
+  // - There is a character limit for this screen size
+  // - The text actually meets your minimum length requirement (> 100 words)
+  const shouldTruncate = charLimit !== null && !expanded && isLongText;
 
   return (
     <div className={styles.DescriptionSection}>
@@ -101,7 +51,7 @@ const DescriptionComponent = ({ description }) => {
 
       <div className={styles.paraCont}>
         {paragraphs.map((para, idx) => {
-          // desktop OR expanded → full text
+          // If we shouldn't truncate, render full paragraph
           if (!shouldTruncate) {
             return <p key={idx}>{para}</p>;
           }
@@ -120,7 +70,8 @@ const DescriptionComponent = ({ description }) => {
         })}
       </div>
 
-      {charLimit !== null && (
+      {/* Only show the button if the text passes the 100-word mark AND the screen size has a limit */}
+      {isLongText && charLimit !== null && (
         <button
           className={styles.seeMoreBtn}
           onClick={() => setExpanded(!expanded)}

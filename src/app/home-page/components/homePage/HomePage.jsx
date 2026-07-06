@@ -17,7 +17,7 @@ import { getHeroSection } from "@/shared/services/heroApi";
 
 // import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/app/context/AuthContext";
+import { getAuthDisplayName, useAuth } from "@/app/context/AuthContext";
 import Cookies from "js-cookie";
 import CustomLoaderHomePage from "@/shared/components/CustomLoaderHomePage";
 import { useDatewiseFare } from "@/features/flights/hooks/useDatewiseFare";
@@ -289,6 +289,7 @@ const HomePage = ({
     user,
     loading: authLoading,
   } = useAuth();
+  const displayName = getAuthDisplayName(userProfile, user);
   
   const [travellerDestination, setTravellerDestination] =
     useState("SELECT DESTINATION");
@@ -1676,7 +1677,7 @@ const HomePage = ({
                       className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile} ${styles.logggedInBtnSidebar}`}
                       type="button"
                     >
-                      Hi, {userProfile?.display_name || "User"}
+                      Hi, {displayName}
                     </button>
 
                     {showProfileModal && (
@@ -1805,7 +1806,7 @@ const HomePage = ({
                     className={`${styles.glass_button} ${styles.logggedInBtn}`}
                     type="button"
                   >
-                    Hi, {userProfile?.display_name || "User"}
+                    Hi, {displayName}
                   </button>
 
                   {showProfileModal && (

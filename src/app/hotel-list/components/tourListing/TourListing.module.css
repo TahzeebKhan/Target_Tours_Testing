@@ -393,6 +393,25 @@
   line-height: 1;
   color: #000000;
 }
+.facilitiesToggle {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #006e96;
+  cursor: pointer;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  text-transform: lowercase;
+}
+.noFacilities {
+  color: #6b7280;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+}
 .freeList {
   display: flex;
   flex-direction: column;

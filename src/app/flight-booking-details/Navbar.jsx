@@ -1,10 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
-import { useAuth } from "../context/AuthContext";
+import { getAuthDisplayName, useAuth } from "../context/AuthContext";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 import { useOptionalFlightBooking } from "./FlightBookingContext";
 import {
   clearFlightBookingSession,
@@ -46,6 +48,8 @@ const Navbar = ({
   const [isMounted, setIsMounted] = useState(false);
   const [remainingMs, setRemainingMs] = useState(0);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const sessionExpiresAt =
     sessionExpiresAtOverride || getFlightBookingSessionExpiry(bookingSession);
 
@@ -85,14 +89,15 @@ const Navbar = ({
     setIsSessionExpiredModalOpen(false);
     router.replace(sessionExpiredRedirectPath);
   };
-  const displayName =
-    userProfile?.display_name ||
-    userProfile?.full_name ||
-    user?.display_name ||
-    user?.full_name ||
-    user?.name ||
-    user?.email?.split("@")[0] ||
-    "User";
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
+  const displayName = getAuthDisplayName(userProfile, user);
 
   return (
     <>
@@ -134,7 +139,7 @@ const Navbar = ({
                 {!isLoggedIn ? (
                   <button
                     className={styles.signInBtn}
-                    onClick={() => router.push("/?openLogin=true")}
+                    onClick={openAuthModal}
                   >
                     Sign In
                   </button>
@@ -160,15 +165,6 @@ const Navbar = ({
               </>
             )}
 
-            {/* {!isLoggedIn && (
-              <button
-                onClick={() => router.push("/?openLogin=true")}
-                className={styles.signInBtn}
-              >
-                Sign In
-              </button>
-            )} */}
-
             <button className={styles.hamBurger}>
               <img src="/icons/hamBurger.png" alt="" />
               menu
@@ -176,6 +172,12 @@ const Navbar = ({
           </div>
         </div>
       </div>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

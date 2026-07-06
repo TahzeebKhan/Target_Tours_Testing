@@ -11,13 +11,17 @@ import InnerCarousel from "./InnerCarousel";
 import styles from "./ExpCarousel.module.css";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function ExpCarousel({ activeTab, onWishlistClick }) {
+export default function ExpCarousel({
+  activeTab,
+  onWishlistClick,
+  savedFavoriteIndexes = [],
+}) {
   const [swiperRef, setSwiperRef] = useState(null);
   // track the current slidesPerView according to breakpoints so we can
   // conditionally show navigation buttons when there are more slides than visible
   const [slidesPerViewLocal, setSlidesPerViewLocal] = useState(4);
 
-  const [allSlidesData, setAllSlidesData] = useState([
+  const [allSlidesData] = useState([
     {
       title: "Munnar, Kerala",
       subtitle: "Tranquil Retreat Lodge",
@@ -209,12 +213,8 @@ export default function ExpCarousel({ activeTab, onWishlistClick }) {
           .map((item, index) => ({ ...item, originalIndex: index }))
           .filter((item) => item.type === activeTab);
 
-  // Toggle favorite
   const toggleFavorite = (index) => {
-    const updated = [...allSlidesData];
-    updated[index].favorite = !updated[index].favorite;
-    setAllSlidesData(updated);
-    onWishlistClick?.();
+    onWishlistClick?.(index);
   };
 
   useEffect(() => {
@@ -285,11 +285,13 @@ export default function ExpCarousel({ activeTab, onWishlistClick }) {
               {slides.map((item, index) => (
                 <SwiperSlide key={index} virtualIndex={index}>
                   <div className={`${styles.cardItem} cardItem`}>
-                    <InnerCarousel
-                      images={item.images}
-                      favorite={item.favorite}
-                      onFavorite={() => toggleFavorite(item.originalIndex)}
-                    />
+                <InnerCarousel
+                  images={item.images}
+                  favorite={
+                    item.favorite || savedFavoriteIndexes.includes(item.originalIndex)
+                  }
+                  onFavorite={() => toggleFavorite(item.originalIndex)}
+                />
 
                     <div className={styles.innerCarouselContent}>
                       <p className={styles.innerCarouselContentTitle}>

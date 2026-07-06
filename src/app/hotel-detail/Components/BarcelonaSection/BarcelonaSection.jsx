@@ -5,6 +5,8 @@ import styles from "./BarcelonaSection.module.css";
 import ExpCarousel from "../exploreCarousel/component/ExpCarousel";
 import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
 import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
   const [activeTab, setActiveTab] = useState("All");
@@ -15,8 +17,23 @@ const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
   const [wishlists, setWishlists] = useState([]);
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] = useState(false);
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
+  const [pendingFavoriteIndex, setPendingFavoriteIndex] = useState(null);
+  const [savedFavoriteIndexes, setSavedFavoriteIndexes] = useState([]);
 
-  const handleWishlistClick = () => {
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
+
+  const handleWishlistClick = (favoriteIndex = null) => {
+    setPendingFavoriteIndex(favoriteIndex);
     if (!wishlists.length) {
       setIsCreateWishlistOpen(true);
     } else {
@@ -33,6 +50,7 @@ const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
           <ExpCarousel
             activeTab={activeTab}
             onWishlistClick={handleWishlistClick}
+            savedFavoriteIndexes={savedFavoriteIndexes}
           />
         </div>
       </div>
@@ -43,11 +61,20 @@ const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={(name) => {
           setWishlists((prev) => [...prev, { id: Date.now(), name }]);
+          if (pendingFavoriteIndex !== null) {
+            setSavedFavoriteIndexes((prev) =>
+              prev.includes(pendingFavoriteIndex)
+                ? prev
+                : [...prev, pendingFavoriteIndex],
+            );
+          }
+          setPendingFavoriteIndex(null);
           setIsCreateWishlistOpen(false);
           setIsSaveWishlistOpen(true);
         }}
         type="hotel"
         ids={wishlistIds}
+        onAuthRequired={openAuthModal}
       />
 
       <SaveToWishlistModal
@@ -60,7 +87,16 @@ const BarcelonaSection = ({ city = "", currentHotelId = "" }) => {
         }}
         type="hotel"
         ids={wishlistIds}
+        onAuthRequired={openAuthModal}
       />
+
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

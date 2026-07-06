@@ -547,7 +547,7 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
     `/api/hotels/search/result/${encodeURIComponent(id)}/filterdata`,
     normalizeBaseUrl(),
   );
-  url.searchParams.set("domain", getDomain());
+
 
   try {
     const response = await fetch(url.toString(), {

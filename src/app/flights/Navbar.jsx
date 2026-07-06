@@ -4,7 +4,7 @@ import styles from "./Navbar.module.css";
 import LoginPopup from "../account/loginPopUp/LoginPopup";
 import SignupPopup from "../account/signUpPopUp/SignupPopup";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
-import { useAuth } from "../context/AuthContext";
+import { getAuthDisplayName, useAuth } from "../context/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
 const Navbar = ({ scrollProgress = { scrollProgress } }) => {
@@ -34,12 +34,7 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
     setIsmounted(true);
   }, []);
 
-  const displayName =
-    userProfile?.display_name ||
-    userProfile?.full_name ||
-    user?.name ||
-    user?.email?.split("@")[0] ||
-    "User";
+  const displayName = getAuthDisplayName(userProfile, user);
 
   return (
     <>
