@@ -1,5 +1,5 @@
 .section {
-    padding: 0px 200px 60px 200px;
+    padding: 80px 260px 80px 260px;
     background-color: #F9F9F9;
 }
 
@@ -13,25 +13,25 @@
     font-family: Antic Didone;
     font-weight: 400;
     font-style: Regular;
-    font-size: 42px;
-    line-height: 1.19;
+    font-size: 32px;
+    line-height: 100%;
     text-transform: capitalize;
 }
 
 .carousel {
-    margin-top: 40px;
+    /* margin-top: 40px; */
 }
 
 
 @media (max-width: 1440px) {
     .section {
-        padding: 0px 80px 60px 80px;
+        padding: 60px 80px 60px 80px;
     }
 }
 
 @media (max-width: 1200px) {
     .section {
-        padding: 0px 40px 60px 40px;
+        padding: 60px 40px 60px 40px;
     }
 
     .heading {
@@ -48,20 +48,20 @@
 
 @media (max-width: 885px) {
     .section {
-        padding: 0px 60px 40px 60px;
+        padding: 60px 60px 40px 60px;
     }
 }
 
 
 @media (max-width: 768px) {
     .section {
-        padding: 0px 32px 40px 32px;
+        padding: 60px 32px 40px 32px;
     }
 }
 
 @media (max-width: 529px) {
     .section {
-        padding: 0px 16px 40px 16px;
+        padding: 60px 16px 40px 16px;
     }
 }
 
@@ -81,7 +81,7 @@
 
 @media (max-width: 400px) {
     .section {
-        padding: 0px 16px 24px 16px !important;
+        padding: 60px 16px 24px 16px !important;
     }
 
     .heading {

@@ -129,17 +129,19 @@ justify-content: space-between; */
     cursor: pointer;
     transition: all 0.3s ease;
 }
-.btn:hover{
-        background: #000000;
-        color: white;
-    }
-    .btn img {
-  filter: invert(0);
-  transition: filter 0.2s ease;
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
 }
 
 .btn:hover img {
-  filter: invert(1);
+    filter: invert(1);
 }
 
 @media (max-width: 1540px) {

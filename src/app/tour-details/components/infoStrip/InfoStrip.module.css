@@ -1,5 +1,5 @@
 .infoStrip {
-    padding: 60px 20px;
+    padding: 60px 260px;
     background-color: #000033;
 }
 
@@ -56,8 +56,9 @@
 }
 
 .icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    margin-bottom: 10px;
 }
 
 .title {
@@ -185,13 +186,16 @@
     .containerPhoneView {
         display: flex;
     }
-    .infoItem{
+
+    .infoItem {
         gap: 12px;
     }
-    .infoStrip{
+
+    .infoStrip {
         padding: 20px 16px;
     }
-    .title{
+
+    .title {
         letter-spacing: 0;
     }
 }
@@ -200,16 +204,20 @@
     .infoStrip {
         padding: 0px 16px 24px 16px !important;
     }
+
     .pareContainer {
         flex-direction: column;
         gap: 24px;
     }
+
     .pareContainer .infoItem {
         width: 100%;
     }
+
     .containerPhoneView {
         gap: 24px;
     }
+
     .title {
         font-size: 16px;
     }
