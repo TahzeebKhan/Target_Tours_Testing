@@ -248,7 +248,7 @@
   flex-direction: column;
   /* reduce gap from 24px -> 10px using --shrink */
   gap: calc(24px - (14px * var(--shrink, 0)));
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   box-sizing: border-box;
   transition: gap 220ms linear, padding 220ms linear, top 220ms linear;
@@ -489,6 +489,8 @@
   font-weight: 400;
   font-size: 16px;
   font-family: var(--font-inter);
+  letter-spacing: -2%;
+  line-height: 24px;
 }
 
 .glass_button {
@@ -701,7 +703,8 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 10px;
-  /* letter-spacing: -2%; */
+  letter-spacing: -2%;
+  line-height: 16px;
   text-transform: uppercase;
   color: #c4c4c4;
 }
