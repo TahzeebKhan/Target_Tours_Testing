@@ -88,9 +88,9 @@
   top: 120px;
   right: 0;
   z-index: 3000;
-  width: max-content;
+  width: min(720px, calc(100vw - 32px));
   max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 180px);
+  max-height: calc(100vh - 112px);
   padding: 16px 16px 36px;
   background: #171717;
   border: 0.5px solid #ffffff;
@@ -158,12 +158,12 @@
 @media (max-width: 1280px) {
     .calendarDropdown {
         position: fixed;
-        top: 132px;
+        top: 112px;
         right: 20px;
         left: auto;
-        width: min-content;
+        width: min(720px, calc(100vw - 40px));
         max-width: calc(100vw - 40px);
-        max-height: calc(100vh - 164px);
+        max-height: calc(100vh - 136px);
     }
 }
 

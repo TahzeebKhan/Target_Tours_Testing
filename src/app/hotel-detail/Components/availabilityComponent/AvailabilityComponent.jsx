@@ -15,11 +15,31 @@ const ratingToStars = {
   terrible: 1,
 };
 
-const getRatingScore = (rating = {}) => {
-  const ratingLabel = String(rating.label || "").trim().toLowerCase();
-  return ratingToStars[ratingLabel] || rating.score || "";
+// Inverse map to find text from a numeric score
+const starsToRatingLabel = {
+  5: "Excellent",
+  4: "Good",
+  3: "Average",
+  2: "Poor",
+  1: "Terrible",
 };
 
+// 1. Get the numeric score safely
+export const getRatingScore = (rating = {}) => {
+  if (rating?.score !== undefined && rating?.score !== null && rating?.score !== "") {
+    return Number(rating.score);
+  }
+  const ratingLabel = String(rating?.label || "").trim().toLowerCase();
+  return ratingToStars[ratingLabel] || "";
+};
+
+// 2. Get the clean UI text label dynamically
+export const getRatingLabel = (rating = {}) => {
+  const score = getRatingScore(rating);
+  
+  // Return matched label (e.g. 3 -> "Average"), fallback to original label, or empty string
+  return starsToRatingLabel[score] || rating?.label || "";
+};
 const getRoomUnitCount = (room = {}) =>
   Math.max(1, Number(room.roomUnits || room.comboRoomCount || 1));
 
@@ -101,7 +121,7 @@ const AvailabilityComponent = ({
   const [roomQty, setRoomQty] = useState({});
   const [expandedFeatureRooms, setExpandedFeatureRooms] = useState({});
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
-
+ console.log("roooms", rooms);
   const roomUnitMap = rooms.reduce((unitMap, room) => {
     unitMap[room.id] = getRoomUnitCount(room);
     return unitMap;
@@ -534,7 +554,8 @@ const AvailabilityComponent = ({
                   <div className={styles.ExcellentCont}>
                     <div className={styles.ExcellentText}>
                       <span className={styles.Excellent}>
-                        {room.rating.label}
+                        {/* {room.rating.label} */}
+                             {getRatingLabel(room.rating)}
                       </span>
                       <span className={styles.reviews}>
                         {room.rating.reviews}

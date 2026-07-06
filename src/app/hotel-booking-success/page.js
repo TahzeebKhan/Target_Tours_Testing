@@ -363,16 +363,14 @@ function HotelBookingSuccessContent() {
         retrieveData.BookingConfirmationId,
         retrieveData.HotelConfirmationNumber,
         retrieveData.booking_id,
-        retrieveData.bookingId,
-        "N/A"
+        retrieveData.bookingId
       ),
       providerReference: pickFirst(
         apiBooking.provider_reference,
         apiBooking.providerReference,
         retrieveData.ReferenceNumber,
         retrieveData.TransactionId,
-        retrieveData.TransactionID,
-        "N/A"
+        retrieveData.TransactionID
       ),
       hotelName: pickFirst(
         hotelInfo.Name,
@@ -389,8 +387,7 @@ function HotelBookingSuccessContent() {
         hotelInfo.heroimage,
         hotelInfo.heroImage,
         hotelInfo.image,
-        sessionHotel.image,
-        "/images/hotelArt1.png"
+        sessionHotel.image
       ),
       hotelRating: pickFirst(
         hotelInfo.StarRating,
@@ -499,7 +496,9 @@ function HotelBookingSuccessContent() {
             <div className={styles.summaryGrid}>
               {/* Hotel detail card */}
               <div className={styles.hotelCard}>
-                <img src={details.hotelImage} alt={details.hotelName} className={styles.hotelImage} />
+                {details.hotelImage && (
+                  <img src={details.hotelImage} alt={details.hotelName} className={styles.hotelImage} />
+                )}
                 <div className={styles.hotelInfo}>
                   <div className={styles.hotelHeader}>
                     <h2>{details.hotelName}</h2>
@@ -563,14 +562,18 @@ function HotelBookingSuccessContent() {
               <h3>Booking References</h3>
             </div>
             <div className={styles.infoGrid}>
-              <div>
-                <span>Booking ID</span>
-                <strong>{details.bookingId}</strong>
-              </div>
-              <div>
-                <span>Provider Reference</span>
-                <strong>{details.providerReference}</strong>
-              </div>
+              {details.bookingId && (
+                <div>
+                  <span>Booking ID</span>
+                  <strong>{details.bookingId}</strong>
+                </div>
+              )}
+              {details.providerReference && (
+                <div>
+                  <span>Provider Reference</span>
+                  <strong>{details.providerReference}</strong>
+                </div>
+              )}
 	              <div>
 	                <span>Status</span>
 	                <strong className={styles.statusColor}>{details.status}</strong>

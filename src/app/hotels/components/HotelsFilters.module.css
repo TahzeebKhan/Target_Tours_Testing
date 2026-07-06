@@ -348,7 +348,7 @@ color:#111827;
 
 .starText {
   flex-shrink: 0;
-  min-width: 50px;
+  /* min-width: 50px; */
   color: #000033;
   font-size: 14px;
   letter-spacing: 2px;

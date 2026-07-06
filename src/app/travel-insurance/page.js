@@ -7,17 +7,28 @@ import FeatureSection from "../home-page/components/featureSection/FeatureSectio
 import Footer from "../home-page/components/footer/Footer";
 import TravelInsurance from "./components/Navbar/TravelInsurance";
 import styles from "./TravelInsurancePage.module.css";
-import { useAuth } from "../context/AuthContext";
+import { getAuthDisplayName, useAuth } from "../context/AuthContext";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import BrandLogo from "@/shared/components/BrandLogo";
+import LoginPopup from "../account/loginPopUp/LoginPopup";
+import SignupPopup from "../account/signUpPopUp/SignupPopup";
 const page = () => {
-  const { isLoggedIn, profile: userProfile } = useAuth();
+  const { isLoggedIn, profile: userProfile, user } = useAuth();
+  const displayName = getAuthDisplayName(userProfile, user);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const profileBtnRef = useRef(null);
-  const router = useRouter();
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
   return (
     <div className={styles.container}>
       <div
@@ -41,7 +52,7 @@ const page = () => {
               {!isLoggedIn ? (
                 <button
                   className={`${styles.signInBtn} ${styles.downloadBtnMobile}`}
-                  onClick={() => setShowLogin(true)}
+                  onClick={openAuthModal}
                 >
                   Sign In
                 </button>
@@ -53,7 +64,7 @@ const page = () => {
                     className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile} ${styles.logggedInBtnSidebar}`}
                     type="button"
                   >
-                    Hi, {userProfile?.display_name || "User"}
+                    Hi, {displayName}
                   </button>
 
                   {showProfileModal && (
@@ -100,7 +111,7 @@ const page = () => {
           <div className={styles.menuBottom}>
             {!isLoggedIn && (
               <button
-                onClick={() => router.push("./?openLogin=true")}
+                onClick={openAuthModal}
                 className={styles.accountBtn}
               >
                 ACCOUNT LOGIN
@@ -115,6 +126,12 @@ const page = () => {
       <Questions />
       <FeatureSection />
       <Footer />
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </div>
   );
 };

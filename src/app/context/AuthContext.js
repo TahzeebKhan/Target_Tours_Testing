@@ -15,8 +15,10 @@ const clearAuthCookies = () => {
   Cookies.remove(AUTH_EXPIRY_COOKIE);
 };
 
-const DISPLAY_NAME_PLACEHOLDER =
-  "USER";
+const INVALID_DISPLAY_NAMES = new Set([
+  "user",
+  "choose how your name appears across transpeed.",
+]);
 
 const getValidName = (...values) =>
   values.find((value) => {
@@ -25,15 +27,19 @@ const getValidName = (...values) =>
     const name = value.trim();
     return (
       name &&
-      name.toLowerCase() !== DISPLAY_NAME_PLACEHOLDER.toLowerCase()
+      !INVALID_DISPLAY_NAMES.has(name.toLowerCase())
     );
   })?.trim() || "";
 
-const normalizeName = (value) =>
-  typeof value === "string" ? value.trim() : "";
-
-const hasProfileField = (profileData, field) =>
-  Object.prototype.hasOwnProperty.call(profileData || {}, field);
+export const getAuthDisplayName = (profileData, userData) =>
+  getValidName(
+    profileData?.display_name,
+    profileData?.full_name,
+    userData?.display_name,
+    userData?.full_name,
+    userData?.name,
+    userData?.email?.split("@")[0],
+  ) || "User";
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,22 +49,21 @@ export const AuthProvider = ({ children }) => {
 
   const getProfileFallback = (userData, profileData = null) => ({
     ...(profileData || {}),
-    full_name: hasProfileField(profileData, "full_name")
-      ? normalizeName(profileData?.full_name)
-      : getValidName(
-          userData?.full_name,
-          userData?.display_name,
-          userData?.name,
-          userData?.email?.split("@")[0],
-        ),
-    display_name: hasProfileField(profileData, "display_name")
-      ? normalizeName(profileData?.display_name)
-      : getValidName(
-          userData?.display_name,
-          userData?.full_name,
-          userData?.name,
-          userData?.email?.split("@")[0],
-        ),
+    full_name: getValidName(
+      profileData?.full_name,
+      userData?.full_name,
+      userData?.display_name,
+      userData?.name,
+      userData?.email?.split("@")[0],
+    ),
+    display_name: getValidName(
+      profileData?.display_name,
+      profileData?.full_name,
+      userData?.display_name,
+      userData?.full_name,
+      userData?.name,
+      userData?.email?.split("@")[0],
+    ),
   });
 
   useEffect(() => {

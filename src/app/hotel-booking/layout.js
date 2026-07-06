@@ -36,26 +36,7 @@ const layout = ({ children }) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
   const sessionExpiresAt = getHotelBookingSessionExpiry(bookingSession);
-  const [roomList, setRoomList] = useState([
-    {
-      id: "deluxe_ac_room",
-      title: "Deluxe Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 1,
-    },
-    {
-      id: "premium_ac_room",
-      title: "Premium Private AC Room with Ensuite Bathroom",
-      image: "/images/hotelArt1.png",
-      pricePerNight: 1397.86,
-      quantity: 1,
-      maxQuantity: 5,
-      nights: 1,
-    },
-  ]);
+  const [roomList, setRoomList] = useState([]);
 
   useEffect(() => {
     roomListRef.current = roomList;

@@ -1278,22 +1278,20 @@ const normalizeHotelFacilities = (hotel = {}) => {
 
   const uniqueFacilities = [...new Set(facilities)];
 
-  return uniqueFacilities.slice(0, 5).map((name) => ({
+  return uniqueFacilities.map((name) => ({
     name,
     icon: getFacilityIcon(name),
   }));
 };
 
 const HotelFacilities = ({ facilities = [] }) => {
-  const visibleFacilities = facilities.length
-    ? facilities
-    : [
-        { name: "Air conditioning", icon: "/icons/AirConditioning.svg" },
-        { name: "Wifi", icon: "/icons/Wifi.svg" },
-        { name: "Kitchen", icon: "/icons/Kitchen.svg" },
-        { name: "Pool", icon: "/icons/Pool.svg" },
-        { name: "Mixer", icon: "/icons/pool.svg" },
-      ];
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasMoreFacilities = facilities.length > 6;
+  const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);
+
+  if (!facilities.length) {
+    return <div className={styles.noFacilities}>No facilities</div>;
+  }
 
   return (
     <div className={styles.featuresCont}>
@@ -1304,6 +1302,18 @@ const HotelFacilities = ({ facilities = [] }) => {
           {index < visibleFacilities.length - 1 && <span>•</span>}
         </div>
       ))}
+      {hasMoreFacilities && (
+        <button
+          type="button"
+          className={styles.facilitiesToggle}
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsExpanded((prev) => !prev);
+          }}
+        >
+          {isExpanded ? "see less" : "...see more"}
+        </button>
+      )}
     </div>
   );
 };
@@ -2561,6 +2571,7 @@ const TourListing = () => {
         isOpen={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
         onCreate={handleCreateWishlist}
+        onAuthRequired={openLoginModal}
         type="hotel"
         ids={selectedTourId ? [selectedTourId] : []}
       />
@@ -2571,6 +2582,7 @@ const TourListing = () => {
         wishlists={wishlists}
         type="hotel"
         ids={selectedTourId ? [selectedTourId] : []}
+        onAuthRequired={openLoginModal}
         onClose={() => setIsSaveWishlistOpen(false)}
       />
       {showAuthModal && authView === "login" && (

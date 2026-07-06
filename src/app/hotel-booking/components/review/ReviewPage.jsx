@@ -26,84 +26,6 @@ import {
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
-const fallbackHotelStartBookingPayload = {
-  TUI: "cc6a2275-d39c-43ce-a57e-316e3f6b4070",
-  ServiceEnquiry: "",
-  ContactInfo: {
-    Title: "Mr",
-    FName: "TEST",
-    LName: "AV",
-    Mobile: "8590055610",
-    Email: "robin@benzyinfotech.com",
-    Address: "MRRA 4  EDAPPALLY  Edappally , EDAPPALLY , Edappally",
-    State: "Kerala",
-    City: "Cochin",
-    PIN: "6865245",
-    GSTCompanyName: "",
-    GSTTIN: "",
-    GSTMobile: "",
-    GSTEmail: "",
-    UpdateProfile: true,
-    IsGuest: false,
-    CountryCode: "IN",
-    MobileCountryCode: "+91",
-    NetAmount: "",
-    DestMobCountryCode: "",
-    DestMob: "",
-  },
-  Auxiliaries: [
-    {
-      Code: "PROMO",
-      Parameters: [
-        { Type: "Code", Value: "" },
-        { Type: "ID", Value: "" },
-        { Type: "Amount", Value: "" },
-      ],
-    },
-    {
-      Code: "CUSTOMER DETAILS",
-      parameters: [
-        { Type: "Nationality", Value: "IN" },
-        { Type: "Country of Residence", Value: "IN" },
-      ],
-    },
-  ],
-  Rooms: [
-    {
-      RoomId: "2247c12a-bb99-42fe-8bd3-0e45fc3e17cc",
-      GuestCode: "|1|1:A:25|",
-      SupplierName: "Sabre",
-      RoomGroupId: "c6b6658c-b413-4175-bfc1-140e3475f9f9",
-      Guests: [
-        {
-          GuestID: "0",
-          Operation: "U",
-          Title: "Ms",
-          FirstName: "REXY",
-          MiddleName: "",
-          LastName: "RAJU",
-          MobileNo: "",
-          PaxType: "A",
-          Age: "25",
-          Email: "",
-          Pan: "",
-        },
-      ],
-    },
-  ],
-  NetAmount: "862576",
-  ClientID: "FVI6V120g22Ei5ztGK0FIQ==",
-  DeviceID: "",
-  AppVersion: "",
-  SearchId: "05f95641-197f-4719-901e-bc878ac6d2bf.UcPgZrc4QDFQO_g5L_EzkEYBHlHFapV_nr-j8m8_0rU",
-  RecommendationId: "e77812cb-10df-424c-adfd-924c917298be",
-  LocationName: null,
-  HotelCode: "39743918",
-  CheckInDate: "2026-09-09",
-  CheckOutDate: "2026-10-10",
-  TravelingFor: "NTF",
-};
-
 const toApiDate = (value) => {
   if (!value) return "";
   const text = String(value).trim();
@@ -777,7 +699,7 @@ const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {
       const entryGuests = guestGroups[entryIndex] || guests;
 
       return {
-        RoomId: getRoomApiId(room, detailRoom, rawDetailRoom, room.roomId || room.id || ""),
+        RoomId: getRoomApiId(room, detailRoom, rawDetailRoom),
         GuestCode: buildGuestCode(occupancies, entryGuests, entryIndex || roomIndex),
         SupplierName: getFirstValue(
           getRoomApiValue(room, detailRoom, rawDetailRoom, "supplierName"),
@@ -788,7 +710,6 @@ const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {
           getRoomApiValue(room, detailRoom, rawDetailRoom, "roomGroupId"),
           getRoomApiValue(room, detailRoom, rawDetailRoom, "RoomGroupId"),
           room.roomGroupId,
-          room.id,
         ),
         Guests: entryGuests.map((guest, guestIndex) => ({
           GuestID: String(guestIndex),
@@ -806,6 +727,23 @@ const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {
       };
     });
   });
+
+const validateStartBookingRooms = (rooms = []) => {
+  const missingIndex = rooms.findIndex(
+    (room) => !room.RoomId || !room.RoomGroupId || !room.Guests?.length,
+  );
+
+  if (missingIndex < 0) return "";
+
+  const missingRoom = rooms[missingIndex] || {};
+  const missingParts = [
+    !missingRoom.RoomId ? "RoomId" : "",
+    !missingRoom.RoomGroupId ? "RoomGroupId" : "",
+    !missingRoom.Guests?.length ? "guest details" : "",
+  ].filter(Boolean);
+
+  return `Room ${missingIndex + 1} is missing ${missingParts.join(", ")}. Please go back and select the room again.`;
+};
 
 const getRoomTotal = (room, fallbackNights = 1) => {
   const quantity = Number(room.quantity || 0);
@@ -944,6 +882,17 @@ const ReviewPage = () => {
       request.searchContext?.location?.name,
       request.searchContext?.city,
     ) || "Address not available";
+  const hotelImage = getDisplayValue(
+    hotel.image,
+    hotel.imageUrl,
+    hotel.mainImage,
+    hotel.thumbnail,
+    hotel.images?.[0],
+    hotel.raw?.image,
+    hotel.raw?.imageUrl,
+    hotel.raw?.mainImage,
+    hotel.raw?.images?.[0],
+  );
   const checkInDisplay = formatBookingDisplayDate(checkInSource, "Check-in");
   const checkOutDisplay = formatBookingDisplayDate(checkOutSource, "Check-out");
   const totalAmount = selectedRooms.reduce(
@@ -1288,16 +1237,59 @@ const ReviewPage = () => {
         return;
       }
 
+      const startBookingRooms = buildStartBookingRooms(selectedRooms, roomGuests, contact);
+      const roomsValidationMessage = validateStartBookingRooms(startBookingRooms);
+      if (roomsValidationMessage) {
+        toast.error(roomsValidationMessage);
+        return;
+      }
+
+      const recommendationId = getFirstValue(
+        firstRoom.recommendationId,
+        firstRoom.raw?.recommendationId,
+        firstRoom.raw?.RecommendationId,
+        request.recommendationId,
+        request.RecommendationId,
+        findFirstDeepValue(initSearchContext, [
+          "recommendationId",
+          "RecommendationId",
+          "recommendationID",
+        ]),
+      );
+      const hotelCode = getFirstValue(
+        hotel.id,
+        hotel.hotelId,
+        hotel.HotelCode,
+        hotel.HotelId,
+        hotel.raw?.id,
+        hotel.raw?.hotelId,
+        hotel.raw?.HotelCode,
+        request.hotelId,
+        request.HotelCode,
+        request.searchContext?.hotelId,
+        request.searchContext?.hotel?.id,
+        request.searchContext?.hotel?.hotelId,
+      );
+
+      if (!recommendationId || !hotelCode) {
+        const missingParts = [
+          !recommendationId ? "RecommendationId" : "",
+          !hotelCode ? "HotelCode" : "",
+        ].filter(Boolean);
+
+        toast.error(`Hotel booking is missing ${missingParts.join(" and ")}. Please go back and select the room again.`);
+        return;
+      }
+
       markHotelBookingSubmitStarted({
         TUI: searchTracingKey,
       });
       setBookingLoading(true);
 
       const payload = {
-        ...fallbackHotelStartBookingPayload,
         TUI: searchTracingKey || "",
+        ServiceEnquiry: "",
         ContactInfo: {
-          ...fallbackHotelStartBookingPayload.ContactInfo,
           Title: contact.title,
           FName: contact.firstName,
           LName: contact.lastName,
@@ -1307,20 +1299,47 @@ const ReviewPage = () => {
           State: contact.state,
           City: contact.city,
           PIN: contact.pin,
+          GSTCompanyName: "",
+          GSTTIN: "",
+          GSTMobile: "",
+          GSTEmail: "",
+          UpdateProfile: true,
+          IsGuest: false,
           CountryCode: getCountryCode(contact.countryCode),
           MobileCountryCode: getDialCode(firstTraveler.countryCode || contact.countryCode),
+          NetAmount: "",
+          DestMobCountryCode: "",
+          DestMob: "",
         },
-        Rooms: buildStartBookingRooms(selectedRooms, roomGuests, contact),
+        Auxiliaries: [
+          {
+            Code: "PROMO",
+            Parameters: [
+              { Type: "Code", Value: "" },
+              { Type: "ID", Value: "" },
+              { Type: "Amount", Value: "" },
+            ],
+          },
+          {
+            Code: "CUSTOMER DETAILS",
+            parameters: [
+              { Type: "Nationality", Value: getCountryCode(contact.countryCode) || "IN" },
+              { Type: "Country of Residence", Value: getCountryCode(contact.countryCode) || "IN" },
+            ],
+          },
+        ],
+        Rooms: startBookingRooms,
         NetAmount: selectedNetAmount,
+        ClientID: "",
+        DeviceID: "",
+        AppVersion: "",
         SearchId: searchId,
         hotelSearchId,
-        RecommendationId:
-          firstRoom.recommendationId ||
-          request.recommendationId ||
-          fallbackHotelStartBookingPayload.RecommendationId,
-        HotelCode: hotel.id || request.hotelId || fallbackHotelStartBookingPayload.HotelCode,
+        RecommendationId: recommendationId,
+        HotelCode: hotelCode,
         CheckInDate: checkInDate,
         CheckOutDate: checkOutDate,
+        TravelingFor: "NTF",
       };
 
       const startBookingResponse = await startHotelBooking(payload);
@@ -1444,6 +1463,36 @@ const ReviewPage = () => {
     );
   }
 
+  if (!bookingSession || !roomList.length) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.hotelContainer}>
+          <div className={styles.hotelTopContainer}>
+            <div className={styles.hotelTextContainer}>
+              <div className={styles.hotelNameAndLocation}>
+                <h3>No active hotel booking session</h3>
+                <div className={styles.locationAndRating}>
+                  <span className={styles.hotelAddress}>
+                    Please select a hotel room again to continue booking.
+                  </span>
+                </div>
+              </div>
+              <div className={styles.checkinOutContainer}>
+                <button
+                  type="button"
+                  className={styles.paymentOption}
+                  onClick={() => router.push("/hotels")}
+                >
+                  Search hotels
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {/* HEADER */}
@@ -1453,7 +1502,7 @@ const ReviewPage = () => {
       <div className={styles.hotelContainer}>
         <div className={styles.hotelTopContainer}>
           <div className={styles.hotelImageContainer}>
-            <img src={hotel.image || "/images/hotelArt1.png"} alt="" />
+            {hotelImage ? <img src={hotelImage} alt={hotelName} /> : null}
           </div>
           <div className={styles.hotelTextContainer}>
             <div className={styles.hotelNameAndLocation}>

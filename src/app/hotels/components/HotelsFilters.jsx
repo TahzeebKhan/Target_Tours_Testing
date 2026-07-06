@@ -2,154 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ListFilter, Search, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import styles from "./HotelsFilters.module.css";
 import { useHotelsContext } from "../context/HotelsContext";
+import HotelMap, {
+  getGoogleMapEmbedUrl,
+  getHotelSearchCenter,
+} from "./hotelMap/hotelMap";
 
 const DEFAULT_PRICE_RANGE = [0, 25000];
 const HOTEL_FILTER_MEMORY_KEY = "hotelSidebarFilters";
-const FILTER_OPTION_PREVIEW_LIMIT = 15;
+const FILTER_OPTION_PREVIEW_LIMIT = 5;
 
-const HOTEL_FILTER_SECTIONS = [
-  {
-    key: "suggested",
-    title: "SUGGESTED FOR YOU",
-    options: [
-      { key: "lastMinuteDeals", label: "Last Minute Deals" },
-      { key: "fiveStar", label: "5 Star" },
-      { key: "fourStar", label: "4 Star" },
-      { key: "breakfastIncluded", label: "Breakfast Included" },
-      { key: "oneClickRewards", label: "OneClick Rewards" },
-    ],
-  },
-  {
-    key: "starCategory",
-    title: "STAR CATEGORY",
-    options: [
-      { key: "3", label: "3 Star" },
-      { key: "4", label: "4 Star" },
-      { key: "5", label: "5 Star" },
-    ],
-  },
-  {
-    key: "guestRating",
-    title: "GUEST RATING",
-    options: [
-      { key: "4.2", label: "Excellent 4.2+" },
-      { key: "3.5", label: "Very Good 3.5+" },
-      { key: "3", label: "Good 3+" },
-      { key: "4.7", label: "Wonderful 4.7+" },
-      { key: "4.8", label: "Exceptional 4.8+" },
-    ],
-  },
-  {
-    key: "propertyType",
-    title: "PROPERTY TYPE",
-    options: [
-      { key: "hotel", label: "Hotel" },
-      { key: "homestay", label: "Homestay" },
-      { key: "villa", label: "Villa" },
-      { key: "cottage", label: "Cottage" },
-      { key: "resort", label: "Resort" },
-      { key: "apartment", label: "Apartment" },
-      { key: "hostel", label: "Hostel" },
-      { key: "guestHouse", label: "Guest House" },
-      { key: "servicedApartment", label: "Serviced Apartment" },
-      { key: "vacationHome", label: "Vacation Home" },
-    ],
-  },
-  {
-    key: "roomViews",
-    title: "ROOM VIEWS",
-    options: [
-      { key: "garden", label: "Garden View" },
-      { key: "mountain", label: "Mountain View" },
-      { key: "valley", label: "Valley View" },
-      { key: "lake", label: "Lake View" },
-      { key: "city", label: "City View" },
-      { key: "forest", label: "Forest View" },
-    ],
-  },
-  {
-    key: "roomAmenities",
-    title: "ROOM AMENITIES",
-    searchable: true,
-    searchPlaceholder: "Search room amenities",
-    options: [
-      { key: "balcony", label: "Balcony" },
-      { key: "bathtub", label: "Bathtub" },
-      { key: "fireplace", label: "Fireplace" },
-      { key: "kitchenette", label: "Kitchenette" },
-      { key: "coffeeMachine", label: "Coffee Machine" },
-      { key: "roomService", label: "Cook & Butler Service" },
-      { key: "privatePool", label: "Private Pool" },
-      { key: "jacuzzi", label: "Jacuzzi" },
-      { key: "airConditioning", label: "Air Conditioning" },
-      { key: "miniBar", label: "Mini Bar" },
-      { key: "smartTv", label: "Smart TV" },
-    ],
-  },
-  {
-    key: "hotelAmenities",
-    title: "HOTEL AMENITIES",
-    searchable: true,
-    searchPlaceholder: "Search amenities",
-    options: [
-      { key: "wifi", label: "Wi-Fi" },
-      { key: "swimmingPool", label: "Swimming Pool" },
-      { key: "spa", label: "Spa" },
-      { key: "gym", label: "Gym" },
-      { key: "restaurant", label: "Restaurant" },
-      { key: "bar", label: "Bar" },
-      { key: "kidsPlayArea", label: "Kids Play Area" },
-      { key: "parking", label: "Parking" },
-      { key: "airportShuttle", label: "Airport Shuttle" },
-      { key: "petFriendly", label: "Pet Friendly" },
-      { key: "businessCentre", label: "Business Centre" },
-      { key: "evCharging", label: "Electric Vehicle Charging" },
-      { key: "laundry", label: "Laundry" },
-      { key: "roomService", label: "Room Service" },
-    ],
-  },
-  {
-    key: "houseRules",
-    title: "HOUSE RULES",
-    options: [
-      { key: "unmarriedCouples", label: "Allows Unmarried Couples" },
-      { key: "familyFriendly", label: "Family Friendly" },
-      { key: "alcoholAllowed", label: "Alcohol Allowed" },
-      { key: "smokingAllowed", label: "Smoking Allowed" },
-      { key: "petsAllowed", label: "Pets Allowed" },
-      { key: "twentyFourPlus", label: "2+ Pets Allowed" },
-      { key: "selfCheckIn", label: "Self Check-In" },
-      { key: "maleGroups", label: "Male Groups Allowed" },
-      { key: "coupleFriendly", label: "Couple Friendly" },
-    ],
-  },
-  {
-    key: "flexibleCheckIn",
-    title: "FLEXIBLE CHECK-IN / CHECK-OUT",
-    options: [
-      { key: "earlyCheckIn", label: "Guaranteed Early Check-In" },
-      { key: "lateCheckOut", label: "Guaranteed Late Check-Out" },
-      { key: "twentyFourHour", label: "24-Hour Check-In" },
-    ],
-  },
-  {
-    key: "hotelChains",
-    title: "HOTEL CHAINS",
-    searchable: true,
-    searchPlaceholder: "Search hotel chains",
-    options: [
-      { key: "marriott", label: "Marriott" },
-      { key: "hilton", label: "Hilton" },
-      { key: "ihg", label: "IHG" },
-      { key: "hyatt", label: "Hyatt" },
-      { key: "radisson", label: "Radisson" },
-      { key: "accor", label: "Accor" },
-      { key: "taj", label: "Taj" },
-    ],
-  },
-];
 
 const PRICE_BUCKETS = [
   { key: "0-2500", label: "₹0-2500", min: 0, max: 2500 },
@@ -412,6 +276,25 @@ const mapApiOption = (option = {}, category = "") => ({
   apiCategory: category,
 });
 
+const getStarSortValue = (option = {}) => {
+  const starNumber = Number(option.key || option.value);
+  if (Number.isFinite(starNumber) && starNumber > 0) return starNumber;
+
+  const labelNumber = Number(String(option.label || "").match(/\d+/)?.[0]);
+  if (Number.isFinite(labelNumber) && labelNumber > 0) return labelNumber;
+
+  return 6;
+};
+
+const sortFilterOptions = (options = [], sectionKey = "") => {
+  if (sectionKey !== "starCategory") return options;
+
+  return [...options].sort(
+    (firstOption, secondOption) =>
+      getStarSortValue(firstOption) - getStarSortValue(secondOption),
+  );
+};
+
 const getApiFilterSections = (filterData) =>
   getApiFilterList(filterData)
     .map((filter) => {
@@ -429,7 +312,7 @@ const getApiFilterSections = (filterData) =>
       return {
         ...config,
         apiCategory: filter.category,
-        options,
+        options: sortFilterOptions(options, config.key),
       };
     })
     .filter(Boolean);
@@ -538,6 +421,7 @@ const getStoredBudget = (memory) => {
 };
 
 export default function HotelsFilters() {
+  const searchParams = useSearchParams();
   const {
     filterData,
     isLoading,
@@ -564,11 +448,16 @@ export default function HotelsFilters() {
   const [expandedSections, setExpandedSections] = useState(
     filterMemoryRef.current?.expandedSections || {},
   );
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [mapPreviewCenter, setMapPreviewCenter] = useState(() =>
+    getHotelSearchCenter(searchParams, meta?.channel || ""),
+  );
   const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
   const apiPriceSection = apiSections.find((section) => section.key === "price");
   const renderedSections = apiSections.filter((section) => section.key !== "price");
   const hasApiFilters = apiSections.length > 0;
   const isFilterLoading = !hasApiFilters && (meta?.isFilterLoading || isLoading);
+  const mapPreviewUrl = getGoogleMapEmbedUrl(mapPreviewCenter, 13);
 
   const { min: minPrice, max: maxPrice } = getPriceRange(filterData);
   const safeBudget = [
@@ -581,6 +470,10 @@ export default function HotelsFilters() {
 
     setBudget([minPrice, maxPrice]);
   }, [budgetTouched, maxPrice, minPrice]);
+
+  useEffect(() => {
+    setMapPreviewCenter(getHotelSearchCenter(searchParams, meta?.channel || ""));
+  }, [meta?.channel, searchParams]);
 
   const selectedChips = useMemo(() => {
     const chips = [];
@@ -717,12 +610,16 @@ export default function HotelsFilters() {
         <div className={styles.mapCard}>
           <iframe
             title="Google Map Explore"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3501.1963288417934!2d77.2065171!3d28.6238803!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd3600000001%3A0x6e9f16d89b1d9bfb!2sConnaught%20Place%2C%20New%20Delhi%2C%20Delhi%20110001!5e0!3m2!1sen!2sin!4v1719750000000!5m2!1sen!2sin"
+            src={mapPreviewUrl}
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
-          <button type="button" className={styles.mapButton}>
+          <button
+            type="button"
+            className={styles.mapButton}
+            onClick={() => setIsMapOpen(true)}
+          >
             EXPLORE ON MAP
           </button>
         </div>
@@ -851,6 +748,7 @@ export default function HotelsFilters() {
           APPLY
         </button>
       </div>
+      <HotelMap isOpen={isMapOpen} onClose={() => setIsMapOpen(false)} />
     </aside>
   );
 }

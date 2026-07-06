@@ -4,9 +4,11 @@ import Image from "next/image";
 
 import styles from "./Navbar.module.css";
 import ProfileModal from "@/app/home-page/components/homePage/modals/ProfileModal";
-import { useAuth } from "@/app/context/AuthContext";
+import { getAuthDisplayName, useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import BrandLogo from "@/shared/components/BrandLogo";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 const HELP_POPULAR_TOPICS = [
   "Cancel booking",
   "Refund status",
@@ -16,6 +18,8 @@ const HELP_POPULAR_TOPICS = [
 const Navbar = () => {
   const [activeTopic, setActiveTopic] = useState("");
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const profileBtnRef = useRef(null);
   const {
     isLoggedIn,
@@ -23,7 +27,16 @@ const Navbar = () => {
     user,
     loading: authLoading,
   } = useAuth();
+  const displayName = getAuthDisplayName(userProfile, user);
   const router = useRouter();
+  const openAuthModal = () => {
+    setAuthView("login");
+    setShowAuthModal(true);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
   return (
     <>
       {" "}
@@ -65,7 +78,7 @@ const Navbar = () => {
               {!isLoggedIn ? (
                 <button
                   className={`${styles.signInBtn} ${styles.downloadBtnMobile}`}
-                  onClick={() => router.push("/?openLogin=true")}
+                  onClick={openAuthModal}
                 >
                   Sign In
                 </button>
@@ -77,7 +90,7 @@ const Navbar = () => {
                     className={`${styles.glass_button} ${styles.logggedInBtn} ${styles.downloadBtnMobile} ${styles.logggedInBtnSidebar}`}
                     type="button"
                   >
-                    Hi, {userProfile?.display_name || "User"}
+                    Hi, {displayName}
                   </button>
 
                   {showProfileModal && (
@@ -228,6 +241,12 @@ const Navbar = () => {
           <div className={styles.br} />
         </section>
       </div>
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
     </>
   );
 };

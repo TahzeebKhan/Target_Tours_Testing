@@ -13,8 +13,7 @@ export default function RoomPriceRow({
 }) {
   return (
     <div className={styles.card}>
-      {/* Image */}
-      <img src={image} alt={title} className={styles.image} />
+      {image ? <img src={image} alt={title} className={styles.image} /> : null}
 
       {/* Content */}
       <div className={styles.contentContainer}>
