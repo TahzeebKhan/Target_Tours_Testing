@@ -32,23 +32,27 @@
   background: transparent;
   border-bottom: none;
   font-family: var(--font-inter);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
   text-transform: uppercase;
-  color: #4b5563;
+  color: #000000;
 }
 
 .roundColumnHeader {
   display: grid;
-  grid-template-columns: 1fr 1.8fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1.8fr 1fr 1fr;
   gap: 12px;
   padding: 12px 16px;
   background: #f8fafc;
   border-top: 1px solid #edf0f4;
   border-bottom: 1px solid #edf0f4;
   font-family: var(--font-inter);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  letter-spacing: 0%;
   text-transform: uppercase;
   color: #8290a3;
 }
@@ -61,8 +65,8 @@
 .roundOptionList {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-top: 14px;
+  gap: 24px;
+  padding-top: 16px;
 }
 
 .roundOptionCard {
@@ -71,7 +75,9 @@
   border-radius: 6px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .roundOptionCard:hover {
@@ -151,8 +157,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   border: 1px solid #d8dce2;
   border-radius: 6px;
   color: #4c4c4c;
@@ -168,8 +174,10 @@
   gap: 5px;
   color: #000000;
   font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 11.25px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -667,7 +675,7 @@
   gap: 12px;
   align-items: center;
   margin-top: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .timeCol {
@@ -685,18 +693,23 @@
 }
 
 .largeTime {
-  font-family: Antic Didone, serif;
-  font-size: 32px;
+  font-family:
+    Antic Didone,
+    serif;
+  font-size: 28px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 100%;
+  letter-spacing: 0%;
   color: #000000;
 }
 
 .cityText {
   font-family: var(--font-inter);
-  font-size: 11px;
-  font-weight: 500;
-  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #a3a3a3;
   text-transform: uppercase;
 }
 
@@ -718,8 +731,8 @@
 }
 
 .flightDot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: #94a3b8;
   flex-shrink: 0;
@@ -732,8 +745,8 @@
 }
 
 .planeIcon {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -764,15 +777,18 @@
 
 .priceText {
   font-family: var(--font-inter);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: #000000;
-  line-height: 1.2;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .adultText {
   font-family: var(--font-inter);
   font-size: 10px;
-  font-weight: 500;
-  color: #94a3b8;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #858585;
 }
