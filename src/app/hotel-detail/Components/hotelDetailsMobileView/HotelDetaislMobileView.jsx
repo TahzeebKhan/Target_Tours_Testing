@@ -87,6 +87,41 @@ const parseCurrencyNumber = (value) => {
 const getFirstValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "") || "";
 
+const HOTEL_SEARCH_TRACING_KEYS = [
+    "roomsSearchTracingKey",
+    "RoomsSearchTracingKey",
+    "searchTracingKey",
+    "SearchTracingKey",
+    "searchTracingkey",
+    "search_tracing_key",
+    "searchTracing",
+    "searchtracing",
+    "TUI",
+    "tui",
+];
+
+const findFirstDeepValue = (source, keys = HOTEL_SEARCH_TRACING_KEYS, seen = new Set()) => {
+    if (!source || typeof source !== "object" || seen.has(source)) return "";
+
+    seen.add(source);
+
+    for (const key of keys) {
+        const value = source[key];
+        if (value !== undefined && value !== null && value !== "") {
+            return value;
+        }
+    }
+
+    for (const value of Object.values(source)) {
+        if (value && typeof value === "object") {
+            const deepValue = findFirstDeepValue(value, keys, seen);
+            if (deepValue) return deepValue;
+        }
+    }
+
+    return "";
+};
+
 const readStoredHotelSearch = () => {
     if (typeof window === "undefined") return {};
 
@@ -271,6 +306,28 @@ const HotelDetaislMobileView = () => {
         setSelectionMessage("");
         const searchParams = mobileSearchParams || new URLSearchParams();
         const storedHotelSearch = readStoredHotelSearch();
+        const searchTracingKey = getFirstValue(
+            selectedRoomEntries[0]?.room?.roomsSearchTracingKey,
+            selectedRoomEntries[0]?.room?.searchTracingKey,
+            selectedRoomEntries[0]?.room?.TUI,
+            selectedRoomEntries[0]?.room?.raw?.roomsSearchTracingKey,
+            selectedRoomEntries[0]?.room?.raw?.searchTracingKey,
+            selectedRoomEntries[0]?.room?.raw?.TUI,
+            hotelDetail?.roomsSearchTracingKey,
+            hotelDetail?.request?.roomsSearchTracingKey,
+            hotelDetail?.request?.searchTracingKey,
+            hotelDetail?.request?.TUI,
+            hotelDetail?.request?.tui,
+            storedHotelSearch.roomsSearchTracingKey,
+            storedHotelSearch.searchTracingKey,
+            storedHotelSearch.TUI,
+            storedHotelSearch.tui,
+            searchParams.get("searchTracingKey"),
+            searchParams.get("TUI"),
+            searchParams.get("tui"),
+            findFirstDeepValue(storedHotelSearch.initResponse),
+            findFirstDeepValue(storedHotelSearch),
+        );
         const selectedRooms = selectedRoomEntries.map(({ room, qty }) => ({
             id: room.id,
             title: room.title,
@@ -292,8 +349,13 @@ const HotelDetaislMobileView = () => {
             supplierName: room.supplierName,
             guestCode: room.guestCode,
             roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
-            roomsSearchTracingKey:
-                room.roomsSearchTracingKey || hotelDetail?.roomsSearchTracingKey || "",
+            roomsSearchTracingKey: getFirstValue(
+                room.roomsSearchTracingKey,
+                hotelDetail?.roomsSearchTracingKey,
+                searchTracingKey,
+            ),
+            searchTracingKey: getFirstValue(room.searchTracingKey, searchTracingKey),
+            TUI: getFirstValue(room.TUI, searchTracingKey),
             occupancies: room.occupancies,
             raw: room.raw,
             rawRecommendation: room.rawRecommendation,
@@ -339,7 +401,10 @@ const HotelDetaislMobileView = () => {
                     storedHotelSearch.roomsSearchTracingKey,
                     storedHotelSearch.searchTracingKey,
                     searchParams.get("searchTracingKey"),
+                    searchTracingKey,
                 ),
+                searchTracingKey,
+                TUI: searchTracingKey,
                 checkInDate: searchParams.get("checkIn") || searchParams.get("checkin") || "",
                 checkOutDate: searchParams.get("checkOut") || searchParams.get("checkout") || "",
                 checkIn: searchParams.get("checkIn") || searchParams.get("checkin") || "",

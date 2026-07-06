@@ -648,23 +648,32 @@ const getInitCompleteSearchMeta = (payload = {}) => {
   const content = getMessageContent(payload);
   const init = content?.init || data?.init || payload?.init || {};
   const searchId =
-    init.searchId ||
-    init.search_id ||
-    init.searchid ||
     content?.searchId ||
     content?.search_id ||
     content?.searchid ||
+    data?.content?.searchId ||
+    data?.content?.search_id ||
+    data?.content?.searchid ||
     data?.searchId ||
     data?.search_id ||
     data?.searchid ||
+    init.searchId ||
+    init.search_id ||
+    init.searchid ||
     "";
   const hotelSearchId =
     content?.hotelSearchId ||
     content?.hotel_search_id ||
     content?.hotel_search_key ||
+    data?.content?.hotelSearchId ||
+    data?.content?.hotel_search_id ||
+    data?.content?.hotel_search_key ||
     data?.hotelSearchId ||
     data?.hotel_search_id ||
     data?.hotel_search_key ||
+    init.hotelSearchId ||
+    init.hotel_search_id ||
+    init.hotel_search_key ||
     "";
 
   return { searchId, hotelSearchId };
@@ -683,36 +692,58 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
 
   return {
     searchId:
+      content?.searchId ||
+      content?.search_id ||
+      content?.searchid ||
+      data?.content?.searchId ||
+      data?.content?.search_id ||
+      data?.content?.searchid ||
+      payload?.content?.searchId ||
+      payload?.content?.search_id ||
+      payload?.content?.searchid ||
       init?.searchId ||
       init?.search_id ||
       init?.searchid ||
       data?.searchId ||
       data?.search_id ||
       data?.searchid ||
-      content?.searchId ||
-      content?.search_id ||
-      content?.searchid ||
       payload?.searchId ||
       payload?.search_id ||
       firstHotelWithSearchId?.searchId ||
       firstHotelWithSearchId?.search_id ||
       "",
     hotelSearchId:
+      content?.hotelSearchId ||
+      content?.hotel_search_id ||
+      content?.hotel_search_key ||
+      data?.content?.hotelSearchId ||
+      data?.content?.hotel_search_id ||
+      data?.content?.hotel_search_key ||
+      payload?.content?.hotelSearchId ||
+      payload?.content?.hotel_search_id ||
+      payload?.content?.hotel_search_key ||
       init?.hotelSearchId ||
       init?.hotel_search_id ||
       init?.hotel_search_key ||
       data?.hotelSearchId ||
       data?.hotel_search_id ||
       data?.hotel_search_key ||
-      content?.hotelSearchId ||
-      content?.hotel_search_id ||
-      content?.hotel_search_key ||
       payload?.hotelSearchId ||
       payload?.hotel_search_id ||
       firstHotelWithHotelSearchId?.hotelSearchId ||
       firstHotelWithHotelSearchId?.hotel_search_id ||
       "",
   };
+};
+
+const isFilterSearchPayloadReady = (payload = {}, resultSource = "") => {
+  const socketType = getHotelSocketType(payload);
+
+  return (
+    resultSource === "merged" ||
+    socketType === "HOTEL_MERGED_RESPONSE" ||
+    socketType === "HOTEL_INIT_COMPLETE"
+  );
 };
 
 const hasUsableFilterData = (data) => {
@@ -1290,7 +1321,7 @@ const HotelFacilities = ({ facilities = [] }) => {
   const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);
 
   if (!facilities.length) {
-    return <div className={styles.noFacilities}>No facilities</div>;
+    return <div className={styles.noFacilities}>No facilities available</div>;
   }
 
   return (
@@ -1737,6 +1768,7 @@ const TourListing = () => {
   };
 
   const handleBookNow = async (hotel) => {
+     console.log("handleBookNow called with hotel:", hotel);
     if (!hotel) return;
 
     hotelDetailsAbortRef.current?.abort();
@@ -1923,12 +1955,7 @@ const TourListing = () => {
           "",
       };
 
-      if (
-        (nextResults.source === "merged" ||
-          getHotelSocketType(payload) === "HOTEL_INIT_RESPONSE" ||
-          getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE") &&
-        filterMeta.searchId
-      ) {
+      if (isFilterSearchPayloadReady(payload, nextResults.source) && filterMeta.searchId) {
         setMergedFilterSearchMeta((prev) => ({
           searchId: filterMeta.searchId,
           hotelSearchId: filterMeta.hotelSearchId || prev.hotelSearchId,
@@ -2009,9 +2036,10 @@ const TourListing = () => {
       return;
     }
 
-    if (hotelSearchChannel && !filterSearchId) {
+    if (hotelSearchChannel && (!hasMergedHotelResponse || !filterSearchId)) {
       setIsFilterLoading(true);
       setApiFilterData(null);
+      lastFilterRequestKeyRef.current = "";
       return;
     }
 
@@ -2083,23 +2111,18 @@ const TourListing = () => {
     filterDataRequestKey,
     filterRetryNonce,
     filterSearchId,
+    hasMergedHotelResponse,
     hotelSearchChannel,
   ]);
 
-  const staticHotelResults = useMemo(
-    () =>
-      STATIC_HOTEL_RESULTS.map((hotel, index) =>
-        normalizeHotelCard(hotel, index),
-      ),
-    [],
-  );
+
   const hasActiveHotelSearch = Boolean(hotelSearchChannel);
   const sourceHotels = useMemo(
     () =>
       hotelResults.length || hasActiveHotelSearch
         ? hotelResults
-        : staticHotelResults,
-    [hasActiveHotelSearch, hotelResults, staticHotelResults],
+        : [],
+    [hasActiveHotelSearch, hotelResults],
   );
 
   const sortedHotels = useMemo(

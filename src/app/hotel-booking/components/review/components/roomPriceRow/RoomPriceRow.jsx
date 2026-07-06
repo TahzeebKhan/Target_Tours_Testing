@@ -2,10 +2,16 @@
 
 import styles from "./RoomPriceRow.module.css";
 
+const formatCurrency = (value) =>
+  `₹ ${Number(value || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 2,
+  })}`;
+
 export default function RoomPriceRow({
   image,
   title,
   price,
+  priceLabel = "total",
   quantity,
   maxQuantity = 5,
   onIncrease,
@@ -24,8 +30,8 @@ export default function RoomPriceRow({
         {/* Price */}
         <div className={styles.priceContainer}>
           <div className={styles.priceSection}>
-            <p className={styles.price}>₹ {price.toFixed(2)}</p>
-            <p className={styles.perNight}>per/night</p>
+            <p className={styles.price}>{formatCurrency(price)}</p>
+            <p className={styles.perNight}>{priceLabel}</p>
           </div>
 
           {/* Counter */}
