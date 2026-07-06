@@ -594,80 +594,6 @@
   display: none;
 }
 
-@media (max-width: 1440px) {
-  .expandWrap.open {
-    max-height: 886px;
-  }
-}
-
-@media (max-width: 1383px) {
-  .card {
-    flex-direction: column;
-    padding-right: 16px;
-  }
-
-  .cardLeft {
-    max-width: 100%;
-  }
-
-  .cardLeftMainCont {
-    max-width: 100%;
-  }
-
-  .departContainer {
-    max-width: 100%;
-  }
-
-  .cardRight {
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 0px;
-    padding-right: 0;
-  }
-
-  .cardRight .seeDetailsBtn {
-    display: flex;
-  }
-
-  .cardLeftMainCont .seeDetailsBtn {
-    display: none;
-  }
-}
-
-@media (max-width: 1200px) {
-  .roundTripColumns {
-    grid-template-columns: 1fr;
-  }
-
-  .selectionBar {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .selectionDivider {
-    display: none;
-  }
-
-  .selectionFare {
-    justify-items: start;
-  }
-
-  .bookNowBtn {
-    width: 100%;
-  }
-
-  .departTimeContainer,
-  .returnContainer {
-    max-width: unset;
-  }
-}
-
-@media (max-width: 800px) {
-  .cardLeft {
-    flex-direction: column;
-  }
-}
-
 /* Card Middle Row Styles */
 .cardMiddleRow {
   display: grid;
@@ -791,4 +717,140 @@
   line-height: 100%;
   letter-spacing: 0%;
   color: #858585;
+}
+
+@media (max-width: 1440px) {
+  .expandWrap.open {
+    max-height: 886px;
+  }
+}
+
+@media (max-width: 1383px) {
+  .card {
+    flex-direction: column;
+    padding-right: 16px;
+  }
+
+  .cardLeft {
+    max-width: 100%;
+  }
+
+  .cardLeftMainCont {
+    max-width: 100%;
+  }
+
+  .departContainer {
+    max-width: 100%;
+  }
+
+  .cardRight {
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0px;
+    padding-right: 0;
+  }
+
+  .cardRight .seeDetailsBtn {
+    display: flex;
+  }
+
+  .cardLeftMainCont .seeDetailsBtn {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) {
+  /* .roundTripColumns {
+    grid-template-columns: 1fr;
+  } */
+
+  .roundColumnHeader{
+        grid-template-columns: 1.6fr 1.4fr 1.2fr 1fr;
+  }
+
+  .selectionBar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .selectionDivider {
+    display: none;
+  }
+
+  .selectionFare {
+    justify-items: start;
+  }
+
+  .bookNowBtn {
+    width: 100%;
+  }
+
+  .departTimeContainer,
+  .returnContainer {
+    max-width: unset;
+  }
+}
+
+@media (max-width: 850px) {
+  .cardMiddleRow {
+    gap: 8px;
+    grid-template-columns: 1fr 1.2fr 1fr 1fr;
+  }
+  .largeTime {
+    font-size: 24px;
+  }
+  .roundOptionCard{
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .cityText{
+    font-size: 10px;
+  }
+  .durationText{
+    gap:4px;
+    font-size: 9px;
+  }
+  .durationCol{
+    width: 100%;
+  }
+  .roundColumnHeader{
+    grid-template-columns: 1.4fr 1.2fr 1fr 1fr;
+    gap: 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .roundTripColumns{
+    gap: 14px;
+  }
+
+  .largeTime {
+    font-size: 20px;
+  }
+
+  .cityText{
+    font-size: 9px;
+  }
+
+  .cardMiddleRow{
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+  .roundOptionCard{
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .priceText{
+    font-size: 13px;
+  }
+
+  .roundColumnHeader{
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 9px;
+  }
+  /* .cardLeft {
+    flex-direction: column;
+  } */
 }
