@@ -17,6 +17,13 @@
   gap: 24px;
 }
 
+.roundTripGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 16px;
+}
+
 .roundColumn {
   display: flex;
   flex-direction: column;
@@ -65,8 +72,8 @@
 .roundOptionList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-top: 16px;
+  gap: 0;
+  padding-top: 0;
 }
 
 .roundOptionCard {
@@ -564,6 +571,11 @@
   /* enough for content */
   border: 1px solid #e5e7f0;
   transition: all 0.45s ease-in-out;
+}
+
+.roundRowExpand {
+  grid-column: 1 / -1;
+  margin-top: -4px;
 }
 
 .open {
