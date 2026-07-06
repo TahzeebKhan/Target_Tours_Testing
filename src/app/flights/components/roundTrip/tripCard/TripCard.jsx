@@ -49,6 +49,7 @@ const TripCard = ({
   const [selectedReturnId, setSelectedReturnId] = useState(null);
   const [fareModalFlight, setFareModalFlight] = useState(null);
   const [detailFlight, setDetailFlight] = useState(null);
+  const [detailRowId, setDetailRowId] = useState(null);
 
   const flightResults = [
     {
@@ -228,13 +229,14 @@ const TripCard = ({
     };
   };
 
-  const toggleDetails = async (flight) => {
+  const toggleDetails = async (flight, rowId) => {
     const flightId = flight?.id;
     if (!flightId) return;
 
     const isClosing = openId === flightId;
     setOpenId(isClosing ? null : flightId);
     setDetailFlight(isClosing ? null : flight);
+    setDetailRowId(isClosing ? null : rowId);
     if (isClosing || flightInfoData[flightId] || loadingFlightInfoId === flightId) return;
 
     const payload = buildFlightInfoPayload(flight);
@@ -461,7 +463,7 @@ const TripCard = ({
               className={styles.inlineDetailsBtn}
               onClick={(event) => {
                 event.stopPropagation();
-                toggleDetails(detailItem);
+                toggleDetails(detailItem, item.id);
               }}
             >
               See Details
@@ -497,7 +499,7 @@ const TripCard = ({
   return (
     <>
       <div className={styles.roundTripShell}>
-        <div className={styles.roundTripColumns}>
+        <div className={styles.roundTripGrid}>
           <section className={styles.roundColumn}>
             <div className={styles.roundColumnTitle}>
               {selectedDepart?.depart?.flight?.departure?.city ? (
@@ -513,9 +515,6 @@ const TripCard = ({
               <span>Duration ↑↓</span>
               <span>Arrival ↑↓</span>
               <span>Price ↑↓</span>
-            </div>
-            <div className={styles.roundOptionList}>
-              {tripCardsData.map((item) => renderLegOption(item, "depart"))}
             </div>
           </section>
 
@@ -535,24 +534,36 @@ const TripCard = ({
               <span>Arrival ↑↓</span>
               <span>Price ↑↓</span>
             </div>
-            <div className={styles.roundOptionList}>
-              {tripCardsData.map((item) => renderLegOption(item, "return"))}
-            </div>
           </section>
-        </div>
 
-        <div
-          className={`${styles.expandWrap} ${
-            detailFlight && openId === detailFlight.id ? styles.open : ""
-          }`}
-        >
-          {detailFlight && (
-            <RoundTripExpendable
-              flightData={detailFlight}
-              flightInfoData={flightInfoData[detailFlight.id]}
-              isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
-            />
-          )}
+          {tripCardsData.map((item) => {
+            const isRowOpen =
+              detailRowId === item.id && detailFlight && openId === detailFlight.id;
+
+            return (
+              <React.Fragment key={item.id}>
+                <div className={styles.roundOptionList}>
+                  {renderLegOption(item, "depart")}
+                </div>
+                <div className={styles.roundOptionList}>
+                  {renderLegOption(item, "return")}
+                </div>
+                <div
+                  className={`${styles.expandWrap} ${styles.roundRowExpand} ${
+                    isRowOpen ? styles.open : ""
+                  }`}
+                >
+                  {isRowOpen && (
+                    <RoundTripExpendable
+                      flightData={detailFlight}
+                      flightInfoData={flightInfoData[detailFlight.id]}
+                      isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
+                    />
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
 
         {tripCardsData.length > 2 && (

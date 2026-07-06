@@ -378,6 +378,256 @@
   justify-content: center;
 }
 
+.mobileSplitResults {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mobileSplitHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: #f6f7fb;
+  border-top: 1px solid #eef0f4;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.mobileSplitHeader > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+.mobileSplitHeader > div + div {
+  border-left: 1px solid #eef0f4;
+}
+
+.mobileSplitHeader strong {
+  min-width: 0;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileSplitHeader span {
+  flex: 0 0 auto;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #8190a1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mobileSplitGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 5px;
+}
+
+.mobileSegmentCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 138px;
+  padding: 10px 10px 9px;
+  background: #ffffff;
+  border: 1px solid #f0f1f4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobileSegmentCardSelected {
+  position: relative;
+  z-index: 1;
+  border-color: #000033;
+  background: #f7f8fc;
+}
+
+.mobileSegmentTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mobileAirline {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mobileAirline img {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  object-fit: contain;
+  background: #001f9f;
+}
+
+.mobileAirline div {
+  min-width: 0;
+}
+
+.mobileAirline p {
+  margin: 0;
+  max-width: 82px;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: #2c3440;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileAirline span {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: #8b96a8;
+}
+
+.mobileSegmentTop strong {
+  flex: 0 0 auto;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: #000033;
+  white-space: nowrap;
+}
+
+.mobileSegmentTimes {
+  display: grid;
+  grid-template-columns: auto minmax(56px, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.mobileSegmentTimes > span {
+  font-family: Antic Didone;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #000033;
+  white-space: nowrap;
+}
+
+.mobileSegmentMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mobileSegmentMeta span,
+.mobileSegmentMeta small {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.mobileSegmentMeta i {
+  width: 100%;
+  border-top: 1px solid #d7dce4;
+}
+
+.mobileSeeDetailBtn {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #0604b2;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mobileBookingBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(156px, 0.9fr);
+  align-items: center;
+  gap: 16px;
+  margin: 8px -16px -12px;
+  padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-top: 1px solid #e7e9ee;
+  box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.mobileBookingBar span {
+  display: block;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #3f4858;
+  text-transform: uppercase;
+}
+
+.mobileBookingBar strong {
+  display: block;
+  margin-top: 4px;
+  font-family: Antic Didone;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #000033;
+}
+
+.mobileBookingBar button {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  background: #000033;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
 @media (max-width: 1264px) {
   .flightFareDetailsContainer {
     gap: 4px;
@@ -508,6 +758,7 @@
 
   .isMobileView {
     display: flex;
+    padding-bottom: 96px;
   }
 
   .sortSubContainer {
@@ -572,6 +823,18 @@
   }
 }
 
+@media (max-width: 430px) {
+  .isMobileView {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .mobileBookingBar {
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+}
+
 @media (max-width: 380px) {
   .sortedItemContainer {
     gap: unset;
@@ -587,5 +850,53 @@
   }
   .chevronSort {
     display: none;
+  }
+
+  .mobileSplitHeader > div {
+    padding: 12px 10px;
+  }
+
+  .mobileSplitHeader strong,
+  .mobileSplitHeader span {
+    font-size: 11px;
+  }
+
+  .mobileSegmentCard {
+    padding: 9px 8px;
+    min-height: 132px;
+  }
+
+  .mobileSegmentTop {
+    gap: 6px;
+  }
+
+  .mobileAirline p {
+    max-width: 68px;
+  }
+
+  .mobileSegmentTop strong {
+    font-size: 13px;
+  }
+
+  .mobileSegmentTimes {
+    gap: 6px;
+  }
+
+  .mobileSegmentTimes > span {
+    font-size: 18px;
+  }
+
+  .mobileSegmentMeta span,
+  .mobileSegmentMeta small {
+    font-size: 10px;
+  }
+
+  .mobileBookingBar {
+    grid-template-columns: minmax(0, 1fr) minmax(132px, 0.9fr);
+    gap: 10px;
+  }
+
+  .mobileBookingBar strong {
+    font-size: 24px;
   }
 }
