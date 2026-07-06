@@ -61,6 +61,41 @@ const getFirstValue = (...values) =>
       !isPlaceholderDate(value),
   ) || "";
 
+const HOTEL_SEARCH_TRACING_KEYS = [
+  "roomsSearchTracingKey",
+  "RoomsSearchTracingKey",
+  "searchTracingKey",
+  "SearchTracingKey",
+  "searchTracingkey",
+  "search_tracing_key",
+  "searchTracing",
+  "searchtracing",
+  "TUI",
+  "tui",
+];
+
+const findFirstDeepValue = (source, keys = HOTEL_SEARCH_TRACING_KEYS, seen = new Set()) => {
+  if (!source || typeof source !== "object" || seen.has(source)) return "";
+
+  seen.add(source);
+
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
+  }
+
+  for (const value of Object.values(source)) {
+    if (value && typeof value === "object") {
+      const deepValue = findFirstDeepValue(value, keys, seen);
+      if (deepValue) return deepValue;
+    }
+  }
+
+  return "";
+};
+
 const getNightCount = (checkInValue, checkOutValue) => {
   const checkInDate = new Date(checkInValue);
   const checkOutDate = new Date(checkOutValue);
@@ -530,6 +565,35 @@ const Page = () => {
   const saveBookingSession = useCallback(() => {
     if (typeof window === "undefined") return;
 
+    const searchTracingKey = getFirstValue(
+      selectedRooms[0]?.roomsSearchTracingKey,
+      selectedRooms[0]?.searchTracingKey,
+      selectedRooms[0]?.TUI,
+      selectedRooms[0]?.raw?.roomsSearchTracingKey,
+      selectedRooms[0]?.raw?.searchTracingKey,
+      selectedRooms[0]?.raw?.TUI,
+      hotelDetail?.roomsSearchTracingKey,
+      searchRequest.roomsSearchTracingKey,
+      searchRequest.searchTracingKey,
+      searchRequest.TUI,
+      searchRequest.tui,
+      storedHotelSearch.roomsSearchTracingKey,
+      storedHotelSearch.searchTracingKey,
+      storedHotelSearch.TUI,
+      storedHotelSearch.tui,
+      getSearchParamValue("searchTracingKey"),
+      getSearchParamValue("TUI"),
+      getSearchParamValue("tui"),
+      findFirstDeepValue(storedHotelSearch.initResponse),
+      findFirstDeepValue(storedHotelSearch),
+    );
+    const roomsWithTracingKey = selectedRooms.map((room) => ({
+      ...room,
+      roomsSearchTracingKey: getFirstValue(room.roomsSearchTracingKey, searchTracingKey),
+      searchTracingKey: getFirstValue(room.searchTracingKey, searchTracingKey),
+      TUI: getFirstValue(room.TUI, searchTracingKey),
+    }));
+
     const payload = {
       hotel: {
         id: hotelDetail?.id || "",
@@ -558,15 +622,9 @@ const Page = () => {
           storedHotelSearch.searchId ||
           getSearchParamValue("searchId") ||
           "",
-        roomsSearchTracingKey:
-          selectedRooms[0]?.roomsSearchTracingKey ||
-          hotelDetail?.roomsSearchTracingKey ||
-          searchRequest.roomsSearchTracingKey ||
-          searchRequest.searchTracingKey ||
-          storedHotelSearch.roomsSearchTracingKey ||
-          storedHotelSearch.searchTracingKey ||
-          getSearchParamValue("searchTracingKey") ||
-          "",
+        roomsSearchTracingKey: searchTracingKey,
+        searchTracingKey,
+        TUI: searchTracingKey,
         checkInDate: effectiveCheckIn,
         checkOutDate: effectiveCheckOut,
         checkIn: effectiveCheckInDisplay,
@@ -578,7 +636,7 @@ const Page = () => {
         childAges: effectiveSelection.childAges,
         roomDetails: effectiveSelection.roomDetails,
       },
-      rooms: selectedRooms,
+      rooms: roomsWithTracingKey,
     };
 
     writeHotelBookingSession(payload);
@@ -715,8 +773,16 @@ const Page = () => {
           supplierName: room.supplierName,
           guestCode: room.guestCode,
           roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
-          roomsSearchTracingKey:
-            room.roomsSearchTracingKey || hotelDetail?.roomsSearchTracingKey || "",
+          roomsSearchTracingKey: getFirstValue(
+            room.roomsSearchTracingKey,
+            hotelDetail?.roomsSearchTracingKey,
+            searchRequest.roomsSearchTracingKey,
+            searchRequest.searchTracingKey,
+            storedHotelSearch.roomsSearchTracingKey,
+            storedHotelSearch.searchTracingKey,
+            findFirstDeepValue(storedHotelSearch.initResponse),
+            findFirstDeepValue(storedHotelSearch),
+          ),
           occupancies: room.occupancies,
           raw: room.raw,
           rawRecommendation: room.rawRecommendation,
@@ -727,7 +793,14 @@ const Page = () => {
         };
       }),
     );
-  }, [hotelDetail?.rooms, hotelDetail?.roomsSearchId, hotelDetail?.roomsSearchTracingKey, nights]);
+  }, [
+    hotelDetail?.rooms,
+    hotelDetail?.roomsSearchId,
+    hotelDetail?.roomsSearchTracingKey,
+    nights,
+    searchRequest,
+    storedHotelSearch,
+  ]);
   const removeRoom = useCallback((id) => {
     setRoomList((prev) => {
       const nextRooms = prev.map((room) =>

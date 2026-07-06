@@ -187,14 +187,14 @@ padding-top: 73px;
 }
 
 
-@media (max-width: 1040px){
+/* @media (max-width: 1040px){
     .contentWrapper{
         grid-template-columns: 1fr 316px;
         
     }
     
 
-}
+} */
 
 @media (max-width: 991px){
     .contentWrapper{

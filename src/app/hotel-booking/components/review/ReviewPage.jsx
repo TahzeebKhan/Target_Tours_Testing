@@ -927,6 +927,9 @@ const ReviewPage = () => {
     });
 
     // window.location.assign(redirectUrl);
+//     setTimeout(() => {
+//   window.location.assign(redirectUrl);
+// }, 150);
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -1122,13 +1125,11 @@ const ReviewPage = () => {
         initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
         searchContext: request.searchContext,
       };
-       console.log("initSearchContext",initSearchContext)
       const hotelInitData = getHotelInitData({
         request,
         storedHotelSearch,
         storedHotelResults,
       });
-      console.log("hotelInitData",hotelInitData)
 
       const searchTracingKey = getFirstValue(
         firstRoom.roomsSearchTracingKey,
@@ -1226,7 +1227,6 @@ const ReviewPage = () => {
         toast.error("Select age for each child.");
         return;
       }
-
       if (!searchTracingKey || !searchId) {
         const missingParts = [
           !searchTracingKey ? "TUI/search tracing key" : "",
@@ -1463,6 +1463,20 @@ const ReviewPage = () => {
     );
   }
 
+  if (bookingLoading && !bookingSession) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.bookingLoadingCard}>
+          <div className={styles.bookingLoadingSpinner}></div>
+          <div>
+            <h3>Loading hotel booking</h3>
+            <p>Please wait while we restore your booking details.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!bookingSession || !roomList.length) {
     return (
       <div className={styles.container}>
@@ -1549,7 +1563,8 @@ const ReviewPage = () => {
             key={room.id}
             image={room.image}
             title={room.title}
-            price={room.pricePerNight}
+            price={getRoomTotal(room, nights)}
+            priceLabel="total"
             quantity={getQuantity(room.id)}
             maxQuantity={room.maxQuantity}
             onIncrease={() => increaseRoom(room.id)}

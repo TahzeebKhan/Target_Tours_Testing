@@ -5,6 +5,49 @@
   flex-direction: column;
   gap: 24px;
 }
+
+.bookingLoadingCard {
+  min-height: 236px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 32px;
+  background: #ffffff;
+}
+
+.bookingLoadingCard h3 {
+  margin: 0 0 8px;
+  color: #000033;
+  font-family: Antic Didone;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bookingLoadingCard p {
+  margin: 0;
+  color: #4b5563;
+  font-family: var(--font-inter);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.bookingLoadingSpinner {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 3px solid #e6e8ef;
+  border-top-color: #000033;
+  border-radius: 999px;
+  animation: bookingLoadingSpin 0.8s linear infinite;
+}
+
+@keyframes bookingLoadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .headerText {
   font-family: Antic Didone;
   font-weight: 400;

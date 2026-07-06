@@ -31,7 +31,7 @@ const layout = ({ children }) => {
   const bookingUrlRef = useRef("");
   const roomListRef = useRef([]);
   const [bookingSession, setBookingSession] = useState(null);
-  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(true);
   const [hotelBookingStatus, setHotelBookingStatus] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -50,7 +50,10 @@ const layout = ({ children }) => {
       setRoomList(session.rooms);
     } else {
       setBookingSession(null);
+      setRoomList([]);
     }
+
+    setBookingLoading(false);
   }, []);
 
   useEffect(() => {
@@ -215,6 +218,8 @@ const layout = ({ children }) => {
     0,
   );
   const isCorporate = false;
+  const isInitialBookingLoad = bookingLoading && !bookingSession && !hotelBookingStatus;
+
   return (
     <RoomProvider
       value={{
@@ -242,10 +247,12 @@ const layout = ({ children }) => {
         </div>
         <div className={styles.childrenWrapper}>
           {children}
-          <div className={styles.sideBarDesktop}>
-            <BookingSummary roomList={roomList} onRemove={removeRoom} />
-            {isCorporate && <CorporateSidebarSummary />}
-          </div>
+          {!isInitialBookingLoad && (
+            <div className={styles.sideBarDesktop}>
+              <BookingSummary roomList={roomList} onRemove={removeRoom} />
+              {isCorporate && <CorporateSidebarSummary />}
+            </div>
+          )}
         </div>
       </section>
       {sidebarOpen && (
@@ -263,12 +270,14 @@ const layout = ({ children }) => {
             sidebarOpen ? styles.openSidebar : styles.closeSidebar
           }`}
         >
-          <BookingSummary
-            sidebarOpen={sidebarOpen}
-            roomList={roomList}
-            onRemove={removeRoom}
-            setSideBarOpen={setSideBarOpen}
-          />
+          {!isInitialBookingLoad && (
+            <BookingSummary
+              sidebarOpen={sidebarOpen}
+              roomList={roomList}
+              onRemove={removeRoom}
+              setSideBarOpen={setSideBarOpen}
+            />
+          )}
         </div>
         <div className={styles.tripDetailsContainer}>
           <div className={styles.tripDetailsHeader}>

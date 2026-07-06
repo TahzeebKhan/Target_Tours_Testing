@@ -933,7 +933,7 @@ const HotelFacilities = ({ facilities = [] }) => {
   const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);
 
   if (!facilities.length) {
-    return <div className={styles.noFacilities}>No facilities</div>;
+    return <div className={styles.noFacilities}>No facilities available</div>;
   }
 
   return (
