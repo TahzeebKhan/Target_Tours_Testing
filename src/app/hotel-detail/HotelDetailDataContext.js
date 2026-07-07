@@ -18,13 +18,7 @@ import {
 
 const roomsRequestCache = new Map();
 
-const FALLBACK_IMAGES = [
-  "/images/hotelArt1.png",
-  "/images/hotelArt2.png",
-  "/images/hotelArt3.png",
-  "/images/hotelArt2.png",
-  "/images/hotelArt4.png",
-];
+const FALLBACK_IMAGE = "/fallback.png";
 
 const normalizeImageUrl = (value = "") => {
   const rawUrl = String(value || "").trim();
@@ -498,13 +492,7 @@ const extractGalleryImages = (stored = {}, routeHotelId = "") => {
   });
 
   if (!uniqueItems.length) {
-    return [
-      { image: FALLBACK_IMAGES[0], title: "Lobby" },
-      { image: FALLBACK_IMAGES[1], title: "Room" },
-      { image: FALLBACK_IMAGES[2], title: "Bathroom" },
-      { image: FALLBACK_IMAGES[3], title: "Dining" },
-      { image: FALLBACK_IMAGES[4], title: "Exterior" },
-    ];
+    return [{ image: FALLBACK_IMAGE, title: "Photo 1" }];
   }
 
   return uniqueItems.slice(0, 12);
@@ -754,7 +742,7 @@ const getRoomPolicyTexts = (room = {}, roomDetail = {}, recommendation = {}, isR
 
 const normalizeRooms = (data = {}, hotel = {}) => {
   const roomsGroup = getRecommendationRooms(data);
-  const images = collectImages(data).length ? collectImages(data) : FALLBACK_IMAGES;
+  const images = collectImages(data).length ? collectImages(data) : [FALLBACK_IMAGE];
   const fallbackPrice = getRateValue(hotel);
   const roomsSearchId = getRoomsResponseSearchId(data);
   const roomsSearchTracingKey = getRoomsResponseSearchTracingKey(data);
@@ -1290,7 +1278,7 @@ const normalizeHotelDetail = (
     starRating,
     reviewScore: reviewSummary.score,
     reviewText: getFirst(data.reviewText, data.reviewsText, reviewSummary.text),
-    images: uniqueImages.length ? uniqueImages : FALLBACK_IMAGES,
+    images: uniqueImages.length ? uniqueImages : [FALLBACK_IMAGE],
     description:
       getFirst(
         data.description,

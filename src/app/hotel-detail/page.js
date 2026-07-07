@@ -17,6 +17,8 @@ import {
 } from "@/shared/services/hotelSearch";
 import { toast } from "react-toastify";
 
+const TAB_SCROLL_OFFSET = 140;
+
 const parseCurrencyNumber = (value) => {
   const numericValue = Number(String(value || "").replace(/[^\d.]/g, ""));
   return Number.isFinite(numericValue) ? numericValue : 0;
@@ -839,9 +841,12 @@ const Page = () => {
   const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
 
-    sectionRefs[tab]?.current?.scrollIntoView({
+    const section = sectionRefs[tab]?.current;
+    if (!section || typeof window === "undefined") return;
+
+    window.scrollTo({
+      top: section.getBoundingClientRect().top + window.scrollY - TAB_SCROLL_OFFSET,
       behavior: "smooth",
-      block: "start",
     });
   }, [sectionRefs]);
 

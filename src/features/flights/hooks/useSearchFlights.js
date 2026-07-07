@@ -14,6 +14,7 @@ export const useSearchFlights = ({
     queryFn: () => searchFlights(params),
     enabled,
     staleTime: 1000 * 60,
+    refetchOnWindowFocus: false,
     placeholderData: (previousData) => previousData,
   });
 };

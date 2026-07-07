@@ -9,27 +9,6 @@ import api from "@/shared/services/axios";
 import { useProfile } from "../../context/ProfileContext";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
-const reservationData = [
-  {
-    id: "173826",
-    hotel: "Golden Tulip Hotel",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    status: "CONFIRMED",
-    image: "/images/hotel-thumbnail.jpg",
-  },
-  {
-    id: "173826",
-    hotel: "Golden Tulip Hotel",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    status: "PENDING",
-    image: "/images/hotel-thumbnail.jpg",
-  },
-];
-
 const corporateReservationData = [
   {
     id: "173826",
@@ -162,6 +141,134 @@ const buildMediaUrl = (value, fallback = "/images/packages.png") => {
   if (/^https?:\/\//i.test(value) || value.startsWith("/images/")) return value;
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   return `${baseUrl}${value.startsWith("/") ? value : `/${value}`}`;
+};
+
+const getHotelGuestSummary = (item, hotelBooking = {}) => {
+  const rawGuestLabel =
+    item?.guests ||
+    item?.guest_label ||
+    item?.guestLabel ||
+    hotelBooking?.guests ||
+    hotelBooking?.guest_label ||
+    hotelBooking?.guestLabel;
+  const adults = Number(
+    item?.adults ||
+      item?.adult_count ||
+      item?.no_of_adults ||
+      hotelBooking?.adults ||
+      hotelBooking?.adult_count ||
+      hotelBooking?.no_of_adults ||
+      item?.request?.adults ||
+      0
+  );
+  const children = Number(
+    item?.children ||
+      item?.child_count ||
+      item?.no_of_children ||
+      hotelBooking?.children ||
+      hotelBooking?.child_count ||
+      hotelBooking?.no_of_children ||
+      item?.request?.children ||
+      0
+  );
+  const guests = Number(
+    item?.guest_count ||
+      item?.no_of_guests ||
+      hotelBooking?.guest_count ||
+      hotelBooking?.no_of_guests ||
+      0
+  );
+
+  const labels = [
+    adults ? `${adults} Adult${adults > 1 ? "s" : ""}` : "",
+    children ? `${children} Child${children > 1 ? "ren" : ""}` : "",
+  ].filter(Boolean);
+
+  if (labels.length) return labels.join(", ");
+  if (rawGuestLabel && Number.isNaN(Number(rawGuestLabel))) return String(rawGuestLabel);
+  return guests ? `${guests} Guest${guests > 1 ? "s" : ""}` : "N/A";
+};
+
+const getHotelImage = (item, hotelInfo = {}, hotelBooking = {}) => {
+  const media =
+    item?.image ||
+    item?.hotel_image ||
+    item?.hotel_image?.url ||
+    hotelBooking?.hotel_image ||
+    hotelBooking?.hotel_image?.url ||
+    hotelInfo?.image ||
+    hotelInfo?.thumbnail ||
+    hotelInfo?.heroImage ||
+    hotelInfo?.images?.[0] ||
+    hotelInfo?.galleryImages?.[0]?.image ||
+    hotelInfo?.media?.[0]?.url;
+
+  return buildMediaUrl(media, "/fallback.png");
+};
+
+const mapHotelReservation = (item, index) => {
+  const hotelBooking = item?.hotel_booking || item?.hotelBooking || {};
+  const hotelInfo =
+    hotelBooking?.hotel ||
+    item?.hotel ||
+    item?.hotel_details ||
+    item?.hotelDetail ||
+    item?.data?.hotel ||
+    {};
+  const hotelName =
+    hotelBooking?.hotel_name ||
+    hotelBooking?.hotelName ||
+    item?.hotel_name ||
+    item?.hotelName ||
+    item?.name ||
+    hotelInfo?.name ||
+    hotelInfo?.title ||
+    "Hotel booking";
+
+  return {
+    bookingType: "HOTEL BOOKING",
+    id: String(
+      hotelBooking?.booking_id ||
+        item?.booking_id ||
+        item?.booking_reference ||
+        item?.reference_id ||
+        item?.id ||
+        index + 1
+    ),
+    hotel: hotelName,
+    hotelName,
+    checkIn: formatDate(
+      hotelBooking?.check_in ||
+        hotelBooking?.checkIn ||
+        hotelBooking?.check_in_date ||
+        item?.check_in ||
+        item?.checkIn ||
+        item?.check_in_date ||
+        item?.start_date ||
+        item?.request?.checkIn
+    ),
+    checkOut: formatDate(
+      hotelBooking?.check_out ||
+        hotelBooking?.checkOut ||
+        hotelBooking?.check_out_date ||
+        item?.check_out ||
+        item?.checkOut ||
+        item?.check_out_date ||
+        item?.end_date ||
+        item?.request?.checkOut
+    ),
+    guests: getHotelGuestSummary(item, hotelBooking),
+    status: normalizeBookingStatus(
+      item?.status ||
+        item?.booking_status ||
+        item?.payment_status ||
+        hotelBooking?.status ||
+        hotelBooking?.booking_status ||
+        hotelBooking?.payment_status
+    ),
+    image: getHotelImage(item, hotelInfo, hotelBooking),
+    raw: item,
+  };
 };
 
 const getAirlineName = (airline, fallback = "Flight") => {
@@ -465,10 +572,45 @@ export default function Reservations({
   activeTab,
   setActiveTab,
 }) {
+  const [hotelReservationData, setHotelReservationData] = useState([]);
   const [flightReservationData, setFlightReservationData] = useState([]);
   const [packageReservationData, setPackageReservationData] = useState([]);
   const { tripFilter } = useProfile();
   const bookingStatus = getBookingStatusParam(tripFilter);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadHotelBookings = async () => {
+      try {
+        const response = await api.get("/bookings", {
+          params: {
+            type: "hotel",
+            domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+            page: 1,
+            per_page: 20,
+            ...(bookingStatus ? { status: bookingStatus } : {}),
+          },
+        });
+
+        if (ignore) return;
+
+        setHotelReservationData(
+          extractBookingRows(response?.data).map(mapHotelReservation)
+        );
+      } catch (error) {
+        if (!ignore) {
+          setHotelReservationData([]);
+        }
+      }
+    };
+
+    loadHotelBookings();
+
+    return () => {
+      ignore = true;
+    };
+  }, [bookingStatus]);
 
   useEffect(() => {
     let ignore = false;
@@ -544,6 +686,7 @@ export default function Reservations({
     };
   }, [bookingStatus]);
 
+  const allTabHotelData = useMemo(() => hotelReservationData, [hotelReservationData]);
   const allTabFlightData = useMemo(() => flightReservationData, [flightReservationData]);
   const allTabPackageData = useMemo(
     () => packageReservationData,
@@ -582,8 +725,8 @@ export default function Reservations({
           <>
             {" "}
             <div className={styles.list}>
-              {reservationData.map((item, index) => (
-                <article key={index} className={styles.card}>
+              {allTabHotelData.map((item, index) => (
+                <article key={`hotel-${item.id}-${index}`} className={styles.card}>
                   <div className={styles.cardMain}>
                     <div className={styles.imageWrapper}>
                       <Image
@@ -629,7 +772,7 @@ export default function Reservations({
 
                     <button
                       className={styles.checkDetails}
-                      onClick={onCheckDetails}
+                      onClick={() => onCheckDetails(item)}
                     >
                       Check Details
                     </button>
@@ -808,8 +951,8 @@ export default function Reservations({
         )}
         {activeTab === "HOTEL BOOKING" && (
           <div className={styles.list}>
-            {reservationData.map((item, index) => (
-              <article key={index} className={styles.card}>
+            {hotelReservationData.map((item, index) => (
+              <article key={`hotel-${item.id}-${index}`} className={styles.card}>
                 <div className={styles.cardMain}>
                   <div className={styles.imageWrapper}>
                     <Image
@@ -855,7 +998,7 @@ export default function Reservations({
 
                   <button
                     className={styles.checkDetails}
-                    onClick={onCheckDetails}
+                    onClick={() => onCheckDetails(item)}
                   >
                     Check Details
                   </button>
@@ -1049,6 +1192,7 @@ export default function Reservations({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onCheckDetails={onCheckDetails}
+          hotelReservations={hotelReservationData}
           flightReservations={flightReservationData}
           packageReservations={packageReservationData}
         />

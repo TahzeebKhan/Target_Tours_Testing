@@ -16,31 +16,11 @@ const TABS = [
   { label: "Travel Insurance", value: "TRAVEL INSURANCE" },
 ];
 
-const RESERVATIONS = [
-  {
-    id: "173826",
-    hotelName: "Golden Tulip Hotel",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    image: "/images/hotel-thumbnail.jpg",
-  },
-  {
-    id: "173826",
-    hotelName: "Golden Tulip Hotel",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    image: "/images/hotel-thumbnail.jpg",
-  },
-];
-
 export default function ActiveReservations({
   activeTab,
   setActiveTab,
   onCheckDetails,
+  hotelReservations = [],
   flightReservations = [],
   packageReservations = [],
 }) {
@@ -69,19 +49,19 @@ export default function ActiveReservations({
         {activeTab === "HOTEL BOOKING" ? (
           <>
             <div className={styles.cardList}>
-              {RESERVATIONS.map((res, index) => (
+              {hotelReservations.map((res, index) => (
                 <section key={index} className={styles.card}>
                   <div className={styles.cardHeader}>
                     <div className={styles.imageWrapper}>
                       <Image
                         src={res.image}
-                        alt={res.hotelName}
+                        alt={res.hotelName || res.hotel}
                         fill
                         style={{ objectFit: "cover" }}
                       />
                     </div>
                     <div className={styles.hotelInfo}>
-                      <h2 className={styles.hotelName}>{res.hotelName}</h2>
+                      <h2 className={styles.hotelName}>{res.hotelName || res.hotel}</h2>
                       <span className={styles.statusBadge}>{res.status}</span>
                     </div>
                   </div>
@@ -114,7 +94,7 @@ export default function ActiveReservations({
                     <button
                       onClick={() => {
                         setMobileTitle?.("Booking Details");
-                        onCheckDetails();
+                        onCheckDetails(res);
                       }}
                       className={styles.detailsButton}
                     >
