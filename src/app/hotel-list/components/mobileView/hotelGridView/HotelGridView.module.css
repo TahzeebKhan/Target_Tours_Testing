@@ -6,8 +6,11 @@
 
 .gridWrapper {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
 }
 
 .emptyState {
@@ -111,7 +114,7 @@
 }
 
 .gridCard {
-    max-width: 398px;
+    max-width: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -128,19 +131,27 @@
 .gridCardImage {
     position: relative;
     width: 100%;
-    height: 285px;
+    height: 220px;
+    overflow: hidden;
 }
 
 .ListViewCardImage {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .gridCardText {
-    padding: 16px 0;
+    position: relative;
+    z-index: 1;
+    margin-top: -18px;
+    padding: 14px 14px 18px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 20px;
+    background: #FFFFFF;
+    border-radius: 18px 18px 0 0;
 }
 
 .cartListTop {
@@ -152,7 +163,7 @@
 .ListViewCardTextTop {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
 }
 
 .topTextHead {
@@ -161,10 +172,41 @@
     gap: 8px;
 }
 
+.ratingRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 .rating {
     display: flex;
     align-items: center;
+    gap: 3px;
+}
+
+.rating img {
+    width: 15px;
+    height: 15px;
+}
+
+.reviewSummary {
+    display: flex;
+    align-items: center;
     gap: 4px;
+    font-family: var(--font-inter);
+    font-size: 13px;
+    line-height: 1.2;
+    color: #6B7280;
+}
+
+.reviewSummary span {
+    padding: 2px 5px;
+    background: #43A047;
+    color: #FFFFFF;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 1.1;
 }
 
 .topTextHead h2 {
@@ -202,6 +244,7 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    overflow: hidden;
 }
 
 .featureItem {
@@ -216,6 +259,7 @@
     line-height: 20px;
     letter-spacing: 0px;
     color: #000000;
+    white-space: nowrap;
 }
 
 .freeList {
@@ -246,6 +290,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
 }
 
 .priceContainer {
@@ -280,10 +325,10 @@
 }
 
 .bookNowBtn {
-    max-width: 210px;
+    max-width: 180px;
     width: 100%;
-    height: 41px;
-    padding: 12px 24px;
+    height: 45px;
+    padding: 12px 14px;
     background-color: #000033;
 
 
@@ -296,6 +341,7 @@
     color: #FFFFFF;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    border: 0;
 }
 
 .bookNowBtn:disabled {
@@ -398,29 +444,34 @@
 
 @media (max-width: 768px) {
     .bookNowBtn {
-        max-width: 170px;
+        max-width: 180px;
     }
 }
 
 @media (max-width: 612px) {
-    .totalPrice {}
-
     .gridWrapper {
         gap: 16px;
     }
 
     .bookNowBtn {
-        max-width: 145px;
-        padding: 12px 6px;
+        max-width: 180px;
+        padding: 12px 14px;
     }
 }
 
-@media (max-width: 540px) {
-
-
+@media (max-width: 440px) {
     .gridWrapper {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
+        grid-template-columns: 1fr;
+        gap: 24px;
+        max-width: 444px;
+    }
+
+    .gridCardImage {
+        height: 253px;
+    }
+
+    .gridCardText {
+        padding: 16px 18px 20px;
         gap: 24px;
     }
 
@@ -449,7 +500,7 @@
     }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 440px) {
   :global(.ResultsBottomSheet_content__x_vjU):not(.gridWrapper) {
     padding: 16px 16px;
     overflow-x: hidden;
@@ -459,12 +510,13 @@
 
   .gridWrapper {
     width: 100%;
-    grid-template-columns: repeat(1, 1fr);
+    max-width: 444px;
+    grid-template-columns: 1fr;
     overflow: hidden;
     box-sizing: border-box;
-    gap: 32px;
+    gap: 24px;
     padding: 0;
-    margin: 0;
+    margin: 0 auto;
   }
 
   .gridCard {
@@ -489,7 +541,7 @@
   img.ListViewCardImage {
     width: 100%;
     max-width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
     display: block;
   }

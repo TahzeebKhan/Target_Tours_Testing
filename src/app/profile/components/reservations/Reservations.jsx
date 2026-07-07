@@ -144,49 +144,42 @@ const buildMediaUrl = (value, fallback = "/images/packages.png") => {
 };
 
 const getHotelGuestSummary = (item, hotelBooking = {}) => {
-  const rawGuestLabel =
-    item?.guests ||
-    item?.guest_label ||
-    item?.guestLabel ||
-    hotelBooking?.guests ||
-    hotelBooking?.guest_label ||
-    hotelBooking?.guestLabel;
+  const guestCount = Number(
+    item?.guests_count ??
+      item?.guest_count ??
+      item?.no_of_guests ??
+      hotelBooking?.guests_count ??
+      hotelBooking?.guest_count ??
+      hotelBooking?.no_of_guests ??
+      item?.data?.guests_count ??
+      0
+  );
   const adults = Number(
-    item?.adults ||
-      item?.adult_count ||
-      item?.no_of_adults ||
-      hotelBooking?.adults ||
-      hotelBooking?.adult_count ||
-      hotelBooking?.no_of_adults ||
-      item?.request?.adults ||
+    item?.adults ??
+      item?.adult_count ??
+      item?.no_of_adults ??
+      hotelBooking?.adults ??
+      hotelBooking?.adult_count ??
+      hotelBooking?.no_of_adults ??
       0
   );
   const children = Number(
-    item?.children ||
-      item?.child_count ||
-      item?.no_of_children ||
-      hotelBooking?.children ||
-      hotelBooking?.child_count ||
-      hotelBooking?.no_of_children ||
-      item?.request?.children ||
+    item?.children ??
+      item?.child_count ??
+      item?.no_of_children ??
+      hotelBooking?.children ??
+      hotelBooking?.child_count ??
+      hotelBooking?.no_of_children ??
       0
   );
-  const guests = Number(
-    item?.guest_count ||
-      item?.no_of_guests ||
-      hotelBooking?.guest_count ||
-      hotelBooking?.no_of_guests ||
-      0
-  );
-
   const labels = [
     adults ? `${adults} Adult${adults > 1 ? "s" : ""}` : "",
     children ? `${children} Child${children > 1 ? "ren" : ""}` : "",
   ].filter(Boolean);
 
   if (labels.length) return labels.join(", ");
-  if (rawGuestLabel && Number.isNaN(Number(rawGuestLabel))) return String(rawGuestLabel);
-  return guests ? `${guests} Guest${guests > 1 ? "s" : ""}` : "N/A";
+  if (guestCount) return `${guestCount} Guest${guestCount > 1 ? "s" : ""}`;
+  return "N/A";
 };
 
 const getHotelImage = (item, hotelInfo = {}, hotelBooking = {}) => {
@@ -227,6 +220,7 @@ const mapHotelReservation = (item, index) => {
 
   return {
     bookingType: "HOTEL BOOKING",
+    detailId: String(item?.id || hotelBooking?.id || ""),
     id: String(
       hotelBooking?.booking_id ||
         item?.booking_id ||

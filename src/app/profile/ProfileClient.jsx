@@ -19,10 +19,15 @@ const ProfileClient = () => {
   useEffect(() => {
     const isMyTrips = searchParams.get("my-trips") === "true";
     const isSettings = searchParams.get("settings") === "true";
+    const hasBookingDetails = Boolean(
+      searchParams.get("bookingId") && searchParams.get("bookingType")
+    );
 
-    if (isMyTrips) {
+    if (isMyTrips || hasBookingDetails) {
       setActiveMenu("trip");
-      router.replace("/profile", { scroll: false });
+      if (isMyTrips) {
+        router.replace("/profile", { scroll: false });
+      }
     } else if (isSettings) {
       setActiveMenu("settings");
       router.replace("/profile", { scroll: false });

@@ -2,14 +2,18 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './MobileHotelDetails.module.css'
 import { Pencil } from 'lucide-react'
-import MapSection from '../mapSection/MapSection'
 import ResultsBottomSheet from './ResultsBottomSheet'
+import HotelFilterSheet from './HotelFilterSheet'
+import MobileHotelEditSheet from './MobileHotelEditSheet'
 import HotelGridView from './hotelGridView/HotelGridView'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
+  HOTEL_SEARCH_SESSION_KEY,
+  HOTEL_LAST_SEARCH_URL_KEY,
+  createHotelSearchChannel,
   fetchHotelDetails,
   isMissingHotelAuthTokenError,
 } from '@/shared/services/hotelSearch'
@@ -19,6 +23,8 @@ import {
   getHotelDetailUrl,
   getHotelDetailsRequest,
   isHotelTerminalPayload,
+  buildHotelFilterCounts,
+  matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
 } from '../tourListing/TourListing'
@@ -62,6 +68,40 @@ const getNumericSearchParam = (searchParams, key, fallback = 0) => {
 const pluralize = (count, label) =>
   `${count} ${label}${count === 1 ? "" : "s"}`;
 
+const parseChildAges = (value = "") =>
+  String(value || "")
+    .split(",")
+    .map((age) => age.trim())
+    .filter(Boolean);
+
+const parseNumberList = (value = "") =>
+  String(value || "")
+    .split(",")
+    .map((item) => Number(item.trim()))
+    .filter((item) => Number.isFinite(item));
+
+const getRoomDetailsFromParams = (searchParams) => {
+  const roomCount = Math.max(1, Number(searchParams.get("rooms") || 1));
+  const roomAdults = parseNumberList(searchParams.get("roomAdults"));
+  const roomChildren = parseNumberList(searchParams.get("roomChildren"));
+  const childAges = parseChildAges(searchParams.get("childAges"));
+  let childAgeIndex = 0;
+
+  if (!roomAdults.length && !roomChildren.length) return [];
+
+  return Array.from({ length: roomCount }, (_, index) => {
+    const children = Math.max(0, Number(roomChildren[index] || 0));
+    const roomChildAges = childAges.slice(childAgeIndex, childAgeIndex + children);
+    childAgeIndex += children;
+
+    return {
+      adults: Math.max(1, Number(roomAdults[index] || 1)),
+      children,
+      childAges: roomChildAges,
+    };
+  });
+};
+
 const MobileHotelDetails = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -93,6 +133,10 @@ const MobileHotelDetails = () => {
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  const [activeFilters, setActiveFilters] = useState({});
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
 
@@ -136,6 +180,93 @@ const MobileHotelDetails = () => {
     } finally {
       setLoadingHotelDetailsId("");
     }
+  };
+
+  const handleEditSearch = (form) => {
+    const city = String(form.city || searchLocationLabel || "").trim();
+    const checkIn = String(form.checkIn || "").trim();
+    const checkOut = String(form.checkOut || "").trim();
+    const roomDetails = Array.isArray(form.roomDetails)
+      ? form.roomDetails.map((room) => ({
+          adults: Math.max(1, Number(room.adults || 1)),
+          children: Math.max(0, Number(room.children || 0)),
+          childAges: Array.isArray(room.childAges)
+            ? room.childAges.map((age) => String(age || "").trim())
+            : [],
+        }))
+      : [];
+    const roomTotals = roomDetails.reduce(
+      (totals, room) => ({
+        adults: totals.adults + room.adults,
+        children: totals.children + room.children,
+      }),
+      { adults: 0, children: 0 },
+    );
+    const rooms = Math.max(1, roomDetails.length || Number(form.rooms || 1));
+    const adults = Math.max(
+      1,
+      roomDetails.length ? roomTotals.adults : Number(form.adults || 1),
+    );
+    const children = Math.max(
+      0,
+      roomDetails.length ? roomTotals.children : Number(form.children || 0),
+    );
+    const childAges = Array.isArray(form.childAges)
+      ? form.childAges.slice(0, children).map((age) => String(age || "").trim())
+      : [];
+
+    if (!city || !checkIn || !checkOut) return;
+    if (children > 0 && childAges.some((age) => !age)) return;
+
+    setIsEditSubmitting(true);
+
+    const channel = createHotelSearchChannel();
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("city", city);
+    nextParams.set("checkIn", checkIn);
+    nextParams.set("checkOut", checkOut);
+    nextParams.set("channel", channel);
+    nextParams.set("rooms", String(rooms));
+    nextParams.set("adults", String(adults));
+    nextParams.set("children", String(children));
+    if (roomDetails.length) {
+      nextParams.set(
+        "roomAdults",
+        roomDetails.map((room) => room.adults).join(","),
+      );
+      nextParams.set(
+        "roomChildren",
+        roomDetails.map((room) => room.children).join(","),
+      );
+    } else {
+      nextParams.delete("roomAdults");
+      nextParams.delete("roomChildren");
+    }
+    if (children > 0) {
+      nextParams.set("childAges", childAges.join(","));
+    } else {
+      nextParams.delete("childAges");
+    }
+    nextParams.delete("searchId");
+    nextParams.delete("hotelSearchId");
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+      window.sessionStorage.removeItem(HOTEL_SEARCH_SESSION_KEY);
+      try {
+        window.localStorage.setItem(
+          HOTEL_LAST_SEARCH_URL_KEY,
+          `/hotels?${nextParams.toString()}`,
+        );
+      } catch {
+        // Ignore storage failures.
+      }
+    }
+
+    setIsEditOpen(false);
+    setActiveFilters({});
+    router.push(`/hotels?${nextParams.toString()}`);
+    setIsEditSubmitting(false);
   };
 
   useEffect(() => {
@@ -267,7 +398,14 @@ const MobileHotelDetails = () => {
     };
   }, [hotelSearchChannel, isMobileViewport]);
 
-  const displayHotels = hotelResults;
+  const filterCounts = useMemo(
+    () => buildHotelFilterCounts(hotelResults),
+    [hotelResults],
+  );
+  const displayHotels = useMemo(
+    () => hotelResults.filter((hotel) => matchesHotelFilters(hotel, activeFilters)),
+    [activeFilters, hotelResults],
+  );
 
     return (
         <div className={styles.hotelDetailsMobileContainer}>
@@ -296,13 +434,20 @@ const MobileHotelDetails = () => {
                         </div>
                     </div>
                 </div>
-                <Pencil className={styles.editIcon} color="#FFFFFF" size={16} />
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  onClick={() => setIsEditOpen(true)}
+                  aria-label="Edit hotel search"
+                >
+                  <Pencil className={styles.editIcon} color="#FFFFFF" size={16} />
+                </button>
             </div>
 
-            <MapSection />
             <ResultsBottomSheet
               resultsCount={totalHotelResults || displayHotels.length}
               isLoading={isHotelLoading}
+              onOpenFilters={() => setIsFilterOpen(true)}
             >
                     <HotelGridView
                         tourData={displayHotels}
@@ -316,6 +461,30 @@ const MobileHotelDetails = () => {
                         showEmptyState={Boolean(hotelSearchChannel)}
                     />
             </ResultsBottomSheet>
+            <HotelFilterSheet
+              open={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              counts={filterCounts}
+              selectedFilters={activeFilters}
+              onApply={setActiveFilters}
+              onReset={() => setActiveFilters({})}
+            />
+            <MobileHotelEditSheet
+              open={isEditOpen}
+              onClose={() => setIsEditOpen(false)}
+              isSubmitting={isEditSubmitting}
+              initialValues={{
+                city: searchSummary.city === "Hotel stay" ? "" : searchSummary.city,
+                checkIn: searchParams.get("checkIn") || searchParams.get("checkin") || "",
+                checkOut: searchParams.get("checkOut") || searchParams.get("checkout") || "",
+                rooms: searchParams.get("rooms") || 1,
+                adults: searchParams.get("adults") || 1,
+                children: searchParams.get("children") || 0,
+                childAges: parseChildAges(searchParams.get("childAges")),
+                roomDetails: getRoomDetailsFromParams(searchParams),
+              }}
+              onApply={handleEditSearch}
+            />
             {showAuthModal && authView === "login" && (
               <LoginPopup
                 onClose={() => {

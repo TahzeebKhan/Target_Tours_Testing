@@ -330,6 +330,77 @@ export const getHotelRating = (hotel = {}) => {
   return Math.max(0, Math.min(5, Math.round(rating)));
 };
 
+const getNumberValue = (...values) => {
+  for (const value of values) {
+    const number = Number(value);
+    if (Number.isFinite(number) && number > 0) return number;
+  }
+
+  return null;
+};
+
+const formatRatingScore = (value) => {
+  const rating = getNumberValue(value);
+  if (rating === null) return "";
+  return rating.toFixed(1).replace(/\.0$/, "");
+};
+
+const formatReviewText = (count) => {
+  const reviewCount = getNumberValue(count);
+  if (!reviewCount) return "";
+  return `${reviewCount.toLocaleString("en-IN")} review${reviewCount === 1 ? "" : "s"}`;
+};
+
+const getHotelReviewSummary = (hotel = {}) => {
+  const reviews = Array.isArray(hotel.reviews)
+    ? hotel.reviews
+    : Array.isArray(hotel.raw?.reviews)
+      ? hotel.raw.reviews
+      : [];
+  const firstReview = reviews[0] || {};
+  const reviewSummary =
+    hotel.reviewSummary ||
+    hotel.review_summary ||
+    hotel.guestReview ||
+    hotel.guest_review ||
+    hotel.raw?.reviewSummary ||
+    hotel.raw?.review_summary ||
+    {};
+  const reviewScore = getNumberValue(
+    hotel.reviewRating,
+    hotel.review_rating,
+    hotel.reviewScore,
+    hotel.review_score,
+    hotel.guest_rating,
+    hotel.ratingScore,
+    hotel.rating_score,
+    reviewSummary.rating,
+    reviewSummary.averageRating,
+    reviewSummary.average_rating,
+    firstReview.rating,
+  );
+  const reviewCount = getNumberValue(
+    hotel.reviewCount,
+    hotel.review_count,
+    hotel.reviewsCount,
+    hotel.reviews_count,
+    hotel.totalReviews,
+    hotel.total_reviews,
+    reviewSummary.count,
+    reviewSummary.reviewCount,
+    reviewSummary.totalReviews,
+    reviews.length && reviews.some((review) => review.comment || review.review || review.text)
+      ? reviews.length
+      : null,
+  );
+
+  return {
+    score: reviewScore,
+    scoreText: formatRatingScore(reviewScore),
+    text: formatReviewText(reviewCount),
+  };
+};
+
 export const getHotelCoordinates = (hotel = {}) => {
   const coordinates =
     hotel.coordinates ||
@@ -485,6 +556,9 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
   const coordinates = getHotelCoordinates(hotel);
   const price = formatHotelPrice(hotel);
   const hasPrice = /\d/.test(price);
+  const reviewSummary = getHotelReviewSummary(hotel);
+  const rating = getHotelRating(hotel);
+  const reviewScore = reviewSummary.score ?? rating;
   const hotelId =
     hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode;
   const priceProvider = getHotelPriceProvider(hotel);
@@ -509,7 +583,10 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
     hasPrice,
     facilities: normalizeHotelFacilities(hotel),
     benefits: normalizeHotelBenefits(hotel),
-    rating: getHotelRating(hotel),
+    rating,
+    reviewScore,
+    reviewScoreText: formatRatingScore(reviewScore),
+    reviewText: reviewSummary.text,
     latitude: coordinates?.latitude,
     longitude: coordinates?.longitude,
     raw: hotel,
@@ -609,7 +686,7 @@ const hasText = (hotel, ...needles) => {
   return needles.some((needle) => text.includes(needle));
 };
 
-const buildHotelFilterCounts = (hotels = []) => {
+export const buildHotelFilterCounts = (hotels = []) => {
   const counts = emptyHotelFilterCounts();
   const prices = hotels
     .map(getHotelPriceNumber)
@@ -811,7 +888,7 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
     return hasText(hotel, ...needles);
   });
 
-const matchesHotelFilters = (hotel, filters = {}) => {
+export const matchesHotelFilters = (hotel, filters = {}) => {
   const price = getHotelPriceNumber(hotel);
   const rating = Number(hotel.rating || 0);
 

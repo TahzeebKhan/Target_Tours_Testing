@@ -16,6 +16,29 @@
   overflow: auto;
 }
 
+.backButton {
+  width: fit-content;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  background: #ffffff;
+  color: rgba(0, 0, 51, 1);
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.backButton:hover {
+  background: rgba(0, 0, 51, 1);
+  color: #ffffff;
+}
+
 /* Header & Meta */
 .header {
   display: flex;
@@ -368,6 +391,207 @@
   color: rgba(56, 62, 72, 1);
 }
 
+.loadingText,
+.errorText {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.loadingText {
+  color: rgba(74, 85, 101, 1);
+}
+
+.errorText {
+  color: rgba(199, 45, 45, 1);
+}
+
+.roomTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.roomTab {
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  background: #ffffff;
+  color: rgba(0, 0, 51, 1);
+  padding: 8px 18px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.activeRoomTab {
+  background: rgba(0, 0, 51, 1);
+  color: #ffffff;
+}
+
+.roomGuestPanel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid rgba(228, 230, 232, 1);
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.accordionItem {
+  width: 100%;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.accordionItem:last-child {
+  border-bottom: 0;
+}
+
+.accordionHeader {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  padding: 14px 0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(31, 34, 38, 1);
+  text-align: left;
+  cursor: pointer;
+}
+
+.accordionIcon {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(221, 223, 227, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(0, 0, 51, 1);
+}
+
+.accordionPanel {
+  padding: 0 0 16px;
+}
+
+.guestList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.guestCard {
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guestName {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(31, 34, 38, 1);
+}
+
+.guestMeta {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(101, 111, 129, 1);
+}
+
+.roomDetailBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roomDetailTitle {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(31, 34, 38, 1);
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.infoChip {
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 5px 10px;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(74, 85, 101, 1);
+  background: rgba(249, 250, 251, 1);
+}
+
+.policyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.policyItem {
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 10px 12px;
+  background: rgba(249, 250, 251, 1);
+}
+
+.policyItem p {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: rgba(31, 34, 38, 1);
+}
+
+.policyItem span {
+  display: block;
+  margin-top: 4px;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(101, 111, 129, 1);
+}
+
+.roomPolicyList {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+}
+
+.roomPolicyList li {
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(74, 85, 101, 1);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.roomPolicyList li:last-child {
+  border-bottom: 0;
+}
+
 /* Amenities */
 .amenitiesGrid {
   display: flex;
@@ -482,5 +706,9 @@
   .mapWrapper {
     height: 200px;
     /* order: -1; */
+  }
+
+  .guestList {
+    grid-template-columns: 1fr;
   }
 }
