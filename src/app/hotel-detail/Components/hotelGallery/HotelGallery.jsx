@@ -1,15 +1,10 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styles from './HotelGallery.module.css'
 import { useRouter } from 'next/navigation';
 import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch';
 
-const FALLBACK_IMAGES = [
-    "/images/hotelArt1.png",
-    "/images/hotelArt2.png",
-    "/images/hotelArt3.png",
-    "/images/hotelArt2.png",
-    "/images/hotelArt4.png",
-];
+const FALLBACK_IMAGE = "/fallback.png";
+const GALLERY_SLOT_COUNT = 5;
 
 const isRemoteImage = (image = "") => /^https?:\/\//.test(String(image || ""));
 
@@ -28,23 +23,46 @@ const normalizeImageUrl = (value = "") => {
     return url.replace(/\s/g, "%20");
 };
 
-const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
+const GalleryImage = ({ image, title = "" }) => {
+    const resolvedImage = image || FALLBACK_IMAGE;
+    const [src, setSrc] = useState(resolvedImage);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setSrc(resolvedImage);
+        setIsLoading(true);
+    }, [resolvedImage]);
+
+    return (
+        <>
+            {isLoading && <span className={styles.imageLoader} aria-hidden="true" />}
+            <img
+                className={`${styles.galleryImage} ${isLoading ? styles.imageLoading : ""}`}
+                src={src}
+                alt={title}
+                onLoad={() => setIsLoading(false)}
+                onError={() => {
+                    if (src !== FALLBACK_IMAGE) {
+                        setSrc(FALLBACK_IMAGE);
+                        return;
+                    }
+                    setIsLoading(false);
+                }}
+            />
+        </>
+    );
+};
+
+const HotelGallery = ({ images = [] }) => {
 
      const router = useRouter();
-     const getFallbackImage = (index = 0) =>
-        FALLBACK_IMAGES[index % FALLBACK_IMAGES.length] || FALLBACK_IMAGES[0];
-     const handleImageError = (event, index = 0) => {
-        const fallbackImage = getFallbackImage(index);
-        if (event.currentTarget.src.endsWith(fallbackImage)) return;
-        event.currentTarget.src = fallbackImage;
-     };
-     const normalizedImages = (Array.isArray(images) && images.length ? images : FALLBACK_IMAGES).map(
+     const normalizedImages = useMemo(() => (Array.isArray(images) ? images : []).map(
         (item, index) =>
           typeof item === "string"
             ? { image: normalizeImageUrl(item), title: `Photo ${index + 1}` }
             : {
                 image: normalizeImageUrl(
-                    item?.image || item?.url || item?.src || FALLBACK_IMAGES[index] || FALLBACK_IMAGES[0],
+                    item?.image || item?.url || item?.src,
                 ),
                 title:
                   item?.title ||
@@ -53,10 +71,13 @@ const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
                   item?.label ||
                   `Photo ${index + 1}`,
               },
-      );
+      ).filter((item) => item.image), [images]);
      const remoteImages = normalizedImages.filter((item) => isRemoteImage(item.image));
      const localImages = normalizedImages.filter((item) => !isRemoteImage(item.image));
      const galleryImages = remoteImages.length ? [...remoteImages, ...localImages] : normalizedImages;
+     const visibleImages = Array.from({ length: GALLERY_SLOT_COUNT }, (_, index) => (
+        galleryImages[index] || { image: FALLBACK_IMAGE, title: `Photo ${index + 1}` }
+     ));
 
         const goToGallery = () => {
             if (typeof window !== "undefined") {
@@ -67,7 +88,10 @@ const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
                         HOTEL_DETAILS_KEY,
                         JSON.stringify({
                             ...stored,
-                            galleryImages: galleryImages.map((item, index) =>
+                            galleryImages: (galleryImages.length
+                                ? galleryImages
+                                : [{ image: FALLBACK_IMAGE, title: "Photo 1" }]
+                            ).map((item, index) =>
                               typeof item === "string"
                                 ? { image: item, title: `Photo ${index + 1}` }
                                 : item,
@@ -83,43 +107,23 @@ const HotelGallery = ({ images = FALLBACK_IMAGES }) => {
     return (
         <div className={styles.bottomContainerRef}>
             <div className={styles.rightImage}>
-                <img
-                    src={galleryImages[0]?.image || FALLBACK_IMAGES[0]}
-                    alt={galleryImages[0]?.title || ""}
-                    onError={(event) => handleImageError(event, 0)}
-                />
+                <GalleryImage image={visibleImages[0]?.image} title={visibleImages[0]?.title} />
             </div>
             <div className={styles.rightGrid}>
                 <div className={styles.imageBox}>
-                    <img
-                        src={galleryImages[1]?.image || FALLBACK_IMAGES[1]}
-                        alt={galleryImages[1]?.title || ""}
-                        onError={(event) => handleImageError(event, 1)}
-                    />
+                    <GalleryImage image={visibleImages[1]?.image} title={visibleImages[1]?.title} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <img
-                        src={galleryImages[2]?.image || FALLBACK_IMAGES[2]}
-                        alt={galleryImages[2]?.title || ""}
-                        onError={(event) => handleImageError(event, 2)}
-                    />
+                    <GalleryImage image={visibleImages[2]?.image} title={visibleImages[2]?.title} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <img
-                        src={galleryImages[3]?.image || FALLBACK_IMAGES[3]}
-                        alt={galleryImages[3]?.title || ""}
-                        onError={(event) => handleImageError(event, 3)}
-                    />
+                    <GalleryImage image={visibleImages[3]?.image} title={visibleImages[3]?.title} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <img
-                        src={galleryImages[4]?.image || FALLBACK_IMAGES[4]}
-                        alt={galleryImages[4]?.title || ""}
-                        onError={(event) => handleImageError(event, 4)}
-                    />
+                    <GalleryImage image={visibleImages[4]?.image} title={visibleImages[4]?.title} />
                     <button className={styles.viewGalleryBtn} onClick={goToGallery} >
                         <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                     </button>

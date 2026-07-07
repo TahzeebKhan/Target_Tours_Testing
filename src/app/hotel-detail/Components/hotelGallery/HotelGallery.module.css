@@ -1,6 +1,6 @@
 .bottomContainerRef {
     display: flex;
-    gap: 24px;
+    gap: 16px;
     max-width: 1920px;
     width: 100%;
     height: 581px;
@@ -10,14 +10,31 @@
 }
 
 .rightImage {
+    position: relative;
     width: 50%;
     height: 100%;
     overflow: hidden;
 }
-.rightImage img {
+.galleryImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.imageLoading {
+    opacity: 0;
+}
+
+.imageLoader {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #eceff3 0%, #f8f8f8 45%, #eceff3 100%);
+    background-size: 220% 100%;
+    animation: imageLoading 1.1s ease-in-out infinite;
+    z-index: 1;
 }
 .viewGalleryBtnIcon{
     width: 12px !important;
@@ -31,18 +48,12 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 1fr;
-    gap: 24px;
+    gap: 16px;
 }
 
 .imageBox {
     position: relative;
     overflow: hidden;
-}
-
-.imageBox img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 /* VIEW GALLERY BUTTON */
@@ -60,6 +71,17 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    z-index: 2;
+}
+
+@keyframes imageLoading {
+    0% {
+        background-position: 120% 0;
+    }
+
+    100% {
+        background-position: -120% 0;
+    }
 }
 
 @media (max-width: 1280px){

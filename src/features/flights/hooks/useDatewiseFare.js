@@ -220,6 +220,7 @@ export const useDatewiseFare = ({
     enabled: enabled && hasRequiredParams,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
     select: (data) => ({
       raw: data,
       tiles: mapDatewiseFareToTiles(data),
