@@ -49,19 +49,22 @@
 
 .roundColumnHeader {
   display: grid;
-  grid-template-columns: 1.6fr 1.8fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1.6fr 1.2fr 1fr;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px;
   background: #f8fafc;
-  border-top: 1px solid #edf0f4;
-  border-bottom: 1px solid #edf0f4;
+  border-bottom: 1px solid #E4E6E8;
   font-family: var(--font-inter);
   font-size: 12px;
   font-weight: 500;
   line-height: 100%;
   letter-spacing: 0%;
   text-transform: uppercase;
-  color: #8290a3;
+  color: #59707E;
+}
+
+.roundColumnHeader span{
+  padding: 10px;
 }
 
 .roundColumnHeader span:nth-child(3),
@@ -78,7 +81,7 @@
 
 .roundOptionCard {
   background: #ffffff;
-  border: 1px solid #e4e6e8;
+  /* border: 1px solid #e4e6e8; */
   border-radius: 6px;
   padding: 12px 16px;
   cursor: pointer;
@@ -87,13 +90,9 @@
     box-shadow 0.2s ease;
 }
 
-.roundOptionCard:hover {
+/* .roundOptionCard:hover {
   box-shadow: 0px 1px 18.6px 0px #00000017;
-}
-
-.selectedRoundOption {
-  border-color: #000000;
-}
+} */
 
 .roundOptionTop {
   display: flex;
@@ -105,7 +104,7 @@
 .radioMark {
   width: 16px;
   height: 16px;
-  border: 1px solid #c7cbd1;
+  border: 1px solid #A8A8A8;
   border-radius: 50%;
   flex: 0 0 auto;
   position: relative;
@@ -154,7 +153,9 @@
   padding: 0;
   font-family: var(--font-inter);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
+  letter-spacing: 0%;
+  line-height: 100%;
   text-transform: uppercase;
   color: #000033;
   cursor: pointer;
@@ -166,12 +167,12 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  border: 1px solid #d8dce2;
-  border-radius: 6px;
+  border: 0.5px solid #D6D6D6;
+  border-radius: 4px;
   color: #4c4c4c;
   font-family: var(--font-inter);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -179,13 +180,19 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #000000;
+  color: #1A1A1A;
   font-family: var(--font-inter);
   font-size: 11.25px;
   line-height: 100%;
   letter-spacing: 0%;
   font-weight: 400;
   white-space: nowrap;
+}
+
+.seatBadge img {
+  width: 18px;
+  height: 18px;
+  
 }
 
 .seatBadge svg {
@@ -690,14 +697,20 @@
 
 .durationText {
   font-family: var(--font-inter);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
   color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   white-space: nowrap;
+}
+
+.durationText span span {
+  color: #A3A3A3;
 }
 
 .dotSeparator {
@@ -781,7 +794,7 @@
   }
 
   .selectionBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 12px;
   }
 
