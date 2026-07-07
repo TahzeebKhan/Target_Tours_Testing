@@ -26,11 +26,7 @@ const truncate = (str) => {
   return str.length > 10 ? str.slice(0, 10) + "..." : str;
 };
 
-const passengerTypes = [
-  "REGULAR",
-  "SENIOR CITIZEN",
-  "STUDENT"
-];
+const passengerTypes = ["REGULAR", "SENIOR CITIZEN", "STUDENT"];
 const MAX_MULTI_CITY_ROUTES = 4;
 
 const PencilIcon = () => {
@@ -191,10 +187,15 @@ const TopFilterSection = ({
 
   const getAirportDisplayValue = (value, code) => {
     const trimmedValue = String(value || "").trim();
-    const normalizedCode = String(code || "").trim().toUpperCase();
+    const normalizedCode = String(code || "")
+      .trim()
+      .toUpperCase();
 
     if (!trimmedValue) return normalizedCode;
-    if (!normalizedCode || trimmedValue.toUpperCase().includes(`(${normalizedCode})`)) {
+    if (
+      !normalizedCode ||
+      trimmedValue.toUpperCase().includes(`(${normalizedCode})`)
+    ) {
       return trimmedValue;
     }
 
@@ -991,7 +992,11 @@ const TopFilterSection = ({
                                   setActiveMultiFromIndex(segmentIndex);
                                 }}
                                 onChange={(e) => {
-                                  updateSegment(segmentIndex, "from", e.target.value);
+                                  updateSegment(
+                                    segmentIndex,
+                                    "from",
+                                    e.target.value,
+                                  );
                                   setFromSuggestionsOpen(true);
                                   setActiveMultiFromIndex(segmentIndex);
                                 }}
@@ -1004,7 +1009,9 @@ const TopFilterSection = ({
                                     query={segment.from}
                                     fallbackSuggestions={recentSearches}
                                     field="from"
-                                    onSelect={(s) => selectSuggestion(s, "from")}
+                                    onSelect={(s) =>
+                                      selectSuggestion(s, "from")
+                                    }
                                   />
                                 )}
 
@@ -1041,7 +1048,11 @@ const TopFilterSection = ({
                                   setActiveMultiToIndex(segmentIndex);
                                 }}
                                 onChange={(e) => {
-                                  updateSegment(segmentIndex, "to", e.target.value);
+                                  updateSegment(
+                                    segmentIndex,
+                                    "to",
+                                    e.target.value,
+                                  );
                                   setToSuggestionsOpen(true);
                                   setActiveMultiToIndex(segmentIndex);
                                 }}
@@ -1115,7 +1126,21 @@ const TopFilterSection = ({
                                 onClick={() => removeMultiSegment(segmentIndex)}
                                 aria-label={`Remove route ${segmentIndex + 1}`}
                               >
-                                x
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="1.25"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  class="lucide lucide-x-icon lucide-x"
+                                >
+                                  <path d="M18 6 6 18" />
+                                  <path d="m6 6 12 12" />
+                                </svg>
                               </button>
                             )}
 
@@ -1125,13 +1150,33 @@ const TopFilterSection = ({
                                   type="button"
                                   className={styles.addMultiCityBtn}
                                   onClick={addMultiSegment}
-                                  disabled={multiSegments.length >= MAX_MULTI_CITY_ROUTES}
+                                  disabled={
+                                    multiSegments.length >=
+                                    MAX_MULTI_CITY_ROUTES
+                                  }
                                 >
-                                  + ADD CITY
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.25"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-plus-icon lucide-plus"
+                                  >
+                                    <path d="M5 12h14" />
+                                    <path d="M12 5v14" />
+                                  </svg>{" "}
+                                  ADD CITY
                                 </button>
                                 <div
                                   className={`${styles.searchBtn} ${
-                                    isSearchSubmitting ? styles.searchBtnLoading : ""
+                                    isSearchSubmitting
+                                      ? styles.searchBtnLoading
+                                      : ""
                                   }`}
                                   onClick={handleSearch}
                                   aria-disabled={isSearchSubmitting}
@@ -1147,9 +1192,9 @@ const TopFilterSection = ({
                         className={styles.multiCityActions}
                         style={{ pointerEvents: "auto" }}
                       >
-                        <span className={styles.multiCityLimit}>
+                        {/* <span className={styles.multiCityLimit}>
                           {multiSegments.length}/{MAX_MULTI_CITY_ROUTES} ROUTES
-                        </span>
+                        </span> */}
                       </div>
                     </div>
                   </>

@@ -763,6 +763,7 @@ const MultiCityTrip = ({
         <div className={styles.routeTabsWrap}>
           {routeSegments.map((segment, index) => {
             const selectedCard = selectedRouteFlights[index];
+            console.log("selectedCard",selectedCard)
             return (
               <button
                 key={`${segment.from}-${segment.to}-${index}`}
@@ -775,6 +776,7 @@ const MultiCityTrip = ({
                 <span className={styles.routeTabStatus}>
                   {selectedCard ? "✓" : index + 1}
                 </span>
+
                 <span className={styles.routeTabText}>
                   {routeShortLabel(segment.from)} → {routeShortLabel(segment.to)}
                 </span>

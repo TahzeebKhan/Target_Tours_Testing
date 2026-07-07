@@ -321,6 +321,15 @@
     grid-column: 1 / -1;
   }
 }
+
+@media (max-width: 761px) {
+.sidebarToggle{
+  padding-left: 16px;
+  padding-right: 16px;
+  font-size: 12px;
+}
+}
+
 @media (max-width: 630px) {
   .sidebarToggle {
     display: none;
