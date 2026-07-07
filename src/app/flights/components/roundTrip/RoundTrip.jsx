@@ -931,9 +931,9 @@ const RoundTrip = ({
             <span className={styles.priceInfo}>
               The price is average for one person. Included all taxes and fees.
             </span>
-            <span className={styles.itemsResult}>
+            {/* <span className={styles.itemsResult}>
               {resultsText}
-            </span>
+            </span> */}
           </div>
         </div>
         {/* <DatePriceSlider

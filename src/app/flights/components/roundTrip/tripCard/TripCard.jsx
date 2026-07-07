@@ -435,7 +435,7 @@ const TripCard = ({
               <div className={styles.flightDot}></div>
             </div>
             <div className={styles.durationText}>
-              <span>{leg.flight.duration.hours}h {leg.flight.duration.minutes}m</span>
+              <span>{leg.flight.duration.hours} <span>h</span> {leg.flight.duration.minutes} <span>m</span></span>
               <span className={styles.dotSeparator}>●</span>
               <span>{leg.flight.stops.type}</span>
             </div>
@@ -486,7 +486,8 @@ const TripCard = ({
             {isRefundable && <span className={styles.refundableBadge}>R</span>}
             {hasSeatCount && (
               <span className={styles.seatBadge}>
-                <Armchair size={20} strokeWidth={2.2} />
+                {/* <Armchair size={20} strokeWidth={2.2} /> */}
+                <img src="icons/flight-seat.svg" alt="seatIcon" />
                 {seats} Left
               </span>
             )}
