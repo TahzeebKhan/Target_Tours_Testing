@@ -78,7 +78,9 @@ const MultiCityFlightCard = ({
             {actionLabel}
           </button>
           <span>
-            {fare.pricePerAdult} <small>/ADULT</small>
+            <div>
+              {fare.pricePerAdult} <small>/ADULT</small>
+            </div>
             <i />
             <em>{fare.cabinClass}</em>
           </span>

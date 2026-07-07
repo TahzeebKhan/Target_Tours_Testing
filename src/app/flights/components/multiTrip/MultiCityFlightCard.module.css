@@ -6,7 +6,10 @@
   padding: 16px;
   background: #ffffff;
   border: 1px solid transparent;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
 
 .card:hover {
@@ -52,14 +55,18 @@
 
 .airlineName {
   font-size: 14px;
-  line-height: 18px;
+  line-height: 18.57px;
+  font-weight: 300;
+  letter-spacing: 0%;
   color: #000000;
 }
 
 .flightNo {
   margin-top: 2px;
   font-size: 14px;
-  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0%;
+  line-height: 15.71px;
   color: #737373;
 }
 
@@ -73,9 +80,10 @@
 
 .farePanel strong {
   font-family: var(--font-inter);
-  font-size: 22px;
-  line-height: 1;
-  font-weight: 600;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  font-weight: 500;
   color: #000000;
 }
 
@@ -86,11 +94,15 @@
   background: #000033;
   color: #ffffff;
   font-family: var(--font-inter);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: -2%;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
 .farePanel button:hover {
@@ -101,28 +113,38 @@
 .farePanel span {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   font-family: var(--font-inter);
   font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
   white-space: nowrap;
   color: #000000;
 }
 
 .farePanel small {
   font-size: 10px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .farePanel i {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #737373;
+  background: #A3A3A3;
 }
 
 .farePanel em {
   font-size: 12px;
   font-style: normal;
-  color: #208ef5;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 1%;
+  color: #208EF5;
 }
 
 .detailsBtn {
@@ -159,16 +181,18 @@
   max-height: 900px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .card {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 0.3fr;
+    gap: 16px;
   }
 
   .flightPanel {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .farePanel {
-    align-items: flex-start;
+    align-items: center;
   }
 }
