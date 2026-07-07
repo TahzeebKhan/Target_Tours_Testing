@@ -39,6 +39,18 @@ const formatCurrency = (value) => {
   }).format(amount);
 };
 
+const toAmount = (...values) => {
+  for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+    const amount =
+      typeof value === "number"
+        ? value
+        : Number(String(value).replace(/[^\d.-]/g, ""));
+    if (Number.isFinite(amount)) return amount;
+  }
+  return null;
+};
+
 const getDateParts = (value) => {
   if (!value) return { day: "N/A", month: "" };
   const date = new Date(`${value}T00:00:00`);
@@ -201,6 +213,70 @@ const normalizeGuests = (guests = []) =>
       ),
     }));
 
+const toList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+
+const getRoomRatePricing = (room = {}) => {
+  const rates = toList(firstValue(room.RoomRates, room.room_rates, room.rates, []));
+  const taxLines = [];
+
+  const totals = rates.reduce(
+    (sum, rate) => {
+      const taxAmount =
+        toAmount(rate?.Tax?.Amount, rate?.tax?.amount, rate?.TaxAmount, rate?.taxAmount) ?? 0;
+      const taxLabel = firstValue(
+        rate?.Tax?.Description,
+        rate?.tax?.description,
+        rate?.Tax?.Name,
+        rate?.tax?.name,
+        "Tax",
+      );
+
+      sum.baseRate += toAmount(rate?.BaseRate, rate?.baseRate) ?? 0;
+      sum.totalRate += toAmount(rate?.TotalRate, rate?.totalRate) ?? 0;
+      sum.tax += taxAmount;
+      sum.discount += toAmount(rate?.Discount, rate?.discount) ?? 0;
+      sum.commission += toAmount(rate?.Commission, rate?.commission) ?? 0;
+      sum.serviceCharge += toAmount(rate?.ServiceCharge, rate?.serviceCharge) ?? 0;
+      sum.agentMarkup += toAmount(rate?.AgentMarkup, rate?.agentMarkup) ?? 0;
+      sum.addonMarkup += toAmount(rate?.AddonMarkup, rate?.addonMarkup) ?? 0;
+      sum.vatOnBFTax += toAmount(rate?.VATOnBFTax, rate?.vatOnBFTax) ?? 0;
+      sum.vatTotal += toAmount(rate?.VATTotal, rate?.vatTotal) ?? 0;
+      sum.tcsTotal += toAmount(rate?.TCSTotal, rate?.tcsTotal) ?? 0;
+      sum.tdsOnCommission +=
+        toAmount(rate?.TDSOnCommission, rate?.tdsOnCommission) ?? 0;
+      if (taxAmount) {
+        taxLines.push({
+          label: String(taxLabel || "Tax")
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase()),
+          amount: taxAmount,
+        });
+      }
+      return sum;
+    },
+    {
+      baseRate: 0,
+      totalRate: 0,
+      tax: 0,
+      discount: 0,
+      commission: 0,
+      serviceCharge: 0,
+      agentMarkup: 0,
+      addonMarkup: 0,
+      vatOnBFTax: 0,
+      vatTotal: 0,
+      tcsTotal: 0,
+      tdsOnCommission: 0,
+    },
+  );
+
+  return {
+    ...totals,
+    hasRateData: rates.length > 0,
+    taxLines,
+  };
+};
+
 const normalizeRooms = (detail = {}) => {
   const hotelBooking = detail.hotel_booking || detail.hotelBooking || detail;
   const roomCandidates = firstValue(
@@ -251,6 +327,7 @@ const normalizeRooms = (detail = {}) => {
       const inclusions = normalizeNameList(
         firstValue(room.RoomInclusions, room.room_inclusions, room.inclusions, []),
       );
+      const ratePricing = getRoomRatePricing(room);
 
       return {
         id: firstValue(room.id, room.ID, room.room_id, room.RoomId, index + 1),
@@ -270,6 +347,7 @@ const normalizeRooms = (detail = {}) => {
           firstValue(room.CancellationPolicy, room.cancellation_policy, room.cancellationPolicies, []),
         ),
         refundable: firstValue(room.Refundable, room.refundable, ""),
+        pricing: ratePricing,
       };
     });
   }
@@ -287,6 +365,7 @@ const normalizeRooms = (detail = {}) => {
       policies: [],
       cancellationPolicies: [],
       refundable: "",
+      pricing: getRoomRatePricing({}),
     },
   ];
 };
@@ -307,6 +386,101 @@ const getAmenityLabels = (detail = {}) => {
         : firstValue(item.label, item.name, item.title, item.amenity_name, ""),
     )
     .filter(Boolean);
+};
+
+const getHotelPricingBreakdown = (detail = {}, hotelBooking = {}, amountPaid = 0) => {
+  const pricing = firstValue(detail.pricing, detail.price_breakdown, hotelBooking.pricing, {}) || {};
+
+  const totalAmount =
+    toAmount(
+      detail.total_amount,
+      detail.amount_paid,
+      hotelBooking.total_amount,
+      hotelBooking.amount_paid,
+      pricing.total_amount,
+      pricing.amount_paid,
+      pricing.net_fare,
+      amountPaid,
+    ) ?? 0;
+
+  const basePrice =
+    toAmount(
+      detail.base_price,
+      hotelBooking.base_price,
+      pricing.base_price,
+      pricing.base_fare,
+      pricing.baseFare,
+      pricing.room_price,
+      pricing.roomPrice,
+      pricing.net_fare,
+      totalAmount,
+    ) ?? 0;
+
+  const discount =
+    toAmount(
+      detail.discount,
+      detail.discount_amount,
+      hotelBooking.discount,
+      hotelBooking.discount_amount,
+      pricing.discount,
+      pricing.discount_amount,
+    ) ?? 0;
+
+  const couponDiscount =
+    toAmount(
+      detail.coupon_discount,
+      hotelBooking.coupon_discount,
+      pricing.coupon_discount,
+      pricing.couponDiscount,
+    ) ?? 0;
+
+  const gstAmount =
+    toAmount(
+      detail.gst_taxes_amount,
+      detail.gst_amount,
+      hotelBooking.gst_taxes_amount,
+      pricing.gst,
+      pricing.gst_amount,
+      pricing.gst_taxes_amount,
+    ) ?? 0;
+
+  const taxesAmount =
+    toAmount(
+      detail.taxes,
+      detail.tax_amount,
+      detail.taxes_amount,
+      hotelBooking.taxes,
+      hotelBooking.tax_amount,
+      pricing.tax,
+      pricing.tax_amount,
+      pricing.taxes,
+      pricing.taxes_amount,
+      pricing.all_taxes,
+      pricing.total_taxes,
+    ) ?? 0;
+
+  const feesAmount =
+    toAmount(
+      detail.fees,
+      detail.fee_amount,
+      hotelBooking.fees,
+      hotelBooking.fee_amount,
+      pricing.fees,
+      pricing.fee_amount,
+      pricing.service_fee,
+      pricing.convenience_fee,
+    ) ?? 0;
+
+  return {
+    basePrice,
+    discount,
+    couponDiscount,
+    gstAmount,
+    taxesAmount,
+    feesAmount,
+    totalAmount,
+    totalTaxesAndFees: gstAmount + taxesAmount + feesAmount,
+  };
 };
 
 const normalizeHotelDetail = (payload, selectedBooking = {}) => {
@@ -330,6 +504,42 @@ const normalizeHotelDetail = (payload, selectedBooking = {}) => {
     selectedBooking?.raw?.check_out_date,
   );
   const rooms = normalizeRooms(detail);
+  const roomPricingTotals = rooms.reduce(
+    (sum, room) => {
+      const pricing = room?.pricing || {};
+      sum.baseRate += toAmount(pricing.baseRate) ?? 0;
+      sum.totalRate += toAmount(pricing.totalRate) ?? 0;
+      sum.tax += toAmount(pricing.tax) ?? 0;
+      sum.discount += toAmount(pricing.discount) ?? 0;
+      sum.commission += toAmount(pricing.commission) ?? 0;
+      sum.serviceCharge += toAmount(pricing.serviceCharge) ?? 0;
+      sum.agentMarkup += toAmount(pricing.agentMarkup) ?? 0;
+      sum.addonMarkup += toAmount(pricing.addonMarkup) ?? 0;
+      sum.vatOnBFTax += toAmount(pricing.vatOnBFTax) ?? 0;
+      sum.vatTotal += toAmount(pricing.vatTotal) ?? 0;
+      sum.tcsTotal += toAmount(pricing.tcsTotal) ?? 0;
+      sum.tdsOnCommission += toAmount(pricing.tdsOnCommission) ?? 0;
+      sum.taxLines.push(...toList(pricing.taxLines));
+      sum.hasRateData = sum.hasRateData || Boolean(pricing.hasRateData);
+      return sum;
+    },
+    {
+      baseRate: 0,
+      totalRate: 0,
+      tax: 0,
+      discount: 0,
+      commission: 0,
+      serviceCharge: 0,
+      agentMarkup: 0,
+      addonMarkup: 0,
+      vatOnBFTax: 0,
+      vatTotal: 0,
+      tcsTotal: 0,
+      tdsOnCommission: 0,
+      taxLines: [],
+      hasRateData: false,
+    },
+  );
   const nights = Number(firstValue(detail.nights, hotelBooking.nights, 0)) || getNightCount(checkIn, checkOut);
   const amountPaid = firstValue(
     detail.amount_paid,
@@ -338,6 +548,39 @@ const normalizeHotelDetail = (payload, selectedBooking = {}) => {
     hotelBooking.amount_paid,
     selectedBooking?.raw?.amount_paid,
   );
+  const pricing = getHotelPricingBreakdown(detail, hotelBooking, amountPaid);
+  const mergedPricing = {
+    ...pricing,
+    basePrice: roomPricingTotals.hasRateData && roomPricingTotals.baseRate
+      ? roomPricingTotals.baseRate
+      : pricing.basePrice,
+    discount: roomPricingTotals.hasRateData
+      ? roomPricingTotals.discount || pricing.discount
+      : pricing.discount,
+    commission: roomPricingTotals.hasRateData ? roomPricingTotals.commission : 0,
+    gstAmount: roomPricingTotals.hasRateData
+      ? roomPricingTotals.vatTotal + roomPricingTotals.vatOnBFTax
+      : pricing.gstAmount,
+    taxesAmount: roomPricingTotals.hasRateData
+      ? roomPricingTotals.tax
+      : pricing.taxesAmount,
+    feesAmount: roomPricingTotals.hasRateData
+      ? roomPricingTotals.serviceCharge +
+        roomPricingTotals.agentMarkup +
+        roomPricingTotals.addonMarkup +
+        roomPricingTotals.tcsTotal
+      : pricing.feesAmount,
+    tdsOnCommission: roomPricingTotals.hasRateData
+      ? roomPricingTotals.tdsOnCommission
+      : 0,
+    totalAmount: roomPricingTotals.hasRateData && roomPricingTotals.totalRate
+      ? roomPricingTotals.totalRate
+      : pricing.totalAmount,
+  };
+  mergedPricing.totalTaxesAndFees =
+    (toAmount(mergedPricing.gstAmount) ?? 0) +
+    (toAmount(mergedPricing.taxesAmount) ?? 0) +
+    (toAmount(mergedPricing.feesAmount) ?? 0);
   const isCancel = Boolean(detail?.actions?.can_cancel);
   const isDownload = Boolean(detail?.actions?.can_download_ticket);
   const directCoordinates =
@@ -404,12 +647,19 @@ const normalizeHotelDetail = (payload, selectedBooking = {}) => {
       hotel.description,
       "Booking details for this property.",
     ),
-    mealPlan: firstValue(detail.meal_plan, detail.mealPlan, hotelBooking.meal_plan, "Meal plan details are not available."),
-    basePrice: firstValue(detail.base_price, hotelBooking.base_price, amountPaid),
-    discount: firstValue(detail.discount, detail.discount_amount, hotelBooking.discount_amount, 0),
-    couponDiscount: firstValue(detail.coupon_discount, hotelBooking.coupon_discount, 0),
-    taxes: firstValue(detail.gst_taxes_amount, detail.taxes, detail.tax_amount, hotelBooking.gst_taxes_amount, 0),
-    totalAmount: firstValue(detail.total_amount, detail.amount_paid, hotelBooking.amount_paid, amountPaid),
+    mealPlan: firstValue(detail.meal_plan, detail.mealPlan, hotelBooking.meal_plan, ""),
+    pricing: mergedPricing,
+    basePrice: mergedPricing.basePrice,
+    discount: mergedPricing.discount,
+    couponDiscount: mergedPricing.couponDiscount,
+    commission: mergedPricing.commission,
+    gstAmount: mergedPricing.gstAmount,
+    taxes: mergedPricing.totalTaxesAndFees,
+    taxesAmount: mergedPricing.taxesAmount,
+    feesAmount: mergedPricing.feesAmount,
+    tdsOnCommission: mergedPricing.tdsOnCommission,
+    totalAmount: mergedPricing.totalAmount,
+    taxLines: roomPricingTotals.taxLines,
     amenities: getAmenityLabels(detail),
     bookingId: firstValue(detail.booking_id, hotelBooking.booking_id, selectedBooking?.id, ""),
     isCancel:isCancel,
@@ -438,21 +688,6 @@ const IndividualProperty = ({
   const closeCancelModal = () => setShowCancelModal(false);
 
   const [showModifyModal, setShowModifyModal] = useState(false);
-  const amenities = [
-    { icon: "/icons/hot-tub.svg", label: "Hot tub" },
-    { icon: "/icons/city-view.svg", label: "City view" },
-    { icon: "/icons/ac.svg", label: "Air conditioning" },
-    { icon: "/icons/tv-retro.svg", label: "TV" },
-    { icon: "/icons/fridge.svg", label: "Refrigerator" },
-    { icon: "/icons/hair-dryer.svg", label: "Hair dryer" },
-    { icon: "/icons/microwave.svg", label: "Microwave" },
-    { icon: "/icons/wifi copy.svg", label: "Wifi" },
-    { icon: "/icons/Plate.svg", label: "Plates" },
-    { icon: "/icons/camera-circle.svg", label: "Security Cameras" },
-    { icon: "/icons/coffee.svg", label: "Coffee machine" },
-    { icon: "/icons/towels.svg", label: "Towels" },
-    { icon: "/icons/sofa.svg", label: "Sofa" },
-  ];
   const { setMobileTitle } = useProfile();
 
   useEffect(() => {
@@ -523,9 +758,7 @@ const IndividualProperty = ({
   const checkOutDate = getDateParts(hotelDetail.checkOut);
   const activeRoom = hotelDetail.rooms[activeRoomIndex] || hotelDetail.rooms[0];
   const activeRoomPolicies = splitPolicyRows(activeRoom?.policies || []);
-  const amenitiesToShow = hotelDetail.amenities.length
-    ? hotelDetail.amenities.map((label) => ({ icon: "/icons/ac.svg", label }))
-    : amenities;
+  const amenitiesToShow = hotelDetail.amenities.map((label) => ({ icon: "/icons/ac.svg", label }));
   const shouldShowDetailLoading =
     activeTab === "HOTEL BOOKING" &&
     Boolean(hotelDetailId) &&
@@ -538,6 +771,56 @@ const IndividualProperty = ({
     Boolean(hotelDetailError) &&
     !hotelDetailPayload;
   const isCorporate = false;
+  const hasRateFormula =
+    Number(toAmount(hotelDetail.basePrice)) > 0 ||
+    Number(toAmount(hotelDetail.commission)) > 0 ||
+    Number(toAmount(hotelDetail.tdsOnCommission)) > 0;
+  const pricingRows = hasRateFormula
+    ? [
+        {
+          label: `${formatCurrency(hotelDetail.basePrice)} x ${hotelDetail.roomCount} Room${hotelDetail.roomCount === 1 ? "" : "s"} x ${hotelDetail.nights} Night${hotelDetail.nights === 1 ? "" : "s"}`,
+          value: formatCurrency(hotelDetail.basePrice),
+        },
+        { label: "Base Rate", value: formatCurrency(hotelDetail.basePrice) },
+        hotelDetail.commission
+          ? { label: "- Off Commission", value: `- ${formatCurrency(hotelDetail.commission)}` }
+          : null,
+        ...toList(hotelDetail.taxLines).map((taxLine, index) => ({
+          label: taxLine?.label || `Tax ${index + 1}`,
+          value: formatCurrency(taxLine?.amount || 0),
+        })),
+        hotelDetail.tdsOnCommission
+          ? { label: "TDS On Commission", value: formatCurrency(hotelDetail.tdsOnCommission) }
+          : null,
+        { label: "Total Rate", value: formatCurrency(hotelDetail.totalAmount) },
+      ].filter(Boolean)
+    : [
+        {
+          label: `${formatCurrency(hotelDetail.basePrice)} x ${hotelDetail.roomCount} Room${hotelDetail.roomCount === 1 ? "" : "s"} x ${hotelDetail.nights} Night${hotelDetail.nights === 1 ? "" : "s"}`,
+          value: formatCurrency(hotelDetail.basePrice),
+        },
+        { label: "Base Price", value: formatCurrency(hotelDetail.basePrice) },
+        hotelDetail.discount
+          ? { label: "Discount", value: formatCurrency(hotelDetail.discount) }
+          : null,
+        hotelDetail.couponDiscount
+          ? { label: "Coupon Discount", value: formatCurrency(hotelDetail.couponDiscount) }
+          : null,
+        ...toList(hotelDetail.taxLines).map((taxLine, index) => ({
+          label: taxLine?.label || `Tax ${index + 1}`,
+          value: formatCurrency(taxLine?.amount || 0),
+        })),
+        hotelDetail.gstAmount
+          ? { label: "GST", value: formatCurrency(hotelDetail.gstAmount) }
+          : null,
+        hotelDetail.taxesAmount
+          ? { label: "Other Taxes", value: formatCurrency(hotelDetail.taxesAmount) }
+          : null,
+        hotelDetail.feesAmount
+          ? { label: "Fees", value: formatCurrency(hotelDetail.feesAmount) }
+          : null,
+        { label: "Taxes & Fees", value: formatCurrency(hotelDetail.taxes) },
+      ].filter(Boolean);
 
   const openModifyModal = () => setShowModifyModal(true);
   const closeModifyModal = () => setShowModifyModal(false);
@@ -699,16 +982,7 @@ const IndividualProperty = ({
             <section className={styles.summarySection}>
               <h2 className={styles.sectionTitle}>BOOKING SUMMARY</h2>
               <div className={styles.priceTable}>
-                {[
-                  {
-                    label: `${formatCurrency(hotelDetail.basePrice)} x ${hotelDetail.roomCount} Room${hotelDetail.roomCount === 1 ? "" : "s"} x ${hotelDetail.nights} Night${hotelDetail.nights === 1 ? "" : "s"}`,
-                    value: formatCurrency(hotelDetail.basePrice),
-                  },
-                  { label: "Base Price", value: formatCurrency(hotelDetail.basePrice) },
-                  { label: "Discount", value: formatCurrency(hotelDetail.discount) },
-                  { label: "Coupon Discount", value: formatCurrency(hotelDetail.couponDiscount) },
-                  { label: "Taxes & Fees", value: formatCurrency(hotelDetail.taxes) },
-                ].map((item, idx) => (
+                {pricingRows.map((item, idx) => (
                   <div key={idx} className={styles.priceRow}>
                     <span className={styles.priceLabel}>{item.label}</span>
                     <span className={styles.textPrimary}>{item.value}</span>
@@ -794,7 +1068,7 @@ const IndividualProperty = ({
                         <p className={styles.infoText}>
                           {activeRoom?.boardBasis?.length
                             ? activeRoom.boardBasis.join(", ")
-                            : hotelDetail.mealPlan}
+                            : hotelDetail.mealPlan || "Meal plan details are not available."}
                         </p>
                       </div>
                     )}
@@ -911,21 +1185,23 @@ const IndividualProperty = ({
                 </div>
               </div>
 
-              <div className={styles.amenitiesGrid}>
-                {amenitiesToShow.map((item, idx) => (
-                  <div key={idx} className={styles.amenityCard}>
-                    <div className={styles.iconWrapper}>
-                      <Image
-                        src={item.icon}
-                        alt={item.label}
-                        width={22}
-                        height={22}
-                      />
+              {amenitiesToShow.length ? (
+                <div className={styles.amenitiesGrid}>
+                  {amenitiesToShow.map((item, idx) => (
+                    <div key={idx} className={styles.amenityCard}>
+                      <div className={styles.iconWrapper}>
+                        <Image
+                          src={item.icon}
+                          alt={item.label}
+                          width={22}
+                          height={22}
+                        />
+                      </div>
+                      <span>{item.label}</span>
                     </div>
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             {(hotelDetail.isCancel || hotelDetail.isDownload || isCorporate) && (
