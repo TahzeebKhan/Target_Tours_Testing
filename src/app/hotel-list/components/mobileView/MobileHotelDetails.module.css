@@ -1,8 +1,16 @@
 /* ================= Trip Details Sticky Header ================= */
 
 .hotelDetailsMobileContainer{
-    width: 100%
+    width: 100%;
+    min-height: 100dvh;
+    background: #ffffff;
+    overflow: visible;
 }
+
+.hotelDetailsMobileContainer :global([class*="MapSection_mapContainer"]) {
+  display: none !important;
+}
+
 .tripDetailsHeader {
   background-color: #000033;
   padding: 10px 16px;
@@ -104,6 +112,18 @@
   background-color: #ffffff;
   border-radius: 50%;
   opacity: 0.9;
+}
+
+.editButton {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 /* Edit icon */

@@ -1,0 +1,209 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.38);
+  z-index: 999;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 88dvh;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.28s ease-out;
+}
+
+.header {
+  height: 64px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e4e6e8;
+  color: #7b8799;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #1a2029;
+}
+
+.body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--font-inter);
+  color: #1f2937;
+}
+
+.field span {
+  font-size: 12px;
+  color: #7b8799;
+  text-transform: uppercase;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dfe3ea;
+  padding: 0 12px;
+  font: inherit;
+  color: #000033;
+  background: #ffffff;
+}
+
+.dateGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.childAgeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.roomsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.roomCard {
+  padding: 14px 0 4px;
+  border-top: 1px solid #e4e6e8;
+}
+
+.roomHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-family: var(--font-inter);
+  color: #000033;
+}
+
+.roomHeader strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.roomHeader span {
+  font-size: 12px;
+  color: #7b8799;
+  text-align: right;
+}
+
+.counterRow {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-inter);
+  color: #000033;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.counter button {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dfe3ea;
+  background: #ffffff;
+  color: #000033;
+}
+
+.counter button:disabled {
+  opacity: 0.4;
+}
+
+.counter strong {
+  min-width: 20px;
+  text-align: center;
+}
+
+.actionBar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px 16px 18px;
+  border-top: 1px solid #e4e6e8;
+}
+
+.cancelButton,
+.applyButton {
+  height: 46px;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.cancelButton {
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  color: #000033;
+}
+
+.applyButton {
+  border: 0;
+  background: #000033;
+  color: #ffffff;
+}
+
+.applyButton:disabled {
+  opacity: 0.65;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 440px) {
+  .dateGrid,
+  .childAgeGrid {
+    grid-template-columns: 1fr;
+  }
+}

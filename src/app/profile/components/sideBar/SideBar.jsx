@@ -13,6 +13,8 @@ import { formatRoleUnderscoreToSpaceSeparated } from "@/app/utils/formatters";
 import { getParsedCookie } from "@/app/utils/getParsedCookie";
 import LogoutConfirmModal from "./LogoutConfirmModal";
 
+const TRIPS_MENU_OPEN_STORAGE_KEY = "profileTripsMenuOpen";
+
 const ChevronIcon = () => (
   <svg
     width="20"
@@ -32,8 +34,14 @@ const ChevronIcon = () => (
 );
 
 const SideBar = () => {
-  const { activeMenu, setActiveMenu, profilePhoto, tripFilter, setTripFilter } =
-    useProfile();
+  const {
+    activeMenu,
+    setActiveMenu,
+    hasRestoredActiveMenu,
+    profilePhoto,
+    tripFilter,
+    setTripFilter,
+  } = useProfile();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { logout, profile } = useAuth();
@@ -55,10 +63,31 @@ const SideBar = () => {
 
   const router = useRouter();
   const [openTrips, setOpenTrips] = useState(false);
+  const [hasRestoredOpenTrips, setHasRestoredOpenTrips] = useState(false);
   const activeTrip = tripFilter || "All";
+
   useEffect(() => {
+    const storedOpenTrips = window.localStorage.getItem(
+      TRIPS_MENU_OPEN_STORAGE_KEY
+    );
+
+    setOpenTrips(storedOpenTrips === "true");
+    setHasRestoredOpenTrips(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestoredOpenTrips || !hasRestoredActiveMenu) return;
     if (activeMenu !== "trip" && openTrips) setOpenTrips(false);
-  }, [setActiveMenu, activeMenu]);
+  }, [activeMenu, hasRestoredActiveMenu, hasRestoredOpenTrips, openTrips]);
+
+  useEffect(() => {
+    if (!hasRestoredOpenTrips || !hasRestoredActiveMenu) return;
+    window.localStorage.setItem(
+      TRIPS_MENU_OPEN_STORAGE_KEY,
+      openTrips ? "true" : "false"
+    );
+  }, [hasRestoredActiveMenu, hasRestoredOpenTrips, openTrips]);
+
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
   useEffect(() => {

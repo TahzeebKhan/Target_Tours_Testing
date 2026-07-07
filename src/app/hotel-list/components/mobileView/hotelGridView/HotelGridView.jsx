@@ -104,18 +104,26 @@ const HotelGridView = ({
             <div className={styles.cartListTop}>
               <div className={styles.ListViewCardTextTop}>
                 <div className={styles.topTextHead}>
-                  <div className={styles.rating}>
-                    {[...Array(5)].map((_, index) => (
-                      <img
-                        key={index}
-                        src={
-                          index < (item.rating ?? rating ?? 5)
-                            ? "/icons/conicstar.svg"
-                            : "/icons/star-gray.svg"
-                        }
-                        alt="star"
-                      />
-                    ))}
+                  <div className={styles.ratingRow}>
+                    <div className={styles.rating}>
+                      {[...Array(5)].map((_, index) => (
+                        <img
+                          key={index}
+                          src={
+                            index < (item.rating ?? rating ?? 5)
+                              ? "/icons/conicstar.svg"
+                              : "/icons/star-gray.svg"
+                          }
+                          alt="star"
+                        />
+                      ))}
+                    </div>
+                    {item.reviewScoreText && (
+                      <div className={styles.reviewSummary}>
+                        <span>{item.reviewScoreText}</span>
+                        {item.reviewText ? ` (${item.reviewText})` : ""}
+                      </div>
+                    )}
                   </div>
                   <h2>{item.title}</h2>
 
