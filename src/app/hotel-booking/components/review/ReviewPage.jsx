@@ -1297,10 +1297,11 @@ const ReviewPage = () => {
       );
       const priceProvider = getHotelPriceProvider({ firstRoom, request, hotel });
 
-      if (!recommendationId || !hotelCode || !priceProvider) {
+      if (!recommendationId || !hotelCode || !priceProvider || !hotelSearchId) {
         const missingParts = [
           !recommendationId ? "RecommendationId" : "",
           !hotelCode ? "HotelCode" : "",
+          !hotelSearchId ? "HotelSearchId" : "",
           !priceProvider ? "PriceProvider" : "",
         ].filter(Boolean);
 
@@ -1371,6 +1372,7 @@ const ReviewPage = () => {
 
       await fetchHotelPricingDetails({
         searchId,
+        hotelSearchId,
         hotelId: hotelCode,
         priceProvider,
         recommendationId,

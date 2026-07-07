@@ -639,6 +639,7 @@ export const fetchHotelPricingDetails = async (payload = {}) => {
     body: JSON.stringify({
       domain: payload.domain || getDomain(),
       searchId: payload.searchId,
+      hotelSearchId: payload.hotelSearchId,
       hotelId: payload.hotelId,
       priceProvider: payload.priceProvider,
       recommendationId: payload.recommendationId,
