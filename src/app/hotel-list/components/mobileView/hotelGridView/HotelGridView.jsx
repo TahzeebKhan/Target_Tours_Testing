@@ -1,7 +1,10 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import styles from "./HotelGridView.module.css";
-import { HotelBenefits } from "../../tourListing/TourListing";
+import { HotelBenefits, HotelFacilities } from "../../tourListing/TourListing";
+
+const getHotelLoadingKey = (hotel = {}) =>
+  hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode || "";
 
 const HotelGridView = ({
   tourData,
@@ -17,7 +20,6 @@ const HotelGridView = ({
 }) => {
   const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
   const shouldShowEmptyState = showEmptyState && !isLoading && !tourData.length;
-  const isDetailsLoading = Boolean(loadingHotelDetailsId);
 
   return (
     <motion.div
@@ -70,123 +72,108 @@ const HotelGridView = ({
           </div>
         </div>
       )}
-      {tourData.map((item, index) => (
-        <div
-          key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}
-          className={styles.gridCard}
-        >
-          <div className={styles.gridCardImage}>
-            <img
-              className={styles.ListViewCardImage}
-              src={item.image || "/hotelList/hotelCardImg.png"}
-              alt={item.title || "Hotel"}
-            />
-            <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
-              <div className={styles.headerLeft}>
-                <div className={styles.new}>New</div>
-                <div className={styles.private}>Flagship</div>
-              </div>
+      {tourData.map((item, index) => {
+        const itemLoadingKey = getHotelLoadingKey(item);
+        const isItemLoading = loadingHotelDetailsId === itemLoadingKey;
 
+        return (
+          <div
+            key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}
+            className={styles.gridCard}
+          >
+            <div className={styles.gridCardImage}>
               <img
-                src={
-                  likedTours.includes(item.id)
-                    ? "/icons/heartIconFilled.svg"
-                    : "/icons/heartIcon.svg"
-                }
-                alt="wishlist"
-                className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
-                onClick={() => toggleLike(item.id)}
+                className={styles.ListViewCardImage}
+                src={item.image || "/hotelList/hotelCardImg.png"}
+                alt={item.title || "Hotel"}
               />
-            </div>
-          </div>
+              <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
+                <div className={styles.headerLeft}>
+                  <div className={styles.new}>New</div>
+                  <div className={styles.private}>Flagship</div>
+                </div>
 
-          <div className={styles.gridCardText}>
-            <div className={styles.cartListTop}>
-              <div className={styles.ListViewCardTextTop}>
-                <div className={styles.topTextHead}>
-                  <div className={styles.ratingRow}>
-                    <div className={styles.rating}>
-                      {[...Array(5)].map((_, index) => (
-                        <img
-                          key={index}
-                          src={
-                            index < (item.rating ?? rating ?? 5)
-                              ? "/icons/conicstar.svg"
-                              : "/icons/star-gray.svg"
-                          }
-                          alt="star"
-                        />
-                      ))}
-                    </div>
-                    {item.reviewScoreText && (
-                      <div className={styles.reviewSummary}>
-                        <span>{item.reviewScoreText}</span>
-                        {item.reviewText ? ` (${item.reviewText})` : ""}
+                <img
+                  src={
+                    likedTours.includes(item.id)
+                      ? "/icons/heartIconFilled.svg"
+                      : "/icons/heartIcon.svg"
+                  }
+                  alt="wishlist"
+                  className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+                  onClick={() => toggleLike(item.id)}
+                />
+              </div>
+            </div>
+
+            <div className={styles.gridCardText}>
+              <div className={styles.cartListTop}>
+                <div className={styles.ListViewCardTextTop}>
+                  <div className={styles.topTextHead}>
+                    <div className={styles.ratingRow}>
+                      <div className={styles.rating}>
+                        {[...Array(5)].map((_, starIndex) => (
+                          <img
+                            key={starIndex}
+                            src={
+                              starIndex < (item.rating ?? rating ?? 5)
+                                ? "/icons/conicstar.svg"
+                                : "/icons/star-gray.svg"
+                            }
+                            alt="star"
+                          />
+                        ))}
                       </div>
-                    )}
-                  </div>
-                  <h2>{item.title}</h2>
+                      {item.reviewScoreText && (
+                        <div className={styles.reviewSummary}>
+                          <span>{item.reviewScoreText}</span>
+                          {item.reviewText ? ` (${item.reviewText})` : ""}
+                        </div>
+                      )}
+                    </div>
+                    <h2>{item.title}</h2>
 
-                  <div className={styles.topTextHeadAddress}>
-                    <img src="/icons/blackAddress.svg" alt="" />
-                    <span>{item.route}</span>
+                    <div className={styles.topTextHeadAddress}>
+                      <img src="/icons/blackAddress.svg" alt="" />
+                      <span>{item.route}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.featuresCont}>
-                  <div className={styles.featureItem}>
-                    <img src="/icons/AirConditioning.svg" alt="" />
-                    <p>Air conditioning</p>
-                    <span>•</span>
-                  </div>
-                  <div className={styles.featureItem}>
-                    <img src="/icons/Wifi.svg" alt="" />
-                    <p>Wifi</p>
-                    <span>•</span>
-                  </div>
-                  <div className={styles.featureItem}>
-                    <img src="/icons/Kitchen.svg" alt="" />
-                    <p>Kitchen</p>
-                    <span>•</span>
-                  </div>
-                  <div className={styles.featureItem}>
-                    <img src="/icons/Pool.svg" alt="" />
-                    <p>Pool</p>
-                    <span>•</span>
-                  </div>
-                  <div className={styles.featureItem}>
-                    <img src="/icons/pool.svg" alt="mixer" />
-                    <p>Mixer</p>
-                  </div>
-                </div>
+                  <HotelFacilities facilities={item.facilities} />
 
-                <HotelBenefits benefits={item.benefits} classes={styles} />
-              </div>
-            </div>
-
-            <div className={styles.ListViewCardTextBottom}>
-              <div className={styles.priceContainer}>
-                <div className={styles.priceSec}>
-                  {item.price}
-                </div>
-                <div className={styles.totalPrice}>
-                  <span>{staySummary}</span>
+                  <HotelBenefits benefits={item.benefits} classes={styles} />
                 </div>
               </div>
 
-              <button
-                className={styles.bookNowBtn}
-                disabled={isDetailsLoading}
-                onClick={() => handleBookNow(item)}
-              >
-                {loadingHotelDetailsId === item.id
-                  ? "LOADING"
-                  : "SEE AVAILABILITY"}
-              </button>
+              <div className={styles.ListViewCardTextBottom}>
+                <div className={styles.priceContainer}>
+                  {item.hasPrice ? (
+                    <>
+                      <div className={styles.priceSec}>{item.price}</div>
+                      <div className={styles.totalPrice}>
+                        <span>{staySummary}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className={styles.priceLoading}>
+                      <span className={styles.priceLoadingAmount} />
+                      <span className={styles.priceLoadingMeta} />
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  className={styles.bookNowBtn}
+                  disabled={isItemLoading}
+                  onClick={() => handleBookNow(item)}
+                >
+                  {isItemLoading ? "LOADING..." : "SEE AVAILABILITY"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </motion.div>
   );
 };
