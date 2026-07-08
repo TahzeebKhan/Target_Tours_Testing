@@ -156,9 +156,19 @@ const getHotelSearchMeta = (...sources) => {
     );
     const requestId = findMetaValue("requestId", "request_id");
     const hotelSearchKey = findMetaValue("hotel_search_key", "hotelSearchKey");
+    const searchTracingKey = findMetaValue(
+      "searchTracingKey",
+      "SearchTracingKey",
+      "searchTracingkey",
+      "search_tracing_key",
+      "roomsSearchTracingKey",
+      "RoomsSearchTracingKey",
+      "TUI",
+      "tui",
+    );
 
-    if (searchId || hotelSearchId || requestId || hotelSearchKey) {
-      return { searchId, hotelSearchId, requestId, hotelSearchKey };
+    if (searchId || hotelSearchId || requestId || hotelSearchKey || searchTracingKey) {
+      return { searchId, hotelSearchId, requestId, hotelSearchKey, searchTracingKey };
     }
   }
 
@@ -550,6 +560,63 @@ export const getHotelDetailsPayload = (hotel = {}) => ({
       hotel.raw?.hotelSearchID ||
       "",
   ).trim(),
+  searchTracingKey: String(
+    hotel.searchTracingKey ||
+      hotel.SearchTracingKey ||
+      hotel.searchTracingkey ||
+      hotel.search_tracing_key ||
+      hotel.roomsSearchTracingKey ||
+      hotel.RoomsSearchTracingKey ||
+      hotel.TUI ||
+      hotel.tui ||
+      hotel.raw?.searchTracingKey ||
+      hotel.raw?.SearchTracingKey ||
+      hotel.raw?.searchTracingkey ||
+      hotel.raw?.search_tracing_key ||
+      hotel.raw?.roomsSearchTracingKey ||
+      hotel.raw?.RoomsSearchTracingKey ||
+      hotel.raw?.TUI ||
+      hotel.raw?.tui ||
+      "",
+  ).trim(),
+  roomsSearchTracingKey: String(
+    hotel.roomsSearchTracingKey ||
+      hotel.RoomsSearchTracingKey ||
+      hotel.searchTracingKey ||
+      hotel.SearchTracingKey ||
+      hotel.searchTracingkey ||
+      hotel.search_tracing_key ||
+      hotel.TUI ||
+      hotel.tui ||
+      hotel.raw?.roomsSearchTracingKey ||
+      hotel.raw?.RoomsSearchTracingKey ||
+      hotel.raw?.searchTracingKey ||
+      hotel.raw?.SearchTracingKey ||
+      hotel.raw?.searchTracingkey ||
+      hotel.raw?.search_tracing_key ||
+      hotel.raw?.TUI ||
+      hotel.raw?.tui ||
+      "",
+  ).trim(),
+  TUI: String(
+    hotel.TUI ||
+      hotel.tui ||
+      hotel.searchTracingKey ||
+      hotel.SearchTracingKey ||
+      hotel.searchTracingkey ||
+      hotel.search_tracing_key ||
+      hotel.roomsSearchTracingKey ||
+      hotel.RoomsSearchTracingKey ||
+      hotel.raw?.TUI ||
+      hotel.raw?.tui ||
+      hotel.raw?.searchTracingKey ||
+      hotel.raw?.SearchTracingKey ||
+      hotel.raw?.searchTracingkey ||
+      hotel.raw?.search_tracing_key ||
+      hotel.raw?.roomsSearchTracingKey ||
+      hotel.raw?.RoomsSearchTracingKey ||
+      "",
+  ).trim(),
   hotelId: String(
     hotel.hotelId ||
       hotel.id ||
@@ -598,6 +665,16 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
       hotel.hotel_search_id ||
       hotel.HotelSearchId ||
       hotel.hotelSearchID ||
+      "",
+    searchTracingKey:
+      hotel.searchTracingKey ||
+      hotel.SearchTracingKey ||
+      hotel.searchTracingkey ||
+      hotel.search_tracing_key ||
+      hotel.roomsSearchTracingKey ||
+      hotel.RoomsSearchTracingKey ||
+      hotel.TUI ||
+      hotel.tui ||
       "",
     priceProvider: priceProvider ? String(priceProvider) : "",
     image: getHotelImage(hotel),
@@ -650,7 +727,7 @@ const getInitCompleteSearchMeta = (payload = {}) => {
 
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
-  const init = content?.init || data?.init || payload?.init || {};
+  const init = data?.init || content?.init || payload?.init || {};
   const searchId =
     content?.searchId ||
     content?.search_id ||
@@ -680,13 +757,30 @@ const getInitCompleteSearchMeta = (payload = {}) => {
     init.hotel_search_key ||
     "";
 
-  return { searchId, hotelSearchId };
+  const searchTracingKey =
+    init.searchTracingKey ||
+    init.SearchTracingKey ||
+    init.searchTracingkey ||
+    init.search_tracing_key ||
+    init.roomsSearchTracingKey ||
+    init.RoomsSearchTracingKey ||
+    init.TUI ||
+    init.tui ||
+    data?.searchTracingKey ||
+    data?.SearchTracingKey ||
+    data?.search_tracing_key ||
+    content?.searchTracingKey ||
+    content?.SearchTracingKey ||
+    content?.search_tracing_key ||
+    "";
+
+  return { searchId, hotelSearchId, searchTracingKey };
 };
 
 const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
-  const init = content?.init || data?.init || payload?.init || {};
+  const init = data?.init || content?.init || payload?.init || {};
   const firstHotelWithSearchId = hotels.find(
     (hotel) => hotel?.searchId || hotel?.search_id,
   );
@@ -1566,6 +1660,47 @@ export const getHotelDetailsRequest = (hotel = {}, searchParams) => {
       findDeepValue(storedHotelResults, "hotel_search_id") ||
       findDeepValue(storedHotelResults, "hotel_search_key") ||
       findDeepValue(storedHotelResults, "hotelSearchKey"),
+    searchTracingKey:
+      payload.searchTracingKey ||
+      getSearchParam(searchParams, "searchTracingKey", "tui", "TUI") ||
+      findDeepValue(hotel, "searchTracingKey") ||
+      findDeepValue(hotel, "SearchTracingKey") ||
+      findDeepValue(hotel, "searchTracingkey") ||
+      findDeepValue(hotel, "search_tracing_key") ||
+      findDeepValue(hotel, "roomsSearchTracingKey") ||
+      findDeepValue(hotel, "RoomsSearchTracingKey") ||
+      findDeepValue(hotel, "TUI") ||
+      findDeepValue(hotel, "tui") ||
+      findDeepValue(storedHotelSearch, "searchTracingKey") ||
+      findDeepValue(storedHotelSearch, "SearchTracingKey") ||
+      findDeepValue(storedHotelSearch, "searchTracingkey") ||
+      findDeepValue(storedHotelSearch, "search_tracing_key") ||
+      findDeepValue(storedHotelSearch, "roomsSearchTracingKey") ||
+      findDeepValue(storedHotelSearch, "RoomsSearchTracingKey") ||
+      findDeepValue(storedHotelSearch, "TUI") ||
+      findDeepValue(storedHotelSearch, "tui") ||
+      findDeepValue(storedHotelResults, "searchTracingKey") ||
+      findDeepValue(storedHotelResults, "SearchTracingKey") ||
+      findDeepValue(storedHotelResults, "searchTracingkey") ||
+      findDeepValue(storedHotelResults, "search_tracing_key") ||
+      findDeepValue(storedHotelResults, "roomsSearchTracingKey") ||
+      findDeepValue(storedHotelResults, "RoomsSearchTracingKey") ||
+      findDeepValue(storedHotelResults, "TUI") ||
+      findDeepValue(storedHotelResults, "tui"),
+    roomsSearchTracingKey:
+      payload.roomsSearchTracingKey ||
+      payload.searchTracingKey ||
+      findDeepValue(storedHotelSearch, "roomsSearchTracingKey") ||
+      findDeepValue(storedHotelSearch, "searchTracingKey") ||
+      findDeepValue(storedHotelResults, "roomsSearchTracingKey") ||
+      findDeepValue(storedHotelResults, "searchTracingKey"),
+    TUI:
+      payload.TUI ||
+      payload.searchTracingKey ||
+      findDeepValue(storedHotelSearch, "TUI") ||
+      findDeepValue(storedHotelSearch, "searchTracingKey") ||
+      findDeepValue(storedHotelResults, "TUI") ||
+      findDeepValue(storedHotelResults, "searchTracingKey"),
     hotelId:
       payload.hotelId ||
       String(
@@ -1621,6 +1756,7 @@ const TourListing = () => {
   const [socketSearchMeta, setSocketSearchMeta] = useState({
     searchId: "",
     hotelSearchId: "",
+    searchTracingKey: "",
   });
   const [mergedFilterSearchMeta, setMergedFilterSearchMeta] = useState({
     searchId: "",
@@ -1862,7 +1998,7 @@ const TourListing = () => {
     setTotalHotelResults(0);
     setIsHotelLoading(Boolean(hotelSearchChannel));
     setHotelResultSource("");
-    setSocketSearchMeta({ searchId: "", hotelSearchId: "" });
+    setSocketSearchMeta({ searchId: "", hotelSearchId: "", searchTracingKey: "" });
     setMergedFilterSearchMeta({ searchId: "", hotelSearchId: "" });
     setHasMergedHotelResponse(false);
     setIsFilterLoading(Boolean(hotelSearchChannel));
@@ -1887,6 +2023,12 @@ const TourListing = () => {
         searchId: hotel.searchId || hotel.search_id || meta.searchId,
         hotelSearchId:
           hotel.hotelSearchId || hotel.hotel_search_id || meta.hotelSearchId,
+        searchTracingKey:
+          hotel.searchTracingKey ||
+          hotel.search_tracing_key ||
+          hotel.roomsSearchTracingKey ||
+          hotel.TUI ||
+          meta.searchTracingKey,
         requestId: hotel.requestId || hotel.request_id || meta.requestId,
         hotelSearchKey:
           hotel.hotelSearchKey || hotel.hotel_search_key || meta.hotelSearchKey,
@@ -1936,6 +2078,7 @@ const TourListing = () => {
         setSocketSearchMeta({
           searchId: initCompleteMeta.searchId,
           hotelSearchId: initCompleteMeta.hotelSearchId,
+          searchTracingKey: initCompleteMeta.searchTracingKey,
         });
       }
 
@@ -1952,6 +2095,7 @@ const TourListing = () => {
         setSocketSearchMeta((prev) => ({
           searchId: payloadMeta.searchId || prev.searchId,
           hotelSearchId: payloadMeta.hotelSearchId || prev.hotelSearchId,
+          searchTracingKey: payloadMeta.searchTracingKey || prev.searchTracingKey,
         }));
       }
 
@@ -1985,7 +2129,75 @@ const TourListing = () => {
           firstResultWithMeta?.hotel_search_id ||
           nextResults.meta?.hotelSearchId ||
           "",
+        searchTracingKey:
+          firstResultWithMeta?.searchTracingKey ||
+          firstResultWithMeta?.search_tracing_key ||
+          firstResultWithMeta?.roomsSearchTracingKey ||
+          firstResultWithMeta?.TUI ||
+          nextResults.meta?.searchTracingKey ||
+          "",
       };
+      const sessionMeta = {
+        searchId:
+          initCompleteMeta.searchId ||
+          payloadMeta.searchId ||
+          resultMeta.searchId ||
+          "",
+        hotelSearchId:
+          initCompleteMeta.hotelSearchId ||
+          payloadMeta.hotelSearchId ||
+          resultMeta.hotelSearchId ||
+          "",
+        searchTracingKey:
+          initCompleteMeta.searchTracingKey ||
+          payloadMeta.searchTracingKey ||
+          resultMeta.searchTracingKey ||
+          "",
+      };
+
+      if (
+        !fromCache &&
+        typeof window !== "undefined" &&
+        (sessionMeta.searchId || sessionMeta.hotelSearchId || sessionMeta.searchTracingKey)
+      ) {
+        try {
+          const storedSearch = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+          const currentSearchContext = storedSearch ? JSON.parse(storedSearch) : {};
+          const data = getMessageData(payload);
+          const init = data?.init || data?.content?.init || payload?.init || currentSearchContext?.init;
+
+          if (!currentSearchContext?.channel || currentSearchContext.channel === hotelSearchChannel) {
+            window.sessionStorage.setItem(
+              HOTEL_SEARCH_SESSION_KEY,
+              JSON.stringify({
+                ...currentSearchContext,
+                channel: currentSearchContext?.channel || hotelSearchChannel,
+                searchId: sessionMeta.searchId || currentSearchContext?.searchId || "",
+                hotelSearchId:
+                  sessionMeta.hotelSearchId || currentSearchContext?.hotelSearchId || "",
+                searchTracingKey:
+                  sessionMeta.searchTracingKey || currentSearchContext?.searchTracingKey || "",
+                roomsSearchTracingKey:
+                  sessionMeta.searchTracingKey ||
+                  currentSearchContext?.roomsSearchTracingKey ||
+                  "",
+                TUI: sessionMeta.searchTracingKey || currentSearchContext?.TUI || "",
+                init,
+                initResponse:
+                  getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE"
+                    ? data
+                    : currentSearchContext?.initResponse,
+                initStatus:
+                  getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE"
+                    ? "complete"
+                    : currentSearchContext?.initStatus,
+              }),
+            );
+          }
+        } catch {
+          // Keep rendering even if session storage is unavailable.
+        }
+      }
 
       if (isFilterSearchPayloadReady(payload, nextResults.source) && filterMeta.searchId) {
         const nextMergedFilterPayloadKey = [
@@ -2015,12 +2227,13 @@ const TourListing = () => {
       }
 
       if (
-        (resultMeta.searchId || resultMeta.hotelSearchId) &&
+        (resultMeta.searchId || resultMeta.hotelSearchId || resultMeta.searchTracingKey) &&
         (!fromCache || !hotelSearchChannel)
       ) {
         setSocketSearchMeta((prev) => ({
           searchId: resultMeta.searchId || prev.searchId,
           hotelSearchId: resultMeta.hotelSearchId || prev.hotelSearchId,
+          searchTracingKey: resultMeta.searchTracingKey || prev.searchTracingKey,
         }));
       }
 
@@ -2048,7 +2261,10 @@ const TourListing = () => {
         return;
       }
 
-      normalizeHotelsInBatches(nextResults.hotels, nextResults.meta);
+      normalizeHotelsInBatches(nextResults.hotels, {
+        ...nextResults.meta,
+        ...resultMeta,
+      });
       hotelResultSourceRef.current = nextResults.source;
       setHotelResultSource(nextResults.source);
     };

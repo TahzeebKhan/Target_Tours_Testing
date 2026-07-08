@@ -1198,6 +1198,8 @@ const ReviewPage = () => {
         storedHotelSearch,
         storedHotelResults,
       });
+       console.log("firstRoom", firstRoom);
+       console.log("request5", request);
 
       const searchTracingKey = getFirstValue(
         firstRoom.roomsSearchTracingKey,
