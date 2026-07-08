@@ -1,7 +1,7 @@
 .searchResultsContainer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   position: sticky;
   top: var(--hotel-hero-sticky-offset, 342px);
   z-index: 120;
