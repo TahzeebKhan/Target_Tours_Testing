@@ -14,6 +14,7 @@ import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
 import { useAuth } from "@/app/context/AuthContext";
 import {
+  HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
   fetchHotelPricingDetails,
@@ -77,12 +78,30 @@ const readStoredHotelResults = () => {
   }
 };
 
+const readStoredHotelDetails = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
-  if (!value || typeof value !== "object" || depth > 6) return "";
+  if (!value || typeof value !== "object" || depth > 12) return "";
   if (seen.has(value)) return "";
   seen.add(value);
 
-  if (!Array.isArray(value) && value[key]) return value[key];
+  if (
+    !Array.isArray(value) &&
+    value[key] !== undefined &&
+    value[key] !== null &&
+    value[key] !== ""
+  ) {
+    return value[key];
+  }
 
   const entries = Array.isArray(value) ? value : Object.values(value);
   for (const entry of entries) {
@@ -101,6 +120,28 @@ const findFirstDeepValue = (value, keys = []) => {
 
   return "";
 };
+
+const HOTEL_SEARCH_TRACING_KEYS = [
+  "roomsSearchTracingKey",
+  "RoomsSearchTracingKey",
+  "searchTracingKey",
+  "SearchTracingKey",
+  "searchTracingkey",
+  "search_tracing_key",
+  "searchTracing",
+  "searchtracing",
+  "TUI",
+  "tui",
+];
+
+const HOTEL_ROOMS_SEARCH_ID_KEYS = [
+  "roomsSearchId",
+  "RoomsSearchId",
+  "searchId",
+  "SearchId",
+  "search_id",
+  "SearchID",
+];
 
 const getHotelInitData = ({
   request = {},
@@ -1113,7 +1154,7 @@ const ReviewPage = () => {
       );
       const storedHotelSearch = readStoredHotelSearch() || {};
       const storedHotelResults = readStoredHotelResults() || {};
-       console.log("storedHotelResults",storedHotelResults)
+      const storedHotelDetails = readStoredHotelDetails() || {};
       const checkInDate = pickApiDate(
         request.checkInDate,
         request.checkInRaw,
@@ -1141,6 +1182,8 @@ const ReviewPage = () => {
         firstRoom,
         selectedRooms,
         roomList,
+        bookingSession,
+        storedHotelDetails,
         init: request.init || storedHotelSearch.init,
         initResponse:
           request.initResponse ||
@@ -1159,8 +1202,17 @@ const ReviewPage = () => {
       const searchTracingKey = getFirstValue(
         firstRoom.roomsSearchTracingKey,
         firstRoom.searchTracingKey,
+        firstRoom.TUI,
         firstRoom.raw?.roomsSearchTracingKey,
         firstRoom.raw?.searchTracingKey,
+        firstRoom.raw?.TUI,
+        firstRoom.rawRecommendation?.roomsSearchTracingKey,
+        firstRoom.rawRecommendation?.searchTracingKey,
+        firstRoom.rawRecommendation?.TUI,
+        firstRoom.rawRoomGroup?.roomsSearchTracingKey,
+        firstRoom.rawRoomGroup?.searchTracingKey,
+        firstRoom.rawRoomGroup?.TUI,
+        findFirstDeepValue(firstRoom, HOTEL_SEARCH_TRACING_KEYS),
         request.roomsSearchTracingKey,
         request.searchTracingKey,
         request.TUI,
@@ -1172,25 +1224,24 @@ const ReviewPage = () => {
         storedHotelSearch.TUI,
         storedHotelSearch.tui,
         hotelInitData.searchTracingKey,
+        hotelInitData.SearchTracingKey,
         hotelInitData.searchTracingkey,
         hotelInitData.search_tracing_key,
-        findFirstDeepValue(initSearchContext, [
-          "roomsSearchTracingKey",
-          "RoomsSearchTracingKey",
-          "searchTracingKey",
-          "searchTracingkey",
-          "search_tracing_key",
-          "searchTracing",
-          "searchtracing",
-          "TUI",
-          "tui",
-        ]),
+        hotelInitData.TUI,
+        hotelInitData.tui,
+        findFirstDeepValue(storedHotelDetails, HOTEL_SEARCH_TRACING_KEYS),
+        findFirstDeepValue(initSearchContext, HOTEL_SEARCH_TRACING_KEYS),
       );
       const searchId = getFirstValue(
         firstRoom.roomsSearchId,
         firstRoom.searchId,
         firstRoom.raw?.roomsSearchId,
         firstRoom.raw?.searchId,
+        firstRoom.rawRecommendation?.roomsSearchId,
+        firstRoom.rawRecommendation?.searchId,
+        firstRoom.rawRoomGroup?.roomsSearchId,
+        firstRoom.rawRoomGroup?.searchId,
+        findFirstDeepValue(firstRoom, HOTEL_ROOMS_SEARCH_ID_KEYS),
         request.roomsSearchId,
         request.searchId,
         storedHotelSearch.roomsSearchId,
@@ -1198,14 +1249,8 @@ const ReviewPage = () => {
         hotelInitData.searchId,
         hotelInitData.SearchId,
         hotelInitData.search_id,
-        findFirstDeepValue(initSearchContext, [
-          "roomsSearchId",
-          "RoomsSearchId",
-          "searchId",
-          "SearchId",
-          "search_id",
-          "SearchID",
-        ]),
+        findFirstDeepValue(storedHotelDetails, HOTEL_ROOMS_SEARCH_ID_KEYS),
+        findFirstDeepValue(initSearchContext, HOTEL_ROOMS_SEARCH_ID_KEYS),
       );
       const hotelSearchId = getFirstValue(
         firstRoom.hotelSearchId,
@@ -1431,8 +1476,6 @@ const ReviewPage = () => {
       }
 
       const hotelPaymentResponse = await HotelPaymentStart(hotelPayment);
-
-      console.log("hotelPaymentResponse", hotelPaymentResponse);
 
       const finalConfirmPayload = {
         ...confirmPayload,

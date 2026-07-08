@@ -15,7 +15,7 @@ const ICONS = {
     phone: Phone,
     desk: Users,
     cleaning: Sparkles,
-    elevator: ArrowUpDown,   // ✅ FIXED
+    elevator: ArrowUpDown,
     shower: Droplet,
     hotwater: Flame,
     toiletries: Package,
@@ -25,9 +25,6 @@ const ICONS = {
     kids: Smile,
     game: Gamepad2,
 };
-
-
-
 
 const getAmenityIcon = (label = "") => {
     const normalized = label.toLowerCase();
@@ -42,15 +39,36 @@ const getAmenityIcon = (label = "") => {
     return "desk";
 };
 
+const getAmenityLabel = (amenity) => {
+    if (!amenity) return "";
+    if (typeof amenity === "string") return amenity;
+
+    return (
+        amenity.name ||
+        amenity.label ||
+        amenity.description ||
+        amenity.value ||
+        amenity.text ||
+        ""
+    );
+};
+
 const Amenities = ({ amenities = [] }) => {
-    const amenityItems = amenities.length
-        ? amenities.map((label) => ({ icon: getAmenityIcon(label), label }))
-        : [
-            { icon: "ac", label: "Air conditioning" },
-            { icon: "wifi", label: "Free WiFi" },
-            { icon: "parking", label: "Free Parking" },
-            { icon: "restaurant", label: "Restaurant" },
-        ];
+    const seenAmenities = new Set();
+    const amenityItems = (Array.isArray(amenities) ? amenities : [])
+        .map(getAmenityLabel)
+        .map((label) => String(label || "").trim())
+        .filter(Boolean)
+        .filter((label) => {
+            const key = label.toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (!key || seenAmenities.has(key)) return false;
+
+            seenAmenities.add(key);
+            return true;
+        })
+        .map((label) => ({ icon: getAmenityIcon(label), label }));
+
+    if (!amenityItems.length) return null;
 
     const amenitiesData = [
         {
@@ -69,7 +87,7 @@ const Amenities = ({ amenities = [] }) => {
                     <div className={styles.grid}>
                         {group.items.map((item) => {
                             const Icon = ICONS[item.icon];
-                            if (!Icon) return null; // 👈 safety
+                            if (!Icon) return null;
 
                             return (
                                 <div key={item.label} className={styles.item}>

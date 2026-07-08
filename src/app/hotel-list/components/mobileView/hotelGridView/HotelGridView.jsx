@@ -84,7 +84,7 @@ const HotelGridView = ({
             <div className={styles.gridCardImage}>
               <img
                 className={styles.ListViewCardImage}
-                src={item.image || "/hotelList/hotelCardImg.png"}
+                src={item.image || "/hotelList/hotelImg.jpg"}
                 alt={item.title || "Hotel"}
               />
               <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>

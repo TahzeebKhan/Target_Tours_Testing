@@ -295,6 +295,36 @@
 .priceContainer {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  min-width: 96px;
+  min-height: 54px;
+  justify-content: center;
+}
+
+.priceLoading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 92px;
+}
+
+.priceLoadingAmount,
+.priceLoadingMeta {
+  display: block;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #eceff3 0%, #f7f8fa 45%, #eceff3 100%);
+  background-size: 220% 100%;
+  animation: hotelSkeletonPulse 1.2s ease-in-out infinite;
+}
+
+.priceLoadingAmount {
+  width: 80px;
+  height: 30px;
+}
+
+.priceLoadingMeta {
+  width: 62px;
+  height: 12px;
 }
 
 .priceSec {

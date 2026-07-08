@@ -121,7 +121,7 @@ const AvailabilityComponent = ({
   const [roomQty, setRoomQty] = useState({});
   const [expandedFeatureRooms, setExpandedFeatureRooms] = useState({});
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
- console.log("roooms", rooms);
+
   const roomUnitMap = rooms.reduce((unitMap, room) => {
     unitMap[room.id] = getRoomUnitCount(room);
     return unitMap;

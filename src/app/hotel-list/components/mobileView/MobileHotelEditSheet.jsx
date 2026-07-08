@@ -289,6 +289,8 @@ export default function MobileHotelEditSheet({
                   boxRef={null}
                   anchorRef={destinationWrapRef}
                   heading="SUGGESTIONS"
+                  theme="light"
+                  style={{ width: "100%" }}
                   suggestions={hotelSuggestions.map((item) => ({
                     ...item,
                     label: item.label || item.value,
