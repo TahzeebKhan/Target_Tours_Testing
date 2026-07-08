@@ -245,7 +245,7 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/hotelList/hotelCardImg.png";
+  return typeof image === "string" && image ? image : "/images/hotelImg.jpg";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
@@ -804,6 +804,8 @@ const PRICE_FILTER_BUCKETS = {
 const TEXT_FILTER_NEEDLES = {
   suggested: {
     lastMinuteDeals: ["deal", "discount"],
+    fiveStar: ["5 star", "five star", "5-star", "five-star"],
+    fourStar: ["4 star", "four star", "4-star", "four-star"],
     breakfastIncluded: ["breakfast"],
     oneClickRewards: ["reward"],
   },
@@ -923,7 +925,20 @@ export const matchesHotelFilters = (hotel, filters = {}) => {
     if (!matchesGuestRating) return false;
   }
 
+  if (hasSelectedValues(filters.suggested)) {
+    const matchesSuggested = selectedKeys(filters.suggested).some((key) => {
+      if (key === "fiveStar") return rating >= 5;
+      if (key === "fourStar") return rating >= 4;
+
+      const needles = TEXT_FILTER_NEEDLES.suggested?.[key] || [key];
+      return hasText(hotel, ...needles);
+    });
+
+    if (!matchesSuggested) return false;
+  }
+
   return Object.keys(TEXT_FILTER_NEEDLES).every((group) => {
+    if (group === "suggested") return true;
     if (!hasSelectedValues(filters[group])) return true;
     return matchesAnyTextFilter(hotel, group, selectedKeys(filters[group]));
   });

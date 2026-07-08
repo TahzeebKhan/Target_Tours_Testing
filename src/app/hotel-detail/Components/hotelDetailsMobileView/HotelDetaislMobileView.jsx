@@ -313,11 +313,23 @@ const HotelDetaislMobileView = () => {
             selectedRoomEntries[0]?.room?.raw?.roomsSearchTracingKey,
             selectedRoomEntries[0]?.room?.raw?.searchTracingKey,
             selectedRoomEntries[0]?.room?.raw?.TUI,
+            selectedRoomEntries[0]?.room?.rawRecommendation?.roomsSearchTracingKey,
+            selectedRoomEntries[0]?.room?.rawRecommendation?.searchTracingKey,
+            selectedRoomEntries[0]?.room?.rawRecommendation?.TUI,
+            selectedRoomEntries[0]?.room?.rawRoomGroup?.roomsSearchTracingKey,
+            selectedRoomEntries[0]?.room?.rawRoomGroup?.searchTracingKey,
+            selectedRoomEntries[0]?.room?.rawRoomGroup?.TUI,
+            findFirstDeepValue(selectedRoomEntries[0]?.room),
+            findFirstDeepValue(selectedRoomEntries[0]?.room?.raw),
+            findFirstDeepValue(selectedRoomEntries[0]?.room?.rawRecommendation),
+            findFirstDeepValue(selectedRoomEntries[0]?.room?.rawRoomGroup),
+            findFirstDeepValue(selectedRoomEntries[0]?.room?.rawCategoryRooms),
             hotelDetail?.roomsSearchTracingKey,
             hotelDetail?.request?.roomsSearchTracingKey,
             hotelDetail?.request?.searchTracingKey,
             hotelDetail?.request?.TUI,
             hotelDetail?.request?.tui,
+            findFirstDeepValue(hotelDetail),
             storedHotelSearch.roomsSearchTracingKey,
             storedHotelSearch.searchTracingKey,
             storedHotelSearch.TUI,
@@ -328,6 +340,30 @@ const HotelDetaislMobileView = () => {
             findFirstDeepValue(storedHotelSearch.initResponse),
             findFirstDeepValue(storedHotelSearch),
         );
+        const roomsSearchId = getFirstValue(
+            selectedRoomEntries[0]?.room?.roomsSearchId,
+            selectedRoomEntries[0]?.room?.raw?.roomsSearchId,
+            selectedRoomEntries[0]?.room?.rawRecommendation?.roomsSearchId,
+            selectedRoomEntries[0]?.room?.rawRoomGroup?.roomsSearchId,
+            hotelDetail?.roomsSearchId,
+            hotelDetail?.request?.roomsSearchId,
+            hotelDetail?.request?.searchId,
+            storedHotelSearch.roomsSearchId,
+            storedHotelSearch.searchId,
+            searchParams.get("searchId"),
+        );
+
+        if (!searchTracingKey || !roomsSearchId) {
+            const missingParts = [
+                !searchTracingKey ? "TUI/search tracing key" : "",
+                !roomsSearchId ? "SearchId" : "",
+            ].filter(Boolean);
+
+            setSelectionMessage(`Hotel search session is missing ${missingParts.join(" and ")}. Please search again.`);
+            sectionRefs.Rooms.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+
         const selectedRooms = selectedRoomEntries.map(({ room, qty }) => ({
             id: room.id,
             title: room.title,
@@ -348,14 +384,35 @@ const HotelDetaislMobileView = () => {
             recommendationId: room.recommendationId,
             supplierName: room.supplierName,
             guestCode: room.guestCode,
-            roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
+            roomsSearchId: getFirstValue(
+                room.roomsSearchId,
+                room.raw?.roomsSearchId,
+                room.rawRecommendation?.roomsSearchId,
+                room.rawRoomGroup?.roomsSearchId,
+                roomsSearchId,
+            ),
             roomsSearchTracingKey: getFirstValue(
                 room.roomsSearchTracingKey,
+                room.raw?.roomsSearchTracingKey,
+                room.rawRecommendation?.roomsSearchTracingKey,
+                room.rawRoomGroup?.roomsSearchTracingKey,
                 hotelDetail?.roomsSearchTracingKey,
                 searchTracingKey,
             ),
-            searchTracingKey: getFirstValue(room.searchTracingKey, searchTracingKey),
-            TUI: getFirstValue(room.TUI, searchTracingKey),
+            searchTracingKey: getFirstValue(
+                room.searchTracingKey,
+                room.raw?.searchTracingKey,
+                room.rawRecommendation?.searchTracingKey,
+                room.rawRoomGroup?.searchTracingKey,
+                searchTracingKey,
+            ),
+            TUI: getFirstValue(
+                room.TUI,
+                room.raw?.TUI,
+                room.rawRecommendation?.TUI,
+                room.rawRoomGroup?.TUI,
+                searchTracingKey,
+            ),
             occupancies: room.occupancies,
             raw: room.raw,
             rawRecommendation: room.rawRecommendation,
@@ -384,15 +441,7 @@ const HotelDetaislMobileView = () => {
                     storedHotelSearch.hotel_search_id,
                     searchParams.get("hotelSearchId"),
                 ),
-                roomsSearchId: getFirstValue(
-                    selectedRooms[0]?.roomsSearchId,
-                    hotelDetail?.roomsSearchId,
-                    hotelDetail?.request?.roomsSearchId,
-                    hotelDetail?.request?.searchId,
-                    storedHotelSearch.roomsSearchId,
-                    storedHotelSearch.searchId,
-                    searchParams.get("searchId"),
-                ),
+                roomsSearchId,
                 roomsSearchTracingKey: getFirstValue(
                     selectedRooms[0]?.roomsSearchTracingKey,
                     hotelDetail?.roomsSearchTracingKey,

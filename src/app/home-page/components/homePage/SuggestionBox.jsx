@@ -8,6 +8,9 @@ const SuggestionBox = ({
   heading = "RECENT SEARCH",
   suggestions = [],
   onSelect,
+  className = "",
+  style = {},
+  theme = "dark",
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [placement, setPlacement] = useState("below");
@@ -96,10 +99,10 @@ const SuggestionBox = ({
         }
         boxRef.current = node;
       }}
-      className={`${styles.suggestionBox} ${
+      className={`${styles.suggestionBox} ${theme === "light" ? styles.light : ""} ${
         placement === "above" ? styles.above : styles.below
-      }`}
-      style={{ maxHeight: `${maxHeight}px` }}
+      } ${className}`.trim()}
+      style={{ maxHeight: `${maxHeight}px`, ...style }}
       role="listbox"
     >
       <div className={styles.recentSearchHeading}>{heading}</div>
