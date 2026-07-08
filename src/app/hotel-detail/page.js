@@ -63,41 +63,6 @@ const getFirstValue = (...values) =>
       !isPlaceholderDate(value),
   ) || "";
 
-const HOTEL_SEARCH_TRACING_KEYS = [
-  "roomsSearchTracingKey",
-  "RoomsSearchTracingKey",
-  "searchTracingKey",
-  "SearchTracingKey",
-  "searchTracingkey",
-  "search_tracing_key",
-  "searchTracing",
-  "searchtracing",
-  "TUI",
-  "tui",
-];
-
-const findFirstDeepValue = (source, keys = HOTEL_SEARCH_TRACING_KEYS, seen = new Set()) => {
-  if (!source || typeof source !== "object" || seen.has(source)) return "";
-
-  seen.add(source);
-
-  for (const key of keys) {
-    const value = source[key];
-    if (value !== undefined && value !== null && value !== "") {
-      return value;
-    }
-  }
-
-  for (const value of Object.values(source)) {
-    if (value && typeof value === "object") {
-      const deepValue = findFirstDeepValue(value, keys, seen);
-      if (deepValue) return deepValue;
-    }
-  }
-
-  return "";
-};
-
 const getNightCount = (checkInValue, checkOutValue) => {
   const checkInDate = new Date(checkInValue);
   const checkOutDate = new Date(checkOutValue);
@@ -258,6 +223,14 @@ const buildHotelAvailabilityPayload = ({
     searchRequest.geoCode ||
     {};
   const geoCode = getLocationGeoCode(sourceGeoCode, location, locationPayload?.coordinates);
+  const destinationCountryCode = getFirstValue(
+    sourcePayload.destinationCountryCode,
+    searchRequest.destinationCountryCode,
+    searchRequest.searchContext?.destinationCountryCode,
+    storedHotelSearch.destinationCountryCode,
+    locationPayload?.country,
+    location.country,
+  );
 
   return {
     ...(locationPayload ? { locations: [locationPayload] } : {}),
@@ -272,6 +245,7 @@ const buildHotelAvailabilityPayload = ({
         locationPayload?.id,
       ),
     ),
+    destinationCountryCode,
     currency: sourcePayload.currency || "INR",
     culture: sourcePayload.culture || "en-US",
     checkIn: toHotelAvailabilityDate(selection.checkIn),
@@ -326,26 +300,7 @@ const updateHotelDetailUrlParams = (selection, response) => {
   window.history.replaceState(window.history.state, "", url.toString());
 };
 
-const DEFAULT_ROOM_LIST = [
-  {
-    id: "deluxe_ac_room",
-    title: "Deluxe Private AC Room with Ensuite Bathroom",
-    image: "/images/hotelArt1.png",
-    pricePerNight: 1397.86,
-    quantity: 1,
-    maxQuantity: 5,
-    nights: 8,
-  },
-  {
-    id: "premium_ac_room",
-    title: "Premium Private AC Room with Ensuite Bathroom",
-    image: "/images/hotelArt1.png",
-    pricePerNight: 1397.86,
-    quantity: 1,
-    maxQuantity: 5,
-    nights: 8,
-  },
-];
+const DEFAULT_ROOM_LIST = [];
 
 const Page = () => {
   const { hotelDetail, roomsLoading, refreshHotelAvailability } = useHotelDetailData();
@@ -365,6 +320,13 @@ const Page = () => {
   const storedHotelSearch = useMemo(() => readStoredHotelSearch() || {}, []);
   const urlSearchValues = useMemo(
     () => ({
+      searchId: getSearchParamValue("searchId"),
+      hotelSearchId: getSearchParamValue("hotelSearchId"),
+      searchTracingKey: getSearchParamValue("searchTracingKey"),
+      roomsSearchTracingKey: getSearchParamValue("roomsSearchTracingKey"),
+      TUI: getSearchParamValue("TUI"),
+      hotelId: getSearchParamValue("hotelId"),
+      priceProvider: getSearchParamValue("priceProvider"),
       checkIn: getSearchParamValue("checkIn"),
       checkOut: getSearchParamValue("checkOut"),
       rooms: getSearchParamValue("rooms"),
@@ -378,27 +340,17 @@ const Page = () => {
     () =>
       getFirstValue(
         urlSearchValues.checkIn,
-        searchRequest.checkInDate,
-        searchRequest.checkInRaw,
         searchRequest.checkIn,
-        searchRequest.check_in,
-        storedHotelSearch.checkIn,
-        storedHotelSearch.initPayload?.checkIn,
       ),
-    [searchRequest, storedHotelSearch, urlSearchValues.checkIn],
+    [searchRequest, urlSearchValues.checkIn],
   );
   const apiCheckOut = useMemo(
     () =>
       getFirstValue(
         urlSearchValues.checkOut,
-        searchRequest.checkOutDate,
-        searchRequest.checkOutRaw,
-        searchRequest.checkOut,
-        searchRequest.check_out,
-        storedHotelSearch.checkOut,
-        storedHotelSearch.initPayload?.checkOut,
+        searchRequest.checkOut
       ),
-    [searchRequest, storedHotelSearch, urlSearchValues.checkOut],
+    [searchRequest, urlSearchValues.checkOut],
   );
   const rooms =
     urlSearchValues.rooms ||
@@ -603,26 +555,16 @@ const Page = () => {
     if (typeof window === "undefined") return;
 
     const searchTracingKey = getFirstValue(
+      urlSearchValues.roomsSearchTracingKey,
+      urlSearchValues.searchTracingKey,
+      urlSearchValues.TUI,
       selectedRooms[0]?.roomsSearchTracingKey,
       selectedRooms[0]?.searchTracingKey,
       selectedRooms[0]?.TUI,
-      selectedRooms[0]?.raw?.roomsSearchTracingKey,
-      selectedRooms[0]?.raw?.searchTracingKey,
-      selectedRooms[0]?.raw?.TUI,
       hotelDetail?.roomsSearchTracingKey,
       searchRequest.roomsSearchTracingKey,
       searchRequest.searchTracingKey,
       searchRequest.TUI,
-      searchRequest.tui,
-      storedHotelSearch.roomsSearchTracingKey,
-      storedHotelSearch.searchTracingKey,
-      storedHotelSearch.TUI,
-      storedHotelSearch.tui,
-      getSearchParamValue("searchTracingKey"),
-      getSearchParamValue("TUI"),
-      getSearchParamValue("tui"),
-      findFirstDeepValue(storedHotelSearch.initResponse),
-      findFirstDeepValue(storedHotelSearch),
     );
     const roomsWithTracingKey = selectedRooms.map((room) => ({
       ...room,
@@ -644,20 +586,19 @@ const Page = () => {
         ...searchRequest,
         searchContext: storedHotelSearch,
         initResponse: storedHotelSearch.initResponse,
-        hotelSearchId: getFirstValue(
-          searchRequest.hotelSearchId,
-          storedHotelSearch.hotelSearchId,
-          storedHotelSearch.hotel_search_id,
-          getSearchParamValue("hotelSearchId"),
+        searchId: getFirstValue(urlSearchValues.searchId, searchRequest.searchId),
+        hotelId: getFirstValue(urlSearchValues.hotelId, searchRequest.hotelId, hotelDetail?.id),
+        hotelSearchId: getFirstValue(urlSearchValues.hotelSearchId, searchRequest.hotelSearchId),
+        priceProvider: getFirstValue(
+          urlSearchValues.priceProvider,
+          searchRequest.priceProvider,
         ),
         roomsSearchId:
           selectedRooms[0]?.roomsSearchId ||
           hotelDetail?.roomsSearchId ||
           searchRequest.roomsSearchId ||
+          urlSearchValues.searchId ||
           searchRequest.searchId ||
-          storedHotelSearch.roomsSearchId ||
-          storedHotelSearch.searchId ||
-          getSearchParamValue("searchId") ||
           "",
         roomsSearchTracingKey: searchTracingKey,
         searchTracingKey,
@@ -691,6 +632,7 @@ const Page = () => {
     searchRequest,
     selectedRooms,
     storedHotelSearch,
+    urlSearchValues,
   ]);
 
   const handleBookNow = useCallback(() => {
@@ -702,6 +644,7 @@ const Page = () => {
   }, [isBookingActionLoading, saveBookingSession]);
 
   const handleSelectRoom = useCallback(async (selection) => {
+     console.log("selection4", selection);
     if (isBookingActionLoading) return;
 
     if (!selection?.checkIn || !selection?.checkOut) {
@@ -813,14 +756,16 @@ const Page = () => {
           guestCode: room.guestCode,
           roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
           roomsSearchTracingKey: getFirstValue(
+            urlSearchValues.roomsSearchTracingKey,
+            urlSearchValues.searchTracingKey,
+            urlSearchValues.TUI,
             room.roomsSearchTracingKey,
+            room.searchTracingKey,
+            room.TUI,
             hotelDetail?.roomsSearchTracingKey,
             searchRequest.roomsSearchTracingKey,
             searchRequest.searchTracingKey,
-            storedHotelSearch.roomsSearchTracingKey,
-            storedHotelSearch.searchTracingKey,
-            findFirstDeepValue(storedHotelSearch.initResponse),
-            findFirstDeepValue(storedHotelSearch),
+            searchRequest.TUI,
           ),
           occupancies: room.occupancies,
           raw: room.raw,
@@ -838,7 +783,7 @@ const Page = () => {
     hotelDetail?.roomsSearchTracingKey,
     nights,
     searchRequest,
-    storedHotelSearch,
+    urlSearchValues,
   ]);
   const removeRoom = useCallback((id) => {
     setRoomList((prev) => {
@@ -902,15 +847,6 @@ const Page = () => {
       mediaQuery.removeEventListener("change", syncRoomSearchCard);
     };
   }, []);
-
-
-
-
-
-
-
-
-
   return (
     <>
       {/* <Tabs
