@@ -1004,7 +1004,7 @@ const normalizeHotelFacilities = (hotel = {}) => {
   }));
 };
 
-const HotelFacilities = ({ facilities = [] }) => {
+export const HotelFacilities = ({ facilities = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasMoreFacilities = facilities.length > 6;
   const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);

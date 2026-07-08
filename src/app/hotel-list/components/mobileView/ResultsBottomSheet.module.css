@@ -12,6 +12,10 @@
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid #E4E6E8;
+  position: sticky;
+  top: 72px;
+  z-index: 30;
+  background: #fff;
 
 }
 
@@ -70,4 +74,10 @@
   height: auto;
   overflow: visible;
   padding: 16px;
+}
+
+@media (max-width: 430px) {
+  .headerCont {
+    top: 70px;
+  }
 }

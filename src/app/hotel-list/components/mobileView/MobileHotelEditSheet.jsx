@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus, X } from "lucide-react";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
+import { fetchHotelSearchSuggestions } from "@/shared/services/hotelSearch";
 import styles from "./MobileHotelEditSheet.module.css";
 
 const toDateInputValue = (value = "") => {
@@ -115,6 +118,34 @@ export default function MobileHotelEditSheet({
       roomDetails,
     };
   });
+  const destinationWrapRef = useRef(null);
+  const [destinationQuery, setDestinationQuery] = useState(
+    initialValues.city || "",
+  );
+  const [selectedDestination, setSelectedDestination] = useState(
+    initialValues.destination || null,
+  );
+  const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false);
+
+  const debouncedDestinationQuery = useMemo(
+    () => String(destinationQuery || "").trim(),
+    [destinationQuery],
+  );
+
+  const shouldFetchDestinationSuggestions = debouncedDestinationQuery.length >= 2;
+
+  const { data: hotelSuggestions = [] } = useQuery({
+    queryKey: [
+      "mobile-hotel-edit-destination-suggestions",
+      debouncedDestinationQuery.toLowerCase(),
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ],
+    queryFn: () => fetchHotelSearchSuggestions(debouncedDestinationQuery),
+    enabled: open && showDestinationSuggestions && shouldFetchDestinationSuggestions,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+  });
 
   useLockBodyScroll(open);
 
@@ -131,6 +162,9 @@ export default function MobileHotelEditSheet({
         children: totals.children,
         roomDetails,
       });
+      setDestinationQuery(initialValues.city || "");
+      setSelectedDestination(initialValues.destination || null);
+      setShowDestinationSuggestions(false);
     }
   }, [initialValues, open]);
 
@@ -218,6 +252,7 @@ export default function MobileHotelEditSheet({
       children: nextTotals.children,
       childAges: roomDetails.flatMap((room) => room.childAges),
       roomDetails,
+      destination: selectedDestination,
     });
   };
 
@@ -233,14 +268,45 @@ export default function MobileHotelEditSheet({
         </header>
 
         <div className={styles.body}>
-          <label className={styles.field}>
+          <div className={styles.field} ref={destinationWrapRef}>
             <span>Destination</span>
             <input
-              value={form.city}
-              onChange={(event) => setValue("city", event.target.value)}
+              value={destinationQuery}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                setDestinationQuery(nextValue);
+                setValue("city", nextValue);
+                setSelectedDestination(null);
+                setShowDestinationSuggestions(true);
+              }}
+              onFocus={() => setShowDestinationSuggestions(true)}
               placeholder="City"
             />
-          </label>
+            {showDestinationSuggestions &&
+              shouldFetchDestinationSuggestions &&
+              hotelSuggestions.length > 0 && (
+                <SuggestionBox
+                  boxRef={null}
+                  anchorRef={destinationWrapRef}
+                  heading="SUGGESTIONS"
+                  suggestions={hotelSuggestions.map((item) => ({
+                    ...item,
+                    label: item.label || item.value,
+                    detail: item.detail,
+                    code: item.code || item.locationId || item.id,
+                    value: item.value || item.label,
+                    hotelLocation: item,
+                  }))}
+                  onSelect={(item) => {
+                    const nextLabel = item.value || item.label || "";
+                    setDestinationQuery(nextLabel);
+                    setValue("city", nextLabel);
+                    setSelectedDestination(item.hotelLocation || item);
+                    setShowDestinationSuggestions(false);
+                  }}
+                />
+              )}
+          </div>
 
           <div className={styles.dateGrid}>
             <label className={styles.field}>

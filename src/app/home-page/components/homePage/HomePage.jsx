@@ -1412,46 +1412,52 @@ const HomePage = ({
         const adults = roomTotals.adults;
         const children = roomTotals.children;
         const rooms = roomPayloads.length;
-        const geoCode = {
-          lat: Number(hotelLocation?.geoCode?.lat),
-          long: Number(hotelLocation?.geoCode?.long),
-        };
-        const hasGeoCode = Number.isFinite(geoCode.lat) && Number.isFinite(geoCode.long);
-        const locationPayload = hotelLocation?.raw || {
-          id: hotelLocation?.locationId || toCode || "",
-          name: hotelLocation?.label || hotelLocation?.value || to,
-          fullName:
-            hotelLocation?.detail ||
+      const geoCode = {
+        lat: Number(hotelLocation?.geoCode?.lat),
+        long: Number(hotelLocation?.geoCode?.long),
+      };
+      const hasGeoCode = Number.isFinite(geoCode.lat) && Number.isFinite(geoCode.long);
+      const destinationCountryCode =
+        hotelLocation?.country ||
+        hotelLocation?.countryCode ||
+        hotelLocation?.raw?.country ||
+        hotelLocation?.raw?.countryCode ||
+        "";
+      const locationPayload = hotelLocation?.raw || {
+        id: hotelLocation?.locationId || toCode || "",
+        name: hotelLocation?.label || hotelLocation?.value || to,
+        fullName:
+          hotelLocation?.detail ||
             hotelLocation?.label ||
             hotelLocation?.value ||
             to,
           code: null,
-          type: hotelLocation?.type || "city",
-          city: null,
-          state: hotelLocation?.state || "",
-          country: hotelLocation?.country || "IN",
-          score: 0,
-          referenceId: null,
-          ...(hasGeoCode ? { coordinates: geoCode } : {}),
-        };
-        const initPayload = {
+        type: hotelLocation?.type || "city",
+        city: null,
+        state: hotelLocation?.state || "",
+        country: destinationCountryCode,
+        score: 0,
+        referenceId: null,
+        ...(hasGeoCode ? { coordinates: geoCode } : {}),
+      };
+      const initPayload = {
           domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
           locations: [locationPayload],
           channel,
           ...(hasGeoCode ? { geoCode } : {}),
           locationId: hotelLocation?.locationId || toCode || "",
-          currency: "INR",
-          culture: "en-US",
-          checkIn: formatHotelApiDate(hotelStartDate),
-          checkOut: formatHotelApiDate(hotelEndDate),
-          rooms: roomPayloads,
-          agentCode: "14005",
-          destinationCountryCode: hotelLocation?.country || "IN",
-          nationality: "IN",
-          countryOfResidence: "IN",
-          channelId: "b2bIndiaDeals",
-          affiliateRegion: "B2B_India",
-          segmentId: "",
+        currency: "INR",
+        culture: "en-US",
+        checkIn: formatHotelApiDate(hotelStartDate),
+        checkOut: formatHotelApiDate(hotelEndDate),
+        rooms: roomPayloads,
+        agentCode: "14005",
+        destinationCountryCode,
+        nationality: "IN",
+        countryOfResidence: "IN",
+        channelId: "b2bIndiaDeals",
+        affiliateRegion: "B2B_India",
+        segmentId: "",
           companyId: "1",
           gstPercentage: 0,
           tdsPercentage: 0,
@@ -1499,8 +1505,8 @@ const HomePage = ({
         if (hotelLocation?.locationId || toCode) {
           params.set("locationId", hotelLocation?.locationId || toCode);
         }
-        if (hotelLocation?.country) {
-          params.set("country", hotelLocation.country);
+        if (destinationCountryCode) {
+          params.set("country", destinationCountryCode);
         }
         if (hotelLocation?.state) {
           params.set("state", hotelLocation.state);

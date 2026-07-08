@@ -844,49 +844,6 @@ const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
 const INITIAL_VIRTUAL_ITEM_COUNT = 24;
 
-const STATIC_HOTEL_RESULTS = [
-  {
-    id: "static-grand-alpine",
-    name: "Grand Alpine Retreat",
-    address: "12 Lakeview Road",
-    city: "Banff",
-    country: "Canada",
-    image: "/hotelList/hotelCardImg.png",
-    price: 66945,
-    rating: 5,
-    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
-    freeCancellation: true,
-    freeBreakfast: true,
-    propertyType: "Hotel",
-  },
-  {
-    id: "static-mountain-hideaway",
-    name: "Mountain Hideaway Inn",
-    address: "456 Summit Road",
-    city: "Canmore",
-    country: "Canada",
-    image: "/hotelList/nextTrip1.png",
-    price: 55300,
-    rating: 4,
-    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
-    freeCancellation: true,
-    propertyType: "Resort",
-  },
-  {
-    id: "static-sunny-coast",
-    name: "Sunny Coast Resort",
-    address: "123 Ocean Drive",
-    city: "Vancouver",
-    country: "Canada",
-    image: "/hotelList/nextTrip2.png",
-    price: 85500,
-    rating: 4,
-    facilities: ["Air conditioning", "Wifi", "Kitchen", "Pool", "Mixer"],
-    freeBreakfast: true,
-    propertyType: "Resort",
-  },
-];
-
 export const getHotelDetailUrl = ({
   hotelId,
   searchId,
@@ -1358,7 +1315,7 @@ const normalizeHotelFacilities = (hotel = {}) => {
   }));
 };
 
-const HotelFacilities = ({ facilities = [] }) => {
+export const HotelFacilities = ({ facilities = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasMoreFacilities = facilities.length > 6;
   const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);

@@ -168,6 +168,9 @@ const createHotelSearchContextFromUrl = (channel) => {
   const rooms = buildRoomsFromUrlParams(params);
   const totals = getHotelRoomTotals(rooms);
   const locationId = params.get("locationId") || "";
+  const lat = Number(params.get("lat"));
+  const long = Number(params.get("long"));
+  const hasGeoCode = Number.isFinite(lat) && Number.isFinite(long);
   const location = {
     id: locationId,
     locationId,
@@ -176,7 +179,7 @@ const createHotelSearchContextFromUrl = (channel) => {
     detail: city,
     country: params.get("country") || "IN",
     type: "city",
-    geoCode: {},
+    ...(hasGeoCode ? { geoCode: { lat, long } } : {}),
   };
   const locationPayload = {
     id: locationId,
@@ -189,6 +192,7 @@ const createHotelSearchContextFromUrl = (channel) => {
     country: params.get("country") || "IN",
     score: 0,
     referenceId: null,
+    ...(hasGeoCode ? { coordinates: { lat, long } } : {}),
   };
   const initPayload = {
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
@@ -201,6 +205,7 @@ const createHotelSearchContextFromUrl = (channel) => {
     checkOut: normalizeHotelApiDateFromUrl(checkOut),
     rooms,
     agentCode: "14005",
+    ...(hasGeoCode ? { geoCode: { lat, long } } : {}),
     destinationCountryCode: location.country,
     nationality: "IN",
     countryOfResidence: "IN",
@@ -842,6 +847,12 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
       };
       const hasGeoCode =
         Number.isFinite(geoCode.lat) && Number.isFinite(geoCode.long);
+      const destinationCountryCode =
+        hotelLocation?.country ||
+        hotelLocation?.countryCode ||
+        hotelLocation?.raw?.country ||
+        hotelLocation?.raw?.countryCode ||
+        "";
       const locationPayload = hotelLocation?.raw || {
         id: hotelLocation?.locationId || toCode || "",
         name: hotelLocation?.label || hotelLocation?.value || from,
@@ -854,7 +865,7 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
         type: hotelLocation?.type || "city",
         city: null,
         state: hotelLocation?.state || "",
-        country: hotelLocation?.country || "IN",
+        country: destinationCountryCode,
         score: 0,
         referenceId: null,
         ...(hasGeoCode ? { coordinates: geoCode } : {}),
@@ -871,7 +882,7 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
         checkOut: formatHotelApiDate(hotelEndDate),
         rooms: roomPayloads,
         agentCode: "14005",
-        destinationCountryCode: hotelLocation?.country || "IN",
+        destinationCountryCode,
         nationality: "IN",
         countryOfResidence: "IN",
         channelId: "b2bIndiaDeals",
@@ -932,8 +943,8 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
       if (hotelLocation?.locationId || toCode) {
         params.set("locationId", hotelLocation?.locationId || toCode);
       }
-      if (hotelLocation?.country) {
-        params.set("country", hotelLocation.country);
+      if (destinationCountryCode) {
+        params.set("country", destinationCountryCode);
       }
       if (hotelLocation?.state) {
         params.set("state", hotelLocation.state);

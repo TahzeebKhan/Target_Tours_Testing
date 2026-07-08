@@ -102,6 +102,30 @@ const getRoomDetailsFromParams = (searchParams) => {
   });
 };
 
+const readStoredHotelSearch = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const formatHotelApiDate = (value) => {
+  if (!value) return "";
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) return "";
+
+  const day = String(parsedDate.getDate()).padStart(2, "0");
+  const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+  const year = parsedDate.getFullYear();
+
+  return `${month}/${day}/${year}`;
+};
+
 const MobileHotelDetails = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -186,6 +210,14 @@ const MobileHotelDetails = () => {
     const city = String(form.city || searchLocationLabel || "").trim();
     const checkIn = String(form.checkIn || "").trim();
     const checkOut = String(form.checkOut || "").trim();
+    const storedSearch = readStoredHotelSearch() || {};
+    const storedInitPayload = storedSearch.initPayload || {};
+    const storedLocation = storedSearch.location || {};
+    const fallbackLocationPayload =
+      Array.isArray(storedInitPayload.locations) && storedInitPayload.locations.length
+        ? storedInitPayload.locations[0]
+        : {};
+    const selectedDestination = form.destination || null;
     const roomDetails = Array.isArray(form.roomDetails)
       ? form.roomDetails.map((room) => ({
           adults: Math.max(1, Number(room.adults || 1)),
@@ -222,6 +254,58 @@ const MobileHotelDetails = () => {
 
     const channel = createHotelSearchChannel();
     const nextParams = new URLSearchParams(searchParams.toString());
+    const locationId =
+      String(
+        selectedDestination?.locationId ||
+          selectedDestination?.id ||
+          selectedDestination?.raw?.locationId ||
+          selectedDestination?.raw?.id ||
+          searchParams.get("locationId") ||
+          storedInitPayload.locationId ||
+          storedLocation.id ||
+          storedLocation.locationId ||
+          fallbackLocationPayload.id ||
+          fallbackLocationPayload.locationId ||
+          "",
+      ).trim();
+    const destinationCountryCode = String(
+      selectedDestination?.country ||
+        selectedDestination?.raw?.country ||
+        selectedDestination?.countryCode ||
+        selectedDestination?.raw?.countryCode ||
+        searchParams.get("country") ||
+        storedInitPayload.destinationCountryCode ||
+        storedLocation.country ||
+        fallbackLocationPayload.country ||
+        "IN",
+    ).trim();
+    const state = String(
+      selectedDestination?.state ||
+        selectedDestination?.raw?.state ||
+        searchParams.get("state") ||
+        storedLocation.state ||
+        fallbackLocationPayload.state ||
+        "",
+    ).trim();
+    const geoCode =
+      selectedDestination?.geoCode ||
+      selectedDestination?.raw?.geoCode ||
+      selectedDestination?.coordinates ||
+      selectedDestination?.raw?.coordinates ||
+      storedInitPayload.geoCode ||
+      storedLocation.geoCode ||
+      storedLocation.coordinates ||
+      fallbackLocationPayload.geoCode ||
+      fallbackLocationPayload.coordinates ||
+      {};
+    const roomPayloads = roomDetails.map((room) => ({
+      adults: String(Math.max(1, Number(room.adults || 1))),
+      children: String(Math.max(0, Number(room.children || 0))),
+      childAges: Array.isArray(room.childAges)
+        ? room.childAges.map((age) => String(age || "").trim())
+        : [],
+    }));
+
     nextParams.set("city", city);
     nextParams.set("checkIn", checkIn);
     nextParams.set("checkOut", checkOut);
@@ -229,6 +313,28 @@ const MobileHotelDetails = () => {
     nextParams.set("rooms", String(rooms));
     nextParams.set("adults", String(adults));
     nextParams.set("children", String(children));
+    if (locationId) {
+      nextParams.set("locationId", locationId);
+    } else {
+      nextParams.delete("locationId");
+    }
+    if (destinationCountryCode) {
+      nextParams.set("country", destinationCountryCode);
+    } else {
+      nextParams.delete("country");
+    }
+    if (state) {
+      nextParams.set("state", state);
+    } else {
+      nextParams.delete("state");
+    }
+    if (Number.isFinite(Number(geoCode.lat)) && Number.isFinite(Number(geoCode.long))) {
+      nextParams.set("lat", String(geoCode.lat));
+      nextParams.set("long", String(geoCode.long));
+    } else {
+      nextParams.delete("lat");
+      nextParams.delete("long");
+    }
     if (roomDetails.length) {
       nextParams.set(
         "roomAdults",
@@ -250,9 +356,116 @@ const MobileHotelDetails = () => {
     nextParams.delete("searchId");
     nextParams.delete("hotelSearchId");
 
+    const nextSearchContext = {
+      ...storedSearch,
+      channel,
+      city,
+      checkIn,
+      checkOut,
+      rooms: roomDetails.length,
+      adults,
+      children,
+      childAges,
+      location: {
+        ...storedLocation,
+        ...fallbackLocationPayload,
+        ...(selectedDestination
+          ? {
+              id:
+                selectedDestination?.locationId ||
+                selectedDestination?.id ||
+                selectedDestination?.raw?.locationId ||
+                selectedDestination?.raw?.id ||
+                "",
+              locationId:
+                selectedDestination?.locationId ||
+                selectedDestination?.id ||
+                selectedDestination?.raw?.locationId ||
+                selectedDestination?.raw?.id ||
+                "",
+              label:
+                selectedDestination?.label ||
+                selectedDestination?.value ||
+                city,
+              value:
+                selectedDestination?.value ||
+                selectedDestination?.label ||
+                city,
+              detail: selectedDestination?.detail || city,
+              country: destinationCountryCode,
+              state,
+              ...(geoCode &&
+              Number.isFinite(Number(geoCode.lat)) &&
+              Number.isFinite(Number(geoCode.long))
+                ? { geoCode }
+                : {}),
+            }
+          : {}),
+        id: locationId || storedLocation.id || fallbackLocationPayload.id || "",
+        locationId:
+          locationId ||
+          storedLocation.locationId ||
+          fallbackLocationPayload.locationId ||
+          "",
+        label: city,
+        value: city,
+        detail: city,
+        country: destinationCountryCode,
+        state,
+        ...(geoCode && Number.isFinite(Number(geoCode.lat)) && Number.isFinite(Number(geoCode.long))
+          ? { geoCode }
+          : {}),
+      },
+      initPayload: {
+        ...storedInitPayload,
+        domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+        locations: [
+          {
+            ...fallbackLocationPayload,
+            id: locationId || fallbackLocationPayload.id || "",
+            name: city,
+            fullName: city,
+            type: fallbackLocationPayload.type || storedLocation.type || "city",
+            city: null,
+            state,
+            country: destinationCountryCode,
+            score: 0,
+            referenceId: fallbackLocationPayload.referenceId ?? null,
+            ...(geoCode &&
+            Number.isFinite(Number(geoCode.lat)) &&
+            Number.isFinite(Number(geoCode.long))
+              ? { coordinates: geoCode }
+              : {}),
+          },
+        ],
+        channel,
+        locationId,
+        currency: storedInitPayload.currency || "INR",
+        culture: storedInitPayload.culture || "en-US",
+        checkIn: formatHotelApiDate(checkIn),
+        checkOut: formatHotelApiDate(checkOut),
+        rooms: roomPayloads,
+        agentCode: storedInitPayload.agentCode || "14005",
+        destinationCountryCode,
+        nationality: storedInitPayload.nationality || "IN",
+        countryOfResidence: storedInitPayload.countryOfResidence || "IN",
+        channelId: storedInitPayload.channelId || "b2bIndiaDeals",
+        affiliateRegion: storedInitPayload.affiliateRegion || "B2B_India",
+        segmentId: storedInitPayload.segmentId || "",
+        companyId: storedInitPayload.companyId || "1",
+        gstPercentage: storedInitPayload.gstPercentage ?? 0,
+        tdsPercentage: storedInitPayload.tdsPercentage ?? 0,
+      },
+      initResponse: null,
+      initStatus: "pending",
+    };
+
     if (typeof window !== "undefined") {
       window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
-      window.sessionStorage.removeItem(HOTEL_SEARCH_SESSION_KEY);
+      window.sessionStorage.setItem(
+        HOTEL_SEARCH_SESSION_KEY,
+        JSON.stringify(nextSearchContext),
+      );
       try {
         window.localStorage.setItem(
           HOTEL_LAST_SEARCH_URL_KEY,
@@ -482,6 +695,7 @@ const MobileHotelDetails = () => {
                 children: searchParams.get("children") || 0,
                 childAges: parseChildAges(searchParams.get("childAges")),
                 roomDetails: getRoomDetailsFromParams(searchParams),
+                destination: readStoredHotelSearch()?.location || null,
               }}
               onApply={handleEditSearch}
             />

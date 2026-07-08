@@ -1,10 +1,10 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
 import FromLocationSheet from "@/shared/components/fromLocationSheet/FromLocationSheet";
 import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
-import PassengersPopup from "@/shared/components/passengersPopUp/PassengersPopup";
+import HotelPassengersPopup from "@/shared/components/hotelPassengersPopup/HotelPassengersPopup";
 
 const HotelSearchMobile = ({
   styles,
@@ -20,7 +20,6 @@ const HotelSearchMobile = ({
   setPassengers,
   truncate,
 }) => {
-  const travellerRef = useRef(null);
   const [openTo, setOpenTo] = useState(false);
   const [openCalendar, setOpenCalendar] = useState(false);
   const [openPassengers, setOpenPassengers] = useState(false);
@@ -106,7 +105,6 @@ const HotelSearchMobile = ({
         </div>
 
         <div
-          ref={travellerRef}
           className={`${styles.fromBtn} ${styles.fromBtn2}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -134,7 +132,7 @@ const HotelSearchMobile = ({
           </div>
 
           {openPassengers && (
-            <PassengersPopup
+            <HotelPassengersPopup
               passengers={passengers}
               setPassengers={setPassengers}
               onClose={() => setOpenPassengers(false)}
