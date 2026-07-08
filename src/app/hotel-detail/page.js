@@ -479,15 +479,39 @@ const Page = () => {
     };
   }, [searchRequest, storedHotelSearch, urlSearchValues]);
   const effectiveSelection = useMemo(
-    () => ({
-      checkIn: selectionOverride?.checkIn || apiCheckIn,
-      checkOut: selectionOverride?.checkOut || apiCheckOut,
-      rooms: selectionOverride?.rooms || rooms,
-      adults: selectionOverride?.adults || adults,
-      children: selectionOverride?.children || children,
-      childAges: selectionOverride?.childAges || initialGuestState.childAges || [],
-      roomDetails: selectionOverride?.roomDetails || initialGuestState.rooms || [],
-    }),
+    () => {
+      const effectiveRoomCount = selectionOverride?.rooms || rooms;
+      const effectiveAdultCount = selectionOverride?.adults || adults;
+      const effectiveChildCount = selectionOverride?.children || children;
+      const sourceRoomDetails =
+        Array.isArray(selectionOverride?.roomDetails) &&
+        selectionOverride.roomDetails.length
+          ? selectionOverride.roomDetails
+          : [
+              {
+                adults: effectiveAdultCount,
+                children: effectiveChildCount,
+                childAges:
+                  selectionOverride?.childAges || initialGuestState.childAges || [],
+              },
+            ];
+      const roomDetails = buildAvailabilityRooms({
+        roomCount: effectiveRoomCount,
+        adults: effectiveAdultCount,
+        children: effectiveChildCount,
+        sourceRooms: sourceRoomDetails,
+      });
+
+      return {
+        checkIn: selectionOverride?.checkIn || apiCheckIn,
+        checkOut: selectionOverride?.checkOut || apiCheckOut,
+        rooms: Number(effectiveRoomCount) || 1,
+        adults: Number(effectiveAdultCount) || 1,
+        children: Number(effectiveChildCount) || 0,
+        childAges: roomDetails.flatMap((room) => room.childAges || []),
+        roomDetails,
+      };
+    },
     [adults, apiCheckIn, apiCheckOut, children, initialGuestState, rooms, selectionOverride],
   );
   const {
@@ -497,6 +521,17 @@ const Page = () => {
     adults: effectiveAdults,
     children: effectiveChildren,
   } = effectiveSelection;
+  const roomSelectionPassengers = useMemo(
+    () => ({
+      room: effectiveRooms,
+      adults: effectiveAdults,
+      children: effectiveChildren,
+      childAges: effectiveSelection.childAges || [],
+      rooms: effectiveSelection.roomDetails || [],
+      pets: Number(initialGuestState.pets || 0),
+    }),
+    [effectiveAdults, effectiveChildren, effectiveRooms, effectiveSelection, initialGuestState.pets],
+  );
   const effectiveCheckInDisplay = useMemo(
     () => formatDisplayDate(effectiveCheckIn, "Check-in"),
     [effectiveCheckIn],
@@ -773,6 +808,8 @@ const Page = () => {
           roomGroupId: room.roomGroupId,
           recommendationId: room.recommendationId,
           supplierName: room.supplierName,
+          providerName: room.providerName || room.supplierName,
+          priceProvider: room.priceProvider || room.providerName || room.supplierName,
           guestCode: room.guestCode,
           roomsSearchId: room.roomsSearchId || hotelDetail?.roomsSearchId || "",
           roomsSearchTracingKey: getFirstValue(
@@ -945,7 +982,7 @@ const Page = () => {
               rooms={effectiveRooms}
               adults={effectiveAdults}
               children={effectiveChildren}
-              initialPassengers={initialGuestState}
+              initialPassengers={roomSelectionPassengers}
             />
           </div>
 

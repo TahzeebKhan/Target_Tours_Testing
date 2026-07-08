@@ -744,9 +744,10 @@ const buildStartBookingRooms = (selectedRooms = [], roomGuests = {}, contact = {
         RoomId: getRoomApiId(room, detailRoom, rawDetailRoom),
         GuestCode: buildGuestCode(occupancies, entryGuests, entryIndex || roomIndex),
         SupplierName: getFirstValue(
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "providerName"),
+          getRoomApiValue(room, detailRoom, rawDetailRoom, "ProviderName"),
           getRoomApiValue(room, detailRoom, rawDetailRoom, "supplierName"),
           getRoomApiValue(room, detailRoom, rawDetailRoom, "SupplierName"),
-          getRoomApiValue(room, detailRoom, rawDetailRoom, "providerName"),
         ),
         RoomGroupId: getFirstValue(
           getRoomApiValue(room, detailRoom, rawDetailRoom, "roomGroupId"),
@@ -822,28 +823,32 @@ const getSelectedRoomsNetAmount = (selectedRooms = [], fallbackNights = 1) =>
     return total + (comboDetailTotal || getRoomTotal(room, fallbackNights));
   }, 0);
 
-const getHotelPriceProvider = ({ firstRoom = {}, request = {}, hotel = {} } = {}) =>
+const getHotelPriceProvider = ({ firstRoom = {} } = {}) =>
   getFirstValue(
+    firstRoom.providerName,
+    firstRoom.ProviderName,
+    firstRoom.supplierName,
+    firstRoom.SupplierName,
     firstRoom.priceProvider,
     firstRoom.PriceProvider,
+    firstRoom.raw?.providerName,
+    firstRoom.raw?.ProviderName,
+    firstRoom.raw?.supplierName,
+    firstRoom.raw?.SupplierName,
     firstRoom.raw?.priceProvider,
     firstRoom.raw?.PriceProvider,
+    firstRoom.rawRecommendation?.providerName,
+    firstRoom.rawRecommendation?.ProviderName,
+    firstRoom.rawRecommendation?.supplierName,
+    firstRoom.rawRecommendation?.SupplierName,
     firstRoom.rawRecommendation?.priceProvider,
     firstRoom.rawRecommendation?.PriceProvider,
-    request.priceProvider,
-    request.PriceProvider,
-    request.searchContext?.priceProvider,
-    request.searchContext?.PriceProvider,
-    request.searchContext?.hotel?.priceProvider,
-    request.searchContext?.hotel?.PriceProvider,
-    hotel.priceProvider,
-    hotel.PriceProvider,
-    hotel.priceProviderCode,
-    hotel.raw?.priceProvider,
-    hotel.raw?.PriceProvider,
-    hotel.raw?.priceProviderCode,
-    hotel.pricing?.priceProvider,
-    hotel.rate?.priceProvider,
+    firstRoom.rawRoomGroup?.providerName,
+    firstRoom.rawRoomGroup?.ProviderName,
+    firstRoom.rawRoomGroup?.supplierName,
+    firstRoom.rawRoomGroup?.SupplierName,
+    firstRoom.rawRoomGroup?.priceProvider,
+    firstRoom.rawRoomGroup?.PriceProvider,
   );
 
 const ReviewPage = () => {
@@ -1342,7 +1347,7 @@ const ReviewPage = () => {
         request.searchContext?.hotel?.id,
         request.searchContext?.hotel?.hotelId,
       );
-      const priceProvider = getHotelPriceProvider({ firstRoom, request, hotel });
+      const priceProvider = getHotelPriceProvider({ firstRoom });
 
       if (!recommendationId || !hotelCode || !priceProvider || !hotelSearchId) {
         const missingParts = [
