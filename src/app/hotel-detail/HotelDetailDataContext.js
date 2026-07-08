@@ -968,6 +968,8 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       roomGroupId: primaryRoomGroup.roomGroupId || primaryRoomGroup.id || "",
       recommendationId: primaryRoomGroup.recommendationId || recommendation.recommendationId || recommendation.id || "",
       supplierName: primaryRoomGroup.providerName || recommendation.providerName || "",
+      providerName: primaryRoomGroup.providerName || recommendation.providerName || "",
+      priceProvider: primaryRoomGroup.providerName || recommendation.providerName || "",
       guestCode: primaryRoomGroup.guestCode || primaryRoomGroup.GuestCode || "",
       roomsSearchId,
       roomsSearchTracingKey,
