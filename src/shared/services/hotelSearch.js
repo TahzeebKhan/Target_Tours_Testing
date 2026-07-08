@@ -608,7 +608,8 @@ export const fetchHotelRooms = async ({
 };
 
 export const changeHotelAvailability = async (payload = {}) => {
-  const response = await fetch("/api/hotel-search/changehotelavailability", {
+    const url = new URL("/api/hotel-search/changehotelavailability", normalizeBaseUrl());
+  const response = await fetch(url.toString(), {
     method: "POST",
     headers: getHotelSearchHeaders(),
     credentials: "include",

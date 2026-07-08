@@ -1153,6 +1153,8 @@ const ReviewPage = () => {
     }
 
     try {
+       console.log("selectedRooms1", selectedRooms);
+       console.log("roomList1", roomList);
       const firstRoom = selectedRooms[0] || roomList[0] || {};
       const selectedNetAmount = formatAmount(
         getSelectedRoomsNetAmount(selectedRooms, nights) || totalAmount || firstRoom.netAmount || 0,
