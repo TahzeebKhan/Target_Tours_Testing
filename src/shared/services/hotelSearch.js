@@ -628,6 +628,33 @@ export const changeHotelAvailability = async (payload = {}) => {
   return data;
 };
 
+export const fetchHotelPricingDetails = async (payload = {}) => {
+  const url = new URL("/api/hotel-search/hotel-pricing-details", normalizeBaseUrl());
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: getHotelSearchHeaders(),
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      domain: payload.domain || getDomain(),
+      searchId: payload.searchId,
+      hotelSearchId: payload.hotelSearchId,
+      hotelId: payload.hotelId,
+      priceProvider: payload.priceProvider,
+      recommendationId: payload.recommendationId,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw createApiError(data, "Hotel pricing details failed");
+  }
+
+  return data;
+};
+
 export const startHotelBooking = async (payload = {}) => {
   const url = new URL("/api/hotel-search/start-booking", normalizeBaseUrl());
 

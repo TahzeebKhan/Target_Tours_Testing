@@ -542,27 +542,32 @@ const TripCard = ({
               detailRowId === item.id && detailFlight && openId === detailFlight.id;
 
             return (
-              <React.Fragment key={item.id}>
-                <div className={styles.roundOptionList}>
-                  {renderLegOption(item, "depart")}
+              <div key={item.id} className={styles.roundTripRow}>
+                <div className={styles.roundRowColumn}>
+                  <div className={styles.roundOptionList}>
+                    {renderLegOption(item, "depart")}
+                  </div>
+                  <div
+                    className={`${styles.expandWrap} ${styles.roundRowExpand} ${
+                      isRowOpen ? styles.open : ""
+                    }`}
+                  >
+                    {isRowOpen && (
+                      <RoundTripExpendable
+                        flightData={detailFlight}
+                        flightInfoData={flightInfoData[detailFlight.id]}
+                        isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div className={styles.roundOptionList}>
-                  {renderLegOption(item, "return")}
+
+                <div className={styles.roundRowColumn}>
+                  <div className={styles.roundOptionList}>
+                    {renderLegOption(item, "return")}
+                  </div>
                 </div>
-                <div
-                  className={`${styles.expandWrap} ${styles.roundRowExpand} ${
-                    isRowOpen ? styles.open : ""
-                  }`}
-                >
-                  {isRowOpen && (
-                    <RoundTripExpendable
-                      flightData={detailFlight}
-                      flightInfoData={flightInfoData[detailFlight.id]}
-                      isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
-                    />
-                  )}
-                </div>
-              </React.Fragment>
+              </div>
             );
           })}
         </div>

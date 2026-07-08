@@ -16,6 +16,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import {
   HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
+  fetchHotelPricingDetails,
   startHotelBooking,
   HotelPaymentStart,
   clearHotelBookingStatus,
@@ -780,6 +781,30 @@ const getSelectedRoomsNetAmount = (selectedRooms = [], fallbackNights = 1) =>
     return total + (comboDetailTotal || getRoomTotal(room, fallbackNights));
   }, 0);
 
+const getHotelPriceProvider = ({ firstRoom = {}, request = {}, hotel = {} } = {}) =>
+  getFirstValue(
+    firstRoom.priceProvider,
+    firstRoom.PriceProvider,
+    firstRoom.raw?.priceProvider,
+    firstRoom.raw?.PriceProvider,
+    firstRoom.rawRecommendation?.priceProvider,
+    firstRoom.rawRecommendation?.PriceProvider,
+    request.priceProvider,
+    request.PriceProvider,
+    request.searchContext?.priceProvider,
+    request.searchContext?.PriceProvider,
+    request.searchContext?.hotel?.priceProvider,
+    request.searchContext?.hotel?.PriceProvider,
+    hotel.priceProvider,
+    hotel.PriceProvider,
+    hotel.priceProviderCode,
+    hotel.raw?.priceProvider,
+    hotel.raw?.PriceProvider,
+    hotel.raw?.priceProviderCode,
+    hotel.pricing?.priceProvider,
+    hotel.rate?.priceProvider,
+  );
+
 const ReviewPage = () => {
   const router = useRouter();
   // 👇 default open = flight
@@ -1270,11 +1295,14 @@ const ReviewPage = () => {
         request.searchContext?.hotel?.id,
         request.searchContext?.hotel?.hotelId,
       );
+      const priceProvider = getHotelPriceProvider({ firstRoom, request, hotel });
 
-      if (!recommendationId || !hotelCode) {
+      if (!recommendationId || !hotelCode || !priceProvider || !hotelSearchId) {
         const missingParts = [
           !recommendationId ? "RecommendationId" : "",
           !hotelCode ? "HotelCode" : "",
+          !hotelSearchId ? "HotelSearchId" : "",
+          !priceProvider ? "PriceProvider" : "",
         ].filter(Boolean);
 
         toast.error(`Hotel booking is missing ${missingParts.join(" and ")}. Please go back and select the room again.`);
@@ -1341,6 +1369,14 @@ const ReviewPage = () => {
         CheckOutDate: checkOutDate,
         TravelingFor: "NTF",
       };
+
+      await fetchHotelPricingDetails({
+        searchId,
+        hotelSearchId,
+        hotelId: hotelCode,
+        priceProvider,
+        recommendationId,
+      });
 
       const startBookingResponse = await startHotelBooking(payload);
       const priceChangeInfo = parsePriceChange(startBookingResponse);

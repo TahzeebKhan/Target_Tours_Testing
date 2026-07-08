@@ -80,6 +80,25 @@ const parseDurationParts = (value = "") => {
   };
 };
 
+const formatDurationFromMinutes = (minutes) => {
+  if (minutes === null || minutes === undefined || minutes === "") {
+    return { hours: "", minutes: "" };
+  }
+  const value = Number(minutes);
+  if (!Number.isFinite(value)) return { hours: "", minutes: "" };
+  return {
+    hours: String(Math.floor(value / 60)).padStart(2, "0"),
+    minutes: String(value % 60).padStart(2, "0"),
+  };
+};
+
+const parseDurationToMinutes = (value) => {
+  if (typeof value === "number") return value;
+  const match = String(value || "").match(/(\d+)\s*h(?:ours?)?\s*(\d+)?\s*m?/i);
+  if (!match) return null;
+  return Number(match[1] || 0) * 60 + Number(match[2] || 0);
+};
+
 const getAirportCodeFromCity = (value = "") =>
   parseAirportLabel(value).code || String(value || "").trim().toUpperCase();
 
@@ -122,6 +141,17 @@ const parseAirportName = (value = "") => {
     name: name.trim(),
     city: city.trim(),
   };
+};
+
+const normalizeConnections = (value) => {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  if (Array.isArray(value?.segments)) return value.segments;
+  if (Array.isArray(value?.Connections)) return value.Connections;
+  if (Array.isArray(value?.connections)) return value.connections;
+  return Object.values(value).filter(
+    (item) => item && typeof item === "object" && !Array.isArray(item)
+  );
 };
 
 const getSegmentList = (flight = {}) => {
@@ -294,25 +324,6 @@ const getSegmentDateTime = (segment = {}, type) => {
   );
 };
 
-const formatDurationFromMinutes = (minutes) => {
-  if (minutes === null || minutes === undefined || minutes === "") {
-    return { hours: "", minutes: "" };
-  }
-  const value = Number(minutes);
-  if (!Number.isFinite(value)) return { hours: "", minutes: "" };
-  return {
-    hours: String(Math.floor(value / 60)).padStart(2, "0"),
-    minutes: String(value % 60).padStart(2, "0"),
-  };
-};
-
-const parseDurationToMinutes = (value) => {
-  if (typeof value === "number") return value;
-  const match = String(value || "").match(/(\d+)\s*h(?:ours?)?\s*(\d+)?\s*m?/i);
-  if (!match) return null;
-  return Number(match[1] || 0) * 60 + Number(match[2] || 0);
-};
-
 const getTimelineSegmentsFromLeg = (leg = {}, fallbackAirline = {}) => {
   const segments = toArray(leg?.flight?.details?.segments);
   if (segments.length <= 1) return [];
@@ -402,6 +413,67 @@ const getTimelineSegmentsFromLeg = (leg = {}, fallbackAirline = {}) => {
         getSegmentCode(nextSegment, "departure") ||
         arrivalCity ||
         arrivalCode,
+    };
+  });
+};
+
+const getTimelineConnectionsFromLeg = (leg = {}, fallbackAirline = {}) => {
+  const rawConnections = normalizeConnections(
+    leg?.flight?.details?.connections ||
+      leg?.flight?.details?.Connections ||
+      leg?.Connections ||
+      leg?.connections
+  );
+
+  if (!rawConnections.length) return [];
+
+  return rawConnections.map((connection, index) => {
+    const nextConnection = rawConnections[index + 1];
+    const baseTimeline = toApiTimelineFlight({
+      ...connection,
+      airline: connection?.airline || connection?.AirlineName || fallbackAirline?.name,
+      airlineName:
+        connection?.airlineName || connection?.AirlineName || fallbackAirline?.name,
+      AirCraft: connection?.AirCraft || connection?.aircraft,
+    });
+    const currentDeparture =
+      connection?.departure || connection?.Departure || connection?.departureTime;
+    const currentArrival =
+      connection?.arrival || connection?.Arrival || connection?.arrivalTime;
+    const nextDeparture =
+      nextConnection?.departure ||
+      nextConnection?.Departure ||
+      nextConnection?.departureTime;
+    const layoverMinutes =
+      currentArrival && nextDeparture
+        ? Math.round((new Date(nextDeparture) - new Date(currentArrival)) / 60000)
+        : null;
+
+    return {
+      ...baseTimeline,
+      layoverDuration:
+        connection?.layoverDuration ||
+        connection?.LayoverDuration ||
+        (Number.isFinite(layoverMinutes) && layoverMinutes >= 0
+          ? `${Math.floor(layoverMinutes / 60)} h ${layoverMinutes % 60} m`
+          : ""),
+      layoverAirport:
+        nextConnection?.From ||
+        nextConnection?.from ||
+        nextConnection?.Airport ||
+        nextConnection?.airport ||
+        baseTimeline.arrival.airport,
+      departure: {
+        ...baseTimeline.departure,
+        date: formatDateLabel(currentDeparture || leg?.date),
+        time: formatTime(currentDeparture) || baseTimeline.departure.time,
+      },
+      arrival: {
+        ...baseTimeline.arrival,
+        date: formatDateLabel(currentArrival || leg?.date),
+        time: formatTime(currentArrival) || baseTimeline.arrival.time,
+      },
+      stops: "Non-Stop",
     };
   });
 };
@@ -619,20 +691,32 @@ const RoundTripExpendable = ({
     flightData?.return,
     flightData?.return?.airline
   );
-  const departTimelines = apiTimelines.depart.length > 1
-    ? apiTimelines.depart
-    : departSegmentTimelines.length
-      ? departSegmentTimelines
-      : apiTimelines.depart.length
-        ? apiTimelines.depart
-        : [departTimeline || flight2];
-  const returnTimelines = apiTimelines.return.length > 1
-    ? apiTimelines.return
-    : returnSegmentTimelines.length
-      ? returnSegmentTimelines
-      : apiTimelines.return.length
-        ? apiTimelines.return
-        : [returnTimeline || flight];
+  const departConnectionTimelines = getTimelineConnectionsFromLeg(
+    flightData?.depart,
+    flightData?.depart?.airline
+  );
+  const returnConnectionTimelines = getTimelineConnectionsFromLeg(
+    flightData?.return,
+    flightData?.return?.airline
+  );
+  const departTimelines = departConnectionTimelines.length
+    ? departConnectionTimelines
+    : apiTimelines.depart.length > 1
+      ? apiTimelines.depart
+      : departSegmentTimelines.length
+        ? departSegmentTimelines
+        : apiTimelines.depart.length
+          ? apiTimelines.depart
+          : [departTimeline || flight2];
+  const returnTimelines = returnConnectionTimelines.length
+    ? returnConnectionTimelines
+    : apiTimelines.return.length > 1
+      ? apiTimelines.return
+      : returnSegmentTimelines.length
+        ? returnSegmentTimelines
+        : apiTimelines.return.length
+          ? apiTimelines.return
+          : [returnTimeline || flight];
 
   useEffect(() => {
     if (!tabsRef.current) return;

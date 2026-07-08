@@ -235,9 +235,11 @@ export const getHotelsFromMessage = (payload = {}) => {
     if (result.hotels.length) return result;
   }
 
-  return pickBestHotelResult(
+  const fallbackResult = pickBestHotelResult(
     findHotelArrays([payload, data, content, nestedData, nestedDataContent, nestedContent]),
   );
+  fallbackResult.meta = meta;
+  return fallbackResult;
 };
 
 export const getHotelImage = (hotel = {}) => {
@@ -1625,6 +1627,7 @@ const TourListing = () => {
   const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(Boolean(hotelSearchChannel));
   const [filterRetryNonce, setFilterRetryNonce] = useState(0);
+  const [filterRefreshNonce, setFilterRefreshNonce] = useState(0);
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -1725,6 +1728,7 @@ const TourListing = () => {
   const hotelDetailsRequestRef = useRef(0);
   const lastFilterRequestKeyRef = useRef("");
   const latestFilterSearchMetaRef = useRef({ searchId: "", hotelSearchId: "" });
+  const lastMergedFilterPayloadKeyRef = useRef("");
   const filterRetryTimerRef = useRef(null);
   const hasLoadedFilterDataRef = useRef(false);
 
@@ -1845,6 +1849,7 @@ const TourListing = () => {
     hotelResultSourceRef.current = "";
     lastFilterRequestKeyRef.current = "";
     latestFilterSearchMetaRef.current = { searchId: "", hotelSearchId: "" };
+    lastMergedFilterPayloadKeyRef.current = "";
     hasLoadedFilterDataRef.current = false;
     if (filterRetryTimerRef.current) {
       window.clearTimeout(filterRetryTimerRef.current);
@@ -1956,6 +1961,13 @@ const TourListing = () => {
       };
 
       if (isFilterSearchPayloadReady(payload, nextResults.source) && filterMeta.searchId) {
+        const nextMergedFilterPayloadKey = [
+          filterMeta.searchId,
+          filterMeta.hotelSearchId,
+          nextResults.hotels.length,
+          payloadMeta.requestId || nextResults.meta?.requestId || getHotelSocketType(payload),
+        ].join("|");
+
         setMergedFilterSearchMeta((prev) => ({
           searchId: filterMeta.searchId,
           hotelSearchId: filterMeta.hotelSearchId || prev.hotelSearchId,
@@ -1964,6 +1976,12 @@ const TourListing = () => {
           searchId: filterMeta.searchId,
           hotelSearchId: filterMeta.hotelSearchId || latestFilterSearchMetaRef.current.hotelSearchId,
         };
+        if (lastMergedFilterPayloadKeyRef.current !== nextMergedFilterPayloadKey) {
+          lastMergedFilterPayloadKeyRef.current = nextMergedFilterPayloadKey;
+          hasLoadedFilterDataRef.current = false;
+          lastFilterRequestKeyRef.current = "";
+          setFilterRefreshNonce((value) => value + 1);
+        }
         setHasMergedHotelResponse(true);
       }
 
@@ -2038,14 +2056,15 @@ const TourListing = () => {
 
     if (hotelSearchChannel && (!hasMergedHotelResponse || !filterSearchId)) {
       setIsFilterLoading(true);
-      setApiFilterData(null);
       lastFilterRequestKeyRef.current = "";
       return;
     }
 
     if (!filterSearchId) {
       setIsFilterLoading(Boolean(hotelSearchChannel));
-      setApiFilterData(null);
+      if (!hotelSearchChannel) {
+        setApiFilterData(null);
+      }
       lastFilterRequestKeyRef.current = "";
       return;
     }
@@ -2083,7 +2102,6 @@ const TourListing = () => {
 
         console.error("Hotel filter data request failed:", error);
         const isRetryableFilterError = String(error?.code || "") === "1216";
-        setApiFilterData(null);
         if (lastFilterRequestKeyRef.current === effectiveFilterDataRequestKey) {
           lastFilterRequestKeyRef.current = "";
         }
@@ -2108,6 +2126,7 @@ const TourListing = () => {
     };
   }, [
     filterDataPayload,
+    filterRefreshNonce,
     filterDataRequestKey,
     filterRetryNonce,
     filterSearchId,
