@@ -1,127 +1,126 @@
 .tourListSection {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .gridWrapper {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .emptyState {
-    width: 100%;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 20px 18px;
-    background: #FFFFFF;
-    border: 1px solid #E6E8EF;
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 18px;
+  background: #ffffff;
+  border: 1px solid #e6e8ef;
 }
 
 .emptyStateImage {
-    width: 150px;
-    max-width: 42%;
-    flex: 0 0 150px;
+  width: 150px;
+  max-width: 42%;
+  flex: 0 0 150px;
 }
 
 .emptyStateText {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .emptyStateText h3 {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 1.15;
-    color: #000033;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #000033;
 }
 
 .emptyStateText p {
-    font-family: var(--font-inter);
-    font-size: 14px;
-    line-height: 1.5;
-    color: #4A5565;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4a5565;
 }
 
 .cardItemHeader {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .ListViewCardHeader {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 14px 16px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 16px;
 }
 
-
 .heartIcon {
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
 }
 
 .ListViewHeartIcon {
-    width: 28px;
-    height: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .headerLeft {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .CardViewCardHeader {
-    padding: 14px 17px !important;
+  padding: 14px 17px !important;
 }
 
 .new {
-    padding: 6px 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #FCC800;
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.18;
-    text-transform: capitalize;
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fcc800;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  text-transform: capitalize;
 }
 
 .private {
-    padding: 6px 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #FFFFFF;
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.18;
-    text-transform: capitalize;
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  text-transform: capitalize;
 }
 
 .gridCard {
-    max-width: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: #FFFFFF;
-    transition: all 0.45s ease;
-    content-visibility: auto;
-    contain-intrinsic-size: 560px;
+  max-width: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  transition: all 0.45s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 560px;
 }
 
 /* .gridCard:hover{
@@ -129,312 +128,309 @@
 } */
 
 .gridCardImage {
-    position: relative;
-    width: 100%;
-    height: 220px;
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
 }
 
 .ListViewCardImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .gridCardText {
-    position: relative;
-    z-index: 1;
-    margin-top: -18px;
-    padding: 14px 14px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background: #FFFFFF;
-    border-radius: 18px 18px 0 0;
+  position: relative;
+  z-index: 1;
+  margin-top: -18px;
+  padding: 14px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-height: 289px;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 18px 18px 0 0;
 }
 
 .cartListTop {
-    display: flex;
-    flex-direction: column;
-    gap: 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
 }
 
 .ListViewCardTextTop {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .topTextHead {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .ratingRow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .rating {
-    display: flex;
-    align-items: center;
-    gap: 3px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
 .rating img {
-    width: 15px;
-    height: 15px;
+  width: 15px;
+  height: 15px;
 }
 
 .reviewSummary {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--font-inter);
-    font-size: 13px;
-    line-height: 1.2;
-    color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  line-height: 1.2;
+  color: #6b7280;
 }
 
 .reviewSummary span {
-    padding: 2px 5px;
-    background: #43A047;
-    color: #FFFFFF;
-    border-radius: 2px;
-    font-size: 12px;
-    line-height: 1.1;
+  padding: 2px 5px;
+  background: #43a047;
+  color: #ffffff;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 1.1;
 }
 
 .topTextHead h2 {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 16px;
-    line-height: 1.25;
-    letter-spacing: 0px;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #000000;
-
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 1.25;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
 }
 
 .topTextHeadAddress {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .topTextHeadAddress span {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 12px;
-    line-height: 1.18;
-    letter-spacing: 0px;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #4A5565;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #4a5565;
 }
 
 .featuresCont {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    overflow: hidden;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow: hidden;
 }
 
 .featureItem {
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .featureItem p {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0px;
-    color: #000000;
-    white-space: nowrap;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  color: #000000;
+  white-space: nowrap;
 }
 
 .freeList {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .freeList li {
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 1.19;
-    letter-spacing: 0px;
-    vertical-align: middle;
-    color: #006E96;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #006e96;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .tickCont {
-    width: 14px;
-    height: 14px;
+  width: 14px;
+  height: 14px;
 }
 
 .ListViewCardTextBottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .priceContainer {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-
 .priceSec {
-    font-family: Antic Didone;
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 28px;
-    line-height: 1.18;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    text-transform: uppercase;
-    text-align: end;
-    color: #000000;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  text-align: end;
+  color: #000000;
 }
 
 .totalPrice span {
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 12px;
-    line-height: 14px;
-    letter-spacing: -2%;
-    text-transform: uppercase;
-    color: #767676;
-
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #767676;
 }
 
 .bookNowBtn {
-    max-width: 180px;
-    width: 100%;
-    height: 45px;
-    padding: 12px 14px;
-    background-color: #000033;
+  max-width: 180px;
+  width: 100%;
+  height: 45px;
+  padding: 12px 14px;
+  background-color: #000033;
 
-
-    font-family: var(--font-inter);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.18;
-    vertical-align: middle;
-    text-transform: uppercase;
-    color: #FFFFFF;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    border: 0;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  border: 0;
 }
 
 .bookNowBtn:disabled {
-    background-color: #4a4a70;
-    color: #FFFFFF;
-    cursor: not-allowed;
-    opacity: 0.72;
+  background-color: #4a4a70;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .skeletonCard {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 .skeletonImage,
 .skeletonLine,
 .skeletonFeatures span {
-    background: linear-gradient(90deg, #eceff3 0%, #f7f8fa 45%, #eceff3 100%);
-    background-size: 220% 100%;
-    animation: hotelSkeletonPulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #eceff3 0%, #f7f8fa 45%, #eceff3 100%);
+  background-size: 220% 100%;
+  animation: hotelSkeletonPulse 1.2s ease-in-out infinite;
 }
 
 .skeletonImage {
-    width: 100%;
-    height: 285px;
+  width: 100%;
+  height: 285px;
 }
 
 .skeletonContent {
-    padding: 16px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .skeletonLine {
-    height: 14px;
+  height: 14px;
 }
 
 .skeletonStars {
-    width: 112px;
-    height: 16px;
+  width: 112px;
+  height: 16px;
 }
 
 .skeletonTitle {
-    width: 72%;
-    height: 20px;
+  width: 72%;
+  height: 20px;
 }
 
 .skeletonAddress {
-    width: 88%;
+  width: 88%;
 }
 
 .skeletonFeatures {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .skeletonFeatures span {
-    width: 92px;
-    height: 16px;
+  width: 92px;
+  height: 16px;
 }
 
 .skeletonBenefit {
-    width: 64%;
+  width: 64%;
 }
 
 .skeletonFooter {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 8px;
 }
 
 .skeletonPrice {
-    width: 104px;
-    height: 30px;
+  width: 104px;
+  height: 30px;
 }
 
 .skeletonButton {
-    max-width: 170px;
-    width: 46%;
-    height: 41px;
+  max-width: 170px;
+  width: 46%;
+  height: 41px;
 }
 
 @keyframes hotelSkeletonPulse {
-    0% {
-        background-position: 120% 0;
-    }
+  0% {
+    background-position: 120% 0;
+  }
 
-    100% {
-        background-position: -120% 0;
-    }
+  100% {
+    background-position: -120% 0;
+  }
 }
 
 /* .bookNowBtn:hover {
@@ -443,61 +439,60 @@
 } */
 
 @media (max-width: 768px) {
-    .bookNowBtn {
-        max-width: 180px;
-    }
+  .bookNowBtn {
+    max-width: 180px;
+  }
 }
 
 @media (max-width: 612px) {
-    .gridWrapper {
-        gap: 16px;
-    }
+  .gridWrapper {
+    gap: 16px;
+  }
 
-    .bookNowBtn {
-        max-width: 180px;
-        padding: 12px 14px;
-    }
+  .bookNowBtn {
+    max-width: 180px;
+    padding: 12px 14px;
+  }
 }
 
 @media (max-width: 440px) {
-    .gridWrapper {
-        grid-template-columns: 1fr;
-        gap: 24px;
-        max-width: 444px;
-    }
+  .gridWrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 444px;
+  }
 
-    .gridCardImage {
-        height: 253px;
-    }
+  .gridCardImage {
+    height: 253px;
+  }
 
-    .gridCardText {
-        padding: 16px 18px 20px;
-        gap: 24px;
-    }
+  .gridCardText {
+    padding: 16px 18px 20px;
+    gap: 24px;
+  }
 
-    .emptyState {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .emptyState {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .emptyStateImage {
-        width: 140px;
-        max-width: 100%;
-        flex-basis: auto;
-    }
+  .emptyStateImage {
+    width: 140px;
+    max-width: 100%;
+    flex-basis: auto;
+  }
 
-    .bookNowBtn {
-        max-width: 210px;
-        padding: 12px 24px;
-    }
-
+  .bookNowBtn {
+    max-width: 210px;
+    padding: 12px 24px;
+  }
 }
 
 @media (max-width: 375px) {
-    .bookNowBtn {
-        max-width: 145px;
-        padding: 12px 6px;
-    }
+  .bookNowBtn {
+    max-width: 145px;
+    padding: 12px 6px;
+  }
 }
 
 @media (max-width: 440px) {

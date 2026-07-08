@@ -1,22 +1,19 @@
 .searchResultsContainer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   position: sticky;
   top: var(--hotel-hero-sticky-offset, 242px);
   top:0px;
   z-index: 120;
   background-color: #f9f9f9;
-  padding: 12px 0;
-  margin: -12px 0 0;
-  
+  padding-bottom: 10px;
+  margin-top: -10px;
 }
 .result{
   font-family: Inter;
 font-weight: 500;
-font-style: Medium;
 font-size: 18px;
-leading-trim: NONE;
 line-height: 100%;
 letter-spacing: -2%;
 vertical-align: middle;

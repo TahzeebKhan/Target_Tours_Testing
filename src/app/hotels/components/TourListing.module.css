@@ -35,7 +35,6 @@
 }
 
 .emptyState {
-
   width: 100%;
   min-height: 360px;
   display: flex;
@@ -146,7 +145,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
   letter-spacing: 0%;
   text-transform: capitalize;
 }
@@ -161,7 +160,7 @@
   font-family: Antic Didone;
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
   letter-spacing: 0%;
   text-transform: capitalize;
 }
@@ -301,7 +300,6 @@
   display: flex;
   gap: 24px;
 
-
   background-color: #ffffff;
   transition: all 0.45s ease;
 }
@@ -365,14 +363,14 @@
   gap: 4px;
 }
 .topTextHead h2 {
-font-family: Inter;
-font-weight: 600;
-font-style: Semi Bold;
-font-size: 18px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: -4%;
-vertical-align: middle;
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: -4%;
+  vertical-align: middle;
 
   text-transform: uppercase;
   color: #000033;
@@ -414,11 +412,12 @@ vertical-align: middle;
   text-transform: lowercase;
 }
 .noFacilities {
-  color: #6b7280;
+  color: #000000;
   font-family: Inter;
   font-size: 14px;
   font-weight: 300;
   line-height: 20px;
+  letter-spacing: 0px;
 }
 .freeList {
   display: flex;
@@ -426,15 +425,15 @@ vertical-align: middle;
   gap: 10px;
 }
 .freeList li {
- font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0px;
-vertical-align: middle;
-color:#1E3A8A;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #1e3a8a;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -453,50 +452,50 @@ color:#1E3A8A;
 }
 
 .topTextHeadAddress img {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .topTextHeadAddress span {
-font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-text-transform: uppercase;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
 
   text-transform: uppercase;
-  color: #4A5565;
+  color: #4a5565;
 }
-.ReviewCount{
+.ReviewCount {
   font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 13px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-color:#6B7280;
-display: flex;
-gap: 4px;
-align-items: center;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #6b7280;
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
-.ReviewCount span{
+.ReviewCount span {
   font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-vertical-align: middle;
-padding: 2px 4px;
-color :#ffffff;
-background-color: #4E8729;
-border-radius: 2px;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  padding: 2px 4px;
+  color: #ffffff;
+  background-color: #4e8729;
+  border-radius: 2px;
 }
 
 .tagsContainer {
@@ -565,24 +564,23 @@ border-radius: 2px;
 
 .ListViewCardTextBottom {
   display: flex;
-  flex-direction: column;   /* Stack items vertically */
-       /* Center items horizontally */
+  flex-direction: column; /* Stack items vertically */
+  /* Center items horizontally */
   justify-content: flex-end; /* Push items to the bottom */
-  gap:12px;
-
+  gap: 12px;
 }
 
-.cardViewCardTextBottom{
-   display: flex;
-  flex-direction: row;   /* Stack items vertically */
-       /* Center items horizontally */
+.cardViewCardTextBottom {
+  display: flex;
+  flex-direction: row; /* Stack items vertically */
+  /* Center items horizontally */
   justify-content: space-between; /* Push items to the bottom */
-  gap:12px;
+  gap: 12px;
   align-items: end;
 }
-.cardpriceContainer{
-    display: flex;
-    flex-direction: column;
+.cardpriceContainer {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
 
   min-width: 100px;
@@ -594,7 +592,6 @@ border-radius: 2px;
   flex-direction: column;
   /* min-width: 132px; */
   align-items: flex-end;
- 
 }
 
 .priceSec {
@@ -602,13 +599,25 @@ border-radius: 2px;
   font-weight: 400;
   font-style: Regular;
   font-size: 22.75px;
-  line-height: 1.18;
+  line-height: 100%;
   letter-spacing: -2%;
   vertical-align: middle;
   text-transform: uppercase;
-   white-space: nowrap;
+  white-space: nowrap;
   text-align: end;
   color: #000000;
+}
+
+.ListViewCardContainer .priceSec {
+  font-size: 28px;
+}
+
+.ListViewCardContainer .freeList li {
+  font-weight: 500;
+}
+.ListViewCardContainer .totalPrice span{
+  font-size: 14px;
+  line-height: 14px;
 }
 
 .priceSec span {
@@ -639,8 +648,8 @@ border-radius: 2px;
 .totalPrice span {
   font-family: Antic Didone;
   font-weight: 400;
-  font-size: 14px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 11.38px;
   letter-spacing: -2%;
   vertical-align: middle;
   text-transform: uppercase;
@@ -679,20 +688,21 @@ border-radius: 2px;
   height: 41px;
   padding: 12px 24px;
   background-color: #000033;
-white-space: nowrap;
+  white-space: nowrap;
   font-family: var(--font-inter);
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
+  letter-spacing: -2%;
   vertical-align: middle;
   text-transform: uppercase;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
 }
-.bookNowBtn2{
+.bookNowBtn2 {
   max-width: 170px;
-   padding: 12px 12px;
+  padding: 12px 24px;
 }
 
 .bookNowBtn:hover {
@@ -997,9 +1007,8 @@ white-space: nowrap;
   /* .gridCardText {
     height: auto;
   } */
-    .bookNowBtn{
-    padding:12px 12px;
-
+  .bookNowBtn {
+    padding: 12px 12px;
   }
 }
 @media (max-width: 1747px) {
@@ -1013,14 +1022,12 @@ white-space: nowrap;
     max-width: 177px;
     padding: 12px 9px;
   }
- 
 }
 
 @media (max-width: 1665px) {
   .topTextHead h2 {
     font-size: 18px;
   }
-
 }
 
 @media (max-width: 1600px) {
@@ -1057,15 +1064,14 @@ white-space: nowrap;
   .bookNowBtn {
     max-width: 144px;
   }
-  .cardpriceContainer{
+  .cardpriceContainer {
     min-width: 112px;
-}
+  }
 }
 @media (max-width: 1480px) {
-   .priceSec {
+  .priceSec {
     font-size: 23px;
   }
-
 }
 
 @media (max-width: 1180px) {
@@ -1075,13 +1081,12 @@ white-space: nowrap;
 }
 
 @media (max-width: 1440px) {
-    .ListViewCardImageContainer {
-        height: auto;
-    }
-    .ListViewCardText{
-        justify-content: space-between;
-    }
-    
+  .ListViewCardImageContainer {
+    height: auto;
+  }
+  .ListViewCardText {
+    justify-content: space-between;
+  }
 }
 @media (max-width: 1400px) {
   .topTextHeadAddress span {
@@ -1131,103 +1136,100 @@ white-space: nowrap;
 }
 
 @media (max-width: 1080px) {
-    .bookNowBtn{
-        max-width: 124px;
-    }
-    .priceSec{
-        font-size: 22px;
-    }
-    .totalPrice span{
-        font-size: 11px;
-    }
-    .gridWrapper{
-        /* grid-template-columns: repeat(1, 1fr); */
-    }
-    .emptyState {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .emptyStateImage {
-        width: 180px;
-        max-width: 100%;
-        flex-basis: auto;
-    }
-    .ListViewCardContainer{
-        gap: 16px;
-    }
-    .ListViewCardText{
-        padding-right: 16px;
-    }
-    .ListViewCardImageContainer{
-        max-width: 212px;
-    }
-    .ListViewCardHeader{
-        padding: 10px 8px;
-    }
+  .bookNowBtn {
+    max-width: 124px;
+  }
+  .priceSec {
+    font-size: 22px;
+  }
+  .totalPrice span {
+    font-size: 11px;
+  }
+  .gridWrapper {
+    /* grid-template-columns: repeat(1, 1fr); */
+  }
+  .emptyState {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .emptyStateImage {
+    width: 180px;
+    max-width: 100%;
+    flex-basis: auto;
+  }
+  .ListViewCardContainer {
+    gap: 16px;
+  }
+  .ListViewCardText {
+    padding-right: 16px;
+  }
+  .ListViewCardImageContainer {
+    max-width: 212px;
+  }
+  .ListViewCardHeader {
+    padding: 10px 8px;
+  }
 }
-
 
 /* @media (max-width: 1024px) {
     
 } */
 
-@media (max-width: 991px){
-    .ListViewCardImageContainer{
-        max-width: 198px;
-    }
-    .ListViewCardText{
-        padding: 16px;
-        padding-left: 0;
-        gap: 14px;
-    }
-    .ListViewCardContainer{
-        gap: 12px;
-    }
-    .ListViewBookNowBtn{
-       max-width: 120px;
-       font-size: 10px;
-       height: 34px; 
-    }
- 
+@media (max-width: 991px) {
+  .ListViewCardImageContainer {
+    max-width: 198px;
+  }
+  .ListViewCardText {
+    padding: 16px;
+    padding-left: 0;
+    gap: 14px;
+  }
+  .ListViewCardContainer {
+    gap: 12px;
+  }
+  .ListViewBookNowBtn {
+    max-width: 120px;
+    font-size: 10px;
+    height: 34px;
+  }
 }
 @media (max-width: 900px) {
-   .gridWrapper{
-        /* grid-template-columns: repeat(1, minmax(0, 1fr)); */
-    }
-    .cardViewCardTextBottom{
-      flex-direction: column;
-    }
-    .bookNowBtn{
-      max-width: 100%;
-    }
-    .cardpriceContainer{
-      justify-content: space-between;
-      flex-direction: row;
-      width: 100%;
-    }
-    .gridCardText{
-     max-height: 300px;
-    }
+  .gridWrapper {
+    /* grid-template-columns: repeat(1, minmax(0, 1fr)); */
+  }
+  .cardViewCardTextBottom {
+    flex-direction: column;
+  }
+  .bookNowBtn {
+    max-width: 100%;
+  }
+  .cardpriceContainer {
+    justify-content: space-between;
+    flex-direction: row;
+    width: 100%;
+  }
+  .gridCardText {
+    max-height: 300px;
+  }
 }
 
-
 @media (max-width: 831px) {
-    .ListViewPriceSec{
-        font-size: 20px;
-    }
-    .ListViewTotalPrice span{
-        font-size: 10px;
-    }
-    .freeList li{
-        font-size: 11px;
-    }
-    .ListViewBookNowBtn{
-        max-width: 105px;
-    }
-    .ListViewCardText{
-        padding: 10px;
-        padding-left: 0;
-    }
+  .ListViewPriceSec {
+    font-size: 20px;
+  }
+  .ListViewTotalPrice span {
+    font-size: 10px;
+  }
+  .freeList li {
+    font-size: 11px;
+  }
+  .ListViewBookNowBtn {
+    max-width: 105px;
+  }
+  .ListViewCardText {
+    padding: 10px;
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 430px) {

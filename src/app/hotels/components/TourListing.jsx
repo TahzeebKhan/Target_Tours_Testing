@@ -146,15 +146,14 @@ const getHotelSearchMeta = (...sources) => {
       return "";
     };
     const searchId = findMetaValue("searchId", "search_id", "searchid");
-    const hotelSearchId =
-      findMetaValue(
-        "hotelSearchId",
-        "hotel_search_id",
-        "HotelSearchId",
-        "hotelSearchID",
-        "hotel_search_key",
-        "hotelSearchKey",
-      );
+    const hotelSearchId = findMetaValue(
+      "hotelSearchId",
+      "hotel_search_id",
+      "HotelSearchId",
+      "hotelSearchID",
+      "hotel_search_key",
+      "hotelSearchKey",
+    );
     const requestId = findMetaValue("requestId", "request_id");
     const hotelSearchKey = findMetaValue("hotel_search_key", "hotelSearchKey");
 
@@ -181,7 +180,9 @@ export const getHotelsFromMessage = (payload = {}) => {
   const content = getMessageContent(payload);
   const nestedData = parseSocketValue(data?.data);
   const nestedDataContent = parseSocketValue(nestedData?.content);
-  const nestedContent = parseSocketValue(content?.content || content?.data?.content);
+  const nestedContent = parseSocketValue(
+    content?.content || content?.data?.content,
+  );
   const mergedHotels =
     data?.mergedHotels ||
     content?.mergedHotels ||
@@ -243,7 +244,7 @@ export const getHotelsFromMessage = (payload = {}) => {
 };
 
 export const getHotelImage = (hotel = {}) => {
-  console.log("hotel",hotel)
+  console.log("hotel", hotel);
   const image =
     hotel.image ||
     hotel.imageUrl ||
@@ -411,7 +412,8 @@ export const getHotelReviewSummary = (hotel = {}) => {
     reviewSummary.reviewCount,
     reviewSummary.totalReviews,
     firstReview.count,
-    reviews.length && reviews.some((review) => review.comment || review.review || review.text)
+    reviews.length &&
+      reviews.some((review) => review.comment || review.review || review.text)
       ? reviews.length
       : "",
   );
@@ -487,7 +489,8 @@ const pickProviderValue = (value) => {
 };
 
 export const getHotelPriceProvider = (hotel = {}) => {
-  const directProvider = pickProviderValue(hotel.priceProvider) ||
+  const directProvider =
+    pickProviderValue(hotel.priceProvider) ||
     pickProviderValue(hotel.price_provider) ||
     pickProviderValue(hotel.providerName) ||
     pickProviderValue(hotel.provider_name) ||
@@ -560,7 +563,8 @@ export const getHotelDetailsPayload = (hotel = {}) => ({
       hotel.raw?.api_hotel_id ||
       "",
   ).trim(),
-  priceProvider: getHotelPriceProvider(hotel) || getHotelPriceProvider(hotel.raw),
+  priceProvider:
+    getHotelPriceProvider(hotel) || getHotelPriceProvider(hotel.raw),
 });
 
 export const normalizeHotelCard = (hotel = {}, index = 0) => {
@@ -586,9 +590,7 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
   const reviewScore = reviewSummary.score ?? rating;
 
   return {
-    id:
-      hotelId ||
-      `${hotel.name || "hotel"}-${index}`,
+    id: hotelId || `${hotel.name || "hotel"}-${index}`,
     hotelId: hotelId ? String(hotelId) : "",
     searchId: hotel.searchId || hotel.search_id || "",
     hotelSearchId:
@@ -815,7 +817,11 @@ const getHotelFailureMessage = (payload = {}) => {
     return "";
   };
 
-  const candidates = [payload, getMessageData(payload), getMessageContent(payload)];
+  const candidates = [
+    payload,
+    getMessageData(payload),
+    getMessageContent(payload),
+  ];
   const hasFailure = candidates.some((item) => {
     const parsedItem = parseSocketValue(item);
 
@@ -1008,62 +1014,100 @@ const buildHotelFilterCounts = (hotels = []) => {
 
     if (price !== null) {
       if (price < 2500) incrementCount(counts, "priceBuckets", "0-2500");
-      else if (price < 4500) incrementCount(counts, "priceBuckets", "2500-4500");
-      else if (price < 7000) incrementCount(counts, "priceBuckets", "4500-7000");
-      else if (price < 11000) incrementCount(counts, "priceBuckets", "7000-11000");
-      else if (price < 17000) incrementCount(counts, "priceBuckets", "11000-17000");
+      else if (price < 4500)
+        incrementCount(counts, "priceBuckets", "2500-4500");
+      else if (price < 7000)
+        incrementCount(counts, "priceBuckets", "4500-7000");
+      else if (price < 11000)
+        incrementCount(counts, "priceBuckets", "7000-11000");
+      else if (price < 17000)
+        incrementCount(counts, "priceBuckets", "11000-17000");
       else incrementCount(counts, "priceBuckets", "17000+");
     }
 
-    if (hasText(hotel, "breakfast")) incrementCount(counts, "suggested", "breakfastIncluded");
-    if (hasText(hotel, "deal", "discount")) incrementCount(counts, "suggested", "lastMinuteDeals");
-    if (hasText(hotel, "reward")) incrementCount(counts, "suggested", "oneClickRewards");
+    if (hasText(hotel, "breakfast"))
+      incrementCount(counts, "suggested", "breakfastIncluded");
+    if (hasText(hotel, "deal", "discount"))
+      incrementCount(counts, "suggested", "lastMinuteDeals");
+    if (hasText(hotel, "reward"))
+      incrementCount(counts, "suggested", "oneClickRewards");
 
-    if (hasText(hotel, "homestay")) incrementCount(counts, "propertyType", "homestay");
-    else if (hasText(hotel, "villa")) incrementCount(counts, "propertyType", "villa");
-    else if (hasText(hotel, "cottage")) incrementCount(counts, "propertyType", "cottage");
-    else if (hasText(hotel, "resort")) incrementCount(counts, "propertyType", "resort");
-    else if (hasText(hotel, "apartment")) incrementCount(counts, "propertyType", "apartment");
-    else if (hasText(hotel, "hostel")) incrementCount(counts, "propertyType", "hostel");
-    else if (hasText(hotel, "guest house")) incrementCount(counts, "propertyType", "guestHouse");
+    if (hasText(hotel, "homestay"))
+      incrementCount(counts, "propertyType", "homestay");
+    else if (hasText(hotel, "villa"))
+      incrementCount(counts, "propertyType", "villa");
+    else if (hasText(hotel, "cottage"))
+      incrementCount(counts, "propertyType", "cottage");
+    else if (hasText(hotel, "resort"))
+      incrementCount(counts, "propertyType", "resort");
+    else if (hasText(hotel, "apartment"))
+      incrementCount(counts, "propertyType", "apartment");
+    else if (hasText(hotel, "hostel"))
+      incrementCount(counts, "propertyType", "hostel");
+    else if (hasText(hotel, "guest house"))
+      incrementCount(counts, "propertyType", "guestHouse");
     else incrementCount(counts, "propertyType", "hotel");
 
     if (hasText(hotel, "garden")) incrementCount(counts, "roomViews", "garden");
-    if (hasText(hotel, "mountain")) incrementCount(counts, "roomViews", "mountain");
+    if (hasText(hotel, "mountain"))
+      incrementCount(counts, "roomViews", "mountain");
     if (hasText(hotel, "valley")) incrementCount(counts, "roomViews", "valley");
     if (hasText(hotel, "lake")) incrementCount(counts, "roomViews", "lake");
     if (hasText(hotel, "city")) incrementCount(counts, "roomViews", "city");
     if (hasText(hotel, "forest")) incrementCount(counts, "roomViews", "forest");
 
-    if (hasText(hotel, "balcony")) incrementCount(counts, "roomAmenities", "balcony");
-    if (hasText(hotel, "bathtub")) incrementCount(counts, "roomAmenities", "bathtub");
-    if (hasText(hotel, "fireplace")) incrementCount(counts, "roomAmenities", "fireplace");
-    if (hasText(hotel, "kitchenette", "kitchen")) incrementCount(counts, "roomAmenities", "kitchenette");
-    if (hasText(hotel, "coffee")) incrementCount(counts, "roomAmenities", "coffeeMachine");
-    if (hasText(hotel, "room service")) incrementCount(counts, "roomAmenities", "roomService");
-    if (hasText(hotel, "private pool")) incrementCount(counts, "roomAmenities", "privatePool");
-    if (hasText(hotel, "jacuzzi")) incrementCount(counts, "roomAmenities", "jacuzzi");
-    if (hasText(hotel, "air conditioning")) incrementCount(counts, "roomAmenities", "airConditioning");
-    if (hasText(hotel, "mini bar", "minibar")) incrementCount(counts, "roomAmenities", "miniBar");
-    if (hasText(hotel, "smart tv")) incrementCount(counts, "roomAmenities", "smartTv");
+    if (hasText(hotel, "balcony"))
+      incrementCount(counts, "roomAmenities", "balcony");
+    if (hasText(hotel, "bathtub"))
+      incrementCount(counts, "roomAmenities", "bathtub");
+    if (hasText(hotel, "fireplace"))
+      incrementCount(counts, "roomAmenities", "fireplace");
+    if (hasText(hotel, "kitchenette", "kitchen"))
+      incrementCount(counts, "roomAmenities", "kitchenette");
+    if (hasText(hotel, "coffee"))
+      incrementCount(counts, "roomAmenities", "coffeeMachine");
+    if (hasText(hotel, "room service"))
+      incrementCount(counts, "roomAmenities", "roomService");
+    if (hasText(hotel, "private pool"))
+      incrementCount(counts, "roomAmenities", "privatePool");
+    if (hasText(hotel, "jacuzzi"))
+      incrementCount(counts, "roomAmenities", "jacuzzi");
+    if (hasText(hotel, "air conditioning"))
+      incrementCount(counts, "roomAmenities", "airConditioning");
+    if (hasText(hotel, "mini bar", "minibar"))
+      incrementCount(counts, "roomAmenities", "miniBar");
+    if (hasText(hotel, "smart tv"))
+      incrementCount(counts, "roomAmenities", "smartTv");
 
-    if (hasText(hotel, "wi-fi", "wifi", "internet")) incrementCount(counts, "hotelAmenities", "wifi");
-    if (hasText(hotel, "pool")) incrementCount(counts, "hotelAmenities", "swimmingPool");
+    if (hasText(hotel, "wi-fi", "wifi", "internet"))
+      incrementCount(counts, "hotelAmenities", "wifi");
+    if (hasText(hotel, "pool"))
+      incrementCount(counts, "hotelAmenities", "swimmingPool");
     if (hasText(hotel, "spa")) incrementCount(counts, "hotelAmenities", "spa");
-    if (hasText(hotel, "gym", "fitness")) incrementCount(counts, "hotelAmenities", "gym");
-    if (hasText(hotel, "restaurant")) incrementCount(counts, "hotelAmenities", "restaurant");
+    if (hasText(hotel, "gym", "fitness"))
+      incrementCount(counts, "hotelAmenities", "gym");
+    if (hasText(hotel, "restaurant"))
+      incrementCount(counts, "hotelAmenities", "restaurant");
     if (hasText(hotel, "bar")) incrementCount(counts, "hotelAmenities", "bar");
-    if (hasText(hotel, "parking")) incrementCount(counts, "hotelAmenities", "parking");
-    if (hasText(hotel, "shuttle")) incrementCount(counts, "hotelAmenities", "airportShuttle");
-    if (hasText(hotel, "pet")) incrementCount(counts, "hotelAmenities", "petFriendly");
-    if (hasText(hotel, "business")) incrementCount(counts, "hotelAmenities", "businessCentre");
-    if (hasText(hotel, "laundry")) incrementCount(counts, "hotelAmenities", "laundry");
+    if (hasText(hotel, "parking"))
+      incrementCount(counts, "hotelAmenities", "parking");
+    if (hasText(hotel, "shuttle"))
+      incrementCount(counts, "hotelAmenities", "airportShuttle");
+    if (hasText(hotel, "pet"))
+      incrementCount(counts, "hotelAmenities", "petFriendly");
+    if (hasText(hotel, "business"))
+      incrementCount(counts, "hotelAmenities", "businessCentre");
+    if (hasText(hotel, "laundry"))
+      incrementCount(counts, "hotelAmenities", "laundry");
 
-    if (hasText(hotel, "marriott")) incrementCount(counts, "hotelChains", "marriott");
-    if (hasText(hotel, "hilton")) incrementCount(counts, "hotelChains", "hilton");
+    if (hasText(hotel, "marriott"))
+      incrementCount(counts, "hotelChains", "marriott");
+    if (hasText(hotel, "hilton"))
+      incrementCount(counts, "hotelChains", "hilton");
     if (hasText(hotel, "ihg")) incrementCount(counts, "hotelChains", "ihg");
     if (hasText(hotel, "hyatt")) incrementCount(counts, "hotelChains", "hyatt");
-    if (hasText(hotel, "radisson")) incrementCount(counts, "hotelChains", "radisson");
+    if (hasText(hotel, "radisson"))
+      incrementCount(counts, "hotelChains", "radisson");
     if (hasText(hotel, "accor")) incrementCount(counts, "hotelChains", "accor");
     if (hasText(hotel, "taj")) incrementCount(counts, "hotelChains", "taj");
   });
@@ -1252,10 +1296,7 @@ const getFacilityIcon = (name = "") => {
     return "/icons/AirConditioning.svg";
   }
 
-  if (
-    normalizedName.includes("wifi") ||
-    normalizedName.includes("internet")
-  ) {
+  if (normalizedName.includes("wifi") || normalizedName.includes("internet")) {
     return "/icons/Wifi.svg";
   }
 
@@ -1457,7 +1498,9 @@ export const getStaySummary = (searchParams) => {
     Number.isFinite(checkOutDate.getTime())
       ? Math.max(
           1,
-          Math.round((checkOutDate.getTime() - checkInDate.getTime()) / 86400000),
+          Math.round(
+            (checkOutDate.getTime() - checkInDate.getTime()) / 86400000,
+          ),
         )
       : 1;
   const guestParts = [];
@@ -1614,7 +1657,9 @@ const TourListing = () => {
   const [hotelResults, setHotelResults] = useState([]);
   const [apiFilterData, setApiFilterData] = useState(null);
   const [totalHotelResults, setTotalHotelResults] = useState(0);
-  const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
+  const [isHotelLoading, setIsHotelLoading] = useState(
+    Boolean(hotelSearchChannel),
+  );
   const [hotelResultSource, setHotelResultSource] = useState("");
   const [socketSearchMeta, setSocketSearchMeta] = useState({
     searchId: "",
@@ -1625,7 +1670,9 @@ const TourListing = () => {
     hotelSearchId: "",
   });
   const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
-  const [isFilterLoading, setIsFilterLoading] = useState(Boolean(hotelSearchChannel));
+  const [isFilterLoading, setIsFilterLoading] = useState(
+    Boolean(hotelSearchChannel),
+  );
   const [filterRetryNonce, setFilterRetryNonce] = useState(0);
   const [filterRefreshNonce, setFilterRefreshNonce] = useState(0);
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
@@ -1653,12 +1700,13 @@ const TourListing = () => {
       country: params.get("country") || "",
       state: params.get("state") || "",
       hotelSearchId:
-        params.get("hotelSearchId") ||
-        params.get("hotelsearchid") ||
-        "",
+        params.get("hotelSearchId") || params.get("hotelsearchid") || "",
     };
   }, [searchQueryString]);
-  const staySummary = useMemo(() => getStaySummary(searchParams), [searchParams]);
+  const staySummary = useMemo(
+    () => getStaySummary(searchParams),
+    [searchParams],
+  );
   const searchIdFromUrl =
     searchParams.get("searchId") ||
     searchParams.get("searchid") ||
@@ -1669,7 +1717,9 @@ const TourListing = () => {
 
     if (searchIdFromUrl) return searchIdFromUrl;
 
-    const hotelSearchId = hotelResults.find((hotel) => hotel.searchId)?.searchId;
+    const hotelSearchId = hotelResults.find(
+      (hotel) => hotel.searchId,
+    )?.searchId;
     if (hotelSearchId) return hotelSearchId;
 
     const storedHotelSearch = readStoredHotelSearch() || {};
@@ -1682,7 +1732,12 @@ const TourListing = () => {
       findDeepValue(storedHotelResults, "search_id") ||
       ""
     );
-  }, [hotelResults, hotelSearchChannel, searchIdFromUrl, socketSearchMeta.searchId]);
+  }, [
+    hotelResults,
+    hotelSearchChannel,
+    searchIdFromUrl,
+    socketSearchMeta.searchId,
+  ]);
   const filterSearchId = hotelSearchChannel
     ? mergedFilterSearchMeta.searchId
     : activeSearchId;
@@ -1715,7 +1770,12 @@ const TourListing = () => {
       country: filterSearchParams.country,
       state: filterSearchParams.state,
     }),
-    [filterHotelSearchId, filterSearchId, filterSearchParams, hotelSearchChannel],
+    [
+      filterHotelSearchId,
+      filterSearchId,
+      filterSearchParams,
+      hotelSearchChannel,
+    ],
   );
   const filterDataRequestKey = useMemo(
     () => JSON.stringify(filterDataPayload),
@@ -1772,7 +1832,7 @@ const TourListing = () => {
   };
 
   const handleBookNow = async (hotel) => {
-     console.log("handleBookNow called with hotel:", hotel);
+    console.log("handleBookNow called with hotel:", hotel);
     if (!hotel) return;
 
     hotelDetailsAbortRef.current?.abort();
@@ -1785,7 +1845,12 @@ const TourListing = () => {
     const payload = getHotelDetailsRequest(hotel, searchParams);
     const loadingKey = getHotelLoadingKey(hotel);
 
-    if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
+    if (
+      !payload.searchId ||
+      !payload.hotelSearchId ||
+      !payload.hotelId ||
+      !payload.priceProvider
+    ) {
       console.warn("Missing hotel details payload fields:", payload);
       if (hotelDetailsRequestRef.current === requestId) {
         setLoadingHotelDetailsId("");
@@ -1872,7 +1937,9 @@ const TourListing = () => {
 
       const firstBatch = hotels
         .slice(0, FIRST_HOTEL_RENDER_BATCH_SIZE)
-        .map((hotel, index) => normalizeHotelCard(withSearchMeta(hotel), index));
+        .map((hotel, index) =>
+          normalizeHotelCard(withSearchMeta(hotel), index),
+        );
 
       setHotelResults(firstBatch);
       setIsHotelLoading(false);
@@ -1939,7 +2006,10 @@ const TourListing = () => {
       }
 
       const nextResults = getHotelsFromMessage(payload);
-      const filterMeta = getFilterSearchMetaFromPayload(payload, nextResults.hotels);
+      const filterMeta = getFilterSearchMetaFromPayload(
+        payload,
+        nextResults.hotels,
+      );
       const firstResultWithMeta = nextResults.hotels.find(
         (hotel) =>
           hotel?.searchId ||
@@ -1974,7 +2044,9 @@ const TourListing = () => {
         }));
         latestFilterSearchMetaRef.current = {
           searchId: filterMeta.searchId,
-          hotelSearchId: filterMeta.hotelSearchId || latestFilterSearchMetaRef.current.hotelSearchId,
+          hotelSearchId:
+            filterMeta.hotelSearchId ||
+            latestFilterSearchMetaRef.current.hotelSearchId,
         };
         if (lastMergedFilterPayloadKeyRef.current !== nextMergedFilterPayloadKey) {
           lastMergedFilterPayloadKeyRef.current = nextMergedFilterPayloadKey;
@@ -2030,11 +2102,16 @@ const TourListing = () => {
 
     window.addEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
 
-    const cachedResults = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    const cachedResults = window.sessionStorage.getItem(
+      HOTEL_SEARCH_RESULTS_KEY,
+    );
     if (cachedResults) {
       try {
         const cachedPayload = JSON.parse(cachedResults);
-        if (!hotelSearchChannel || cachedPayload?.channel === hotelSearchChannel) {
+        if (
+          !hotelSearchChannel ||
+          cachedPayload?.channel === hotelSearchChannel
+        ) {
           applyHotelResults(cachedPayload, { fromCache: true });
         }
       } catch {
@@ -2044,7 +2121,10 @@ const TourListing = () => {
 
     return () => {
       normalizeRunRef.current += 1;
-      window.removeEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+      window.removeEventListener(
+        HOTEL_SEARCH_RESULTS_EVENT,
+        handleHotelResults,
+      );
     };
   }, [hotelSearchChannel]);
 
@@ -2083,7 +2163,8 @@ const TourListing = () => {
     const latestPayload = {
       ...filterDataPayload,
       searchId: latestSearchId,
-      hotelSearchId: latestMeta.hotelSearchId || filterDataPayload.hotelSearchId,
+      hotelSearchId:
+        latestMeta.hotelSearchId || filterDataPayload.hotelSearchId,
     };
 
     fetchHotelFilterData(latestSearchId, {
@@ -2134,13 +2215,9 @@ const TourListing = () => {
     hotelSearchChannel,
   ]);
 
-
   const hasActiveHotelSearch = Boolean(hotelSearchChannel);
   const sourceHotels = useMemo(
-    () =>
-      hotelResults.length || hasActiveHotelSearch
-        ? hotelResults
-        : [],
+    () => (hotelResults.length || hasActiveHotelSearch ? hotelResults : []),
     [hasActiveHotelSearch, hotelResults],
   );
 
@@ -2281,11 +2358,7 @@ const TourListing = () => {
   }, [displayHotels.length, scrollState, viewType]);
 
   const visibleHotels = useMemo(
-    () =>
-      displayHotels.slice(
-        virtualWindow.startIndex,
-        virtualWindow.endIndex,
-      ),
+    () => displayHotels.slice(virtualWindow.startIndex, virtualWindow.endIndex),
     [displayHotels, virtualWindow.endIndex, virtualWindow.startIndex],
   );
 
@@ -2297,7 +2370,9 @@ const TourListing = () => {
     );
   };
   const showEmptyState =
-    !isHotelLoading && !displayHotels.length && Boolean(hotelSearchChannel || hotelResultSource);
+    !isHotelLoading &&
+    !displayHotels.length &&
+    Boolean(hotelSearchChannel || hotelResultSource);
 
   return (
     <>
@@ -2311,301 +2386,329 @@ const TourListing = () => {
           setSort={setSortType}
         />
 
-          {showEmptyState && (
-            <EmptyHotelState locationLabel={searchLocationLabel} />
-          )}
+        {showEmptyState && (
+          <EmptyHotelState locationLabel={searchLocationLabel} />
+        )}
 
+        {/* =================card view==================================================================== */}
 
-          {/* =================card view==================================================================== */}
-
-          {viewType === "grid" && !showEmptyState && (
-            <motion.div
-              className={styles.gridWrapper}
-              key="grid"
-              style={{
-                paddingTop: virtualWindow.paddingTop,
-                paddingBottom: virtualWindow.paddingBottom,
-              }}
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-            >
-              {!displayHotels.length &&
-                isHotelLoading &&
-                skeletonCards.map((item) => (
-                  <div
-                    key={`hotel-grid-skeleton-${item}`}
-                    className={`${styles.gridCard} ${styles.skeletonCard}`}
-                  >
-                    <div className={styles.skeletonImage}></div>
-                    <div className={styles.skeletonContent}>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
-                      <div className={styles.skeletonFeatures}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
-                      <div className={styles.skeletonFooter}>
-                        <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
-                        <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              {visibleHotels.map((item, index) => (
+        {viewType === "grid" && !showEmptyState && (
+          <motion.div
+            className={styles.gridWrapper}
+            key="grid"
+            style={{
+              paddingTop: virtualWindow.paddingTop,
+              paddingBottom: virtualWindow.paddingBottom,
+            }}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {!displayHotels.length &&
+              isHotelLoading &&
+              skeletonCards.map((item) => (
                 <div
-                  key={item?.id || item?.api_hotel_id || item?.title || `hotel-grid-${index}`}
-                  className={styles.gridCard}
+                  key={`hotel-grid-skeleton-${item}`}
+                  className={`${styles.gridCard} ${styles.skeletonCard}`}
                 >
-                  <div className={styles.gridCardImage}>
-                    <img
-                      className={styles.ListViewCardImage}
-                      src={item.image}
-                      alt={item.title}
-                    />
+                  <div className={styles.skeletonImage}></div>
+                  <div className={styles.skeletonContent}>
                     <div
-                      className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
-                    >
-                      <div className={styles.headerLeft}>
-                        <div className={styles.new}>New</div>
-                        <div className={styles.private}>Flagship</div>
-                      </div>
-
-                      <img
-                        src={
-                          likedTours.includes(item.id)
-                            ? "/icons/heartIconFilled.svg"
-                            : "/icons/heartIcon.svg"
-                        }
-                        alt="wishlist"
-                        className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleLike(item.id); // change icon
-                          handleHeartClick(item); // open modal
-                        }}
-                      />
+                      className={`${styles.skeletonLine} ${styles.skeletonStars}`}
+                    ></div>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonTitle}`}
+                    ></div>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonAddress}`}
+                    ></div>
+                    <div className={styles.skeletonFeatures}>
+                      <span></span>
+                      <span></span>
+                      <span></span>
                     </div>
-                  </div>
-                  <div className={styles.gridCardText}>
-                    <div className={styles.cartListTop}>
-                      <div className={styles.ListViewCardTextTop}>
-                        <div className={styles.topTextHead}>
-                          <div className={styles.rating}>
-                           
-                            {[...Array(5)].map((_, index) => (
-                              <img
-                                key={index}
-                                src={
-                                  index < (item.rating ?? rating)
-                                    ? "/icons/conicstar.svg"
-                                    : "/icons/star-gray.svg"
-                                }
-                                alt="star"
-                              />
-                            ))}
-                             <div className={styles.ReviewCount}>
-                              <span>{item.reviewScoreText}</span>
-                               ({item.reviewText})</div>
-                          </div>
-                          <h2>{item.title}</h2>
-
-                          <div className={styles.topTextHeadAddress}>
-                            <img src="/icons/location.svg" alt="" />
-                            <span>{item.route}</span>
-                          </div>
-                        </div>
-                        <HotelFacilities facilities={item.facilities} />
-                        <HotelBenefits benefits={item.benefits} />
-                      </div>
-                    </div>
-
-                    <div className={styles.cardViewCardTextBottom}>
-                      <div className={styles.cardpriceContainer}>
-                        {item.hasPrice ? (
-                          <>
-                            <div className={styles.priceSec}>{item.price}</div>
-
-                            <div className={styles.totalPrice}>
-                              <span>{staySummary}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className={styles.priceLoading}>
-                            <span className={styles.priceLoadingAmount}></span>
-                            <span className={styles.priceLoadingMeta}></span>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        className={`${ styles.bookNowBtn} ${styles.bookNowBtn2}`}
-                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
-                        onClick={() => handleBookNow(item)}
-                      >
-                        {loadingHotelDetailsId === getHotelLoadingKey(item)
-                          ? "LOADING..."
-                          : "SEE AVAILABILITY"}
-                      </button>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}
+                    ></div>
+                    <div className={styles.skeletonFooter}>
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonPrice}`}
+                      ></div>
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonButton}`}
+                      ></div>
                     </div>
                   </div>
                 </div>
               ))}
-            </motion.div>
-            // </div>
-          )}
-{/* =====================================================list view===================================== */}
-
-          {viewType === "list" && !showEmptyState && (
-            <motion.div
-              className={styles.ListViewWrapper}
-              key="list"
-              style={{
-                paddingTop: virtualWindow.paddingTop,
-                paddingBottom: virtualWindow.paddingBottom,
-              }}
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-            >
-              {!displayHotels.length &&
-                isHotelLoading &&
-                skeletonCards.map((item) => (
+            {visibleHotels.map((item, index) => (
+              <div
+                key={
+                  item?.id ||
+                  item?.api_hotel_id ||
+                  item?.title ||
+                  `hotel-grid-${index}`
+                }
+                className={styles.gridCard}
+              >
+                <div className={styles.gridCardImage}>
+                  <img
+                    className={styles.ListViewCardImage}
+                    src={item.image}
+                    alt={item.title}
+                  />
                   <div
-                    key={`hotel-list-skeleton-${item}`}
-                    className={`${styles.ListViewCardContainer} ${styles.skeletonCard}`}
+                    className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
                   >
-                    <div className={styles.skeletonListImage}></div>
-                    <div className={styles.skeletonListContent}>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
-                      <div className={styles.skeletonFeatures}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
-                      <div className={styles.skeletonFooter}>
-                        <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
-                        <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
-                      </div>
+                    <div className={styles.headerLeft}>
+                      <div className={styles.new}>New</div>
+                      <div className={styles.private}>Flagship</div>
                     </div>
-                  </div>
-                ))}
-              {visibleHotels.map((item, index) => (
-                <div
-                  className={styles.ListViewCardContainer}
-                  key={item.id}
-                >
-                  <div className={styles.ListViewCardImageContainer}>
+
                     <img
-                      src={item.image}
-                      alt={item.title}
-                      className={styles.ListViewCardImage}
+                      src={
+                        likedTours.includes(item.id)
+                          ? "/icons/heartIconFilled.svg"
+                          : "/icons/heartIcon.svg"
+                      }
+                      alt="wishlist"
+                      className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(item.id); // change icon
+                        handleHeartClick(item); // open modal
+                      }}
                     />
-
-                    <div
-                      className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
-                    >
-                      <div className={styles.headerLeft}>
-                        <div className={styles.new}>New</div>
-                        <div className={styles.private}>Flagship</div>
-                      </div>
-
-                      <img
-                        src={
-                          likedTours.includes(item.id)
-                            ? "/icons/heartIconFilled.svg"
-                            : "/icons/heartIcon.svg"
-                        }
-                        alt="wishlist"
-                        className={styles.heartIcon}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleLike(item.id); // change icon
-                          handleHeartClick(item); // open modal
-                        }}
-                      />
-                    </div>
                   </div>
-
-                  <div className={styles.ListViewCardText}>
-                    <div className={styles.cartListTop}>
-                      <div className={styles.ListViewCardTextTop}>
-                        <div className={styles.topTextHead}>
-                          <div className={styles.rating}>
-                            {[...Array(5)].map((_, index) => (
-                              <img
-                                key={index}
-                                src={
-                                  index < (item.rating ?? rating)
-                                    ? "/icons/conicstar.svg"
-                                    : "/icons/star-gray.svg"
-                                }
-                                alt="star"
-                              />
-                            ))}
-                              <div className={styles.ReviewCount}>
-                            <span>{item.reviewScoreText}</span>
-                            ({item.reviewText})
-                          </div>
-                          </div>
-                          <h2>{item.title}</h2>
-                        
-
-                          <div className={styles.topTextHeadAddress}>
-                            <img src="/icons/location.svg" alt="" />
-                            <span>{item.route}</span>
+                </div>
+                <div className={styles.gridCardText}>
+                  <div className={styles.cartListTop}>
+                    <div className={styles.ListViewCardTextTop}>
+                      <div className={styles.topTextHead}>
+                        <div className={styles.rating}>
+                          {[...Array(5)].map((_, index) => (
+                            <img
+                              key={index}
+                              src={
+                                index < (item.rating ?? rating)
+                                  ? "/icons/conicstar.svg"
+                                  : "/icons/star-gray.svg"
+                              }
+                              alt="star"
+                            />
+                          ))}
+                          <div className={styles.ReviewCount}>
+                            <span>{item.reviewScoreText}</span>(
+                            {item.reviewText})
                           </div>
                         </div>
-                        <HotelFacilities facilities={item.facilities} />
-                        <HotelBenefits benefits={item.benefits} />
+                        <h2>{item.title}</h2>
+
+                        <div className={styles.topTextHeadAddress}>
+                          <img src="/icons/location.svg" alt="" />
+                          <span>{item.route}</span>
+                        </div>
                       </div>
+                      <HotelFacilities facilities={item.facilities} />
+                      <HotelBenefits benefits={item.benefits} />
+                    </div>
+                  </div>
+
+                  <div className={styles.cardViewCardTextBottom}>
+                    <div className={styles.cardpriceContainer}>
+                      {item.hasPrice ? (
+                        <>
+                          <div className={styles.priceSec}>{item.price}</div>
+
+                          <div className={styles.totalPrice}>
+                            <span>{staySummary}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.priceLoading}>
+                          <span className={styles.priceLoadingAmount}></span>
+                          <span className={styles.priceLoadingMeta}></span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className={styles.ListViewCardTextBottom}>
-                      <div className={styles.priceContainer}>
-                        {item.hasPrice ? (
-                          <>
-                            <div
-                              className={`${styles.priceSec} ${styles.ListViewPriceSec}`}
-                            >
-                              {item.price}
-                            </div>
+                    <button
+                      className={`${styles.bookNowBtn} ${styles.bookNowBtn2}`}
+                      disabled={
+                        loadingHotelDetailsId === getHotelLoadingKey(item)
+                      }
+                      onClick={() => handleBookNow(item)}
+                    >
+                      {loadingHotelDetailsId === getHotelLoadingKey(item)
+                        ? "LOADING..."
+                        : "SEE AVAILABILITY"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+          // </div>
+        )}
+        {/* =====================================================list view===================================== */}
 
-                            <div
-                              className={`${styles.totalPrice} ${styles.ListViewTotalPrice}`}
-                            >
-                              <span>{staySummary}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className={styles.priceLoading}>
-                            <span className={styles.priceLoadingAmount}></span>
-                            <span className={styles.priceLoadingMeta}></span>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
-                        disabled={loadingHotelDetailsId === getHotelLoadingKey(item)}
-                        onClick={() => handleBookNow(item)}
-                      >
-                        {loadingHotelDetailsId === getHotelLoadingKey(item)
-                          ? "LOADING..."
-                          : "SEE AVAILABILITY"}
-                      </button>
+        {viewType === "list" && !showEmptyState && (
+          <motion.div
+            className={styles.ListViewWrapper}
+            key="list"
+            style={{
+              paddingTop: virtualWindow.paddingTop,
+              paddingBottom: virtualWindow.paddingBottom,
+            }}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {!displayHotels.length &&
+              isHotelLoading &&
+              skeletonCards.map((item) => (
+                <div
+                  key={`hotel-list-skeleton-${item}`}
+                  className={`${styles.ListViewCardContainer} ${styles.skeletonCard}`}
+                >
+                  <div className={styles.skeletonListImage}></div>
+                  <div className={styles.skeletonListContent}>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonStars}`}
+                    ></div>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonTitle}`}
+                    ></div>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonAddress}`}
+                    ></div>
+                    <div className={styles.skeletonFeatures}>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div
+                      className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}
+                    ></div>
+                    <div className={styles.skeletonFooter}>
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonPrice}`}
+                      ></div>
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonButton}`}
+                      ></div>
                     </div>
                   </div>
                 </div>
               ))}
-            </motion.div>
-          )}
+            {visibleHotels.map((item, index) => (
+              <div className={styles.ListViewCardContainer} key={item.id}>
+                <div className={styles.ListViewCardImageContainer}>
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className={styles.ListViewCardImage}
+                  />
+
+                  <div
+                    className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
+                  >
+                    <div className={styles.headerLeft}>
+                      <div className={styles.new}>New</div>
+                      <div className={styles.private}>Flagship</div>
+                    </div>
+
+                    <img
+                      src={
+                        likedTours.includes(item.id)
+                          ? "/icons/heartIconFilled.svg"
+                          : "/icons/heartIcon.svg"
+                      }
+                      alt="wishlist"
+                      className={styles.heartIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(item.id); // change icon
+                        handleHeartClick(item); // open modal
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.ListViewCardText}>
+                  <div className={styles.cartListTop}>
+                    <div className={styles.ListViewCardTextTop}>
+                      <div className={styles.topTextHead}>
+                        <div className={styles.rating}>
+                          {[...Array(5)].map((_, index) => (
+                            <img
+                              key={index}
+                              src={
+                                index < (item.rating ?? rating)
+                                  ? "/icons/conicstar.svg"
+                                  : "/icons/star-gray.svg"
+                              }
+                              alt="star"
+                            />
+                          ))}
+                          <div className={styles.ReviewCount}>
+                            <span>{item.reviewScoreText}</span>(
+                            {item.reviewText})
+                          </div>
+                        </div>
+                        <h2>{item.title}</h2>
+
+                        <div className={styles.topTextHeadAddress}>
+                          <img src="/icons/location.svg" alt="" />
+                          <span>{item.route}</span>
+                        </div>
+                      </div>
+                      <HotelFacilities facilities={item.facilities} />
+                      <HotelBenefits benefits={item.benefits} />
+                    </div>
+                  </div>
+
+                  <div className={styles.ListViewCardTextBottom}>
+                    <div className={styles.priceContainer}>
+                      {item.hasPrice ? (
+                        <>
+                          <div
+                            className={`${styles.priceSec} ${styles.ListViewPriceSec}`}
+                          >
+                            {item.price}
+                          </div>
+
+                          <div
+                            className={`${styles.totalPrice} ${styles.ListViewTotalPrice}`}
+                          >
+                            <span>{staySummary}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.priceLoading}>
+                          <span className={styles.priceLoadingAmount}></span>
+                          <span className={styles.priceLoadingMeta}></span>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
+                      disabled={
+                        loadingHotelDetailsId === getHotelLoadingKey(item)
+                      }
+                      onClick={() => handleBookNow(item)}
+                    >
+                      {loadingHotelDetailsId === getHotelLoadingKey(item)
+                        ? "LOADING..."
+                        : "SEE AVAILABILITY"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
       </section>
       <section className={styles.tourListSectionMobileView}></section>
 
