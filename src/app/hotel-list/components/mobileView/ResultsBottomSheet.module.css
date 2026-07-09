@@ -99,7 +99,22 @@
   .resultsText{
     font-size: 11px;
   }
+
 }
 
+@media (max-width: 350px) {
+  .FilterSorfCont {
+    gap: 8px;
+  }
+
+  .filterText,
+  .sortByText,
+  .viewInMap {
+    font-size: 9px;
+  }
+  .resultsText{
+    font-size: 9px;
+  }
+}
 
 

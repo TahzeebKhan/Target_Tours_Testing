@@ -123,3 +123,23 @@ color:#000033;
     }
    
 }
+
+@media (max-width: 875px) {
+.viewTypeContainer{
+  gap: 6px;
+}
+.result{
+  font-size: 16px;
+}
+.viewTypeButtons{
+  width: 30px;
+  height: 30px;
+}
+}
+
+@media (max-width: 875px) {
+  .viewType{
+    text-align: center;
+  }
+}
+

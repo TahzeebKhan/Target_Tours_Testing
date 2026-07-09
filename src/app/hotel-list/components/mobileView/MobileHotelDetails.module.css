@@ -1,10 +1,10 @@
 /* ================= Trip Details Sticky Header ================= */
 
-.hotelDetailsMobileContainer{
-    width: 100%;
-    min-height: 100dvh;
-    background: #ffffff;
-    overflow: visible;
+.hotelDetailsMobileContainer {
+  width: 100%;
+  min-height: 100dvh;
+  background: #ffffff;
+  overflow: visible;
 }
 
 .hotelDetailsMobileContainer :global([class*="MapSection_mapContainer"]) {
@@ -134,3 +134,5 @@
 .editIcon {
   cursor: pointer;
 }
+
+
