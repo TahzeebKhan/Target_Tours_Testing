@@ -18,7 +18,10 @@ const HotelGridView = ({
   locationLabel = "this location",
   showEmptyState = false,
 }) => {
-  const skeletonCards = useMemo(() => Array.from({ length: 6 }, (_, index) => index), []);
+  const skeletonCards = useMemo(
+    () => Array.from({ length: 6 }, (_, index) => index),
+    [],
+  );
   const shouldShowEmptyState = showEmptyState && !isLoading && !tourData.length;
 
   return (
@@ -26,7 +29,7 @@ const HotelGridView = ({
       className={styles.gridWrapper}
       key="grid"
       layout
-      initial={{ opacity: 0, y:0 }}
+      initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 0 }}
       transition={{ duration: 0.55, ease: "easeInOut" }}
@@ -40,18 +43,30 @@ const HotelGridView = ({
           >
             <div className={styles.skeletonImage}></div>
             <div className={styles.skeletonContent}>
-              <div className={`${styles.skeletonLine} ${styles.skeletonStars}`}></div>
-              <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`}></div>
-              <div className={`${styles.skeletonLine} ${styles.skeletonAddress}`}></div>
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonStars}`}
+              ></div>
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonTitle}`}
+              ></div>
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonAddress}`}
+              ></div>
               <div className={styles.skeletonFeatures}>
                 <span></span>
                 <span></span>
                 <span></span>
               </div>
-              <div className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}></div>
+              <div
+                className={`${styles.skeletonLine} ${styles.skeletonBenefit}`}
+              ></div>
               <div className={styles.skeletonFooter}>
-                <div className={`${styles.skeletonLine} ${styles.skeletonPrice}`}></div>
-                <div className={`${styles.skeletonLine} ${styles.skeletonButton}`}></div>
+                <div
+                  className={`${styles.skeletonLine} ${styles.skeletonPrice}`}
+                ></div>
+                <div
+                  className={`${styles.skeletonLine} ${styles.skeletonButton}`}
+                ></div>
               </div>
             </div>
           </div>
@@ -78,7 +93,12 @@ const HotelGridView = ({
 
         return (
           <div
-            key={item?.id || item?.api_hotel_id || item?.title || `hotel-mobile-grid-${index}`}
+            key={
+              item?.id ||
+              item?.api_hotel_id ||
+              item?.title ||
+              `hotel-mobile-grid-${index}`
+            }
             className={styles.gridCard}
           >
             <div className={styles.gridCardImage}>
@@ -87,7 +107,9 @@ const HotelGridView = ({
                 src={item.image || "/hotelList/hotelImg.jpg"}
                 alt={item.title || "Hotel"}
               />
-              <div className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}>
+              <div
+                className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
+              >
                 <div className={styles.headerLeft}>
                   <div className={styles.new}>New</div>
                   <div className={styles.private}>Flagship</div>

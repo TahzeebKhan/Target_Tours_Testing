@@ -95,7 +95,7 @@
   font-family: Antic Didone;
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
   text-transform: capitalize;
 }
 
@@ -108,7 +108,7 @@
   font-family: Antic Didone;
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
   text-transform: capitalize;
 }
 
@@ -164,7 +164,7 @@
 .ListViewCardTextTop {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .topTextHead {
@@ -202,24 +202,26 @@
 }
 
 .reviewSummary span {
-  padding: 2px 5px;
-  background: #43a047;
+  padding: 2px 4px;
+  background: #4e8729;
   color: #ffffff;
   border-radius: 2px;
   font-size: 12px;
-  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 100%;
 }
 
 .topTextHead h2 {
-  font-family: Antic Didone;
-  font-weight: 400;
+  font-family: var(--font-inter);
+  font-weight: 600;
   font-style: Regular;
-  font-size: 16px;
-  line-height: 1.25;
-  letter-spacing: 0px;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: -4%;
   vertical-align: middle;
   text-transform: uppercase;
-  color: #000000;
+  color: #000033;
 }
 
 .topTextHeadAddress {
@@ -233,7 +235,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 12px;
-  line-height: 1.18;
+  line-height: 100%;
   letter-spacing: 0px;
   vertical-align: middle;
   text-transform: uppercase;
@@ -332,7 +334,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 28px;
-  line-height: 1.18;
+  line-height: 100%;
   letter-spacing: -2%;
   vertical-align: middle;
   text-transform: uppercase;
@@ -361,7 +363,7 @@
   font-family: var(--font-inter);
   font-weight: 400;
   font-size: 14px;
-  line-height: 1.18;
+  line-height: 100%;
   vertical-align: middle;
   text-transform: uppercase;
   color: #ffffff;
@@ -469,22 +471,87 @@
 } */
 
 @media (max-width: 768px) {
+  .gridCardText {
+    max-height: 270px;
+  }
   .bookNowBtn {
-    max-width: 180px;
+    max-width: 145px;
+    font-size: 13px;
+  }
+
+  .priceContainer {
+    gap: 0px;
+  }
+
+  .totalPrice {
+    text-align: right;
+  }
+
+  .priceSec {
+    font-size: 19px;
+  }
+
+  .totalPrice span {
+    font-size: 10px;
   }
 }
 
+@media (max-width: 682px) {
+  .bookNowBtn {
+    max-width: 110px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 11px;
+  }
+}
 @media (max-width: 612px) {
   .gridWrapper {
     gap: 16px;
   }
+  .topTextHead h2 {
+    font-size: 15px;
+  }
 
+  .topTextHeadAddress span {
+    font-size: 11px;
+  }
   .bookNowBtn {
-    max-width: 180px;
-    padding: 12px 14px;
+    height: 41px;
+    max-width: 135px;
+    padding: 10px 8px;
   }
 }
 
+@media (max-width: 530px) {
+  .gridWrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gridCardImage {
+    height: 253px;
+  }
+
+  .bookNowBtn {
+    max-width: 180px;
+    width: 100%;
+    font-size: 14px;
+    padding: 12px 24px;
+    height: auto;
+    flex: none;
+    text-align: center;
+  }
+  .gridCardText {
+    padding: 16px 18px 20px;
+    gap: 24px;
+  }
+  .priceSec {
+    font-size: 24px;
+  }
+  .topTextHead h2{
+    font-size:18px;
+  }
+}
 @media (max-width: 440px) {
   .gridWrapper {
     grid-template-columns: 1fr;
@@ -581,7 +648,7 @@
 
   .priceSec {
     font-size: 22px;
-    text-align: left;
+    text-align: right;
     line-height: 1.1;
   }
 

@@ -11,12 +11,11 @@
   padding: 16px 16px 12px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #E4E6E8;
+  border-bottom: 1px solid #e4e6e8;
   position: sticky;
   top: 72px;
   z-index: 30;
   background: #fff;
-
 }
 
 .filterContainer {
@@ -29,43 +28,41 @@
   font-family: var(--font-inter);
   font-weight: 400;
   font-size: 13px;
-  line-height: 1.50;
+  line-height: 1.5;
   letter-spacing: -3%;
   text-transform: uppercase;
-  color: #7B8799;
+  color: #7b8799;
 }
 
 .FilterSorfCont {
   display: flex;
   align-items: center;
   gap: 16px;
-
-
 }
 
 .filterText,
-.sortByText {
+.sortByText,
+.viewInMap {
   display: flex;
   align-items: center;
   gap: 6px;
 
   font-family: var(--font-inter);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 12px;
-  line-height: 1.20;
-  letter-spacing: -3%;
+  line-height: 14px;
+  letter-spacing: -2%;
+  padding: 6px 10px;
+  border: 1px solid #e4e6e8;
   text-transform: uppercase;
   color: #000000;
-
 }
 
 .filterText {
-  border: 0;
   background: transparent;
-  padding: 0;
   cursor: pointer;
 }
-.sortByText img{
+.sortByText img {
   width: 16px;
   height: 16px;
 }
@@ -80,4 +77,29 @@
   .headerCont {
     top: 70px;
   }
+
+  .FilterSorfCont {
+    gap: 13px;
+  }
+
+  .filterText,
+  .sortByText,
+  .viewInMap {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 11px;
+  }
+
+  .filterText svg,
+  .sortByText img{
+    width: 12px;
+    height: 12px;
+  }
+
+  .resultsText{
+    font-size: 11px;
+  }
 }
+
+
+
