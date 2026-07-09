@@ -169,6 +169,9 @@ const MobileHotelDetails = () => {
   const [isHotelLoading, setIsHotelLoading] = useState(
     Boolean(hotelSearchChannel),
   );
+  const [hasCompletedInitialSearch, setHasCompletedInitialSearch] = useState(
+    !hotelSearchChannel,
+  );
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -604,6 +607,7 @@ const MobileHotelDetails = () => {
 
       setHotelResults(firstBatch);
       setIsHotelLoading(false);
+      setHasCompletedInitialSearch(true);
 
       let nextIndex = FIRST_HOTEL_RENDER_BATCH_SIZE;
 
@@ -648,6 +652,7 @@ const MobileHotelDetails = () => {
           payloadType !== "HOTEL_INIT_COMPLETE"
         ) {
           setIsHotelLoading(false);
+          setHasCompletedInitialSearch(true);
         }
         return;
       }
@@ -706,7 +711,12 @@ const MobileHotelDetails = () => {
     [activeFilters, hotelResults],
   );
 
-    if (isMobileViewport && isHotelLoading && !hotelResults.length) {
+    if (
+      isMobileViewport &&
+      !hasCompletedInitialSearch &&
+      isHotelLoading &&
+      !hotelResults.length
+    ) {
       return <CustomLoaderHomePage />;
     }
 
