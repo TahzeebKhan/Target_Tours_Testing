@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import styles from './MobileHotelDetails.module.css'
-import { Pencil } from 'lucide-react'
-import ResultsBottomSheet from './ResultsBottomSheet'
-import HotelFilterSheet from './HotelFilterSheet'
-import MobileHotelEditSheet from './MobileHotelEditSheet'
-import HotelGridView from './hotelGridView/HotelGridView'
-import { useRouter, useSearchParams } from 'next/navigation'
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import styles from "./MobileHotelDetails.module.css";
+import { Pencil } from "lucide-react";
+import ResultsBottomSheet from "./ResultsBottomSheet";
+import HotelFilterSheet from "./HotelFilterSheet";
+import MobileHotelEditSheet from "./MobileHotelEditSheet";
+import HotelGridView from "./hotelGridView/HotelGridView";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
@@ -16,7 +16,7 @@ import {
   createHotelSearchChannel,
   fetchHotelDetails,
   isMissingHotelAuthTokenError,
-} from '@/shared/services/hotelSearch'
+} from "@/shared/services/hotelSearch";
 import {
   getStaySummary,
   getHotelsFromMessage,
@@ -27,24 +27,24 @@ import {
   matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
-} from '../tourListing/TourListing'
-import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
-import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
+} from "../tourListing/TourListing";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
 
 const getSearchLocationLabel = (searchParams) => {
-    const rawLocation =
-        searchParams.get("city") ||
-        searchParams.get("location") ||
-        searchParams.get("destination") ||
-        searchParams.get("whereTo") ||
-        "";
+  const rawLocation =
+    searchParams.get("city") ||
+    searchParams.get("location") ||
+    searchParams.get("destination") ||
+    searchParams.get("whereTo") ||
+    "";
 
-    return rawLocation
-        ? rawLocation.replace(/\+/g, " ").replace(/\s+/g, " ").trim()
-        : "this location";
+  return rawLocation
+    ? rawLocation.replace(/\+/g, " ").replace(/\s+/g, " ").trim()
+    : "this location";
 };
 
 const formatMobileDate = (dateValue) => {
@@ -91,7 +91,10 @@ const getRoomDetailsFromParams = (searchParams) => {
 
   return Array.from({ length: roomCount }, (_, index) => {
     const children = Math.max(0, Number(roomChildren[index] || 0));
-    const roomChildAges = childAges.slice(childAgeIndex, childAgeIndex + children);
+    const roomChildAges = childAges.slice(
+      childAgeIndex,
+      childAgeIndex + children,
+    );
     childAgeIndex += children;
 
     return {
@@ -127,33 +130,41 @@ const formatHotelApiDate = (value) => {
 };
 
 const MobileHotelDetails = () => {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const hotelSearchChannel = searchParams.get("channel") || "";
-    const staySummary = getStaySummary(searchParams);
-    const searchLocationLabel = getSearchLocationLabel(searchParams);
-    const searchSummary = useMemo(() => {
-      const rooms = Math.max(1, getNumericSearchParam(searchParams, "rooms", 1));
-      const adults = getNumericSearchParam(searchParams, "adults", 1);
-      const children = getNumericSearchParam(searchParams, "children", 0);
-      const guests = Math.max(1, adults + children);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const hotelSearchChannel = searchParams.get("channel") || "";
+  const staySummary = getStaySummary(searchParams);
+  const searchLocationLabel = getSearchLocationLabel(searchParams);
+  const searchSummary = useMemo(() => {
+    const rooms = Math.max(1, getNumericSearchParam(searchParams, "rooms", 1));
+    const adults = getNumericSearchParam(searchParams, "adults", 1);
+    const children = getNumericSearchParam(searchParams, "children", 0);
+    const guests = Math.max(1, adults + children);
 
-      return {
-        city: searchLocationLabel === "this location" ? "Hotel stay" : searchLocationLabel,
-        checkIn: formatMobileDate(
-          searchParams.get("checkIn") || searchParams.get("checkin"),
-        ),
-        roomsLabel: pluralize(rooms, "Room"),
-        guestsLabel: pluralize(guests, "Guest"),
-      };
-    }, [searchLocationLabel, searchParams]);
-    const [isMobileViewport, setIsMobileViewport] = useState(false);
+    return {
+      city:
+        searchLocationLabel === "this location"
+          ? "Hotel stay"
+          : searchLocationLabel,
+      checkIn: formatMobileDate(
+        searchParams.get("checkIn") || searchParams.get("checkin"),
+      ),
+      checkOut: formatMobileDate(
+        searchParams.get("checkOut") || searchParams.get("checkOut"),
+      ),
+      roomsLabel: pluralize(rooms, "Room"),
+      guestsLabel: pluralize(guests, "Guest"),
+    };
+  }, [searchLocationLabel, searchParams]);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   /* ✅ REQUIRED STATES */
   const [likedTours, setLikedTours] = useState([]);
   const [hotelResults, setHotelResults] = useState([]);
   const [totalHotelResults, setTotalHotelResults] = useState(0);
-  const [isHotelLoading, setIsHotelLoading] = useState(Boolean(hotelSearchChannel));
+  const [isHotelLoading, setIsHotelLoading] = useState(
+    Boolean(hotelSearchChannel),
+  );
   const [loadingHotelDetailsId, setLoadingHotelDetailsId] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
@@ -164,11 +175,11 @@ const MobileHotelDetails = () => {
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
 
-      const toggleLike = (id) => {
+  const toggleLike = (id) => {
     setLikedTours((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
@@ -177,7 +188,12 @@ const MobileHotelDetails = () => {
 
     const payload = getHotelDetailsRequest(hotel, searchParams);
 
-    if (!payload.searchId || !payload.hotelSearchId || !payload.hotelId || !payload.priceProvider) {
+    if (
+      !payload.searchId ||
+      !payload.hotelSearchId ||
+      !payload.hotelId ||
+      !payload.priceProvider
+    ) {
       console.warn("Missing hotel details payload fields:", payload);
       return;
     }
@@ -214,7 +230,8 @@ const MobileHotelDetails = () => {
     const storedInitPayload = storedSearch.initPayload || {};
     const storedLocation = storedSearch.location || {};
     const fallbackLocationPayload =
-      Array.isArray(storedInitPayload.locations) && storedInitPayload.locations.length
+      Array.isArray(storedInitPayload.locations) &&
+      storedInitPayload.locations.length
         ? storedInitPayload.locations[0]
         : {};
     const selectedDestination = form.destination || null;
@@ -254,20 +271,19 @@ const MobileHotelDetails = () => {
 
     const channel = createHotelSearchChannel();
     const nextParams = new URLSearchParams(searchParams.toString());
-    const locationId =
-      String(
-        selectedDestination?.locationId ||
-          selectedDestination?.id ||
-          selectedDestination?.raw?.locationId ||
-          selectedDestination?.raw?.id ||
-          searchParams.get("locationId") ||
-          storedInitPayload.locationId ||
-          storedLocation.id ||
-          storedLocation.locationId ||
-          fallbackLocationPayload.id ||
-          fallbackLocationPayload.locationId ||
-          "",
-      ).trim();
+    const locationId = String(
+      selectedDestination?.locationId ||
+        selectedDestination?.id ||
+        selectedDestination?.raw?.locationId ||
+        selectedDestination?.raw?.id ||
+        searchParams.get("locationId") ||
+        storedInitPayload.locationId ||
+        storedLocation.id ||
+        storedLocation.locationId ||
+        fallbackLocationPayload.id ||
+        fallbackLocationPayload.locationId ||
+        "",
+    ).trim();
     const destinationCountryCode = String(
       selectedDestination?.country ||
         selectedDestination?.raw?.country ||
@@ -328,7 +344,10 @@ const MobileHotelDetails = () => {
     } else {
       nextParams.delete("state");
     }
-    if (Number.isFinite(Number(geoCode.lat)) && Number.isFinite(Number(geoCode.long))) {
+    if (
+      Number.isFinite(Number(geoCode.lat)) &&
+      Number.isFinite(Number(geoCode.long))
+    ) {
       nextParams.set("lat", String(geoCode.lat));
       nextParams.set("long", String(geoCode.long));
     } else {
@@ -412,7 +431,9 @@ const MobileHotelDetails = () => {
         detail: city,
         country: destinationCountryCode,
         state,
-        ...(geoCode && Number.isFinite(Number(geoCode.lat)) && Number.isFinite(Number(geoCode.long))
+        ...(geoCode &&
+        Number.isFinite(Number(geoCode.lat)) &&
+        Number.isFinite(Number(geoCode.long))
           ? { geoCode }
           : {}),
       },
@@ -527,7 +548,9 @@ const MobileHotelDetails = () => {
       });
       const firstBatch = hotels
         .slice(0, FIRST_HOTEL_RENDER_BATCH_SIZE)
-        .map((hotel, index) => normalizeHotelCard(withSearchMeta(hotel), index));
+        .map((hotel, index) =>
+          normalizeHotelCard(withSearchMeta(hotel), index),
+        );
 
       setHotelResults(firstBatch);
       setIsHotelLoading(false);
@@ -593,11 +616,16 @@ const MobileHotelDetails = () => {
 
     window.addEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
 
-    const cachedResults = window.sessionStorage.getItem(HOTEL_SEARCH_RESULTS_KEY);
+    const cachedResults = window.sessionStorage.getItem(
+      HOTEL_SEARCH_RESULTS_KEY,
+    );
     if (cachedResults) {
       try {
         const cachedPayload = JSON.parse(cachedResults);
-        if (!hotelSearchChannel || cachedPayload?.channel === hotelSearchChannel) {
+        if (
+          !hotelSearchChannel ||
+          cachedPayload?.channel === hotelSearchChannel
+        ) {
           applyHotelResults(cachedPayload);
         }
       } catch {
@@ -607,7 +635,10 @@ const MobileHotelDetails = () => {
 
     return () => {
       normalizeRunRef.current += 1;
-      window.removeEventListener(HOTEL_SEARCH_RESULTS_EVENT, handleHotelResults);
+      window.removeEventListener(
+        HOTEL_SEARCH_RESULTS_EVENT,
+        handleHotelResults,
+      );
     };
   }, [hotelSearchChannel, isMobileViewport]);
 
@@ -616,110 +647,129 @@ const MobileHotelDetails = () => {
     [hotelResults],
   );
   const displayHotels = useMemo(
-    () => hotelResults.filter((hotel) => matchesHotelFilters(hotel, activeFilters)),
+    () =>
+      hotelResults.filter((hotel) => matchesHotelFilters(hotel, activeFilters)),
     [activeFilters, hotelResults],
   );
 
-    return (
-        <div className={styles.hotelDetailsMobileContainer}>
-            <div
-                className={`${styles.tripDetailsHeader}`}
-            >
-                <div className={styles.mainCotainer}>
-                    <img src="/icons/leftArrowTrip.svg" alt="" />
-                    <div
-                        className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
-                    >
-                        <div className={styles.TripCardHeaderDetails}>
-                          <p className={styles.TripCardHeaderDetailsItemText}>
-                            {searchSummary.city}
-                          </p>
-                        </div>
-
-                        <div className={styles.TripCardHeaderBookingDate}>
-                            <p>{searchSummary.checkIn}</p>
-                            <p>
-                                <span className={styles.navDot}></span>{searchSummary.guestsLabel}
-                            </p>
-                            <p>
-                                <span className={styles.navDot}></span>{searchSummary.roomsLabel}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <button
-                  type="button"
-                  className={styles.editButton}
-                  onClick={() => setIsEditOpen(true)}
-                  aria-label="Edit hotel search"
-                >
-                  <Pencil className={styles.editIcon} color="#FFFFFF" size={16} />
-                </button>
+  return (
+    <div className={styles.hotelDetailsMobileContainer}>
+      <div className={`${styles.tripDetailsHeader}`}>
+        <div className={styles.mainCotainer}>
+          {/* <img src="/icons/leftArrowTrip.svg" alt="" /> */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#ffffff"
+            strokewidth="1.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-chevron-left-icon lucide-chevron-left"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <div
+            className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
+          >
+            <div className={styles.TripCardHeaderDetails}>
+              <p className={styles.TripCardHeaderDetailsItemText}>
+                {searchSummary.city}
+              </p>
             </div>
 
-            <ResultsBottomSheet
-              resultsCount={totalHotelResults || displayHotels.length}
-              isLoading={isHotelLoading}
-              onOpenFilters={() => setIsFilterOpen(true)}
-            >
-                    <HotelGridView
-                        tourData={displayHotels}
-                        likedTours={likedTours}
-                        toggleLike={toggleLike}
-                        handleBookNow={handleBookNow}
-                        isLoading={isHotelLoading}
-                        staySummary={staySummary}
-                        loadingHotelDetailsId={loadingHotelDetailsId}
-                        locationLabel={searchLocationLabel}
-                        showEmptyState={Boolean(hotelSearchChannel)}
-                    />
-            </ResultsBottomSheet>
-            <HotelFilterSheet
-              open={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-              counts={filterCounts}
-              selectedFilters={activeFilters}
-              onApply={setActiveFilters}
-              onReset={() => setActiveFilters({})}
-            />
-            <MobileHotelEditSheet
-              open={isEditOpen}
-              onClose={() => setIsEditOpen(false)}
-              isSubmitting={isEditSubmitting}
-              initialValues={{
-                city: searchSummary.city === "Hotel stay" ? "" : searchSummary.city,
-                checkIn: searchParams.get("checkIn") || searchParams.get("checkin") || "",
-                checkOut: searchParams.get("checkOut") || searchParams.get("checkout") || "",
-                rooms: searchParams.get("rooms") || 1,
-                adults: searchParams.get("adults") || 1,
-                children: searchParams.get("children") || 0,
-                childAges: parseChildAges(searchParams.get("childAges")),
-                roomDetails: getRoomDetailsFromParams(searchParams),
-                destination: readStoredHotelSearch()?.location || null,
-              }}
-              onApply={handleEditSearch}
-            />
-            {showAuthModal && authView === "login" && (
-              <LoginPopup
-                onClose={() => {
-                  setShowAuthModal(false);
-                  setAuthView("login");
-                }}
-                onNavigate={setAuthView}
-              />
-            )}
-
-            {showAuthModal && authView === "signup" && (
-              <SignupPopup
-                onClose={() => {
-                  setShowAuthModal(false);
-                  setAuthView("login");
-                }}
-                onNavigate={setAuthView}
-              />
-            )}
+            <div className={styles.TripCardHeaderBookingDate}>
+              <p>{searchSummary.checkIn}</p>
+              <p>-</p>
+              <p>{searchSummary.checkOut}</p>
+              <p>
+                <span className={styles.navDot}></span>
+                {searchSummary.guestsLabel}
+              </p>
+              <p>
+                <span className={styles.navDot}></span>
+                {searchSummary.roomsLabel}
+              </p>
+            </div>
+          </div>
         </div>
-    )
-}
+        <button
+          type="button"
+          className={styles.editButton}
+          onClick={() => setIsEditOpen(true)}
+          aria-label="Edit hotel search"
+        >
+          <Pencil className={styles.editIcon} color="#FFFFFF" size={16} />
+        </button>
+      </div>
 
-export default MobileHotelDetails
+      <ResultsBottomSheet
+        resultsCount={totalHotelResults || displayHotels.length}
+        isLoading={isHotelLoading}
+        onOpenFilters={() => setIsFilterOpen(true)}
+      >
+        <HotelGridView
+          tourData={displayHotels}
+          likedTours={likedTours}
+          toggleLike={toggleLike}
+          handleBookNow={handleBookNow}
+          isLoading={isHotelLoading}
+          staySummary={staySummary}
+          loadingHotelDetailsId={loadingHotelDetailsId}
+          locationLabel={searchLocationLabel}
+          showEmptyState={Boolean(hotelSearchChannel)}
+        />
+      </ResultsBottomSheet>
+      <HotelFilterSheet
+        open={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        counts={filterCounts}
+        selectedFilters={activeFilters}
+        onApply={setActiveFilters}
+        onReset={() => setActiveFilters({})}
+      />
+      <MobileHotelEditSheet
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        isSubmitting={isEditSubmitting}
+        initialValues={{
+          city: searchSummary.city === "Hotel stay" ? "" : searchSummary.city,
+          checkIn:
+            searchParams.get("checkIn") || searchParams.get("checkin") || "",
+          checkOut:
+            searchParams.get("checkOut") || searchParams.get("checkout") || "",
+          rooms: searchParams.get("rooms") || 1,
+          adults: searchParams.get("adults") || 1,
+          children: searchParams.get("children") || 0,
+          childAges: parseChildAges(searchParams.get("childAges")),
+          roomDetails: getRoomDetailsFromParams(searchParams),
+          destination: readStoredHotelSearch()?.location || null,
+        }}
+        onApply={handleEditSearch}
+      />
+      {showAuthModal && authView === "login" && (
+        <LoginPopup
+          onClose={() => {
+            setShowAuthModal(false);
+            setAuthView("login");
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup
+          onClose={() => {
+            setShowAuthModal(false);
+            setAuthView("login");
+          }}
+          onNavigate={setAuthView}
+        />
+      )}
+    </div>
+  );
+};
+
+export default MobileHotelDetails;
