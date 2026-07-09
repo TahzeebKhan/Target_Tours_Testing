@@ -5,8 +5,14 @@ import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import SearchResults from "../components/searchResult/SearchResults";
-import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import CreateWishlistModal, {
+  createWishlist,
+} from "@/shared/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal, {
+  fetchUserWishlists,
+} from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { appToast } from "@/shared/components/appToast/AppToast";
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
@@ -933,6 +939,7 @@ const getHotelFailureMessage = (payload = {}) => {
 const skeletonCards = Array.from({ length: 6 }, (_, index) => index);
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
+const MAX_FILTER_REQUEST_ATTEMPTS = 3;
 const LIST_ROW_HEIGHT = 310;
 const GRID_ROW_HEIGHT = 650;
 const VIRTUAL_OVERSCAN_ROWS = 5;
@@ -1883,31 +1890,85 @@ const TourListing = () => {
   const latestFilterSearchMetaRef = useRef({ searchId: "", hotelSearchId: "" });
   const lastMergedFilterPayloadKeyRef = useRef("");
   const filterRetryTimerRef = useRef(null);
+  const filterRequestSeriesRef = useRef("");
+  const filterRequestAttemptRef = useRef(0);
   const hasLoadedFilterDataRef = useRef(false);
+  const queryClient = useQueryClient();
+
+  const { data: wishlistData } = useQuery({
+    queryKey: ["user-wishlists", "hotel"],
+    queryFn: () => fetchUserWishlists("hotel"),
+  });
+
+  useEffect(() => {
+    const wishlistGroups = Object.entries(wishlistData || {});
+    const wishlistHotelIds = wishlistGroups.flatMap(([, group]) =>
+      (group?.data || []).map((item) =>
+        String(item.hotelId || item.hotel_id || item.id || item.documentId || ""),
+      ),
+    );
+
+    setLikedTours([...new Set(wishlistHotelIds.filter(Boolean))]);
+    setWishlists(wishlistGroups);
+  }, [wishlistData]);
+
+  const { mutate: addHotelToWishlist, isPending: isAddingToWishlist } =
+    useMutation({
+      mutationFn: (hotelId) =>
+        createWishlist({ type: "hotel", ids: [hotelId] }),
+      onSuccess: (_data, hotelId) => {
+        setLikedTours((prev) =>
+          prev.includes(hotelId) ? prev : [...prev, hotelId],
+        );
+        queryClient.invalidateQueries({
+          queryKey: ["user-wishlists", "hotel"],
+        });
+      },
+      onError: (error) => {
+        if (
+          error?.message === "Not authenticated" ||
+          error?.response?.status === 401 ||
+          error?.response?.status === 403
+        ) {
+          openLoginModal();
+          return;
+        }
+
+        appToast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to add hotel to wishlist",
+        );
+      },
+    });
 
   const handleHeartClick = (hotel) => {
     const hotelId = getHotelDetailsPayload(hotel).hotelId;
+    const wishlistHotelId = String(hotelId || hotel?.id || "");
 
-    setSelectedTourId(hotelId || hotel?.id || null);
+    if (!wishlistHotelId) return;
 
-    if (!wishlists.length) {
-      setIsCreateWishlistOpen(true);
-    } else {
-      setIsSaveWishlistOpen(true);
-    }
+    setSelectedTourId(wishlistHotelId);
+    addHotelToWishlist(wishlistHotelId);
   };
 
-  const handleCreateWishlist = (name) => {
+  const handleCreateWishlist = () => {
+    const hotelId = String(selectedTourId || "");
+    if (hotelId) {
+      setLikedTours((prev) =>
+        prev.includes(hotelId) ? prev : [...prev, hotelId],
+      );
+    }
+
     const newWishlist = {
       id: Date.now(),
-      name,
+      name: "Wishlist",
       count: 0,
     };
 
     setWishlists((prev) => [...prev, newWishlist]);
 
     setIsCreateWishlistOpen(false);
-    setIsSaveWishlistOpen(true);
   };
   const router = useRouter();
 
@@ -2322,7 +2383,13 @@ const TourListing = () => {
       return;
     }
 
-    const effectiveFilterDataRequestKey = `${filterDataRequestKey}:${filterRetryNonce}`;
+    const filterRequestSeriesKey = `${filterDataRequestKey}:${filterRefreshNonce}`;
+    if (filterRequestSeriesRef.current !== filterRequestSeriesKey) {
+      filterRequestSeriesRef.current = filterRequestSeriesKey;
+      filterRequestAttemptRef.current = 0;
+    }
+
+    const effectiveFilterDataRequestKey = `${filterRequestSeriesKey}:${filterRetryNonce}`;
 
     if (lastFilterRequestKeyRef.current === effectiveFilterDataRequestKey) {
       return;
@@ -2330,6 +2397,7 @@ const TourListing = () => {
 
     const controller = new AbortController();
     lastFilterRequestKeyRef.current = effectiveFilterDataRequestKey;
+    filterRequestAttemptRef.current += 1;
     setIsFilterLoading(true);
     const latestMeta = latestFilterSearchMetaRef.current;
     const latestSearchId = latestMeta.searchId || filterSearchId;
@@ -2359,7 +2427,11 @@ const TourListing = () => {
         if (lastFilterRequestKeyRef.current === effectiveFilterDataRequestKey) {
           lastFilterRequestKeyRef.current = "";
         }
-        if (isRetryableFilterError && !hasLoadedFilterDataRef.current) {
+        if (
+          isRetryableFilterError &&
+          !hasLoadedFilterDataRef.current &&
+          filterRequestAttemptRef.current < MAX_FILTER_REQUEST_ATTEMPTS
+        ) {
           setIsFilterLoading(true);
           if (filterRetryTimerRef.current) {
             window.clearTimeout(filterRetryTimerRef.current);
@@ -2367,7 +2439,7 @@ const TourListing = () => {
           filterRetryTimerRef.current = window.setTimeout(() => {
             filterRetryTimerRef.current = null;
             setFilterRetryNonce((value) => value + 1);
-          }, 600);
+          }, 1000);
           return;
         }
 
@@ -2535,13 +2607,6 @@ const TourListing = () => {
     [displayHotels, virtualWindow.endIndex, virtualWindow.startIndex],
   );
 
-  const toggleLike = (id) => {
-    setLikedTours((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id],
-    );
-  };
   const showEmptyState =
     !isHotelLoading &&
     !displayHotels.length &&
@@ -2640,16 +2705,17 @@ const TourListing = () => {
 
                     <img
                       src={
-                        likedTours.includes(item.id)
+                        likedTours.includes(String(item.id))
                           ? "/icons/heartIconFilled.svg"
                           : "/icons/heartIcon.svg"
                       }
                       alt="wishlist"
                       className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+                      aria-disabled={isAddingToWishlist}
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleLike(item.id); // change icon
-                        handleHeartClick(item); // open modal
+                        if (isAddingToWishlist) return;
+                        handleHeartClick(item);
                       }}
                     />
                   </div>
@@ -2793,16 +2859,17 @@ const TourListing = () => {
 
                     <img
                       src={
-                        likedTours.includes(item.id)
+                        likedTours.includes(String(item.id))
                           ? "/icons/heartIconFilled.svg"
                           : "/icons/heartIcon.svg"
                       }
                       alt="wishlist"
                       className={styles.heartIcon}
+                      aria-disabled={isAddingToWishlist}
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleLike(item.id); // change icon
-                        handleHeartClick(item); // open modal
+                        if (isAddingToWishlist) return;
+                        handleHeartClick(item);
                       }}
                     />
                   </div>

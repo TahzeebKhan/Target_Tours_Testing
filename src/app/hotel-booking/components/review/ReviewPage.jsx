@@ -1238,8 +1238,6 @@ const ReviewPage = () => {
         hotelInitData.search_tracing_key,
         hotelInitData.TUI,
         hotelInitData.tui,
-        findFirstDeepValue(storedHotelDetails, HOTEL_SEARCH_TRACING_KEYS),
-        findFirstDeepValue(initSearchContext, HOTEL_SEARCH_TRACING_KEYS),
       );
       const searchId = getFirstValue(
         firstRoom.roomsSearchId,
