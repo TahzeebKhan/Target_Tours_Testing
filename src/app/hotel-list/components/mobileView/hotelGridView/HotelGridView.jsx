@@ -1,10 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import styles from "./HotelGridView.module.css";
 import { HotelBenefits, HotelFacilities } from "../../tourListing/TourListing";
 
 const getHotelLoadingKey = (hotel = {}) =>
   hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode || "";
+
+const MOBILE_GRID_BREAKPOINT = 530;
+const MOBILE_GRID_OVERSCAN_ROWS = 4;
+const DEFAULT_GRID_ROW_HEIGHT = 520;
+const DEFAULT_LIST_ROW_HEIGHT = 560;
 
 const HotelGridView = ({
   tourData,
@@ -19,21 +24,134 @@ const HotelGridView = ({
   locationLabel = "this location",
   showEmptyState = false,
 }) => {
+  const gridRef = useRef(null);
+  const measuredColumnsRef = useRef(0);
+  const [viewport, setViewport] = useState({
+    scrollY: 0,
+    height: 0,
+    width: 0,
+  });
+  const [rowHeight, setRowHeight] = useState(DEFAULT_GRID_ROW_HEIGHT);
   const skeletonCards = useMemo(
     () => Array.from({ length: 6 }, (_, index) => index),
     [],
   );
   const shouldShowEmptyState = showEmptyState && !isLoading && !tourData.length;
+  const columns = viewport.width <= MOBILE_GRID_BREAKPOINT ? 1 : 2;
+
+  useEffect(() => {
+    let animationFrame = 0;
+
+    const updateViewport = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        setViewport({
+          scrollY: window.scrollY,
+          height: window.innerHeight,
+          width: window.innerWidth,
+        });
+      });
+    };
+
+    updateViewport();
+    window.addEventListener("scroll", updateViewport, { passive: true });
+    window.addEventListener("resize", updateViewport);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    measuredColumnsRef.current = 0;
+    setRowHeight(
+      columns === 1 ? DEFAULT_LIST_ROW_HEIGHT : DEFAULT_GRID_ROW_HEIGHT,
+    );
+  }, [columns]);
+
+  const virtualWindow = useMemo(() => {
+    if (!tourData.length || !viewport.height || !gridRef.current) {
+      return {
+        startIndex: 0,
+        endIndex: Math.min(tourData.length, 12),
+        paddingTop: 0,
+        paddingBottom: 0,
+      };
+    }
+
+    const gridTop =
+      gridRef.current.getBoundingClientRect().top + viewport.scrollY;
+    const relativeScrollTop = Math.max(0, viewport.scrollY - gridTop);
+    const totalRows = Math.ceil(tourData.length / columns);
+    const startRow = Math.max(
+      0,
+      Math.floor(relativeScrollTop / rowHeight) - MOBILE_GRID_OVERSCAN_ROWS,
+    );
+    const visibleRowCount =
+      Math.ceil(viewport.height / rowHeight) + MOBILE_GRID_OVERSCAN_ROWS * 2;
+    const endRow = Math.min(totalRows, startRow + visibleRowCount);
+
+    return {
+      startIndex: startRow * columns,
+      endIndex: Math.min(tourData.length, endRow * columns),
+      paddingTop: startRow * rowHeight,
+      paddingBottom: Math.max(0, (totalRows - endRow) * rowHeight),
+    };
+  }, [columns, rowHeight, tourData.length, viewport]);
+
+  const visibleHotels = useMemo(
+    () => tourData.slice(virtualWindow.startIndex, virtualWindow.endIndex),
+    [tourData, virtualWindow.endIndex, virtualWindow.startIndex],
+  );
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (
+      !grid ||
+      !visibleHotels.length ||
+      measuredColumnsRef.current === columns
+    ) {
+      return;
+    }
+
+    const cards = Array.from(
+      grid.querySelectorAll(`.${styles.gridCard}`),
+    ).filter((card) => !card.classList.contains(styles.skeletonCard));
+    if (!cards.length) return;
+
+    const gap = Number.parseFloat(window.getComputedStyle(grid).rowGap) || 0;
+    const measuredHeight =
+      Math.max(...cards.slice(0, columns).map((card) => card.offsetHeight)) + gap;
+
+    if (
+      Number.isFinite(measuredHeight) &&
+      measuredHeight > 0 &&
+      Math.abs(measuredHeight - rowHeight) > 4
+    ) {
+      setRowHeight(measuredHeight);
+    }
+    measuredColumnsRef.current = columns;
+  }, [columns, rowHeight, visibleHotels]);
 
   return (
     <motion.div
+      ref={gridRef}
       className={styles.gridWrapper}
       key="grid"
-      layout
       initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 0 }}
       transition={{ duration: 0.55, ease: "easeInOut" }}
+      style={
+        tourData.length
+          ? {
+              paddingTop: virtualWindow.paddingTop,
+              paddingBottom: virtualWindow.paddingBottom,
+            }
+          : undefined
+      }
     >
       {!tourData.length &&
         isLoading &&
@@ -88,7 +206,8 @@ const HotelGridView = ({
           </div>
         </div>
       )}
-      {tourData.map((item, index) => {
+      {visibleHotels.map((item, index) => {
+        const itemIndex = virtualWindow.startIndex + index;
         const itemLoadingKey = getHotelLoadingKey(item);
         const isItemLoading = loadingHotelDetailsId === itemLoadingKey;
 
@@ -98,7 +217,7 @@ const HotelGridView = ({
               item?.id ||
               item?.api_hotel_id ||
               item?.title ||
-              `hotel-mobile-grid-${index}`
+              `hotel-mobile-grid-${itemIndex}`
             }
             className={styles.gridCard}
           >
