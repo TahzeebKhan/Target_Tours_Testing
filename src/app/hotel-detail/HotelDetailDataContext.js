@@ -53,18 +53,18 @@ const readStoredHotelDetail = () => {
   }
 };
 
-const writeStoredHotelDetail = (payload) => {
+const writeStoredHotelDetail = (hotelDetailData) => {
   if (typeof window === "undefined") return;
 
   try {
-    window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(payload));
+    window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(hotelDetailData));
   } catch {
     // Ignore storage failures and keep the in-memory response.
   }
 };
 
 const getDetailRequestFromParams = (params) => {
-  const request = {
+  const hotelDetailPayload = {
     hotelId: params.get("hotelId") || "",
     searchId: params.get("searchId") || "",
     hotelSearchId: params.get("hotelSearchId") || params.get("hotelsearchid") || "",
@@ -73,8 +73,8 @@ const getDetailRequestFromParams = (params) => {
     checkOut: params.get("checkOut") || "",
   };
 
-  return request.hotelId && request.searchId && request.priceProvider
-    ? request
+  return hotelDetailPayload.hotelId && hotelDetailPayload.searchId && hotelDetailPayload.priceProvider
+    ? hotelDetailPayload
     : null;
 };
 
@@ -216,16 +216,9 @@ const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
     return images;
   }
 
-  [
-    value.url,
-    value.src,
-    value.image,
-    value.imageUrl,
-    value.heroImage,
-    value.thumbnail,
-    value.links?.["1000px"]?.href,
-    value.links?.["350px"]?.href,
-  ].forEach((candidate) => collectImages(candidate, images, depth + 1, seen));
+  [value.url, value.image].forEach((candidate) =>
+    collectImages(candidate, images, depth + 1, seen),
+  );
 
   ["images", "photos", "gallery", "media", "hotelImages", "room", "roomGroup"].forEach((key) => {
     collectImages(value[key], images, depth + 1, seen);
@@ -386,16 +379,7 @@ const normalizeGalleryItem = (value, fallbackTitle = "", depth = 0) => {
 
   if (typeof value !== "object") return null;
 
-  const image =
-    value.url ||
-    value.src ||
-    value.image ||
-    value.imageUrl ||
-    value.heroImage ||
-    value.thumbnail ||
-    value.links?.["1000px"]?.href ||
-    value.links?.["350px"]?.href ||
-    "";
+  const image = value.url || value.image || "";
 
   const imageUrl = normalizeImageUrl(image);
 
@@ -456,25 +440,19 @@ const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet())
 const extractGalleryImages = (stored = {}, routeHotelId = "") => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
-  const foundHotel = findFirstObject(data, (item) => item.name && (item.address || item.heroImage));
+  const foundHotel = findFirstObject(
+    data,
+    (item) => item.name && item.addressLine1,
+  );
   const hotel = {
     ...(stored?.hotel?.raw || {}),
     ...(foundHotel || {}),
     ...(stored?.hotel || {}),
   };
   const preferredGalleryItems = [
-    data.galleryImages,
-    data.hotelImages,
-    data.photos,
-    data.media,
-    foundHotel?.galleryImages,
-    foundHotel?.hotelImages,
-    foundHotel?.photos,
-    foundHotel?.media,
-    hotel.galleryImages,
-    hotel.hotelImages,
-    hotel.photos,
-    hotel.media,
+    data.images,
+    foundHotel?.images,
+    hotel.images,
   ].flatMap((item) => collectGalleryItems(item));
 
   const galleryItems = [
@@ -506,72 +484,6 @@ const normalizeFacilities = (facilities = []) =>
     .filter(Boolean)
     .filter((facility, index, list) => list.indexOf(facility) === index);
 
-// const getRecommendationRooms = (data = {}) => {
-//   const source = data?.content || data?.data || data;
-
-//   if (Array.isArray(source.roomCategories)) {
-//     return source.roomCategories.map((category, categoryIndex) => {
-//       const categoryRooms = Array.isArray(category.room) ? category.room : [];
-//       const primaryRoom = categoryRooms[0] || category;
-
-//       return {
-//         room: primaryRoom,
-//         recommendation: category,
-//         recommendationIndex: categoryIndex,
-//         roomIndex: 0,
-//         categoryRooms,
-//       };
-//     });
-//   }
-
-//   const directRooms = [
-//     source.roomRates,
-//     source.roomTypes,
-//     source.availableRooms,
-//     source.rates,
-//   ].find(Array.isArray);
-
-//   if (directRooms) return directRooms.map((room) => ({ room }));
-
-//   if (Array.isArray(source.rooms)) {
-//     return source.rooms.map((room) => ({ room }));
-//   }
-
-//   const recommendations = source.rooms?.recommendations || source.recommendations;
-//   if (!Array.isArray(recommendations)) return [];
-//   console.log("recommendations", recommendations);
-
-//   return recommendations.flatMap((recommendation, recommendationIndex) => {
-//     const roomGroup = Array.isArray(recommendation.roomGroup)
-//       ? recommendation.roomGroup
-//       : [];
-
-//     if (!roomGroup.length) {
-//       return [{ room: recommendation, recommendation, recommendationIndex }];
-//     }
-
-//     const isCombo =
-//       roomGroup.length > 1 ||
-//       roomGroup.some((room) => getRoomGroupRoomCount(room) > 1);
-
-//     if (isCombo) {
-//       return [{
-//         room: roomGroup[0],
-//         recommendation,
-//         recommendationIndex,
-//         roomIndex: 0,
-//         comboRoomGroups: roomGroup,
-//       }];
-//     }
-
-//     return roomGroup.map((room, roomIndex) => ({
-//       room,
-//       recommendation,
-//       recommendationIndex,
-//       roomIndex,
-//     }));
-//   });
-// };
 
 
 const getRecommendationRooms = (data = {}) => {
@@ -1085,11 +997,13 @@ const normalizeReviewRating = (rating) => {
 };
 
 const normalizeReviewSummary = (data = {}, hotel = {}) => {
+   console.log("data3", data);
   const reviews = Array.isArray(data.reviews)
     ? data.reviews
     : Array.isArray(hotel.reviews)
       ? hotel.reviews
       : [];
+       console.log("reviews2", reviews);
   const firstReview = reviews[0] || {};
   const summary =
     data.reviewSummary ||
@@ -1097,6 +1011,7 @@ const normalizeReviewSummary = (data = {}, hotel = {}) => {
     hotel.reviewSummary ||
     hotel.review_summary ||
     {};
+     console.log("summary2", summary);
   const score = getNumericValue(
     data.reviewRating,
     data.review_rating,
@@ -1245,7 +1160,10 @@ const normalizeHotelDetail = (
 ) => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
-  const foundHotel = findFirstObject(data, (item) => item.name && (item.address || item.heroImage));
+  const foundHotel = findFirstObject(
+    data,
+    (item) => item.name && item.addressLine1,
+  );
   const hotel = {
     ...(stored?.hotel?.raw || {}),
     ...(foundHotel || {}),
@@ -1273,9 +1191,9 @@ const normalizeHotelDetail = (
   );
 
   return {
-    id: String(getFirst(hotel.id, hotel.hotelId, routeHotelId, "")),
-    name: getFirst(hotel.name, hotel.title, data.name, "Hotel"),
-    address: getFirst(hotel.address, data.address, hotel.route, hotel.locationName, ""),
+    id: String(getFirst(hotel.id, hotel.providerHotelId, routeHotelId, "")),
+    name: getFirst(hotel.name, data.name, "Hotel"),
+    address: getFirst(hotel.addressLine1, data.addressLine1, ""),
     rating: starRating,
     starRating,
     reviewScore: reviewSummary.score,
@@ -1313,11 +1231,11 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   const [roomsLoading, setRoomsLoading] = useState(false);
 
   const refreshHotelAvailability = useCallback(
-    async (payload) => {
+    async (changeHotelAvailabilityPayload) => {
       setRoomsLoading(true);
 
       try {
-        const response = await changeHotelAvailability(payload);
+        const response = await changeHotelAvailability(changeHotelAvailabilityPayload);
         setRoomsPayload(response);
         setRoomsErrorMessage("");
         return response;
@@ -1339,20 +1257,20 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   useEffect(() => {
     let isMounted = true;
     const params = new URLSearchParams(window.location.search);
-    const request = getDetailRequestFromParams(params);
-    const hotelId = request?.hotelId || params.get("hotelId") || "";
+    const hotelDetailPayload = getDetailRequestFromParams(params);
+    const hotelId = hotelDetailPayload?.hotelId || params.get("hotelId") || "";
     const stored = readStoredHotelDetail();
     const storedHotelId = getStoredHotelId(stored);
     const canUseStored =
       stored && (!hotelId || !storedHotelId || storedHotelId === String(hotelId));
-    const roomsRequest = request || stored?.request || null;
+    const roomsRequest = hotelDetailPayload || stored?.request || null;
 
     setRouteHotelId(hotelId);
 
     if (canUseStored) {
       setStoredDetail(stored);
       setLoading(false);
-    } else if (!request) {
+    } else if (!hotelDetailPayload) {
       setStoredDetail(stored);
       setLoading(false);
     } else {
@@ -1360,12 +1278,12 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
         setLoading(true);
 
         try {
-          const details = await fetchHotelDetails(request);
+          const details = await fetchHotelDetails(hotelDetailPayload);
           const nextStoredDetail = {
-            request,
+            request: hotelDetailPayload,
             hotel: {},
             details,
-            galleryImages: extractGalleryImages({ request, hotel: {}, details }, hotelId),
+            galleryImages: extractGalleryImages({ request: hotelDetailPayload, hotel: {}, details }, hotelId),
           };
 
           writeStoredHotelDetail(nextStoredDetail);

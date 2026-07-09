@@ -504,13 +504,8 @@ export const initHotelSearch = async (payload) => {
   return data;
 };
 
-export const fetchHotelDetails = async ({
-  searchId,
-  hotelSearchId,
-  hotelId,
-  priceProvider,
-  signal,
-}) => {
+export const fetchHotelDetails = async (fetchHotelDetailsPayload = {}) => {
+  const { searchId, hotelSearchId, hotelId, priceProvider, signal } = fetchHotelDetailsPayload;
   const url = new URL("/api/hotel-search/hotel-details", normalizeBaseUrl());
 
   const response = await fetch(url.toString(), {
@@ -575,12 +570,8 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
   }
 };
 
-export const fetchHotelRooms = async ({
-  searchId,
-  hotelSearchId,
-  hotelId,
-  priceProvider,
-}) => {
+export const fetchHotelRooms = async (fetchHotelRoomsPayload = {}) => {
+  const { searchId, hotelSearchId, hotelId, priceProvider } = fetchHotelRoomsPayload;
   const url = new URL("/api/hotel-search/get-rooms", normalizeBaseUrl());
   const headers = getHotelSearchHeaders();
 
@@ -607,16 +598,16 @@ export const fetchHotelRooms = async ({
   return data;
 };
 
-export const changeHotelAvailability = async (payload = {}) => {
-    const url = new URL("/api/hotel-search/changehotelavailability", normalizeBaseUrl());
+export const changeHotelAvailability = async (changeHotelAvailabilityPayload = {}) => {
+  const url = new URL("/api/hotel-search/changehotelavailability", normalizeBaseUrl());
   const response = await fetch(url.toString(), {
     method: "POST",
     headers: getHotelSearchHeaders(),
     credentials: "include",
     cache: "no-store",
     body: JSON.stringify({
-      ...payload,
-      domain: payload.domain || getDomain(),
+      ...changeHotelAvailabilityPayload,
+      domain: changeHotelAvailabilityPayload.domain || getDomain(),
     }),
   });
 
@@ -629,7 +620,7 @@ export const changeHotelAvailability = async (payload = {}) => {
   return data;
 };
 
-export const fetchHotelPricingDetails = async (payload = {}) => {
+export const fetchHotelPricingDetails = async (hotelPricingDetailsPayload = {}) => {
   const url = new URL("/api/hotel-search/hotel-pricing-details", normalizeBaseUrl());
 
   const response = await fetch(url.toString(), {
@@ -638,12 +629,12 @@ export const fetchHotelPricingDetails = async (payload = {}) => {
     credentials: "include",
     cache: "no-store",
     body: JSON.stringify({
-      domain: payload.domain || getDomain(),
-      searchId: payload.searchId,
-      hotelSearchId: payload.hotelSearchId,
-      hotelId: payload.hotelId,
-      priceProvider: payload.priceProvider,
-      recommendationId: payload.recommendationId,
+      domain: hotelPricingDetailsPayload.domain || getDomain(),
+      searchId: hotelPricingDetailsPayload.searchId,
+      hotelSearchId: hotelPricingDetailsPayload.hotelSearchId,
+      hotelId: hotelPricingDetailsPayload.hotelId,
+      priceProvider: hotelPricingDetailsPayload.priceProvider,
+      recommendationId: hotelPricingDetailsPayload.recommendationId,
     }),
   });
 
@@ -656,7 +647,7 @@ export const fetchHotelPricingDetails = async (payload = {}) => {
   return data;
 };
 
-export const startHotelBooking = async (payload = {}) => {
+export const startHotelBooking = async (startHotelBookingPayload = {}) => {
   const url = new URL("/api/hotel-search/start-booking", normalizeBaseUrl());
 
   const response = await fetch(url.toString(), {
@@ -665,8 +656,8 @@ export const startHotelBooking = async (payload = {}) => {
     credentials: "include",
     cache: "no-store",
     body: JSON.stringify({
-      ...payload,
-      domain: payload.domain || getDomain(),
+      ...startHotelBookingPayload,
+      domain: startHotelBookingPayload.domain || getDomain(),
     }),
   });
 
@@ -755,7 +746,7 @@ export const refreshHotelSession = async (payload = {}) => {
   return data;
 };
 
-export const confirmHotelBooking = async (payload = {}) => {
+export const confirmHotelBooking = async (confirmHotelBookingPayload = {}) => {
   const url = new URL("/api/hotel-search/confirm-booking", normalizeBaseUrl());
 
   const response = await fetch(url.toString(), {
@@ -764,8 +755,8 @@ export const confirmHotelBooking = async (payload = {}) => {
     credentials: "include",
     cache: "no-store",
     body: JSON.stringify({
-      ...payload,
-      domain: payload.domain || getDomain(),
+      ...confirmHotelBookingPayload,
+      domain: confirmHotelBookingPayload.domain || getDomain(),
     }),
   });
 

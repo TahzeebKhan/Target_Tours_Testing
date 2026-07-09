@@ -19,6 +19,7 @@ import {
 } from "@/shared/services/hotelSearch";
 import {
   getStaySummary,
+  getMessageData,
   getHotelsFromMessage,
   getHotelDetailUrl,
   getHotelDetailsRequest,
@@ -27,9 +28,14 @@ import {
   matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
-} from "../tourListing/TourListing";
-import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
-import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+} from '../tourListing/TourListing'
+import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
+import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createWishlist } from '@/shared/components/wishlistModals/CreateWishlistModal'
+import { fetchUserWishlists } from '@/shared/components/wishlistModals/SaveToWishlistModal'
+import { appToast } from '@/shared/components/appToast/AppToast'
+import CustomLoaderHomePage from '@/shared/components/CustomLoaderHomePage'
 
 const FIRST_HOTEL_RENDER_BATCH_SIZE = 40;
 const HOTEL_RENDER_BATCH_SIZE = 300;
@@ -141,22 +147,20 @@ const MobileHotelDetails = () => {
     const children = getNumericSearchParam(searchParams, "children", 0);
     const guests = Math.max(1, adults + children);
 
-    return {
-      city:
-        searchLocationLabel === "this location"
-          ? "Hotel stay"
-          : searchLocationLabel,
-      checkIn: formatMobileDate(
-        searchParams.get("checkIn") || searchParams.get("checkin"),
-      ),
-      checkOut: formatMobileDate(
-        searchParams.get("checkOut") || searchParams.get("checkOut"),
-      ),
-      roomsLabel: pluralize(rooms, "Room"),
-      guestsLabel: pluralize(guests, "Guest"),
-    };
-  }, [searchLocationLabel, searchParams]);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
+      return {
+        city: searchLocationLabel === "this location" ? "Hotel stay" : searchLocationLabel,
+        checkIn: formatMobileDate(
+          searchParams.get("checkIn") || searchParams.get("checkin"),
+        ),
+        roomsLabel: pluralize(rooms, "Room"),
+        guestsLabel: pluralize(guests, "Guest"),
+      };
+    }, [searchLocationLabel, searchParams]);
+    const [isMobileViewport, setIsMobileViewport] = useState(
+      () =>
+        typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 768px)").matches,
+    );
 
   /* ✅ REQUIRED STATES */
   const [likedTours, setLikedTours] = useState([]);
@@ -174,13 +178,59 @@ const MobileHotelDetails = () => {
   const [activeFilters, setActiveFilters] = useState({});
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
+  const queryClient = useQueryClient();
 
-  const toggleLike = (id) => {
-    setLikedTours((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id],
+  const { data: wishlistData } = useQuery({
+    queryKey: ["user-wishlists", "hotel"],
+    queryFn: () => fetchUserWishlists("hotel"),
+  });
+
+  useEffect(() => {
+    const wishlistHotelIds = Object.values(wishlistData || {}).flatMap((group) =>
+      (group?.data || []).map((item) =>
+        String(item.hotelId || item.hotel_id || item.id || item.documentId || ""),
+      ),
     );
+
+    setLikedTours([...new Set(wishlistHotelIds.filter(Boolean))]);
+  }, [wishlistData]);
+
+  const { mutate: addHotelToWishlist, isPending: isAddingToWishlist } =
+    useMutation({
+      mutationFn: (hotelId) =>
+        createWishlist({ type: "hotel", ids: [hotelId] }),
+      onSuccess: (_data, hotelId) => {
+        setLikedTours((prev) =>
+          prev.includes(hotelId) ? prev : [...prev, hotelId],
+        );
+        queryClient.invalidateQueries({
+          queryKey: ["user-wishlists", "hotel"],
+        });
+      },
+      onError: (error) => {
+        if (
+          error?.message === "Not authenticated" ||
+          error?.response?.status === 401 ||
+          error?.response?.status === 403
+        ) {
+          setAuthView("login");
+          setShowAuthModal(true);
+          return;
+        }
+
+        appToast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to add hotel to wishlist",
+        );
+      },
+    });
+
+  const handleWishlistClick = (id) => {
+    const hotelId = String(id || "");
+    if (!hotelId || isAddingToWishlist) return;
+
+    addHotelToWishlist(hotelId);
   };
 
   const handleBookNow = async (hotel) => {
@@ -592,7 +642,11 @@ const MobileHotelDetails = () => {
       // console.log("Mobile hotels before UI normalize:", nextResults.hotels);
 
       if (!nextResults.hotels.length) {
-        if (isHotelTerminalPayload(payload)) {
+        const payloadType = payload?.type || getMessageData(payload)?.type;
+        if (
+          isHotelTerminalPayload(payload) &&
+          payloadType !== "HOTEL_INIT_COMPLETE"
+        ) {
           setIsHotelLoading(false);
         }
         return;
@@ -652,6 +706,10 @@ const MobileHotelDetails = () => {
     [activeFilters, hotelResults],
   );
 
+    if (isMobileViewport && isHotelLoading && !hotelResults.length) {
+      return <CustomLoaderHomePage />;
+    }
+
   return (
     <div className={styles.hotelDetailsMobileContainer}>
       <div className={`${styles.tripDetailsHeader}`}>
@@ -705,59 +763,58 @@ const MobileHotelDetails = () => {
         </button>
       </div>
 
-      <ResultsBottomSheet
-        resultsCount={totalHotelResults || displayHotels.length}
-        isLoading={isHotelLoading}
-        onOpenFilters={() => setIsFilterOpen(true)}
-      >
-        <HotelGridView
-          tourData={displayHotels}
-          likedTours={likedTours}
-          toggleLike={toggleLike}
-          handleBookNow={handleBookNow}
-          isLoading={isHotelLoading}
-          staySummary={staySummary}
-          loadingHotelDetailsId={loadingHotelDetailsId}
-          locationLabel={searchLocationLabel}
-          showEmptyState={Boolean(hotelSearchChannel)}
-        />
-      </ResultsBottomSheet>
-      <HotelFilterSheet
-        open={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        counts={filterCounts}
-        selectedFilters={activeFilters}
-        onApply={setActiveFilters}
-        onReset={() => setActiveFilters({})}
-      />
-      <MobileHotelEditSheet
-        open={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        isSubmitting={isEditSubmitting}
-        initialValues={{
-          city: searchSummary.city === "Hotel stay" ? "" : searchSummary.city,
-          checkIn:
-            searchParams.get("checkIn") || searchParams.get("checkin") || "",
-          checkOut:
-            searchParams.get("checkOut") || searchParams.get("checkout") || "",
-          rooms: searchParams.get("rooms") || 1,
-          adults: searchParams.get("adults") || 1,
-          children: searchParams.get("children") || 0,
-          childAges: parseChildAges(searchParams.get("childAges")),
-          roomDetails: getRoomDetailsFromParams(searchParams),
-          destination: readStoredHotelSearch()?.location || null,
-        }}
-        onApply={handleEditSearch}
-      />
-      {showAuthModal && authView === "login" && (
-        <LoginPopup
-          onClose={() => {
-            setShowAuthModal(false);
-            setAuthView("login");
-          }}
-          onNavigate={setAuthView}
-        />
-      )}
+            <ResultsBottomSheet
+              resultsCount={totalHotelResults || displayHotels.length}
+              isLoading={isHotelLoading}
+              onOpenFilters={() => setIsFilterOpen(true)}
+            >
+                    <HotelGridView
+                        tourData={displayHotels}
+                        likedTours={likedTours}
+                        onWishlistClick={handleWishlistClick}
+                        isAddingToWishlist={isAddingToWishlist}
+                        handleBookNow={handleBookNow}
+                        isLoading={isHotelLoading}
+                        staySummary={staySummary}
+                        loadingHotelDetailsId={loadingHotelDetailsId}
+                        locationLabel={searchLocationLabel}
+                        showEmptyState={Boolean(hotelSearchChannel)}
+                    />
+            </ResultsBottomSheet>
+            <HotelFilterSheet
+              open={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              counts={filterCounts}
+              selectedFilters={activeFilters}
+              onApply={setActiveFilters}
+              onReset={() => setActiveFilters({})}
+            />
+            <MobileHotelEditSheet
+              open={isEditOpen}
+              onClose={() => setIsEditOpen(false)}
+              isSubmitting={isEditSubmitting}
+              initialValues={{
+                city: searchSummary.city === "Hotel stay" ? "" : searchSummary.city,
+                checkIn: searchParams.get("checkIn") || searchParams.get("checkin") || "",
+                checkOut: searchParams.get("checkOut") || searchParams.get("checkout") || "",
+                rooms: searchParams.get("rooms") || 1,
+                adults: searchParams.get("adults") || 1,
+                children: searchParams.get("children") || 0,
+                childAges: parseChildAges(searchParams.get("childAges")),
+                roomDetails: getRoomDetailsFromParams(searchParams),
+                destination: readStoredHotelSearch()?.location || null,
+              }}
+              onApply={handleEditSearch}
+            />
+            {showAuthModal && authView === "login" && (
+              <LoginPopup
+                onClose={() => {
+                  setShowAuthModal(false);
+                  setAuthView("login");
+                }}
+                onNavigate={setAuthView}
+              />
+            )}
 
       {showAuthModal && authView === "signup" && (
         <SignupPopup

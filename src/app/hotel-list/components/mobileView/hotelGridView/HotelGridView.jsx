@@ -9,7 +9,8 @@ const getHotelLoadingKey = (hotel = {}) =>
 const HotelGridView = ({
   tourData,
   likedTours,
-  toggleLike,
+  onWishlistClick,
+  isAddingToWishlist = false,
   rating,
   handleBookNow,
   isLoading = false,
@@ -117,13 +118,14 @@ const HotelGridView = ({
 
                 <img
                   src={
-                    likedTours.includes(item.id)
+                    likedTours.includes(String(item.id))
                       ? "/icons/heartIconFilled.svg"
                       : "/icons/heartIcon.svg"
                   }
                   alt="wishlist"
                   className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
-                  onClick={() => toggleLike(item.id)}
+                  aria-disabled={isAddingToWishlist}
+                  onClick={() => onWishlistClick(item.id)}
                 />
               </div>
             </div>

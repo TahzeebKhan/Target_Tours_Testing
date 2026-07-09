@@ -15,7 +15,7 @@ const getErrorMessage = (err) =>
   err?.message ||
   "Failed to create wishlist";
 
-const createWishlist = async ({ type, name, ids }) => {
+export const createWishlist = async ({ type, name, ids }) => {
   const token = Cookies.get("auth_token");
 
   if (!token) {

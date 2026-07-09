@@ -4,8 +4,14 @@ import styles from "./TourListing.module.css";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchResults from "../searchResult/SearchResults";
-import CreateWishlistModal from "@/shared/components/wishlistModals/CreateWishlistModal";
-import SaveToWishlistModal from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import CreateWishlistModal, {
+  createWishlist,
+} from "@/shared/components/wishlistModals/CreateWishlistModal";
+import SaveToWishlistModal, {
+  fetchUserWishlists,
+} from "@/shared/components/wishlistModals/SaveToWishlistModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { appToast } from "@/shared/components/appToast/AppToast";
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
@@ -1324,30 +1330,82 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
+  const queryClient = useQueryClient();
+
+  const { data: wishlistData } = useQuery({
+    queryKey: ["user-wishlists", "hotel"],
+    queryFn: () => fetchUserWishlists("hotel"),
+  });
+
+  useEffect(() => {
+    const wishlistGroups = Object.entries(wishlistData || {});
+    const wishlistHotelIds = wishlistGroups.flatMap(([, group]) =>
+      (group?.data || []).map((item) =>
+        String(item.hotelId || item.hotel_id || item.id || item.documentId || ""),
+      ),
+    );
+
+    setLikedTours([...new Set(wishlistHotelIds.filter(Boolean))]);
+    setWishlists(wishlistGroups);
+  }, [wishlistData]);
+
+  const { mutate: addHotelToWishlist, isPending: isAddingToWishlist } =
+    useMutation({
+      mutationFn: (hotelId) =>
+        createWishlist({ type: "hotel", ids: [hotelId] }),
+      onSuccess: (_data, hotelId) => {
+        setLikedTours((prev) =>
+          prev.includes(hotelId) ? prev : [...prev, hotelId],
+        );
+        queryClient.invalidateQueries({
+          queryKey: ["user-wishlists", "hotel"],
+        });
+      },
+      onError: (error) => {
+        if (
+          error?.message === "Not authenticated" ||
+          error?.response?.status === 401 ||
+          error?.response?.status === 403
+        ) {
+          openLoginModal();
+          return;
+        }
+
+        appToast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to add hotel to wishlist",
+        );
+      },
+    });
 
   const handleHeartClick = (hotel) => {
     const hotelId = getHotelDetailsPayload(hotel).hotelId;
+    const wishlistHotelId = String(hotelId || hotel?.id || "");
 
-    setSelectedTourId(hotelId || hotel?.id || null);
+    if (!wishlistHotelId) return;
 
-    if (!wishlists.length) {
-      setIsCreateWishlistOpen(true);
-    } else {
-      setIsSaveWishlistOpen(true);
-    }
+    setSelectedTourId(wishlistHotelId);
+    addHotelToWishlist(wishlistHotelId);
   };
 
-  const handleCreateWishlist = (name) => {
+  const handleCreateWishlist = () => {
+    const hotelId = String(selectedTourId || "");
+    if (hotelId) {
+      setLikedTours((prev) =>
+        prev.includes(hotelId) ? prev : [...prev, hotelId],
+      );
+    }
+
     const newWishlist = {
       id: Date.now(),
-      name,
+      name: "Wishlist",
       count: 0,
     };
 
     setWishlists((prev) => [...prev, newWishlist]);
 
     setIsCreateWishlistOpen(false);
-    setIsSaveWishlistOpen(true);
   };
   const router = useRouter();
   const openLoginModal = () => {
@@ -1607,13 +1665,6 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
     [displayHotels, virtualWindow.endIndex, virtualWindow.startIndex],
   );
 
-  const toggleLike = (id) => {
-    setLikedTours((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id],
-    );
-  };
   const showEmptyState =
     !isHotelLoading && !displayHotels.length && Boolean(hotelSearchChannel || hotelResultSource);
 
@@ -1690,16 +1741,17 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
                       <img
                         src={
-                          likedTours.includes(item.id)
+                          likedTours.includes(String(item.id))
                             ? "/icons/heartIconFilled.svg"
                             : "/icons/heartIcon.svg"
                         }
                         alt="wishlist"
                         className={`${styles.heartIcon} ${styles.ListViewHeartIcon}`}
+                        aria-disabled={isAddingToWishlist}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id); // change icon
-                          handleHeartClick(item); // open modal
+                          if (isAddingToWishlist) return;
+                          handleHeartClick(item);
                         }}
                       />
                     </div>
@@ -1827,16 +1879,17 @@ const TourListing = ({ activeFilters = {}, onDataLoaded } = {}) => {
 
                       <img
                         src={
-                          likedTours.includes(item.id)
+                          likedTours.includes(String(item.id))
                             ? "/icons/heartIconFilled.svg"
                             : "/icons/heartIcon.svg"
                         }
                         alt="wishlist"
                         className={styles.heartIcon}
+                        aria-disabled={isAddingToWishlist}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleLike(item.id); // change icon
-                          handleHeartClick(item); // open modal
+                          if (isAddingToWishlist) return;
+                          handleHeartClick(item);
                         }}
                       />
                     </div>
