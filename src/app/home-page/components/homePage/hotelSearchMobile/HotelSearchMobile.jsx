@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
-import FromLocationSheet from "@/shared/components/fromLocationSheet/FromLocationSheet";
+import HotelLocationSheet from "@/shared/components/hotelLocationSheet/HotelLocationSheet";
 import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
 import HotelPassengersPopup from "@/shared/components/hotelPassengersPopup/HotelPassengersPopup";
 
@@ -71,10 +71,9 @@ const HotelSearchMobile = ({
           />
         </div>
         {openTo && (
-          <FromLocationSheet
+          <HotelLocationSheet
             onClose={() => setOpenTo(false)}
             inputType="Where to"
-            suggestionType="hotel"
             onSelectCity={(value, item) => {
               setTo(value);
               onHotelSelect?.(item?.hotelLocation || item);

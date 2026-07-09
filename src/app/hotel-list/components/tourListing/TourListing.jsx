@@ -353,7 +353,7 @@ const formatRatingScore = (value) => {
 
 const formatReviewText = (count) => {
   const reviewCount = getNumberValue(count);
-  if (!reviewCount) return "";
+  if (!reviewCount) return "No reviews yet";
   return `${reviewCount.toLocaleString("en-IN")} review${reviewCount === 1 ? "" : "s"}`;
 };
 
@@ -377,6 +377,7 @@ const getHotelReviewSummary = (hotel = {}) => {
     hotel.review_rating,
     hotel.reviewScore,
     hotel.review_score,
+    hotel.guestRating,
     hotel.guest_rating,
     hotel.ratingScore,
     hotel.rating_score,
@@ -384,6 +385,7 @@ const getHotelReviewSummary = (hotel = {}) => {
     reviewSummary.averageRating,
     reviewSummary.average_rating,
     firstReview.rating,
+    firstReview.score,
   );
   const reviewCount = getNumberValue(
     hotel.reviewCount,
@@ -395,6 +397,7 @@ const getHotelReviewSummary = (hotel = {}) => {
     reviewSummary.count,
     reviewSummary.reviewCount,
     reviewSummary.totalReviews,
+    firstReview.count,
     reviews.length && reviews.some((review) => review.comment || review.review || review.text)
       ? reviews.length
       : null,
