@@ -301,6 +301,7 @@
   min-width: 96px;
   min-height: 54px;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .priceLoading {
@@ -472,7 +473,7 @@
 
 @media (max-width: 768px) {
   .gridCardText {
-    max-height: 270px;
+    max-height: none;
   }
   .bookNowBtn {
     max-width: 145px;
@@ -585,10 +586,17 @@
   }
 }
 
-@media (max-width: 375px) {
+
+@media (max-width: 358px) {
+  .totalPrice span{
+    font-size: 9px !important; 
+  }
   .bookNowBtn {
     max-width: 145px;
-    padding: 12px 6px;
+    padding: 12px 13px !important;
+  }
+  .ListViewCardTextBottom{
+    gap: 5px !important;
   }
 }
 

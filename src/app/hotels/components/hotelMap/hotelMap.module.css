@@ -28,10 +28,12 @@
 
 .title {
   margin: 0;
-  color: #1f2540;
-  font-family: var(--font-playfair, serif);
-  font-size: 22px;
+  color: #111827;
+  font-family: var(--font-Antic-Didone);
+  font-size: 20px;
   font-weight: 400;
+  letter-spacing: 0%;
+  line-height: 100%;
 }
 
 .closeButton {
@@ -60,8 +62,8 @@
 }
 
 .section {
-  padding: 20px 18px;
-  border-bottom: 1px solid #eef0f4;
+  padding: 16px;
+  border-bottom: 1px solid #0000001A;
 }
 
 .sectionTitle {

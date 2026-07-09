@@ -362,6 +362,13 @@
   align-items: center;
   gap: 4px;
 }
+
+.rating div{
+   display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .topTextHead h2 {
   font-family: Inter;
   font-weight: 600;
@@ -1210,6 +1217,15 @@
   }
   .gridCardText {
     max-height: 300px;
+  }
+
+  .rating{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .topTextHead{
+    gap:10px;
   }
 }
 

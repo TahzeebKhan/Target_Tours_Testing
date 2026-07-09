@@ -173,8 +173,20 @@ const getHotelSearchMeta = (...sources) => {
       "tui",
     );
 
-    if (searchId || hotelSearchId || requestId || hotelSearchKey || searchTracingKey) {
-      return { searchId, hotelSearchId, requestId, hotelSearchKey, searchTracingKey };
+    if (
+      searchId ||
+      hotelSearchId ||
+      requestId ||
+      hotelSearchKey ||
+      searchTracingKey
+    ) {
+      return {
+        searchId,
+        hotelSearchId,
+        requestId,
+        hotelSearchKey,
+        searchTracingKey,
+      };
     }
   }
 
@@ -253,7 +265,14 @@ export const getHotelsFromMessage = (payload = {}) => {
   }
 
   const fallbackResult = pickBestHotelResult(
-    findHotelArrays([payload, data, content, nestedData, nestedDataContent, nestedContent]),
+    findHotelArrays([
+      payload,
+      data,
+      content,
+      nestedData,
+      nestedDataContent,
+      nestedContent,
+    ]),
   );
   fallbackResult.meta = meta;
   return fallbackResult;
@@ -1904,7 +1923,9 @@ const TourListing = () => {
     const wishlistGroups = Object.entries(wishlistData || {});
     const wishlistHotelIds = wishlistGroups.flatMap(([, group]) =>
       (group?.data || []).map((item) =>
-        String(item.hotelId || item.hotel_id || item.id || item.documentId || ""),
+        String(
+          item.hotelId || item.hotel_id || item.id || item.documentId || "",
+        ),
       ),
     );
 
@@ -2059,7 +2080,11 @@ const TourListing = () => {
     setTotalHotelResults(0);
     setIsHotelLoading(Boolean(hotelSearchChannel));
     setHotelResultSource("");
-    setSocketSearchMeta({ searchId: "", hotelSearchId: "", searchTracingKey: "" });
+    setSocketSearchMeta({
+      searchId: "",
+      hotelSearchId: "",
+      searchTracingKey: "",
+    });
     setMergedFilterSearchMeta({ searchId: "", hotelSearchId: "" });
     setHasMergedHotelResponse(false);
     setIsFilterLoading(Boolean(hotelSearchChannel));
@@ -2156,7 +2181,8 @@ const TourListing = () => {
         setSocketSearchMeta((prev) => ({
           searchId: payloadMeta.searchId || prev.searchId,
           hotelSearchId: payloadMeta.hotelSearchId || prev.hotelSearchId,
-          searchTracingKey: payloadMeta.searchTracingKey || prev.searchTracingKey,
+          searchTracingKey:
+            payloadMeta.searchTracingKey || prev.searchTracingKey,
         }));
       }
 
@@ -2219,30 +2245,51 @@ const TourListing = () => {
       if (
         !fromCache &&
         typeof window !== "undefined" &&
-        (sessionMeta.searchId || sessionMeta.hotelSearchId || sessionMeta.searchTracingKey)
+        (sessionMeta.searchId ||
+          sessionMeta.hotelSearchId ||
+          sessionMeta.searchTracingKey)
       ) {
         try {
-          const storedSearch = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
-          const currentSearchContext = storedSearch ? JSON.parse(storedSearch) : {};
+          const storedSearch = window.sessionStorage.getItem(
+            HOTEL_SEARCH_SESSION_KEY,
+          );
+          const currentSearchContext = storedSearch
+            ? JSON.parse(storedSearch)
+            : {};
           const data = getMessageData(payload);
-          const init = data?.init || data?.content?.init || payload?.init || currentSearchContext?.init;
+          const init =
+            data?.init ||
+            data?.content?.init ||
+            payload?.init ||
+            currentSearchContext?.init;
 
-          if (!currentSearchContext?.channel || currentSearchContext.channel === hotelSearchChannel) {
+          if (
+            !currentSearchContext?.channel ||
+            currentSearchContext.channel === hotelSearchChannel
+          ) {
             window.sessionStorage.setItem(
               HOTEL_SEARCH_SESSION_KEY,
               JSON.stringify({
                 ...currentSearchContext,
                 channel: currentSearchContext?.channel || hotelSearchChannel,
-                searchId: sessionMeta.searchId || currentSearchContext?.searchId || "",
+                searchId:
+                  sessionMeta.searchId || currentSearchContext?.searchId || "",
                 hotelSearchId:
-                  sessionMeta.hotelSearchId || currentSearchContext?.hotelSearchId || "",
+                  sessionMeta.hotelSearchId ||
+                  currentSearchContext?.hotelSearchId ||
+                  "",
                 searchTracingKey:
-                  sessionMeta.searchTracingKey || currentSearchContext?.searchTracingKey || "",
+                  sessionMeta.searchTracingKey ||
+                  currentSearchContext?.searchTracingKey ||
+                  "",
                 roomsSearchTracingKey:
                   sessionMeta.searchTracingKey ||
                   currentSearchContext?.roomsSearchTracingKey ||
                   "",
-                TUI: sessionMeta.searchTracingKey || currentSearchContext?.TUI || "",
+                TUI:
+                  sessionMeta.searchTracingKey ||
+                  currentSearchContext?.TUI ||
+                  "",
                 init,
                 initResponse:
                   getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE"
@@ -2260,12 +2307,17 @@ const TourListing = () => {
         }
       }
 
-      if (isFilterSearchPayloadReady(payload, nextResults.source) && filterMeta.searchId) {
+      if (
+        isFilterSearchPayloadReady(payload, nextResults.source) &&
+        filterMeta.searchId
+      ) {
         const nextMergedFilterPayloadKey = [
           filterMeta.searchId,
           filterMeta.hotelSearchId,
           nextResults.hotels.length,
-          payloadMeta.requestId || nextResults.meta?.requestId || getHotelSocketType(payload),
+          payloadMeta.requestId ||
+            nextResults.meta?.requestId ||
+            getHotelSocketType(payload),
         ].join("|");
 
         setMergedFilterSearchMeta((prev) => ({
@@ -2278,7 +2330,9 @@ const TourListing = () => {
             filterMeta.hotelSearchId ||
             latestFilterSearchMetaRef.current.hotelSearchId,
         };
-        if (lastMergedFilterPayloadKeyRef.current !== nextMergedFilterPayloadKey) {
+        if (
+          lastMergedFilterPayloadKeyRef.current !== nextMergedFilterPayloadKey
+        ) {
           lastMergedFilterPayloadKeyRef.current = nextMergedFilterPayloadKey;
           hasLoadedFilterDataRef.current = false;
           lastFilterRequestKeyRef.current = "";
@@ -2288,13 +2342,16 @@ const TourListing = () => {
       }
 
       if (
-        (resultMeta.searchId || resultMeta.hotelSearchId || resultMeta.searchTracingKey) &&
+        (resultMeta.searchId ||
+          resultMeta.hotelSearchId ||
+          resultMeta.searchTracingKey) &&
         (!fromCache || !hotelSearchChannel)
       ) {
         setSocketSearchMeta((prev) => ({
           searchId: resultMeta.searchId || prev.searchId,
           hotelSearchId: resultMeta.hotelSearchId || prev.hotelSearchId,
-          searchTracingKey: resultMeta.searchTracingKey || prev.searchTracingKey,
+          searchTracingKey:
+            resultMeta.searchTracingKey || prev.searchTracingKey,
         }));
       }
 
@@ -2725,7 +2782,8 @@ const TourListing = () => {
                     <div className={styles.ListViewCardTextTop}>
                       <div className={styles.topTextHead}>
                         <div className={styles.rating}>
-                          {[...Array(5)].map((_, index) => (
+                          <div>
+                            {[...Array(5)].map((_, index) => (
                             <img
                               key={index}
                               src={
@@ -2737,9 +2795,12 @@ const TourListing = () => {
                             />
                           ))}
                           <div className={styles.ReviewCount}>
-                            <span>{item.reviewScoreText}</span>(
-                            {item.reviewText})
+                            <span>{item.reviewScoreText}</span>
                           </div>
+                          </div>
+                          <div className={styles.ReviewCount}>
+                            ({item.reviewText})
+                            </div>
                         </div>
                         <h2>{item.title}</h2>
 

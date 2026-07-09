@@ -61,3 +61,10 @@
 .option:hover {
   background: #f5f7fa;
 }
+
+@media (max-width: 875px) {
+
+  .trigger{
+    height: 30px;
+  }
+}
