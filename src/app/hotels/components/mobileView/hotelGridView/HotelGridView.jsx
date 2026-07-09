@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import styles from "./HotelGridView.module.css";
-import { HotelBenefits, HotelFacilities } from "../../tourListing/TourListing";
+import { HotelBenefits, HotelFacilities } from "../../TourListing";
 
 const getHotelLoadingKey = (hotel = {}) =>
   hotel.id || hotel.hotelId || hotel.api_hotel_id || hotel.hotelCode || "";

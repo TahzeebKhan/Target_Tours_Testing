@@ -28,7 +28,7 @@ import {
   matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
-} from '../tourListing/TourListing'
+} from "../TourListing";
 import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
 import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'

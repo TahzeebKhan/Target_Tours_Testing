@@ -2,8 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./TourHeroSection.module.css";
 import Navbar from "@/app/flights/Navbar";
-import DateField from "@/app/home-page/components/homePage/DateField";
-import TravellerSelector from "@/app/home-page/components/homePage/TravellerSelector";
 import SuggestionBox from "@/app/home-page/components/homePage/SuggestionBox";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -248,7 +246,7 @@ const readStoredHotelRooms = () => {
   }
 };
 
-const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
+const TourHeroSection = ({ resultsPath = "/hotels" } = {}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const searchedCity = searchParams.get("city") || "";
@@ -692,23 +690,7 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const [activeTab, setActiveTab] = useState("");
-  const travellerOptions = [
-    { value: "1_room_2_adult", label: "1 Room, 2 Adults" },
-    { value: "2_room_4_adult", label: "2 Rooms, 4 Adults" },
-  ];
-
-  const openDeparturePicker = () => {
-    const input = departureRef.current;
-    if (!input) return;
-
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-    } else {
-      input.focus();
-      input.click();
-    }
-  };
+;
 
   const handleHotelDateClick = (date) => {
     if (!hotelStartDate || hotelEndDate) {
@@ -963,20 +945,7 @@ const TourHeroSection = ({ resultsPath = "/hotel-list" } = {}) => {
     }
   };
 
-  const handleFieldClick = (e) => {
-    const target = e.currentTarget;
-    const input = target.querySelector("input");
 
-    if (!input) return;
-
-    // Check if it's a date input
-    if (input.type === "date" && typeof input.showPicker === "function") {
-      input.showPicker();
-    } else {
-      // For text inputs, just focus
-      input.focus();
-    }
-  };
   return (
     <section className={styles.tourHeroSection}>
       <div className={styles.overlay}></div>

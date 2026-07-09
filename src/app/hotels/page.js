@@ -3,10 +3,10 @@
 import React, { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./layout.module.css";
-import TourHeroSection from "../hotel-list/components/tourHeroSection.js/TourHeroSection";
+import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
 import TourListing from "./components/TourListing";
 
-import MobileHotelDetails from "../hotel-list/components/mobileView/MobileHotelDetails";
+import MobileHotelDetails from "./components/mobileView/MobileHotelDetails";
 import HotelsFilters from "./components/HotelsFilters"
 import { HotelsProvider } from "./context/HotelsContext";
 import { HOTEL_LAST_SEARCH_URL_KEY } from "@/shared/services/hotelSearch";
