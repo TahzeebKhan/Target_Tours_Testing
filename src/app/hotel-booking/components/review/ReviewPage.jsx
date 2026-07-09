@@ -200,6 +200,10 @@ const getResponseValue = (response, key) =>
   "";
 
 const gatewayMeta = {
+  cashfree: {
+    label: "Cashfree",
+    image: "/images/cashfree.png",
+  },
   phonepe: {
     label: "PhonePe",
     image: "/images/phonepeLogo.png",
@@ -239,7 +243,6 @@ const normalizeGatewayList = (payload) => {
     defaultGateway: normalizeGateway(
       data?.default_gateway ||
         data?.defaultGateway ||
-        availableGateways.find((gateway) => gateway === "phonepe") ||
         availableGateways[0],
     ),
     availableGateways,
@@ -286,13 +289,73 @@ const getPaymentRedirectUrl = (response) =>
 
 const getPaymentMerchantOrderId = (response) =>
   getFirstValue(
-    response?.merchantOrderId,
     response?.merchant_order_id,
-    response?.data?.merchantOrderId,
     response?.data?.merchant_order_id,
-    response?.data?.payment?.merchantOrderId,
-    response?.payment?.merchantOrderId,
+
   );
+
+const getCashfreePaymentSessionId = (response) =>
+  getFirstValue(
+    response?.payment_session_id,
+    response?.data?.payment_session_id,
+  );
+
+let cashfreeSdkPromise;
+
+const loadCashfreeSdk = () => {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Cashfree checkout is only available in the browser."));
+  }
+
+  if (typeof window.Cashfree === "function") {
+    return Promise.resolve(window.Cashfree);
+  }
+
+  if (cashfreeSdkPromise) return cashfreeSdkPromise;
+
+  cashfreeSdkPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(
+      'script[src="https://sdk.cashfree.com/js/v3/cashfree.js"]',
+    );
+    const script = existingScript || document.createElement("script");
+
+    const handleLoad = () => {
+      if (typeof window.Cashfree === "function") {
+        resolve(window.Cashfree);
+        return;
+      }
+
+      cashfreeSdkPromise = null;
+      reject(new Error("Cashfree checkout SDK is unavailable."));
+    };
+    const handleError = () => {
+      cashfreeSdkPromise = null;
+      reject(new Error("Unable to load Cashfree checkout."));
+    };
+
+    script.addEventListener("load", handleLoad, { once: true });
+    script.addEventListener("error", handleError, { once: true });
+
+    if (!existingScript) {
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  });
+
+  return cashfreeSdkPromise;
+};
+
+const getCashfreeMode = () => {
+  if (process.env.NEXT_PUBLIC_CASHFREE_MODE) {
+    return process.env.NEXT_PUBLIC_CASHFREE_MODE;
+  }
+
+  return typeof window !== "undefined" &&
+    ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "sandbox"
+    : "production";
+};
 
 const formatAmount = (value) => {
   const amount = Number(value || 0);
@@ -858,9 +921,9 @@ const ReviewPage = () => {
   const [priceChange, setPriceChange] = useState(null);
   const [pendingConfirmPayload, setPendingConfirmPayload] = useState(null);
   const [pendingPaymentPayload, setPendingPaymentPayload] = useState(null);
-  const [paymentGateways, setPaymentGateways] = useState(["phonepe"]);
-  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("phonepe");
-  const [paymentGatewaysLoading, setPaymentGatewaysLoading] = useState(false);
+  const [paymentGateways, setPaymentGateways] = useState([]);
+  const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
+  const [paymentGatewaysLoading, setPaymentGatewaysLoading] = useState(true);
   const [paymentGatewaysError, setPaymentGatewaysError] = useState("");
   const [guestDetails, setGuestDetails] = useState({
     roomGuests: {},
@@ -979,10 +1042,26 @@ const ReviewPage = () => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
 
-  const redirectToHotelPayment = (paymentResponse, confirmPayload) => {
-    const redirectUrl = getPaymentRedirectUrl(paymentResponse);
-    if (!redirectUrl) {
-      throw new Error("Payment redirect URL is missing.");
+  const redirectToHotelPayment = async (
+    paymentResponse,
+    confirmPayload,
+    paymentGateway,
+  ) => {
+    const gateway = normalizeGateway(paymentGateway);
+    const isCashfree = gateway === "cashfree";
+    const paymentSessionId = isCashfree
+      ? getCashfreePaymentSessionId(paymentResponse)
+      : "";
+    const redirectUrl = isCashfree ? "" : getPaymentRedirectUrl(paymentResponse);
+    let Cashfree;
+
+    if (isCashfree) {
+      if (!paymentSessionId) {
+        throw new Error("Cashfree payment session ID is missing.");
+      }
+      Cashfree = await loadCashfreeSdk();
+    } else if (!redirectUrl) {
+      throw new Error(`${formatGatewayLabel(gateway)} payment URL is missing.`);
     }
 
     writePendingHotelConfirmBooking({
@@ -997,10 +1076,21 @@ const ReviewPage = () => {
       transactionId: confirmPayload.transactionId,
     });
 
-    // window.location.assign(redirectUrl);
-//     setTimeout(() => {
-//   window.location.assign(redirectUrl);
-// }, 150);
+    if (isCashfree) {
+      const cashfree = Cashfree({ mode: getCashfreeMode() });
+      const checkoutResult = await cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: "_self",
+      });
+
+      if (checkoutResult?.error) {
+        throw new Error(
+          checkoutResult.error.message || "Unable to open Cashfree checkout.",
+        );
+      }
+      return;
+    }
+
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -1021,21 +1111,19 @@ const ReviewPage = () => {
         if (!isActive) return;
 
         const { availableGateways, defaultGateway } = normalizeGatewayList(response);
-        const nextGateways = availableGateways.length ? availableGateways : ["phonepe"];
+        const nextGateways = availableGateways;
         const nextSelectedGateway =
           defaultGateway && nextGateways.includes(defaultGateway)
             ? defaultGateway
-            : nextGateways[0];
+            : nextGateways[0] || "";
 
         setPaymentGateways(nextGateways);
-        setSelectedPaymentGateway((current) =>
-          current && nextGateways.includes(current) ? current : nextSelectedGateway,
-        );
+        setSelectedPaymentGateway(nextSelectedGateway);
       } catch (error) {
         if (!isActive) return;
 
-        setPaymentGateways(["phonepe"]);
-        setSelectedPaymentGateway((current) => current || "phonepe");
+        setPaymentGateways([]);
+        setSelectedPaymentGateway("");
         setPaymentGatewaysError(error.message || "Unable to load payment gateways.");
       } finally {
         if (isActive) setPaymentGatewaysLoading(false);
@@ -1065,11 +1153,15 @@ const ReviewPage = () => {
         amount: acceptedAmount,
       });
       const merchantOrderId = getPaymentMerchantOrderId(paymentResponse);
-      redirectToHotelPayment(paymentResponse, {
-        ...pendingConfirmPayload,
-        netAmount: nextAmount,
-        merchant_order_id: merchantOrderId,
-      });
+      await redirectToHotelPayment(
+        paymentResponse,
+        {
+          ...pendingConfirmPayload,
+          netAmount: nextAmount,
+          merchant_order_id: merchantOrderId,
+        },
+        pendingPaymentPayload.payment_gateway,
+      );
 
       setPriceChange(null);
       setPendingConfirmPayload(null);
@@ -1451,8 +1543,8 @@ const ReviewPage = () => {
       const hotelPayment = {
         domain: "localhost:1337",
         booking_type: "hotel",
-        payment_gateway: selectedPaymentGateway || "phonepe",
-        payment_mode: selectedPaymentGateway || "phonepe",
+        payment_gateway: selectedPaymentGateway,
+        payment_mode: selectedPaymentGateway,
         TUI: paymentTui,
         TransactionID: transactionId,
         NetAmount: toAmountNumber(netAmount),
@@ -1489,7 +1581,11 @@ const ReviewPage = () => {
         merchant_order_id: getPaymentMerchantOrderId(hotelPaymentResponse),
       };
 
-      redirectToHotelPayment(hotelPaymentResponse, finalConfirmPayload);
+      await redirectToHotelPayment(
+        hotelPaymentResponse,
+        finalConfirmPayload,
+        hotelPayment.payment_gateway,
+      );
     } catch (error) {
       clearHotelBookingStatus();
       toast.error(error.message || "Unable to start hotel booking.");

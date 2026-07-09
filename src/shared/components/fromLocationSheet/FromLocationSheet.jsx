@@ -7,13 +7,11 @@ import {
     AIRPORT_SUGGESTIONS_QUERY_KEY,
     fetchAirportSuggestions,
 } from "@/shared/services/airportSearch";
-import { fetchHotelSearchSuggestions } from "@/shared/services/hotelSearch";
 
 export default function FromLocationSheet({
     onClose,
     inputType,
     onSelectCity,
-    suggestionType = "airport",
 }) {
     const [search, setSearch] = useState("");
     const [currentLocation, setCurrentLocation] = useState(false);
@@ -105,42 +103,22 @@ export default function FromLocationSheet({
 
     const shouldFetchSuggestions = debouncedSearch.length >= 2;
 
-    const isHotelSuggestions = suggestionType === "hotel";
-
-    const { data: airportSuggestions = [] } = useQuery({
+    const {
+        data: airportSuggestions = [],
+        isFetching: isAirportSuggestionsLoading,
+    } = useQuery({
         queryKey: [...AIRPORT_SUGGESTIONS_QUERY_KEY, debouncedSearch.toLowerCase()],
         queryFn: () => fetchAirportSuggestions(debouncedSearch),
-        enabled: shouldFetchSuggestions && !isHotelSuggestions,
+        enabled: shouldFetchSuggestions,
         staleTime: 1000 * 60 * 10,
         gcTime: 1000 * 60 * 30,
         refetchOnWindowFocus: false,
     });
 
-    const { data: hotelSuggestions = [] } = useQuery({
-        queryKey: [
-            "hotel-mobile-search-suggestions",
-            debouncedSearch.toLowerCase(),
-            process.env.NEXT_PUBLIC_DOMAIN,
-        ],
-        queryFn: () => fetchHotelSearchSuggestions(debouncedSearch),
-        enabled: shouldFetchSuggestions && isHotelSuggestions,
-        staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 30,
-        refetchOnWindowFocus: false,
-    });
+    const isSuggestionsLoading =
+        shouldFetchSuggestions && isAirportSuggestionsLoading;
 
-    const apiCities = isHotelSuggestions ? hotelSuggestions.map((item) => ({
-        city: item.label || item.value,
-        airport: item.detail,
-        type: "suggestion",
-        value: item.value || item.label,
-        locationId: item.locationId || item.id,
-        iataCode: item.code,
-        code: item.code || item.locationId || item.id,
-        geoCode: item.geoCode,
-        raw: item.raw,
-        hotelLocation: item,
-    })) : airportSuggestions.map((item) => ({
+    const apiCities = airportSuggestions.map((item) => ({
         city: item.label,
         airport: item.detail,
         type: "suggestion",
@@ -271,8 +249,13 @@ export default function FromLocationSheet({
                         </>
                     )}
 
+                    {isSuggestionsLoading && (
+                        <p className={styles.sub}>Loading...</p>
+                    )}
+
                     {/* EMPTY STATE */}
-                    {suggestionCities.length === 0 &&
+                    {!isSuggestionsLoading &&
+                        suggestionCities.length === 0 &&
                         popularCities.length === 0 &&
                         nearbyCities.length === 0 && (
                             <p className={styles.sub}>No results found</p>

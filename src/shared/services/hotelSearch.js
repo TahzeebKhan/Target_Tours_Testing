@@ -692,10 +692,15 @@ export const getHotelPaymentGateways = async ({ domain } = {}) => {
 
 export const HotelPaymentStart = async (payload = {}) => {
   const paymentGateway = String(
-    payload.payment_gateway || payload.payment_mode || "phonepe",
+    payload.payment_gateway || payload.payment_mode || "",
   )
     .trim()
     .toLowerCase();
+
+  if (!paymentGateway) {
+    throw new Error("Payment gateway is required");
+  }
+
   const url = new URL(
     `/api/payment-gateways/${paymentGateway}/pay`,
     normalizeBaseUrl(),

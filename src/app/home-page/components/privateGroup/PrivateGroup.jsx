@@ -124,7 +124,7 @@ const PrivateGroup = ({ onGroupQuote, onPrivateQuote }) => {
               x2="0.499984"
               y2="357.4"
               stroke="#000033"
-              stroke-dasharray="9 9"
+              strokeDasharray="9 9"
             />
           </svg>
 
