@@ -238,7 +238,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 14px !important;
-  leading-trim: NONE;
+  
   line-height: 160%;
   letter-spacing: 0%;
   color: rgba(31, 34, 38, 1);
@@ -463,7 +463,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 18px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   text-transform: uppercase;
@@ -497,7 +497,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -509,7 +509,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 20px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -521,7 +521,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 20px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -538,7 +538,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -610,7 +610,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 18px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   text-transform: uppercase;
@@ -623,7 +623,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -669,7 +669,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 2%;
 
@@ -681,7 +681,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 22px;
   letter-spacing: 0%;
   text-transform: uppercase;
@@ -694,7 +694,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -707,7 +707,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -719,7 +719,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   color: #1f2226;
@@ -736,7 +736,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   letter-spacing: 0%;
   vertical-align: middle;

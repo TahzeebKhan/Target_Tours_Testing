@@ -420,7 +420,7 @@
   text-align: center;
   color: #475569;
   font-size: 12px;
-  leading-trim: NONE;
+  
   line-height: 18px;
   letter-spacing: 0%;
 }
@@ -430,7 +430,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
   color: #475569;
@@ -448,7 +448,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 20px;
-  leading-trim: NONE;
+  
   line-height: 30px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -500,7 +500,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
   color: #475569;
@@ -511,7 +511,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
 
@@ -525,7 +525,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
 
@@ -572,7 +572,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
 
@@ -606,7 +606,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -652,7 +652,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 16px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 2%;
   color: #0a0a0a;
@@ -663,7 +663,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 22px;
   letter-spacing: 0%;
 

@@ -29,7 +29,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 125%;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -45,7 +45,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 32px;
-  leading-trim: NONE;
+  
   line-height: 40px;
   letter-spacing: 0px;
   vertical-align: middle;
@@ -57,7 +57,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 16px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -96,7 +96,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 12px;
-  leading-trim: NONE;
+  
   line-height: 16px;
   letter-spacing: 0%;
   text-align: center;
@@ -506,7 +506,7 @@
   font-weight: 500;
   font-style: normal;
   font-size: 18px;
-  leading-trim: NONE;
+  
   line-height: 26px;
   letter-spacing: -2%;
   vertical-align: middle;
@@ -521,7 +521,7 @@
   font-weight: 300;
   font-style: italic;
   font-size: 12px;
-  leading-trim: NONE;
+  
   line-height: 16px;
   letter-spacing: 0px;
   vertical-align: middle;
@@ -619,7 +619,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 13px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: -2%;
   vertical-align: middle;
@@ -667,7 +667,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 13px;
-  leading-trim: NONE;
+  
   line-height: 20px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -717,7 +717,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 14px;
   letter-spacing: 0px;
   vertical-align: middle;
@@ -731,7 +731,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 10px;
-  leading-trim: NONE;
+  
   line-height: 16.5px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -787,7 +787,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 10px;
-  leading-trim: NONE;
+  
   line-height: 14px;
   letter-spacing: 0px;
   vertical-align: middle;
@@ -802,7 +802,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: -2%;
   vertical-align: middle;
@@ -816,7 +816,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 10px;
-  leading-trim: NONE;
+  
   line-height: 160%;
   letter-spacing: 0px;
 
@@ -937,7 +937,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 13px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: -2%;
   vertical-align: middle;
@@ -977,7 +977,7 @@
   font-weight: 400;
   font-style: Italic;
   font-size: 9px;
-  leading-trim: NONE;
+  
   line-height: 13.5px;
   letter-spacing: 0%;
   vertical-align: middle;

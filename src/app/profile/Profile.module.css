@@ -66,7 +66,7 @@
     font-weight: 300;
     font-style: Light;
     font-size: 14px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: 0%;
     text-transform: uppercase;
@@ -80,7 +80,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 32px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: 0%;
   }
@@ -99,7 +99,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 24px;
-    leading-trim: NONE;
+    
     line-height: 44px;
     letter-spacing: 0%;
     margin-bottom: 6px;
@@ -110,7 +110,7 @@
     font-weight: 300;
     font-style: Light;
     font-size: 14px;
-    leading-trim: NONE;
+    
     line-height: 24px;
     letter-spacing: 0%;
   }
@@ -132,7 +132,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 24px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: 0%;
     color: #1f2226;

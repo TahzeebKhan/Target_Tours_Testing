@@ -1306,7 +1306,7 @@ padding-right: 20px;
     font-weight: 500;
     font-style: Medium;
     font-size: 15px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: 0%;
     vertical-align: middle;
@@ -1323,7 +1323,7 @@ padding-right: 20px;
     font-weight: 300;
     font-style: Light;
     font-size: 12px;
-    leading-trim: NONE;
+    
     line-height: 20px;
     letter-spacing: 0%;
     vertical-align: middle;
@@ -1432,7 +1432,7 @@ padding-right: 20px;
     font-weight: 500;
     font-style: Regular;
     font-size: 12px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: -2%;
 
@@ -1446,7 +1446,7 @@ padding-right: 20px;
     font-weight: 400;
     font-style: Regular;
     font-size: 12px;
-    leading-trim: NONE;
+    
     line-height: 100%;
     letter-spacing: 0%;
     text-transform: uppercase;

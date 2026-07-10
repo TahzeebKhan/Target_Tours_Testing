@@ -132,7 +132,7 @@
     font-style: Medium;
     font-size: 18px;
     text-transform: capitalize;
-    leading-trim: NONE;
+    
     line-height: 28px;
     letter-spacing: 0%;
   }
@@ -141,7 +141,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 14px;
-    leading-trim: NONE;
+    
     line-height: 20px;
     letter-spacing: 0%;
     color: #454c58;
