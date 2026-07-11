@@ -25,6 +25,110 @@
   width: 100%;
 }
 
+.visaSolutions {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  overflow: hidden;
+  background-image: url("/images/whyChhose.jpg");
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+}
+
+.visaSolutionsOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(1, 4, 22, 0.12) 0%, rgba(1, 4, 22, 0.9) 100%),
+    linear-gradient(90deg, rgba(1, 4, 22, 0.58) 0%, rgba(1, 4, 22, 0.05) 58%, rgba(1, 4, 22, 0.32) 100%);
+}
+
+.visaSolutionsInner {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  min-height: 620px;
+  margin: 0 auto;
+  padding: 76px 110px 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.visaSolutionsIntro {
+  max-width: 620px;
+}
+
+.visaSolutionsEyebrow {
+  margin: 0 0 22px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.visaSolutionsTitle {
+  margin: 0;
+  font-family: Antic Didone, serif;
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+.visaSolutionsFeatures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 52px;
+  margin-top: auto;
+  padding-bottom: 86px;
+}
+
+.visaSolutionsFeature h3 {
+  margin: 0 0 16px;
+  font-family: Antic Didone, serif;
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.visaSolutionsFeature p {
+  margin: 0;
+  max-width: 260px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.visaSolutionsFooter {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  align-items: end;
+  gap: 34px;
+}
+
+.visaSolutionsFooter img {
+  width: 124px;
+  height: auto;
+  display: block;
+}
+
+.visaSolutionsFooter p {
+  margin: 0;
+  max-width: 980px;
+  font-family: Inter, sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
+}
+
 /* Toggle Button */
 .sidebarToggle {
   padding: 12px 24px;
@@ -69,6 +173,15 @@
   .tourLayout{
     grid-template-columns: 337px 1fr;
   }
+
+  .visaSolutionsInner {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+
+  .visaSolutionsFeatures {
+    gap: 28px;
+  }
 }
 
 /* RESPONSIVE (same as FlightsLayout) */
@@ -108,6 +221,30 @@
  .tourContent{
   padding-top: 12px;
  }
+
+ .visaSolutions {
+  min-height: auto;
+ }
+
+ .visaSolutionsInner {
+  min-height: auto;
+  padding: 56px 24px 42px;
+ }
+
+ .visaSolutionsTitle {
+  font-size: 32px;
+ }
+
+ .visaSolutionsFeatures {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 84px;
+  padding-bottom: 56px;
+ }
+
+ .visaSolutionsFooter {
+  grid-template-columns: 1fr;
+  gap: 22px;
+ }
 }
 
 /* MOBILE BOTTOM SHEET (same as FlightsLayout) */
@@ -138,5 +275,18 @@
   .tourContent{
     padding: 12px 0;
   }
-}
 
+  .visaSolutionsInner {
+    padding: 48px 18px 36px;
+  }
+
+  .visaSolutionsFeatures {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-top: 72px;
+  }
+
+  .visaSolutionsFeature p {
+    max-width: none;
+  }
+}

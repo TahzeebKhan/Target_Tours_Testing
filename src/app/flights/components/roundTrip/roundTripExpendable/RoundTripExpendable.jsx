@@ -154,8 +154,36 @@ const normalizeConnections = (value) => {
   );
 };
 
+const getConnectionEndpointCode = (connection = {}, type) => {
+  const endpoint = type === "from"
+    ? connection?.From || connection?.from || connection?.origin
+    : connection?.To || connection?.to || connection?.destination;
+
+  if (endpoint && typeof endpoint === "object") {
+    return String(
+      endpoint?.airportCode ||
+        endpoint?.airport_code ||
+        endpoint?.code ||
+        endpoint?.iata_code ||
+        ""
+    )
+      .trim()
+      .toUpperCase();
+  }
+
+  return String(endpoint || "").trim().toUpperCase();
+};
+
+const hasConnectionRouteEndpoints = (connection = {}) => {
+  const from = getConnectionEndpointCode(connection, "from");
+  const to = getConnectionEndpointCode(connection, "to");
+  return Boolean(from && to && from !== to);
+};
+
 const getSegmentList = (flight = {}) => {
-  const connections = toArray(flight?.Connections || flight?.connections);
+  const connections = toArray(flight?.Connections || flight?.connections).filter(
+    hasConnectionRouteEndpoints
+  );
   if (!connections.length) return [flight];
 
   return connections.map((connection) => ({
@@ -427,8 +455,11 @@ const getTimelineConnectionsFromLeg = (leg = {}, fallbackAirline = {}) => {
 
   if (!rawConnections.length) return [];
 
-  return rawConnections.map((connection, index) => {
-    const nextConnection = rawConnections[index + 1];
+  const routeConnections = rawConnections.filter(hasConnectionRouteEndpoints);
+  if (!routeConnections.length) return [];
+
+  return routeConnections.map((connection, index) => {
+    const nextConnection = routeConnections[index + 1];
     const baseTimeline = toApiTimelineFlight({
       ...connection,
       airline: connection?.airline || connection?.AirlineName || fallbackAirline?.name,
@@ -734,7 +765,6 @@ const RoundTripExpendable = ({
     if (activeTab !== "baggage") return;
 
     const payload = buildAncillaryPayload(flightData);
-    console.log("rtPayload",payload)
     const requestKey = getAncillaryRequestKey(payload);
    
 

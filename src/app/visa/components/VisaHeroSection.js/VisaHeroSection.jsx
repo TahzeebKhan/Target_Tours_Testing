@@ -376,7 +376,7 @@ const VisaHeroSection = () => {
               onClick={handleFieldClick}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
-                From CITY
+               DESTINATION
               </div>
               <input
                 ref={fromInputRef}
@@ -407,7 +407,7 @@ const VisaHeroSection = () => {
               className={`${styles.fromBtn} ${styles.pos2} ${styles.swapField}`}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
-                Departure Date
+                Purpose
               </div>
               <div
                 className={`${styles.dateInputWrapper} ${styles.contentFade}`}
@@ -427,7 +427,7 @@ const VisaHeroSection = () => {
               onClick={handleFieldClick}
             >
               <div className={`${styles.lable} ${styles.labelFade}`}>
-                To CITY/COUNTRY, CATEGORY
+                Nationality
               </div>
               <input
                 ref={toInputRef}
@@ -462,7 +462,7 @@ const VisaHeroSection = () => {
                 setTravellerOpend((current) => !current);
               }}
             >
-              <div className={styles.lable}>ROOMS & GUESTS</div>
+              <div className={styles.lable}>Visa  Delivery</div>
 
               <div className={styles.guestSummary}>
                 <span className={styles.guestCount}>

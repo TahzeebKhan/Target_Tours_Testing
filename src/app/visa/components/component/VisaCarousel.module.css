@@ -80,6 +80,7 @@ letter-spacing: 0%;
   height: 465px;
   overflow: hidden;
   background: #e8ebef;
+  cursor: pointer;
 }
 
 .image {
@@ -87,28 +88,86 @@ letter-spacing: 0%;
   height: 100%;
   display: block;
   object-fit: cover;
+  transform: scale(1);
+  transition: transform 0.45s ease;
 }
 
 .gradient {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0) 47%,
-    rgba(0, 0, 0, 0.72) 100%
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.72) 62%,
+    #000000 100%
   );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gradient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.82) 42%,
+    #000000 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.hoverZone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  z-index: 3;
+}
+
+.card:has(.hoverZone:hover) .image,
+.card:focus-within .image {
+  transform: scale(1.04);
+}
+
+.card:has(.hoverZone:hover) .gradient::after,
+.card:focus-within .gradient::after {
+  opacity: 1;
 }
 
 .cardContent {
   position: absolute;
   left: 20px;
   right: 20px;
-  bottom: 22px;
+  bottom: 31px;
   display: flex;
-  /* align-items: flex-end; */
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
   color: #ffffff;
+  transform: translateY(90px);
+  transition: transform 0.3s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.card:has(.hoverZone:hover) .cardContent,
+.card:focus-within .cardContent {
+  transform: translateY(0);
+}
+
+.primaryRow {
+  display: flex;
+  /* align-items: flex-; */
+  justify-content: space-between;
+  gap: 16px;
+ border-bottom: 1.37px solid #FFFFFF4F;
+ padding-bottom: 10px;
 }
 
 .cardTitle {
@@ -157,6 +216,69 @@ line-height: 100%;
 letter-spacing: 0%;
 vertical-align: bottom;
 
+}
+
+.hoverDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s ease;
+}
+
+
+.card:has(.hoverZone:hover) .hoverDetails,
+.card:focus-within .hoverDetails {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.visaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailLabel {
+  color: #ffffff;
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+}
+.visaType {
+  font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+
+
+}
+
+.detailValue{
+ font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 19.21px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: bottom;
+color: #FFFFFF;
+
+}
+
+.visaType {
+  text-align: right;
 }
 
 .navButtons {
@@ -214,10 +336,25 @@ vertical-align: bottom;
   .cardContent {
     align-items: flex-start;
     flex-direction: column;
+    transform: translateY(0);
+  }
+
+  .hoverZone {
+    display: none;
   }
 
   .priceBlock {
     align-items: flex-start;
     text-align: left;
+  }
+
+  .primaryRow,
+  .hoverDetails {
+    width: 100%;
+  }
+
+  .hoverDetails {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

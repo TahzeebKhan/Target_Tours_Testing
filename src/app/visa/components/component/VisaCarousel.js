@@ -14,43 +14,57 @@ const DESTINATIONS = [
     title: "Japan",
     price: "₹ 12,000",
     region: "SE Asia",
-    image: "/images/TravelInspiration1.png",
+    image: "/images/japan.png",
+    visaIn: "2 days",
+    visaType: "E-Visa",
   },
   {
     title: "China",
     price: "₹ 12,000",
     region: "SE Asia",
-    image: "/images/TravelInspiration2.png",
+    image: "/images/china.png",
+    visaIn: "1 day",
+    visaType: "E-Visa",
   },
   {
     title: "Qatar",
     price: "₹ 45,000",
     region: "SE Asia",
     image: "/images/travel-hero.webp",
+    visaIn: "3 days",
+    visaType: "E-Visa",
   },
   {
     title: "Australia",
     price: "₹ 12,000",
     region: "SE Asia",
-    image: "/images/TravelInspiration3.png",
+    image: "/images/austlia.png",
+    visaIn: "5 days",
+    visaType: "Sticker Visa",
   },
   {
     title: "United States",
     price: "₹ 85,000",
     region: "Americas",
     image: "/images/northAmerica.png",
+    visaIn: "15 days",
+    visaType: "Embassy Visa",
   },
   {
     title: "France",
     price: "₹ 62,000",
     region: "Europe",
     image: "/images/europe.png",
+    visaIn: "7 days",
+    visaType: "Schengen",
   },
   {
     title: "South Africa",
     price: "₹ 58,000",
     region: "Africa",
     image: "/images/africa.png",
+    visaIn: "6 days",
+    visaType: "E-Visa",
   },
 ];
 
@@ -116,11 +130,22 @@ export default function VisaCarousel() {
               <article className={styles.card}>
                 <img className={styles.image} src={item.image} alt={item.title} />
                 <div className={styles.gradient} />
+                <div className={styles.hoverZone} aria-hidden="true" />
                 <div className={styles.cardContent}>
-                  <h3 className={styles.cardTitle}>{item.title}</h3>
-                  <div className={styles.priceBlock}>
-                    <span className={styles.priceLabel}>Starts From</span>
-                    <span className={styles.price}>{item.price}</span>
+                  <div className={styles.primaryRow}>
+                    <h3 className={styles.cardTitle}>{item.title}</h3>
+                    <div className={styles.priceBlock}>
+                      <span className={styles.priceLabel}>Starts From</span>
+                      <span className={styles.price}>{item.price}</span>
+                    </div>
+                  </div>
+              
+                  <div className={styles.hoverDetails} aria-hidden="true">
+                    <div className={styles.visaInfo}>
+                      <span className={styles.detailLabel}>Get Visa In</span>
+                      <span className={styles.detailValue}>{item.visaIn}</span>
+                    </div>
+                    <span className={styles.visaType}>{item.visaType}</span>
                   </div>
                 </div>
               </article>

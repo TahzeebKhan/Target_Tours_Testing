@@ -71,7 +71,7 @@ letter-spacing: 0%;
 }
 
 .card {
-  min-height: 266px;
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
   padding: 24px;

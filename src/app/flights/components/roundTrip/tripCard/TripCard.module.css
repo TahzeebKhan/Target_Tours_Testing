@@ -81,6 +81,15 @@
   padding: 10px;
 }
 
+.sortHeaderCell {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortHeaderCell:hover {
+  color: #000033;
+}
+
 .roundColumnHeader span:nth-child(3),
 .roundColumnHeader span:last-child {
   text-align: right;

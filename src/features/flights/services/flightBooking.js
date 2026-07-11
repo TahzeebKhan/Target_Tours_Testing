@@ -126,6 +126,184 @@ const getProviderFromSearchKey = (searchKey) => {
   return parts.length < originalLength ? parts.at(-1) || "" : "";
 };
 
+const makePricingChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `pricing:${crypto.randomUUID()}`;
+  }
+
+  return `pricing:${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const parseMaybeJson = (value) => {
+  if (typeof value !== "string") return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
+const unwrapPricingPayload = (payload) => {
+  let current = payload;
+
+  for (let index = 0; index < 5; index += 1) {
+    const parsed = parseMaybeJson(current);
+    if (parsed !== current) {
+      current = parsed;
+      continue;
+    }
+
+    const next = current?.received?.message || current?.data?.message || null;
+    if (!next || next === current) return current;
+    current = next;
+  }
+
+  return current;
+};
+
+const getPayloadChannel = (payload) =>
+  payload?.channel ||
+  payload?.data?.channel ||
+  "";
+
+const getPayloadType = (payload) =>
+  String(payload?.type || payload?.data?.type || "").toUpperCase();
+
+const getApiMessage = (payload) =>
+  payload?.error?.message ||
+  payload?.data?.error?.message ||
+  payload?.message ||
+  payload?.data?.message ||
+  "Flight pricing failed. Please try again.";
+
+const isPricingComplete = (payload) => {
+  const type = getPayloadType(payload);
+  return (
+    type.includes("COMPLETE") ||
+    type.includes("COMPLETED") ||
+    type.includes("RESULT") ||
+    type.includes("DONE")
+  );
+};
+
+const isPricingError = (payload) => {
+  const type = getPayloadType(payload);
+  return Boolean(payload?.error || payload?.data?.error) ||
+    (type.includes("PRICING") && type.includes("ERROR")) ||
+    type === "ERROR";
+};
+
+const toArray = (value) => (Array.isArray(value) ? value : []);
+
+const hasPricingItems = (payload) => {
+  const root = payload?.data || payload || {};
+  const containers = [
+    root,
+    root?.data,
+    root?.result,
+    root?.pricing,
+    root?.fare_options,
+    root?.fareOptions,
+  ].filter(Boolean);
+
+  return containers.some((container) =>
+    [
+      container?.fares,
+      container?.fare_options,
+      container?.fareOptions,
+      container?.flights,
+      container?.results,
+    ].some((value) => Array.isArray(value) && value.length > 0)
+  );
+};
+
+const readTripOrder = (trip, index) =>
+  Number(trip?.Order ?? trip?.OrderID ?? trip?.order ?? trip?.orderId ?? index + 1);
+
+const buildPricingTrip = (trip = {}, index = 0) => ({
+  Index: trip?.Index ?? trip?.index ?? trip?.flightIndex,
+  Order: Number.isFinite(readTripOrder(trip, index)) ? readTripOrder(trip, index) : index + 1,
+});
+
+const buildPricingSearchKeys = (request = {}) => {
+  const requestTrips = toArray(request?.Trips).filter(
+    (trip) => trip?.Index !== undefined && trip?.Index !== null && trip?.Index !== ""
+  );
+  const searchKey = request?.search_key || request?.SearchKey || request?.searchKey || "";
+  const providedSearchKeys = toArray(request?.search_keys || request?.searchKeys);
+
+  if (providedSearchKeys.length) {
+    return providedSearchKeys.map((item, index) => ({
+      search_key: item?.search_key || item?.SearchKey || item?.searchKey || searchKey,
+      index: Number(item?.index || item?.tripIndex || index + 1),
+      Trips: toArray(item?.Trips).length
+        ? toArray(item.Trips).map(buildPricingTrip)
+        : requestTrips.map(buildPricingTrip),
+    }));
+  }
+
+  if (!searchKey || !requestTrips.length) return [];
+
+  return [
+    {
+      search_key: searchKey,
+      index: 1,
+      Trips: requestTrips.map(buildPricingTrip),
+    },
+  ];
+};
+
+const buildV2PricingPayload = ({ request = {}, channel = makePricingChannel() } = {}) => {
+  return {
+    channel,
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    search_keys: buildPricingSearchKeys(request),
+  };
+};
+
+const postV2Pricing = async (payload) => {
+  const response = await fetch("/api/flights/v2/pricing", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(getApiMessage(data));
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+};
+
+const getPricingEventsUrl = (channel) => {
+  const url = new URL("/api/flights/v2/events", window.location.origin);
+  url.searchParams.set("channel", channel);
+  return url.toString();
+};
+
+const PRICING_SSE_EVENT_NAMES = [
+  "FLIGHT_V2_PRICING_ACCEPTED",
+  "FLIGHT_V2_PRICING_STARTED",
+  "FLIGHT_V2_PRICING_RESULT",
+  "FLIGHT_V2_PRICING_COMPLETE",
+  "FLIGHT_V2_PRICING_COMPLETED",
+  "FLIGHT_V2_PRICING_ERROR",
+  "pricing-result",
+  "pricing-complete",
+  "result",
+  "complete",
+  "done",
+  "error",
+];
+
 export const getFlightPrice = async (payload) => {
   const response = await api.post("/api/flights/price", {
     ...payload,
@@ -139,29 +317,130 @@ export const getFlightPrice = async (payload) => {
   return response?.data;
 };
 
-export const getFlightFareOptions = async ({ search_key, flight_no }) => {
-  const response = await api.get("/api/flights/fare-options", {
-    params: {
-      search_key,
-      flight_no,
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const getFlightFareOptions = async ({ request } = {}) => {
+  const channel = makePricingChannel();
+  const payload = buildV2PricingPayload({ request, channel });
 
-  emitFareExpired(response?.data);
-  return response?.data;
+  if (!payload.search_keys.length) {
+    throw new Error("Missing pricing payload for the selected flight.");
+  }
+
+  if (typeof window === "undefined" || !window.EventSource) {
+    const data = await postV2Pricing(payload);
+    emitFareExpired(data);
+    return data;
+  }
+
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let settled = false;
+    let initResponse = null;
+    let idleTimer = null;
+    let events = null;
+
+    const cleanup = () => {
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(hardTimer);
+      events?.close();
+    };
+
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      emitFareExpired(value);
+      callback(value);
+    };
+
+    const buildResult = () => ({
+      ...(initResponse || {}),
+      channel,
+      data: {
+        ...((initResponse || {})?.data || {}),
+        pricingChunks: chunks,
+      },
+      pricingChunks: chunks,
+    });
+
+    const scheduleResolve = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        settle(resolve, buildResult());
+      }, 900);
+    };
+
+    const hardTimer = window.setTimeout(() => {
+      if (chunks.length || initResponse) {
+        settle(resolve, buildResult());
+        return;
+      }
+
+      settle(reject, new Error("Flight pricing timed out. Please try again."));
+    }, 45000);
+
+    const handleMessage = (event) => {
+      const unwrappedPayload = unwrapPricingPayload(event.data);
+      const parsedPayload =
+        unwrappedPayload && typeof unwrappedPayload === "object"
+          ? {
+              ...unwrappedPayload,
+              type: unwrappedPayload.type || unwrappedPayload.data?.type || event.type,
+            }
+          : unwrappedPayload;
+      const payloadChannel = getPayloadChannel(parsedPayload);
+      const isCurrentChannel = !payloadChannel || payloadChannel === channel;
+
+      if (!isCurrentChannel) return;
+
+      if (isPricingError(parsedPayload)) {
+        const error = new Error(getApiMessage(parsedPayload));
+        error.status = parsedPayload?.error?.status || parsedPayload?.data?.error?.status;
+        settle(reject, error);
+        return;
+      }
+
+      if (hasPricingItems(parsedPayload) || isPricingComplete(parsedPayload)) {
+        chunks.push(parsedPayload);
+        scheduleResolve();
+      }
+    };
+
+    const startPricing = async () => {
+      events = new EventSource(getPricingEventsUrl(channel), {
+        withCredentials: true,
+      });
+
+      events.addEventListener("message", handleMessage);
+      PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
+        events.addEventListener(eventName, handleMessage);
+      });
+      events.addEventListener("error", () => {
+        if (chunks.length) scheduleResolve();
+      });
+
+      try {
+        initResponse = await postV2Pricing(payload);
+        if (hasPricingItems(initResponse)) {
+          chunks.push(initResponse);
+          scheduleResolve();
+        }
+      } catch (error) {
+        settle(reject, error);
+      }
+    };
+
+    startPricing();
+  });
 };
 
 export const getFlightFareOptionsUntilCached = async (
-  { search_key, flight_no },
+  { searchParams, request },
   { maxAttempts = 12, delayMs = 700 } = {}
 ) => {
   let lastResponse = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    lastResponse = await getFlightFareOptions({ search_key, flight_no });
+    lastResponse = await getFlightFareOptions({ searchParams, request });
     if (isFareExpiredResponse(lastResponse)) {
       return lastResponse;
     }

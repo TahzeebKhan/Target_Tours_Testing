@@ -11,26 +11,6 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat("en-IN", {
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
-const getByPath = (obj, path) =>
-  path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
-
-const getFirstArrayAtPaths = (obj, paths) => {
-  for (const path of paths) {
-    const value = path.length ? getByPath(obj, path) : obj;
-    if (Array.isArray(value)) return value;
-  }
-  return [];
-};
-
-const getFirstItemsAtPaths = (obj, paths) => {
-  for (const path of paths) {
-    const value = path.length ? getByPath(obj, path) : obj;
-    if (Array.isArray(value)) return value;
-    if (value && typeof value === "object") return [value];
-  }
-  return [];
-};
-
 const readNumber = (...values) => {
   for (const value of values) {
     if (value === undefined || value === null || value === "") continue;
@@ -99,28 +79,6 @@ const buildAirlineDisplayCode = (carrierCode, flightNo) =>
   [normalizeCarrierCode(carrierCode), normalizeFlightNo(flightNo)]
     .filter(Boolean)
     .join(" ");
-
-const findFirstDeepValue = (input, matcher, seen = new WeakSet()) => {
-  if (!input || typeof input !== "object") return undefined;
-  if (seen.has(input)) return undefined;
-  seen.add(input);
-
-  if (Array.isArray(input)) {
-    for (const item of input) {
-      const nested = findFirstDeepValue(item, matcher, seen);
-      if (nested !== undefined) return nested;
-    }
-    return undefined;
-  }
-
-  for (const [key, value] of Object.entries(input)) {
-    if (matcher(key, value)) return value;
-    const nested = findFirstDeepValue(value, matcher, seen);
-    if (nested !== undefined) return nested;
-  }
-
-  return undefined;
-};
 
 const parseDurationMinutes = (value) => {
   if (value === undefined || value === null) return null;
@@ -363,22 +321,6 @@ const SLOT_KEY_MAP = {
   after12: "evening",
 };
 
-const mapSortOptionToApi = (sortBy) => {
-  const map = {
-    lowest: "cheapest",
-    highest: "price_desc",
-    early_dep: "earliest",
-    late_dep: "latest_departure",
-    early_arr: "earliest",
-    shortest: "fastest",
-    airline: "airline",
-    cheapest: "cheapest",
-    fastest: "fastest",
-  };
-
-  return map[sortBy] || "";
-};
-
 const mapCabinClassToApi = (value) => {
   const v = String(value || "").trim().toUpperCase();
   const map = {
@@ -397,29 +339,60 @@ const mapCabinClassToApi = (value) => {
   return map[v] || "economy";
 };
 
-const extractPagination = (payload, fallbackCount, pageHint = 1, limitHint = 50) => {
-  const pagination = pickFirst(
-    payload?.pagination,
-    payload?.meta?.pagination,
-    payload?.data?.pagination,
-    payload?.meta
-  ) || {};
+const getV2PayloadData = (payload = {}) =>
+  payload?.flights ||
+  payload?.tripResults ||
+  payload?.mergedProviders ||
+  payload?.providerResults
+    ? payload
+    : payload?.data || {};
 
-  const page = readNumber(pagination?.page, pagination?.currentPage, pageHint) || 1;
-  const limit =
-    readNumber(
-      pagination?.limit,
-      pagination?.pageSize,
-      pagination?.perPage,
-      limitHint
-    ) || 50;
-  const total =
-    readNumber(
-      pagination?.total,
-      pagination?.totalItems,
-      payload?.total,
-      payload?.count
-    ) || fallbackCount;
+const getV2FlightResultEntries = (payload = {}) => {
+  const data = getV2PayloadData(payload);
+  const entries = [];
+
+  const addTripResult = (tripItem) => {
+    const tripData = tripItem?.data || {};
+    const result = tripData?.result;
+    if (!result || typeof result !== "object") return;
+
+    entries.push({
+      result,
+      trip: tripData?.trip || null,
+      route: result?.meta?.route || "",
+      flights: toArray(result?.flights),
+    });
+  };
+
+  toArray(data?.mergedProviders?.trips).forEach(addTripResult);
+  toArray(data?.providerResults).forEach((providerResult) => {
+    toArray(providerResult?.data?.trips).forEach(addTripResult);
+  });
+
+  return entries;
+};
+
+const getV2Flights = (payload = {}) => {
+  const data = getV2PayloadData(payload);
+  const mappedFlights = toArray(data?.flights);
+  if (mappedFlights.length) return mappedFlights;
+
+  return getV2FlightResultEntries(payload).flatMap((entry) => entry.flights);
+};
+
+const getPrimaryV2Result = (payload = {}) => {
+  const entries = getV2FlightResultEntries(payload);
+  const entryWithFlights = entries.find((entry) => entry.flights.length);
+  return entryWithFlights?.result || entries[0]?.result || {};
+};
+
+const extractPagination = (payload, fallbackCount, pageHint = 1, limitHint = 50) => {
+  const result = getPrimaryV2Result(payload);
+  const pagination = payload?.pagination || result?.meta || {};
+
+  const page = readNumber(pagination?.page, pageHint) || 1;
+  const limit = readNumber(pagination?.limit, limitHint) || 50;
+  const total = readNumber(pagination?.total, fallbackCount) || fallbackCount;
 
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
@@ -538,41 +511,18 @@ const getDefaultOrderId = (tripType) => {
 };
 
 const extractResponseBookingMeta = (payload, tripType) => ({
-  provider: pickFirst(
-    payload?.meta?.provider,
-    payload?.meta?.Provider,
-    payload?.data?.meta?.provider,
-    payload?.data?.meta?.Provider,
-    payload?.provider,
-    payload?.Provider,
-    payload?.data?.provider,
-    payload?.data?.Provider
-  ),
+  provider: pickFirst(getPrimaryV2Result(payload)?.meta?.provider),
   searchKey: pickFirst(
-    payload?.search_key,
-    payload?.SearchKey,
-    payload?.data?.search_key,
-    payload?.data?.SearchKey
+    getPrimaryV2Result(payload)?.search_key,
+    getPrimaryV2Result(payload)?.meta?.search_key
   ),
-  tui: pickFirst(
-    payload?.tui,
-    payload?.TUI,
-    payload?.data?.tui,
-    payload?.data?.TUI
-  ),
+  tui: pickFirst(getPrimaryV2Result(payload)?.tui),
   clientId: DEFAULT_BOOKING_CLIENT_ID,
   mode: DEFAULT_BOOKING_MODE,
   options: DEFAULT_BOOKING_OPTIONS,
   source: DEFAULT_PRICE_SOURCE,
-  ssrSource: pickFirst(
-    payload?.SSRSource,
-    payload?.ssrSource,
-    payload?.data?.SSRSource,
-    payload?.data?.ssrSource
-  ),
-  tripType: normalizeBookingTripType(
-    pickFirst(payload?.TripType, payload?.tripType, payload?.data?.TripType, tripType)
-  ),
+  ssrSource: undefined,
+  tripType: normalizeBookingTripType(tripType),
 });
 
 const buildOneWayCard = (flight, index, options = {}) => {
@@ -736,17 +686,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
   const tripTui = pickFirst(
     responseBookingMeta.tui,
     flight?.TUI,
-    flight?.tui,
-    flight?.trip?.TUI,
-    flight?.trip?.tui,
-    findFirstDeepValue(
-      flight,
-      (key, value) =>
-        String(key).toLowerCase() === "tui" &&
-        value !== undefined &&
-        value !== null &&
-        value !== ""
-    )
+    flight?.tui
   );
   const departureValue = pickFirst(
     first?.departure?.date,
@@ -961,15 +901,7 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
   );
   const tui = pickFirst(
     leg?.TUI,
-    leg?.tui,
-    findFirstDeepValue(
-      leg,
-      (key, value) =>
-        String(key).toLowerCase() === "tui" &&
-        value !== undefined &&
-        value !== null &&
-        value !== ""
-    )
+    leg?.tui
   );
 
   const airlineItems = hasSegments
@@ -1386,15 +1318,7 @@ const buildRoundCard = (flight, index, options = {}) => {
   const sharedTripTui = pickFirst(
     responseBookingMeta.tui,
     flight?.TUI,
-    flight?.tui,
-    findFirstDeepValue(
-      flight,
-      (key, value) =>
-        String(key).toLowerCase() === "tui" &&
-        value !== undefined &&
-        value !== null &&
-        value !== ""
-    )
+    flight?.tui
   );
   const roundTripsPayload = [
     {
@@ -1556,11 +1480,8 @@ const buildRoundCard = (flight, index, options = {}) => {
 };
 
 const extractSortHighlight = (payload, key) => {
-  const source =
-    payload?.[key] ||
-    payload?.data?.[key] ||
-    payload?.meta?.[key] ||
-    null;
+  const result = getPrimaryV2Result(payload);
+  const source = payload?.[key] || result?.[key] || null;
 
   if (!source || typeof source !== "object") return null;
 
@@ -1684,12 +1605,7 @@ const buildMappedMultiRouteResult = ({
   returnDate,
   responseBookingMeta,
 }) => {
-  const routeFlights = getFirstItemsAtPaths(routePayload || {}, [
-    ["flights"],
-    ["results"],
-    ["data", "flights"],
-    ["data", "results"],
-  ]);
+  const routeFlights = toArray(routePayload?.flights);
   const routeText = routePayload?.route || routePayload?.meta?.route || routeKey || "";
   const [fallbackFrom, fallbackTo] = String(routeText).split(/\s*->\s*/);
   const mapped = routeFlights.map((flight, index) =>
@@ -1732,22 +1648,7 @@ export const mapFlightSearchResponse = ({
 }) => {
   const payload = response?.data || response || {};
 
-  const flights =
-    Array.isArray(payload)
-      ? payload
-      : getFirstArrayAtPaths(payload, [
-          ["data", "result", "flights"],
-          ["data", "result", "results"],
-          ["data", "flights"],
-          ["data", "results"],
-          ["data", "itineraries"],
-          ["result", "flights"],
-          ["result", "results"],
-          ["flights"],
-          ["results"],
-          ["itineraries"],
-          ["data"],
-        ]);
+  const flights = getV2Flights(payload);
 
   const adults = Number(passengers?.adult || 1);
   const pagination = extractPagination(payload, flights.length, page, limit);
@@ -1820,8 +1721,6 @@ export const mapFlightSearchResponse = ({
     const multiTripCards = multiMapped.map((item) => item.tripCard);
     const rawTripResults =
       payload?.tripResults ||
-      payload?.data?.tripResults ||
-      payload?.result?.tripResults ||
       {};
     const multiRouteResults = Object.entries(rawTripResults).reduce(
       (acc, [routeKey, routePayload]) => {
@@ -1990,10 +1889,6 @@ export const buildSearchParams = ({
   }
   if (Number(urlParams.late_arrival) === 1) {
     base.late_arrival = 1;
-  }
-  const resolvedSortBy = mapSortOptionToApi(currentFilters.sortBy || urlParams.sort_by);
-  if (resolvedSortBy) {
-    base.sort_by = resolvedSortBy;
   }
   base.domain = urlParams.domain || getDefaultDomain();
   base.fareType = tripType === "multi" ? "DM" : tripType === "round" ? "RT" : "ON";

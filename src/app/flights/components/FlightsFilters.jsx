@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import styles from "./FlightFilters.module.css";
 import { ListFilter, X } from "lucide-react";
 import { MoonCloudSVG, MoonSVG, SunriseSVG, SunSVG } from "./SVGFile";
@@ -9,11 +9,22 @@ import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { useTripType } from "../TripTypeContext";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
-const FALLBACK_PRICE_RANGE = [0, 1000000];
-
 const toFiniteNumber = (value) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+};
+
+const TIME_SLOT_OPTIONS = [
+  { uiKey: "before6", apiKey: "before_6am", label: "Before 6AM", Icon: SunriseSVG },
+  { uiKey: "6to12", apiKey: "morning", label: "6AM – 12PM", Icon: SunSVG },
+  { uiKey: "12to6", apiKey: "afternoon", label: "12PM – 6PM", Icon: MoonCloudSVG },
+  { uiKey: "after6", apiKey: "evening", label: "After 6PM", Icon: MoonSVG },
+];
+
+const STOP_FILTER_OPTIONS = {
+  0: { key: "nonStop", label: "Non-Stop" },
+  1: { key: "oneStop", label: "1 Stop" },
+  2: { key: "twoPlus", label: "2+ Stops" },
 };
 
 export default function FlightFilters() {
@@ -39,8 +50,8 @@ export default function FlightFilters() {
   const apiMaxPrice = toFiniteNumber(apiFilterData?.price_max);
   const hasApiPriceRange =
     apiMinPrice !== null && apiMaxPrice !== null && apiMaxPrice > apiMinPrice;
-  const minPrice = hasApiPriceRange ? apiMinPrice : FALLBACK_PRICE_RANGE[0];
-  const maxPrice = hasApiPriceRange ? apiMaxPrice : FALLBACK_PRICE_RANGE[1];
+  const minPrice = hasApiPriceRange ? apiMinPrice : 0;
+  const maxPrice = hasApiPriceRange ? apiMaxPrice : 0;
   const priceStep = 1000;
   const clampPrice = (value) => Math.min(Math.max(Number(value), minPrice), maxPrice);
   const price = filters.priceTouched
@@ -75,9 +86,9 @@ export default function FlightFilters() {
           }
         : committedSearches?.[tripType] || committedSearches?.oneway || {};
 
-  const getRouteLabel = (value, fallback) => {
+  const getRouteLabel = (value, defaultLabel = "") => {
     const raw = String(value || "").trim();
-    if (!raw) return fallback;
+    if (!raw) return defaultLabel;
     const cityOnly = raw.replace(/\s*\([^)]+\)\s*$/, "").trim();
     if (cityOnly) return cityOnly.toUpperCase();
     return raw.toUpperCase();
@@ -87,14 +98,6 @@ export default function FlightFilters() {
   const toLabel = getRouteLabel(activeRoute.to, "SINGAPORE");
   const isRoundTrip = tripType === "round";
 
-  const slotKeyMap = {
-    before6: "before_6am",
-    "6to12": "morning",
-    "12to6": "afternoon",
-    after6: "evening",
-    after12: "evening",
-  };
-
   const formatSlotPrice = (value) => {
     const normalizedValue =
       typeof value === "object" && value !== null
@@ -102,24 +105,17 @@ export default function FlightFilters() {
         : value;
 
     if (normalizedValue === undefined || normalizedValue === null || normalizedValue === "") {
-      return "₹ 0";
+      return null;
     }
 
     const amount = Number(normalizedValue);
-    if (!Number.isFinite(amount)) return "₹ 0";
+    if (!Number.isFinite(amount)) return null;
     return `₹ ${amount.toLocaleString("en-IN")}`;
   };
 
   const getSlotPrice = (bucket, uiSlot) => {
-    const key = slotKeyMap[uiSlot];
-    const fallbackBuckets = {
-      return_departure_slots: "departure_slots",
-      return_arrival_slots: "arrival_slots",
-    };
-    const slots =
-      apiFilterData?.[bucket] ||
-      apiFilterData?.[fallbackBuckets[bucket]] ||
-      {};
+    const key = TIME_SLOT_OPTIONS.find((slot) => slot.uiKey === uiSlot)?.apiKey;
+    const slots = apiFilterData?.[bucket] || {};
     const rawValue =
       slots?.[key] ??
       slots?.[key?.replace("_", "")] ??
@@ -127,16 +123,6 @@ export default function FlightFilters() {
       slots?.[String(uiSlot).toLowerCase()];
     return formatSlotPrice(rawValue);
   };
-
-  const fallbackAircraftOptions = [
-    { key: "A380", label: "Airbus A380" },
-    { key: "B787", label: "Boeing 787" },
-    { key: "E190", label: "Embraer E190" },
-    { key: "CRJ", label: "Bombardier CRJ" },
-    { key: "ATR72", label: "ATR 72" },
-    { key: "C172", label: "Cessna 172" },
-    { key: "LJ60", label: "Learjet 60" },
-  ];
 
   const apiAircraftOptions = Array.isArray(apiFilterData?.aircrafts)
     ? apiFilterData.aircrafts
@@ -153,20 +139,7 @@ export default function FlightFilters() {
         .filter(Boolean)
     : [];
 
-  const aircraftOptions =
-    apiAircraftOptions.length > 0 ? apiAircraftOptions : fallbackAircraftOptions;
-
-  const fallbackAirlineOptions = [
-    { key: "IndiGo", label: "IndiGo", logo: "/images/indigo.svg" },
-    { key: "Air India", label: "Air India", logo: "/images/airindia.svg" },
-    {
-      key: "Air India Express",
-      label: "Air India Express",
-      logo: "/images/airindiaexpress.svg",
-    },
-    { key: "AkasaAir", label: "AkasaAir", logo: "/images/akasaair.svg" },
-    { key: "SpiceJet", label: "SpiceJet", logo: "/images/spicejet.svg" },
-  ];
+  const aircraftOptions = apiAircraftOptions;
 
   const apiAirlineOptions = Array.isArray(apiFilterData?.airlines)
     ? apiFilterData.airlines
@@ -193,43 +166,100 @@ export default function FlightFilters() {
         .filter(Boolean)
     : [];
 
-  const airlineOptions =
-    apiAirlineOptions.length > 0 ? apiAirlineOptions : fallbackAirlineOptions;
+  const airlineOptions = apiAirlineOptions;
+
+  const stopOptions = useMemo(() => {
+    if (!Array.isArray(apiFilterData?.stops)) return [];
+
+    return apiFilterData.stops
+      .map((stop) => {
+        const stopNumber = Number(stop);
+        if (!Number.isFinite(stopNumber)) return null;
+        return STOP_FILTER_OPTIONS[stopNumber >= 2 ? 2 : stopNumber] || null;
+      })
+      .filter(Boolean)
+      .filter(
+        (option, index, list) =>
+          list.findIndex((item) => item.key === option.key) === index,
+      );
+  }, [apiFilterData?.stops]);
+
+  const getAvailableSlots = (bucket) =>
+    TIME_SLOT_OPTIONS.map((slot) => ({
+      ...slot,
+      price: getSlotPrice(bucket, slot.uiKey),
+    })).filter((slot) => slot.price !== null);
+
+  const activeDepartureBucket =
+    isRoundTrip && roundTripTimingTab === "return"
+      ? "return_departure_slots"
+      : "departure_slots";
+  const activeArrivalBucket =
+    isRoundTrip && roundTripTimingTab === "return"
+      ? "return_arrival_slots"
+      : "arrival_slots";
+  const departureSlots = getAvailableSlots(activeDepartureBucket);
+  const arrivalSlots = getAvailableSlots(activeArrivalBucket);
+
+  const renderHeader = () => (
+    <div className={styles.header}>
+      <div className={styles.titleAndCrossContainer}>
+        <div className={styles.title}>
+          <span className={styles.icon}>
+            <ListFilter size={20} />
+          </span>
+          FILTER
+        </div>
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className={styles.filterClose}
+        >
+          <X size={20} color="#1A2029" />
+        </button>
+        <button onClick={resetFilters} className={styles.reset}>
+          RESET
+        </button>
+      </div>
+      {filterChips.length > 0 && (
+        <div className={styles.filterChips}>
+          {filterChips.map((chip, index) => (
+            <div key={index} className={styles.chip}>
+              <div className={styles.name}>{chip.label}</div>
+              <span onClick={chip.onRemove}>
+                <X size={16} color="#4A5565" />
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSlotButton = (slot, selectedKey, bucketKey) => {
+    const Icon = slot.Icon;
+    const isUnavailable = slot.price === null;
+
+    return (
+      <button
+        key={`${bucketKey}-${slot.uiKey}`}
+        onClick={() => selectDeparture(selectedKey, slot.uiKey)}
+        disabled={isUnavailable}
+        className={`${styles.departureCard} ${
+          filters[selectedKey] === slot.uiKey ? styles.activeDepartureCard : ""
+        } ${isUnavailable ? styles.disabledDepartureCard : ""}`}
+      >
+        <span className={styles.departureIcon}>
+          <Icon />
+        </span>
+        <span className={styles.departureTime}>{slot.label}</span>
+        <span className={styles.departurePrice}>{slot.price || "—"}</span>
+      </button>
+    );
+  };
 
   return (
     <aside className={`${styles.sidebar} ${isRoundTrip ? styles.roundSidebar : ""}`}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.titleAndCrossContainer}>
-          <div className={styles.title}>
-            <span className={styles.icon}>
-              <ListFilter size={20} />
-            </span>
-            FILTER
-          </div>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className={styles.filterClose}
-          >
-            <X size={20} color="#1A2029" />
-          </button>
-          <button onClick={resetFilters} className={styles.reset}>
-            RESET
-          </button>
-        </div>
-        {filterChips.length > 0 && (
-          <div className={styles.filterChips}>
-            {filterChips.map((chip, index) => (
-              <div key={index} className={styles.chip}>
-                <div className={styles.name}>{chip.label}</div>
-                <span onClick={chip.onRemove}>
-                  <X size={16} color="#4A5565" />
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {renderHeader()}
 
       {/* Popular Filters */}
       <section className={styles.sectionPopularFilter}>
@@ -286,7 +316,8 @@ export default function FlightFilters() {
       <div className={styles.border} />
 
       {/* Price Range */}
-      <section className={`${styles.section} ${isRoundTrip ? styles.roundPriceSection : ""}`}>
+      {hasApiPriceRange && (
+        <section className={`${styles.section} ${isRoundTrip ? styles.roundPriceSection : ""}`}>
         <h4 className={`${styles.sectionTitle} ${styles.titlePriceRange}`}>
           PRICE RANGE
         </h4>
@@ -368,45 +399,26 @@ export default function FlightFilters() {
           {formatPrice(price[0])} – {formatPrice(price[1])}
         </div>
       </section>
+      )}
 
-      <div className={styles.border} />
+      {hasApiPriceRange && <div className={styles.border} />}
 
       {/* Stops */}
       <section className={`${styles.section} ${isRoundTrip ? styles.roundStopsSection : ""}`}>
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>STOPS</h4>
-        <label className={styles.checkbox}>
-          <input
-            checked={filters.stops.nonStop}
-            onChange={() => toggleCheckbox("stops", "nonStop")}
-            type="checkbox"
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          Non-Stop
-        </label>
-        <label className={styles.checkbox}>
-          <input
-            checked={filters.stops.oneStop}
-            onChange={() => toggleCheckbox("stops", "oneStop")}
-            type="checkbox"
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          1 Stop
-        </label>
-        <label className={styles.checkbox}>
-          <input
-            checked={filters.stops.twoPlus}
-            onChange={() => toggleCheckbox("stops", "twoPlus")}
-            type="checkbox"
-          />
-          <span className={styles.customCheckbox}>
-            <span className={styles.checkIcon}></span>
-          </span>
-          2+ Stops
-        </label>
+        {stopOptions.length > 0 ? stopOptions.map((option) => (
+          <label key={option.key} className={styles.checkbox}>
+            <input
+              checked={filters.stops[option.key]}
+              onChange={() => toggleCheckbox("stops", option.key)}
+              type="checkbox"
+            />
+            <span className={styles.customCheckbox}>
+              <span className={styles.checkIcon}></span>
+            </span>
+            {option.label}
+          </label>
+        )) : <div className={styles.emptyFilters}>No stop filters available</div>}
       </section>
 
       <div className={styles.border} />
@@ -436,7 +448,7 @@ export default function FlightFilters() {
         </section>
       )}
 
-      {/* departure from jakarta */}
+      {/* departure slots */}
       <section className={`${styles.section} ${isRoundTrip ? styles.roundDepartureFromSection : ""}`}>
         <h4 className={styles.sectionTitle}>
           {isRoundTrip && roundTripTimingTab === "return"
@@ -445,93 +457,14 @@ export default function FlightFilters() {
         </h4>
 
         <div className={styles.departureGrid}>
-          <button
-            onClick={() => selectDeparture("departureJakarta", "before6")}
-            className={`${styles.departureCard} ${
-              filters.departureJakarta === "before6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <SunriseSVG />
-            </span>
-            <span className={styles.departureTime}>Before 6AM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_departure_slots"
-                  : "departure_slots",
-                "before6"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureJakarta", "6to12")}
-            className={`${styles.departureCard} ${
-              filters.departureJakarta === "6to12"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <SunSVG />
-            </span>
-            <span className={styles.departureTime}>6AM – 12PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_departure_slots"
-                  : "departure_slots",
-                "6to12"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureJakarta", "12to6")}
-            className={`${styles.departureCard} ${
-              filters.departureJakarta === "12to6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <MoonCloudSVG />
-            </span>
-            <span className={styles.departureTime}>12PM – 6PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_departure_slots"
-                  : "departure_slots",
-                "12to6"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureJakarta", "after6")}
-            className={`${styles.departureCard} ${
-              filters.departureJakarta === "after6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <MoonSVG />
-            </span>
-            <span className={styles.departureTime}>After 6PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_departure_slots"
-                  : "departure_slots",
-                "after6"
-              )}
-            </span>
-          </button>
+          {TIME_SLOT_OPTIONS.map((baseSlot) => {
+            const slot =
+              departureSlots.find((item) => item.uiKey === baseSlot.uiKey) || {
+                ...baseSlot,
+                price: null,
+              };
+            return renderSlotButton(slot, "departureJakarta", activeDepartureBucket);
+          })}
         </div>
       </section>
 
@@ -547,93 +480,14 @@ export default function FlightFilters() {
         </h4>
 
         <div className={styles.departureGrid}>
-          <button
-            onClick={() => selectDeparture("departureSingapore", "before6")}
-            className={`${styles.departureCard} ${
-              filters.departureSingapore === "before6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <SunriseSVG />
-            </span>
-            <span className={styles.departureTime}>Before 6AM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_arrival_slots"
-                  : "arrival_slots",
-                "before6"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureSingapore", "6to12")}
-            className={`${styles.departureCard} ${
-              filters.departureSingapore === "6to12"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <SunSVG />
-            </span>
-            <span className={styles.departureTime}>6AM – 12PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_arrival_slots"
-                  : "arrival_slots",
-                "6to12"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureSingapore", "12to6")}
-            className={`${styles.departureCard} ${
-              filters.departureSingapore === "12to6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <MoonCloudSVG />
-            </span>
-            <span className={styles.departureTime}>12PM – 6PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_arrival_slots"
-                  : "arrival_slots",
-                "12to6"
-              )}
-            </span>
-          </button>
-
-          <button
-            onClick={() => selectDeparture("departureSingapore", "after6")}
-            className={`${styles.departureCard} ${
-              filters.departureSingapore === "after6"
-                ? styles.activeDepartureCard
-                : ""
-            }`}
-          >
-            <span className={styles.departureIcon}>
-              <MoonSVG />
-            </span>
-            <span className={styles.departureTime}>After 6PM</span>
-            <span className={styles.departurePrice}>
-              {getSlotPrice(
-                isRoundTrip && roundTripTimingTab === "return"
-                  ? "return_arrival_slots"
-                  : "arrival_slots",
-                "after6"
-              )}
-            </span>
-          </button>
+          {TIME_SLOT_OPTIONS.map((baseSlot) => {
+            const slot =
+              arrivalSlots.find((item) => item.uiKey === baseSlot.uiKey) || {
+                ...baseSlot,
+                price: null,
+              };
+            return renderSlotButton(slot, "departureSingapore", activeArrivalBucket);
+          })}
         </div>
       </section>
 
@@ -644,7 +498,7 @@ export default function FlightFilters() {
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Aircraft Model
         </h4>
-        {aircraftOptions.map((aircraft) => (
+        {aircraftOptions.length > 0 ? aircraftOptions.map((aircraft) => (
           <label key={aircraft.key} className={styles.checkbox}>
             <input
               type="checkbox"
@@ -656,26 +510,9 @@ export default function FlightFilters() {
             </span>
             {aircraft.label}
           </label>
-        ))}
+        )) : <div className={styles.emptyFilters}>No aircraft filters available</div>}
       </section>
       <div className={styles.border} />
-
-      {isRoundTrip && (
-        <section className={`${styles.section} ${styles.roundDurationSection}`}>
-          <h4 className={`${styles.sectionTitle} ${styles.stops}`}>DURATION</h4>
-          <div className={styles.durationTrackWrap}>
-            <div className={styles.sliderTrack} />
-            <div className={styles.sliderRange} style={{ left: 13, right: 13 }} />
-            <div className={`${styles.durationThumb} ${styles.durationThumbStart}`} />
-            <div className={`${styles.durationThumb} ${styles.durationThumbEnd}`} />
-          </div>
-          <div className={styles.durationLabels}>
-            <span>0 Hrs</span>
-            <span>24 Hrs</span>
-          </div>
-        </section>
-      )}
-      {isRoundTrip && <div className={styles.border} />}
 
       {/* preferred airline */}
 
@@ -687,7 +524,7 @@ export default function FlightFilters() {
         <h4 className={`${styles.sectionTitle} ${styles.stops}`}>
           Preferred Airline
         </h4>
-        {airlineOptions.map((airline, index) => (
+        {airlineOptions.length > 0 ? airlineOptions.map((airline, index) => (
           <label
             key={airline.key}
             style={index === airlineOptions.length - 1 ? { marginBottom: 0 } : undefined}
@@ -711,7 +548,7 @@ export default function FlightFilters() {
               <span>{airline.label}</span>
             </div>
           </label>
-        ))}
+        )) : <div className={styles.emptyFilters}>No airline filters available</div>}
       </section>
       <div className={styles.actionBar}>
         <button onClick={resetFilters} className={styles.resetBtn}>

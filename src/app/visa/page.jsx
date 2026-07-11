@@ -11,6 +11,26 @@ import { useSearchParams } from "next/navigation";
 import VisaCarousel from "./components/component/VisaCarousel";
 import VisaStep from "./components/component/VisaStep";
 import Footer from "../home-page/components/footer/Footer";
+
+const VISA_SOLUTION_FEATURES = [
+  {
+    title: "Global Reach",
+    text: "Get visa assistance for 100+ countries, handled by experts who know every destination's requirements.",
+  },
+  {
+    title: "High Approval Rate",
+    text: "Years of expertise and accurate documentation help maximize your chances of visa approval.",
+  },
+  {
+    title: "Quick Turnaround",
+    text: "Skip the long waits with our streamlined process and real-time application tracking.",
+  },
+  {
+    title: "Data Security",
+    text: "Your personal documents and information stay fully protected throughout the process.",
+  },
+];
+
 const VisaPage = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -106,6 +126,38 @@ const VisaPageContent = () => {
 
           </div>
         {/* </SidebarContext.Provider> */}
+      </section>
+      <section className={styles.visaSolutions}>
+        <div className={styles.visaSolutionsOverlay} />
+        <div className={styles.visaSolutionsInner}>
+          <div className={styles.visaSolutionsIntro}>
+            <p className={styles.visaSolutionsEyebrow}>
+              Life, well-travelled since 1993
+            </p>
+            <h2 className={styles.visaSolutionsTitle}>
+              Hassle-Free Visa Solutions
+            </h2>
+          </div>
+
+          <div className={styles.visaSolutionsFeatures}>
+            {VISA_SOLUTION_FEATURES.map((feature) => (
+              <div className={styles.visaSolutionsFeature} key={feature.title}>
+                <h3>{feature.title}</h3>
+                <p>{feature.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.visaSolutionsFooter}>
+            <img src="/images/footerIcon.png" alt="Target Tours" />
+            <p>
+              Travel isn't just about reaching a destination - it's about
+              discovering new worlds, new perspectives, and new parts of
+              yourself. At Target Tours, we don't just plan trips; we craft
+              unforgettable journeys designed to match your dreams.
+            </p>
+          </div>
+        </div>
       </section>
       <Footer />
     </>

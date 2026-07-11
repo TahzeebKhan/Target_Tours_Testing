@@ -171,7 +171,8 @@ letter-spacing: -2%;
   cursor: pointer;
 }
 .faqButton span{
-  padding:16px 0px;
+    padding: 40px 0 16px 0px;
+
 }
 
 .faqIcon {

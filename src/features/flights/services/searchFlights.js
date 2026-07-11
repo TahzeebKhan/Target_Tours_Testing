@@ -2,9 +2,27 @@ import axios from "axios";
 
 const FLIGHT_SOCKET_IDLE_TIMEOUT_MS = 2500;
 const FLIGHT_SOCKET_HARD_TIMEOUT_MS = 60000;
-
-const getBackendUrl = () =>
-  String(process.env.NEXT_PUBLIC_BACKEND_URL || "https://sprintsell.com").replace(/\/$/, "");
+const FLIGHT_SSE_EVENT_NAMES = [
+  "CONNECTED",
+  "PING",
+  "FLIGHT_V2_SEARCH_ACCEPTED",
+  "FLIGHT_V2_PROVIDER_STARTED",
+  "FLIGHT_V2_PROVIDER_AUTHENTICATED",
+  "FLIGHT_V2_PROVIDER_RESULT",
+  "FLIGHT_V2_PROVIDER_ERROR",
+  "FLIGHT_V2_SEARCH_COMPLETE",
+  "FLIGHT_V2_SEARCH_COMPLETED",
+  "flight-search-result",
+  "flight_search_result",
+  "FLIGHT_SEARCH_RESULT",
+  "search-result",
+  "SEARCH_RESULT",
+  "result",
+  "provider-result",
+  "complete",
+  "done",
+  "error",
+];
 
 const getDomain = () => process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
 
@@ -32,67 +50,10 @@ const getUuid = () => {
 
 const createFlightSearchChannel = () => `flight-search:${getUuid()}`;
 
-const getFlightSearchWebSocketUrl = () =>
-  `${getBackendUrl().replace(/^http/i, "ws")}/hotel-search/ws`;
-
-const buildFlightsUrl = (path, params = {}) => {
-  const url = new URL(`${getBackendUrl()}/api/flights/${path}`);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") return;
-
-    if (Array.isArray(value)) {
-      const hasObjectItems = value.some((item) => item && typeof item === "object");
-      if (hasObjectItems) {
-        url.searchParams.set(key, JSON.stringify(value));
-        return;
-      }
-
-      value.forEach((item) => {
-        if (item !== undefined && item !== null && item !== "") {
-          url.searchParams.append(key, String(item));
-        }
-      });
-      return;
-    }
-
-    url.searchParams.set(key, String(value));
-  });
-
-  return url;
-};
-
-const extractRefreshTui = (payload) =>
-  payload?.TUI ||
-  payload?.tui ||
-  payload?.data?.TUI ||
-  payload?.data?.tui ||
-  "";
-
-const withRefreshTui = (searchPayload, refreshPayload) => {
-  const refreshTui = extractRefreshTui(refreshPayload);
-  if (!refreshTui) return searchPayload;
-
-  const nextPayload =
-    searchPayload && typeof searchPayload === "object"
-      ? { ...searchPayload }
-      : { data: searchPayload };
-
-  nextPayload.TUI = refreshTui;
-  nextPayload.tui = refreshTui;
-
-  if (
-    nextPayload.data &&
-    typeof nextPayload.data === "object" &&
-    !Array.isArray(nextPayload.data)
-  ) {
-    nextPayload.data = {
-      ...nextPayload.data,
-      TUI: refreshTui,
-      tui: refreshTui,
-    };
-  }
-
-  return nextPayload;
+const getFlightSearchEventsUrl = (channel) => {
+  const url = new URL("/api/flights/v2/events", window.location.origin);
+  url.searchParams.set("channel", channel);
+  return url.toString();
 };
 
 const normalizeCabinClass = (value) => {
@@ -231,11 +192,20 @@ const unwrapSocketPayload = (payload) => {
       continue;
     }
 
+    if (
+      current &&
+      typeof current === "object" &&
+      (current.type ||
+        current.channel ||
+        current.data?.mergedProviders ||
+        current.data?.providerResults)
+    ) {
+      return current;
+    }
+
     const next =
       current?.received?.message ||
-      current?.message ||
       current?.data?.message ||
-      current?.data?.content ||
       null;
 
     if (!next || next === current) return current;
@@ -245,63 +215,63 @@ const unwrapSocketPayload = (payload) => {
   return current;
 };
 
-const findFirstArrayAtPaths = (source, paths) => {
-  for (const path of paths) {
-    let current = source;
-    for (const key of path) {
-      current = current?.[key];
-    }
-    if (Array.isArray(current)) return current;
-  }
+const toArray = (value) => (Array.isArray(value) ? value : []);
 
-  return [];
+const getFlightResultEntries = (payload) => {
+  const entries = [];
+
+  const addTripResult = (tripItem) => {
+    const tripData = tripItem?.data || {};
+    const result = tripData?.result;
+
+    if (!result || typeof result !== "object") return;
+
+    const trip = tripData?.trip || null;
+    const route =
+      result?.meta?.route ||
+      (trip?.origin && trip?.destination
+        ? `${trip.origin} -> ${trip.destination}`
+        : "");
+
+    entries.push({
+      result,
+      routeKey: normalizeRouteKey(route),
+      route: route || "",
+      trip,
+      flights: toArray(result?.flights),
+    });
+  };
+
+  toArray(payload?.data?.mergedProviders?.trips).forEach(addTripResult);
+  toArray(payload?.data?.providerResults).forEach((providerResult) => {
+    toArray(providerResult?.data?.trips).forEach(addTripResult);
+  });
+
+  return entries;
 };
 
-const findFirstItemsAtPaths = (source, paths) => {
-  for (const path of paths) {
-    let current = source;
-    for (const key of path) {
-      current = current?.[key];
-    }
-
-    if (Array.isArray(current)) return current;
-    if (current && typeof current === "object") return [current];
-  }
-
-  return [];
+const isUsableFlight = (flight) => {
+  if (!flight || typeof flight !== "object") return false;
+  if (flight.index || flight.flightNo) return true;
+  if (Array.isArray(flight.onward) && flight.onward.length) return true;
+  if (Array.isArray(flight.return) && flight.return.length) return true;
+  return false;
 };
 
 const getFlightItems = (payload) =>
-  findFirstItemsAtPaths(payload, [
-    ["data", "result", "flights"],
-    ["data", "result", "results"],
-    ["data", "flights"],
-    ["data", "results"],
-    ["data", "itineraries"],
-    ["data", "content", "flights"],
-    ["data", "content", "results"],
-    ["result", "flights"],
-    ["result", "results"],
-    ["content", "flights"],
-    ["content", "results"],
-    ["flights"],
-    ["results"],
-    ["itineraries"],
-  ]);
+  getFlightResultEntries(payload).flatMap((entry) =>
+    entry.flights.filter(isUsableFlight),
+  );
 
 const getPayloadChannel = (payload) =>
   payload?.channel ||
   payload?.data?.channel ||
-  payload?.content?.channel ||
-  payload?.data?.content?.channel ||
   "";
 
 const getPayloadType = (payload) =>
   String(
     payload?.type ||
       payload?.data?.type ||
-      payload?.content?.type ||
-      payload?.data?.content?.type ||
       "",
   ).toUpperCase();
 
@@ -313,40 +283,12 @@ const normalizeRouteKey = (value = "") =>
     .replace(/\s*(?:->|→)\s*/g, " -> ");
 
 const getPayloadResultData = (payload) => {
-  const payloadData = payload?.data || payload || {};
-  return payloadData?.result && typeof payloadData.result === "object"
-    ? payloadData.result
-    : payloadData;
-};
+  const entries = getFlightResultEntries(payload);
+  const entryWithFlights = entries.find((entry) =>
+    entry.flights.some(isUsableFlight),
+  );
 
-const getPayloadRouteKey = (payload) => {
-  const resultData = getPayloadResultData(payload);
-  const routeText =
-    resultData?.route ||
-    resultData?.meta?.route ||
-    payload?.route ||
-    payload?.data?.route ||
-    payload?.data?.meta?.route ||
-    "";
-
-  if (routeText) return normalizeRouteKey(routeText);
-
-  const origin =
-    resultData?.trip?.origin ||
-    resultData?.origin ||
-    payload?.origin ||
-    payload?.data?.origin ||
-    "";
-  const destination =
-    resultData?.trip?.destination ||
-    resultData?.destination ||
-    payload?.destination ||
-    payload?.data?.destination ||
-    "";
-
-  return origin && destination
-    ? normalizeRouteKey(`${origin} -> ${destination}`)
-    : "";
+  return entryWithFlights?.result || entries[0]?.result || {};
 };
 
 const isFlightSearchError = (payload) =>
@@ -357,6 +299,7 @@ const isFlightSearchComplete = (payload) => {
   const type = getPayloadType(payload);
   return (
     type.includes("COMPLETE") ||
+    type.includes("COMPLETED") ||
     type.includes("DONE") ||
     type === "FLIGHT_SEARCH_RESULT" ||
     type === "SEARCH_RESULT"
@@ -378,42 +321,43 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
 
   chunks.forEach((chunk) => {
     latestPayload = chunk || latestPayload;
-    const routeKey = getPayloadRouteKey(chunk);
-    const chunkFlights = getFlightItems(chunk);
+    const resultEntries = getFlightResultEntries(chunk);
 
-    if (routeKey && !tripResults[routeKey]) {
-      const resultData = getPayloadResultData(chunk);
-      tripResults[routeKey] = {
-        route: resultData?.route || resultData?.meta?.route || routeKey,
-        trip: resultData?.trip || null,
-        meta: resultData?.meta || {},
-        cheapest: resultData?.cheapest || null,
-        fastest: resultData?.fastest || null,
-        filters: resultData?.filters || null,
-        aircrafts: resultData?.aircrafts || resultData?.filters?.aircrafts || [],
-        airlines: resultData?.airlines || resultData?.filters?.airlines || [],
-        flights: [],
-      };
-    }
+    resultEntries.forEach((entry) => {
+      const routeKey = entry.routeKey;
+      const resultData = entry.result;
 
-    chunkFlights.forEach((flight, index) => {
-      const flightKey = String(
-        flight?.id ||
-          flight?.flightId ||
-          flight?.resultIndex ||
-          flight?.recommendationId ||
-          flight?.TUI ||
-          JSON.stringify(flight).slice(0, 500) ||
-          index,
-      );
-      const key = `${routeKey || "ALL"}:${flightKey}`;
-
-      if (seen.has(key)) return;
-      seen.add(key);
-      flights.push(flight);
-      if (routeKey) {
-        tripResults[routeKey].flights.push(flight);
+      if (routeKey && !tripResults[routeKey]) {
+        tripResults[routeKey] = {
+          route: entry.route || routeKey,
+          trip: entry.trip,
+          meta: resultData?.meta || {},
+          cheapest: resultData?.cheapest || null,
+          fastest: resultData?.fastest || null,
+          filters: resultData?.filters || null,
+          aircrafts: resultData?.aircrafts || [],
+          airlines: resultData?.filters?.airlines || [],
+          flights: [],
+        };
       }
+
+      entry.flights.filter(isUsableFlight).forEach((flight, index) => {
+        const flightKey = String(
+          flight?.index ||
+            flight?.flightNo ||
+            flight?.tui ||
+            JSON.stringify(flight).slice(0, 500) ||
+            index,
+        );
+        const key = `${routeKey || "ALL"}:${flightKey}`;
+
+        if (seen.has(key)) return;
+        seen.add(key);
+        flights.push(flight);
+        if (routeKey) {
+          tripResults[routeKey].flights.push(flight);
+        }
+      });
     });
   });
 
@@ -422,25 +366,25 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
   const pagination = {
     page: Number(params.page || 1),
     limit: Number(params.limit || 20),
-    total: Number(resultData?.pagination?.total || resultData?.total || flights.length),
+    total: Number(resultData?.meta?.total || flights.length),
   };
 
   return {
     ...latestPayload,
     channel,
     requestId: initResponse?.requestId || latestPayload?.requestId || "",
-    websocketPath: initResponse?.websocketPath || "/hotel-search/ws",
+    websocketPath: initResponse?.websocketPath || "/api/flights/v2/events",
+    ssePath: initResponse?.ssePath || "/api/flights/v2/events",
     streaming: true,
     data: {
       ...payloadData,
-      ...resultData,
       flights,
       results: flights,
       tripResults,
       pagination,
-      filters: resultData?.filters || payloadData?.filters || latestPayload?.filters,
+      filters: resultData?.filters,
       meta: {
-        ...(resultData?.meta || payloadData?.meta || latestPayload?.meta || {}),
+        ...(resultData?.meta || {}),
         pagination,
       },
     },
@@ -448,7 +392,7 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
 };
 
 const postSocketFlightSearch = async (payload) => {
-  const response = await fetch("/api/flights/searchflight", {
+  const response = await fetch("/api/flights/v2/search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -485,12 +429,13 @@ const searchFlightsViaSocket = async (params = {}) => {
     let settled = false;
     let initResponse = null;
     let idleTimer = null;
-    const socket = new WebSocket(getFlightSearchWebSocketUrl());
+    let events = null;
+    let completionReceived = false;
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
       window.clearTimeout(hardTimer);
-      socket.close();
+      events?.close();
     };
 
     const settle = (callback, value) => {
@@ -501,9 +446,10 @@ const searchFlightsViaSocket = async (params = {}) => {
     };
 
     const scheduleIdleResolve = () => {
+      if (!chunks.length && !completionReceived) return;
+
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
-        if (!chunks.length) return;
         settle(
           resolve,
           mergeSocketPayloads({
@@ -517,38 +463,20 @@ const searchFlightsViaSocket = async (params = {}) => {
     };
 
     const hardTimer = window.setTimeout(() => {
-      if (chunks.length) {
-        settle(
-          resolve,
-          mergeSocketPayloads({
-            chunks,
-            initResponse,
-            params,
-            channel,
-          }),
-        );
-        return;
-      }
-
-      settle(reject, new Error("Flight search timed out. Please try again."));
+      settle(
+        chunks.length || completionReceived ? resolve : reject,
+        chunks.length || completionReceived
+          ? mergeSocketPayloads({
+              chunks,
+              initResponse,
+              params,
+              channel,
+            })
+          : new Error("Flight search timed out. Please try again."),
+      );
     }, FLIGHT_SOCKET_HARD_TIMEOUT_MS);
 
-    socket.addEventListener("open", async () => {
-      socket.send(
-        JSON.stringify({
-          type: "SUBSCRIBE",
-          channel,
-        }),
-      );
-
-      try {
-        initResponse = await postSocketFlightSearch(searchPayload);
-      } catch (error) {
-        settle(reject, error);
-      }
-    });
-
-    socket.addEventListener("message", (event) => {
+    const handleMessage = (event) => {
       const payload = unwrapSocketPayload(event.data);
       const payloadChannel = getPayloadChannel(payload);
       const flights = getFlightItems(payload);
@@ -568,51 +496,61 @@ const searchFlightsViaSocket = async (params = {}) => {
         scheduleIdleResolve();
       }
 
-      if (isFlightSearchComplete(payload) && chunks.length) {
+      if (isFlightSearchComplete(payload)) {
+        completionReceived = true;
         scheduleIdleResolve();
       }
-    });
+    };
 
-    socket.addEventListener("error", () => {
-      settle(reject, new Error("Flight search socket connection failed."));
-    });
+    const startSearch = async () => {
+      events = new EventSource(getFlightSearchEventsUrl(channel), {
+        withCredentials: true,
+      });
 
-    socket.addEventListener("close", () => {
-      if (!settled && chunks.length) {
-        settle(
-          resolve,
-          mergeSocketPayloads({
-            chunks,
-            initResponse,
-            params,
-            channel,
-          }),
-        );
+      events.addEventListener("message", handleMessage);
+      FLIGHT_SSE_EVENT_NAMES.forEach((eventName) => {
+        events.addEventListener(eventName, handleMessage);
+      });
+      events.addEventListener("error", () => {
+        if (chunks.length || completionReceived) {
+          scheduleIdleResolve();
+        }
+      });
+
+      try {
+        initResponse = await postSocketFlightSearch(searchPayload);
+      } catch (error) {
+        settle(reject, error);
       }
-    });
+    };
+
+    startSearch();
   });
 };
 
 const searchFlightsViaHttp = async (params = {}) => {
-  const searchUrl = buildFlightsUrl("search", params);
-  const refreshTuiUrl = buildFlightsUrl("get-refresh-tui", params);
+  const searchPayload = buildSocketSearchPayload(
+    params,
+    createFlightSearchChannel(),
+  );
   const requestOptions = {
     withCredentials: true,
     headers: {
       "Content-Type": "application/json",
     },
   };
-  const [searchResponse, refreshTuiResponse] = await Promise.all([
-    axios.get(searchUrl.toString(), requestOptions),
-    axios.get(refreshTuiUrl.toString(), requestOptions),
-  ]);
+  const searchResponse = await axios.post(
+    "/api/flights/v2/search",
+    searchPayload,
+    requestOptions,
+  );
 
-  return withRefreshTui(searchResponse.data, refreshTuiResponse.data);
+  return searchResponse.data;
 };
 
 export const searchFlights = async (params = {}) => {
   try {
-    if (typeof window !== "undefined" && window.WebSocket) {
+    if (typeof window !== "undefined" && window.EventSource) {
       return await searchFlightsViaSocket(params);
     }
 

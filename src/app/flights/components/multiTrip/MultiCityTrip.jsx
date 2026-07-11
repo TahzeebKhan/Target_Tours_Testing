@@ -533,13 +533,6 @@ const MultiCityTrip = ({
       ),
     };
 
-    if (!nextFilterData.return_departure_slots && nextFilterData.departure_slots) {
-      nextFilterData.return_departure_slots = nextFilterData.departure_slots;
-    }
-    if (!nextFilterData.return_arrival_slots && nextFilterData.arrival_slots) {
-      nextFilterData.return_arrival_slots = nextFilterData.arrival_slots;
-    }
-
     setApiFilterData(nextFilterData);
   }, [activeRouteKey, activeRouteResult, setApiFilterData]);
   const visibleFlights =
@@ -763,7 +756,6 @@ const MultiCityTrip = ({
         <div className={styles.routeTabsWrap}>
           {routeSegments.map((segment, index) => {
             const selectedCard = selectedRouteFlights[index];
-            console.log("selectedCard",selectedCard)
             return (
               <button
                 key={`${segment.from}-${segment.to}-${index}`}

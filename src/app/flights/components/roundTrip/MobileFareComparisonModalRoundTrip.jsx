@@ -444,8 +444,8 @@ const MobileFareComparisonModalRoundTrip = ({
     setActibeTab("onward");
     setSelectedFares({ onward: null, return: null });
 
-    const searchKey = flightData?.booking?.priceRequest?.search_key;
-    if (!searchKey || !flightNos.fareOptionsFlightNoParam) return;
+    const priceRequest = flightData?.booking?.priceRequest;
+    if (!priceRequest) return;
 
     let cancelled = false;
 
@@ -453,8 +453,8 @@ const MobileFareComparisonModalRoundTrip = ({
       try {
         setIsFareOptionsLoading(true);
         const response = await getFlightFareOptions({
-          search_key: searchKey,
-          flight_no: flightNos.fareOptionsFlightNoParam,
+          searchParams,
+          request: priceRequest,
         });
         if (!cancelled) {
           if (isFareExpiredPayload(response)) {
@@ -479,7 +479,7 @@ const MobileFareComparisonModalRoundTrip = ({
     return () => {
       cancelled = true;
     };
-  }, [flightData, flightNos.fareOptionsFlightNoParam, isOpen]);
+  }, [flightData, isOpen, searchParams]);
 
   const performBookNow = useCallback(async (selectedFare) => {
     const selectedPriceRequest = buildSelectedFarePriceRequest(
@@ -649,7 +649,6 @@ const MobileFareComparisonModalRoundTrip = ({
           fareOptionsResponse: fareOptionsPayload,
         },
         adults: searchParams?.get("adults") || 1,
-        allowFallbackCards: false,
       })
     : [];
 

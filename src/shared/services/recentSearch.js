@@ -295,10 +295,14 @@ export const fetchRecentSearches = async ({
   type = "flight",
   airport = "",
 } = {}) => {
+  const token = getAuthToken();
+  if (!token) {
+    return readRecentSearchCache(type, airport);
+  }
+
   const url = new URL("/api/recent-search", normalizeBaseUrl());
   url.searchParams.set("type", type);
   if (airport) url.searchParams.set("airport", airport);
-  const token = getAuthToken();
 
   let response;
   try {
@@ -341,6 +345,11 @@ export const saveRecentFlightSearch = async ({
   departureDate,
   returnDate,
 } = {}) => {
+  const token = getAuthToken();
+  if (!token) {
+    return null;
+  }
+
   const normalizedOrigin = parseAirportCode(origin);
   const normalizedDestination = parseAirportCode(destination);
 
@@ -349,7 +358,6 @@ export const saveRecentFlightSearch = async ({
   }
 
   const url = new URL("/api/recent-search", normalizeBaseUrl());
-  const token = getAuthToken();
   const [originAirport, destinationAirport] = await Promise.all([
     fetchAirportByCode(normalizedOrigin),
     fetchAirportByCode(normalizedDestination),

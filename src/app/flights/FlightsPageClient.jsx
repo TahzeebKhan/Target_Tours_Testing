@@ -73,6 +73,84 @@ const parseCurrencyValue = (value) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const parseTimeValue = (value) => {
+  const match = String(value || "").match(/(\d{1,2}):(\d{2})/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  return Number(match[1]) * 60 + Number(match[2]);
+};
+
+const getDurationValue = (duration = {}) => {
+  const hasDuration = duration?.hours !== undefined || duration?.minutes !== undefined;
+  if (!hasDuration) return Number.MAX_SAFE_INTEGER;
+
+  const hours = Number(duration?.hours || 0);
+  const minutes = Number(duration?.minutes || 0);
+  return hours * 60 + minutes;
+};
+
+const getFlightSortValue = (flight, sortBy) => {
+  const primaryLeg = flight?.outbound || flight?.depart?.flight || flight;
+
+  switch (sortBy) {
+    case "lowest":
+      return parseCurrencyValue(flight?.fare?.totalFare || primaryLeg?.fare?.totalFare) ?? Number.MAX_SAFE_INTEGER;
+    case "highest":
+      return -(parseCurrencyValue(flight?.fare?.totalFare || primaryLeg?.fare?.totalFare) ?? 0);
+    case "early_dep":
+      return parseTimeValue(primaryLeg?.departure?.time);
+    case "late_dep": {
+      const departureTime = parseTimeValue(primaryLeg?.departure?.time);
+      return departureTime === Number.MAX_SAFE_INTEGER
+        ? Number.MAX_SAFE_INTEGER
+        : -departureTime;
+    }
+    case "early_arr":
+      return parseTimeValue(primaryLeg?.arrival?.time);
+    case "shortest":
+      return getDurationValue(primaryLeg?.duration);
+    case "airline":
+      return String(
+        primaryLeg?.airlines?.[0]?.name ||
+          primaryLeg?.airline?.name ||
+          flight?.airlines?.[0]?.name ||
+          "",
+      ).toLowerCase();
+    default:
+      return 0;
+  }
+};
+
+const sortFlightsByOption = (items = [], sortBy) => {
+  if (!sortBy || !Array.isArray(items)) return items;
+
+  return [...items].sort((left, right) => {
+    const leftValue = getFlightSortValue(left, sortBy);
+    const rightValue = getFlightSortValue(right, sortBy);
+
+    if (typeof leftValue === "string" || typeof rightValue === "string") {
+      return String(leftValue).localeCompare(String(rightValue));
+    }
+
+    return leftValue - rightValue;
+  });
+};
+
+const sortCardsByFlightOrder = (cards = [], sortedFlights = []) => {
+  if (!Array.isArray(cards) || !Array.isArray(sortedFlights) || !sortedFlights.length) {
+    return cards;
+  }
+
+  const order = new Map(
+    sortedFlights.map((flight, index) => [String(flight?.id || ""), index]),
+  );
+
+  return [...cards].sort((left, right) => {
+    const leftOrder = order.get(String(left?.id || "")) ?? Number.MAX_SAFE_INTEGER;
+    const rightOrder = order.get(String(right?.id || "")) ?? Number.MAX_SAFE_INTEGER;
+    return leftOrder - rightOrder;
+  });
+};
+
 const FlightsPageClient = () => {
   const { tripType, committedRequest, searchRefreshToken: contextSearchRefreshToken } = useTripType();
   const { filters, setApiFilterData } = useFlightFilters();
@@ -96,7 +174,10 @@ const FlightsPageClient = () => {
     [urlSearchParams]
   );
 
-  const apiFilters = useMemo(() => ({ ...filters }), [filters]);
+  const apiFilters = useMemo(() => {
+    const { sortBy, ...apiRelevantFilters } = filters;
+    return apiRelevantFilters;
+  }, [filters]);
 
   const baseSearchParams = useMemo(
     () =>
@@ -150,8 +231,9 @@ const FlightsPageClient = () => {
   useEffect(() => {
     setCurrentPage(1);
     setAggregatedMappedData(null);
+    setApiFilterData(null);
     isLoadingMoreRef.current = false;
-  }, [baseSearchKey, combinedRefreshToken]);
+  }, [baseSearchKey, combinedRefreshToken, setApiFilterData]);
 
   const {
     data,
@@ -311,11 +393,43 @@ const FlightsPageClient = () => {
     sortHighlights: null,
   };
 
+  const sortedMappedData = useMemo(() => {
+    const sortBy = filters.sortBy;
+    if (!sortBy) return mappedData;
+
+    const oneway = sortFlightsByOption(mappedData.oneway, sortBy);
+    const round = sortFlightsByOption(mappedData.round, sortBy);
+    const multi = sortFlightsByOption(mappedData.multi, sortBy);
+    const multiRouteResults = Object.fromEntries(
+      Object.entries(mappedData.multiRouteResults || {}).map(([routeKey, routeData]) => {
+        const routeMulti = sortFlightsByOption(routeData?.multi, sortBy);
+        return [
+          routeKey,
+          {
+            ...routeData,
+            multi: routeMulti,
+            multiTripCards: sortCardsByFlightOrder(routeData?.multiTripCards, routeMulti),
+          },
+        ];
+      }),
+    );
+
+    return {
+      ...mappedData,
+      oneway,
+      round,
+      roundTripCards: sortCardsByFlightOrder(mappedData.roundTripCards, round),
+      multi,
+      multiTripCards: sortCardsByFlightOrder(mappedData.multiTripCards, multi),
+      multiRouteResults,
+    };
+  }, [filters.sortBy, mappedData]);
+
   const selectedDateTilePrice = useMemo(() => {
     if (requestTripType !== "oneway" || !request.startDate) return null;
     if (currentPage === 1 && isFetching) return null;
 
-    const candidates = (mappedData.oneway || [])
+    const candidates = (sortedMappedData.oneway || [])
       .map((flight) =>
         parseCurrencyValue(
           flight?.fare?.pricePerAdult || flight?.fare?.totalFare || ""
@@ -325,7 +439,7 @@ const FlightsPageClient = () => {
 
     if (!candidates.length) return null;
     return Math.min(...candidates);
-  }, [currentPage, isFetching, mappedData.oneway, request.startDate, requestTripType]);
+  }, [currentPage, isFetching, request.startDate, requestTripType, sortedMappedData.oneway]);
 
   const resolvedDatewiseFareTiles = useMemo(() => {
     const baseTiles =
@@ -400,17 +514,12 @@ const FlightsPageClient = () => {
       price_max: Number.isFinite(priceMax) ? priceMax : undefined,
     };
 
-    if (!mergedFilterData.return_departure_slots && mergedFilterData.departure_slots) {
-      mergedFilterData.return_departure_slots = mergedFilterData.departure_slots;
-    }
-
-    if (!mergedFilterData.return_arrival_slots && mergedFilterData.arrival_slots) {
-      mergedFilterData.return_arrival_slots = mergedFilterData.arrival_slots;
-    }
-
     const hasValidSlots =
       mergedFilterData &&
-      (mergedFilterData.departure_slots || mergedFilterData.arrival_slots);
+      (mergedFilterData.departure_slots ||
+        mergedFilterData.arrival_slots ||
+        mergedFilterData.return_departure_slots ||
+        mergedFilterData.return_arrival_slots);
     const hasAircrafts =
       Array.isArray(mergedFilterData?.aircrafts) &&
       mergedFilterData.aircrafts.length > 0;
@@ -489,12 +598,12 @@ const FlightsPageClient = () => {
 
       {tripType === "oneway" && (
         <OnewayFlightBooking
-          flightData={mappedData.oneway}
+          flightData={sortedMappedData.oneway}
           datewiseFareTiles={resolvedDatewiseFareTiles}
           selectedDepartureDate={request.startDate}
           travellerSummary={request?.passengers}
-          pagination={mappedData.pagination}
-          sortHighlights={mappedData.sortHighlights}
+          pagination={sortedMappedData.pagination}
+          sortHighlights={sortedMappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
           isRefreshing={isRefreshingResults}
@@ -504,12 +613,12 @@ const FlightsPageClient = () => {
 
       {tripType === "round" && (
         <RoundTrip
-          flightData={mappedData.round}
-          tripCards={mappedData.roundTripCards}
+          flightData={sortedMappedData.round}
+          tripCards={sortedMappedData.roundTripCards}
           datewiseFareTiles={resolvedDatewiseFareTiles}
           selectedDepartureDate={request.startDate}
-          pagination={mappedData.pagination}
-          sortHighlights={mappedData.sortHighlights}
+          pagination={sortedMappedData.pagination}
+          sortHighlights={sortedMappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
           isRefreshing={isRefreshingResults}
@@ -519,13 +628,13 @@ const FlightsPageClient = () => {
 
       {tripType === "multi" && (
         <MultiCityTrip
-          flightData={mappedData.multi}
-          tripCards={mappedData.multiTripCards}
-          routeResults={mappedData.multiRouteResults}
+          flightData={sortedMappedData.multi}
+          tripCards={sortedMappedData.multiTripCards}
+          routeResults={sortedMappedData.multiRouteResults}
           datewiseFareTiles={resolvedDatewiseFareTiles}
           selectedDepartureDate={request.startDate}
-          pagination={mappedData.pagination}
-          sortHighlights={mappedData.sortHighlights}
+          pagination={sortedMappedData.pagination}
+          sortHighlights={sortedMappedData.sortHighlights}
           hasSearched={hasCommittedSearch}
           isLoading={isInitialLoad}
           isRefreshing={isRefreshingResults}
