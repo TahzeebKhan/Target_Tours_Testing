@@ -1,5 +1,11 @@
 import VisaDetailsClient from "./VisaDetailsClient";
+import ApplicationForm from "./components/ApplicationForm";
 
 export default function Page() {
-  return <VisaDetailsClient />;
+  return (
+    <>
+    {/* <ApplicationForm /> */}
+    <VisaDetailsClient />
+    </>
+  )
 }

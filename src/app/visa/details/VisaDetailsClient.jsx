@@ -116,11 +116,17 @@ const VisaDetailsClient = () => {
       <Footer />
 
       {showAuthModal && authView === "login" && (
-        <LoginPopup onClose={() => setShowAuthModal(false)} onNavigate={setAuthView} />
+        <LoginPopup
+          onClose={() => setShowAuthModal(false)}
+          onNavigate={setAuthView}
+        />
       )}
 
       {showAuthModal && authView === "signup" && (
-        <SignupPopup onClose={() => setShowAuthModal(false)} onNavigate={setAuthView} />
+        <SignupPopup
+          onClose={() => setShowAuthModal(false)}
+          onNavigate={setAuthView}
+        />
       )}
     </main>
   );
