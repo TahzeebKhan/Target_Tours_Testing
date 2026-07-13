@@ -148,7 +148,7 @@ const VisaPageContent = () => {
             ))}
           </div>
 
-          <div className={styles.visaSolutionsFooter}>
+          {/* <div className={styles.visaSolutionsFooter}>
             <img src="/images/footerIcon.png" alt="Target Tours" />
             <p>
               Travel isn't just about reaching a destination - it's about
@@ -156,7 +156,7 @@ const VisaPageContent = () => {
               yourself. At Target Tours, we don't just plan trips; we craft
               unforgettable journeys designed to match your dreams.
             </p>
-          </div>
+          </div> */}
         </div>
       </section>
       <Footer />
