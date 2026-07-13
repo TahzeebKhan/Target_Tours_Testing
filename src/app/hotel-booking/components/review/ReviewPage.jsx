@@ -1402,7 +1402,7 @@ const ReviewPage = () => {
           !searchId ? "SearchId" : "",
         ].filter(Boolean);
 
-        toast.error(`Hotel search session is missing ${missingParts.join(" and ")}. Please search again.`);
+        toast.error(`Hotel search sessions is missing ${missingParts.join(" and ")}. Please search again.`);
         return;
       }
 

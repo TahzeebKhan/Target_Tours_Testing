@@ -732,9 +732,9 @@ const MobileHotelDetails = () => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="#ffffff"
-            strokewidth="1.25"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             class="lucide lucide-chevron-left-icon lucide-chevron-left"
           >
             <path d="m15 18-6-6 6-6" />
