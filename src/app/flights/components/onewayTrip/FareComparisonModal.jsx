@@ -312,25 +312,6 @@ const getMatchingRuleSource = (fare, index, ruleSources) => {
     );
 };
 
-const getFareOptionsFromResponse = (payload, flightNo) => {
-    const response = payload?.data || payload || {};
-    const fareOptions = response?.fare_options || response?.fareOptions || {};
-    const flightKey = String(flightNo || "").trim();
-    const directFares = fareOptions?.[flightKey]?.fares;
-
-    if (Array.isArray(directFares)) return directFares;
-
-    const firstFareGroup = Object.values(fareOptions || {}).find((item) =>
-        Array.isArray(item?.fares)
-    );
-    if (firstFareGroup?.fares) return firstFareGroup.fares;
-
-    return getNestedArray(response, [
-        ["fares"],
-        ["data", "fares"],
-    ]);
-};
-
 const formatAllowance = (value = "", suffix = "Allowance") => {
     const normalized = String(value || "").trim();
     if (!normalized) return "";
@@ -360,10 +341,21 @@ const getBaggageDetails = (fare) => {
         baggageParts[0] ||
         firstBaggage?.weight ||
         firstBaggage?.name ||
+        fare?.baggage?.checkin ||
+        fare?.baggage?.checkIn ||
+        fare?.Baggage?.checkin ||
+        fare?.Baggage?.checkIn ||
+        fare?.checkInBaggage ||
+        fare?.checkinBaggage ||
+        fare?.CheckInBaggage ||
         fare?.inclusions?.Baggage;
     const cabin =
         fare?.inclusions?.CabinBaggage ||
         fare?.inclusions?.Cabin ||
+        fare?.inclusions?.PieceDescription ||
+        fare?.baggage?.cabin ||
+        fare?.Baggage?.cabin ||
+        fare?.CabinBaggage ||
         fare?.cabinBaggage ||
         firstBaggage?.cabin_weight ||
         baggageParts[1] ||
@@ -397,66 +389,6 @@ const getRuleLabel = (fare, type, fallback) => {
     return fallback;
 };
 
-const DEFAULT_FARE_TEMPLATES = [
-    {
-        id: "saver",
-        name: "SAVER FARE",
-        price: "₹ 760,000",
-        pricePerAdult: "₹ 6,083",
-        isPremium: false,
-        baggage: {
-            cabin: "7 Kg Cabin Bag Allowance",
-            checkin: "15 Kg Check-in Bag Allowance",
-        },
-        changes: {
-            charges: "Change Charges Upto INR 2999",
-            cancellation: "Cancellation Charges Upto INR 4999",
-        },
-        addons: {
-            seats: "Chargeable Seats",
-            meals: "Chargeable Meals",
-        },
-    },
-    {
-        id: "flexi",
-        name: "FLEXI PLUS FARE",
-        price: "₹ 760,000",
-        pricePerAdult: "₹ 6,083",
-        isPremium: true,
-        baggage: {
-            cabin: "7 Kg Cabin Bag Allowance",
-            checkin: "15 Kg Check-in Bag Allowance",
-        },
-        changes: {
-            charges: "Change Charges Upto INR 3499",
-            cancellation: "Cancellation Charges Upto INR 3499",
-        },
-        addons: {
-            seats: "Complimentary XL Bomb Legroom Seat",
-            meals: "Complimentary Standard Seat",
-        },
-    },
-    {
-        id: "premium",
-        name: "PREMIUM FARE",
-        price: "₹ 760,000",
-        pricePerAdult: "₹ 6,083",
-        isPremium: false,
-        baggage: {
-            cabin: "7 Kg Cabin Bag Allowance",
-            checkin: "15 Kg Check-in Bag Allowance",
-        },
-        changes: {
-            charges: "Change Charges Upto INR 2999",
-            cancellation: "Cancellation Charges Upto INR 4999",
-        },
-        addons: {
-            seats: "Complimentary XL Bomb Legroom Seat",
-            meals: "Chargeable Meals",
-        },
-    },
-];
-
 const renderLoadingCards = (styles) =>
     Array.from({ length: 3 }).map((_, index) => (
         <div key={index} className={styles.loadingCard}>
@@ -485,20 +417,18 @@ export const buildFareOptions = ({
     flightData,
     prefetchedData,
     adults,
-    allowFallbackCards = true,
 }) => {
     const resolvedPrefetchedData = prefetchedData || flightData?.prefetchedFareData || {};
     const priceResponse = resolvedPrefetchedData?.priceResponse || {};
     const pricePayload = priceResponse?.data || priceResponse || {};
-    const flightNo = String(
+    const fareOptionItems = getFareOptionItems(
+        resolvedPrefetchedData?.fareOptionsResponse,
+        String(
         flightData?.booking?.flightNo ||
         flightData?.details?.flightNo ||
         flightData?.airlines?.[0]?.code ||
         ""
-    ).match(/\d+/)?.[0];
-    const fareOptionItems = getFareOptionsFromResponse(
-        resolvedPrefetchedData?.fareOptionsResponse,
-        flightNo
+    ).match(/\d+/)?.[0]
     );
     const safeAdults = Math.max(Number(adults || 1), 1);
 
@@ -506,20 +436,73 @@ export const buildFareOptions = ({
         const ruleSources = collectFareRuleSources(pricePayload);
         return fareOptionItems.map((item, index) => {
             const ruleSource = getMatchingRuleSource(item, index, ruleSources);
-            const total = readNumber(item?.price, item?.grossFare);
-            const perAdult = readNumber(
+            const total = readNumber(
                 item?.price,
+                item?.Price,
+                item?.totalFare,
+                item?.TotalFare,
+                item?.netAmount,
+                item?.NetAmount,
+                item?.grossFare,
+                item?.GrossFare,
+                item?.netFare,
+                item?.NetFare,
+                item?.baseFare,
+                item?.BaseFare,
+                item?.amount,
+                item?.Amount,
+                item?.total,
+                item?.Total,
+                item?.fare,
+                item?.Fare,
+                item?.pricing?.total,
+                item?.pricing?.Total,
+                item?.pricing?.totalFare,
+                item?.pricing?.TotalFare,
+                item?.pricing?.amount,
+                item?.pricing?.Amount,
+                item?.pricing?.netFare,
+                item?.pricing?.NetFare,
+                item?.pricing?.netAmount,
+                item?.pricing?.NetAmount
+            );
+            const perAdult = readNumber(
+                item?.pricePerAdult,
+                item?.PricePerAdult,
+                item?.perAdult,
+                item?.PerAdult,
+                item?.adultFare,
+                item?.AdultFare,
+                item?.price,
+                item?.Price,
                 total !== null ? Math.round(total / safeAdults) : null
             );
             const fareName = String(
-                pickValue(item?.FCType, item?.fareClass, item?.FCGroup, `Fare ${index + 1}`)
+                pickValue(
+                    item?.FCType,
+                    item?.FareType,
+                    item?.fareType,
+                    item?.fareClass,
+                    item?.FCGroup,
+                    item?.DisplayName,
+                    item?.displayName,
+                    item?.title,
+                    item?.Title,
+                    item?.brand,
+                    item?.Brand,
+                    item?.name,
+                    item?.Name,
+                    item?.fare_name,
+                    item?.FareName,
+                    `Fare ${index + 1}`
+                )
             ).toUpperCase();
             const baggage = getBaggageDetails(item);
             const meals = Array.isArray(item?.ssr?.meals) ? item.ssr.meals : [];
-            const seats = Number(item?.seats);
+            const seats = Number(item?.seats ?? item?.Seats ?? item?.seatCount);
 
             return {
-                id: String(pickValue(item?.index, item?.fare_id, item?.id, index)),
+                id: String(pickValue(item?.index, item?.Index, item?.fare_id, item?.id, item?.ID, index)),
                 name: fareName,
                 price: formatCurrency(total) || flightData?.fare?.totalFare || "N/A",
                 pricePerAdult:
@@ -547,85 +530,7 @@ export const buildFareOptions = ({
         });
     }
 
-    const fareBreakdown = getNestedArray(pricePayload, [
-        ["fare_breakdown"],
-    ]);
-    const onwardFareBreakdown =
-        fareBreakdown.find(
-            (item) => String(item?.journey_type || "").toUpperCase() === "ONWARD"
-        ) ||
-        fareBreakdown[0] ||
-        {};
-    const formattedJourneys = getNestedArray(pricePayload, [
-        ["formatted", "journeys"],
-        ["data", "formatted", "journeys"],
-    ]);
-    const onwardFormattedJourney =
-        formattedJourneys.find((journey) =>
-            String(journey?.journey_type || journey?.journeyType || "").toUpperCase() === "ONWARD"
-        ) ||
-        formattedJourneys[0] ||
-        {};
-    const netPerAdult = readNumber(
-        onwardFormattedJourney?.per_adult?.net,
-        onwardFormattedJourney?.perAdult?.net,
-        onwardFormattedJourney?.per_adult?.netfare,
-        onwardFormattedJourney?.perAdult?.netFare
-    );
-    const firstJourneyPrice = readNumber(
-        onwardFareBreakdown?.total_journey_price,
-        onwardFareBreakdown?.totalJourneyPrice
-    );
-    const rootTotal = readNumber(
-        netPerAdult !== null ? netPerAdult * safeAdults : null,
-        firstJourneyPrice
-    );
-    const rootPerAdult = readNumber(
-        netPerAdult,
-        onwardFareBreakdown?.ADT?.per_person,
-        onwardFareBreakdown?.ADT?.perPerson
-    );
-    if (!allowFallbackCards) {
-        return [];
-    }
-
-    const sourceItems = DEFAULT_FARE_TEMPLATES;
-
-    return sourceItems.map((item, index) => {
-        const template = DEFAULT_FARE_TEMPLATES[index] || DEFAULT_FARE_TEMPLATES[0];
-        const shouldUseDynamicPrice = index === 0;
-        const total = shouldUseDynamicPrice ? readNumber(rootTotal) : null;
-        const perAdult = shouldUseDynamicPrice
-            ? readNumber(rootPerAdult, total !== null ? Math.round(total / safeAdults) : null)
-            : null;
-
-        return {
-            ...template,
-            id: String(pickValue(item?.id, item?.ID, item?.fare_id, item?.FareID, template.id, index)),
-            name: String(
-                pickValue(
-                    item?.name,
-                    item?.Name,
-                    item?.fare_name,
-                    item?.FareName,
-                    item?.fareType,
-                    item?.FareType,
-                    template.name
-                )
-            ).toUpperCase(),
-            price: shouldUseDynamicPrice
-                ? formatCurrency(total) || template.price || flightData?.fare?.totalFare || "N/A"
-                : template.price,
-            pricePerAdult: shouldUseDynamicPrice
-                ? formatCurrency(perAdult) ||
-                template.pricePerAdult ||
-                flightData?.fare?.pricePerAdult ||
-                "N/A"
-                : template.pricePerAdult,
-            netAmount: shouldUseDynamicPrice ? total : undefined,
-            netPerAdult: shouldUseDynamicPrice ? perAdult : undefined,
-        };
-    });
+    return [];
 };
 
 const FareComparisonModal = ({
@@ -669,8 +574,7 @@ const FareComparisonModal = ({
         setHasResolvedFareOptions(Boolean(prefetchedData?.fareOptionsResponse));
 
         const priceRequest = flightData?.booking?.priceRequest;
-        const searchKey = priceRequest?.search_key;
-        if (!searchKey || !flightNo) {
+        if (!priceRequest) {
             setHasResolvedFareOptions(true);
             return;
         }
@@ -681,10 +585,10 @@ const FareComparisonModal = ({
             try {
                 setIsPollingFareOptions(true);
                 const response = await getCachedFareOptionsRequest(
-                    `${searchKey}:${flightNo}`,
+                    `pricing-v2:${priceRequest?.search_key || flightData?.id || "fare-options"}:${flightNo || "all"}`,
                     () => getFlightFareOptions({
-                        search_key: searchKey,
-                        flight_no: flightNo,
+                        searchParams,
+                        request: priceRequest,
                     })
                 );
 
@@ -715,7 +619,7 @@ const FareComparisonModal = ({
         return () => {
             cancelled = true;
         };
-    }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse]);
+    }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
     const performBookNow = useCallback(async (selectedFare) => {
         const basePriceRequest = flightData?.booking?.priceRequest;
@@ -855,7 +759,6 @@ const FareComparisonModal = ({
                 fareOptionsResponse: fareSourcePayload,
             },
             adults: searchParams?.get("adults") || 1,
-            allowFallbackCards: false,
         });
     const showEmptyFareOptions =
         hasResolvedFareOptions && !isStreamingFareOptions && fareOptions.length === 0;

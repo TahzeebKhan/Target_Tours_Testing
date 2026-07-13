@@ -287,7 +287,7 @@ font-family: Inter;
 font-weight: 500;
 font-style: Medium;
 font-size: 20px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 
@@ -297,7 +297,7 @@ letter-spacing: 0%;
 font-weight: 400;
 font-style: Regular;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 1%;
 vertical-align: middle;
@@ -309,7 +309,7 @@ color:#208EF5;
 font-weight: 400;
 font-style: Regular;
 font-size: 14px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 color:#000000;

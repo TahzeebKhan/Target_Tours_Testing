@@ -1,0 +1,229 @@
+.section {
+  width: 100%;
+  background: #ffffff;
+}
+
+.stepsPanel {
+  min-height: 540px;
+  background:
+    linear-gradient(90deg, rgba(3, 18, 42, 0.72), rgba(0, 72, 92, 0.18)),
+    url("/images/VisaStep.png") center / cover no-repeat;
+}
+
+.stepsInner {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 140px 0px;
+}
+
+.stepsHeading {
+  max-width: 520px;
+  margin: 0 0 48px;
+  color: #ffffff;
+font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 42px;
+
+line-height: 140%;
+letter-spacing: 0%;
+
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stepCard {
+  min-height: 170px;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  padding: 24px;
+  overflow: hidden;
+  background: rgba(2, 20, 42, 0.58);
+  border-bottom: 1px solid #EAEAEA;
+}
+
+.stepContent {
+  position: relative;
+  z-index: 2;
+}
+
+.stepTitle {
+  max-width: 348px;
+  margin: 0 0 20px;
+  color: #ffffff;
+font-family: Inter;
+font-weight: 200;
+font-style: Extra Light;
+font-size: 26px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.stepDescription {
+  max-width: 300px;
+  margin: 0;
+  color: rgba(255, 255, 255);
+ font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 16px;
+
+line-height: 150%;
+letter-spacing: 0%;
+
+}
+
+.stepNumber {
+  position: absolute;
+  right: 24px;
+  bottom: -14px;
+  color: rgba(255, 255, 255, 0.18);
+  font-family: Inter, sans-serif;
+  font-size: 118px;
+  font-weight: 800;
+  line-height: 0.85;
+}
+
+.faqPanel {
+  background: #ffffff;
+}
+
+.faqInner {
+  max-width: 1440px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 72px;
+  margin: 0 auto;
+  padding: 54px 24px 52px;
+}
+
+.faqIntro {
+  padding-top: 2px;
+}
+
+.faqHeading {
+  margin: 0 0 22px;
+  color: #000033;
+font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 36px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+
+}
+
+.faqSubheading {
+  margin: 0;
+  color: #11131c;
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 16px;
+
+line-height: 160%;
+letter-spacing: 0%;
+color:#000000;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid #e3e7ed;
+}
+
+.faqButton {
+  width: 100%;
+  padding:16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #000033;
+ font-family: Inter;
+font-weight: 500;
+
+font-size: 20px;
+
+line-height: 28px;
+letter-spacing: -2%;
+
+  text-align: left;
+  cursor: pointer;
+}
+.faqButton span{
+    padding: 40px 0 16px 0px;
+
+}
+
+.faqIcon {
+  color: #6c7484;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.faqAnswer {
+  max-width: 760px;
+  margin: -2px 0 18px;
+  color: #4A5565;
+font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 15px;
+
+line-height: 160%;
+letter-spacing: -0.15px;
+
+}
+
+@media (max-width: 1100px) {
+  .stepsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .faqInner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 640px) {
+  .stepsInner {
+    padding: 72px 18px;
+  }
+
+  .stepsHeading {
+    font-size: 32px;
+  }
+
+  .stepsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .faqInner {
+    padding: 44px 18px;
+  }
+
+  .faqHeading {
+    font-size: 30px;
+  }
+}

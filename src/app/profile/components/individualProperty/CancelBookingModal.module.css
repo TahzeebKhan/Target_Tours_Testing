@@ -117,7 +117,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 20px;
-  leading-trim: NONE;
+  
   line-height: 24px;
   margin-bottom: 5px;
   letter-spacing: -0.15px;
@@ -131,7 +131,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 16px;
   letter-spacing: 0px;
   color: #6a7282;

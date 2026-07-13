@@ -758,7 +758,7 @@
   color: #ffffff;
   font-family: Inter;
   font-size: 12px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: -2%;
   text-transform: uppercase;
@@ -836,7 +836,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -848,7 +848,7 @@
   font-weight: 600;
   font-style: Semi Bold;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;

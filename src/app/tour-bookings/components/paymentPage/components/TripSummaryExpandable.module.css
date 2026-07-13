@@ -90,7 +90,7 @@
   font-weight: 500;
   font-style: Medium;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 18.57px;
   letter-spacing: 0%;
   vertical-align: middle;
@@ -106,7 +106,7 @@
   color: white;
   font-style: Medium;
   font-size: 12px;
-  leading-trim: NONE;
+  
   /* line-height: 100%; */
   letter-spacing: 0%;
   text-transform: uppercase;
@@ -155,7 +155,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 22px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 0%;
   color: #000033;
@@ -259,7 +259,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 150%;
   letter-spacing: -2%;
 }
@@ -274,7 +274,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 0px;
   text-align: center;

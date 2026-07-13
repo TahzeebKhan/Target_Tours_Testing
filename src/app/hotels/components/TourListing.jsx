@@ -1056,7 +1056,7 @@ const hasText = (hotel, ...needles) => {
   return needles.some((needle) => text.includes(normalizeText(needle)));
 };
 
-const buildHotelFilterCounts = (hotels = []) => {
+export const buildHotelFilterCounts = (hotels = []) => {
   const counts = emptyHotelFilterCounts();
   const prices = hotels
     .map(getHotelPriceNumber)
@@ -1314,7 +1314,7 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
     return hasText(hotel, ...needles);
   });
 
-const matchesHotelFilters = (hotel, filters = {}) => {
+export const matchesHotelFilters = (hotel, filters = {}) => {
   const price = getHotelPriceNumber(hotel);
   const rating = Number(hotel.rating || 0);
   const hotelSearchText = String(filters.hotelSearchText || "").trim();
@@ -2388,6 +2388,7 @@ const TourListing = () => {
     };
 
     const handleHotelResults = (event) => {
+        console.log("Received hotel search results event:", event.detail);
       applyHotelResults(event.detail);
     };
 

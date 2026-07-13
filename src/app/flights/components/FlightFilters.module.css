@@ -351,6 +351,14 @@
   background: #f6f8ff;
 }
 
+.disabledDepartureCard,
+.disabledDepartureCard:hover {
+  cursor: not-allowed;
+  opacity: 0.55;
+  border-color: #e5e7eb;
+  background: #f8fafc;
+}
+
 /* Icon */
 .departureIcon {
   color: #000000;
@@ -391,6 +399,12 @@
 }
 .filterChips {
   display: none;
+}
+
+.emptyFilters {
+  padding: 18px 0;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .roundSidebar {
@@ -567,7 +581,7 @@
     font-weight: 400;
     font-style: Regular;
     font-size: 12px;
-    leading-trim: NONE;
+    
     line-height: 150%;
     letter-spacing: 0%;
     text-align: center;

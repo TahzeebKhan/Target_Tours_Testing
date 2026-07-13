@@ -1133,9 +1133,9 @@ const TopFilterSection = ({
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
-                                  stroke-width="1.25"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
+                                  strokeWidth="1.25"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
                                   class="lucide lucide-x-icon lucide-x"
                                 >
                                   <path d="M18 6 6 18" />
@@ -1162,9 +1162,9 @@ const TopFilterSection = ({
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="1.25"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                                    strokeWidth="1.25"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                     class="lucide lucide-plus-icon lucide-plus"
                                   >
                                     <path d="M5 12h14" />

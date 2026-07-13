@@ -115,7 +115,7 @@
 font-weight: 200;
 font-style: Extra Light;
 font-size: 24px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 text-transform: uppercase;
@@ -144,7 +144,7 @@ font-family: Inter;
 font-weight: 300;
 font-style: Light;
 font-size: 16px;
-leading-trim: NONE;
+
 line-height: 160%;
 letter-spacing: -2%;
 vertical-align: middle;
@@ -172,7 +172,7 @@ vertical-align: middle;
 font-weight: 300;
 font-style: Light;
 font-size: 14px;
-leading-trim: NONE;
+
 line-height: 16px;
 letter-spacing: 0%;
 vertical-align: middle;

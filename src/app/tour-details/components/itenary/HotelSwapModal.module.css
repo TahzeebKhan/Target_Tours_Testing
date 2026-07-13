@@ -198,7 +198,7 @@ font-family: Inter;
 font-weight: 300;
 font-style: Light;
 font-size: 14px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: -2%;
 
@@ -211,7 +211,7 @@ font-family: Inter;
 font-weight: 500;
 font-style: Medium;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: -2%;
 vertical-align: middle;
@@ -258,7 +258,7 @@ text-decoration-skip-ink: auto;
 font-weight: 700;
 font-style: Bold;
 font-size: 14px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 
@@ -322,7 +322,7 @@ color:#070773;
 font-weight: 200;
 font-style: Extra Light;
 font-size: 16px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 text-transform: uppercase;
@@ -333,7 +333,7 @@ color:#FFFFFF;
 font-weight: 400;
 font-style: Regular;
 font-size: 36px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 text-transform: capitalize;
@@ -345,7 +345,7 @@ color:#FFFFFF;
 font-weight: 400;
 font-style: Regular;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 14px;
 letter-spacing: 0%;
 text-align: right;
@@ -367,7 +367,7 @@ font-family: Inter !important;
 font-weight: 500!important;
 font-style: Regular;
 font-size: 12px !important;
-leading-trim: NONE;
+
 line-height: 14px !important;
 letter-spacing: 0% !important;
 text-align: right;
@@ -448,7 +448,7 @@ margin-top: 4px!important;
 font-weight: 700;
 font-style: Bold;
 font-size: 9px;
-leading-trim: NONE;
+
 line-height: 13.5px;
 letter-spacing: 0.45px;
 vertical-align: middle;
@@ -462,7 +462,7 @@ text-transform: uppercase;
 font-weight: 600;
 font-style: Semi Bold;
 font-size: 16px;
-leading-trim: NONE;
+
 line-height: 20px;
 letter-spacing: -3%;
 color:#000033;
@@ -476,7 +476,7 @@ color:#000033;
 font-weight: 400;
 font-style: Regular;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: -2%;
 vertical-align: middle;
@@ -507,7 +507,7 @@ font-family: Inter;
 font-weight: 400;
 font-style: Regular;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: -2%;
 vertical-align: middle;
@@ -536,7 +536,7 @@ font-family: Inter;
 font-weight: 500;
 font-style: Medium;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 14px;
 letter-spacing: 0%;
 text-align: right;
@@ -547,7 +547,7 @@ text-align: right;
 font-weight: 500;
 font-style: Medium;
 font-size: 14px;
-leading-trim: NONE;
+
 line-height: 22px;
 letter-spacing: 0%;
 text-align: center;
@@ -561,7 +561,7 @@ background: #F1F2F3;
 font-weight: 700;
 font-style: Bold;
 font-size: 18px;
-leading-trim: NONE;
+
 line-height: 24px;
 letter-spacing: 0%;
 text-align: center;
@@ -572,7 +572,7 @@ color:#000000;
 font-weight: 400;
 font-style: Regular;
 font-size: 13px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: 0%;
 text-align: right;
@@ -586,7 +586,7 @@ font-family: Inter;
 font-weight: 500;
 font-style: Medium;
 font-size: 12px;
-leading-trim: NONE;
+
 line-height: 100%;
 letter-spacing: -2%;
 vertical-align: middle;

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./TripCard.module.css";
 import FlightTimingDetail from "../../flightTimingDetails/FlightTimingDetail";
 import RoundTripExpendable from "../roundTripExpendable/RoundTripExpendable";
@@ -28,6 +28,53 @@ const formatColumnDate = (dateStr) => {
   return dateStr.replace(",", "").toUpperCase();
 };
 
+const parseCurrencyValue = (value) => {
+  const amount = Number(String(value || "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(amount) ? amount : Number.MAX_SAFE_INTEGER;
+};
+
+const parseTimeValue = (value) => {
+  const match = String(value || "").match(/(\d{1,2}):(\d{2})/);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  return Number(match[1]) * 60 + Number(match[2]);
+};
+
+const getDurationValue = (duration = {}) => {
+  const hasDuration = duration?.hours !== undefined || duration?.minutes !== undefined;
+  if (!hasDuration) return Number.MAX_SAFE_INTEGER;
+
+  return Number(duration?.hours || 0) * 60 + Number(duration?.minutes || 0);
+};
+
+const getLegSortValue = (item, legType, sortKey) => {
+  const leg = legType === "depart" ? item?.depart : item?.return;
+  const flight = leg?.flight || {};
+
+  switch (sortKey) {
+    case "departure":
+      return parseTimeValue(flight?.departure?.time);
+    case "duration":
+      return getDurationValue(flight?.duration);
+    case "arrival":
+      return parseTimeValue(flight?.arrival?.time);
+    case "price":
+      return parseCurrencyValue(flight?.fare?.totalFare || item?.fare?.pricePerAdult);
+    default:
+      return 0;
+  }
+};
+
+const sortTripCardsByLeg = (items = [], legType, sortConfig) => {
+  if (!sortConfig?.key) return items;
+
+  const direction = sortConfig.direction === "desc" ? -1 : 1;
+  return [...items].sort((left, right) => {
+    const leftValue = getLegSortValue(left, legType, sortConfig.key);
+    const rightValue = getLegSortValue(right, legType, sortConfig.key);
+    return (leftValue - rightValue) * direction;
+  });
+};
+
 const TripCard = ({
   tripCardsData,
   fareModalOpen,
@@ -50,6 +97,10 @@ const TripCard = ({
   const [fareModalFlight, setFareModalFlight] = useState(null);
   const [detailFlight, setDetailFlight] = useState(null);
   const [detailRowId, setDetailRowId] = useState(null);
+  const [columnSort, setColumnSort] = useState({
+    depart: { key: null, direction: "asc" },
+    return: { key: null, direction: "asc" },
+  });
 
   const flightResults = [
     {
@@ -212,6 +263,54 @@ const TripCard = ({
           },
         }
       : null;
+
+  const sortedDepartCards = useMemo(
+    () => sortTripCardsByLeg(tripCardsData, "depart", columnSort.depart),
+    [columnSort.depart, tripCardsData]
+  );
+
+  const sortedReturnCards = useMemo(
+    () => sortTripCardsByLeg(tripCardsData, "return", columnSort.return),
+    [columnSort.return, tripCardsData]
+  );
+
+  const maxVisibleRows = Math.max(sortedDepartCards.length, sortedReturnCards.length);
+
+  const toggleColumnSort = (legType, key) => {
+    setColumnSort((current) => {
+      const active = current[legType] || {};
+      const direction =
+        active.key === key && active.direction === "asc" ? "desc" : "asc";
+
+      return {
+        ...current,
+        [legType]: { key, direction },
+      };
+    });
+  };
+
+  const getSortLabel = (legType, key) => {
+    const active = columnSort[legType];
+    if (active?.key !== key) return "↑↓";
+    return active.direction === "asc" ? "↑" : "↓";
+  };
+
+  const renderSortHeader = (legType, key, label) => (
+    <span
+      className={styles.sortHeaderCell}
+      role="button"
+      tabIndex={0}
+      onClick={() => toggleColumnSort(legType, key)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleColumnSort(legType, key);
+        }
+      }}
+    >
+      {label} {getSortLabel(legType, key)}
+    </span>
+  );
 
   const buildFlightInfoPayload = (flight) => {
     const priceRequest = flight?.booking?.priceRequest || {};
@@ -512,10 +611,10 @@ const TripCard = ({
               )}
             </div>
             <div className={styles.roundColumnHeader}>
-              <span>Departure ↑↓</span>
-              <span>Duration ↑↓</span>
-              <span>Arrival ↑↓</span>
-              <span>Price ↑↓</span>
+              {renderSortHeader("depart", "departure", "Departure")}
+              {renderSortHeader("depart", "duration", "Duration")}
+              {renderSortHeader("depart", "arrival", "Arrival")}
+              {renderSortHeader("depart", "price", "Price")}
             </div>
           </section>
 
@@ -530,22 +629,28 @@ const TripCard = ({
               )}
             </div>
             <div className={styles.roundColumnHeader}>
-              <span>Departure ↑↓</span>
-              <span>Duration ↑↓</span>
-              <span>Arrival ↑↓</span>
-              <span>Price ↑↓</span>
+              {renderSortHeader("return", "departure", "Departure")}
+              {renderSortHeader("return", "duration", "Duration")}
+              {renderSortHeader("return", "arrival", "Arrival")}
+              {renderSortHeader("return", "price", "Price")}
             </div>
           </section>
 
-          {tripCardsData.map((item) => {
+          {Array.from({ length: maxVisibleRows }, (_, index) => {
+            const departItem = sortedDepartCards[index] || null;
+            const returnItem = sortedReturnCards[index] || null;
+            const rowKey = `${departItem?.id || "empty-depart"}-${returnItem?.id || "empty-return"}-${index}`;
             const isRowOpen =
-              detailRowId === item.id && detailFlight && openId === detailFlight.id;
+              departItem &&
+              detailRowId === departItem.id &&
+              detailFlight &&
+              openId === detailFlight.id;
 
             return (
-              <div key={item.id} className={styles.roundTripRow}>
+              <div key={rowKey} className={styles.roundTripRow}>
                 <div className={styles.roundRowColumn}>
                   <div className={styles.roundOptionList}>
-                    {renderLegOption(item, "depart")}
+                    {departItem && renderLegOption(departItem, "depart")}
                   </div>
                   <div
                     className={`${styles.expandWrap} ${styles.roundRowExpand} ${
@@ -564,7 +669,7 @@ const TripCard = ({
 
                 <div className={styles.roundRowColumn}>
                   <div className={styles.roundOptionList}>
-                    {renderLegOption(item, "return")}
+                    {returnItem && renderLegOption(returnItem, "return")}
                   </div>
                 </div>
               </div>

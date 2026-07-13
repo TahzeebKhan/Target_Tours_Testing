@@ -44,7 +44,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 1%;
   text-align: center;
@@ -67,7 +67,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 42px;
-  leading-trim: NONE;
+  
   line-height: 100%;
   letter-spacing: 0%;
   text-transform: capitalize;
@@ -83,7 +83,7 @@
   font-weight: 300;
   font-style: Light;
   font-size: 14px;
-  leading-trim: NONE;
+  
   line-height: 173%;
   letter-spacing: -2%;
   vertical-align: middle;

@@ -133,8 +133,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
     setIsPollingFareOptions(false);
 
     const priceRequest = flightData?.booking?.priceRequest;
-    const searchKey = priceRequest?.search_key;
-    if (!searchKey || !flightNo) return;
+    if (!priceRequest) return;
 
     let cancelled = false;
 
@@ -142,10 +141,10 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
       try {
         setIsPollingFareOptions(true);
         const response = await getCachedFareOptionsRequest(
-          `${searchKey}:${flightNo}`,
+          `pricing-v2:${priceRequest?.search_key || flightData?.id || "fare-options"}:${flightNo || "all"}`,
           () => getFlightFareOptions({
-            search_key: searchKey,
-            flight_no: flightNo,
+            searchParams,
+            request: priceRequest,
           })
         );
 
@@ -175,7 +174,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
     return () => {
       cancelled = true;
     };
-  }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse]);
+  }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
   const performBookNow = useCallback(async (selectedFare) => {
     const selectedFareIndex = getSelectedFareIndex(selectedFare);
