@@ -27,7 +27,7 @@ font-size: 36px;
 line-height: 100%;
 letter-spacing: 0%;
 text-transform: capitalize;
-  color: #060824;
+  color: #000033;
 }
 
 .filters {
@@ -67,7 +67,7 @@ letter-spacing: 0%;
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px 24px;
+  gap: 33px 24px;
 }
 
 .card {
@@ -115,7 +115,7 @@ font-weight: 600;
 font-style: Semi Bold;
 font-size: 20.73px;
 
-/* line-height: 39.15px; */
+line-height: 39.15px;
 letter-spacing: 0%;
 color:#111827;
 }
@@ -178,7 +178,7 @@ color:#6C798B;
   border: 0.8px solid #CACFE2;
   border-radius: 8px;
   background: #F2F3F7;
-  color: #070821;
+  color: #000033;
 font-family: Inter;
 font-weight: 500;
 font-style: Medium;
@@ -242,13 +242,14 @@ color:#111827;
   min-width: 140px;
   min-height: 40px;
   padding: 0 22px;
-  border: 1px solid #05061d;
-  background: #05061d;
+  border: 1px solid #000033;
+  background: #000033;
   color: #ffffff;
   font-family: Inter, sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1;
+  font-size: 16.12px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: -2%;
   text-transform: uppercase;
   cursor: pointer;
   transition:

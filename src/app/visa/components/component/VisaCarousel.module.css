@@ -27,7 +27,7 @@ font-size: 36px;
 line-height: 100%;
 letter-spacing: 0%;
 text-transform: capitalize;
-  color: #060824;
+  color: #000033;
 }
 
 .filters {
@@ -66,8 +66,8 @@ letter-spacing: 0%;
 
 .filterButton:hover,
 .filterButtonActive {
-  background: #070821;
-  border-color: #070821;
+  background: #121433;
+  border-color: #121433;
   color: #ffffff;
 }
 

@@ -23,14 +23,12 @@ const OVERVIEW_METRICS = [
 const INCLUDED_CARDS = [
   {
     title: "Guided DS-160 filling",
-    text:
-      "We help shape the visa form carefully so the details line up with your documents.",
+    text: "We help shape the visa form carefully so the details line up with your documents.",
     meta: "~25 min average - autosaved",
   },
   {
     title: "Mock interview practice",
-    text:
-      "Practice the questions a consular officer may ask, with feedback on your answers.",
+    text: "Practice the questions a consular officer may ask, with feedback on your answers.",
     meta: "Free, unlimited practice rounds",
   },
 ];
@@ -184,7 +182,7 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>VISA OVERVIEW</p>
-                  <h2 className={styles.sectionTitle}>Visa Overview</h2>
+                  {/* <h2 className={styles.sectionTitle}>Visa Overview</h2> */}
                 </div>
               </div>
 
@@ -224,7 +222,7 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>WHAT'S INCLUDED</p>
-                  <h2 className={styles.sectionTitle}>What is included</h2>
+                  {/* <h2 className={styles.sectionTitle}>WHAT'S INCLUDED</h2> */}
                 </div>
               </div>
 
@@ -268,7 +266,12 @@ const VisaDetailSection = () => {
                     >
                       <summary>
                         <span>{item.title.toUpperCase()}</span>
-                        <ChevronDown size={16} className={isOpen ? styles.chevronOpen : styles.chevron} />
+                        <ChevronDown
+                          size={16}
+                          className={
+                            isOpen ? styles.chevronOpen : styles.chevron
+                          }
+                        />
                       </summary>
                       <p>{item.text}</p>
                     </details>
@@ -281,7 +284,7 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>WHAT YOU'LL NEED</p>
-                  <h2 className={styles.sectionTitle}>What you'll need</h2>
+                  {/* <h2 className={styles.sectionTitle}>What you'll need</h2> */}
                 </div>
               </div>
 
@@ -289,7 +292,8 @@ const VisaDetailSection = () => {
                 {WHAT_YOUll_NEED.map((item) => (
                   <article key={item.title} className={styles.needCard}>
                     <span className={styles.needIcon}>
-                      <CircleCheckBig size={18} />
+                      {/* <CircleCheckBig size={18} /> */}
+                      <img src="/icons/check-square.svg" alt="" />
                     </span>
                     <div>
                       <h3>{item.title}</h3>
@@ -304,7 +308,7 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>APPLY NOW VS LATER</p>
-                  <h2 className={styles.sectionTitle}>Apply now vs later</h2>
+                  {/* <h2 className={styles.sectionTitle}>Apply now vs later</h2> */}
                 </div>
               </div>
 
@@ -326,7 +330,7 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>THE VISA PROCESS</p>
-                  <h2 className={styles.sectionTitle}>The visa process</h2>
+                  {/* <h2 className={styles.sectionTitle}>The visa process</h2> */}
                 </div>
               </div>
 
@@ -344,14 +348,14 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>WHY TRAVELLERS PICK US</p>
-                  <h2 className={styles.sectionTitle}>Why travellers pick us</h2>
+                  {/* <h2 className={styles.sectionTitle}>Why travellers pick us</h2> */}
                 </div>
               </div>
 
               <div className={styles.pickGrid}>
                 {PICK_US.map((item) => (
                   <article key={item.title} className={styles.pickCard}>
-                    <h3>{item.title}</h3>
+                    <h3> <img src="/icons/check-square.svg" alt="" /> {item.title}</h3>
                     <p>{item.text}</p>
                   </article>
                 ))}
@@ -362,15 +366,34 @@ const VisaDetailSection = () => {
               <div className={styles.sectionHeader}>
                 <div>
                   <p className={styles.sectionKicker}>VFS CENTRE</p>
-                  <h2 className={styles.sectionTitle}>VFS centre</h2>
+                  {/* <h2 className={styles.sectionTitle}>VFS centre</h2> */}
                 </div>
               </div>
 
               <div className={styles.vfsCard}>
                 <div>
                   <strong>VFS Global - France (Schengen) visa, Delhi</strong>
-                  <span>Shivaji Stadium Metro Station, Connaught Place, New Delhi 110001</span>
-                  <span>Mon-Sat - 09:00 to 14:00</span>
+                  <span>
+                    Shivaji Stadium Metro Station, Connaught Place, New Delhi
+                    110001
+                  </span>
+                  <span> <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-calendar-icon lucide-calendar"
+                    >
+                      <path d="M8 2v4" />
+                      <path d="M16 2v4" />
+                      <rect width="18" height="18" x="3" y="4" rx="2" />
+                      <path d="M3 10h18" />
+                    </svg> Mon-Sat - 09:00 to 14:00</span>
                 </div>
               </div>
             </section>
@@ -378,16 +401,21 @@ const VisaDetailSection = () => {
             <section className={styles.sectionBlock}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <p className={styles.sectionKicker}>REAL STORIES FROM INDIAN TRAVELLERS</p>
-                  <h2 className={styles.sectionTitle}>Real stories from Indian travellers</h2>
+                  <p className={styles.sectionKicker}>
+                    REAL STORIES FROM INDIAN TRAVELLERS
+                  </p>
+                  {/* <h2 className={styles.sectionTitle}>Real stories from Indian travellers</h2> */}
                 </div>
               </div>
 
               <article className={styles.storyCard}>
                 <p>
-                  "As a self-employed individual, I often felt nervous about
-                  sourcing the paperwork. However, I found the communication
-                  clear and the process much smoother than I expected."
+                  "As a self-employed individual, I often feel anxious about
+                  securing new opportunities. However, I found that the
+                  comprehensive cover letter and thorough financial review
+                  provided by the service truly alleviated my concerns. They
+                  highlighted my strengths and gave me the confidence I needed
+                  to present myself effectively."
                 </p>
                 <strong>Riya M.</strong>
                 <span>Freelancer, Mumbai</span>
@@ -400,7 +428,9 @@ const VisaDetailSection = () => {
                   <p className={styles.sectionKicker}>
                     FREQUENTLY ASKED QUESTIONS
                   </p>
-                  <h2 className={styles.sectionTitle}>Frequently asked questions</h2>
+                  {/* <h2 className={styles.sectionTitle}>
+                    Frequently asked questions
+                  </h2> */}
                 </div>
               </div>
 
@@ -442,7 +472,10 @@ const VisaDetailSection = () => {
 
               <div className={styles.totalBlock}>
                 <span>TOTAL</span>
-                <strong>INR {totalAmount}</strong>
+                <strong>
+                  <span>INR</span>
+                  {totalAmount}
+                </strong>
               </div>
 
               <div className={styles.stepperRow}>
@@ -450,7 +483,9 @@ const VisaDetailSection = () => {
                 <div className={styles.stepperControl}>
                   <button
                     type="button"
-                    onClick={() => setTravellers((value) => Math.max(1, value - 1))}
+                    onClick={() =>
+                      setTravellers((value) => Math.max(1, value - 1))
+                    }
                     aria-label="Decrease travellers"
                   >
                     <Minus size={14} />
@@ -472,7 +507,27 @@ const VisaDetailSection = () => {
                   <strong>INR {serviceFee}</strong>
                 </div>
                 <div>
-                  <span>At appointment - govt. fee</span>
+                  <span>
+                    {" "}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-calendar-icon lucide-calendar"
+                    >
+                      <path d="M8 2v4" />
+                      <path d="M16 2v4" />
+                      <rect width="18" height="18" x="3" y="4" rx="2" />
+                      <path d="M3 10h18" />
+                    </svg>{" "}
+                    At appointment - govt. fee
+                  </span>
                   <strong>INR {govtFee}</strong>
                 </div>
               </div>
@@ -482,10 +537,10 @@ const VisaDetailSection = () => {
               </button>
 
               <ul className={styles.benefitList}>
-                <li>Personal case manager</li>
-                <li>Document pre-check in 12h</li>
-                <li>Appointment booked for you</li>
-                <li>Refund if rejected for our error</li>
+                <li> <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FBD530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dot-icon lucide-dot"><circle cx="12" cy="12" r="1"/></svg> Personal case manager</li>
+                <li> <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FBD530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dot-icon lucide-dot"><circle cx="12" cy="12" r="1"/></svg> Document pre-check in 12h</li>
+                <li> <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FBD530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dot-icon lucide-dot"><circle cx="12" cy="12" r="1"/></svg> Appointment booked for you</li>
+                <li> <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FBD530" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dot-icon lucide-dot"><circle cx="12" cy="12" r="1"/></svg> Refund if rejected for our error</li>
               </ul>
             </div>
 

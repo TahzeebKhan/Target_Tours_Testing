@@ -42,19 +42,27 @@
 
 .sectionKicker {
   margin: 0 0 8px;
-  font-family: Inter, sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: #98a1b4;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 32px;
+  letter-spacing: -0.36px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #081027;
 }
 
 .sectionTitle {
   margin: 0;
-  font-family: "Antic Didone", serif;
-  font-size: 32px;
-  line-height: 1.1;
+  font-family: Plus Jakarta Sans;
   font-weight: 400;
-  color: #101735;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #5e6981;
 }
 
 .overviewMetrics {
@@ -77,16 +85,28 @@
 }
 
 .metricCard span {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: #97a1b3;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16.5px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #5e6981;
 }
 
 .metricCard strong {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
   font-size: 18px;
-  line-height: 1.35;
-  font-weight: 600;
-  color: #18203f;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 .alertCard {
@@ -99,13 +119,17 @@
   border: 1px solid #f0ddb0;
   border-radius: 2px;
   font-family: Inter, sans-serif;
-  color: #5d4920;
+  color: #503500;
 }
 
 .alertCard p {
   margin: 0;
+  font-family: Inter;
+  font-weight: 500;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 }
 
 .alertDot {
@@ -178,33 +202,46 @@
 
 .includedCard {
   min-height: 154px;
-  padding: 20px 18px 16px;
+  padding: 24px;
   border: 1px solid #e7ebf2;
   background: #ffffff;
 }
 
 .includedCard h3 {
   margin: 0 0 10px;
-  font-family: Inter, sans-serif;
+  font-family: Inter;
+  font-weight: 600;
   font-size: 16px;
-  line-height: 1.35;
-  color: #1c2748;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 .includedCard p {
   margin: 0;
-  font-family: Inter, sans-serif;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #6f788d;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #59707e;
 }
 
 .includedCard span {
   display: inline-block;
   margin-top: 18px;
-  font-family: Inter, sans-serif;
+  font-family: Inter;
+  font-weight: 400;
   font-size: 12px;
-  color: #98a1b4;
+  line-height: 16px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #5e6981;
 }
 
 .documentList,
@@ -219,7 +256,25 @@
   background: #ffffff;
 }
 
-.documentRow summary,
+.documentRow summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: -4%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #081027;
+  cursor: pointer;
+}
+
 .faqRow summary {
   list-style: none;
   display: flex;
@@ -227,9 +282,14 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 18px;
-  font-family: Inter, sans-serif;
-  font-size: 14px;
-  color: #1c2748;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  vertical-align: middle;
+
+  color: #081027;
   cursor: pointer;
 }
 
@@ -265,7 +325,7 @@
 
 .needCard {
   display: flex;
-  align-items: center;
+  align-items:start;
   gap: 12px;
   min-height: 72px;
   padding: 12px 14px;
@@ -282,19 +342,29 @@
 }
 
 .needCard h3 {
+  font-family: Inter;
+  font-weight: 600;
   font-size: 14px;
-  line-height: 1.35;
-  color: #1c2748;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 .needCard p {
   margin: 2px 0 0;
+  font-family: Inter;
+  font-weight: 400;
   font-size: 12px;
-  line-height: 1.4;
-  color: #6f788d;
+  line-height: 16px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #5e6981;
 }
 
-.needIcon {
+/* .needIcon {
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
@@ -304,6 +374,11 @@
   justify-content: center;
   background: #f8edc8;
   color: #8d6b06;
+} */
+
+.needIcon img{
+  width:28px;
+  height: 28px;
 }
 
 .compareTable {
@@ -321,13 +396,19 @@
   border-right: 1px solid #dfe5ef;
   background: #f5f7fc;
   font-family: Inter, sans-serif;
+  font-weight: 600;
   font-size: 12px;
-  font-weight: 700;
-  color: #5d6c94;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #5e6981;
 }
 
 .compareHead span:last-child {
   border-right: none;
+  color: #213791;
 }
 
 .compareRow div {
@@ -335,12 +416,17 @@
   border-top: 1px solid #dfe5ef;
   border-right: 1px solid #dfe5ef;
   font-family: Inter, sans-serif;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #1c2748;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027b2;
 }
 
 .compareRow div:last-child {
+  color: #081027;
   border-right: none;
 }
 
@@ -372,9 +458,15 @@
 }
 
 .processStep p {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #1c2748;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 150%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+
+  color: #081027d9;
 }
 
 .pickGrid {
@@ -391,18 +483,30 @@
 }
 
 .pickCard h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
-  font-size: 15px;
-  line-height: 1.35;
-  color: #1c2748;
+  font-family: Inter;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 .pickCard p {
   margin: 0;
-  font-family: Inter, sans-serif;
-  font-size: 13px;
-  line-height: 1.55;
-  color: #6f788d;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027bf;
 }
 
 .vfsCard {
@@ -418,17 +522,31 @@
 }
 
 .vfsCard strong {
-  font-size: 15px;
-  color: #1c2748;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 .vfsCard span {
   margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #6f788d;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #5e6981;
 }
 
+.vfsCard span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .storyCard {
   padding: 22px;
   border: 1px solid #dfe5ef;
@@ -439,14 +557,23 @@
 .storyCard p {
   margin: 0 0 14px;
   font-family: Inter, sans-serif;
-  font-size: 14px;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #ffffff;
 }
 
 .storyCard strong {
   display: block;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
   font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+
   color: #ffffff;
 }
 
@@ -454,8 +581,12 @@
   display: block;
   margin-top: 6px;
   font-family: Inter, sans-serif;
+  font-weight: 400;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.72);
+  line-height: 16px;
+  letter-spacing: 0%;
+
+  color: #b5bcca;
 }
 
 .summaryCard,
@@ -475,10 +606,14 @@
 
 .summaryHeader h3 {
   margin: 0;
-  font-family: "Antic Didone", serif;
-  font-size: 22px;
+  font-family: Antic Didone;
   font-weight: 400;
-  color: #1a2344;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #000033;
 }
 
 .secureBadge {
@@ -488,9 +623,13 @@
   padding: 5px 10px;
   border-radius: 999px;
   background: #eef3ff;
-  color: #5f74c8;
-  font-family: Inter, sans-serif;
-  font-size: 12px;
+  color: #0d2c99;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16.5px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 }
 
 .totalBlock {
@@ -500,20 +639,65 @@
   margin-bottom: 16px;
 }
 
-.totalBlock span,
+.totalBlock span {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #596475;
+}
+
 .stepperRow span,
-.feeList span,
+.feeList span {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #051127;
+}
+.feeList span {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
 .sideInfoCard span {
-  font-family: Inter, sans-serif;
-  font-size: 12px;
-  color: #98a1b4;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #5e6981;
 }
 
 .totalBlock strong {
   font-family: Inter, sans-serif;
-  font-size: 42px;
-  line-height: 1;
-  color: #1a2344;
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -0.9px;
+  vertical-align: middle;
+
+  color: #051127;
+}
+
+.totalBlock strong span {
+  font-family: Inter;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.9px;
+  vertical-align: baseline;
+
+  color: #596475;
 }
 
 .stepperRow {
@@ -567,8 +751,14 @@
 }
 
 .feeList strong {
+  font-family: Inter;
+  font-weight: 600;
   font-size: 14px;
-  color: #1a2344;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #051127;
 }
 
 .primarySidebarCta {
@@ -576,24 +766,37 @@
   min-height: 44px;
   margin-bottom: 14px;
   border: none;
-  background: #f2bc06;
-  color: #08102a;
-  font-family: Inter, sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  background: #000033;
+  color: #ffffff;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 16.12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
   cursor: pointer;
 }
 
 .benefitList {
   margin: 0;
-  padding: 0 0 0 18px;
+  /* padding: 0 0 0 18px; */
   display: grid;
   gap: 8px;
-  font-family: Inter, sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #98a1b4;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #7b8799;
+}
+
+.benefitList li{
+  display: flex;
+  align-items: center;
 }
 
 .sideInfoCard {
@@ -609,9 +812,14 @@
 }
 
 .sideInfoCard strong {
-  font-family: Inter, sans-serif;
+  font-family: Inter;
+  font-weight: 500;
   font-size: 14px;
-  color: #1a2344;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #081027;
 }
 
 @media (max-width: 1180px) {

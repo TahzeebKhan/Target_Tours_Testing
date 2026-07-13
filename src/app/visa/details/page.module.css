@@ -8,7 +8,11 @@
   position: relative;
   min-height: 640px;
   background:
-    linear-gradient(180deg, rgba(5, 10, 35, 0.18) 0%, rgba(5, 10, 35, 0.8) 100%),
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 35, 0.18) 0%,
+      rgba(5, 10, 35, 0.8) 100%
+    ),
     url("/images/travel-hero.jpg") center center / cover no-repeat;
   color: #ffffff;
   overflow: hidden;
@@ -17,7 +21,12 @@
 .heroOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(3, 8, 35, 0.62) 0%, rgba(3, 8, 35, 0.16) 58%, rgba(3, 8, 35, 0.48) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(3, 8, 35, 0.62) 0%,
+    rgba(3, 8, 35, 0.16) 58%,
+    rgba(3, 8, 35, 0.48) 100%
+  );
 }
 
 .heroTopBar {
@@ -91,9 +100,12 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  font-family: Inter, sans-serif;
+  font-family: Inter;
+  font-weight: 500;
   font-size: 12px;
-  line-height: 1;
+  line-height: 16px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 }
 
 .countryFlag {
@@ -111,26 +123,26 @@
 .heroTitle {
   margin: 24px 0 18px;
   font-family: Antic Didone;
-font-weight: 400;
-font-style: Regular;
-font-size: 48px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-text-transform: capitalize;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 48px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
 
   max-width: 620px;
 }
 
 .heroCopy {
   max-width: 752px;
- font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 15px;
-line-height: 24px;
-letter-spacing: 0%;
-vertical-align: middle;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 
   color: rgba(255, 255, 255, 0.86);
 }
@@ -148,11 +160,15 @@ vertical-align: middle;
   min-height: 44px;
   border: none;
   background: #f2bc06;
-  color: #08102a;
-  font-family: Inter, sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  color: #000033;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 16.12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
   cursor: pointer;
 }
 
@@ -164,22 +180,27 @@ vertical-align: middle;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  font-family: Inter, sans-serif;
-  font-size: 14px;
+  color: #ffffffbf;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 }
 
 .heroStats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+   border-top: 1px solid #FFFFFF26;
   gap: 28px;
   margin-top: 56px;
   max-width: 640px;
 }
 
 .heroStat {
-  border-top: 1px solid rgba(255, 255, 255, 0.24);
-  padding-top: 12px;
+ 
+  padding-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -191,14 +212,22 @@ vertical-align: middle;
 }
 
 .heroStat span {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.62);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff8c;
 }
 
 .heroStat strong {
+  font-weight: 400;
   font-size: 16px;
-  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
   color: #ffffff;
 }
 
@@ -212,10 +241,15 @@ vertical-align: middle;
 }
 
 .trustLabel {
-  font-family: Inter, sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: #99a2b4;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16.5px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #667286;
 }
 
 .trustPartners {
@@ -223,9 +257,13 @@ vertical-align: middle;
   align-items: center;
   gap: 28px;
   flex-wrap: wrap;
-  color: #9aa6ba;
-  font-family: Inter, sans-serif;
-  font-size: 14px;
+  color: #59707e;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
 }
 
 .tabsBar {
@@ -321,11 +359,17 @@ vertical-align: middle;
 
 .sectionTitle {
   margin: 0;
-  font-family: "Antic Didone", serif;
-  font-size: 32px;
-  line-height: 1.1;
+  font-family: Antic Didone;
   font-weight: 400;
-  color: #101735;
+  font-style: Regular;
+  font-size: 22px;
+  leading-trim: NONE;
+  line-height: 32px;
+  letter-spacing: -0.36px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #081027;
 }
 
 .overviewMetrics {

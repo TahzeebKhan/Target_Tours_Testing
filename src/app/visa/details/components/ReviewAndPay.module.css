@@ -1,0 +1,647 @@
+﻿.reviewContainer {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px 80px;
+  background: #f4f6f8;
+}
+
+.pageFrame {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.locationTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locationDot {
+  width: 26px;
+  height: 26px;
+  border-radius: 80px;
+  background: #eef4ff;
+}
+
+.locationText {
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  line-height: 19px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  text-transform: capitalize;
+  color: #59707e;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 100%;
+  color: #000033;
+}
+
+.subtitle {
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 140%;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  color: #59707e;
+}
+
+.planCard {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  border-radius: 4px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #1a1a1a;
+}
+
+.sectionDivider {
+  display: block;
+  width: 100%;
+  border-top: 1px dashed #59707e;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.fieldItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #5b6480;
+}
+
+.fieldValue {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.documentBlock,
+.priceBlock,
+.paymentCard {
+  border: 1px solid #e4e6e8;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.documentsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documentItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.documentIcon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.checkMark {
+  font-size: 12px;
+  color: #059669;
+}
+
+.documentLabel {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.documentStatus {
+  margin-left: auto;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #059669;
+}
+
+.priceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceRow,
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.priceRow {
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.priceLabel,
+.totalLabel {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #5b6480;
+}
+
+.priceValue {
+  font-family: Inter;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.totalRow {
+  background: #eef4ff;
+  border-radius: 8px;
+  padding: 16px 14px;
+}
+
+.totalLabel {
+  font-weight: 600;
+  color: #070773;
+}
+
+.totalValue {
+  font-family: Inter;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #070773;
+}
+
+.paymentHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 24px 24px 0;
+}
+
+.paymentTitle {
+  font-family: Inter;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.paymentSubtitle {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #5b6480;
+}
+
+.tabsContainer {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+}
+
+.tabItem {
+  border: none;
+  background: transparent;
+  padding: 24px 0 12px;
+  color: #5b6480;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.activeTab {
+  color: #000033;
+  font-weight: 600;
+  border-bottom: 2px solid #000033;
+}
+
+.tabDivider {
+  width: 100%;
+  height: 1px;
+  background: #e4e6e8;
+}
+
+.methodContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px 0;
+}
+
+.appGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.appCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+  border: 1px solid #e4e6e8;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.appCardActive {
+  border-color: #000033;
+}
+
+.appRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.appLogo {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #10142a;
+  font-weight: 600;
+}
+
+.appLabel {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.radioOuter {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cdcdcd;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.radioInner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.radioSelected {
+  background: #000033;
+}
+
+.orRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.divider {
+  flex: 1;
+  height: 1px;
+  background: #e4e6e8;
+}
+
+.orText {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 600;
+  color: #5b6480;
+}
+
+.inputGroup,
+.inputGroupSmall {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputLabel {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.textInput,
+.selectInput {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid #e4e6e8;
+  border-radius: 12px;
+  padding: 14px;
+  background: #f7f9fb;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #10142a;
+}
+
+.selectInput {
+  appearance: none;
+  background-color: #f7f9fb;
+}
+
+.inputGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.rowGroup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.helpTextBlock {
+  padding-top: 8px;
+}
+
+.helpText {
+  margin: 0;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #5b6480;
+}
+
+.errorText {
+  color: #d02d2d;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.footerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0 0;
+}
+
+.backButton {
+  border: none;
+  background: transparent;
+  color: #59707e;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+
+  cursor: pointer;
+}
+
+.payButton {
+  border: none;
+  background: #000033;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 12px 42px;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.statusMessage {
+  margin: 0;
+  color: #059669;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+@media (max-width: 1280px) {
+  .reviewContainer {
+    padding: 32px 16px 64px;
+  }
+
+  .fieldGrid,
+  .inputGrid,
+  .rowGroup,
+  .appGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .reviewContainer {
+    padding: 24px 16px 48px;
+  }
+
+  .planCard {
+    padding: 20px;
+  }
+
+  .tabsContainer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pageTitle {
+    font-size: 28px;
+    line-height: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .reviewContainer {
+    padding: 20px 12px 40px;
+  }
+
+  
+  .inputGrid,
+  .rowGroup,
+  .appGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabsContainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .paymentCard,
+  .sectionBlock {
+    padding: 0;
+  }
+
+  .paymentHeader {
+    padding: 20px 0 0;
+  }
+
+  .priceList,
+  .documentsGrid {
+    gap: 12px;
+  }
+
+  .footerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575px) {
+  .reviewContainer {
+    padding: 16px 10px 32px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .subtitle,
+  .paymentSubtitle,
+  .fieldLabel,
+  .documentLabel,
+  .documentStatus,
+  .priceLabel,
+  .priceValue,
+  .totalLabel,
+  .totalValue,
+  .inputLabel,
+  .helpText,
+  .backButton,
+  .payButton {
+    font-size: 13px;
+  }
+
+  .payButton {
+    padding: 12px 24px;
+  }
+}
+
+
+@media (max-width: 475px) {
+
+    .fieldGrid{
+        grid-template-columns: 1fr;
+    }
+}
