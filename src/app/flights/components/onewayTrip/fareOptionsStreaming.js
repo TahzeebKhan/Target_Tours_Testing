@@ -178,23 +178,88 @@ const collectFareItems = (value, items, seenItems, seenObjects) => {
   });
 };
 
+const withFlightNo = (item, flightNo) =>
+  flightNo && !item?.flight_no && !item?.flightNo
+    ? { ...item, flight_no: flightNo }
+    : item;
+
+const readMergedFareItems = (payload, flightNo) => {
+  const flightKey = getFlightKey(flightNo);
+  if (!flightKey) return [];
+
+  const mergedMaps = [
+    payload?.merged,
+    payload?.data?.merged,
+    payload?.data?.data?.merged,
+    payload?.data?.fare_options,
+    payload?.data?.data?.fare_options,
+    ...toArray(payload?.results).flatMap((result) => [
+      result?.merged,
+      result?.data?.merged,
+      result?.data?.data?.fare_options,
+    ]),
+    ...toArray(payload?.data?.results).flatMap((result) => [
+      result?.merged,
+      result?.data?.merged,
+      result?.data?.data?.fare_options,
+    ]),
+  ].filter((map) => map && typeof map === "object" && !Array.isArray(map));
+
+  for (const merged of mergedMaps) {
+    const exactItems = merged?.[flightKey];
+    if (Array.isArray(exactItems) && exactItems.length > 0) {
+      return exactItems
+        .filter(looksLikeFareOption)
+        .map((item) => withFlightNo(item, flightKey));
+    }
+  }
+
+  return [];
+};
+
 const extractV2FareOptionItems = (payload) => {
   const response = unwrapPayload(payload);
   const items = [];
   const seen = new Set();
 
-  const pushItems = (list = []) => {
+  const pushItems = (list = [], context = {}) => {
     toArray(list).forEach((item, index) => {
       if (!looksLikeFareOption(item)) return;
-      const key = getItemKey(item, index);
+      const resolvedItem = withFlightNo(item, context.flight_no);
+      const key = getItemKey(resolvedItem, index);
       if (seen.has(key)) return;
       seen.add(key);
-      items.push(item);
+      items.push(resolvedItem);
     });
   };
 
+  const pushMergedItems = (merged) => {
+    if (!merged || typeof merged !== "object") return;
+
+    Object.entries(merged).forEach(([flightNo, list]) => {
+      pushItems(list, { flight_no: flightNo });
+    });
+  };
+
+  pushMergedItems(response?.merged);
+  pushMergedItems(response?.data?.merged);
+
   pushItems(response?.flights);
   pushItems(response?.data?.flights);
+
+  toArray(response?.results).forEach((result) => {
+    pushMergedItems(result?.merged);
+    pushMergedItems(result?.data?.merged);
+    pushMergedItems(result?.data?.data?.merged);
+    pushMergedItems(result?.data?.data?.fare_options);
+  });
+
+  toArray(response?.data?.results).forEach((result) => {
+    pushMergedItems(result?.merged);
+    pushMergedItems(result?.data?.merged);
+    pushMergedItems(result?.data?.data?.merged);
+    pushMergedItems(result?.data?.data?.fare_options);
+  });
 
   toArray(response?.mergedProviders?.trips).forEach((trip) => {
     pushItems(trip?.data?.result?.flights);
@@ -226,6 +291,9 @@ const extractV2FareOptionItems = (payload) => {
 };
 
 export const getFareOptionItems = (payload, flightNo) => {
+  const exactMergedItems = readMergedFareItems(payload, flightNo);
+  if (exactMergedItems.length > 0) return exactMergedItems;
+
   const response = unwrapPayload(payload);
   const directItems = extractV2FareOptionItems(response);
   const flightKey = getFlightKey(flightNo);

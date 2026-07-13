@@ -6,7 +6,6 @@ import { getSelectedFlightSummary } from "./fareComparisonUtils";
 import { toast } from "react-toastify";
 import {
     getFlightPrice,
-    getFlightTravelChecklist,
     getFlightFareOptions,
 } from "@/features/flights/services/flightBooking";
 import {
@@ -56,6 +55,40 @@ const getSelectedFareIndex = (fare) =>
 const getPricePayload = (priceResponse) => {
     const nestedPayload = priceResponse?.data?.data;
     const directPayload = priceResponse?.data;
+    const pricingChunkPayload = (priceResponse?.pricingChunks || directPayload?.pricingChunks || [])
+        .slice()
+        .reverse()
+        .find((chunk) => {
+            const resultPayload = Array.isArray(chunk?.data?.results)
+                ? chunk.data.results.find((result) => result?.data?.data)?.data?.data
+                : null;
+            return (
+                resultPayload?.formatted ||
+                resultPayload?.fare_breakdown ||
+                resultPayload?.tui
+            );
+        });
+    const chunkResultPayload = Array.isArray(pricingChunkPayload?.data?.results)
+        ? pricingChunkPayload.data.results.find((result) => result?.data?.data)?.data?.data
+        : null;
+    const v2PricingResultPayload = Array.isArray(directPayload?.results)
+        ? directPayload.results.find((result) => {
+            const resultPayload = result?.data?.data || result?.data;
+            return (
+                resultPayload?.formatted ||
+                resultPayload?.fare_breakdown ||
+                resultPayload?.tui
+            );
+        })?.data?.data
+        : null;
+
+    if (chunkResultPayload?.formatted || chunkResultPayload?.fare_breakdown || chunkResultPayload?.tui) {
+        return chunkResultPayload;
+    }
+
+    if (v2PricingResultPayload?.formatted || v2PricingResultPayload?.fare_breakdown || v2PricingResultPayload?.tui) {
+        return v2PricingResultPayload;
+    }
 
     if (nestedPayload?.formatted || nestedPayload?.fare_breakdown || nestedPayload?.tui) {
         return nestedPayload;
@@ -82,6 +115,8 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
     const tui =
         payload?.tui ||
         payload?.TUI ||
+        payload?.raw?.TUI ||
+        payload?.raw?.tui ||
         priceResponse?.tui ||
         priceResponse?.TUI;
     const trackid =
@@ -118,9 +153,11 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
             totalTax: payload?.totalTax,
             Tax: payload?.Tax,
             tax: payload?.tax,
+            raw: payload?.raw,
         },
         formatted,
         fare_breakdown: fareBreakdown,
+        raw: payload?.raw,
         total_tax: payload?.total_tax,
         totalTax: payload?.totalTax,
         Tax: payload?.Tax,
@@ -205,6 +242,26 @@ const formatCurrency = (value) => {
     return `₹ ${amount.toLocaleString("en-IN")}`;
 };
 
+export const normalizeFareFlightNo = (...values) => {
+    for (const value of values) {
+        const text = String(value || "").trim();
+        if (!text) continue;
+
+        if (text.includes("|")) return text.split("|").pop()?.trim() || "";
+        if (/^\d+$/.test(text)) return text;
+
+        const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
+        if (trailing) return trailing[1];
+
+        const numericParts = text.match(/\d+/g);
+        if (numericParts?.length) return numericParts[numericParts.length - 1];
+
+        return text;
+    }
+
+    return "";
+};
+
 const getFarePriceDetails = (fare, adults = 1) => {
     const adultCount = Math.max(Number(adults || 1), 1);
     const total = readNumber(fare?.netAmount, fare?.price);
@@ -221,7 +278,11 @@ const getFarePriceDetails = (fare, adults = 1) => {
         rawFare?.Taxes,
         rawFare?.total_tax,
         rawFare?.totalTax,
-        rawFare?.TotalTax
+        rawFare?.TotalTax,
+        rawFare?.fare_breakdown?.tax,
+        rawFare?.fare_breakdown?.Tax,
+        rawFare?.fareBreakdown?.tax,
+        rawFare?.fareBreakdown?.Tax
     );
     const baseFare = readNumber(
         rawFare?.baseFare,
@@ -229,6 +290,10 @@ const getFarePriceDetails = (fare, adults = 1) => {
         rawFare?.base_fare,
         rawFare?.total_base_fare,
         rawFare?.TotalBaseFare,
+        rawFare?.fare_breakdown?.baseFare,
+        rawFare?.fare_breakdown?.BaseFare,
+        rawFare?.fareBreakdown?.baseFare,
+        rawFare?.fareBreakdown?.BaseFare,
         tax !== null && total !== null ? total - tax : null,
         total
     );
@@ -423,12 +488,12 @@ export const buildFareOptions = ({
     const pricePayload = priceResponse?.data || priceResponse || {};
     const fareOptionItems = getFareOptionItems(
         resolvedPrefetchedData?.fareOptionsResponse,
-        String(
-        flightData?.booking?.flightNo ||
-        flightData?.details?.flightNo ||
-        flightData?.airlines?.[0]?.code ||
-        ""
-    ).match(/\d+/)?.[0]
+        normalizeFareFlightNo(
+            flightData?.booking?.flightNo,
+            flightData?.details?.flightNo,
+            flightData?.airlines?.[0]?.flightNo,
+            flightData?.airlines?.[0]?.code
+        )
     );
     const safeAdults = Math.max(Number(adults || 1), 1);
 
@@ -558,12 +623,12 @@ const FareComparisonModal = ({
     const fareCardsRef = useRef(null);
 
     const flightNo = useMemo(() => {
-        return String(
-            flightData?.booking?.flightNo ||
-            flightData?.details?.flightNo ||
-            flightData?.airlines?.[0]?.code ||
-            ""
-        ).match(/\d+/)?.[0] || "";
+        return normalizeFareFlightNo(
+            flightData?.booking?.flightNo,
+            flightData?.details?.flightNo,
+            flightData?.airlines?.[0]?.flightNo,
+            flightData?.airlines?.[0]?.code
+        );
     }, [flightData]);
 
     useEffect(() => {
@@ -589,6 +654,7 @@ const FareComparisonModal = ({
                     () => getFlightFareOptions({
                         searchParams,
                         request: priceRequest,
+                        flight: flightData,
                     })
                 );
 
@@ -612,14 +678,14 @@ const FareComparisonModal = ({
             }
         };
 
-        if (!prefetchedData?.fareOptionsResponse) {
+        if (!prefetchedData && !fareOptionsPayload && !isLoadingFareOptions) {
             loadFareOptions();
         }
 
         return () => {
             cancelled = true;
         };
-    }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
+    }, [flightData, flightNo, isLoadingFareOptions, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
     const performBookNow = useCallback(async (selectedFare) => {
         const basePriceRequest = flightData?.booking?.priceRequest;
@@ -657,44 +723,13 @@ const FareComparisonModal = ({
                 selectedFare,
                 formattedOnlyPriceResponse
             );
-            const checklistTui =
-                formattedOnlyPriceResponse?.data?.tui ||
-                formattedOnlyPriceResponse?.data?.TUI ||
-                formattedOnlyPriceResponse?.tui ||
-                formattedOnlyPriceResponse?.TUI ||
-                formattedOnlyPriceResponse?.data?.formatted?.TUI ||
-                formattedOnlyPriceResponse?.data?.formatted?.tui ||
-                formattedOnlyPriceResponse?.formatted?.TUI ||
-                formattedOnlyPriceResponse?.formatted?.tui;
-            const provider =
-                priceRequest?.provider ||
-                flightData?.booking?.provider ||
-                flightData?.provider ||
-                formattedOnlyPriceResponse?.data?.provider ||
-                formattedOnlyPriceResponse?.provider;
-
-            let checklistResponse = null;
-            if (checklistTui) {
-                try {
-                    checklistResponse = await getFlightTravelChecklist({
-                        TUI: checklistTui,
-                        provider,
-                        ClientID:
-                            flightData?.booking?.clientId ||
-                            priceRequest?.ClientID ||
-                            "FVI6V120g22Ei5ztGK0FIQ==",
-                    });
-                } catch (error) {
-                    console.warn("Travel checklist unavailable", error);
-                }
-            }
             const nextSession = {
                 selectedFlight: flightData,
                 selectedFare: selectedFareFromFormattedPrice,
                 routeContext,
                 priceRequest,
                 priceResponse: formattedOnlyPriceResponse,
-                checklistResponse,
+                checklistResponse: null,
                 ssrRequest: null,
                 ssrResponse: null,
             };

@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createFlightItinerary, getFlightSeatLayout, getFlightSsr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
+import { createFlightItinerary, getFlightSeatLayout, getFlightSsr, getFlightV2Ssr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
 import { toast } from "react-toastify";
 import {
   buildCreateItineraryPayload,
@@ -8,6 +8,7 @@ import {
   buildSeatLayoutPayload,
   buildStartPaymentPayload,
   buildSsrPayload,
+  buildV2SsrPayload,
   extractBaseFareAmount,
   extractTaxAmount,
   readBookingFallbackFromSearch,
@@ -33,6 +34,18 @@ const getSsrRequestKey = (payload = {}) => {
       search_key: payload?.search_key,
       Source: payload?.Source,
       FareType: payload?.FareType,
+      ssr_requests: Array.isArray(payload?.ssr_requests)
+        ? payload.ssr_requests.map((request) => ({
+            search_key: request?.search_key,
+            Trips: Array.isArray(request?.Trips)
+              ? request.Trips.map((trip) => ({
+                  Index: trip?.Index,
+                  Order: trip?.Order,
+                  TUI: trip?.TUI,
+                }))
+              : [],
+          }))
+        : [],
       Trips: Array.isArray(payload?.Trips)
         ? payload.Trips.map((trip) => ({
             Amount: trip?.Amount,
@@ -127,6 +140,7 @@ export function FlightBookingProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(2);
   const skipNextHistoryPushRef = useRef(false);
   const ssrRequestInFlightRef = useRef(false);
+  const initialSsrLoadRef = useRef(false);
   const seatLayoutRequestInFlightRef = useRef(false);
 
   const [baggage, setBaggage] = useState([]);
@@ -219,7 +233,73 @@ export function FlightBookingProvider({ children }) {
   }, [bookingSession, bookingSessionReady]);
 
   const loadSsrForBooking = async () => {
+    console.log("bookingSession?.priceResponse",bookingSession?.priceResponse)
     if (!bookingSession?.priceResponse) return false;
+
+    const v2SsrPayload = buildV2SsrPayload(bookingSession);
+    const hasV2SsrPayload =
+      Array.isArray(v2SsrPayload?.ssr_requests) &&
+      v2SsrPayload.ssr_requests.length > 0;
+    const cachedV2SsrRequestKey = getSsrRequestKey(bookingSession?.ssrRequest);
+    const v2SsrRequestKey = getSsrRequestKey(v2SsrPayload);
+    const canReuseV2SsrResponse =
+      bookingSession?.ssrResponse &&
+      cachedV2SsrRequestKey &&
+      cachedV2SsrRequestKey === v2SsrRequestKey;
+
+    if (hasV2SsrPayload) {
+      ssrRequestInFlightRef.current = true;
+      setSsrLoading(true);
+      setBookingError("");
+
+      try {
+        console.log("v2 SSR payload", v2SsrPayload);
+        const ssrResponse = canReuseV2SsrResponse
+          ? bookingSession.ssrResponse
+          : await getFlightV2Ssr(v2SsrPayload);
+        let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
+        let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+        if (!seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
+          seatLayoutRequestInFlightRef.current = true;
+          setSeatLayoutLoading(true);
+          const sessionWithSsr = {
+            ...(bookingSession || {}),
+            ssrRequest: v2SsrPayload,
+            ssrResponse,
+          };
+          seatLayoutRequest = buildSeatLayoutPayload(
+            sessionWithSsr,
+            travelerDetails
+          );
+
+          if (seatLayoutRequest?.Trips?.[0]?.TUI || seatLayoutRequest?.TrackId) {
+            try {
+              seatLayoutResponse = await getFlightSeatLayout(seatLayoutRequest);
+            } catch (seatLayoutError) {
+              console.error("Unable to load seat layout", seatLayoutError);
+            }
+          }
+        }
+
+        setBookingSession((prev) => ({
+          ...(prev || {}),
+          ssrRequest: v2SsrPayload,
+          ssrResponse,
+          ssrSource: "v2",
+          seatLayoutRequest,
+          seatLayoutResponse,
+        }));
+        return true;
+      } catch (error) {
+        console.warn("Unable to load v2 SSR details", error);
+      } finally {
+        ssrRequestInFlightRef.current = false;
+        seatLayoutRequestInFlightRef.current = false;
+        setSsrLoading(false);
+        setSeatLayoutLoading(false);
+      }
+    }
 
     const priceSsrResponse = buildSsrResponseFromPrice(bookingSession.priceResponse);
     if (priceSsrResponse) {
@@ -363,6 +443,19 @@ export function FlightBookingProvider({ children }) {
       setSeatLayoutLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (
+      !bookingSessionReady ||
+      !bookingSession?.priceResponse ||
+      initialSsrLoadRef.current
+    ) {
+      return;
+    }
+
+    initialSsrLoadRef.current = true;
+    loadSsrForBooking();
+  }, [bookingSession?.priceResponse, bookingSessionReady]);
 
   const prices = useMemo(() => {
     const baseFare = extractBaseFareAmount(bookingSession);

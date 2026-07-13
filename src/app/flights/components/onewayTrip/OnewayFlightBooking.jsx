@@ -16,10 +16,11 @@ import FlightNoResults from "../FlightNoResults";
 import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import MobileFareComparisonModal from "./expendableTabs/MobileFareComparisonModal";
+import { getFareOptionItems, hasFareOptionItems } from "./fareOptionsStreaming";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import {
+  getFlightFareOptions,
   getFlightInfo,
-  getFlightWebSettings,
 } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
@@ -113,8 +114,6 @@ const OnewayFlightBooking = ({
 
   const openFareModal = async (flight) => {
     const flightId = flight?.id ?? null;
-    const searchTui = flight?.booking?.tui;
-    const provider = flight?.booking?.provider || flight?.provider;
 
     if (!flightId) return;
 
@@ -128,33 +127,79 @@ const OnewayFlightBooking = ({
     setFareModalOpen(flightId);
     setPrefetchingFlightId(flightId);
     try {
-      const webSettingsResponse = searchTui
-        ? await getFlightWebSettings({ TUI: searchTui, provider })
-        : null;
+      const updateFareOptionsPrefetch = (fareOptionsResponse) => {
+        if (!fareOptionsResponse) return;
+
+        const responseHasFareCards =
+          getFareOptionItems(fareOptionsResponse, flight?.booking?.flightNo).length > 0 ||
+          hasFareOptionItems(fareOptionsResponse);
+
+        if (!responseHasFareCards) return;
+
+        setPrefetchingFlightId((currentId) => (currentId === flightId ? null : currentId));
+
+        setPrefetchedFareData((prev) => {
+          const previousData = prev[flightId] || {};
+          const nextPrefetchedData = {
+            ...previousData,
+            fareOptionsResponse,
+          };
+
+          return {
+            ...prev,
+            [flightId]: nextPrefetchedData,
+          };
+        });
+
+        setSelectedFareFlight((currentFlight) => {
+          const baseFlight = currentFlight?.id === flightId ? currentFlight : flight;
+
+          return {
+            ...baseFlight,
+            prefetchedFareData: {
+              ...(baseFlight?.prefetchedFareData || {}),
+              fareOptionsResponse,
+            },
+          };
+        });
+      };
+
+      const initialPrefetchedData = {
+        fareOptionsResponse: null,
+      };
 
       setPrefetchedFareData((prev) => ({
         ...prev,
-        [flightId]: {
-          webSettingsResponse,
-          fareOptionsResponse: null,
-        },
+        [flightId]: initialPrefetchedData,
       }));
       setSelectedFareFlight({
         ...flight,
-        prefetchedFareData: {
-          webSettingsResponse,
-          fareOptionsResponse: null,
-        },
+        prefetchedFareData: initialPrefetchedData,
+      });
+
+      const fareOptionsResponse = flight?.booking?.priceRequest
+        ? await getFlightFareOptions({
+            searchParams,
+            request: flight.booking.priceRequest,
+            flight,
+            onFareOptionsEvent: updateFareOptionsPrefetch,
+          })
+        : null;
+
+      const nextPrefetchedData = {
+        fareOptionsResponse,
+      };
+
+      setPrefetchedFareData((prev) => ({
+        ...prev,
+        [flightId]: nextPrefetchedData,
+      }));
+      setSelectedFareFlight({
+        ...flight,
+        prefetchedFareData: nextPrefetchedData,
       });
     } catch (error) {
       console.error("Failed to fetch fare details", error);
-      if (searchTui) {
-        try {
-          await getFlightWebSettings({ TUI: searchTui, provider });
-        } catch (settingsError) {
-          console.error("Failed to fetch flight web settings", settingsError);
-        }
-      }
     } finally {
       setPrefetchingFlightId(null);
     }
