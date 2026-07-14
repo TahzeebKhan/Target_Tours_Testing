@@ -22,6 +22,10 @@ import "swiper/css";
 import "swiper/css/pagination";
 import Link from "next/link";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+import {
+  isUserNotRegisteredResponse,
+  writeSignupPrefill,
+} from "@/app/account/authPrefill";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -120,6 +124,19 @@ export default function LoginPopup({ onNavigate, onClose }) {
     return payload;
   };
 
+  const getSignupPrefillPayload = () => {
+    if (loginMode === "phone") {
+      return {
+        phoneNumber: email,
+        country: phoneCountry,
+      };
+    }
+
+    return {
+      email,
+    };
+  };
+
   const saveVerifiedLogin = async (data) => {
     const authData = data?.data || data || {};
     const token = authData.token;
@@ -193,6 +210,14 @@ export default function LoginPopup({ onNavigate, onClose }) {
       );
 
       const data = await res.json();
+
+      if (isUserNotRegisteredResponse(data, res.status)) {
+        writeSignupPrefill(getSignupPrefillPayload());
+        setAuthStep("login");
+        setIsPhoneCountryDropdownOpen(false);
+        onNavigate("signup");
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(data?.error?.message || data?.message || "Login failed");

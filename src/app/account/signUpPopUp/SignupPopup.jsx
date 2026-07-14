@@ -19,6 +19,7 @@ import Link from "next/link";
 import "swiper/css";
 import "swiper/css/pagination";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
+import { readSignupPrefill } from "@/app/account/authPrefill";
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -169,6 +170,39 @@ export default function SignupPopup({ onNavigate, onClose }) {
 
     return true;
   };
+
+  useEffect(() => {
+    const signupPrefill = readSignupPrefill();
+    if (!signupPrefill) return;
+
+    if (signupPrefill.email) {
+      setEmail(signupPrefill.email);
+      setEmailError("");
+    }
+
+    if (signupPrefill.phoneNumber) {
+      const prefillCountry =
+        COUNTRY_OPTIONS.find((option) => option.code === signupPrefill.country)
+          ?.code || "IN";
+      const countryOption =
+        COUNTRY_OPTIONS.find((option) => option.code === prefillCountry) ||
+        COUNTRY_OPTIONS[0];
+
+      setCountry(prefillCountry);
+      setPhoneNumber(
+        String(signupPrefill.phoneNumber)
+          .replace(/[^\d]/g, "")
+          .slice(0, countryOption.maxLength),
+      );
+      setPhoneNumberError("");
+    }
+
+    setError("");
+    setOtpSent(false);
+    setOtpDigits(Array(SIGNUP_OTP_LENGTH).fill(""));
+    setOtpError("");
+    setSuccessMessage("");
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
