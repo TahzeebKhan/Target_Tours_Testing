@@ -58,7 +58,7 @@ const DocumentCard = ({ title, description }) => (
   </article>
 );
 
-const RequiredDocuments = () => {
+const RequiredDocuments = ({ onNext }) => {
   return (
     <div className={styles.wrapper}>
       <section className={styles.section} aria-labelledby="required-documents-heading">
@@ -95,7 +95,7 @@ const RequiredDocuments = () => {
             </div>
 
             <div className={styles.footer}>
-              <button className={styles.submitButton} type="button">
+              <button className={styles.submitButton} type="button" onClick={onNext}>
                 Start Filling
               </button>
             </div>

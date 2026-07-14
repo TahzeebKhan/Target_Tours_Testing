@@ -1,16 +1,16 @@
-import React from "react";
+"use client";
+
+import React, { useCallback, useRef, useState } from "react";
 import styles from "./uploadDocuments.module.css";
 
 const documents = [
   {
     title: "Passport (Original + Scan)",
     description: "Clear scan of the photo page.",
-    uploaded: true,
   },
   {
     title: "Standard Passport Photo",
     description: "White background, no glasses last 6 months.",
-    uploaded: false,
   },
 ];
 
@@ -125,15 +125,18 @@ const BackIcon = () => (
   </svg>
 );
 
-const UploadZone = () => (
-  <button className={styles.uploadZone} type="button">
-    <CameraIcon />
-    <span>Click to upload or drag &amp; drop JPG, PNG, PDF - Max 5MB</span>
-  </button>
-);
+const UploadCard = ({ index, title, description, file, error, onFileSelect }) => {
+  const inputRef = useRef(null);
 
-const UploadCard = ({ title, description, uploaded }) => (
-  <article className={`${styles.documentCard} ${uploaded ? styles.uploadedCard : ""}`}>
+  const openPicker = useCallback(() => inputRef.current?.click(), []);
+  const handleChange = useCallback((event) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) onFileSelect(index, selectedFile);
+    event.target.value = "";
+  }, [index, onFileSelect]);
+
+  return (
+  <article className={`${styles.documentCard} ${file ? styles.uploadedCard : ""}`}>
     <div className={styles.documentHeader}>
       <span className={styles.iconWrap}>
         <CheckSquareIcon />
@@ -142,25 +145,60 @@ const UploadCard = ({ title, description, uploaded }) => (
         <h3>{title}</h3>
         <p>{description}</p>
       </div>
-      <UploadZone />
+      <button className={styles.uploadZone} type="button" onClick={openPicker}>
+        <CameraIcon />
+        <span>Click to upload or drag &amp; drop JPG, PNG, PDF - Max 5MB</span>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".jpg,.jpeg,.png,.pdf"
+        multiple={false}
+        hidden
+        onChange={handleChange}
+      />
     </div>
 
-    {uploaded ? (
+    {file ? (
       <div className={styles.uploadedDetails}>
         <div className={styles.fileRow}>
           <UploadedIcon />
-          <span className={styles.fileName}>passport_scan.pdf</span>
-          <button className={styles.replaceButton} type="button">
+          <span className={styles.fileName}>{file.name}</span>
+          <button className={styles.replaceButton} type="button" onClick={openPicker}>
             Replace
           </button>
         </div>
         <p className={styles.successBadge}>Passport details extracted automatically</p>
       </div>
     ) : null}
+    {error && <p className={styles.fileError}>{error}</p>}
   </article>
-);
+  );
+};
 
-const UploadDocuments = () => {
+const UploadDocuments = ({ onNext, onBack }) => {
+  const [files, setFiles] = useState({});
+  const [errors, setErrors] = useState({});
+
+  const handleFileSelect = useCallback((index, file) => {
+    const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setErrors((current) => ({ ...current, [index]: "Upload a JPG, PNG, or PDF up to 5MB." }));
+      return;
+    }
+    setFiles((current) => ({ ...current, [index]: file }));
+    setErrors((current) => ({ ...current, [index]: "" }));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    const nextErrors = documents.reduce((current, _, index) => {
+      if (!files[index]) current[index] = "This document is required.";
+      return current;
+    }, {});
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length === 0) onNext?.();
+  }, [files, onNext]);
+
   return (
     <div className={styles.wrapper}>
       <section className={styles.section} aria-labelledby="upload-documents-heading">
@@ -176,28 +214,31 @@ const UploadDocuments = () => {
               Upload documents
             </h2>
             <p className={styles.subtitle}>
-              0 Of 2 Uploaded. PDF, JPG, Or PNG Up To 10 MB Each.
+              {Object.keys(files).length} Of {documents.length} Uploaded. PDF, JPG, Or PNG Up To 10 MB Each.
             </p>
           </header>
 
           <div className={styles.card}>
             <div className={styles.documentsList}>
-              {documents.map((document) => (
+              {documents.map((document, index) => (
                 <UploadCard
                   key={document.title}
+                  index={index}
                   title={document.title}
                   description={document.description}
-                  uploaded={document.uploaded}
+                  file={files[index]}
+                  error={errors[index]}
+                  onFileSelect={handleFileSelect}
                 />
               ))}
             </div>
 
             <footer className={styles.footer}>
-              <button className={styles.backButton} type="button">
+              <button className={styles.backButton} type="button" onClick={onBack}>
                 <BackIcon />
                 <span>Back To Form</span>
               </button>
-              <button className={styles.submitButton} type="button">
+              <button className={styles.submitButton} type="button" onClick={handleNext}>
                 Review And Pay
               </button>
             </footer>
