@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, {
   createContext,
   useCallback,
@@ -8,8 +9,11 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { toast } from "react-toastify";
 import {
   HOTEL_DETAILS_KEY,
+  HOTEL_LAST_SEARCH_URL_KEY,
+  HOTEL_SEARCH_SESSION_KEY,
   changeHotelAvailability,
   fetchHotelDetails,
   fetchHotelRooms,
@@ -60,6 +64,47 @@ const writeStoredHotelDetail = (hotelDetailData) => {
     window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(hotelDetailData));
   } catch {
     // Ignore storage failures and keep the in-memory response.
+  }
+};
+
+const buildHotelListingUrlFromStoredSearch = () => {
+  if (typeof window === "undefined") return "";
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
+    const searchContext = raw ? JSON.parse(raw) : null;
+    if (!searchContext || typeof searchContext !== "object") return "";
+
+    const params = new URLSearchParams();
+    const city = searchContext.city || searchContext.location?.value || searchContext.location?.label || "";
+    const checkIn = searchContext.checkIn || searchContext.checkin || searchContext.initPayload?.checkIn || "";
+    const checkOut = searchContext.checkOut || searchContext.checkout || searchContext.initPayload?.checkOut || "";
+    const channel = searchContext.channel || "";
+    const rooms = searchContext.rooms ?? searchContext.initPayload?.rooms;
+    const adults = searchContext.adults ?? searchContext.initPayload?.adults;
+    const children = searchContext.children ?? searchContext.initPayload?.children;
+    const childAges = searchContext.childAges || searchContext.initPayload?.childAges || "";
+    const locationId = searchContext.location?.locationId || searchContext.initPayload?.locationId || "";
+    const country = searchContext.location?.country || searchContext.initPayload?.country || "";
+    const state = searchContext.location?.state || searchContext.initPayload?.state || "";
+
+    if (city) params.set("city", city);
+    if (checkIn) params.set("checkIn", checkIn);
+    if (checkOut) params.set("checkOut", checkOut);
+    if (channel) params.set("channel", channel);
+    if (rooms !== undefined && rooms !== null && rooms !== "") params.set("rooms", String(rooms));
+    if (adults !== undefined && adults !== null && adults !== "") params.set("adults", String(adults));
+    if (children !== undefined && children !== null && children !== "") params.set("children", String(children));
+    if (childAges) {
+      params.set("childAges", Array.isArray(childAges) ? childAges.join(",") : String(childAges));
+    }
+    if (locationId) params.set("locationId", String(locationId));
+    if (country) params.set("country", String(country));
+    if (state) params.set("state", String(state));
+
+    return params.toString() ? `/hotels?${params.toString()}` : "";
+  } catch {
+    return "";
   }
 };
 
@@ -1223,12 +1268,37 @@ const normalizeHotelDetail = (
 };
 
 export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
+  const router = useRouter();
   const [routeHotelId, setRouteHotelId] = useState("");
   const [storedDetail, setStoredDetail] = useState(null);
   const [roomsPayload, setRoomsPayload] = useState(null);
   const [roomsErrorMessage, setRoomsErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [roomsLoading, setRoomsLoading] = useState(false);
+
+  const redirectToHotelListing = useCallback(() => {
+    toast.warn("This hotel is not available", {
+      toastId: "hotel-room-search-expired",
+    });
+
+    if (typeof window === "undefined") {
+      router.push("/hotels");
+      return;
+    }
+
+    let lastSearchUrl = "";
+    try {
+      lastSearchUrl = window.localStorage.getItem(HOTEL_LAST_SEARCH_URL_KEY) || "";
+    } catch {
+      lastSearchUrl = "";
+    }
+    const storedSearchUrl = buildHotelListingUrlFromStoredSearch();
+    const targetUrl =
+      storedSearchUrl ||
+      (lastSearchUrl?.startsWith("/hotels") ? lastSearchUrl : "/hotels");
+
+    router.replace(targetUrl);
+  }, [router]);
 
   const refreshHotelAvailability = useCallback(
     async (changeHotelAvailabilityPayload) => {
@@ -1328,6 +1398,14 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
           console.error("Hotel rooms request failed:", error);
           if (isMissingHotelAuthTokenError(error)) {
             onUnauthorized?.();
+          }
+          if (String(error?.code || "") === "1211") {
+            if (isMounted) {
+              setRoomsPayload(null);
+              setRoomsErrorMessage("This hotel is not available");
+            }
+            redirectToHotelListing();
+            return;
           }
           if (isMounted) {
             setRoomsPayload(null);

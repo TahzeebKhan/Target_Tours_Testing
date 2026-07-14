@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./ReviewPage.module.css";
 
@@ -346,9 +346,30 @@ const loadCashfreeSdk = () => {
   return cashfreeSdkPromise;
 };
 
-const getCashfreeMode = () => {
+const normalizeCashfreeMode = (value) => {
+  const mode = String(value || "").trim().toLowerCase();
+  if (mode === "sandbox" || mode === "production") return mode;
+  return "";
+};
+
+const getCashfreeMode = (paymentResponse) => {
+  const responseMode = normalizeCashfreeMode(
+    getFirstValue(
+      paymentResponse?.environment,
+      paymentResponse?.checkout_mode,
+      paymentResponse?.checkoutMode,
+      paymentResponse?.data?.environment,
+      paymentResponse?.data?.checkout_mode,
+      paymentResponse?.data?.checkoutMode,
+      paymentResponse?.data?.raw?.environment,
+      paymentResponse?.raw?.environment,
+    ),
+  );
+
+  if (responseMode) return responseMode;
+
   if (process.env.NEXT_PUBLIC_CASHFREE_MODE) {
-    return process.env.NEXT_PUBLIC_CASHFREE_MODE;
+    return normalizeCashfreeMode(process.env.NEXT_PUBLIC_CASHFREE_MODE) || "production";
   }
 
   return typeof window !== "undefined" &&
@@ -914,6 +935,127 @@ const getHotelPriceProvider = ({ firstRoom = {} } = {}) =>
     firstRoom.rawRoomGroup?.PriceProvider,
   );
 
+const buildHotelPricingDetailsPayload = ({
+  request = {},
+  hotel = {},
+  selectedRooms = [],
+  roomList = [],
+  bookingSession = {},
+} = {}) => {
+  const firstRoom = selectedRooms[0] || roomList[0] || {};
+  const storedHotelSearch = readStoredHotelSearch() || {};
+  const storedHotelResults = readStoredHotelResults() || {};
+  const storedHotelDetails = readStoredHotelDetails() || {};
+  const initSearchContext = {
+    request,
+    storedHotelSearch,
+    hotel,
+    firstRoom,
+    selectedRooms,
+    roomList,
+    bookingSession,
+    storedHotelDetails,
+    init: request.init || storedHotelSearch.init,
+    initResponse:
+      request.initResponse ||
+      request.searchContext?.initResponse ||
+      storedHotelSearch.initResponse,
+    hotelSearchResults: storedHotelResults,
+    initPayload: request.searchContext?.initPayload || storedHotelSearch.initPayload,
+    searchContext: request.searchContext,
+  };
+  const hotelInitData = getHotelInitData({
+    request,
+    storedHotelSearch,
+    storedHotelResults,
+  });
+  const searchId = getFirstValue(
+    firstRoom.roomsSearchId,
+    firstRoom.searchId,
+    firstRoom.raw?.roomsSearchId,
+    firstRoom.raw?.searchId,
+    firstRoom.rawRecommendation?.roomsSearchId,
+    firstRoom.rawRecommendation?.searchId,
+    firstRoom.rawRoomGroup?.roomsSearchId,
+    firstRoom.rawRoomGroup?.searchId,
+    findFirstDeepValue(firstRoom, HOTEL_ROOMS_SEARCH_ID_KEYS),
+    request.roomsSearchId,
+    request.searchId,
+    storedHotelSearch.roomsSearchId,
+    storedHotelSearch.searchId,
+    hotelInitData.searchId,
+    hotelInitData.SearchId,
+    hotelInitData.search_id,
+    findFirstDeepValue(storedHotelDetails, HOTEL_ROOMS_SEARCH_ID_KEYS),
+    findFirstDeepValue(initSearchContext, HOTEL_ROOMS_SEARCH_ID_KEYS),
+  );
+  const hotelSearchId = getFirstValue(
+    firstRoom.hotelSearchId,
+    firstRoom.hotel_search_id,
+    firstRoom.hotel_search_key,
+    firstRoom.hotelSearchKey,
+    request.hotelSearchId,
+    request.hotel_search_id,
+    request.hotel_search_key,
+    request.hotelSearchKey,
+    hotel.hotelSearchId,
+    hotel.hotel_search_id,
+    hotel.hotel_search_key,
+    hotel.hotelSearchKey,
+    hotelInitData.hotelSearchId,
+    hotelInitData.hotel_search_id,
+    hotelInitData.hotel_search_key,
+    hotelInitData.hotelSearchKey,
+    findFirstDeepValue(initSearchContext, [
+      "hotelSearchId",
+      "HotelSearchId",
+      "hotel_search_id",
+      "hotelSearchID",
+      "hotel_search_key",
+      "hotelSearchKey",
+    ]),
+  );
+  const recommendationId = getFirstValue(
+    firstRoom.recommendationId,
+    firstRoom.raw?.recommendationId,
+    firstRoom.raw?.RecommendationId,
+    request.recommendationId,
+    request.RecommendationId,
+    findFirstDeepValue(initSearchContext, [
+      "recommendationId",
+      "RecommendationId",
+      "recommendationID",
+    ]),
+  );
+  const hotelId = getFirstValue(
+    hotel.id,
+    hotel.hotelId,
+    hotel.HotelCode,
+    hotel.HotelId,
+    hotel.raw?.id,
+    hotel.raw?.hotelId,
+    hotel.raw?.HotelCode,
+    request.hotelId,
+    request.HotelCode,
+    request.searchContext?.hotelId,
+    request.searchContext?.hotel?.id,
+    request.searchContext?.hotel?.hotelId,
+  );
+  const priceProvider = getHotelPriceProvider({ firstRoom });
+
+  if (!searchId || !hotelSearchId || !hotelId || !priceProvider || !recommendationId) {
+    return null;
+  }
+
+  return {
+    searchId,
+    hotelSearchId,
+    hotelId,
+    priceProvider,
+    recommendationId,
+  };
+};
+
 const ReviewPage = () => {
   const router = useRouter();
   // 👇 default open = flight
@@ -925,6 +1067,8 @@ const ReviewPage = () => {
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState("");
   const [paymentGatewaysLoading, setPaymentGatewaysLoading] = useState(true);
   const [paymentGatewaysError, setPaymentGatewaysError] = useState("");
+  const pricingDetailsRequestKeyRef = useRef("");
+  const pricingDetailsPromiseRef = useRef(null);
   const [guestDetails, setGuestDetails] = useState({
     roomGuests: {},
     bookingContact: {},
@@ -1033,6 +1177,21 @@ const ReviewPage = () => {
     (sum, room) => sum + getRoomTotal(room, nights),
     0,
   );
+  const pricingDetailsPayload = useMemo(
+    () =>
+      buildHotelPricingDetailsPayload({
+        request,
+        hotel,
+        selectedRooms,
+        roomList,
+        bookingSession,
+      }),
+    [bookingSession, hotel, request, roomList, selectedRooms],
+  );
+  const pricingDetailsRequestKey = useMemo(
+    () => (pricingDetailsPayload ? JSON.stringify(pricingDetailsPayload) : ""),
+    [pricingDetailsPayload],
+  );
 
   const handleGuestDetailsChange = useCallback((value) => {
     setGuestDetails(value);
@@ -1077,7 +1236,7 @@ const ReviewPage = () => {
     });
 
     if (isCashfree) {
-      const cashfree = Cashfree({ mode: getCashfreeMode() });
+      const cashfree = Cashfree({ mode: getCashfreeMode(paymentResponse) });
       const checkoutResult = await cashfree.checkout({
         paymentSessionId,
         redirectTarget: "_self",
@@ -1136,6 +1295,17 @@ const ReviewPage = () => {
       isActive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!pricingDetailsPayload || !pricingDetailsRequestKey) return;
+    if (pricingDetailsRequestKeyRef.current === pricingDetailsRequestKey) return;
+
+    pricingDetailsRequestKeyRef.current = pricingDetailsRequestKey;
+    pricingDetailsPromiseRef.current = fetchHotelPricingDetails(pricingDetailsPayload);
+    pricingDetailsPromiseRef.current.catch((error) => {
+      console.error("Hotel pricing details request failed:", error);
+    });
+  }, [pricingDetailsPayload, pricingDetailsRequestKey]);
 
   const handleAcceptPriceChange = async () => {
     if (!pendingConfirmPayload || !pendingPaymentPayload || bookingLoading) return;
@@ -1514,13 +1684,27 @@ const ReviewPage = () => {
         TravelingFor: "NTF",
       };
 
-      await fetchHotelPricingDetails({
+      const submitPricingDetailsPayload = {
         searchId,
         hotelSearchId,
         hotelId: hotelCode,
         priceProvider,
         recommendationId,
-      });
+      };
+      const submitPricingDetailsKey = JSON.stringify(submitPricingDetailsPayload);
+
+      if (
+        pricingDetailsRequestKeyRef.current === submitPricingDetailsKey &&
+        pricingDetailsPromiseRef.current
+      ) {
+        await pricingDetailsPromiseRef.current;
+      } else {
+        pricingDetailsRequestKeyRef.current = submitPricingDetailsKey;
+        pricingDetailsPromiseRef.current = fetchHotelPricingDetails(
+          submitPricingDetailsPayload,
+        );
+        await pricingDetailsPromiseRef.current;
+      }
 
       const startBookingResponse = await startHotelBooking(payload);
       const priceChangeInfo = parsePriceChange(startBookingResponse);

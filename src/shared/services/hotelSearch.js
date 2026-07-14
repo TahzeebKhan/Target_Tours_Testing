@@ -335,19 +335,20 @@ const getApiMessage = (data) => {
 
 const createApiError = (data, fallbackMessage) => {
   const apiError = data?.error || {};
+  const nestedData = data?.data || {};
   const error = new Error(getApiMessage(data) || fallbackMessage);
 
-  error.status = apiError.status || data?.status;
-  error.code = apiError.code || data?.code;
+  error.status = apiError.status || data?.status || nestedData?.status;
+  error.code = apiError.code || data?.code || nestedData?.code;
   error.name = apiError.name || error.name;
-  error.details = apiError.details || {};
+  error.details = apiError.details || nestedData || {};
 
   return error;
 };
 
 const isApiFailure = (data) =>
-  String(data?.status || data?.error?.status || "").toLowerCase() === "failure" ||
-  String(data?.code || data?.error?.code || "") === "1216";
+  String(data?.status || data?.data?.status || data?.error?.status || "").toLowerCase() === "failure" ||
+  ["1211", "1216"].includes(String(data?.code || data?.data?.code || data?.error?.code || ""));
 
 export const isMissingHotelAuthTokenError = (error) =>
   Number(error?.status) === 401 &&
@@ -554,6 +555,8 @@ export const fetchHotelFilterData = async (searchId, { signal, payload = {} } = 
       body: JSON.stringify({
         domain: payload.domain || getDomain(),
         searchId: payload.searchId || id,
+        hotelSearchId: payload.hotelSearchId || payload.hotel_search_id || "",
+        hotel_search_id: payload.hotelSearchId || payload.hotel_search_id || "",
       }),
     });
 
@@ -591,7 +594,7 @@ export const fetchHotelRooms = async (fetchHotelRoomsPayload = {}) => {
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+  if (!response.ok || isApiFailure(data)) {
     throw createApiError(data, "Hotel rooms failed");
   }
 
