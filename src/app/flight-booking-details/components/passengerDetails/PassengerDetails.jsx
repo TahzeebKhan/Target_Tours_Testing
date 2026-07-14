@@ -44,7 +44,9 @@ const PassengerDetails = () => {
       return;
     }
 
-    const loaded = await loadSsrForBooking();
+    const loaded = await loadSsrForBooking({
+      travelerDetailsOverride: travelerDetails,
+    });
     if (loaded) {
       setCurrentStep(3);
     }

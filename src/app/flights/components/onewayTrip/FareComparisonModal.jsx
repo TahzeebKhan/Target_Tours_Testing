@@ -566,8 +566,18 @@ export const buildFareOptions = ({
             const meals = Array.isArray(item?.ssr?.meals) ? item.ssr.meals : [];
             const seats = Number(item?.seats ?? item?.Seats ?? item?.seatCount);
 
+            const providerFareId = String(
+                pickValue(item?.index, item?.Index, item?.fare_id, item?.id, item?.ID, index)
+            );
+
             return {
-                id: String(pickValue(item?.index, item?.Index, item?.fare_id, item?.id, item?.ID, index)),
+                id: [
+                    providerFareId,
+                    item?.provider,
+                    item?.Provider,
+                    fareName,
+                    index,
+                ].filter((value) => value !== undefined && value !== null && value !== "").join("|"),
                 name: fareName,
                 price: formatCurrency(total) || flightData?.fare?.totalFare || "N/A",
                 pricePerAdult:
@@ -688,6 +698,7 @@ const FareComparisonModal = ({
     }, [flightData, flightNo, isLoadingFareOptions, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
     const performBookNow = useCallback(async (selectedFare) => {
+         console.log("selectedFare",selectedFare)
         const basePriceRequest = flightData?.booking?.priceRequest;
         const selectedFareIndex = getSelectedFareIndex(selectedFare);
         const selectedPriceRequest = buildSelectedFarePriceRequest(basePriceRequest, selectedFare);
@@ -698,6 +709,7 @@ const FareComparisonModal = ({
                 Index: index === 0 ? selectedFareIndex ?? trip?.Index : trip?.Index,
             })),
         };
+         console.log("priceRequest",priceRequest)
         const hasPricePayload =
             Boolean(priceRequest?.search_key) &&
             priceRequest?.Trips?.[0]?.Index !== undefined &&
@@ -718,11 +730,14 @@ const FareComparisonModal = ({
         let shouldResetSubmitting = true;
         try {
             const priceResponse = await getFlightPrice(priceRequest);
+            console.log("priceResponse",priceResponse)
             const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
+            console.log("formattedOnlyPriceResponse",formattedOnlyPriceResponse)
             const selectedFareFromFormattedPrice = buildSelectedFareFromFormattedPrice(
                 selectedFare,
                 formattedOnlyPriceResponse
             );
+             console.log("selectedFareFromFormattedPrice",selectedFareFromFormattedPrice)
             const nextSession = {
                 selectedFlight: flightData,
                 selectedFare: selectedFareFromFormattedPrice,
@@ -733,6 +748,7 @@ const FareComparisonModal = ({
                 ssrRequest: null,
                 ssrResponse: null,
             };
+             console.log("nextSession",nextSession)
             writeFlightBookingSession(nextSession);
             const fallbackQuery = buildBookingFallbackQuery(nextSession);
             router.push(

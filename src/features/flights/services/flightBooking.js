@@ -1,4 +1,9 @@
 import api from "@/lib/axios";
+import {
+  extractFlightPricingPayload,
+  hasFlightPricingPayload,
+  isFlightPricingResult,
+} from "./flightPricingPayload.mjs";
 
 export const FLIGHT_FARE_EXPIRED_EVENT = "target-tours:flight-fare-expired";
 
@@ -142,6 +147,22 @@ const makeV2PricingChannel = () => {
   return `pricing:${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const makeSsrChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `ssr-${crypto.randomUUID()}`;
+  }
+
+  return `ssr-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const makeSeatLayoutChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `seatLayout-${crypto.randomUUID()}`;
+  }
+
+  return `seatLayout-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 const parseMaybeJson = (value) => {
   if (typeof value !== "string") return value;
 
@@ -164,7 +185,14 @@ const unwrapPricingPayload = (payload) => {
 
     const next = current?.received?.message || current?.data?.message || null;
     if (!next || next === current) return current;
-    current = next;
+
+    const parsedNext = parseMaybeJson(next);
+    if (parsedNext && typeof parsedNext === "object" && parsedNext !== current) {
+      current = parsedNext;
+      continue;
+    }
+
+    return current;
   }
 
   return current;
@@ -200,18 +228,210 @@ const isPricingError = (payload) => {
   return Boolean(payload?.error || payload?.data?.error) ||
     (type.includes("FARE_OPTIONS") && type.includes("ERROR")) ||
     (type.includes("PRICING") && type.includes("ERROR")) ||
+    (type.includes("SSR") && type.includes("ERROR")) ||
+    (type.includes("SEAT") && type.includes("LAYOUT") && type.includes("ERROR")) ||
     type === "ERROR";
 };
 
-const isFlightPricingResult = (payload) => {
+const isFlightSsrComplete = (payload) => {
   const type = getPayloadType(payload);
   return (
-    type.includes("PRICING") &&
+    type.includes("SSR") &&
     (type.includes("COMPLETE") || type.includes("COMPLETED"))
   );
 };
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
+
+const hasSsrItems = (payload) => {
+  const root = payload?.data || payload || {};
+  const containers = [
+    root,
+    root?.data,
+    root?.result,
+    root?.formatted,
+    root?.raw,
+    root?.data?.formatted,
+    root?.data?.raw,
+  ].filter(Boolean);
+
+  return containers.some((container) =>
+    Boolean(
+      container?.tui ||
+        container?.TUI ||
+        container?.trackid ||
+        container?.TrackId ||
+        container?.SSRSource ||
+        container?.ssrSource ||
+        container?.ssr ||
+        container?.SSR ||
+        container?.meals ||
+        container?.baggage ||
+        container?.seats ||
+        container?.journeys ||
+        container?.Flights ||
+        container?.flights ||
+        Array.isArray(container?.Meal) ||
+        Array.isArray(container?.Baggage) ||
+        Array.isArray(container?.Seat)
+    )
+  );
+};
+
+const extractFlightSsrPayload = (payload) => {
+  if (!payload || typeof payload !== "object") return null;
+
+  const directCandidates = [
+    payload,
+    payload?.data,
+    payload?.data?.data,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (hasSsrItems(candidate)) return candidate;
+  }
+
+  const resultContainers = [
+    payload?.results,
+    payload?.data?.results,
+    payload?.data?.data?.results,
+  ];
+
+  for (const results of resultContainers) {
+    for (const result of toArray(results)) {
+      const status = String(result?.status || "").toLowerCase();
+      if (status && status !== "fulfilled" && status !== "success") continue;
+      if (result?.success === false || result?.data?.success === false) continue;
+
+      const candidates = [
+        result?.data,
+        result?.data?.data,
+        result,
+      ];
+      const ssrPayload = candidates.find(hasSsrItems);
+      if (ssrPayload) return ssrPayload;
+    }
+  }
+
+  return null;
+};
+
+const hasSeatLayoutItems = (payload) => {
+  if (!payload || typeof payload !== "object") return false;
+
+  if (Array.isArray(payload)) {
+    return payload.some((item) => hasSeatLayoutItems(item));
+  }
+
+  const containers = [
+    payload,
+    payload?.formatted,
+    payload?.data?.formatted,
+    payload?.data?.data?.formatted,
+  ].filter(Boolean);
+
+  return containers.some((container) => {
+    if (Array.isArray(container)) {
+      return container.some((item) => hasSeatLayoutItems(item));
+    }
+
+    const seatCollections = [
+      container?.seat_layout,
+      container?.seatLayout,
+      container?.SeatLayout,
+      container?.seat_map,
+      container?.seatMap,
+      container?.seats,
+      container?.Seats,
+      container?.rows,
+      container?.Rows,
+      container?.decks,
+      container?.Decks,
+      container?.Seat,
+      container?.journeys,
+      container?.Journeys,
+      container?.Journey,
+    ];
+
+    return seatCollections.some((value) =>
+      Array.isArray(value)
+        ? value.length > 0 && value.some((item) => hasSeatLayoutItems(item) || Boolean(item))
+        : Boolean(value)
+    );
+  });
+};
+
+const getSeatLayoutFormatted = (payload) => {
+  if (!payload || typeof payload !== "object") return null;
+
+  const candidates = [
+    payload?.formatted,
+    payload?.data?.formatted,
+    payload?.data?.data?.formatted,
+    payload,
+  ];
+
+  return candidates.find(hasSeatLayoutItems) || null;
+};
+
+const normalizeSeatLayoutPayload = (payload) => {
+  const formatted = getSeatLayoutFormatted(payload);
+  if (!formatted) return null;
+
+  return {
+    ...(payload || {}),
+    formatted,
+  };
+};
+
+const extractFlightSeatLayoutPayload = (payload) => {
+  if (!payload || typeof payload !== "object") return null;
+
+  const directCandidates = [
+    payload,
+    payload?.data,
+    payload?.data?.data,
+  ];
+
+  for (const candidate of directCandidates) {
+    const normalized = normalizeSeatLayoutPayload(candidate);
+    if (normalized) return normalized;
+  }
+
+  const resultContainers = [
+    payload?.results,
+    payload?.data?.results,
+    payload?.data?.data?.results,
+  ];
+
+  for (const results of resultContainers) {
+    for (const result of toArray(results)) {
+      const status = String(result?.status || "").toLowerCase();
+      if (status && status !== "fulfilled" && status !== "success") continue;
+      if (result?.success === false || result?.data?.success === false) continue;
+
+      const candidates = [
+        result?.data?.data,
+        result?.data,
+        result,
+      ];
+      const seatLayoutPayload = candidates
+        .map(normalizeSeatLayoutPayload)
+        .find(Boolean);
+      if (seatLayoutPayload) return seatLayoutPayload;
+    }
+  }
+
+  return null;
+};
+
+const isFlightSeatLayoutComplete = (payload) => {
+  const type = getPayloadType(payload);
+  return (
+    type.includes("SEAT") &&
+    (type.includes("COMPLETE") || type.includes("COMPLETED"))
+  );
+};
 
 const hasPricingItems = (payload) => {
   const root = payload?.data || payload || {};
@@ -452,10 +672,26 @@ const PRICING_SSE_EVENT_NAMES = [
   "FLIGHT_V2_PRICING_COMPLETE",
   "FLIGHT_V2_PRICING_COMPLETED",
   "FLIGHT_V2_PRICING_ERROR",
+  "FLIGHT_V2_SSR_ACCEPTED",
+  "FLIGHT_V2_SSR_STARTED",
+  "FLIGHT_V2_SSR_RESULT",
+  "FLIGHT_V2_SSR_COMPLETE",
+  "FLIGHT_V2_SSR_COMPLETED",
+  "FLIGHT_V2_SSR_ERROR",
+  "FLIGHT_V2_SEAT_LAYOUT_ACCEPTED",
+  "FLIGHT_V2_SEAT_LAYOUT_STARTED",
+  "FLIGHT_V2_SEAT_LAYOUT_RESULT",
+  "FLIGHT_V2_SEAT_LAYOUT_COMPLETE",
+  "FLIGHT_V2_SEAT_LAYOUT_COMPLETED",
+  "FLIGHT_V2_SEAT_LAYOUT_ERROR",
   "pricing-result",
   "pricing-complete",
   "fare-options-result",
   "fare-options-complete",
+  "ssr-result",
+  "ssr-complete",
+  "seat-layout-result",
+  "seat-layout-complete",
   "result",
   "complete",
   "done",
@@ -501,6 +737,7 @@ const waitForSseConnected = (events, channel, timeoutMs = 1500) =>
 
 export const getFlightPrice = async (payload) => {
   const pricingPayload = buildV2PricePayload(payload);
+  console.log("getFlightPrice pricingPayload:", pricingPayload);
   const channel = pricingPayload.channel;
 
   if (!pricingPayload.search_keys.length) {
@@ -513,11 +750,15 @@ export const getFlightPrice = async (payload) => {
 
   return new Promise((resolve, reject) => {
     const chunks = [];
+    const seenChunkKeys = new Set();
     let settled = false;
     let initResponse = null;
+    let idleTimer = null;
     let events = null;
 
     const cleanup = () => {
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(hardTimer);
       events?.close();
     };
 
@@ -525,30 +766,88 @@ export const getFlightPrice = async (payload) => {
       if (settled) return;
       settled = true;
       cleanup();
+      console.log("[pricing:sse] settle", {
+        status: callback === resolve ? "resolve" : "reject",
+        channel,
+        hasPricing: callback === resolve ? hasFlightPricingPayload(value) : false,
+      });
       callback(value);
     };
 
-    const getCompletedPricingPayload = () =>
-      [...chunks].reverse().find((chunk) => {
-        return isFlightPricingResult(chunk);
-      }) || null;
+    const getPricingChunkKey = (payload, eventType = "") => {
+      const type = getPayloadType(payload) || eventType;
+      const resultKeys = toArray(payload?.data?.results || payload?.results)
+        .map((result, index) =>
+          [
+            index,
+            result?.search_key,
+            result?.index,
+            result?.provider,
+            result?.status,
+          ].join(":")
+        )
+        .join("|");
+
+      return [
+        payload?.requestId || payload?.data?.requestId || "",
+        type,
+        payload?.sent_at || payload?.data?.sent_at || "",
+        resultKeys,
+      ].join("::");
+    };
+
+    const pushPricingChunk = (payload, eventType = "") => {
+      const key = getPricingChunkKey(payload, eventType);
+      if (seenChunkKeys.has(key)) return false;
+
+      seenChunkKeys.add(key);
+      console.log("chunkpayload", payload);
+      chunks.push(payload);
+      return true;
+    };
+
+    const getCompletedPricingPayload = () => {
+      const reversedChunks = [...chunks].reverse();
+      for (const chunk of reversedChunks) {
+        const pricingPayload = extractFlightPricingPayload(chunk);
+        if (pricingPayload) return pricingPayload;
+      }
+
+      return extractFlightPricingPayload(initResponse);
+    };
 
     const buildResult = () => {
-      const completedPayload = getCompletedPricingPayload();
-      const completedData = completedPayload?.data || {};
+      const pricingResult = getCompletedPricingPayload();
 
       return {
         ...(initResponse || {}),
-        ...(completedPayload || {}),
         channel,
+        pricingResult,
         data: {
           ...((initResponse || {})?.data || {}),
-          ...completedData,
+          ...(pricingResult || {}),
           pricingChunks: chunks,
         },
         pricingChunks: chunks,
       };
     };
+
+    const scheduleResolve = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        settle(resolve, buildResult());
+      }, 300);
+    };
+
+    const hardTimer = window.setTimeout(() => {
+      const result = buildResult();
+      if (extractFlightPricingPayload(result)) {
+        settle(resolve, result);
+        return;
+      }
+
+      settle(reject, new Error("Flight pricing timed out. Please try again."));
+    }, 45000);
 
     const handleMessage = (event) => {
       const unwrappedPayload = unwrapPricingPayload(event.data);
@@ -560,10 +859,23 @@ export const getFlightPrice = async (payload) => {
                 unwrappedPayload.type ||
                 unwrappedPayload.data?.type ||
                 event.type,
-            }
+          }
           : unwrappedPayload;
       const payloadChannel = getPayloadChannel(parsedPayload);
       const isCurrentChannel = !payloadChannel || payloadChannel === channel;
+      const type = String(getPayloadType(parsedPayload) || event.type || "").toUpperCase();
+      const extractedPricing = extractFlightPricingPayload(parsedPayload);
+      const isCompletePricingEvent = isFlightPricingResult(parsedPayload);
+
+      console.log("[pricing:sse] event", {
+        rawType: event.type,
+        parsedType: type,
+        expectedChannel: channel,
+        payloadChannel,
+        channelMatched: isCurrentChannel,
+        pricingExtracted: Boolean(extractedPricing),
+        complete: isCompletePricingEvent,
+      });
 
       if (!isCurrentChannel) return;
 
@@ -576,37 +888,128 @@ export const getFlightPrice = async (payload) => {
         return;
       }
 
-      const type = getPayloadType(parsedPayload);
       if (type.includes("PRICING")) {
-        chunks.push(parsedPayload);
+        pushPricingChunk(parsedPayload, event.type);
       }
 
-      if (isFlightPricingResult(parsedPayload)) {
+      if (isCompletePricingEvent && extractedPricing) {
         settle(resolve, buildResult());
+        return;
+      }
+
+      if (type.includes("PRICING") && extractedPricing) {
+        scheduleResolve();
       }
     };
 
     const startPricing = async () => {
-      events = new EventSource(getPricingEventsUrl(channel), {
+      const eventsUrl = getPricingEventsUrl(channel);
+    
+      console.log("[Pricing] Creating EventSource", {
+        channel,
+        eventsUrl,
+      });
+    
+      events = new EventSource(eventsUrl, {
         withCredentials: true,
       });
-
-      events.addEventListener("message", handleMessage);
+    
+      events.addEventListener("open", () => {
+        console.log("[Pricing] SSE connection opened", {
+          channel,
+          readyState: events.readyState,
+        });
+      });
+    
+      events.addEventListener("message", (event) => {
+        console.log("[Pricing] Native message event received", {
+          type: event.type,
+          data: event.data,
+        });
+    
+        handleMessage(event);
+      });
+    
       PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
-        events.addEventListener(eventName, handleMessage);
+        events.addEventListener(eventName, (event) => {
+          console.log("[Pricing] Named event received", {
+            registeredEventName: eventName,
+            nativeEventType: event.type,
+            data: event.data,
+          });
+    
+          handleMessage(event);
+        });
       });
-      events.addEventListener("error", () => {
-        if (chunks.length) settle(resolve, buildResult());
+    
+      events.addEventListener("error", (event) => {
+        console.error("[Pricing] EventSource error", {
+          readyState: events?.readyState,
+          event,
+          chunksCount: chunks.length,
+          settled,
+        });
+    
+        const result = buildResult();
+        const extractedPricing = extractFlightPricingPayload(result);
+    
+        console.log("[Pricing] Result after SSE error", {
+          result,
+          extractedPricing,
+        });
+    
+        if (extractedPricing) {
+          settle(resolve, result);
+        }
       });
-
+    
       try {
+        console.log("[Pricing] Waiting for SSE connection", {
+          channel,
+        });
+    
         await waitForSseConnected(events, channel);
+    
+        console.log("[Pricing] waitForSseConnected finished", {
+          channel,
+          readyState: events.readyState,
+        });
+    
+        console.log("[Pricing] Calling postV2Price", {
+          pricingPayload,
+        });
+    
         initResponse = await postV2Price(pricingPayload);
-        if (isFlightPricingResult(initResponse)) {
-          chunks.push(initResponse);
-          settle(resolve, buildResult());
+    
+        console.log("[Pricing] postV2Price response", {
+          initResponse,
+          isFlightPricingResult:
+            isFlightPricingResult(initResponse),
+          extractedPricing:
+            extractFlightPricingPayload(initResponse),
+        });
+    
+        const extractedPricing =
+          extractFlightPricingPayload(initResponse);
+    
+        if (
+          isFlightPricingResult(initResponse) ||
+          extractedPricing
+        ) {
+          pushPricingChunk(
+            initResponse,
+            "postV2Price"
+          );
+    
+          scheduleResolve();
         }
       } catch (error) {
+        console.error("[Pricing] startPricing failed", {
+          error,
+          message: error?.message,
+          stack: error?.stack,
+        });
+    
         settle(reject, error);
       }
     };
@@ -616,6 +1019,9 @@ export const getFlightPrice = async (payload) => {
 };
 
 export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent } = {}) => {
+   console.log("req",request)
+   console.log("onFareOptionsEvent",onFareOptionsEvent)
+   console.log("flight",flight)
   const channel = makePricingChannel();
   const payload = buildV2PricingPayload({ request, flight, channel });
 
@@ -651,6 +1057,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
     };
 
     const mergeFareOptionMaps = (...maps) => {
+      console.log("maps",maps)
       const merged = {};
 
       maps.forEach((map) => {
@@ -672,6 +1079,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...toArray(chunk?.results).map((result) => result?.data?.merged || result?.merged),
         ...toArray(chunk?.data?.results).map((result) => result?.data?.merged || result?.merged)
       );
+      console.log("chunks",chunks)
 
     const buildResult = () => {
       const merged = mergeFareOptionMaps(
@@ -680,6 +1088,9 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...chunks.map(getChunkMergedFares)
       );
       const hasMergedFares = Object.keys(merged).length > 0;
+      console.log("merged",merged)
+       console.log("hasMergedFares",hasMergedFares)
+       console.log("initResponse",initResponse)
 
       return {
         ...(initResponse || {}),
@@ -722,6 +1133,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
                 event.type,
           }
           : unwrappedPayload;
+          console.log("parsedPayload",parsedPayload)
       const payloadChannel = getPayloadChannel(parsedPayload);
       const isCurrentChannel =
         !payloadChannel || payloadChannel === channel;
@@ -743,9 +1155,14 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
     
       const hasItems = hasPricingItems(parsedPayload);
       const isComplete = isPricingComplete(parsedPayload);
+      const isPricingCompleteEvent = isFlightPricingResult(parsedPayload);
     
       if (hasItems || isComplete) {
         chunks.push(parsedPayload);
+        if (isPricingCompleteEvent) {
+          settle(resolve, buildResult());
+          return;
+        }
         scheduleResolve();
       }
     };
@@ -885,7 +1302,7 @@ export const getFlightSsr = async (payload) => {
   return response?.data;
 };
 
-export const getFlightV2Ssr = async (payload) => {
+const postV2Ssr = async (payload) => {
   const response = await fetch("/api/flights/v2/ssr", {
     method: "POST",
     headers: {
@@ -906,7 +1323,368 @@ export const getFlightV2Ssr = async (payload) => {
   return data;
 };
 
+const postV2SeatLayout = async (payload) => {
+  const response = await fetch("/api/flights/v2/seat-layout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(getApiMessage(data));
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+};
+
+export const getFlightV2Ssr = async (payload) => {
+  const ssrPayload = {
+    ...payload,
+    channel: payload?.channel || makeSsrChannel(),
+  };
+  const channel = ssrPayload.channel;
+
+  if (!Array.isArray(ssrPayload?.ssr_requests) || !ssrPayload.ssr_requests.length) {
+    throw new Error("Missing v2 SSR payload for the selected booking.");
+  }
+
+  if (typeof window === "undefined" || !window.EventSource) {
+    return postV2Ssr(ssrPayload);
+  }
+
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let settled = false;
+    let initResponse = null;
+    let idleTimer = null;
+    let events = null;
+
+    const cleanup = () => {
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(hardTimer);
+      events?.close();
+    };
+
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback(value);
+    };
+
+    const getCompletedSsrPayload = () => {
+      const reversedChunks = [...chunks].reverse();
+      for (const chunk of reversedChunks) {
+        const ssrPayload = extractFlightSsrPayload(chunk);
+        if (ssrPayload) return ssrPayload;
+      }
+
+      return extractFlightSsrPayload(initResponse);
+    };
+
+    const buildResult = () => {
+      const ssrResult = getCompletedSsrPayload();
+
+      return {
+        ...(initResponse || {}),
+        channel,
+        ssrResult,
+        data: {
+          ...((initResponse || {})?.data || {}),
+          ...(ssrResult || {}),
+          ssrChunks: chunks,
+        },
+        ssrChunks: chunks,
+      };
+    };
+
+    const scheduleResolve = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        settle(resolve, buildResult());
+      }, 900);
+    };
+
+    const hardTimer = window.setTimeout(() => {
+      if (chunks.length || initResponse) {
+        settle(resolve, buildResult());
+        return;
+      }
+
+      settle(reject, new Error("Flight SSR details timed out. Please try again."));
+    }, 45000);
+
+    const handleMessage = (event) => {
+      const unwrappedPayload = unwrapPricingPayload(event.data);
+      const parsedPayload =
+        unwrappedPayload && typeof unwrappedPayload === "object"
+          ? {
+              ...unwrappedPayload,
+              type:
+                unwrappedPayload.type ||
+                unwrappedPayload.data?.type ||
+                event.type,
+            }
+          : unwrappedPayload;
+      const payloadChannel = getPayloadChannel(parsedPayload);
+      const isCurrentChannel = !payloadChannel || payloadChannel === channel;
+
+      if (!isCurrentChannel) return;
+
+      if (isPricingError(parsedPayload)) {
+        const error = new Error(getApiMessage(parsedPayload));
+        error.status =
+          parsedPayload?.error?.status ||
+          parsedPayload?.data?.error?.status;
+        settle(reject, error);
+        return;
+      }
+
+      const type = getPayloadType(parsedPayload);
+      const isSsrEvent = type.includes("SSR");
+      const hasItems = hasSsrItems(parsedPayload);
+
+      if (isSsrEvent || hasItems) {
+        chunks.push(parsedPayload);
+      }
+
+      if (isFlightSsrComplete(parsedPayload) && extractFlightSsrPayload(parsedPayload)) {
+        settle(resolve, buildResult());
+        return;
+      }
+
+      if (hasItems) {
+        scheduleResolve();
+      }
+    };
+
+    const startSsr = async () => {
+      events = new EventSource(getPricingEventsUrl(channel), {
+        withCredentials: true,
+      });
+
+      events.addEventListener("message", handleMessage);
+      PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
+        events.addEventListener(eventName, handleMessage);
+      });
+      events.addEventListener("error", () => {
+        if (chunks.length) scheduleResolve();
+      });
+
+      try {
+        await waitForSseConnected(events, channel);
+        initResponse = await postV2Ssr(ssrPayload);
+        if (isFlightSsrComplete(initResponse)) {
+          chunks.push(initResponse);
+          settle(resolve, buildResult());
+          return;
+        }
+        if (hasSsrItems(initResponse)) {
+          chunks.push(initResponse);
+          scheduleResolve();
+        }
+      } catch (error) {
+        settle(reject, error);
+      }
+    };
+
+    startSsr();
+  });
+};
+
 export const getFlightSeatLayout = async (payload) => {
+  if (Array.isArray(payload?.seat_layout_requests) && payload.seat_layout_requests.length) {
+    const seatLayoutPayload = {
+      ...payload,
+      channel: payload?.channel || makeSeatLayoutChannel(),
+    };
+    const channel = seatLayoutPayload.channel;
+
+    if (typeof window === "undefined" || !window.EventSource) {
+      return postV2SeatLayout(seatLayoutPayload);
+    }
+
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      const seenChunkKeys = new Set();
+      let settled = false;
+      let initResponse = null;
+      let idleTimer = null;
+      let events = null;
+
+      const cleanup = () => {
+        window.clearTimeout(idleTimer);
+        window.clearTimeout(hardTimer);
+        events?.close();
+      };
+
+      const settle = (callback, value) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callback(value);
+      };
+
+      const getSeatLayoutChunkKey = (chunk, eventType = "") => {
+        const type = getPayloadType(chunk) || eventType;
+        const resultKeys = toArray(chunk?.data?.results || chunk?.results)
+          .map((result, index) =>
+            [
+              index,
+              result?.search_key,
+              result?.index,
+              result?.provider,
+              result?.status,
+            ].join(":")
+          )
+          .join("|");
+
+        return [
+          chunk?.requestId || chunk?.data?.requestId || "",
+          type,
+          chunk?.sent_at || chunk?.data?.sent_at || "",
+          resultKeys,
+        ].join("::");
+      };
+
+      const pushSeatLayoutChunk = (chunk, eventType = "") => {
+        const key = getSeatLayoutChunkKey(chunk, eventType);
+        if (seenChunkKeys.has(key)) return false;
+
+        seenChunkKeys.add(key);
+        chunks.push(chunk);
+        return true;
+      };
+
+      const getCompletedSeatLayoutPayload = () => {
+        const reversedChunks = [...chunks].reverse();
+        for (const chunk of reversedChunks) {
+          const seatLayoutResult = extractFlightSeatLayoutPayload(chunk);
+          if (seatLayoutResult) return seatLayoutResult;
+        }
+
+        return extractFlightSeatLayoutPayload(initResponse);
+      };
+
+      const buildResult = () => {
+        const seatLayoutResult = getCompletedSeatLayoutPayload();
+
+        return {
+          ...(initResponse || {}),
+          channel,
+          seatLayoutResult,
+          data: {
+            ...((initResponse || {})?.data || {}),
+            ...(seatLayoutResult || {}),
+            seatLayoutChunks: chunks,
+          },
+          seatLayoutChunks: chunks,
+        };
+      };
+
+      const scheduleResolve = () => {
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => {
+          settle(resolve, buildResult());
+        }, 300);
+      };
+
+      const hardTimer = window.setTimeout(() => {
+        const result = buildResult();
+        if (extractFlightSeatLayoutPayload(result)) {
+          settle(resolve, result);
+          return;
+        }
+
+        settle(reject, new Error("Flight seat layout timed out. Please try again."));
+      }, 45000);
+
+      const handleMessage = (event) => {
+        const unwrappedPayload = unwrapPricingPayload(event.data);
+        const parsedPayload =
+          unwrappedPayload && typeof unwrappedPayload === "object"
+            ? {
+                ...unwrappedPayload,
+                type:
+                  unwrappedPayload.type ||
+                  unwrappedPayload.data?.type ||
+                  event.type,
+              }
+            : unwrappedPayload;
+        const payloadChannel = getPayloadChannel(parsedPayload);
+        const isCurrentChannel = !payloadChannel || payloadChannel === channel;
+        const type = String(getPayloadType(parsedPayload) || event.type || "").toUpperCase();
+        const isSeatLayoutEvent = type.includes("SEAT") && type.includes("LAYOUT");
+        const extractedSeatLayout = extractFlightSeatLayoutPayload(parsedPayload);
+
+        if (!isCurrentChannel) return;
+
+        if (isPricingError(parsedPayload)) {
+          const error = new Error(getApiMessage(parsedPayload));
+          error.status =
+            parsedPayload?.error?.status ||
+            parsedPayload?.data?.error?.status;
+          settle(reject, error);
+          return;
+        }
+
+        if (isSeatLayoutEvent || extractedSeatLayout) {
+          pushSeatLayoutChunk(parsedPayload, event.type);
+        }
+
+        if (isFlightSeatLayoutComplete(parsedPayload) && extractedSeatLayout) {
+          settle(resolve, buildResult());
+          return;
+        }
+
+        if (extractedSeatLayout) {
+          scheduleResolve();
+        }
+      };
+
+      const startSeatLayout = async () => {
+        events = new EventSource(getPricingEventsUrl(channel), {
+          withCredentials: true,
+        });
+
+        events.addEventListener("message", handleMessage);
+        PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
+          events.addEventListener(eventName, handleMessage);
+        });
+        events.addEventListener("error", () => {
+          if (extractFlightSeatLayoutPayload(buildResult())) scheduleResolve();
+        });
+
+        try {
+          await waitForSseConnected(events, channel);
+          initResponse = await postV2SeatLayout(seatLayoutPayload);
+
+          if (isFlightSeatLayoutComplete(initResponse)) {
+            pushSeatLayoutChunk(initResponse, "postV2SeatLayout");
+            settle(resolve, buildResult());
+            return;
+          }
+
+          if (extractFlightSeatLayoutPayload(initResponse)) {
+            pushSeatLayoutChunk(initResponse, "postV2SeatLayout");
+            scheduleResolve();
+          }
+        } catch (error) {
+          settle(reject, error);
+        }
+      };
+
+      startSeatLayout();
+    });
+  }
+
   const response = await api.post("/api/flights/seat-layout", payload, {
     headers: {
       "Content-Type": "application/json",

@@ -270,14 +270,17 @@ const getSeatType = (seat) => {
   return "orange";
 };
 
+const getSeatLayoutFormattedPayload = (seatLayoutResponse) =>
+  seatLayoutResponse?.data?.formatted ||
+  seatLayoutResponse?.formatted ||
+  seatLayoutResponse?.data?.data?.formatted ||
+  null;
+
 const buildFormattedSeatRows = (seatLayoutResponse) => {
-  const formatted =
-    seatLayoutResponse?.data?.formatted ||
-    seatLayoutResponse?.formatted ||
-    seatLayoutResponse;
+  const formatted = getSeatLayoutFormattedPayload(seatLayoutResponse) || seatLayoutResponse;
 
   const seats = findSeatArray(formatted);
-  if (!seats.length) return { rows: rowData, seatsById: {} };
+  if (!seats.length) return { rows: [], seatsById: {} };
 
   const rowMap = new Map();
   const seatsById = {};
@@ -342,21 +345,13 @@ const buildFormattedSeatRows = (seatLayoutResponse) => {
   };
 };
 
-const unwrapSeatLayoutPayload = (seatLayoutResponse) =>
-  seatLayoutResponse?.data?.raw ||
-  seatLayoutResponse?.raw ||
-  seatLayoutResponse?.data?.data?.raw ||
-  seatLayoutResponse?.data ||
-  seatLayoutResponse ||
-  {};
-
 const getSeatLayoutJourneys = (seatLayoutResponse) => {
-  const payload = unwrapSeatLayoutPayload(seatLayoutResponse);
-  const formatted =
-    seatLayoutResponse?.data?.formatted ||
-    seatLayoutResponse?.formatted ||
-    payload?.formatted ||
-    {};
+  const formatted = getSeatLayoutFormattedPayload(seatLayoutResponse);
+
+  if (Array.isArray(formatted) && formatted.length) {
+    return formatted;
+  }
+
   const formattedJourneys =
     formatted?.journeys || formatted?.Journeys || formatted?.Journey;
 
@@ -364,17 +359,7 @@ const getSeatLayoutJourneys = (seatLayoutResponse) => {
     return formattedJourneys;
   }
 
-  const trips = Array.isArray(payload?.Trips)
-    ? payload.Trips
-    : Array.isArray(payload?.trips)
-      ? payload.trips
-      : [];
-  const journeys = trips.flatMap((trip) => {
-    const tripJourneys = trip?.Journey || trip?.Journeys || trip?.journey || trip?.journeys;
-    return Array.isArray(tripJourneys) ? tripJourneys : tripJourneys ? [tripJourneys] : [];
-  });
-
-  return journeys.length ? journeys : [seatLayoutResponse];
+  return [];
 };
 
 const getJourneyRouteLabel = (journey, fallback = "") => {
@@ -389,6 +374,8 @@ const getJourneyRouteLabel = (journey, fallback = "") => {
 };
 
 const buildSeatLayoutGroups = (seatLayoutResponse, bookingDetailsView) => {
+  if (!seatLayoutResponse) return [];
+
   const journeys = getSeatLayoutJourneys(seatLayoutResponse);
   const fallbackFlights = [
     bookingDetailsView?.departureFlight,
@@ -505,6 +492,7 @@ const SeatingDetails = () => {
       ),
     [seatLayoutGroups]
   );
+  const hasSeatLayoutData = seatLayoutGroups.some((layout) => layout?.rows?.length > 0);
   const activeSeatLayout =
     seatLayoutGroups[activeSeatLayoutIndex] || seatLayoutGroups[0] || {};
   const activeSeatPrefix = activeSeatLayout?.prefix || "";
@@ -789,24 +777,32 @@ const SeatingDetails = () => {
                   ref={seatLayoutsScrollerRef}
                   onScroll={updateSeatNavState}
                 >
-                  {seatLayoutGroups.map((layout) => (
-                    <div key={layout.id} className={styles.seatJourneyPanel}>
-                      <div className={styles.seatJourneyHeader}>
-                        <span>{layout.routeLabel}</span>
-                        <small>
-                          {[layout.date, layout.timeRange].filter(Boolean).join(" • ")}
-                        </small>
-                      </div>
-                      <Plane
-                        callFromDesktop={true}
-                        toggleSeat={toggleSeat}
-                        selectedSeats={selectedSeats}
-                        setSelectedSeats={setSelectedSeats}
-                        rowData={layout.rows}
-                        seatIdPrefix={layout.prefix}
-                      />
+                  {!hasSeatLayoutData ? (
+                    <div className={styles.seatLayoutEmptyState}>
+                      {seatLayoutLoading
+                        ? "Loading seat layout"
+                        : "Seat layout is not available for this flight"}
                     </div>
-                  ))}
+                  ) : (
+                    seatLayoutGroups.map((layout) => (
+                      <div key={layout.id} className={styles.seatJourneyPanel}>
+                        <div className={styles.seatJourneyHeader}>
+                          <span>{layout.routeLabel}</span>
+                          <small>
+                            {[layout.date, layout.timeRange].filter(Boolean).join(" • ")}
+                          </small>
+                        </div>
+                        <Plane
+                          callFromDesktop={true}
+                          toggleSeat={toggleSeat}
+                          selectedSeats={selectedSeats}
+                          setSelectedSeats={setSelectedSeats}
+                          rowData={layout.rows}
+                          seatIdPrefix={layout.prefix}
+                        />
+                      </div>
+                    ))
+                  )}
                 </div>
                 {seatNavState.canScrollNext && (
                   <button

@@ -223,6 +223,7 @@ export function FlightBookingProvider({ children }) {
             ...(fallbackView ? { urlFallback: fallbackView } : {}),
           })
         : null;
+        console.log("nextSession2",nextSession)
     setBookingSession(nextSession);
     setBookingSessionReady(true);
   }, []);
@@ -232,9 +233,15 @@ export function FlightBookingProvider({ children }) {
     writeFlightBookingSession(bookingSession);
   }, [bookingSession, bookingSessionReady]);
 
-  const loadSsrForBooking = async () => {
+  const loadSsrForBooking = async ({
+    travelerDetailsOverride,
+    includeSeatLayout = true,
+  } = {}) => {
     console.log("bookingSession?.priceResponse",bookingSession?.priceResponse)
     if (!bookingSession?.priceResponse) return false;
+    const activeTravelerDetails = Array.isArray(travelerDetailsOverride)
+      ? travelerDetailsOverride
+      : travelerDetails;
 
     const v2SsrPayload = buildV2SsrPayload(bookingSession);
     const hasV2SsrPayload =
@@ -257,10 +264,16 @@ export function FlightBookingProvider({ children }) {
         const ssrResponse = canReuseV2SsrResponse
           ? bookingSession.ssrResponse
           : await getFlightV2Ssr(v2SsrPayload);
+           console.log("ssrResponse",ssrResponse)
+
         let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
         let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+        if (includeSeatLayout && bookingSession?.seatLayoutRequest?.seat_layout_requests?.length) {
+          seatLayoutResponse = null;
+          seatLayoutRequest = null;
+        }
 
-        if (!seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
+        if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
           seatLayoutRequestInFlightRef.current = true;
           setSeatLayoutLoading(true);
           const sessionWithSsr = {
@@ -270,10 +283,14 @@ export function FlightBookingProvider({ children }) {
           };
           seatLayoutRequest = buildSeatLayoutPayload(
             sessionWithSsr,
-            travelerDetails
+            activeTravelerDetails
           );
 
-          if (seatLayoutRequest?.Trips?.[0]?.TUI || seatLayoutRequest?.TrackId) {
+          if (
+            seatLayoutRequest?.Trips?.[0]?.TUI ||
+            seatLayoutRequest?.TrackId ||
+            seatLayoutRequest?.seat_layout_requests?.length
+          ) {
             try {
               seatLayoutResponse = await getFlightSeatLayout(seatLayoutRequest);
             } catch (seatLayoutError) {
@@ -307,7 +324,7 @@ export function FlightBookingProvider({ children }) {
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
 
       try {
-        if (!seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
+        if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
           seatLayoutRequestInFlightRef.current = true;
           setSeatLayoutLoading(true);
 
@@ -318,10 +335,14 @@ export function FlightBookingProvider({ children }) {
           };
           seatLayoutRequest = buildSeatLayoutPayload(
             sessionWithPriceSsr,
-            travelerDetails
+            activeTravelerDetails
           );
    console.log("Seat layout request built from price SSR", seatLayoutRequest);
-          if (seatLayoutRequest?.Trips?.[0]?.TUI || seatLayoutRequest?.TrackId) {
+          if (
+            seatLayoutRequest?.Trips?.[0]?.TUI ||
+            seatLayoutRequest?.TrackId ||
+            seatLayoutRequest?.seat_layout_requests?.length
+          ) {
             try {
               seatLayoutResponse = await getFlightSeatLayout(seatLayoutRequest);
             } catch (seatLayoutError) {
@@ -389,7 +410,7 @@ export function FlightBookingProvider({ children }) {
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
 
-      if (!seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
+      if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
         seatLayoutRequestInFlightRef.current = true;
         setSeatLayoutLoading(true);
         const sessionWithSsr = {
@@ -399,10 +420,14 @@ export function FlightBookingProvider({ children }) {
         };
         seatLayoutRequest = buildSeatLayoutPayload(
           sessionWithSsr,
-          travelerDetails
+          activeTravelerDetails
         );
 
-        if (seatLayoutRequest?.Trips?.[0]?.TUI || seatLayoutRequest?.TrackId) {
+        if (
+          seatLayoutRequest?.Trips?.[0]?.TUI ||
+          seatLayoutRequest?.TrackId ||
+          seatLayoutRequest?.seat_layout_requests?.length
+        ) {
           try {
             seatLayoutResponse = await getFlightSeatLayout(seatLayoutRequest);
           } catch (seatLayoutError) {
@@ -454,7 +479,7 @@ export function FlightBookingProvider({ children }) {
     }
 
     initialSsrLoadRef.current = true;
-    loadSsrForBooking();
+    loadSsrForBooking({ includeSeatLayout: false });
   }, [bookingSession?.priceResponse, bookingSessionReady]);
 
   const prices = useMemo(() => {

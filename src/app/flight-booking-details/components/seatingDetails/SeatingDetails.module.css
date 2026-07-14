@@ -279,6 +279,21 @@
   scroll-snap-align: start;
 }
 
+.seatLayoutEmptyState {
+  min-width: 492px;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px dashed #c9d3e2;
+  background: #f8fafc;
+  color: #5b6574;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  text-align: center;
+}
+
 .seatJourneyHeader {
   width: 100%;
   display: flex;
