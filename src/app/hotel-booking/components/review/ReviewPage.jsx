@@ -13,6 +13,7 @@ import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
 import { useAuth } from "@/app/context/AuthContext";
+import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_KEY,
@@ -1061,6 +1062,7 @@ const ReviewPage = () => {
   // 👇 default open = flight
   const [openTab, setOpenTab] = useState("flight");
   const [priceChange, setPriceChange] = useState(null);
+  useLockBodyScroll(Boolean(priceChange));
   const [pendingConfirmPayload, setPendingConfirmPayload] = useState(null);
   const [pendingPaymentPayload, setPendingPaymentPayload] = useState(null);
   const [paymentGateways, setPaymentGateways] = useState([]);
