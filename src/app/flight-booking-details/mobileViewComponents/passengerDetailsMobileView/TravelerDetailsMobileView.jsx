@@ -273,7 +273,9 @@ const TravelerDetailsMobileView = ({ onClose }) => {
       return;
     }
 
-    const loaded = await loadSsrForBooking();
+    const loaded = await loadSsrForBooking({
+      travelerDetailsOverride: serializeTravelers(travelers),
+    });
     if (loaded) {
       setCurrentStep(3);
     }

@@ -828,6 +828,14 @@ const makeV2SsrChannel = () => {
   return `ssr-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const makeV2SeatLayoutChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `seatLayout-${crypto.randomUUID()}`;
+  }
+
+  return `seatLayout-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export const buildV2SsrPayload = (session = {}) => {
   const priceResponse = session?.priceResponse || {};
   const payload = unwrapPayload(priceResponse);
@@ -1158,6 +1166,83 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
   };
 };
 
+const buildV2SeatLayoutPaxDetails = (travelerDetails = []) =>
+  (Array.isArray(travelerDetails) ? travelerDetails : []).map((traveler, index) => ({
+    PaxRefNumber: String(index + 1),
+    Title: String(traveler?.Title || "MR").replace(/\./g, "").toUpperCase(),
+    FirstName: String(traveler?.FName || traveler?.FirstName || "").trim().toUpperCase(),
+    LastName: String(traveler?.LName || traveler?.LastName || "").trim().toUpperCase(),
+  }));
+
+const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
+  const priceRequest = session?.priceRequest || {};
+  const ssrRequest = session?.ssrRequest || {};
+  const ssrPayload = unwrapPayload(session?.ssrResponse);
+  const pricePayload = unwrapPayload(session?.priceResponse);
+  const requestTrips = extractTrips(priceRequest);
+  const ssrRequests = Array.isArray(ssrRequest?.ssr_requests)
+    ? ssrRequest.ssr_requests
+    : [];
+  const primarySsrRequest = ssrRequests[0] || {};
+  const searchKey = pickFirst(
+    primarySsrRequest?.search_key,
+    priceRequest?.search_key,
+    priceRequest?.SearchKey,
+    priceRequest?.searchKey,
+    pricePayload?.search_key,
+    pricePayload?.SearchKey,
+    session?.selectedFlight?.booking?.searchKey
+  );
+  const tui = pickFirst(
+    primarySsrRequest?.TUI,
+    primarySsrRequest?.Trips?.[0]?.TUI,
+    ssrPayload?.tui,
+    ssrPayload?.TUI,
+    ssrPayload?.raw?.TUI,
+    pricePayload?.tui,
+    pricePayload?.TUI,
+    pricePayload?.raw?.TUI,
+    priceRequest?.TUI,
+    priceRequest?.tui
+  );
+  const sourceTrips = Array.isArray(primarySsrRequest?.Trips) &&
+    primarySsrRequest.Trips.length
+      ? primarySsrRequest.Trips
+      : requestTrips;
+  const trips = sourceTrips
+    .map((trip, index) => ({
+      OrderID: String(
+        pickFirst(
+          trip?.OrderID,
+          trip?.OrderId,
+          trip?.Order,
+          trip?.orderId,
+          trip?.order,
+          index + 1
+        )
+      ),
+      TUI: pickFirst(trip?.TUI, trip?.tui, tui),
+    }))
+    .filter((trip) => trip.OrderID);
+  const seatLayoutRequests = [
+    {
+      search_key: searchKey,
+      Trips: trips,
+    },
+  ].filter((request) =>
+    request.search_key &&
+    request.Trips.length &&
+    request.Trips.every((trip) => trip.TUI)
+  );
+
+  return {
+    channel: makeV2SeatLayoutChannel(),
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    APIPaxDetails: buildV2SeatLayoutPaxDetails(travelerDetails),
+    seat_layout_requests: seatLayoutRequests,
+  };
+};
+
 export const buildSeatLayoutPayload = (session, travelerDetails = []) => {
   const provider = resolveFlightProvider(session);
   const providerPayloadBuilders = {
@@ -1167,6 +1252,10 @@ export const buildSeatLayoutPayload = (session, travelerDetails = []) => {
 
   if (providerPayloadBuilder) {
     return providerPayloadBuilder(session, travelerDetails);
+  }
+
+  if (Array.isArray(session?.ssrRequest?.ssr_requests)) {
+    return buildV2SeatLayoutPayload(session, travelerDetails);
   }
 
   const priceRequest = session?.priceRequest || {};
