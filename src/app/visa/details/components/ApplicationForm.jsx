@@ -42,7 +42,7 @@ const initialData = {
   itinerary: "",
 };
 
-const ApplicationForm = () => {
+const ApplicationForm = ({ onNext, onBack }) => {
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
   const [activeSection, setActiveSection] = useState("personal");
@@ -269,7 +269,8 @@ const ApplicationForm = () => {
       return;
     }
     setStatusMessage("All fields are valid. You can continue to documents.");
-  }, [sectionByField, validateForm]);
+    onNext?.();
+  }, [sectionByField, validateForm, onNext]);
 
   const currentStepIndex = useMemo(
     () => sections.findIndex((section) => section.id === activeSection),
@@ -819,9 +820,23 @@ const ApplicationForm = () => {
               <button
                 className={styles.backButton}
                 type="button"
-                onClick={handleBackToForm}
+                onClick={onBack}
               >
-                <span className={styles.backArrow} aria-hidden="true" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#000000"
+                  stroke-width="1.25"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-arrow-left-icon lucide-arrow-left"
+                >
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="M19 12H5" />
+                </svg>
                 Back To Form
               </button>
               <button

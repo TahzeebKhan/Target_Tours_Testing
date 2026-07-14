@@ -1,0 +1,54 @@
+.heroTopBar {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: rgba(6, 10, 38, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.heroContainer {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+}
+
+.heroTopBar .heroContainer,
+.trustStrip .heroContainer,
+.tabsBar .heroContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.heroTopBar .heroContainer {
+  min-height: 62px;
+}
+
+.heroLogo {
+  width: 72px;
+  height: auto;
+  display: block;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heroButton,
+.heroButtonFilled {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: transparent;
+  color: #ffffff;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.heroButtonFilled {
+  background: rgba(255, 255, 255, 0.08);
+}

@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useCallback, useState } from "react";
 import styles from "./eligibilityCheck.module.css";
 
 const travelPurposes = [
@@ -61,7 +63,7 @@ const AlertIcon = () => (
   </svg>
 );
 
-const DateField = ({ id, label }) => (
+const DateField = ({ id, label, value, onChange, error }) => (
   <div className={styles.field}>
     <label className={styles.label} htmlFor={id}>
       {label}
@@ -70,15 +72,57 @@ const DateField = ({ id, label }) => (
       <input
         id={id}
         className={styles.input}
-        type="text"
-        placeholder="DD / MM / YYYY"
+        type="date"
+        value={value}
+        onChange={onChange}
       />
-      <CalendarIcon />
+      {/* <CalendarIcon /> */}
     </div>
+    {error && <p className={styles.fieldError}>{error}</p>}
   </div>
 );
 
-const EligibilityCheck = () => {
+const EligibilityCheck = ({ onNext }) => {
+  const [formData, setFormData] = useState({
+    purpose: "Tourism",
+    travelDate: "",
+    returnDate: "",
+    travelers: "1",
+    passportExpiry: "",
+  });
+  const [errors, setErrors] = useState({});
+
+  const updateField = useCallback((field) => (event) => {
+    const { value } = event.target;
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: "" }));
+  }, []);
+
+  const handleTravelersChange = useCallback((event) => {
+    const { value } = event.target;
+    if (value === "" || /^[1-9]\d*$/.test(value)) {
+      setFormData((current) => ({ ...current, travelers: value }));
+      setErrors((current) => ({ ...current, travelers: "" }));
+    }
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    const nextErrors = {};
+    if (!formData.purpose) nextErrors.purpose = "Select a purpose of travel.";
+    if (!formData.travelDate) nextErrors.travelDate = "Select an intended travel date.";
+    if (!formData.returnDate) nextErrors.returnDate = "Select an intended return date.";
+    if (!/^[1-9]\d*$/.test(formData.travelers)) {
+      nextErrors.travelers = "Enter a positive whole number.";
+    }
+    if (!formData.passportExpiry) nextErrors.passportExpiry = "Select a passport expiry date.";
+    if (formData.travelDate && formData.returnDate && formData.travelDate >= formData.returnDate) {
+      nextErrors.returnDate = "Return date must be after the travel date.";
+    }
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length === 0) onNext?.();
+  }, [formData, onNext]);
+
   return (
     <section className={styles.section} aria-labelledby="eligibility-heading">
       <div className={styles.wrapper}>
@@ -101,35 +145,42 @@ const EligibilityCheck = () => {
           <form className={styles.card}>
             <fieldset className={styles.purposeGroup}>
               <legend className={styles.label}>Purpose of Travel</legend>
+              
+              {errors.purpose && <p className={styles.fieldError}>{errors.purpose}</p>}
             </fieldset>
-
-            <div
-              className={styles.tabs}
-              role="radiogroup"
-              aria-label="Purpose of Travel"
-            >
-              {travelPurposes.map((purpose, index) => (
+            <div className={styles.tabs} role="radiogroup" aria-label="Purpose of Travel">
+              {travelPurposes.map((purpose) => (
                 <button
-                  className={`${styles.tab} ${index === 0 ? styles.activeTab : ""}`}
+                  className={`${styles.tab} ${formData.purpose === purpose ? styles.activeTab : ""}`}
                   type="button"
                   role="radio"
-                  aria-checked={index === 0}
+                  aria-checked={formData.purpose === purpose}
                   key={purpose}
+                  onClick={() => {
+                    setFormData((current) => ({ ...current, purpose }));
+                    setErrors((current) => ({ ...current, purpose: "" }));
+                  }}
                 >
                   {purpose}
                 </button>
               ))}
-            </div>
+              </div>
 
             <div className={styles.fields}>
               <div className={styles.row}>
                 <DateField
                   id="intended-travel-date"
                   label="Intended Travel Date"
+                  value={formData.travelDate}
+                  onChange={updateField("travelDate")}
+                  error={errors.travelDate}
                 />
                 <DateField
                   id="intended-return-date"
                   label="Intended Return Date"
+                  value={formData.returnDate}
+                  onChange={updateField("returnDate")}
+                  error={errors.returnDate}
                 />
               </div>
 
@@ -142,18 +193,25 @@ const EligibilityCheck = () => {
                     id="number-of-travelers"
                     className={`${styles.inputShell} ${styles.numberInput}`}
                     type="text"
-                    defaultValue="1"
+                    value={formData.travelers}
+                    onChange={handleTravelersChange}
+                    inputMode="numeric"
+                    pattern="[1-9][0-9]*"
                   />
+                  {errors.travelers && <p className={styles.fieldError}>{errors.travelers}</p>}
                 </div>
                 <DateField
                   id="passport-expiry-date"
                   label="Passport Expiry Date"
+                  value={formData.passportExpiry}
+                  onChange={updateField("passportExpiry")}
+                  error={errors.passportExpiry}
                 />
               </div>
             </div>
 
             <div className={styles.footer}>
-              <button className={styles.submitButton} type="button">
+              <button className={styles.submitButton} type="button" onClick={handleSubmit}>
                 Check Eligibility
               </button>
             </div>

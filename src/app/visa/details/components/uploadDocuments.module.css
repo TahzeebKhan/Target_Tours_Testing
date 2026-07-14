@@ -479,3 +479,11 @@
     padding-left: 12px;
   }
 }
+
+.fileError {
+  margin: 0;
+  color: #b42318;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+}

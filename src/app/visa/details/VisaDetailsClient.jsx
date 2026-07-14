@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 
 import Footer from "../../home-page/components/footer/Footer";
@@ -27,6 +28,8 @@ const TRUSTED_PARTNERS = [
 const VisaDetailsClient = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
+
+  const router = useRouter();
 
   const openAuthModal = (view = "login") => {
     setAuthView(view);
@@ -79,7 +82,7 @@ const VisaDetailsClient = () => {
             </p>
 
             <div className={styles.heroCtas}>
-              <button type="button" className={styles.primaryCta}>
+              <button type="button" className={styles.primaryCta} onClick={() => router.push("/visa/details/components")}>
                 APPLY WITH EMBASSY-GRADE SUPPORT
               </button>
               <div className={styles.refundNote}>

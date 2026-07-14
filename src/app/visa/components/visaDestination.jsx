@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./visaDestination.module.css";
 
 const FILTERS = [
@@ -88,6 +89,7 @@ const DESTINATIONS = [
 const VisaDestination = () => {
   const [activeFilter, setActiveFilter] = useState("all");
 
+  const router = useRouter();
   const visibleDestinations = useMemo(() => {
     if (activeFilter === "all") return DESTINATIONS;
     return DESTINATIONS.filter((item) => item.category === activeFilter);
@@ -144,7 +146,7 @@ const VisaDestination = () => {
                   <p className={styles.priceLabel}>Starts From</p>
                   <p className={styles.price}>₹3,099</p>
                 </div>
-                <button type="button" className={styles.applyButton}>
+                <button type="button" className={styles.applyButton} onClick={() => router.push("/visa/details")}>
                   Apply Now
                 </button>
               </div>

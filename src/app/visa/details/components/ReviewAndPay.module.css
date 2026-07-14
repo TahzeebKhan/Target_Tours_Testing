@@ -498,6 +498,9 @@
 }
 
 .backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   border: none;
   background: transparent;
   color: #59707e;

@@ -1,0 +1,103 @@
+.visaHeader {
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  min-height: 58px;
+
+  padding: 8px 200px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+}
+
+.cancelButton {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  padding: 0;
+
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+}
+
+.cancelButton svg {
+  width: 20px;
+  height: 20px;
+
+  color: #000;
+}
+
+.cancelButton span {
+  font-family: "Inter", sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+
+  color: #59707e;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.rightSection h3 {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  text-transform: uppercase;
+
+  color: #070773;
+
+  white-space: nowrap;
+}
+
+.countryFlag {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+.countryFlag {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+  overflow: hidden;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-shrink: 0;
+}
+
+.countryFlag img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  display: block;
+}

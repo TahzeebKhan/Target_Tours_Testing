@@ -59,7 +59,7 @@ const initialPaymentData = {
   emiTerm: "6 months",
 };
 
-const ReviewAndPay = () => {
+const ReviewAndPay = ({ onNext, onBack }) => {
   const [paymentData, setPaymentData] = useState(initialPaymentData);
   const [errors, setErrors] = useState({});
   const [statusMessage, setStatusMessage] = useState("");
@@ -82,32 +82,38 @@ const ReviewAndPay = () => {
     setStatusMessage("");
   }, []);
 
-  const handleInputChange = useCallback((field) => (event) => {
-    const value = event.target.value;
-    setPaymentData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
-      if (!prev[field]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-    setStatusMessage("");
-  }, []);
+  const handleInputChange = useCallback(
+    (field) => (event) => {
+      const value = event.target.value;
+      setPaymentData((prev) => ({ ...prev, [field]: value }));
+      setErrors((prev) => {
+        if (!prev[field]) {
+          return prev;
+        }
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+      setStatusMessage("");
+    },
+    [],
+  );
 
-  const handleOptionSelect = useCallback((field, value) => () => {
-    setPaymentData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
-      if (!prev[field]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-    setStatusMessage("");
-  }, []);
+  const handleOptionSelect = useCallback(
+    (field, value) => () => {
+      setPaymentData((prev) => ({ ...prev, [field]: value }));
+      setErrors((prev) => {
+        if (!prev[field]) {
+          return prev;
+        }
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+      setStatusMessage("");
+    },
+    [],
+  );
 
   const totalAmount = useMemo(() => {
     const base = 5000;
@@ -139,7 +145,9 @@ const ReviewAndPay = () => {
       }
       if (!paymentData.cardExpiry.trim()) {
         nextErrors.cardExpiry = "Enter expiry date.";
-      } else if (!/^(0[1-9]|1[0-2])\/(\d{2}|\d{4})$/.test(paymentData.cardExpiry.trim())) {
+      } else if (
+        !/^(0[1-9]|1[0-2])\/(\d{2}|\d{4})$/.test(paymentData.cardExpiry.trim())
+      ) {
         nextErrors.cardExpiry = "Expiry must be in MM/YY or MM/YYYY.";
       }
       if (!paymentData.cardCvv.trim()) {
@@ -193,8 +201,9 @@ const ReviewAndPay = () => {
       setStatusMessage(
         "Payment request submitted successfully. Complete the selected payment flow to finish the booking.",
       );
+      onNext?.();
     },
-    [validatePayment],
+    [validatePayment, onNext],
   );
 
   const paymentContent = useMemo(() => {
@@ -214,7 +223,9 @@ const ReviewAndPay = () => {
                 onClick={handleOptionSelect("upiApp", app.key)}
               >
                 <div className={styles.appRow}>
-                  <span className={styles.appLogo}><img src={app.image} alt="upiImage" /></span>
+                  <span className={styles.appLogo}>
+                    <img src={app.image} alt="upiImage" />
+                  </span>
                   <span className={styles.appLabel}>{app.label}</span>
                 </div>
                 <span className={styles.radioOuter}>
@@ -248,7 +259,9 @@ const ReviewAndPay = () => {
                 inputRefs.current.upiId = el;
               }}
             />
-            {errors.upiId && <span className={styles.errorText}>{errors.upiId}</span>}
+            {errors.upiId && (
+              <span className={styles.errorText}>{errors.upiId}</span>
+            )}
             <p className={styles.helpText}>
               A collect request will be sent to your UPI app.
             </p>
@@ -374,7 +387,9 @@ const ReviewAndPay = () => {
                 </option>
               ))}
             </select>
-            {errors.bank && <span className={styles.errorText}>{errors.bank}</span>}
+            {errors.bank && (
+              <span className={styles.errorText}>{errors.bank}</span>
+            )}
           </div>
           <div className={styles.helpTextBlock}>
             <p className={styles.helpText}>
@@ -394,7 +409,9 @@ const ReviewAndPay = () => {
                 key={wallet.key}
                 type="button"
                 className={`${styles.appCard} ${
-                  paymentData.walletName === wallet.key ? styles.appCardActive : ""
+                  paymentData.walletName === wallet.key
+                    ? styles.appCardActive
+                    : ""
                 }`}
                 onClick={handleOptionSelect("walletName", wallet.key)}
               >
@@ -405,7 +422,9 @@ const ReviewAndPay = () => {
                 <span className={styles.radioOuter}>
                   <span
                     className={`${styles.radioInner} ${
-                      paymentData.walletName === wallet.key ? styles.radioSelected : ""
+                      paymentData.walletName === wallet.key
+                        ? styles.radioSelected
+                        : ""
                     }`}
                   />
                 </span>
@@ -489,7 +508,8 @@ const ReviewAndPay = () => {
           </div>
           <div className={styles.helpTextBlock}>
             <p className={styles.helpText}>
-              EMI plans are subject to bank approval. Your monthly amount will be shown on the next screen.
+              EMI plans are subject to bank approval. Your monthly amount will
+              be shown on the next screen.
             </p>
           </div>
         </div>
@@ -505,14 +525,15 @@ const ReviewAndPay = () => {
         <div className={styles.headerInfo}>
           <div className={styles.locationTag}>
             <span className={styles.locationDot}>
-                <img src="/icons/vietnamFlag.svg" alt="" />
+              <img src="/icons/vietnamFlag.svg" alt="" />
             </span>
             <span className={styles.locationText}>Vietnam</span>
           </div>
           <div className={styles.titleBlock}>
             <h1 className={styles.pageTitle}>Review and Pay</h1>
             <p className={styles.subtitle}>
-              Confirm and sign off. Instant Razorpay & UPI endpoints integrated Below in compliance with active sandbox protocols.
+              Confirm and sign off. Instant Razorpay & UPI endpoints integrated
+              Below in compliance with active sandbox protocols.
             </p>
           </div>
         </div>
@@ -554,7 +575,9 @@ const ReviewAndPay = () => {
               </div>
               <div className={styles.fieldItem}>
                 <span className={styles.fieldLabel}>Issuing Authority</span>
-                <span className={styles.fieldValue}>Ministry of External Affairs</span>
+                <span className={styles.fieldValue}>
+                  Ministry of External Affairs
+                </span>
               </div>
               <div className={styles.fieldItem}>
                 <span className={styles.fieldLabel}>Place of Issue</span>
@@ -593,7 +616,9 @@ const ReviewAndPay = () => {
             </div>
             <div className={styles.priceList}>
               <div className={styles.priceRow}>
-                <span className={styles.priceLabel}>Government / Embassy Visa Fee</span>
+                <span className={styles.priceLabel}>
+                  Government / Embassy Visa Fee
+                </span>
                 <span className={styles.priceValue}>₹ 5,000.00</span>
               </div>
               <div className={styles.priceRow}>
@@ -611,10 +636,16 @@ const ReviewAndPay = () => {
             </div>
           </div>
 
-          <form className={styles.paymentCard} onSubmit={handleSubmit} noValidate>
+          <form
+            className={styles.paymentCard}
+            onSubmit={handleSubmit}
+            noValidate
+          >
             <div className={styles.paymentHeader}>
               <span className={styles.paymentTitle}>Payment Method</span>
-              <span className={styles.paymentSubtitle}>Choose your desired payment method</span>
+              <span className={styles.paymentSubtitle}>
+                Choose your desired payment method
+              </span>
             </div>
             <div className={styles.tabsContainer}>
               {paymentMethods.map((method) => (
@@ -622,7 +653,9 @@ const ReviewAndPay = () => {
                   key={method.key}
                   type="button"
                   className={`${styles.tabItem} ${
-                    paymentData.selectedMethod === method.key ? styles.activeTab : ""
+                    paymentData.selectedMethod === method.key
+                      ? styles.activeTab
+                      : ""
                   }`}
                   onClick={() => handlePaymentMethodChange(method.key)}
                 >
@@ -633,14 +666,35 @@ const ReviewAndPay = () => {
             <div className={styles.tabDivider} />
             {paymentContent}
             <div className={styles.footerRow}>
-              <button type="button" className={styles.backButton} onClick={() => window.history.back()}>
-                ← Back To Form
+              <button
+                type="button"
+                className={styles.backButton}
+                onClick={onBack}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#000000"
+                  stroke-width="1.25"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-arrow-left-icon lucide-arrow-left"
+                >
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="M19 12H5" />
+                </svg>
+                Back To Form
               </button>
               <button type="submit" className={styles.payButton}>
                 PAY ₹ {totalAmount}
               </button>
             </div>
-            {statusMessage && <p className={styles.statusMessage}>{statusMessage}</p>}
+            {statusMessage && (
+              <p className={styles.statusMessage}>{statusMessage}</p>
+            )}
           </form>
         </div>
       </div>
