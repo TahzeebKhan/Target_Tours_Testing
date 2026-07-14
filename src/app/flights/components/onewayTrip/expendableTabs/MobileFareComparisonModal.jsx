@@ -4,7 +4,7 @@ import styles from "./MobileFareComparisonModal.module.css";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSelectedFlightSummary } from "../fareComparisonUtils";
-import { buildFareOptions } from "../FareComparisonModal";
+import { buildFareOptions, normalizeFareFlightNo } from "../FareComparisonModal";
 import { toast } from "react-toastify";
 import {
   getFlightPrice,
@@ -118,12 +118,12 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
   const [isPollingFareOptions, setIsPollingFareOptions] = useState(false);
 
   const flightNo = useMemo(() => {
-    return String(
-      flightData?.booking?.flightNo ||
-        flightData?.details?.flightNo ||
-        flightData?.airlines?.[0]?.code ||
-        ""
-    ).match(/\d+/)?.[0] || "";
+    return normalizeFareFlightNo(
+      flightData?.booking?.flightNo,
+      flightData?.details?.flightNo,
+      flightData?.airlines?.[0]?.flightNo,
+      flightData?.airlines?.[0]?.code
+    );
   }, [flightData]);
 
   useEffect(() => {
@@ -145,6 +145,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
           () => getFlightFareOptions({
             searchParams,
             request: priceRequest,
+            flight: flightData,
           })
         );
 
@@ -167,14 +168,14 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
       }
     };
 
-    if (!prefetchedData?.fareOptionsResponse) {
+    if (!prefetchedData && !fareOptionsPayload && !isLoadingFareOptions) {
       loadFareOptions();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [flightData, flightNo, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
+  }, [flightData, flightNo, isLoadingFareOptions, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
   const performBookNow = useCallback(async (selectedFare) => {
     const selectedFareIndex = getSelectedFareIndex(selectedFare);

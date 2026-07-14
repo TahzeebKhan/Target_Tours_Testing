@@ -158,6 +158,48 @@ const extractPrimaryTrip = (payload) => extractTrips(payload)[0] || null;
 const unwrapPayload = (payload) => {
   const directPayload = payload?.data;
   const nestedPayload = payload?.data?.data;
+  const pricingChunkPayload = (payload?.pricingChunks || directPayload?.pricingChunks || [])
+    .slice()
+    .reverse()
+    .find((chunk) => {
+      const resultPayload = Array.isArray(chunk?.data?.results)
+        ? chunk.data.results.find((result) => result?.data?.data)?.data?.data
+        : null;
+      return (
+        resultPayload?.formatted ||
+        resultPayload?.fare_breakdown ||
+        resultPayload?.tui
+      );
+    });
+  const chunkResultPayload = Array.isArray(pricingChunkPayload?.data?.results)
+    ? pricingChunkPayload.data.results.find((result) => result?.data?.data)?.data?.data
+    : null;
+  const v2PricingResultPayload = Array.isArray(directPayload?.results)
+    ? directPayload.results.find((result) => {
+        const resultPayload = result?.data?.data || result?.data;
+        return (
+          resultPayload?.formatted ||
+          resultPayload?.fare_breakdown ||
+          resultPayload?.tui
+        );
+      })?.data?.data
+    : null;
+
+  if (
+    chunkResultPayload?.formatted ||
+    chunkResultPayload?.fare_breakdown ||
+    chunkResultPayload?.tui
+  ) {
+    return chunkResultPayload;
+  }
+
+  if (
+    v2PricingResultPayload?.formatted ||
+    v2PricingResultPayload?.fare_breakdown ||
+    v2PricingResultPayload?.tui
+  ) {
+    return v2PricingResultPayload;
+  }
 
   if (nestedPayload?.formatted || nestedPayload?.fare_breakdown || nestedPayload?.tui) {
     return nestedPayload;
@@ -703,7 +745,9 @@ export const buildSsrPayload = (session) => {
     priceResponse?.tui,
     priceResponse?.TUI,
     priceResponse?.data?.tui,
-    priceResponse?.data?.TUI
+    priceResponse?.data?.TUI,
+    priceResponse?.data?.raw?.TUI,
+    priceResponse?.data?.raw?.tui
   );
 
   return {
@@ -773,6 +817,82 @@ export const buildSsrPayload = (session) => {
           ),
         };
       }),
+  };
+};
+
+const makeV2SsrChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `ssr-${crypto.randomUUID()}`;
+  }
+
+  return `ssr-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+export const buildV2SsrPayload = (session = {}) => {
+  const priceResponse = session?.priceResponse || {};
+  const payload = unwrapPayload(priceResponse);
+  const priceRequest = session?.priceRequest || {};
+  const selectedFare = session?.selectedFare || {};
+  const requestTrips = extractTrips(priceRequest);
+  const rootTui = pickFirst(
+    payload?.tui,
+    payload?.TUI,
+    payload?.raw?.TUI,
+    priceResponse?.tui,
+    priceResponse?.TUI,
+    priceResponse?.data?.tui,
+    priceResponse?.data?.TUI
+  );
+  const searchKey = pickFirst(
+    priceRequest?.search_key,
+    priceRequest?.SearchKey,
+    priceRequest?.searchKey,
+    payload?.search_key,
+    payload?.SearchKey,
+    session?.selectedFlight?.booking?.searchKey
+  );
+  const selectedFareIndex = pickFirst(
+    selectedFare?.rawFare?.index,
+    selectedFare?.rawFare?.Index,
+    selectedFare?.rawFare?.flightIndex,
+    selectedFare?.index,
+    selectedFare?.Index,
+    selectedFare?.flightIndex,
+    selectedFare?.id
+  );
+  const sourceTrips = requestTrips.length
+    ? requestTrips
+    : selectedFareIndex
+      ? [{ Index: selectedFareIndex, Order: 1 }]
+      : [];
+  const ssrRequests = [
+    {
+      search_key: searchKey,
+      Trips: sourceTrips
+        .map((trip, index) => ({
+          Index: String(
+            normalizeTripIndexForOrder(trip, index, sourceTrips) ||
+              selectedFareIndex ||
+              ""
+          ),
+          Order: Number(
+            trip?.Order ??
+              trip?.OrderID ??
+              trip?.order ??
+              trip?.orderId ??
+              index + 1
+          ),
+          TUI: pickFirst(rootTui, trip?.TUI, trip?.tui),
+        }))
+        .filter((trip) => trip.Index && trip.TUI),
+    },
+  ].filter((request) => request.search_key && request.Trips.length > 0);
+
+  return {
+    channel: makeV2SsrChannel(),
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    PaidSSR: "true",
+    ssr_requests: ssrRequests,
   };
 };
 
@@ -1184,6 +1304,9 @@ export const extractTaxAmount = (session) => {
       item?.totalTax,
       item?.total_journey_tax,
       item?.totalJourneyTax,
+      item?.ADT?.tax,
+      item?.CHD?.tax,
+      item?.INF?.tax,
       item?.tax
     );
     return sum + (value ?? 0);
