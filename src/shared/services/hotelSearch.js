@@ -740,6 +740,7 @@ export const HotelPaymentStart = async (payload = {}) => {
   });
 
   const data = await response.json().catch(() => ({}));
+  console.log("inPaymentResponse",data)
 
   if (!response.ok) {
     throw createApiError(data, "Hotel booking Payment failed");

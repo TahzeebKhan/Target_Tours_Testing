@@ -1369,6 +1369,7 @@ const ReviewPage = () => {
         NetAmount: acceptedAmount,
         amount: acceptedAmount,
       });
+      console.log("paymentResponse",nextAmount)
       const merchantOrderId = getPaymentMerchantOrderId(paymentResponse);
       await redirectToHotelPayment(
         paymentResponse,
