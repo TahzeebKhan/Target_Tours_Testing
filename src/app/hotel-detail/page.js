@@ -715,6 +715,19 @@ const Page = () => {
     }
   }, [hotelDetail, isBookingActionLoading, refreshHotelAvailability, storedHotelSearch]);
 
+  const handleRoomSearchCardAction = useCallback(
+    (selection) => {
+      if (selectedRooms.length) {
+        setShowSummary(true);
+        setShowRoomSearchCard(false);
+        return;
+      }
+
+      handleSelectRoom(selection);
+    },
+    [handleSelectRoom, selectedRooms.length],
+  );
+
   useEffect(() => {
     if (!hotelDetail?.rooms?.length) return;
 
@@ -914,7 +927,7 @@ const Page = () => {
             }`}
           >
             <RoomSelectionCard
-              onBookNow={handleSelectRoom}
+              onBookNow={handleRoomSearchCardAction}
               checkingAvailability={availabilityChecking || roomsLoading}
               checkIn={effectiveCheckIn}
               checkOut={effectiveCheckOut}

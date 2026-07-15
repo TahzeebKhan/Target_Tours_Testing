@@ -31,6 +31,26 @@ const normalizeImageUrl = (value = "") => {
   return url.replace(/\s/g, "%20");
 };
 
+const isGeneratedPhotoTitle = (value = "") =>
+  /^photo\s+\d+$/i.test(String(value || "").trim());
+
+const getGalleryTitle = (value = {}, index = 0) => {
+  const title = String(value.title || "").trim();
+  const caption = String(value.caption || "").trim();
+
+  if (caption && (!title || isGeneratedPhotoTitle(title))) return caption;
+
+  return (
+    title ||
+    caption ||
+    value.name ||
+    value.label ||
+    value.category ||
+    value.roomType ||
+    `Photo ${index + 1}`
+  );
+};
+
 const normalizeGalleryItem = (value, index = 0) => {
   if (!value) return null;
 
@@ -58,14 +78,7 @@ const normalizeGalleryItem = (value, index = 0) => {
 
   return {
     image: imageUrl,
-    title:
-      value.title ||
-      value.caption ||
-      value.name ||
-      value.label ||
-      value.category ||
-      value.roomType ||
-      `Photo ${index + 1}`,
+    title: getGalleryTitle(value, index),
   };
 };
 

@@ -787,12 +787,19 @@ export const retrieveHotelBookingDetails = async (request = {}) => {
             request.booking_id ||
             request.bookingId ||
             request.bookingConfirmationId ||
+            request.booking?.booking_id ||
+            request.booking?.bookingId ||
+            request.booking?.id ||
             request.merchantOrderId ||
             "",
           TUI: request.TUI || request.tui || "",
           ReferenceNumber:
             request.ReferenceNumber ||
             request.referenceNumber ||
+            request.provider_reference ||
+            request.providerReference ||
+            request.booking?.provider_reference ||
+            request.booking?.providerReference ||
             request.TransactionID ||
             request.transactionId ||
             "",

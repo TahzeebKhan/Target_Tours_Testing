@@ -61,6 +61,7 @@ const buildRetrieveBookingRequest = ({ source = {}, fallback = {} }) => ({
       "bookingId",
       "BookingConfirmationId",
       "bookingConfirmationId",
+      "id",
       "merchant_order_id",
       "merchantOrderId",
     ),
@@ -79,11 +80,15 @@ const buildRetrieveBookingRequest = ({ source = {}, fallback = {} }) => ({
       source,
       "ReferenceNumber",
       "referenceNumber",
+      "provider_reference",
+      "providerReference",
       "TransactionID",
       "transactionId",
     ),
     fallback.ReferenceNumber,
     fallback.referenceNumber,
+    fallback.provider_reference,
+    fallback.providerReference,
     fallback.TransactionID,
     fallback.transactionId,
   ),
@@ -119,6 +124,16 @@ const toNumber = (value) => {
 };
 
 const toList = (value) => (Array.isArray(value) ? value : []);
+
+const isBrowserReload = () => {
+  if (typeof window === "undefined") return false;
+
+  const navigationEntry = window.performance
+    ?.getEntriesByType?.("navigation")
+    ?.[0];
+
+  return navigationEntry?.type === "reload";
+};
 
 const buildHotelAddress = (hotelInfo = {}) => {
   const address = hotelInfo.HotelAddress || hotelInfo.hotelAddress || {};
@@ -202,6 +217,13 @@ function HotelBookingSuccessContent() {
     let isActive = true;
 
     const loadBookingDetails = async () => {
+      if (isBrowserReload()) {
+        clearHotelBookingSession();
+        clearPendingHotelConfirmBooking();
+        router.replace("/");
+        return;
+      }
+
       const pendingBooking = readPendingHotelConfirmBooking();
 
       if (!bookingId && !merchantOrderId && !pendingBooking?.confirmPayload) {
@@ -246,7 +268,7 @@ function HotelBookingSuccessContent() {
             fallback: confirmPayload,
           });
 
-          if (retrieveRequest.booking_id && retrieveRequest.TUI && retrieveRequest.ReferenceNumber) {
+          if (retrieveRequest.booking_id) {
             data = await retrieveHotelBookingDetails(retrieveRequest);
           } else {
             data = confirmResponse;
@@ -277,7 +299,7 @@ function HotelBookingSuccessContent() {
     return () => {
       isActive = false;
     };
-  }, [bookingId, merchantOrderId]);
+  }, [bookingId, merchantOrderId, router]);
 
   const details = useMemo(() => {
     const apiData = bookingResponse || {};

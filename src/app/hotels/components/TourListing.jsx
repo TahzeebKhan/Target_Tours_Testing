@@ -1789,6 +1789,11 @@ const TourListing = () => {
     hotelSearchId: "",
   });
   const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
+  const [hasHotelInitComplete, setHasHotelInitComplete] = useState(
+    !hotelSearchChannel,
+  );
+  const [shouldShowEmptyHotelState, setShouldShowEmptyHotelState] =
+    useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(
     Boolean(hotelSearchChannel),
   );
@@ -2009,6 +2014,7 @@ const TourListing = () => {
   const handleBookNow = async (hotel) => {
     console.log("handleBookNow called with hotel:", hotel);
     if (!hotel) return;
+    if (hotelSearchChannel && !hasHotelInitComplete) return;
 
     hotelDetailsAbortRef.current?.abort();
 
@@ -2087,6 +2093,8 @@ const TourListing = () => {
     });
     setMergedFilterSearchMeta({ searchId: "", hotelSearchId: "" });
     setHasMergedHotelResponse(false);
+    setHasHotelInitComplete(!hotelSearchChannel);
+    setShouldShowEmptyHotelState(false);
     setIsFilterLoading(Boolean(hotelSearchChannel));
     setFilterRetryNonce(0);
     setApiFilterData(null);
@@ -2160,6 +2168,9 @@ const TourListing = () => {
       }
 
       const initCompleteMeta = getInitCompleteSearchMeta(payload);
+      if (getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE" && !fromCache) {
+        setHasHotelInitComplete(true);
+      }
       if (initCompleteMeta.searchId && !fromCache) {
         setSocketSearchMeta({
           searchId: initCompleteMeta.searchId,
@@ -2361,11 +2372,13 @@ const TourListing = () => {
       });
 
       if (!nextResults.hotels.length) {
-        if (isHotelTerminalPayload(payload)) {
+        if (isHotelTerminalPayload(payload) && !fromCache) {
+          setShouldShowEmptyHotelState(true);
           setIsHotelLoading(false);
         }
         return;
       }
+      setShouldShowEmptyHotelState(false);
       if (
         !shouldApplyHotelResults(
           hotelResultSourceRef.current,
@@ -2666,6 +2679,7 @@ const TourListing = () => {
   );
 
   const showEmptyState =
+    shouldShowEmptyHotelState &&
     !isHotelLoading &&
     !displayHotels.length &&
     Boolean(hotelSearchChannel || hotelResultSource);
@@ -2836,6 +2850,7 @@ const TourListing = () => {
                     <button
                       className={`${styles.bookNowBtn} ${styles.bookNowBtn2}`}
                       disabled={
+                        (hotelSearchChannel && !hasHotelInitComplete) ||
                         loadingHotelDetailsId === getHotelLoadingKey(item)
                       }
                       onClick={() => handleBookNow(item)}
@@ -2997,6 +3012,7 @@ const TourListing = () => {
                     <button
                       className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
                       disabled={
+                        (hotelSearchChannel && !hasHotelInitComplete) ||
                         loadingHotelDetailsId === getHotelLoadingKey(item)
                       }
                       onClick={() => handleBookNow(item)}
