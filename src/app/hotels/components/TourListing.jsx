@@ -825,7 +825,11 @@ const getInitCompleteSearchMeta = (payload = {}) => {
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
   const init = data?.init || content?.init || payload?.init || {};
+  console.log("init",init)
   const searchId =
+    init.searchId ||
+    init.search_id ||
+    init.searchid ||
     content?.searchId ||
     content?.search_id ||
     content?.searchid ||
@@ -835,11 +839,12 @@ const getInitCompleteSearchMeta = (payload = {}) => {
     data?.searchId ||
     data?.search_id ||
     data?.searchid ||
-    init.searchId ||
-    init.search_id ||
-    init.searchid ||
     "";
+    console.log("searchId",searchId)
   const hotelSearchId =
+    init.hotelSearchId ||
+    init.hotel_search_id ||
+    init.hotel_search_key ||
     content?.hotelSearchId ||
     content?.hotel_search_id ||
     content?.hotel_search_key ||
@@ -849,9 +854,6 @@ const getInitCompleteSearchMeta = (payload = {}) => {
     data?.hotelSearchId ||
     data?.hotel_search_id ||
     data?.hotel_search_key ||
-    init.hotelSearchId ||
-    init.hotel_search_id ||
-    init.hotel_search_key ||
     "";
 
   const searchTracingKey =
@@ -887,6 +889,9 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
 
   return {
     searchId:
+      init?.searchId ||
+      init?.search_id ||
+      init?.searchid ||
       content?.searchId ||
       content?.search_id ||
       content?.searchid ||
@@ -896,9 +901,6 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
       payload?.content?.searchId ||
       payload?.content?.search_id ||
       payload?.content?.searchid ||
-      init?.searchId ||
-      init?.search_id ||
-      init?.searchid ||
       data?.searchId ||
       data?.search_id ||
       data?.searchid ||
@@ -908,6 +910,9 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
       firstHotelWithSearchId?.search_id ||
       "",
     hotelSearchId:
+      init?.hotelSearchId ||
+      init?.hotel_search_id ||
+      init?.hotel_search_key ||
       content?.hotelSearchId ||
       content?.hotel_search_id ||
       content?.hotel_search_key ||
@@ -917,9 +922,6 @@ const getFilterSearchMetaFromPayload = (payload = {}, hotels = []) => {
       payload?.content?.hotelSearchId ||
       payload?.content?.hotel_search_id ||
       payload?.content?.hotel_search_key ||
-      init?.hotelSearchId ||
-      init?.hotel_search_id ||
-      init?.hotel_search_key ||
       data?.hotelSearchId ||
       data?.hotel_search_id ||
       data?.hotel_search_key ||
@@ -2006,6 +2008,7 @@ const TourListing = () => {
   const hotelDetailsRequestRef = useRef(0);
   const lastFilterRequestKeyRef = useRef("");
   const latestFilterSearchMetaRef = useRef({ searchId: "", hotelSearchId: "" });
+  const initCompleteFilterSearchIdRef = useRef("");
   const lastMergedFilterPayloadKeyRef = useRef("");
   const filterRetryTimerRef = useRef(null);
   const filterRequestSeriesRef = useRef("");
@@ -2187,6 +2190,7 @@ const TourListing = () => {
     hotelResultSourceRef.current = "";
     lastFilterRequestKeyRef.current = "";
     latestFilterSearchMetaRef.current = { searchId: "", hotelSearchId: "" };
+    initCompleteFilterSearchIdRef.current = "";
     lastMergedFilterPayloadKeyRef.current = "";
     hasLoadedFilterDataRef.current = false;
     if (filterRetryTimerRef.current) {
@@ -2258,11 +2262,34 @@ const TourListing = () => {
         setHasHotelInitComplete(true);
       }
       if (initCompleteMeta.searchId && !fromCache) {
+        if (filterRetryTimerRef.current) {
+          window.clearTimeout(filterRetryTimerRef.current);
+          filterRetryTimerRef.current = null;
+        }
+        hasLoadedFilterDataRef.current = false;
+        lastFilterRequestKeyRef.current = "";
+        filterRequestAttemptRef.current = 0;
+        const initFilterKey = [
+          initCompleteMeta.searchId,
+          initCompleteMeta.hotelSearchId,
+          getHotelSocketType(payload),
+        ].join("|");
+        initCompleteFilterSearchIdRef.current = initCompleteMeta.searchId;
+        lastMergedFilterPayloadKeyRef.current = initFilterKey;
+        setMergedFilterSearchMeta({
+          searchId: initCompleteMeta.searchId,
+          hotelSearchId: initCompleteMeta.hotelSearchId,
+        });
+        latestFilterSearchMetaRef.current = {
+          searchId: initCompleteMeta.searchId,
+          hotelSearchId: initCompleteMeta.hotelSearchId,
+        };
         setSocketSearchMeta({
           searchId: initCompleteMeta.searchId,
           hotelSearchId: initCompleteMeta.hotelSearchId,
           searchTracingKey: initCompleteMeta.searchTracingKey,
         });
+        setFilterRefreshNonce((value) => value + 1);
       }
 
       const payloadMeta = getHotelSearchMeta(
@@ -2406,7 +2433,9 @@ const TourListing = () => {
 
       if (
         isFilterSearchPayloadReady(payload, nextResults.source) &&
-        filterMeta.searchId
+        filterMeta.searchId &&
+        (!initCompleteFilterSearchIdRef.current ||
+          filterMeta.searchId === initCompleteFilterSearchIdRef.current)
       ) {
         const nextMergedFilterPayloadKey = [
           filterMeta.searchId,
@@ -2515,7 +2544,20 @@ const TourListing = () => {
       return;
     }
 
-    if (hotelSearchChannel && (!hasMergedHotelResponse || !filterSearchId)) {
+    if (
+      hotelSearchChannel &&
+      (!hasHotelInitComplete || !socketSearchMeta.searchId || !filterSearchId)
+    ) {
+      setIsFilterLoading(true);
+      lastFilterRequestKeyRef.current = "";
+      return;
+    }
+
+    if (
+      hotelSearchChannel &&
+      socketSearchMeta.searchId &&
+      filterSearchId !== socketSearchMeta.searchId
+    ) {
       setIsFilterLoading(true);
       lastFilterRequestKeyRef.current = "";
       return;
@@ -2547,7 +2589,9 @@ const TourListing = () => {
     filterRequestAttemptRef.current += 1;
     setIsFilterLoading(true);
     const latestMeta = latestFilterSearchMetaRef.current;
-    const latestSearchId = latestMeta.searchId || filterSearchId;
+    const latestSearchId = hotelSearchChannel
+      ? socketSearchMeta.searchId
+      : latestMeta.searchId || filterSearchId;
     const latestPayload = {
       ...filterDataPayload,
       searchId: latestSearchId,
@@ -2603,8 +2647,9 @@ const TourListing = () => {
     filterDataRequestKey,
     filterRetryNonce,
     filterSearchId,
-    hasMergedHotelResponse,
+    hasHotelInitComplete,
     hotelSearchChannel,
+    socketSearchMeta.searchId,
   ]);
 
   const hasActiveHotelSearch = Boolean(hotelSearchChannel);
