@@ -137,7 +137,7 @@ const Amenities = ({ amenities = [] }) => {
                         </div>
 
                         <div className={styles.modalBody}>
-                            <h4>General</h4>
+                            {/* <h4>General</h4> */}
                             <div className={styles.modalGrid}>
                                 {amenityItems.map(renderAmenityItem)}
                             </div>

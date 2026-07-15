@@ -457,7 +457,8 @@
   font-family: var(--font-inter);
   font-weight: 300;
   font-size: 12px;
-  line-height: 1.18;
+  line-height: 100%;
+  letter-spacing: -2%;
   color: #000000;
 }
 
@@ -465,6 +466,8 @@
   font-family: var(--font-inter);
   font-weight: 600;
   font-size: 12px;
+  line-height: 120%;
+  letter-spacing: -3%;
   text-transform: uppercase;
   color: #0604b2;
   background: none;
@@ -595,7 +598,7 @@
 /* ================= SORT BY ================= */
 .sortByContainer {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   cursor: pointer;
 }
@@ -790,6 +793,8 @@
   .sortByText {
     font-size: 12px;
     font-weight: 300;
+    line-height: 120%;
+    letter-spacing: -3%;
   }
   .sortContainer {
     background-color: transparent;

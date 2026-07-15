@@ -34,11 +34,11 @@ const FlightDetailsCard = ({ flight, setFareModalOpen }) => {
 
       {/* ===== DEPART LABEL ===== */}
       <div>
-        <div className={styles.depart}>
+        {/* <div className={styles.depart}> */}
           {/* <span className={styles.bold}>DEPART</span>&nbsp;&nbsp; */}
-          <span>{outbound.dateLabel}</span>
-          <span>{outbound.dateLabel}</span>
-        </div>
+          {/* <span>{outbound.dateLabel}</span> */}
+          {/* <span>{outbound.dateLabel}</span> */}
+        {/* </div> */}
 
         <FlightTimingDetail flight={outbound} />
       </div>

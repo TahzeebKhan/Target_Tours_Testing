@@ -1262,40 +1262,6 @@ const TopFilterSection = ({
               </div>
             </div>
 
-            <div className={styles.datesContainer}>
-              <div className={styles.datesScrollerWrapper}>
-                {/* Month badge */}
-                <div className={styles.monthBadge}>{currentMonth}</div>
-                {/* Scrollable dates */}
-                {visibleDateTiles.length > 0 && (
-                  <div className={styles.datesScroller}>
-                    {visibleDateTiles.map((item, i) => (
-                      <div
-                        key={i}
-                        className={`${styles.dateTile} ${
-                          activeTile.includes(i) ? styles.activeTile : ""
-                        }`}
-                        onClick={() => toggleTile(i)}
-                      >
-                        <div className={styles.dateLabel}>{item.label}</div>
-
-                        <div
-                          className={`${styles.price} ${
-                            item.trend === "up"
-                              ? styles.priceUp
-                              : item.trend === "down"
-                                ? styles.priceDown
-                                : ""
-                          }`}
-                        >
-                          ₹ {item.price.toLocaleString("en-IN")}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
         {/* {isOpecEditFields && (
@@ -1307,3 +1273,7 @@ const TopFilterSection = ({
 };
 
 export default TopFilterSection;
+
+
+
+
