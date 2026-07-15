@@ -544,18 +544,16 @@ export default function HotelsFilters() {
   }, [hotelSearchText]);
 
   const toggleFilter = (group, key) => {
-    setSelectedFilters((prev) => {
-      const nextFilters = {
-        ...prev,
-        [group]: {
-          ...prev[group],
-          [key]: !prev[group]?.[key],
-        },
-      };
+    const nextFilters = {
+      ...selectedFilters,
+      [group]: {
+        ...selectedFilters[group],
+        [key]: !selectedFilters[group]?.[key],
+      },
+    };
 
-      setAppliedFilters(buildAppliedFilters(nextFilters));
-      return nextFilters;
-    });
+    setSelectedFilters(nextFilters);
+    setAppliedFilters(buildAppliedFilters(nextFilters));
   };
 
   const resetFilters = () => {

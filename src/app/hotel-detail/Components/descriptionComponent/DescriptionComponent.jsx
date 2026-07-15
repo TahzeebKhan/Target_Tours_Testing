@@ -71,6 +71,70 @@ const splitDescriptionLabel = (value = "") => {
   };
 };
 
+const inferAttractionCategory = (name = "") => {
+  const text = String(name || "").toLowerCase();
+
+  if (/temple|church|cathedral|mosque|gurudwara|iskcon|mandir/.test(text)) {
+    return "Religious";
+  }
+  if (/fort|museum|memorial|palace|heritage|historic|monument|hospital/.test(text)) {
+    return "Historical";
+  }
+  if (/mall|market|bazaar|shop|centre|center/.test(text)) {
+    return "Shopping";
+  }
+  if (/stadium|park|aquarium|zoo|cinema|film|worlds of wonder|golf/.test(text)) {
+    return "Entertainment";
+  }
+  if (/airport|station|metro|bus|rail/.test(text)) {
+    return "Transport";
+  }
+
+  return "Nearby";
+};
+
+const parseAttractions = (content = "") => {
+  const text = stripHtml(content);
+  const matches = [...text.matchAll(/([^.,\n]+?)\s*-\s*([\d.]+\s*(?:km|mi))(?:\s*\/\s*[\d.]+\s*(?:km|mi))?/gi)];
+
+  return matches
+    .map((match) => {
+      const name = String(match[1] || "")
+        .replace(/^distances are displayed.*?kilometer\.?/i, "")
+        .trim();
+      const distance = String(match[2] || "").trim();
+
+      if (!name || !distance) return null;
+
+      return {
+        name,
+        distance,
+        category: inferAttractionCategory(name),
+      };
+    })
+    .filter(Boolean);
+};
+
+const AttractionsGrid = ({ content }) => {
+  const attractions = parseAttractions(content);
+
+  if (!attractions.length) return <p>{stripHtml(content)}</p>;
+
+  return (
+    <div className={styles.attractionsGrid}>
+      {attractions.map((item, index) => (
+        <div key={`${item.name}-${index}`} className={styles.attractionCard}>
+          <div>
+            <span>{item.category}</span>
+            <strong>{item.name}</strong>
+          </div>
+          <b>{item.distance}</b>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const DescriptionComponent = ({ description, descriptions = [] }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   useBodyScrollLock(isModalOpen);
@@ -134,7 +198,9 @@ const DescriptionComponent = ({ description, descriptions = [] }) => {
                 return (
                   <div key={index} className={styles.modalDescriptionItem}>
                     {label && <h4>{label}</h4>}
-                    {hasHtml(content) ? (
+                    {label.toLowerCase() === "attractions" ? (
+                      <AttractionsGrid content={content} />
+                    ) : hasHtml(content) ? (
                       <div
                         className={styles.htmlDescription}
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}

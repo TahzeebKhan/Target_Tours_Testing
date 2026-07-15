@@ -6,6 +6,20 @@ import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch';
 const FALLBACK_IMAGE = "/fallback.png";
 const GALLERY_SLOT_COUNT = 5;
 
+const stripRawFields = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 10) return value;
+
+    if (Array.isArray(value)) {
+        return value.map((item) => stripRawFields(item, depth + 1));
+    }
+
+    return Object.fromEntries(
+        Object.entries(value)
+            .filter(([key]) => key !== "raw")
+            .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
+    );
+};
+
 const isRemoteImage = (image = "") => /^https?:\/\//.test(String(image || ""));
 
 const normalizeImageUrl = (value = "") => {
@@ -107,7 +121,7 @@ const HotelGallery = ({ images = [] }) => {
                     const stored = raw ? JSON.parse(raw) : {};
                     window.sessionStorage.setItem(
                         HOTEL_DETAILS_KEY,
-                        JSON.stringify({
+                        JSON.stringify(stripRawFields({
                             ...stored,
                             galleryImages: (galleryImages.length
                                 ? galleryImages
@@ -117,7 +131,7 @@ const HotelGallery = ({ images = [] }) => {
                                 ? { image: item, title: `Photo ${index + 1}` }
                                 : item,
                             ),
-                        }),
+                        })),
                     );
                 } catch {
                     // Ignore storage failures and still navigate.

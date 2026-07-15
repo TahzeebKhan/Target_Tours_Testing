@@ -46,12 +46,33 @@ const HotelDetailDataContext = createContext({
   refreshHotelAvailability: async () => null,
 });
 
+const stripRawFields = (value, depth = 0) => {
+  if (!value || typeof value !== "object" || depth > 10) return value;
+
+  if (Array.isArray(value)) {
+    return value.map((item) => stripRawFields(item, depth + 1));
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => key !== "raw")
+      .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
+  );
+};
+
 const readStoredHotelDetail = () => {
   if (typeof window === "undefined") return null;
 
   try {
     const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    const sanitized = stripRawFields(parsed);
+
+    if (raw && JSON.stringify(sanitized) !== raw) {
+      window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(sanitized));
+    }
+
+    return sanitized;
   } catch {
     return null;
   }
@@ -61,7 +82,10 @@ const writeStoredHotelDetail = (hotelDetailData) => {
   if (typeof window === "undefined") return;
 
   try {
-    window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(hotelDetailData));
+    window.sessionStorage.setItem(
+      HOTEL_DETAILS_KEY,
+      JSON.stringify(stripRawFields(hotelDetailData)),
+    );
   } catch {
     // Ignore storage failures and keep the in-memory response.
   }
@@ -1400,6 +1424,12 @@ const normalizeHotelDetail = (
   roomsErrorMessage = "",
 ) => {
   const detailsPayload = stored?.details || stored || {};
+  const latestRoomsPayload =
+    roomsPayload ||
+    stored?.latestAvailabilityResponse ||
+    stored?.availabilityResponse ||
+    stored?.roomsPayload ||
+    null;
   const data = detailsPayload.data || detailsPayload;
   const content = data?.content || detailsPayload?.content || {};
   const contentHotel = content?.hotel || {};
@@ -1476,11 +1506,15 @@ const normalizeHotelDetail = (
       ) || `${getFirst(hotel.name, "This hotel")} details are being updated.`,
     amenities: facilities,
     policies: normalizePolicies(data, hotel),
-    rooms: roomsPayload ? normalizeRooms(roomsPayload, { ...hotel, facilities }) : [],
-    roomGroups: roomsPayload ? getRecommendationRooms(roomsPayload) : [],
-    roomsSearchId: roomsPayload ? getRoomsResponseSearchId(roomsPayload) : "",
-    roomsSearchTracingKey: roomsPayload ? getRoomsResponseSearchTracingKey(roomsPayload) : "",
-    roomsErrorMessage: roomsErrorMessage || (roomsPayload ? getApiFailureMessage(roomsPayload) : ""),
+    rooms: latestRoomsPayload ? normalizeRooms(latestRoomsPayload, { ...hotel, facilities }) : [],
+    roomGroups: latestRoomsPayload ? getRecommendationRooms(latestRoomsPayload) : [],
+    roomsSearchId: latestRoomsPayload ? getRoomsResponseSearchId(latestRoomsPayload) : "",
+    roomsSearchTracingKey: latestRoomsPayload
+      ? getRoomsResponseSearchTracingKey(latestRoomsPayload)
+      : "",
+    roomsErrorMessage:
+      roomsErrorMessage ||
+      (latestRoomsPayload ? getApiFailureMessage(latestRoomsPayload) : ""),
     reviews,
     ratingBars,
     scoreDetails,
@@ -1530,6 +1564,16 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
         const response = await changeHotelAvailability(changeHotelAvailabilityPayload);
         setRoomsPayload(response);
         setRoomsErrorMessage("");
+        const currentStoredDetail = readStoredHotelDetail() || {};
+        const nextStoredDetail = {
+          ...currentStoredDetail,
+          latestAvailabilityResponse: response,
+          availabilityResponse: response,
+          roomsPayload: response,
+        };
+
+        writeStoredHotelDetail(nextStoredDetail);
+        setStoredDetail(nextStoredDetail);
         return response;
       } catch (error) {
         console.error("Hotel availability check failed:", error);
@@ -1555,12 +1599,29 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
     const storedHotelId = getStoredHotelId(stored);
     const canUseStored =
       stored && (!hotelId || !storedHotelId || storedHotelId === String(hotelId));
+    const hasStoredDetails = Boolean(
+      stored?.details ||
+        stored?.data ||
+        stored?.content ||
+        stored?.hotel?.raw ||
+        stored?.hotel?.addressLine1,
+    );
+    const storedAvailabilityPayload = canUseStored
+      ? stored?.latestAvailabilityResponse ||
+        stored?.availabilityResponse ||
+        stored?.roomsPayload ||
+        null
+      : null;
     const roomsRequest = hotelDetailPayload || stored?.request || null;
 
     setRouteHotelId(hotelId);
 
-    if (canUseStored) {
+    if (canUseStored && (hasStoredDetails || !hotelDetailPayload)) {
       setStoredDetail(stored);
+      if (storedAvailabilityPayload) {
+        setRoomsPayload(storedAvailabilityPayload);
+        setRoomsErrorMessage("");
+      }
       setLoading(false);
     } else if (!hotelDetailPayload) {
       setStoredDetail(stored);
@@ -1600,7 +1661,9 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
       roomsRequest?.hotelId &&
       roomsRequest?.priceProvider;
 
-    if (hasRoomsRequest) {
+    if (hasRoomsRequest && storedAvailabilityPayload) {
+      setRoomsLoading(false);
+    } else if (hasRoomsRequest) {
       const loadHotelRooms = async () => {
         const requestKey = JSON.stringify(roomsRequest);
         setRoomsLoading(true);

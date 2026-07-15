@@ -318,6 +318,7 @@ const Page = () => {
   const policyRef = useRef(null);
   const searchRequest = useMemo(() => hotelDetail?.request || {}, [hotelDetail?.request]);
   const storedHotelSearch = useMemo(() => readStoredHotelSearch() || {}, []);
+  const availabilityResponseRef = useRef(storedHotelSearch.availabilityResponse || null);
   const urlSearchValues = useMemo(
     () => ({
       searchId: getSearchParamValue("searchId"),
@@ -572,6 +573,22 @@ const Page = () => {
       searchTracingKey: getFirstValue(room.searchTracingKey, searchTracingKey),
       TUI: getFirstValue(room.TUI, searchTracingKey),
     }));
+    const latestAvailabilityResponse =
+      availabilityResponseRef.current || storedHotelSearch.availabilityResponse || null;
+    const latestHotelSearchId = getFirstValue(
+      latestAvailabilityResponse?.hotelSearchId,
+      latestAvailabilityResponse?.hotel_search_id,
+      latestAvailabilityResponse?.hotel_search_key,
+      urlSearchValues.hotelSearchId,
+      searchRequest.hotelSearchId,
+    );
+    const latestStoredHotelSearch = {
+      ...storedHotelSearch,
+      ...(latestAvailabilityResponse
+        ? { availabilityResponse: latestAvailabilityResponse }
+        : {}),
+      ...(latestHotelSearchId ? { hotelSearchId: latestHotelSearchId } : {}),
+    };
 
     const payload = {
       hotel: {
@@ -584,11 +601,11 @@ const Page = () => {
       },
       request: {
         ...searchRequest,
-        searchContext: storedHotelSearch,
-        initResponse: storedHotelSearch.initResponse,
+        searchContext: latestStoredHotelSearch,
+        initResponse: latestStoredHotelSearch.initResponse,
         searchId: getFirstValue(urlSearchValues.searchId, searchRequest.searchId),
         hotelId: getFirstValue(urlSearchValues.hotelId, searchRequest.hotelId, hotelDetail?.id),
-        hotelSearchId: getFirstValue(urlSearchValues.hotelSearchId, searchRequest.hotelSearchId),
+        hotelSearchId: latestHotelSearchId,
         priceProvider: getFirstValue(
           urlSearchValues.priceProvider,
           searchRequest.priceProvider,
@@ -613,6 +630,7 @@ const Page = () => {
         children: effectiveChildren,
         childAges: effectiveSelection.childAges,
         roomDetails: effectiveSelection.roomDetails,
+        availabilityResponse: latestAvailabilityResponse,
       },
       rooms: roomsWithTracingKey,
     };
@@ -685,6 +703,7 @@ const Page = () => {
 
     try {
       const response = await refreshHotelAvailability(payload);
+      availabilityResponseRef.current = response;
 
       lastAvailabilitySignatureRef.current = nextSignature;
       updateHotelDetailUrlParams(nextSelection, response);
@@ -700,6 +719,12 @@ const Page = () => {
             adults: nextSelection.adults,
             children: nextSelection.children,
             childAges: nextSelection.childAges,
+            hotelSearchId: getFirstValue(
+              response?.hotelSearchId,
+              response?.hotel_search_id,
+              response?.hotel_search_key,
+              storedHotelSearch.hotelSearchId,
+            ),
             initPayload: {
               ...(storedHotelSearch.initPayload || {}),
               ...payload,
@@ -811,6 +836,11 @@ const Page = () => {
   const handleRoomQuantityChange = useCallback((id, quantity) => {
     setRoomList((prev) => {
       const requestedQuantity = Math.max(0, Number(quantity) || 0);
+      const targetRoom = prev.find((room) => room.id === id);
+
+      if (!targetRoom) return prev;
+
+      const roomUnits = Math.max(1, Number(targetRoom.roomUnits || 1));
       const otherRoomTotal = prev.reduce(
         (total, room) =>
           room.id === id
@@ -818,12 +848,32 @@ const Page = () => {
             : total + Number(room.quantity || 0) * Math.max(1, Number(room.roomUnits || 1)),
         0,
       );
-      const targetRoom = prev.find((room) => room.id === id);
-      const roomUnits = Math.max(1, Number(targetRoom?.roomUnits || 1));
       const allowedQuantity = Math.min(
         requestedQuantity,
         Math.floor(Math.max(0, maxSelectableRoomCount - otherRoomTotal) / roomUnits),
       );
+      const maxTargetQuantity = Math.max(1, Number(targetRoom.maxQuantity || 1));
+
+      if (
+        requestedQuantity > 0 &&
+        allowedQuantity <= 0 &&
+        roomUnits <= maxSelectableRoomCount
+      ) {
+        const replacementQuantity = Math.min(
+          requestedQuantity,
+          maxTargetQuantity,
+          Math.floor(maxSelectableRoomCount / roomUnits),
+        );
+        const nextRooms = prev.map((room) =>
+          room.id === id
+            ? { ...room, quantity: replacementQuantity }
+            : { ...room, quantity: 0 },
+        );
+
+        setShowSummary(replacementQuantity > 0);
+        return nextRooms;
+      }
+
       const nextRooms = prev.map((room) =>
         room.id === id ? { ...room, quantity: allowedQuantity } : room,
       );
