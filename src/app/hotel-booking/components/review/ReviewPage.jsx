@@ -144,6 +144,42 @@ const HOTEL_ROOMS_SEARCH_ID_KEYS = [
   "SearchID",
 ];
 
+const HOTEL_SEARCH_ID_KEYS = [
+  "hotelSearchId",
+  "HotelSearchId",
+  "hotel_search_id",
+  "hotelSearchID",
+  "hotel_search_key",
+  "hotelSearchKey",
+];
+
+const getAvailabilityHotelSearchId = (...sources) => {
+  for (const source of sources) {
+    const availability =
+      source?.availabilityResponse ||
+      source?.latestAvailabilityResponse ||
+      source?.roomsPayload ||
+      source;
+    const value = getFirstValue(
+      availability?.hotelSearchId,
+      availability?.HotelSearchId,
+      availability?.hotel_search_id,
+      availability?.hotelSearchID,
+      availability?.hotel_search_key,
+      availability?.hotelSearchKey,
+      availability?.data?.hotelSearchId,
+      availability?.data?.hotel_search_id,
+      availability?.content?.hotelSearchId,
+      availability?.content?.hotel_search_id,
+      findFirstDeepValue(availability, HOTEL_SEARCH_ID_KEYS),
+    );
+
+    if (value) return value;
+  }
+
+  return "";
+};
+
 const getHotelInitData = ({
   request = {},
   storedHotelSearch = {},
@@ -196,6 +232,8 @@ const toRefreshDate = (value) => {
 const getResponseValue = (response, key) =>
   response?.[key] ||
   response?.data?.[key] ||
+  response?.content?.[key] ||
+  response?.data?.content?.[key] ||
   response?.result?.[key] ||
   response?.data?.result?.[key] ||
   "";
@@ -626,7 +664,13 @@ const buildRefreshSessionPayload = ({
     culture: getFirstValue(sourcePayload.culture, "en-US"),
     checkIn: toRefreshDate(checkInDate || sourcePayload.checkIn || searchContext.checkIn),
     checkOut: toRefreshDate(checkOutDate || sourcePayload.checkOut || searchContext.checkOut),
-    rooms: normalizeRefreshRooms(sourcePayload.rooms || searchContext.rooms, request),
+    rooms: normalizeRefreshRooms(
+      request.roomDetails ||
+        request.searchContext?.roomDetails ||
+        searchContext.rooms ||
+        sourcePayload.rooms,
+      request,
+    ),
     agentCode: getFirstValue(sourcePayload.agentCode, "14005"),
     destinationCountryCode: getFirstValue(
       sourcePayload.destinationCountryCode,
@@ -991,6 +1035,14 @@ const buildHotelPricingDetailsPayload = ({
     findFirstDeepValue(initSearchContext, HOTEL_ROOMS_SEARCH_ID_KEYS),
   );
   const hotelSearchId = getFirstValue(
+    getAvailabilityHotelSearchId(
+      request,
+      request.searchContext,
+      storedHotelSearch,
+      storedHotelDetails,
+      bookingSession?.request,
+      bookingSession,
+    ),
     firstRoom.hotelSearchId,
     firstRoom.hotel_search_id,
     firstRoom.hotel_search_key,
@@ -1007,14 +1059,7 @@ const buildHotelPricingDetailsPayload = ({
     hotelInitData.hotel_search_id,
     hotelInitData.hotel_search_key,
     hotelInitData.hotelSearchKey,
-    findFirstDeepValue(initSearchContext, [
-      "hotelSearchId",
-      "HotelSearchId",
-      "hotel_search_id",
-      "hotelSearchID",
-      "hotel_search_key",
-      "hotelSearchKey",
-    ]),
+    findFirstDeepValue(initSearchContext, HOTEL_SEARCH_ID_KEYS),
   );
   const recommendationId = getFirstValue(
     firstRoom.recommendationId,
@@ -1524,6 +1569,14 @@ const ReviewPage = () => {
         findFirstDeepValue(initSearchContext, HOTEL_ROOMS_SEARCH_ID_KEYS),
       );
       const hotelSearchId = getFirstValue(
+        getAvailabilityHotelSearchId(
+          request,
+          request.searchContext,
+          storedHotelSearch,
+          storedHotelDetails,
+          bookingSession?.request,
+          bookingSession,
+        ),
         firstRoom.hotelSearchId,
         firstRoom.hotel_search_id,
         firstRoom.hotel_search_key,
@@ -1540,14 +1593,7 @@ const ReviewPage = () => {
         hotelInitData.hotel_search_id,
         hotelInitData.hotel_search_key,
         hotelInitData.hotelSearchKey,
-        findFirstDeepValue(initSearchContext, [
-          "hotelSearchId",
-          "HotelSearchId",
-          "hotel_search_id",
-          "hotelSearchID",
-          "hotel_search_key",
-          "hotelSearchKey",
-        ]),
+        findFirstDeepValue(initSearchContext, HOTEL_SEARCH_ID_KEYS),
       );
       const initPayload = buildRefreshSessionPayload({
         request,

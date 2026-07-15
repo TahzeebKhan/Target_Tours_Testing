@@ -21,6 +21,20 @@ import {
     writeHotelBookingSession,
 } from '@/shared/services/hotelSearch'
 
+const stripRawFields = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 10) return value;
+
+    if (Array.isArray(value)) {
+        return value.map((item) => stripRawFields(item, depth + 1));
+    }
+
+    return Object.fromEntries(
+        Object.entries(value)
+            .filter(([key]) => key !== "raw")
+            .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
+    );
+};
+
 const formatCurrency = (value) =>
     `₹ ${Math.round(Number(value || 0)).toLocaleString("en-IN", {
         maximumFractionDigits: 0,
@@ -436,6 +450,9 @@ const HotelDetaislMobileView = () => {
                 initResponse: storedHotelSearch.initResponse,
                 hotelId: hotelDetail?.id || searchParams.get("hotelId") || "",
                 hotelSearchId: getFirstValue(
+                    storedHotelSearch.availabilityResponse?.hotelSearchId,
+                    storedHotelSearch.availabilityResponse?.hotel_search_id,
+                    storedHotelSearch.availabilityResponse?.hotel_search_key,
                     hotelDetail?.request?.hotelSearchId,
                     storedHotelSearch.hotelSearchId,
                     storedHotelSearch.hotel_search_id,
@@ -476,7 +493,7 @@ const HotelDetaislMobileView = () => {
                 const stored = raw ? JSON.parse(raw) : {};
                 window.sessionStorage.setItem(
                     HOTEL_DETAILS_KEY,
-                    JSON.stringify({
+                    JSON.stringify(stripRawFields({
                         ...stored,
                         galleryImages:
                             hotelDetail?.galleryImages?.length
@@ -487,7 +504,7 @@ const HotelDetaislMobileView = () => {
                                       ? { image: item, title: `Photo ${index + 1}` }
                                       : item,
                                 ),
-                    }),
+                    })),
                 );
             } catch {
                 // Ignore storage failures and still navigate.

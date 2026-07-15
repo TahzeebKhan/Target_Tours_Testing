@@ -1,7 +1,7 @@
 "use client";
 import "swiper/css";
 import "swiper/css/navigation";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -74,6 +74,9 @@ const getComboHeaderTitle = (comboRoom = {}, comboDetailRows = []) => {
 
   return `${comboRoom.title} - ${uniqueDetailTitles.join(" + ")}`;
 };
+
+const ROOM_CARD_ESTIMATED_HEIGHT = 343;
+const VIRTUAL_OVERSCAN_COUNT = 4;
 
 const toArray = (value) => {
   if (!value) return [];
@@ -317,23 +320,100 @@ const AvailabilityComponent = ({
   maxSelectableRooms = Infinity,
   onRoomQuantityChange,
 }) => {
+  const availabilityRef = useRef(null);
   const swiperRefs = useRef({});
   const [roomQty, setRoomQty] = useState({});
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
   const [detailsRoom, setDetailsRoom] = useState(null);
+  const [scrollState, setScrollState] = useState({
+    scrollY: 0,
+    viewportHeight: 900,
+  });
 
-  const roomUnitMap = rooms.reduce((unitMap, room) => {
+  const roomUnitMap = useMemo(() => rooms.reduce((unitMap, room) => {
     unitMap[room.id] = getRoomUnitCount(room);
     return unitMap;
-  }, {});
+  }, {}), [rooms]);
   const getSelectedUnitTotal = (quantityMap) =>
     Object.entries(quantityMap).reduce(
       (total, [roomId, quantity]) =>
         total + Number(quantity || 0) * (roomUnitMap[roomId] || 1),
       0,
     );
-  const comboRooms = rooms.filter((room) => Boolean(room.isCombo));
+  const comboRooms = useMemo(
+    () => rooms.filter((room) => Boolean(room.isCombo)),
+    [rooms],
+  );
   const firstComboRoomId = comboRooms[0]?.id || "";
+  const renderableRooms = useMemo(
+    () =>
+      rooms.filter(
+        (room) => !room.isCombo || room.id === firstComboRoomId,
+      ),
+    [firstComboRoomId, rooms],
+  );
+  const virtualWindow = useMemo(() => {
+    const itemCount = renderableRooms.length;
+
+    if (!itemCount) {
+      return { startIndex: 0, endIndex: 0, paddingTop: 0, paddingBottom: 0 };
+    }
+
+    const section = availabilityRef.current;
+    const sectionTop = section
+      ? section.getBoundingClientRect().top + scrollState.scrollY
+      : 0;
+    const relativeScrollTop = Math.max(0, scrollState.scrollY - sectionTop);
+    const startIndex = Math.max(
+      0,
+      Math.floor(relativeScrollTop / ROOM_CARD_ESTIMATED_HEIGHT) -
+        VIRTUAL_OVERSCAN_COUNT,
+    );
+    const visibleCount =
+      Math.ceil(scrollState.viewportHeight / ROOM_CARD_ESTIMATED_HEIGHT) +
+      VIRTUAL_OVERSCAN_COUNT * 2;
+    const endIndex = Math.min(itemCount, startIndex + visibleCount);
+
+    return {
+      startIndex,
+      endIndex,
+      paddingTop: startIndex * ROOM_CARD_ESTIMATED_HEIGHT,
+      paddingBottom: Math.max(
+        0,
+        (itemCount - endIndex) * ROOM_CARD_ESTIMATED_HEIGHT,
+      ),
+    };
+  }, [renderableRooms.length, scrollState]);
+  const visibleRooms = useMemo(
+    () => renderableRooms.slice(virtualWindow.startIndex, virtualWindow.endIndex),
+    [renderableRooms, virtualWindow.endIndex, virtualWindow.startIndex],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    let animationFrame = 0;
+
+    const updateScrollState = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        setScrollState({
+          scrollY: window.scrollY || window.pageYOffset || 0,
+          viewportHeight: window.innerHeight || 900,
+        });
+      });
+    };
+
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
 
   const toggleComboExpansion = (roomId) => {
     if (actionDisabled) return;
@@ -357,7 +437,19 @@ const AvailabilityComponent = ({
       Math.max(0, maxSelectableRooms - selectedOtherTotal) / unitCount,
     );
 
-    if (allowedByRoomLimit <= currentQty) return;
+    if (allowedByRoomLimit <= currentQty) {
+      const canReplaceSelection =
+        currentQty <= 0 &&
+        Number(maxQty) > 0 &&
+        unitCount <= maxSelectableRooms;
+
+      if (canReplaceSelection) {
+        setRoomQty({ [id]: 1 });
+        onRoomQuantityChange?.(id, 1);
+      }
+
+      return;
+    }
 
     const nextQty = Math.min(currentQty + 1, maxQty, allowedByRoomLimit);
 
@@ -398,7 +490,7 @@ const AvailabilityComponent = ({
   const closeRoomDetails = () => setDetailsRoom(null);
 
   return (
-    <div className={styles.availabilitySection}>
+    <div className={styles.availabilitySection} ref={availabilityRef}>
       <h3 className={styles.heading}>Availability</h3>
 
       {loading && <AvailabilitySkeleton />}
@@ -409,7 +501,15 @@ const AvailabilityComponent = ({
         </p>
       )}
 
-      {!loading && rooms.map((room) => {
+      {!loading && Boolean(renderableRooms.length) && (
+        <div
+          className={styles.virtualRoomList}
+          style={{
+            paddingTop: virtualWindow.paddingTop,
+            paddingBottom: virtualWindow.paddingBottom,
+          }}
+        >
+      {visibleRooms.map((room) => {
         const roomImages = Array.isArray(room.image) ? room.image : [];
         const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
         const benefits = Array.isArray(room.benefits) ? room.benefits : [];
@@ -422,15 +522,15 @@ const AvailabilityComponent = ({
         const selectedOtherTotal = selectedRoomTotal - Number(qty || 0) * roomUnitCount;
         const remainingUnits = Math.max(0, maxSelectableRooms - selectedOtherTotal);
         const hasReachedRoomLimit = remainingUnits < roomUnitCount;
+        const canReplaceWithRoom =
+          Number(qty || 0) <= 0 &&
+          selectedRoomTotal > 0 &&
+          roomUnitCount <= maxSelectableRooms;
         const visibleFeatures = features.slice(0, 10);
         const hasRoomDetailsData =
           getDescriptionRows(room).length > 0 ||
           getRoomInfoRows(room).length > 0 ||
           getCancellationPolicyRows(room).length > 0;
-
-        if (isCombo && room.id !== firstComboRoomId) {
-          return null;
-        }
 
         if (isCombo) {
           return (
@@ -442,6 +542,10 @@ const AvailabilityComponent = ({
                   selectedRoomTotal - Number(comboQty || 0) * comboUnitCount;
                 const comboLimitReached =
                   Math.max(0, maxSelectableRooms - comboSelectedOtherTotal) < comboUnitCount;
+                const canReplaceWithCombo =
+                  Number(comboQty || 0) <= 0 &&
+                  selectedRoomTotal > 0 &&
+                  comboUnitCount <= maxSelectableRooms;
                 const isExpanded = expandedComboRooms[comboRoom.id] ?? comboIndex === 0;
                 const comboDetailRows = Array.isArray(comboRoom.comboRooms)
                   ? comboRoom.comboRooms
@@ -471,7 +575,10 @@ const AvailabilityComponent = ({
 
                         <button
                           className={styles.comboSelectBtn}
-                          disabled={actionDisabled || comboQty <= 0 && comboLimitReached}
+                          disabled={
+                            actionDisabled ||
+                            (comboQty <= 0 && comboLimitReached && !canReplaceWithCombo)
+                          }
                           onClick={() => handleAddRoom(comboRoom.id, 1, comboUnitCount)}
                         >
                           {comboQty > 0 ? "Selected Combo" : "Select Combo"}
@@ -792,7 +899,11 @@ const AvailabilityComponent = ({
                     className={`${styles.addRoomBtn} ${
                       qty > 0 ? styles.fadeOut : styles.fadeIn
                     }`}
-                    disabled={actionDisabled || maxQty <= 0 || hasReachedRoomLimit}
+                    disabled={
+                      actionDisabled ||
+                      maxQty <= 0 ||
+                      (hasReachedRoomLimit && !canReplaceWithRoom)
+                    }
                     onClick={() => handleAddRoom(room.id, maxQty, roomUnitCount)}
                   >
                     ADD ROOM
@@ -854,6 +965,8 @@ const AvailabilityComponent = ({
           </div>
         );
       })}
+        </div>
+      )}
 
       <RoomDetailsModal room={detailsRoom} onClose={closeRoomDetails} />
     </div>

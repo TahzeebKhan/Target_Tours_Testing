@@ -70,6 +70,51 @@ const getHotelArraySource = (key = "") => {
 const getHotelDisplayName = (hotel = {}) =>
   String(hotel.name || hotel.hotelName || hotel.title || "").trim();
 
+const stripRawFields = (value, depth = 0) => {
+  if (!value || typeof value !== "object" || depth > 10) return value;
+
+  if (Array.isArray(value)) {
+    return value.map((item) => stripRawFields(item, depth + 1));
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => key !== "raw")
+      .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
+  );
+};
+
+const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
+  const fullDetail = {
+    request: payload,
+    hotel: stripRawFields(hotel),
+    details: stripRawFields(details),
+  };
+
+  try {
+    window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(fullDetail));
+    return;
+  } catch (error) {
+    console.warn("Hotel details payload exceeded session storage; storing slim payload.", error);
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      HOTEL_DETAILS_KEY,
+      JSON.stringify({
+        request: payload,
+        hotel,
+      }),
+    );
+  } catch {
+    try {
+      window.sessionStorage.removeItem(HOTEL_DETAILS_KEY);
+    } catch {
+      // Ignore storage cleanup failures.
+    }
+  }
+};
+
 const isRenderableHotel = (hotel = {}) => {
   const displayName = getHotelDisplayName(hotel);
 
@@ -193,6 +238,28 @@ const getHotelSearchMeta = (...sources) => {
   return {};
 };
 
+const compactHotelInit = (init = {}, fallback = {}) => ({
+  searchId:
+    init?.searchId ||
+    init?.search_id ||
+    init?.searchid ||
+    fallback?.searchId ||
+    "",
+  hotelSearchId:
+    init?.hotelSearchId ||
+    init?.hotel_search_id ||
+    init?.hotel_search_key ||
+    fallback?.hotelSearchId ||
+    "",
+  searchTracingKey:
+    init?.searchTracingKey ||
+    init?.search_tracing_key ||
+    init?.roomsSearchTracingKey ||
+    init?.TUI ||
+    fallback?.searchTracingKey ||
+    "",
+});
+
 const HOTEL_RESULT_SOURCE_PRIORITY = {
   merged: 3,
   curated: 2,
@@ -252,8 +319,14 @@ export const getHotelsFromMessage = (payload = {}) => {
     if (result.hotels.length) return result;
   }
 
+  if (Array.isArray(payload?.hotels) && payload.hotels.length) {
+    const result = sanitizeHotelResult(payload.source || "hotels", payload.hotels);
+    result.meta = meta;
+    if (result.hotels.length) return result;
+  }
+
   if (Array.isArray(data?.hotels) && data.hotels.length) {
-    const result = sanitizeHotelResult("hotels", data.hotels);
+    const result = sanitizeHotelResult(data.source || "hotels", data.hotels);
     result.meta = meta;
     if (result.hotels.length) return result;
   }
@@ -279,7 +352,6 @@ export const getHotelsFromMessage = (payload = {}) => {
 };
 
 export const getHotelImage = (hotel = {}) => {
-  console.log("hotel", hotel);
   const image =
     hotel.image ||
     hotel.imageUrl ||
@@ -1623,6 +1695,28 @@ const readStoredHotelResults = () => {
   }
 };
 
+const writeSlimStoredHotelResults = (payload = {}, result = {}, meta = {}) => {
+  if (typeof window === "undefined" || !result?.hotels?.length) return;
+
+  try {
+    window.sessionStorage.setItem(
+      HOTEL_SEARCH_RESULTS_KEY,
+      JSON.stringify({
+        channel: payload?.channel || "",
+        type: getHotelSocketType(payload) || payload?.type || "HOTEL_RESULTS",
+        source: result.source || "hotels",
+        hotelCount: result.hotels.length,
+        searchId: meta.searchId || result.meta?.searchId || "",
+        hotelSearchId: meta.hotelSearchId || result.meta?.hotelSearchId || "",
+        searchTracingKey:
+          meta.searchTracingKey || result.meta?.searchTracingKey || "",
+      }),
+    );
+  } catch {
+    // Keep rendering even if session storage is unavailable.
+  }
+};
+
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || depth > 7) return "";
   if (seen.has(value)) return "";
@@ -2012,7 +2106,6 @@ const TourListing = () => {
   };
 
   const handleBookNow = async (hotel) => {
-    console.log("handleBookNow called with hotel:", hotel);
     if (!hotel) return;
     if (hotelSearchChannel && !hasHotelInitComplete) return;
 
@@ -2049,14 +2142,7 @@ const TourListing = () => {
 
       if (hotelDetailsRequestRef.current !== requestId) return;
 
-      window.sessionStorage.setItem(
-        HOTEL_DETAILS_KEY,
-        JSON.stringify({
-          request: payload,
-          hotel,
-          details,
-        }),
-      );
+      writeHotelDetailsForNavigation({ payload, hotel, details });
       router.push(getHotelDetailUrl(payload));
     } catch (error) {
       if (error?.name === "AbortError") return;
@@ -2235,6 +2321,9 @@ const TourListing = () => {
           nextResults.meta?.searchTracingKey ||
           "",
       };
+
+      writeSlimStoredHotelResults(payload, nextResults, resultMeta);
+
       const sessionMeta = {
         searchId:
           initCompleteMeta.searchId ||
@@ -2301,11 +2390,8 @@ const TourListing = () => {
                   sessionMeta.searchTracingKey ||
                   currentSearchContext?.TUI ||
                   "",
-                init,
-                initResponse:
-                  getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE"
-                    ? data
-                    : currentSearchContext?.initResponse,
+                init: compactHotelInit(init, sessionMeta),
+                initResponse: null,
                 initStatus:
                   getHotelSocketType(payload) === "HOTEL_INIT_COMPLETE"
                     ? "complete"
@@ -2366,11 +2452,6 @@ const TourListing = () => {
         }));
       }
 
-      console.log("Hotel result source:", {
-        source: nextResults.source,
-        count: nextResults.hotels.length,
-      });
-
       if (!nextResults.hotels.length) {
         if (isHotelTerminalPayload(payload) && !fromCache) {
           setShouldShowEmptyHotelState(true);
@@ -2385,10 +2466,6 @@ const TourListing = () => {
           nextResults.source,
         )
       ) {
-        console.log("Hotel result ignored lower priority source:", {
-          currentSource: hotelResultSourceRef.current,
-          nextSource: nextResults.source,
-        });
         return;
       }
 
@@ -2401,7 +2478,6 @@ const TourListing = () => {
     };
 
     const handleHotelResults = (event) => {
-        console.log("Received hotel search results event:", event.detail);
       applyHotelResults(event.detail);
     };
 

@@ -35,6 +35,117 @@ const safeSetSessionStorage = (key, value) => {
   }
 };
 
+const parseSocketValue = (value) => {
+  if (typeof value !== "string") return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
+const getSocketContent = (payload = {}) => {
+  const data = parseSocketValue(payload?.data);
+  return parseSocketValue(data?.content || data?.data?.content) || data || payload;
+};
+
+const getFirstHotelMetaValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "") || "";
+
+const compactHotelInit = (init = {}, fallback = {}) => ({
+  searchId:
+    init?.searchId ||
+    init?.search_id ||
+    init?.searchid ||
+    fallback?.searchId ||
+    fallback?.search_id ||
+    fallback?.searchid ||
+    "",
+  hotelSearchId:
+    init?.hotelSearchId ||
+    init?.hotel_search_id ||
+    init?.hotel_search_key ||
+    fallback?.hotelSearchId ||
+    fallback?.hotel_search_id ||
+    fallback?.hotel_search_key ||
+    "",
+  searchTracingKey:
+    init?.searchTracingKey ||
+    init?.search_tracing_key ||
+    init?.roomsSearchTracingKey ||
+    init?.TUI ||
+    fallback?.searchTracingKey ||
+    fallback?.search_tracing_key ||
+    fallback?.roomsSearchTracingKey ||
+    fallback?.TUI ||
+    "",
+});
+
+const buildSlimHotelSearchResult = (payload = {}, fallbackChannel = "") => {
+  const data = parseSocketValue(payload?.data) || payload;
+  const content = getSocketContent(payload);
+  const hotelSets = [
+    { source: "merged", hotels: content?.mergedHotels },
+    { source: "curated", hotels: content?.curatedHotels },
+    { source: "hotels", hotels: content?.hotels },
+    { source: "hotels", hotels: data?.hotels },
+    { source: "hotels", hotels: payload?.hotels },
+  ];
+  const result = hotelSets.find(({ hotels }) => Array.isArray(hotels) && hotels.length);
+
+  if (!result) return null;
+
+  const init = content?.init || data?.init || payload?.init || {};
+  const searchId = getFirstHotelMetaValue(
+    content?.searchId,
+    content?.search_id,
+    content?.searchid,
+    init?.searchId,
+    init?.search_id,
+    init?.searchid,
+    data?.searchId,
+    data?.search_id,
+    payload?.searchId,
+    payload?.search_id,
+  );
+  const hotelSearchId = getFirstHotelMetaValue(
+    content?.hotelSearchId,
+    content?.hotel_search_id,
+    content?.hotel_search_key,
+    data?.hotelSearchId,
+    data?.hotel_search_id,
+    payload?.hotelSearchId,
+    payload?.hotel_search_id,
+  );
+  const searchTracingKey = getFirstHotelMetaValue(
+    content?.searchTracingKey,
+    content?.search_tracing_key,
+    init?.searchTracingKey,
+    init?.search_tracing_key,
+    data?.searchTracingKey,
+    data?.search_tracing_key,
+    payload?.searchTracingKey,
+    payload?.search_tracing_key,
+  );
+  const type =
+    payload?.type ||
+    content?.type ||
+    data?.type ||
+    payload?.data?.content?.type ||
+    "HOTEL_RESULTS";
+
+  return {
+    channel: payload?.channel || fallbackChannel,
+    type,
+    source: result.source,
+    hotelCount: result.hotels.length,
+    searchId,
+    hotelSearchId,
+    searchTracingKey,
+  };
+};
+
 const rememberHotelSearchUrl = (url) => {
   if (typeof window === "undefined" || !url) return;
 
@@ -474,7 +585,14 @@ const TourHeroSection = ({ resultsPath = "/hotels" } = {}) => {
                   ...latestSearchContext,
                   searchId,
                   hotelSearchId,
-                  initResponse,
+                  init: compactHotelInit(
+                    latestSearchContext?.init ||
+                      initResponse?.init ||
+                      initResponse?.data?.init ||
+                      {},
+                    { searchId, hotelSearchId },
+                  ),
+                  initResponse: null,
                   initStatus: "complete",
                 }),
               );
@@ -603,8 +721,11 @@ const TourHeroSection = ({ resultsPath = "/hotels" } = {}) => {
                   JSON.stringify({
                     ...(searchContext || {}),
                     channel: searchContext?.channel || hotelSearchChannel,
-                    init: content.init,
-                    initResponse: content,
+                    init: compactHotelInit(content.init, {
+                      searchId,
+                      hotelSearchId,
+                    }),
+                    initResponse: null,
                     initStatus: "complete",
                     searchId,
                     hotelSearchId,
@@ -631,12 +752,16 @@ const TourHeroSection = ({ resultsPath = "/hotels" } = {}) => {
             if (payload?.type === "HOTEL_MERGED_RESPONSE") {
               window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
             } else if (cachedResult?.type !== "HOTEL_MERGED_RESPONSE") {
+              const slimPayload = buildSlimHotelSearchResult(
+                payload,
+                hotelSearchChannel,
+              );
               const didCacheResults = safeSetSessionStorage(
                 HOTEL_SEARCH_RESULTS_KEY,
-                JSON.stringify(payload),
+                JSON.stringify(slimPayload),
               );
 
-              if (!didCacheResults) {
+              if (!slimPayload || !didCacheResults) {
                 window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
               }
             }

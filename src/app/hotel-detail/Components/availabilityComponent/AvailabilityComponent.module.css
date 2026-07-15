@@ -53,6 +53,11 @@
   color: #d92d20;
 }
 
+.virtualRoomList {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .skeletonList {
   display: flex;
   flex-direction: column;

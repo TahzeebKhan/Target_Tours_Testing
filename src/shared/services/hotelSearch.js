@@ -47,6 +47,23 @@ export const clearHotelBookingSession = () => {
   removeStoredHotelBookingSession();
 };
 
+export const clearCompletedHotelFlowStorage = () => {
+  if (typeof window === "undefined") return;
+
+  clearHotelBookingSession();
+  clearPendingHotelConfirmBooking();
+  clearHotelBookingStatus();
+
+  try {
+    window.sessionStorage.removeItem(HOTEL_DETAILS_KEY);
+    window.sessionStorage.removeItem(HOTEL_SEARCH_RESULTS_KEY);
+    window.sessionStorage.removeItem(HOTEL_SEARCH_SESSION_KEY);
+    window.localStorage.removeItem(HOTEL_LAST_SEARCH_URL_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
 const scheduleHotelBookingSessionExpiry = (expiresAt) => {
   if (typeof window === "undefined") return;
 

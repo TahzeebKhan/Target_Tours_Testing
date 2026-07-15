@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   confirmHotelBooking,
   retrieveHotelBookingDetails,
-  clearHotelBookingSession,
+  clearCompletedHotelFlowStorage,
   clearPendingHotelConfirmBooking,
   markHotelBookingConfirmed,
   readPendingHotelConfirmBooking,
@@ -214,12 +214,37 @@ function HotelBookingSuccessContent() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    window.history.replaceState(
+      { ...(window.history.state || {}), hotelBookingSuccess: true },
+      "",
+      window.location.href,
+    );
+    window.history.pushState(
+      { ...(window.history.state || {}), hotelBookingSuccessGuard: true },
+      "",
+      window.location.href,
+    );
+
+    const handleBackNavigation = () => {
+      clearCompletedHotelFlowStorage();
+      router.replace("/");
+    };
+
+    window.addEventListener("popstate", handleBackNavigation);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackNavigation);
+    };
+  }, [router]);
+
+  useEffect(() => {
     let isActive = true;
 
     const loadBookingDetails = async () => {
       if (isBrowserReload()) {
-        clearHotelBookingSession();
-        clearPendingHotelConfirmBooking();
+        clearCompletedHotelFlowStorage();
         router.replace("/");
         return;
       }
@@ -283,6 +308,7 @@ function HotelBookingSuccessContent() {
           merchantOrderId,
         });
         setBookingResponse(data);
+        clearCompletedHotelFlowStorage();
       } catch (err) {
         if (!isActive) return;
         console.error("API error fetching hotel booking details", err);
@@ -454,8 +480,7 @@ function HotelBookingSuccessContent() {
 
   const handleDone = () => {
     if (typeof window !== "undefined") {
-      clearHotelBookingSession();
-      clearPendingHotelConfirmBooking();
+      clearCompletedHotelFlowStorage();
     }
     router.push("/");
   };
