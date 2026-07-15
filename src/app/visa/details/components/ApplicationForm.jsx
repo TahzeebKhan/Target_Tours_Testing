@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import styles from "./applicationForm.module.css";
+import styles from "./ApplicationForm.module.css";
 
 const sections = [
   { id: "personal", title: "Personal Details" },
