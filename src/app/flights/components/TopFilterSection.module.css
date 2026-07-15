@@ -1280,7 +1280,6 @@ padding-right: 20px;
     width: 100%;
     align-items: flex-start;
     gap: 0px;
-    margin-bottom: 12px;
   }
 
   /* Left Arrow */
@@ -1304,7 +1303,6 @@ padding-right: 20px;
   .routeText {
     font-family: Inter;
     font-weight: 500;
-    font-style: Medium;
     font-size: 15px;
     
     line-height: 100%;

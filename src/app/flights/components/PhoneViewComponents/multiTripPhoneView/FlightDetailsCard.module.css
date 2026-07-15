@@ -41,6 +41,9 @@
   color: #000000;
 }
 .flightCode {
+  font-weight: 400 !important;
+  line-height: 15.71px !important;
+
   color: #737373 !important;
 }
 .bookingPrice {
@@ -65,7 +68,7 @@
   width: 100%;
   justify-content: space-between;
   font-size: 11px;
-  
+
   line-height: 100%;
   letter-spacing: 0%;
   text-transform: uppercase;
@@ -73,7 +76,7 @@
 .bold {
   font-weight: 600;
 }
-.flightName{
+.flightName {
   text-transform: capitalize;
 }
 @media (max-width: 430px) {

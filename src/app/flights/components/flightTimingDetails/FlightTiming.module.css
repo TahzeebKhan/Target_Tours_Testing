@@ -19,7 +19,7 @@
   font-weight: 400;
   font-style: Regular;
   font-size: 34px;
-  line-height: 1.26;
+  line-height: 100%;
   letter-spacing: 0%;
   color: #000033;
 }
@@ -64,7 +64,7 @@
   font-family: Inter;
   font-weight: 400;
   font-size: 12px;
-  line-height: 1.2;
+  line-height: 100%;
   letter-spacing: 0%;
   text-transform: uppercase;
   color: #a3a3a3;
@@ -80,8 +80,8 @@
   font-family: Inter;
   font-weight: 400;
   font-size: 12px;
-  line-height: 1;
-  letter-spacing: -2%;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .hours {

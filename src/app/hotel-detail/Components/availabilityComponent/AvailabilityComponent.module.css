@@ -338,18 +338,18 @@
   border: 1px solid #dddfe3;
 }
 
-.showMoreBtn{
+.showMoreBtn {
   font-weight: 500;
-    font-style: Medium;
-    font-size: 11px;
-    line-height: 1.19;
-    letter-spacing: -2%;
-    vertical-align: middle;
-    color: #0604b2;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
+  font-style: Medium;
+  font-size: 11px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #0604b2;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 
 .featureList .showMoreItem {
@@ -503,7 +503,7 @@
   width: 100%;
   min-height: 40px;
   padding: 12px 24px;
-justify-content: center;
+  justify-content: center;
   background-color: #000033;
   color: #ffffff;
 
@@ -512,7 +512,10 @@ justify-content: center;
   text-transform: uppercase;
   cursor: pointer;
 
-  transition: background-color 0.35s ease, color 0.35s ease, opacity 0.35s ease,
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    opacity 0.35s ease,
     transform 0.35s ease;
 }
 
@@ -657,16 +660,16 @@ justify-content: center;
 }
 
 .comboOfferTaxes {
-font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 14px;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
 
-line-height: 100%;
-letter-spacing: 0%;
-text-align: right;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: right;
 
-  color: #4A5565;
+  color: #4a5565;
   text-align: right;
 }
 
@@ -676,14 +679,14 @@ text-align: right;
   padding: 14px 19px;
   background-color: #000033;
   color: #ffffff;
- font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 14px;
-line-height: 100%;
-letter-spacing: -2%;
-vertical-align: middle;
-text-transform: uppercase;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
 
   cursor: pointer;
 }
@@ -751,13 +754,13 @@ text-transform: uppercase;
 
 .comboInlineContent h4 {
   margin: 0;
- font-family: Inter;
-font-weight: 500;
-font-style: Medium;
-font-size: 18px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 18px;
 
-line-height: 24px;
-letter-spacing: -2%;
+  line-height: 24px;
+  letter-spacing: -2%;
 
   color: #000000;
 }
@@ -767,12 +770,12 @@ letter-spacing: -2%;
   flex-wrap: wrap;
   gap: 0;
   font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
 
-line-height: 24px;
-letter-spacing: -2%;
+  line-height: 24px;
+  letter-spacing: -2%;
 
   color: #343434;
 }
@@ -800,17 +803,16 @@ letter-spacing: -2%;
   line-height: 14px;
   color: #343434;
 }
-.comboFeatureList li span{
+.comboFeatureList li span {
   font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
 
-line-height: 100%;
-letter-spacing: -2%;
-vertical-align: middle;
-color:#0A0A0A;
-
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #0a0a0a;
 }
 .comboFeatureList img {
   width: 12px;
@@ -833,14 +835,14 @@ color:#0A0A0A;
   padding-left: 14px;
 }
 .comboInlinePerks li {
- font-family: Inter;
-font-weight: 400;
-font-style: Regular;
-font-size: 12px;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
 
-line-height: 100%;
-letter-spacing: -2%;
-vertical-align: middle;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
 
   color: #343434;
 }
@@ -856,27 +858,27 @@ vertical-align: middle;
   gap: 12px;
   padding-left: 14px;
 }
-.comboCancellation{
+.comboCancellation {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.comboCancellation img{
+.comboCancellation img {
   height: 10px;
   width: 13px;
 }
 
 .comboFooter span {
- font-family: Inter;
-font-weight: 500;
-font-style: Medium;
-font-size: 12px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
 
-line-height: 100%;
-letter-spacing: -2%;
-vertical-align: middle;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
 
-  color: #0604B2;
+  color: #0604b2;
 }
 
 /* Shared animation base */
@@ -1134,10 +1136,12 @@ vertical-align: middle;
 
 .detailsHeader h3 {
   margin: 0;
-  font-family: var(--font-inter);
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 600;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
   color: #000033;
 }
 
@@ -1167,9 +1171,12 @@ vertical-align: middle;
 
 .detailsSection h4 {
   margin: 0 0 14px;
-  font-family: var(--font-inter);
+  font-family: Inter;
+  font-weight: 600;
   font-size: 15px;
-  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: -1%;
+
   color: #000033;
   text-transform: uppercase;
 }
@@ -1182,10 +1189,15 @@ vertical-align: middle;
   border: 1px solid #e4e6e8;
 }
 
+/* .infoList {
+  border:none;
+} */
+
 .descriptionList {
   gap: 10px;
   padding: 14px 16px;
   font-family: var(--font-inter);
+  border: none;
 }
 
 .descriptionList p {
@@ -1243,7 +1255,6 @@ vertical-align: middle;
 .detailsEmpty {
   margin: 0;
   padding: 14px 16px;
-  border: 1px solid #e4e6e8;
   color: #667085;
   font-family: var(--font-inter);
   font-size: 13px;

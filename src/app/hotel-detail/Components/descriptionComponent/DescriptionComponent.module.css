@@ -120,6 +120,11 @@
     line-height: 1.55;
 }
 
+.htmlDescription p{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
 .htmlDescription p + p {
     margin-top: 10px;
 }
