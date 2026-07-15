@@ -129,8 +129,13 @@ const getStructuredCancellationRows = (fareRule = {}, platformCharges = null) =>
             }))
         );
 
-const buildFallbackCards = (flightData) =>
-    ["depart", "return"].map((key) => {
+const getActiveLegKeys = (activeLeg = "both") =>
+    activeLeg === "depart" || activeLeg === "return"
+        ? [activeLeg]
+        : ["depart", "return"];
+
+const buildFallbackCards = (flightData, activeLeg = "both") =>
+    getActiveLegKeys(activeLeg).map((key) => {
         const leg = flightData?.[key] || {};
         return {
             airline: {
@@ -142,8 +147,14 @@ const buildFallbackCards = (flightData) =>
         };
     });
 
-const buildCancellationRulesData = (fareRulesData, flightData, error, isLoading) => {
-    const fallbackCards = buildFallbackCards(flightData);
+const buildCancellationRulesData = (
+    fareRulesData,
+    flightData,
+    error,
+    isLoading,
+    activeLeg = "both"
+) => {
+    const fallbackCards = buildFallbackCards(flightData, activeLeg);
 
     if (isLoading) {
         return fallbackCards.map((card) => ({
@@ -190,13 +201,15 @@ const CancellationRules = ({
     fareRulesData = null,
     isLoading = false,
     error = "",
+    activeLeg = "both",
 }) => {
 
     const cancellationRulesData = buildCancellationRulesData(
         fareRulesData,
         flightData,
         error,
-        isLoading
+        isLoading,
+        activeLeg
     );
 
     return (

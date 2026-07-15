@@ -870,7 +870,10 @@ const Page = () => {
       <main className={styles.contentWrapper}>
         <div className={styles.leftContent}>
           <section ref={sectionRefs.Description}>
-            <DescriptionComponent description={hotelDetail?.description} />
+            <DescriptionComponent
+              description={hotelDetail?.description}
+              descriptions={hotelDetail?.descriptions}
+            />
           </section>
           <section ref={sectionRefs.Amenities}>
             <Amenities amenities={hotelDetail?.amenities} />

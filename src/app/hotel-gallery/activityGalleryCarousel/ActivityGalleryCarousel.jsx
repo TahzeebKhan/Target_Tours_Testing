@@ -24,53 +24,11 @@ const useIsMobile = (breakpoint = 600) => {
   return isMobile;
 };
 
-const FALLBACK_IMAGES = [
-  {
-    id: 1,
-    title: "Kitchen",
-    image: "/gallery/kitchen1.png",
-  },
-  {
-    id: 2,
-    title: "Bathroom",
-    image: "/gallery/bathroom2.png",
-  },
-  {
-    id: 3,
-    title: "Bedroom",
-    image: "/gallery/bedroom1.png",
-  },
-  {
-    id: 4,
-    title: "Living Room",
-    image: "/gallery/livingRoom2.png",
-  },
-  {
-    id: 5,
-    title: "Exterior",
-    image: "/gallery/Exterior.png",
-  },
-  {
-    id: 6,
-    title: "Activity",
-    image: "/gallery/Activity.png",
-  },
-  {
-    id: 7,
-    title: "Luxury Yacht Experience",
-    image: "/gallery/item6.png",
-  },
-  {
-    id: 8,
-    title: "Luxury Yacht Experience",
-    image: "/gallery/item6.png",
-  },
-  {
-    id: 9,
-    title: "Luxury Yacht Experience",
-    image: "/gallery/item6.png",
-  },
-];
+const FALLBACK_IMAGES = Array.from({ length: 5 }, (_, index) => ({
+  id: `fallback-gallery-${index}`,
+  title: `Photo ${index + 1}`,
+  image: "/fallback.png",
+}));
 
 const normalizeImages = (images = FALLBACK_IMAGES) =>
   (Array.isArray(images) ? images : FALLBACK_IMAGES)
@@ -89,7 +47,11 @@ const normalizeImages = (images = FALLBACK_IMAGES) =>
     )
     .filter((item) => item.image);
 
-const ActivityGalleryCarousel = ({ images = FALLBACK_IMAGES, disableNavigation = false }) => {
+const ActivityGalleryCarousel = ({
+  images = FALLBACK_IMAGES,
+  disableNavigation = false,
+  heading = "Hotel Gallery",
+}) => {
   const [swiperRef, setSwiperRef] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -112,7 +74,7 @@ const ActivityGalleryCarousel = ({ images = FALLBACK_IMAGES, disableNavigation =
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>Activity Gallery</h2>
+      <h2 className={styles.heading}>{heading}</h2>
       {isMobile ? (
         /* ================= MOBILE VIEW (NO SWIPER) ================= */
         <div className={styles.mobileGrid}>
@@ -185,54 +147,3 @@ const ActivityGalleryCarousel = ({ images = FALLBACK_IMAGES, disableNavigation =
 };
 
 export default ActivityGalleryCarousel;
-
-
-
-
-// const images = [
-//         {
-//             "id": 1,
-//             "title": "Kitchen",
-//             "image": "/gallery/kitchen1.png"
-//         },
-//         {
-//             "id": 2,
-//             "title": "Bathroom",
-//             "image": "/gallery/bathroom2.png"
-//         },
-//         {
-//             "id": 3,
-//             "title": "Bedroom",
-//             "image": "/gallery/bedroom1.png"
-//         },
-//         {
-//             "id": 4,
-//             "title": "Living Room",
-//             "image": "/gallery/livingroom2.png"
-//         },
-//         {
-//             "id": 5,
-//             "title": "Exterior",
-//             "image": "/gallery/Exterior.png"
-//         },
-//         {
-//             "id": 6,
-//             "title": "Activity",
-//             "image": "/gallery/Activity.png"
-//         },
-//         {
-//             "id": 7,
-//             "title": "Luxury Yacht Experience",
-//             "image": "/gallery/item6.png"
-//         },
-//         {
-//             "id": 8,
-//             "title": "Luxury Yacht Experience",
-//             "image": "/gallery/item6.png"
-//         },
-//         {
-//             "id": 9,
-//             "title": "Luxury Yacht Experience",
-//             "image": "/gallery/item6.png"
-//         }
-//     ]

@@ -1,5 +1,7 @@
 "use client";
+import { useState } from "react";
 import styles from "./Amenities.module.css";
+import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
 import {
     Wind, Wifi, Car, Utensils, Phone, Users, Sparkles,
     Droplet, Flame, Package, Scissors,
@@ -54,6 +56,8 @@ const getAmenityLabel = (amenity) => {
 };
 
 const Amenities = ({ amenities = [] }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    useBodyScrollLock(isModalOpen);
     const seenAmenities = new Set();
     const amenityItems = (Array.isArray(amenities) ? amenities : [])
         .map(getAmenityLabel)
@@ -70,37 +74,77 @@ const Amenities = ({ amenities = [] }) => {
 
     if (!amenityItems.length) return null;
 
-    const amenitiesData = [
-        {
-            title: "General",
-            items: amenityItems,
-        },
-    ];
+    const visibleAmenities = amenityItems.slice(0, 7);
+    const hasMoreAmenities = amenityItems.length > visibleAmenities.length;
+    const renderAmenityItem = (item) => {
+        const Icon = ICONS[item.icon];
+        if (!Icon) return null;
+
+        return (
+            <div key={item.label} className={styles.item}>
+                <div className={styles.iconBox}>
+                    <Icon size={20} />
+                </div>
+                <span>{item.label}</span>
+            </div>
+        );
+    };
+
     return (
         <section className={styles.section}>
             <h2 className={styles.heading}>Amenities</h2>
 
-            {amenitiesData.map((group) => (
-                <div key={group.title} className={styles.group}>
-                    <h3 className={styles.groupTitle}>{group.title}</h3>
+            <div className={styles.group}>
+                <h3 className={styles.groupTitle}>General</h3>
 
-                    <div className={styles.grid}>
-                        {group.items.map((item) => {
-                            const Icon = ICONS[item.icon];
-                            if (!Icon) return null;
+                <div className={styles.grid}>
+                    {visibleAmenities.map(renderAmenityItem)}
+                </div>
 
-                            return (
-                                <div key={item.label} className={styles.item}>
-                                    <div className={styles.iconBox}>
-                                        <Icon size={20} />
-                                    </div>
-                                    <span>{item.label}</span>
-                                </div>
-                            );
-                        })}
+                {hasMoreAmenities && (
+                    <button
+                        type="button"
+                        className={styles.seeMoreBtn}
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        See more
+                    </button>
+                )}
+            </div>
+
+            {isModalOpen && (
+                <div
+                    className={styles.modalOverlay}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="All amenities"
+                    onClick={() => setIsModalOpen(false)}
+                >
+                    <div
+                        className={styles.modal}
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className={styles.modalHeader}>
+                            <h3>Amenities</h3>
+                            <button
+                                type="button"
+                                className={styles.closeBtn}
+                                aria-label="Close amenities"
+                                onClick={() => setIsModalOpen(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className={styles.modalBody}>
+                            <h4>General</h4>
+                            <div className={styles.modalGrid}>
+                                {amenityItems.map(renderAmenityItem)}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            ))}
+            )}
         </section>
     );
 };

@@ -75,6 +75,206 @@ const getComboHeaderTitle = (comboRoom = {}, comboDetailRows = []) => {
   return `${comboRoom.title} - ${uniqueDetailTitles.join(" + ")}`;
 };
 
+const toArray = (value) => {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+};
+
+const formatDateTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const formatPolicyValue = (rule = {}) => {
+  const value = Number(rule.value ?? rule.estimatedValue ?? 0);
+  const valueType = String(rule.valueType || "").toLowerCase();
+
+  if (valueType === "percentage") return `${value}%`;
+  if (valueType === "amount") return `₹ ${value.toLocaleString("en-IN")}`;
+  if (Number.isFinite(value) && value > 0) return String(value);
+
+  return "Free";
+};
+
+const getCancellationPolicyRows = (room = {}) =>
+  toArray(room?.cancellationPolicies).flatMap((policy, policyIndex) =>
+    toArray(policy?.rules).map((rule, ruleIndex) => ({
+      id: `${policyIndex}-${ruleIndex}`,
+      title: policy?.text || "Cancellation policy",
+      value: formatPolicyValue(rule),
+      start: formatDateTime(rule?.start),
+      end: formatDateTime(rule?.end),
+    })),
+  );
+
+const getRoomInfoRows = (room = {}) => {
+  const rows = [];
+  const boardBasis = room?.boardBasis?.description || room?.boardBasis?.type;
+
+  if (boardBasis) rows.push({ label: "Board basis", value: boardBasis });
+
+  toArray(room?.includes).forEach((item) => {
+    if (item) rows.push({ label: "Includes", value: String(item) });
+  });
+
+  toArray(room?.additionalInformation).forEach((item) => {
+    const text = item?.text || item?.value || "";
+    const type = item?.type || "Information";
+    if (text) rows.push({ label: type, value: text });
+  });
+
+  toArray(room?.policies).forEach((item) => {
+    const text = item?.text || item?.description || item?.value || "";
+    const type = item?.type || item?.title || "Policy";
+    if (text) rows.push({ label: type, value: text });
+  });
+
+  return rows;
+};
+
+const getDetailText = (value) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value !== "object") return String(value);
+
+  return (
+    value.text ||
+    value.description ||
+    value.desc ||
+    value.value ||
+    value.name ||
+    value.label ||
+    ""
+  );
+};
+
+const getDescriptionRows = (room = {}) => {
+  const rows = [];
+
+  [
+    room?.descriptions,
+    room?.description,
+    room?.raw?.descriptions,
+    room?.raw?.description,
+  ].forEach((source) => {
+    toArray(source).forEach((item) => {
+      const text = getDetailText(item);
+      if (text) rows.push(String(text));
+    });
+  });
+
+
+  return [...new Set(rows.map((item) => item.trim()).filter(Boolean))];
+};
+
+const RoomDetailsModal = ({ room, onClose }) => {
+  if (!room) return null;
+
+  const descriptionRows = getDescriptionRows(room);
+  const policyRows = getCancellationPolicyRows(room);
+  const infoRows = getRoomInfoRows(room);
+
+  return (
+    <div
+      className={styles.detailsOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${room.title || "Room"} details`}
+      onClick={onClose}
+    >
+      <div
+        className={styles.detailsModal}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.detailsHeader}>
+          <div>
+            <h3>{room.title || "Room details"}</h3>
+            <p>{[room.beds, room.persons].filter(Boolean).join(" • ")}</p>
+          </div>
+          <button
+            type="button"
+            className={styles.detailsClose}
+            onClick={onClose}
+            aria-label="Close room details"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className={styles.detailsBody}>
+          <section className={styles.detailsSection}>
+            <h4>Description</h4>
+            {descriptionRows.length ? (
+              <div className={styles.descriptionList}>
+                {descriptionRows.map((description, index) => (
+                  <p key={index}>{description}</p>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.detailsEmpty}>
+                Room description is not available.
+              </p>
+            )}
+          </section>
+
+          <section className={styles.detailsSection}>
+            <h4>Cancellation Policies</h4>
+            {policyRows.length ? (
+              <div className={styles.policyList}>
+                {policyRows.map((policy) => (
+                  <div key={policy.id} className={styles.policyRow}>
+                    <div>
+                      <strong>{policy.title}</strong>
+                      <span>
+                        {policy.start || "Booking time"} to{" "}
+                        {policy.end || "check-in"}
+                      </span>
+                    </div>
+                    <b>{policy.value}</b>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.detailsEmpty}>
+                Cancellation policy is not available for this room.
+              </p>
+            )}
+          </section>
+
+          <section className={styles.detailsSection}>
+            <h4>Room Information</h4>
+            {infoRows.length ? (
+              <div className={styles.infoList}>
+                {infoRows.map((item, index) => (
+                  <div key={`${item.label}-${index}`} className={styles.infoRow}>
+                    <span>{item.label}</span>
+                    <p>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.detailsEmpty}>
+                No additional room details available.
+              </p>
+            )}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AvailabilitySkeleton = () => (
   <div className={styles.skeletonList} aria-label="Loading available rooms">
     {[0, 1].map((item) => (
@@ -119,8 +319,8 @@ const AvailabilityComponent = ({
 }) => {
   const swiperRefs = useRef({});
   const [roomQty, setRoomQty] = useState({});
-  const [expandedFeatureRooms, setExpandedFeatureRooms] = useState({});
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
+  const [detailsRoom, setDetailsRoom] = useState(null);
 
   const roomUnitMap = rooms.reduce((unitMap, room) => {
     unitMap[room.id] = getRoomUnitCount(room);
@@ -134,15 +334,6 @@ const AvailabilityComponent = ({
     );
   const comboRooms = rooms.filter((room) => Boolean(room.isCombo));
   const firstComboRoomId = comboRooms[0]?.id || "";
-
-  const toggleFeatureExpansion = (roomId) => {
-    if (actionDisabled) return;
-
-    setExpandedFeatureRooms((prev) => ({
-      ...prev,
-      [roomId]: !prev[roomId],
-    }));
-  };
 
   const toggleComboExpansion = (roomId) => {
     if (actionDisabled) return;
@@ -200,6 +391,11 @@ const AvailabilityComponent = ({
     if (actionDisabled) return;
     increase(id, maxQty, unitCount);
   };
+  const openRoomDetails = (room) => {
+    if (actionDisabled) return;
+    setDetailsRoom(room);
+  };
+  const closeRoomDetails = () => setDetailsRoom(null);
 
   return (
     <div className={styles.availabilitySection}>
@@ -226,11 +422,11 @@ const AvailabilityComponent = ({
         const selectedOtherTotal = selectedRoomTotal - Number(qty || 0) * roomUnitCount;
         const remainingUnits = Math.max(0, maxSelectableRooms - selectedOtherTotal);
         const hasReachedRoomLimit = remainingUnits < roomUnitCount;
-        const isFeatureExpanded = Boolean(expandedFeatureRooms[room.id]);
-        const visibleFeatures = features.slice(
-          0,
-          isFeatureExpanded ? features.length : 10,
-        );
+        const visibleFeatures = features.slice(0, 10);
+        const hasRoomDetailsData =
+          getDescriptionRows(room).length > 0 ||
+          getRoomInfoRows(room).length > 0 ||
+          getCancellationPolicyRows(room).length > 0;
 
         if (isCombo && room.id !== firstComboRoomId) {
           return null;
@@ -409,6 +605,7 @@ const AvailabilityComponent = ({
                                     type="button"
                                     className={styles.moreDetailsBtn}
                                     disabled={actionDisabled}
+                                    onClick={() => openRoomDetails(detailRoom)}
                                   >
                                     More Details
                                   </button>
@@ -490,15 +687,18 @@ const AvailabilityComponent = ({
                             {item.text}
                           </li>
                         ))}
-                        {features.length > 10 && (
-                        <button
-                          className={styles.showMoreBtn}
-                          disabled={actionDisabled}
-                          onClick={() => toggleFeatureExpansion(room.id)}
-                        >
-                          {isFeatureExpanded ? "...Show Less" : "...Show More"}
-                        </button>
-                      )}
+                        {(features.length > 10 || hasRoomDetailsData) && (
+                          <li className={styles.showMoreItem}>
+                            <button
+                              type="button"
+                              className={styles.showMoreBtn}
+                              disabled={actionDisabled}
+                              onClick={() => openRoomDetails(room)}
+                            >
+                              ...Show More
+                            </button>
+                          </li>
+                        )}
                       </ul>
 
                       
@@ -536,6 +736,7 @@ const AvailabilityComponent = ({
                     <button
                       className={styles.moreDetailsBtn}
                       disabled={actionDisabled}
+                      onClick={() => openRoomDetails(room)}
                     >
                       More Details
                     </button>
@@ -653,6 +854,8 @@ const AvailabilityComponent = ({
           </div>
         );
       })}
+
+      <RoomDetailsModal room={detailsRoom} onClose={closeRoomDetails} />
     </div>
   );
 };

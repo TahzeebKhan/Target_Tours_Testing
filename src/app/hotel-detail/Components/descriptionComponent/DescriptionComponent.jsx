@@ -1,83 +1,153 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "./DescriptionComponent.module.css";
+import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
 
-const DescriptionComponent = ({ description }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [charLimit, setCharLimit] = useState(null);
+const getDescriptionText = (value) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value !== "object") return String(value);
 
-  const fullText = String(description || "Hotel details are being updated.").trim();
+  return (
+    value.text ||
+    value.description ||
+    value.desc ||
+    value.value ||
+    value.name ||
+    value.label ||
+    ""
+  );
+};
 
-  // 1. Check total word count from the raw text
-  const words = fullText.split(/\s+/).filter(Boolean);
-  const isLongText = words.length > 100; // Only truncate if total text > 100 words
+const normalizeDescriptions = (description, descriptions) => {
+  const rows = [];
 
-  // 2. Split into clean paragraphs for rendering
-  const paragraphs = fullText
+  (Array.isArray(descriptions) ? descriptions : [descriptions]).forEach((item) => {
+    const text = getDescriptionText(item);
+    if (text) rows.push(String(text));
+  });
+
+  const fallbackText = getDescriptionText(description);
+  const isGeneratedFallback = /details are being updated/i.test(fallbackText);
+  if (fallbackText && (!rows.length || !isGeneratedFallback)) {
+    rows.push(String(fallbackText));
+  }
+
+  return [...new Set(rows.map((item) => item.trim()).filter(Boolean))];
+};
+
+const stripHtml = (value = "") =>
+  String(value)
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/p>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const sanitizeHtml = (value = "") =>
+  String(value)
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/javascript:/gi, "");
+
+const hasHtml = (value = "") => /<\/?[a-z][\s\S]*>/i.test(String(value));
+
+const formatLabel = (value = "") =>
+  String(value)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const splitDescriptionLabel = (value = "") => {
+  const match = String(value).match(/^([a-zA-Z_][\w\s-]{1,40}):\s*([\s\S]+)$/);
+
+  if (!match) {
+    return { label: "", content: String(value) };
+  }
+
+  return {
+    label: formatLabel(match[1]),
+    content: match[2],
+  };
+};
+
+const DescriptionComponent = ({ description, descriptions = [] }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  useBodyScrollLock(isModalOpen);
+  const descriptionRows = normalizeDescriptions(description, descriptions);
+  const fullText = (
+    descriptionRows.length ? descriptionRows.join("\n") : "Hotel details are being updated."
+  ).trim();
+  const plainPreview = stripHtml(fullText);
+  const previewText = plainPreview.length > 220 ? `${plainPreview.slice(0, 220)}...` : plainPreview;
+  const paragraphs = previewText
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-
-  // 3. Screen-size based character limit
-  useEffect(() => {
-    const updateLimit = () => {
-      const width = window.innerWidth;
-
-      if (width <= 640) {
-        setCharLimit(489);
-      } else if (width <= 1920) {
-        setCharLimit(730);
-      } else {
-        setCharLimit(null); // desktop → no truncate
-      }
-    };
-
-    updateLimit();
-    window.addEventListener("resize", updateLimit);
-    return () => window.removeEventListener("resize", updateLimit);
-  }, []);
-
-  let usedChars = 0;
-
-  // Truncate ONLY if:
-  // - It's not expanded
-  // - There is a character limit for this screen size
-  // - The text actually meets your minimum length requirement (> 100 words)
-  const shouldTruncate = charLimit !== null && !expanded && isLongText;
 
   return (
     <div className={styles.DescriptionSection}>
       <h2 className={styles.heading}>Description</h2>
 
       <div className={styles.paraCont}>
-        {paragraphs.map((para, idx) => {
-          // If we shouldn't truncate, render full paragraph
-          if (!shouldTruncate) {
-            return <p key={idx}>{para}</p>;
-          }
-
-          if (usedChars >= charLimit) return null;
-
-          const remaining = charLimit - usedChars;
-
-          if (para.length <= remaining) {
-            usedChars += para.length;
-            return <p key={idx}>{para}</p>;
-          }
-
-          usedChars = charLimit;
-          return <p key={idx}>{para.slice(0, remaining)}...</p>;
-        })}
+        {paragraphs.map((para, idx) => (
+          <p key={idx}>{para}</p>
+        ))}
       </div>
 
-      {/* Only show the button if the text passes the 100-word mark AND the screen size has a limit */}
-      {isLongText && charLimit !== null && (
-        <button
-          className={styles.seeMoreBtn}
-          onClick={() => setExpanded(!expanded)}
+      <button
+        type="button"
+        className={styles.seeMoreBtn}
+        onClick={() => setIsModalOpen(true)}
+      >
+        See more
+      </button>
+
+      {isModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Hotel description"
+          onClick={() => setIsModalOpen(false)}
         >
-          {expanded ? "See less" : "See more"}
-        </button>
+          <div
+            className={styles.modal}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3>Description</h3>
+              <button
+                type="button"
+                className={styles.closeBtn}
+                aria-label="Close description"
+                onClick={() => setIsModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {(descriptionRows.length ? descriptionRows : [fullText]).map((item, index) => {
+                const { label, content } = splitDescriptionLabel(item);
+
+                return (
+                  <div key={index} className={styles.modalDescriptionItem}>
+                    {label && <h4>{label}</h4>}
+                    {hasHtml(content) ? (
+                      <div
+                        className={styles.htmlDescription}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
+                      />
+                    ) : (
+                      <p>{content}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

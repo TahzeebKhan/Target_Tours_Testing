@@ -62,7 +62,13 @@ const HotelGallery = ({ images = [] }) => {
             ? { image: normalizeImageUrl(item), title: `Photo ${index + 1}` }
             : {
                 image: normalizeImageUrl(
-                    item?.image || item?.url || item?.src,
+                    item?.image ||
+                    item?.url ||
+                    item?.src ||
+                    item?.imageUrl ||
+                    item?.thumbnail ||
+                    item?.coverImage ||
+                    item?.heroImage,
                 ),
                 title:
                   item?.title ||
