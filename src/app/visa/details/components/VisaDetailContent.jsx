@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import styles from "./VisaDetailContent.module.css";
+import styles from "./VisaDetailSection.module.css";
 
 const OVERVIEW_METRICS = [
   { label: "STATUS", value: "On track for approval" },
