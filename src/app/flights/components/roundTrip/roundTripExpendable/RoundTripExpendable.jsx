@@ -509,20 +509,21 @@ const getTimelineConnectionsFromLeg = (leg = {}, fallbackAirline = {}) => {
   });
 };
 
-const buildAncillaryPayload = (flightData) => {
+const buildAncillaryPayload = (flightData, activeLeg = "both") => {
   const priceRequest = flightData?.booking?.priceRequest || {};
   const fallbackAmount = parseCurrencyAmount(flightData?.fare?.totalFare);
-  const isRoundTrip =
-    String(priceRequest?.TripType || flightData?.booking?.tripType || "")
-      .trim()
-      .toUpperCase() === "RT";
-  const trips = toArray(priceRequest?.Trips).map((trip,index) => ({
-    Amount: trip?.Amount ?? fallbackAmount,
-    Index: trip?.Index,
-    OrderID: index +1,
-    TUI: trip?.TUI,
-    ChannelCode: trip?.ChannelCode ?? null,
-  }));
+  const activeTripIndex =
+    activeLeg === "depart" ? 0 : activeLeg === "return" ? 1 : null;
+  const trips = toArray(priceRequest?.Trips)
+    .map((trip, index) => ({ trip, index }))
+    .filter(({ index }) => activeTripIndex === null || index === activeTripIndex)
+    .map(({ trip, index }) => ({
+      Amount: trip?.Amount ?? fallbackAmount,
+      Index: trip?.Index,
+      OrderID: trip?.OrderID ?? index + 1,
+      TUI: trip?.TUI,
+      ChannelCode: trip?.ChannelCode ?? null,
+    }));
 
   return {
     provider:
@@ -584,6 +585,7 @@ const RoundTripExpendable = ({
   flightData = null,
   flightInfoData = null,
   isFlightInfoLoading = false,
+  activeLeg = "both",
 }) => {
   const [activeTab, setActiveTab] = useState("flight");
   const handleTabClick = (next) => setActiveTab(next);
@@ -596,6 +598,8 @@ const RoundTripExpendable = ({
   const [fareRulesRequestKey, setFareRulesRequestKey] = useState("");
   const [isFareRulesLoading, setIsFareRulesLoading] = useState(false);
   const [fareRulesError, setFareRulesError] = useState("");
+  const showDepartLeg = activeLeg === "both" || activeLeg === "depart";
+  const showReturnLeg = activeLeg === "both" || activeLeg === "return";
   const departTimeline = flightData
     ? toTimelineFlight(flightData.depart, flightData.depart?.airline)
     : null;
@@ -764,7 +768,7 @@ const RoundTripExpendable = ({
   useEffect(() => {
     if (activeTab !== "baggage") return;
 
-    const payload = buildAncillaryPayload(flightData);
+    const payload = buildAncillaryPayload(flightData, activeLeg);
     const requestKey = getAncillaryRequestKey(payload);
    
 
@@ -801,12 +805,12 @@ const RoundTripExpendable = ({
     return () => {
       isMounted = false;
     };
-  }, [activeTab, flightData]);
+  }, [activeTab, flightData, activeLeg]);
 
   useEffect(() => {
     if (activeTab !== "cancellation") return;
 
-    const payload = buildAncillaryPayload(flightData);
+    const payload = buildAncillaryPayload(flightData, activeLeg);
     const requestKey = getAncillaryRequestKey(payload);
 
     if (
@@ -847,7 +851,7 @@ const RoundTripExpendable = ({
     return () => {
       isMounted = false;
     };
-  }, [activeTab, flightData]);
+  }, [activeTab, flightData, activeLeg]);
 
   return (
     <div className={styles.expandableSection}>
@@ -873,79 +877,87 @@ const RoundTripExpendable = ({
 
         {activeTab === "flight" && (
           <div className={styles.flightInfoContainer}>
-            <div className={styles.leftFlightInfoCont}>
-              <div className={styles.flightHeading}>
-                <h3>
-                  {departHeading} <img src="/icons/flightIconBlue.svg" alt="" />{" "}
-                  <span className={styles.smallerHeadingText}>
-                    {departArrival}, {flightData?.depart?.date || "18 Dec 2025"}
-                  </span>
-                </h3>
+            {isFlightInfoLoading && (
+              <div className={styles.changeOfPlanes}>Loading flight details...</div>
+            )}
+            {flightInfoData?.error && (
+              <div className={styles.changeOfPlanes}>Unable to load live flight details.</div>
+            )}
+            {showDepartLeg && (
+              <div className={styles.leftFlightInfoCont}>
+                <div className={styles.flightHeading}>
+                  <h3>
+                    {departHeading} <img src="/icons/flightIconBlue.svg" alt="" />{" "}
+                    <span className={styles.smallerHeadingText}>
+                      {departArrival}, {flightData?.depart?.date || "18 Dec 2025"}
+                    </span>
+                  </h3>
+                </div>
+                <div className={styles.mainBody}>
+                  {departTimelines.map((timeline, index) => (
+                    <React.Fragment key={`depart-${timeline.airline.code}-${index}`}>
+                      <FlightTimeline flight={timeline} />
+                      {index < departTimelines.length - 1 && (
+                        <div className={styles.changeOfPlanes}>
+                          Change of Aircraft:
+                          <span className={styles.changeOfPlanesTiem}>
+                            {timeline.layoverDuration || "N/A"}
+                          </span>
+                          in {timeline.layoverAirport || "N/A"}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-              {isFlightInfoLoading && (
-                <div className={styles.changeOfPlanes}>Loading flight details...</div>
-              )}
-              {flightInfoData?.error && (
-                <div className={styles.changeOfPlanes}>Unable to load live flight details.</div>
-              )}
-              <div className={styles.mainBody}>
-                {departTimelines.map((timeline, index) => (
-                  <React.Fragment key={`depart-${timeline.airline.code}-${index}`}>
-                    <FlightTimeline flight={timeline} />
-                    {index < departTimelines.length - 1 && (
-                      <div className={styles.changeOfPlanes}>
-                        Change of Aircraft:
-                        <span className={styles.changeOfPlanesTiem}>
-                          {timeline.layoverDuration || "N/A"}
-                        </span>
-                        in {timeline.layoverAirport || "N/A"}
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
+            )}
+            {showReturnLeg && (
+              <div className={styles.rightFlightInfoCont}>
+                <div className={styles.flightHeading}>
+                  <h3>
+                    {returnHeading} <img src="/icons/flightIconBlue.svg" alt="" />{" "}
+                    <span className={styles.smallerHeadingText}>
+                      {returnArrival}, {flightData?.return?.date || "25 Dec 2025"}
+                    </span>
+                  </h3>
+                </div>
+                <div className={styles.mainBody}>
+                  {returnTimelines.map((timeline, index) => (
+                    <React.Fragment key={`return-${timeline.airline.code}-${index}`}>
+                      <FlightTimeline flight={timeline} />
+                      {index < returnTimelines.length - 1 && (
+                        <div className={styles.changeOfPlanes}>
+                          Change of Aircraft:
+                          <span className={styles.changeOfPlanesTiem}>
+                            {timeline.layoverDuration || "N/A"}
+                          </span>
+                          in {timeline.layoverAirport || "N/A"}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className={styles.rightFlightInfoCont}>
-              <div className={styles.flightHeading}>
-                <h3>
-                  {returnHeading} <img src="/icons/flightIconBlue.svg" alt="" />{" "}
-                  <span className={styles.smallerHeadingText}>
-                    {returnArrival}, {flightData?.return?.date || "25 Dec 2025"}
-                  </span>
-                </h3>
-              </div>
-              <div className={styles.mainBody}>
-                {returnTimelines.map((timeline, index) => (
-                  <React.Fragment key={`return-${timeline.airline.code}-${index}`}>
-                    <FlightTimeline flight={timeline} />
-                    {index < returnTimelines.length - 1 && (
-                      <div className={styles.changeOfPlanes}>
-                        Change of Aircraft:
-                        <span className={styles.changeOfPlanesTiem}>
-                          {timeline.layoverDuration || "N/A"}
-                        </span>
-                        in {timeline.layoverAirport || "N/A"}
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
         {activeTab === "fare" && (
           <div className={styles.flightFareContaienr}>
-            <FlightFare
-              flightData={flightData}
-              leg={flightData?.depart}
-              tripIndex={0}
-            />
-            <FlightFare
-              flightData={flightData}
-              leg={flightData?.return}
-              tripIndex={1}
-            />
+            {showDepartLeg && (
+              <FlightFare
+                flightData={flightData}
+                leg={flightData?.depart}
+                tripIndex={0}
+              />
+            )}
+            {showReturnLeg && (
+              <FlightFare
+                flightData={flightData}
+                leg={flightData?.return}
+                tripIndex={1}
+              />
+            )}
           </div>
         )}
 
@@ -956,6 +968,7 @@ const RoundTripExpendable = ({
               ssrData={ssrData}
               isLoading={isSsrLoading}
               error={ssrError}
+              activeLeg={activeLeg}
             />
           </div>
         )}
@@ -967,6 +980,7 @@ const RoundTripExpendable = ({
               fareRulesData={fareRulesData}
               isLoading={isFareRulesLoading}
               error={fareRulesError}
+              activeLeg={activeLeg}
             />
           </div>
         )}

@@ -84,7 +84,10 @@ const TripCard = ({
 }) => {
   const isMobileViewport = useMediaQuery("(max-width: 430px)");
   const { isLoggedIn, loading: authLoading } = useAuth();
-  const [openId, setOpenId] = useState(null);
+  const [openDetails, setOpenDetails] = useState({
+    depart: {},
+    return: {},
+  });
   const [prefetchedFareData, setPrefetchedFareData] = useState({});
   const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
   const [flightInfoData, setFlightInfoData] = useState({});
@@ -95,8 +98,6 @@ const TripCard = ({
   const [selectedDepartId, setSelectedDepartId] = useState(null);
   const [selectedReturnId, setSelectedReturnId] = useState(null);
   const [fareModalFlight, setFareModalFlight] = useState(null);
-  const [detailFlight, setDetailFlight] = useState(null);
-  const [detailRowId, setDetailRowId] = useState(null);
   const [columnSort, setColumnSort] = useState({
     depart: { key: null, direction: "asc" },
     return: { key: null, direction: "asc" },
@@ -328,14 +329,27 @@ const TripCard = ({
     };
   };
 
-  const toggleDetails = async (flight, rowId) => {
+  const toggleDetails = async (flight, rowId, columnType) => {
     const flightId = flight?.id;
     if (!flightId) return;
 
-    const isClosing = openId === flightId;
-    setOpenId(isClosing ? null : flightId);
-    setDetailFlight(isClosing ? null : flight);
-    setDetailRowId(isClosing ? null : rowId);
+    const isClosing = openDetails[columnType]?.[rowId]?.id === flightId;
+
+    setOpenDetails((current) => {
+      const nextColumnDetails = { ...(current[columnType] || {}) };
+
+      if (isClosing) {
+        delete nextColumnDetails[rowId];
+      } else {
+        nextColumnDetails[rowId] = flight;
+      }
+
+      return {
+        ...current,
+        [columnType]: nextColumnDetails,
+      };
+    });
+
     if (isClosing || flightInfoData[flightId] || loadingFlightInfoId === flightId) return;
 
     const payload = buildFlightInfoPayload(flight);
@@ -493,6 +507,7 @@ const TripCard = ({
     const isSelected = isDepart
       ? selectedDepartId === item.id
       : selectedReturnId === item.id;
+    const isDetailsOpen = openDetails[type]?.[item.id]?.id === detailItem.id;
     const onSelect = () =>
       isDepart ? setSelectedDepartId(item.id) : setSelectedReturnId(item.id);
 
@@ -562,13 +577,13 @@ const TripCard = ({
               className={styles.inlineDetailsBtn}
               onClick={(event) => {
                 event.stopPropagation();
-                toggleDetails(detailItem, item.id);
+                toggleDetails(detailItem, item.id, type);
               }}
             >
               See Details
               <svg
                 className={`${styles.downArrow} ${
-                  openId === detailItem.id ? styles.rotate : ""
+                  isDetailsOpen ? styles.rotate : ""
                 }`}
                 width="8"
                 height="5"
@@ -640,11 +655,14 @@ const TripCard = ({
             const departItem = sortedDepartCards[index] || null;
             const returnItem = sortedReturnCards[index] || null;
             const rowKey = `${departItem?.id || "empty-depart"}-${returnItem?.id || "empty-return"}-${index}`;
-            const isRowOpen =
-              departItem &&
-              detailRowId === departItem.id &&
-              detailFlight &&
-              openId === detailFlight.id;
+            const departDetailFlight = departItem
+              ? openDetails.depart?.[departItem.id] || null
+              : null;
+            const returnDetailFlight = returnItem
+              ? openDetails.return?.[returnItem.id] || null
+              : null;
+            const isRowOpen = Boolean(departDetailFlight);
+            const isReturnRowOpen = Boolean(returnDetailFlight);
 
             return (
               <div key={rowKey} className={styles.roundTripRow}>
@@ -659,9 +677,10 @@ const TripCard = ({
                   >
                     {isRowOpen && (
                       <RoundTripExpendable
-                        flightData={detailFlight}
-                        flightInfoData={flightInfoData[detailFlight.id]}
-                        isFlightInfoLoading={loadingFlightInfoId === detailFlight.id}
+                        flightData={departDetailFlight}
+                        flightInfoData={flightInfoData[departDetailFlight.id]}
+                        isFlightInfoLoading={loadingFlightInfoId === departDetailFlight.id}
+                        activeLeg="depart"
                       />
                     )}
                   </div>
@@ -670,6 +689,20 @@ const TripCard = ({
                 <div className={styles.roundRowColumn}>
                   <div className={styles.roundOptionList}>
                     {returnItem && renderLegOption(returnItem, "return")}
+                  </div>
+                  <div
+                    className={`${styles.expandWrap} ${styles.roundRowExpand} ${
+                      isReturnRowOpen ? styles.open : ""
+                    }`}
+                  >
+                    {isReturnRowOpen && (
+                      <RoundTripExpendable
+                        flightData={returnDetailFlight}
+                        flightInfoData={flightInfoData[returnDetailFlight.id]}
+                        isFlightInfoLoading={loadingFlightInfoId === returnDetailFlight.id}
+                        activeLeg="return"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

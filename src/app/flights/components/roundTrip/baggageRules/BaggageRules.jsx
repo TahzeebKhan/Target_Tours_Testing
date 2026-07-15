@@ -96,8 +96,13 @@ const splitBaggageName = (name) => {
     };
 };
 
-const buildFallbackRows = (flightData) =>
-    ["depart", "return"].map((key) => {
+const getActiveLegKeys = (activeLeg = "both") =>
+    activeLeg === "depart" || activeLeg === "return"
+        ? [activeLeg]
+        : ["depart", "return"];
+
+const buildFallbackRows = (flightData, activeLeg = "both") =>
+    getActiveLegKeys(activeLeg).map((key) => {
         const leg = flightData?.[key] || {};
         return {
             id: `fallback-${key}`,
@@ -165,8 +170,14 @@ const extractBaggageRows = (ssrData, fallbackRows) => {
     return [];
 };
 
-const BaggageRules = ({ flightData = null, ssrData = null, isLoading = false, error = "" }) => {
-    const fallbackRows = buildFallbackRows(flightData);
+const BaggageRules = ({
+    flightData = null,
+    ssrData = null,
+    isLoading = false,
+    error = "",
+    activeLeg = "both",
+}) => {
+    const fallbackRows = buildFallbackRows(flightData, activeLeg);
     const rows = isLoading
         ? fallbackRows.map((row) => ({ ...row, checkin: "Loading...", cabin: "Please wait" }))
         : extractBaggageRows(ssrData, fallbackRows);

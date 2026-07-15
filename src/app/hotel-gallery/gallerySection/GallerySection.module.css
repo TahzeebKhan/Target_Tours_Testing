@@ -18,7 +18,7 @@
 .galleryBottom{
 
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     height: 373px;
     overflow: hidden;
@@ -38,7 +38,7 @@
     /* display: flex; */
     height: 373px;
     display: grid;
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     /* height: 373px; */
     overflow: hidden;
@@ -46,6 +46,7 @@
 .galleryTop img{
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
 
 .galleryBottomMobile{
@@ -112,4 +113,3 @@
         display: none;
     }
 }
-

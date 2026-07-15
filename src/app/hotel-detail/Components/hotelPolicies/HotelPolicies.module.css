@@ -72,6 +72,124 @@
 
 }
 
+.right ul,
+.right ol {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.right li + li {
+    margin-top: 4px;
+}
+
+.viewBtn {
+    width: fit-content;
+    display: block;
+    margin-top: 8px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.19;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    color: #000033;
+    cursor: pointer;
+}
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+    width: min(720px, 100%);
+    max-height: min(78vh, 760px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #e4e6e8;
+}
+
+.modalHeader h3 {
+    margin: 0;
+    font-family: var(--font-inter);
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 600;
+    color: #000033;
+}
+
+.closeBtn {
+    border: 0;
+    background: transparent;
+    color: #000033;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modalBody {
+    overflow: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-family: var(--font-inter);
+    color: #383E48;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.instructionSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.instructionSection h4 {
+    margin: 0;
+    font-family: var(--font-inter);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: #000033;
+}
+
+.instructionList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modalBody ul,
+.modalBody ol {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.modalBody li + li {
+    margin-top: 8px;
+}
+
 @media (max-width: 1200px){
     .heading{
         font-size: 30px;

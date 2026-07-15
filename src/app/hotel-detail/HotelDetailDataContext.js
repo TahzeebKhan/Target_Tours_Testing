@@ -243,11 +243,11 @@ const findFirstObject = (value, predicate, depth = 0, seen = new WeakSet()) => {
 };
 
 const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
-  if (!value || images.length >= 12 || depth > 6) return images;
+  if (!value || images.length >= 30 || depth > 6) return images;
 
   if (typeof value === "string") {
     const imageUrl = normalizeImageUrl(value);
-    if (/^https?:\/\//.test(imageUrl) || imageUrl.startsWith("/images/")) {
+    if (/^https?:\/\//.test(imageUrl) || imageUrl.startsWith("/")) {
       images.push(imageUrl);
     }
     return images;
@@ -261,11 +261,32 @@ const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
     return images;
   }
 
-  [value.url, value.image].forEach((candidate) =>
+  [
+    value.url,
+    value.image,
+    value.src,
+    value.imageUrl,
+    value.thumbnail,
+    value.coverImage,
+    value.heroImage,
+  ].forEach((candidate) =>
     collectImages(candidate, images, depth + 1, seen),
   );
 
-  ["images", "photos", "gallery", "media", "hotelImages", "room", "roomGroup"].forEach((key) => {
+  [
+    "images",
+    "galleryImages",
+    "photos",
+    "gallery",
+    "media",
+    "hotelImages",
+    "hotelGallery",
+    "hotel_gallery",
+    "room",
+    "roomGroup",
+    "content",
+    "hotel",
+  ].forEach((key) => {
     collectImages(value[key], images, depth + 1, seen);
   });
 
@@ -424,7 +445,15 @@ const normalizeGalleryItem = (value, fallbackTitle = "", depth = 0) => {
 
   if (typeof value !== "object") return null;
 
-  const image = value.url || value.image || "";
+  const image =
+    value.url ||
+    value.image ||
+    value.src ||
+    value.imageUrl ||
+    value.thumbnail ||
+    value.coverImage ||
+    value.heroImage ||
+    "";
 
   const imageUrl = normalizeImageUrl(image);
 
@@ -448,7 +477,7 @@ const normalizeGalleryItem = (value, fallbackTitle = "", depth = 0) => {
 };
 
 const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet()) => {
-  if (!value || items.length >= 20 || depth > 6) return items;
+  if (!value || items.length >= 30 || depth > 6) return items;
 
   if (typeof value === "string") {
     const item = normalizeGalleryItem(value);
@@ -468,11 +497,21 @@ const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet())
   if (currentItem) items.push(currentItem);
 
   [
+    value.image,
+    value.url,
+    value.src,
+    value.imageUrl,
+    value.thumbnail,
+    value.coverImage,
+    value.heroImage,
     value.images,
     value.galleryImages,
+    value.gallery,
     value.photos,
     value.media,
     value.hotelImages,
+    value.hotelGallery,
+    value.hotel_gallery,
     value.room,
     value.roomGroup,
     value.details,
@@ -485,19 +524,49 @@ const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet())
 const extractGalleryImages = (stored = {}, routeHotelId = "") => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
+  const content = data?.content || detailsPayload?.content || {};
+  const contentHotel = content?.hotel || {};
   const foundHotel = findFirstObject(
     data,
     (item) => item.name && item.addressLine1,
   );
   const hotel = {
     ...(stored?.hotel?.raw || {}),
+    ...(contentHotel || {}),
     ...(foundHotel || {}),
     ...(stored?.hotel || {}),
   };
   const preferredGalleryItems = [
+    contentHotel.images,
+    contentHotel.galleryImages,
+    contentHotel.gallery,
+    contentHotel.photos,
+    contentHotel.media,
+    contentHotel.hotelImages,
+    content.images,
+    content.galleryImages,
+    content.gallery,
+    content.photos,
+    content.media,
+    content.hotelImages,
     data.images,
+    data.galleryImages,
+    data.gallery,
+    data.photos,
+    data.media,
+    data.hotelImages,
     foundHotel?.images,
+    foundHotel?.galleryImages,
+    foundHotel?.gallery,
+    foundHotel?.photos,
+    foundHotel?.media,
+    foundHotel?.hotelImages,
     hotel.images,
+    hotel.galleryImages,
+    hotel.gallery,
+    hotel.photos,
+    hotel.media,
+    hotel.hotelImages,
   ].flatMap((item) => collectGalleryItems(item));
 
   const galleryItems = [
@@ -518,7 +587,7 @@ const extractGalleryImages = (stored = {}, routeHotelId = "") => {
     return [{ image: FALLBACK_IMAGE, title: "Photo 1" }];
   }
 
-  return uniqueItems.slice(0, 12);
+  return uniqueItems.slice(0, 30);
 };
 
 const normalizeFacilities = (facilities = []) =>
@@ -666,6 +735,9 @@ const normalizeTextItems = (value) => {
 
   return [];
 };
+
+const getDescriptionItems = (...values) =>
+  uniqueTexts(values.flatMap((value) => normalizeTextItems(value)));
 
 const getRoomPolicyTexts = (room = {}, roomDetail = {}, recommendation = {}, isRefundable = false) => {
   const policies = [
@@ -902,6 +974,39 @@ const normalizeRooms = (data = {}, hotel = {}) => {
               isRefundable,
           ),
         ),
+        cancellationPolicies:
+          comboRoom.cancellationPolicies ||
+          comboRoomDetail.cancellationPolicies ||
+          recommendation.cancellationPolicies ||
+          [],
+        policies:
+          comboRoom.policies ||
+          comboRoomDetail.policies ||
+          recommendation.policies ||
+          [],
+        additionalInformation:
+          comboRoom.additionalInformation ||
+          comboRoomDetail.additionalInformation ||
+          recommendation.additionalInformation ||
+          [],
+        includes:
+          comboRoom.includes ||
+          comboRoomDetail.includes ||
+          recommendation.includes ||
+          [],
+        boardBasis:
+          comboRoom.boardBasis ||
+          comboRoomDetail.boardBasis ||
+          recommendation.boardBasis ||
+          null,
+        descriptions: getDescriptionItems(
+          comboRoom.descriptions,
+          comboRoom.description,
+          comboRoomDetail.descriptions,
+          comboRoomDetail.description,
+          recommendation.descriptions,
+          recommendation.description,
+        ),
         pricePerNight: getCurrencyNumber(comboRoomPrice),
         publishedRate: getCurrencyNumber(comboPublishedRate),
         taxPerNight: getCurrencyNumber(comboTaxes),
@@ -960,6 +1065,39 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       ),
       featuresLeft: getRoomFeatureTexts(roomDetail, recommendation, hotel),
       benefits: getRoomPolicyTexts(primaryRoomGroup, roomDetail, recommendation, isRefundable),
+      cancellationPolicies:
+        primaryRoomGroup.cancellationPolicies ||
+        roomDetail.cancellationPolicies ||
+        recommendation.cancellationPolicies ||
+        [],
+      policies:
+        primaryRoomGroup.policies ||
+        roomDetail.policies ||
+        recommendation.policies ||
+        [],
+      additionalInformation:
+        primaryRoomGroup.additionalInformation ||
+        roomDetail.additionalInformation ||
+        recommendation.additionalInformation ||
+        [],
+      includes:
+        primaryRoomGroup.includes ||
+        roomDetail.includes ||
+        recommendation.includes ||
+        [],
+      boardBasis:
+        primaryRoomGroup.boardBasis ||
+        roomDetail.boardBasis ||
+        recommendation.boardBasis ||
+        null,
+      descriptions: getDescriptionItems(
+        primaryRoomGroup.descriptions,
+        primaryRoomGroup.description,
+        roomDetail.descriptions,
+        roomDetail.description,
+        recommendation.descriptions,
+        recommendation.description,
+      ),
       cancellation: isRefundable ? "Refundable booking" : "Non refundable booking",
       rating: {
         label: "Excellent",
@@ -982,41 +1120,99 @@ const normalizeRooms = (data = {}, hotel = {}) => {
 };
 
 const normalizePolicies = (data = {}, hotel = {}) => {
-  const policies = data.policies || data.hotelPolicies || data.policy || {};
-  const policyArray = Array.isArray(policies) ? policies : [];
+  const contentHotel = data?.content?.hotel || {};
+  const hotelSource = { ...contentHotel, ...hotel };
+  const sourcePolicies =
+    hotelSource.policies ||
+    data.policies ||
+    data.hotelPolicies ||
+    data.policy ||
+    [];
+  const policyArray = Array.isArray(sourcePolicies) ? sourcePolicies : [];
+  const rows = [];
+  const pushRow = (title, description) => {
+    if (description && typeof description === "object" && !Array.isArray(description)) {
+      const hasObjectContent = Object.values(description).some((value) =>
+        Array.isArray(value) ? value.filter(Boolean).length : Boolean(value),
+      );
 
-  if (policyArray.length) {
-    return policyArray.map((policy) => ({
-      title: String(policy.title || policy.name || "POLICY").toUpperCase(),
-      description: policy.description || policy.text || policy.value || "",
-    }));
+      if (!title || !hasObjectContent) return;
+
+      rows.push({
+        title: String(title).replace(/_/g, " ").toUpperCase(),
+        description,
+      });
+      return;
+    }
+
+    const text = Array.isArray(description)
+      ? description.filter(Boolean).join("\n")
+      : description;
+
+    if (!title || !text) return;
+
+    rows.push({
+      title: String(title).replace(/_/g, " ").toUpperCase(),
+      description: String(text).trim(),
+    });
+  };
+
+  policyArray.forEach((policy) => {
+    pushRow(
+      policy.title || policy.name || policy.type || "POLICY",
+      policy.description || policy.text || policy.value,
+    );
+  });
+
+  const checkinInfo = hotelSource.checkinInfo || hotelSource.checkInInfo || {};
+  const checkoutInfo = hotelSource.checkoutInfo || hotelSource.checkOutInfo || {};
+
+  pushRow(
+    "CHECK-IN",
+    [
+      checkinInfo.beginTime ? `From ${checkinInfo.beginTime}` : "",
+      checkinInfo.endTime ? `Until ${checkinInfo.endTime}` : "",
+      checkinInfo.minAge ? `Minimum check-in age: ${checkinInfo.minAge}` : "",
+      sourcePolicies.checkIn,
+      sourcePolicies.checkin,
+    ].filter(Boolean),
+  );
+  pushRow(
+    "SPECIAL INSTRUCTIONS",
+    {
+      instructions: normalizeTextItems(checkinInfo.instructions),
+      specialInstructions: normalizeTextItems(checkinInfo.specialInstructions),
+    },
+  );
+  pushRow(
+    "CHECK-OUT",
+    [
+      checkoutInfo.time ? `Before ${checkoutInfo.time}` : "",
+      sourcePolicies.checkOut,
+      sourcePolicies.checkout,
+    ].filter(Boolean),
+  );
+
+  if (hotelSource.freeCancellation || hotelSource.isRefundable) {
+    pushRow("CANCELLATION/PREPAYMENT", "Free cancellation is available for this hotel.");
   }
 
-  return [
-    {
-      title: "CHECK-IN",
-      description: getFirst(policies.checkIn, policies.checkin, "Check-in time varies by room"),
-    },
-    {
-      title: "CHECK-OUT",
-      description: getFirst(policies.checkOut, policies.checkout, "Check-out time varies by room"),
-    },
-    {
-      title: "CANCELLATION/PREPAYMENT",
-      description:
-        hotel.freeCancellation || hotel.isRefundable
-          ? "Free cancellation is available for this hotel."
-          : "Cancellation and prepayment policies vary by room and rate.",
-    },
-    {
-      title: "CHILDREN AND BEDS",
-      description: "Child and extra bed policies depend on your selected room.",
-    },
-    {
-      title: "PETS",
-      description: "Pet policy depends on the property.",
-    },
-  ];
+  return rows.length
+    ? rows
+    : [
+        {
+          title: "CHECK-IN",
+          description: "Check-in time varies by room",
+        },
+        {
+          title: "CHECK-OUT",
+          description: "Check-out time varies by room",
+        },
+        {
+          title: "CANCELLATION/PREPAYMENT",
+          description: "Cancellation and prepayment policies vary by room and rate.",
+        },
+      ];
 };
 
 const findFirstArray = (value, predicate, depth = 0, seen = new WeakSet()) => {
@@ -1205,12 +1401,15 @@ const normalizeHotelDetail = (
 ) => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
+  const content = data?.content || detailsPayload?.content || {};
+  const contentHotel = content?.hotel || {};
   const foundHotel = findFirstObject(
     data,
     (item) => item.name && item.addressLine1,
   );
   const hotel = {
     ...(stored?.hotel?.raw || {}),
+    ...(contentHotel || {}),
     ...(foundHotel || {}),
     ...(stored?.hotel || {}),
   };
@@ -1237,15 +1436,38 @@ const normalizeHotelDetail = (
 
   return {
     id: String(getFirst(hotel.id, hotel.providerHotelId, routeHotelId, "")),
-    name: getFirst(hotel.name, data.name, "Hotel"),
-    address: getFirst(hotel.addressLine1, data.addressLine1, ""),
+    name: getFirst(hotel.name, contentHotel.name, data.name, "Hotel"),
+    address: getFirst(hotel.addressLine1, contentHotel.addressLine1, data.addressLine1, ""),
     rating: starRating,
     starRating,
     reviewScore: reviewSummary.score,
     reviewText: getFirst(data.reviewText, data.reviewsText, reviewSummary.text),
     images: uniqueImages.length ? uniqueImages : [FALLBACK_IMAGE],
+    descriptions: getDescriptionItems(
+      contentHotel.descriptions,
+      contentHotel.description,
+      contentHotel.overview,
+      contentHotel.about,
+      content.descriptions,
+      content.description,
+      content.overview,
+      content.about,
+      data.descriptions,
+      data.description,
+      data.overview,
+      data.about,
+      hotel.descriptions,
+      hotel.description,
+      hotel.overview,
+    ),
     description:
       getFirst(
+        contentHotel.description,
+        contentHotel.overview,
+        contentHotel.about,
+        content.description,
+        content.overview,
+        content.about,
         data.description,
         data.overview,
         data.about,

@@ -7,13 +7,14 @@ import GallerySection from "./gallerySection/GallerySection";
 import { HOTEL_DETAILS_KEY } from "@/shared/services/hotelSearch";
 import { useRouter } from "next/navigation";
 
-const FALLBACK_IMAGES = [
-  { image: "/images/hotelArt1.png", title: "Lobby" },
-  { image: "/images/hotelArt2.png", title: "Room" },
-  { image: "/images/hotelArt3.png", title: "Bathroom" },
-  { image: "/images/hotelArt2.png", title: "Dining" },
-  { image: "/images/hotelArt4.png", title: "Exterior" },
-];
+const FALLBACK_IMAGE = "/fallback.png";
+const GALLERY_SECTION_SIZE = 5;
+
+const getFallbackImages = (count = GALLERY_SECTION_SIZE) =>
+  Array.from({ length: count }, (_, index) => ({
+    image: FALLBACK_IMAGE,
+    title: `Photo ${index + 1}`,
+  }));
 
 const normalizeImageUrl = (value = "") => {
   const rawUrl = String(value || "").trim();
@@ -69,7 +70,7 @@ const normalizeGalleryItem = (value, index = 0) => {
 };
 
 const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
-  if (!value || images.length >= 20 || depth > 6) return images;
+  if (!value || images.length >= 30 || depth > 6) return images;
 
   if (typeof value === "string") {
     const imageUrl = normalizeImageUrl(value);
@@ -120,7 +121,7 @@ const collectImages = (value, images = [], depth = 0, seen = new WeakSet()) => {
 
 const readStoredHotelGallery = () => {
   if (typeof window === "undefined") {
-    return { title: "Hotel Gallery", images: FALLBACK_IMAGES };
+    return { title: "Hotel Gallery", images: getFallbackImages() };
   }
 
   try {
@@ -137,10 +138,10 @@ const readStoredHotelGallery = () => {
 
     return {
       title,
-      images: images.length ? images.slice(0, 12) : FALLBACK_IMAGES,
+      images: images.length ? images.slice(0, 30) : getFallbackImages(),
     };
   } catch {
-    return { title: "Hotel Gallery", images: FALLBACK_IMAGES };
+    return { title: "Hotel Gallery", images: getFallbackImages() };
   }
 };
 
@@ -158,7 +159,7 @@ const ViewGalleryPage = () => {
   const router = useRouter();
   const [galleryMeta, setGalleryMeta] = useState({
     title: "Hotel Gallery",
-    images: FALLBACK_IMAGES,
+    images: getFallbackImages(),
   });
 
   useEffect(() => {
@@ -167,18 +168,23 @@ const ViewGalleryPage = () => {
 
   const galleryImages = galleryMeta.images.length
     ? galleryMeta.images
-    : FALLBACK_IMAGES;
+    : getFallbackImages();
 
   const gallerySections = useMemo(() => {
-    const chunks = chunkImages(galleryImages, 5);
+    const chunks = chunkImages(galleryImages, GALLERY_SECTION_SIZE);
 
     if (!chunks.length) {
-      return [{ title: galleryMeta.title, images: FALLBACK_IMAGES }];
+      return [{ title: galleryMeta.title, images: getFallbackImages().map((item) => item.image) }];
     }
 
     return chunks.map((chunk, index) => ({
-      title: index === 0 ? galleryMeta.title : `More Photos ${index}`,
-      images: chunk.map((item) => item.image),
+      title: index === 0 ? "Hotel Gallery" : `More Photos ${index}`,
+      images: [
+        ...chunk,
+        ...getFallbackImages(Math.max(0, GALLERY_SECTION_SIZE - chunk.length)),
+      ]
+        .slice(0, GALLERY_SECTION_SIZE)
+        .map((item) => item.image),
     }));
   }, [galleryImages, galleryMeta.title]);
 
@@ -190,7 +196,11 @@ const ViewGalleryPage = () => {
         </div>
       </div>
       <div className={styles.container}>
-        <ActivityGalleryCarousel images={galleryImages} disableNavigation />
+        <ActivityGalleryCarousel
+          images={galleryImages}
+          disableNavigation
+          heading="Hotel Gallery"
+        />
         {gallerySections.map((data, index) => (
           <GallerySection key={index} data={data} hideOnMobile />
         ))}

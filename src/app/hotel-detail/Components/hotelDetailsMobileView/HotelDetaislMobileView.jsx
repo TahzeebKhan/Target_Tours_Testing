@@ -560,7 +560,10 @@ const HotelDetaislMobileView = () => {
                         onChange={handleTabChange}
                     />
                     <div ref={sectionRefs.Description}>
-                        <DescriptionComponent description={hotelDetail?.description} />
+                        <DescriptionComponent
+                            description={hotelDetail?.description}
+                            descriptions={hotelDetail?.descriptions}
+                        />
                     </div>
                     <div ref={sectionRefs.Amenities}>
                         <Amenities amenities={hotelDetail?.amenities || []} />

@@ -21,14 +21,14 @@ const GallerySection = ({ data, hideOnMobile = false  }) => {
       }`}>
         {/* TOP ROW (2 Images) */}
         <div className={styles.galleryTop}>
-          {images.slice(0, 1).map((img, index) => (
+          {images.slice(0, 2).map((img, index) => (
             <img key={index} src={img} alt={`gallery-${index}`} />
           ))}
         </div>
 
         {/* BOTTOM ROW (3 Images) */}
         <div className={styles.galleryBottom}>
-          {images.slice(1, 3).map((img, index) => (
+          {images.slice(2, 5).map((img, index) => (
             <img key={index} src={img} alt={`gallery-${index + 2}`} />
           ))}
         </div>
