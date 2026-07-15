@@ -30,6 +30,26 @@ const FALLBACK_IMAGES = Array.from({ length: 5 }, (_, index) => ({
   image: "/fallback.png",
 }));
 
+const isGeneratedPhotoTitle = (value = "") =>
+  /^photo\s+\d+$/i.test(String(value || "").trim());
+
+const getImageTitle = (item = {}, index = 0) => {
+  const title = String(item?.title || "").trim();
+  const caption = String(item?.caption || "").trim();
+
+  if (caption && (!title || isGeneratedPhotoTitle(title))) return caption;
+
+  return (
+    title ||
+    caption ||
+    item?.name ||
+    item?.label ||
+    item?.category ||
+    item?.roomType ||
+    `Photo ${index + 1}`
+  );
+};
+
 const normalizeImages = (images = FALLBACK_IMAGES) =>
   (Array.isArray(images) ? images : FALLBACK_IMAGES)
     .map((item, index) =>
@@ -41,7 +61,7 @@ const normalizeImages = (images = FALLBACK_IMAGES) =>
           }
         : {
             id: item?.id || `gallery-image-${index}`,
-            title: item?.title || `Photo ${index + 1}`,
+            title: getImageTitle(item, index),
             image: item?.image || item?.url || "",
           },
     )

@@ -23,6 +23,26 @@ const normalizeImageUrl = (value = "") => {
     return url.replace(/\s/g, "%20");
 };
 
+const isGeneratedPhotoTitle = (value = "") =>
+    /^photo\s+\d+$/i.test(String(value || "").trim());
+
+const getGalleryTitle = (item = {}, index = 0) => {
+    const title = String(item?.title || "").trim();
+    const caption = String(item?.caption || "").trim();
+
+    if (caption && (!title || isGeneratedPhotoTitle(title))) return caption;
+
+    return (
+        title ||
+        caption ||
+        item?.name ||
+        item?.label ||
+        item?.category ||
+        item?.roomType ||
+        `Photo ${index + 1}`
+    );
+};
+
 const GalleryImage = ({ image, title = "" }) => {
     const resolvedImage = image || FALLBACK_IMAGE;
     const [src, setSrc] = useState(resolvedImage);
@@ -70,12 +90,7 @@ const HotelGallery = ({ images = [] }) => {
                     item?.coverImage ||
                     item?.heroImage,
                 ),
-                title:
-                  item?.title ||
-                  item?.caption ||
-                  item?.name ||
-                  item?.label ||
-                  `Photo ${index + 1}`,
+                title: getGalleryTitle(item, index),
               },
       ).filter((item) => item.image), [images]);
      const remoteImages = normalizedImages.filter((item) => isRemoteImage(item.image));
