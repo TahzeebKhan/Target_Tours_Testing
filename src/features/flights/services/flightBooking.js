@@ -36,87 +36,6 @@ const emitFareExpired = (payload) => {
   );
 };
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const shouldRetryRequest = (error) => {
-  const status = error?.response?.status;
-  const isInvalidTravellerChecklist = error?.code === "INVALID_TRAVELLER_CHECKLIST";
-
-  if (isInvalidTravellerChecklist) {
-    return true;
-  }
-
-  if (!status) {
-    return true;
-  }
-
-  return status >= 500;
-};
-
-const postWithRetry = async (
-  url,
-  payload,
-  options,
-  { retries = 2, retryDelayMs = 800 } = {}
-) => {
-  let lastError;
-
-  for (let attempt = 0; attempt <= retries; attempt += 1) {
-    try {
-      return await api.post(url, payload, options);
-    } catch (error) {
-      lastError = error;
-
-      const isLastAttempt = attempt === retries;
-      if (isLastAttempt || !shouldRetryRequest(error)) {
-        throw error;
-      }
-
-      await wait(retryDelayMs * (attempt + 1));
-    }
-  }
-
-  throw lastError;
-};
-
-const getTravellerChecklist = (responseData) =>
-  responseData?.data?.raw?.TravellerCheckList ||
-  responseData?.data?.data?.raw?.TravellerCheckList ||
-  responseData?.raw?.TravellerCheckList ||
-  responseData?.data?.TravellerCheckList ||
-  responseData?.TravellerCheckList;
-
-const hasValidTravellerChecklist = (responseData) =>
-  Array.isArray(getTravellerChecklist(responseData));
-
-const normalizeTravellerChecklistResponse = (responseData) => {
-  if (!hasValidTravellerChecklist(responseData)) return responseData;
-  if (Array.isArray(responseData?.data?.raw?.TravellerCheckList)) return responseData;
-
-  const nestedData = responseData?.data?.data || {};
-  const raw = nestedData?.raw || responseData?.raw || {
-    TravellerCheckList: getTravellerChecklist(responseData),
-  };
-
-  return {
-    ...responseData,
-    data: {
-      ...(responseData?.data || {}),
-      ...nestedData,
-      raw,
-    },
-  };
-};
-
-const createInvalidTravellerChecklistError = (responseData) => {
-  const error = new Error("TravellerCheckList is not an array");
-
-  error.code = "INVALID_TRAVELLER_CHECKLIST";
-  error.response = { data: responseData };
-
-  return error;
-};
-
 const normalizeProvider = (provider) =>
   String(provider || "akbar").trim().toLowerCase();
 
@@ -566,6 +485,39 @@ const buildV2PricingPayload = ({ request = {}, flight = {}, channel = makePricin
   };
 };
 
+const fareOptionsResponseCache = new Map();
+const fareOptionsRequestCache = new Map();
+const FARE_OPTIONS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const getFareOptionsCacheKey = (payload = {}) => {
+  try {
+    return JSON.stringify({
+      domain: payload.domain,
+      search_keys: payload.search_keys,
+    });
+  } catch {
+    return "";
+  }
+};
+
+const getCachedFareOptionsResponse = (cacheKey) => {
+  const cached = fareOptionsResponseCache.get(cacheKey);
+  if (!cached) return null;
+  if (Date.now() - cached.createdAt > FARE_OPTIONS_CACHE_TTL_MS) {
+    fareOptionsResponseCache.delete(cacheKey);
+    return null;
+  }
+  return cached.response;
+};
+
+const setCachedFareOptionsResponse = (cacheKey, response) => {
+  if (!cacheKey || isFareExpiredResponse(response)) return;
+  fareOptionsResponseCache.set(cacheKey, {
+    response,
+    createdAt: Date.now(),
+  });
+};
+
 const readTripOrder = (trip, index) =>
   Number(trip?.Order ?? trip?.OrderID ?? trip?.order ?? trip?.orderId ?? index + 1);
 
@@ -684,6 +636,18 @@ const PRICING_SSE_EVENT_NAMES = [
   "FLIGHT_V2_SEAT_LAYOUT_COMPLETE",
   "FLIGHT_V2_SEAT_LAYOUT_COMPLETED",
   "FLIGHT_V2_SEAT_LAYOUT_ERROR",
+  "FLIGHT_V2_CREATE_BOOKING_ACCEPTED",
+  "FLIGHT_V2_CREATE_BOOKING_PAYLOAD_READY",
+  "FLIGHT_V2_CREATE_BOOKING_TRAVEL_CHECK_STARTED",
+  "FLIGHT_V2_CREATE_BOOKING_TRAVEL_CHECK_RESULT",
+  "FLIGHT_V2_CREATE_BOOKING_PROVIDER_STARTED",
+  "FLIGHT_V2_CREATE_BOOKING_STARTED",
+  "FLIGHT_V2_CREATE_BOOKING_RESULT",
+  "FLIGHT_V2_CREATE_BOOKING_ITINERARY_STARTED",
+  "FLIGHT_V2_CREATE_BOOKING_ITINERARY_RESULT",
+  "FLIGHT_V2_CREATE_BOOKING_COMPLETE",
+  "FLIGHT_V2_CREATE_BOOKING_COMPLETED",
+  "FLIGHT_V2_CREATE_BOOKING_ERROR",
   "pricing-result",
   "pricing-complete",
   "fare-options-result",
@@ -692,6 +656,10 @@ const PRICING_SSE_EVENT_NAMES = [
   "ssr-complete",
   "seat-layout-result",
   "seat-layout-complete",
+  "create-booking-result",
+  "create-booking-complete",
+  "booking-result",
+  "booking-complete",
   "result",
   "complete",
   "done",
@@ -734,6 +702,45 @@ const waitForSseConnected = (events, channel, timeoutMs = 1500) =>
     events.addEventListener("message", handleConnected);
     events.addEventListener("CONNECTED", handleConnected);
   });
+
+const isFlightCreateBookingComplete = (payload) => {
+  const type = getPayloadType(payload);
+  return (
+    (type.includes("CREATE") && type.includes("BOOKING")) ||
+    type.includes("BOOKING")
+  ) && (
+    type.includes("RESULT") ||
+    type.includes("COMPLETE") ||
+    type.includes("COMPLETED") ||
+    type.includes("DONE")
+  );
+};
+
+const hasCreateBookingPayload = (payload) => {
+  const root = payload?.data || payload || {};
+  const containers = [
+    root,
+    root?.data,
+    root?.result,
+    root?.booking,
+    root?.raw,
+    root?.data?.booking,
+    root?.data?.raw,
+  ].filter(Boolean);
+
+  return containers.some((container) =>
+    Boolean(
+      container?.bookingId ||
+        container?.booking_id ||
+        container?.bookingReference ||
+        container?.booking_reference ||
+        container?.pnr ||
+        container?.PNR ||
+        container?.TUI ||
+        container?.tui
+    )
+  );
+};
 
 export const getFlightPrice = async (payload) => {
   const pricingPayload = buildV2PricePayload(payload);
@@ -1019,11 +1026,19 @@ export const getFlightPrice = async (payload) => {
 };
 
 export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent } = {}) => {
-   console.log("req",request)
-   console.log("onFareOptionsEvent",onFareOptionsEvent)
-   console.log("flight",flight)
   const channel = makePricingChannel();
   const payload = buildV2PricingPayload({ request, flight, channel });
+  const cacheKey = getFareOptionsCacheKey(payload);
+  const cachedResponse = cacheKey ? getCachedFareOptionsResponse(cacheKey) : null;
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  const inFlightRequest = cacheKey ? fareOptionsRequestCache.get(cacheKey) : null;
+  if (inFlightRequest) {
+    return inFlightRequest;
+  }
 
   if (!payload.search_keys.length) {
     throw new Error("Missing fare-options payload for the selected flight.");
@@ -1032,10 +1047,11 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
   if (typeof window === "undefined" || !window.EventSource) {
     const data = await postV2Pricing(payload);
     emitFareExpired(data);
+    setCachedFareOptionsResponse(cacheKey, data);
     return data;
   }
 
-  return new Promise((resolve, reject) => {
+  const fareOptionsPromise = new Promise((resolve, reject) => {
     const chunks = [];
     let settled = false;
     let initResponse = null;
@@ -1053,11 +1069,13 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       settled = true;
       cleanup();
       emitFareExpired(value);
+      if (callback === resolve) {
+        setCachedFareOptionsResponse(cacheKey, value);
+      }
       callback(value);
     };
 
     const mergeFareOptionMaps = (...maps) => {
-      console.log("maps",maps)
       const merged = {};
 
       maps.forEach((map) => {
@@ -1079,7 +1097,6 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...toArray(chunk?.results).map((result) => result?.data?.merged || result?.merged),
         ...toArray(chunk?.data?.results).map((result) => result?.data?.merged || result?.merged)
       );
-      console.log("chunks",chunks)
 
     const buildResult = () => {
       const merged = mergeFareOptionMaps(
@@ -1088,9 +1105,6 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...chunks.map(getChunkMergedFares)
       );
       const hasMergedFares = Object.keys(merged).length > 0;
-      console.log("merged",merged)
-       console.log("hasMergedFares",hasMergedFares)
-       console.log("initResponse",initResponse)
 
       return {
         ...(initResponse || {}),
@@ -1133,7 +1147,6 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
                 event.type,
           }
           : unwrappedPayload;
-          console.log("parsedPayload",parsedPayload)
       const payloadChannel = getPayloadChannel(parsedPayload);
       const isCurrentChannel =
         !payloadChannel || payloadChannel === channel;
@@ -1193,7 +1206,14 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
     };
 
     startPricing();
+  }).finally(() => {
+    fareOptionsRequestCache.delete(cacheKey);
   });
+
+  if (cacheKey) {
+    fareOptionsRequestCache.set(cacheKey, fareOptionsPromise);
+  }
+  return fareOptionsPromise;
 };
 
 export const getFlightInfo = async (payload) => {
@@ -1234,51 +1254,6 @@ export const getFlightWebSettings = async (payload) => {
   });
 
   return response?.data;
-};
-
-export const getFlightTravelChecklist = async (payload) => {
-  const requestPayload = {
-    ...payload,
-    provider: normalizeProvider(payload?.provider || payload?.Provider),
-    domain: "localhost:1337",
-  };
-  const requestOptions = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-  let lastError;
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const response = await postWithRetry(
-        "/api/flights/travel-check-list",
-        requestPayload,
-        requestOptions,
-        {
-          retries: 2,
-          retryDelayMs: 1000,
-        }
-      );
-
-      if (hasValidTravellerChecklist(response?.data)) {
-        return normalizeTravellerChecklistResponse(response?.data);
-      }
-
-      lastError = createInvalidTravellerChecklistError(response?.data);
-    } catch (error) {
-      lastError = error;
-    }
-
-    const isLastAttempt = attempt === 2;
-    if (isLastAttempt || !shouldRetryRequest(lastError)) {
-      throw lastError;
-    }
-
-    await wait(1000 * (attempt + 1));
-  }
-
-  throw lastError;
 };
 
 export const getFlightSsr = async (payload) => {
@@ -1707,6 +1682,176 @@ export const createFlightItinerary = async (payload) => {
   return response?.data;
 };
 
+export const createFlightV2Booking = async (payload) => {
+  const bookingPayload = {
+    ...payload,
+    domain: payload?.domain || "localhost:1337",
+  };
+  const channel = bookingPayload.channel;
+
+  const postCreateBooking = async () => {
+    const response = await fetch("/api/flights/v2/create-booking", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      cache: "no-store",
+      body: JSON.stringify(bookingPayload),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const error = new Error(getApiMessage(data));
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  };
+
+  if (!channel || typeof window === "undefined" || !window.EventSource) {
+    return postCreateBooking();
+  }
+
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let settled = false;
+    let initResponse = null;
+    let idleTimer = null;
+    let events = null;
+
+    const cleanup = () => {
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(hardTimer);
+      events?.close();
+    };
+
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback(value);
+    };
+
+    const getFinalCreateBookingResponse = () => {
+      const reversedChunks = [...chunks].reverse();
+      return (
+        reversedChunks.find((chunk) => isFlightCreateBookingComplete(chunk)) ||
+        reversedChunks.find((chunk) => hasCreateBookingPayload(chunk)) ||
+        (isFlightCreateBookingComplete(initResponse) ||
+        hasCreateBookingPayload(initResponse)
+          ? initResponse
+          : null)
+      );
+    };
+
+    const hasFinalCreateBookingResponse = () => Boolean(getFinalCreateBookingResponse());
+
+    const buildResult = () => {
+      const finalResponse = getFinalCreateBookingResponse() || initResponse || {};
+
+      return {
+        ...(finalResponse || {}),
+        channel,
+        data: {
+          ...((finalResponse || {})?.data || {}),
+          createBookingChunks: chunks,
+        },
+        createBookingChunks: chunks,
+      };
+    };
+
+    const scheduleResolve = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        settle(resolve, buildResult());
+      }, 900);
+    };
+
+    const hardTimer = window.setTimeout(() => {
+      if (hasFinalCreateBookingResponse()) {
+        settle(resolve, buildResult());
+        return;
+      }
+
+      settle(reject, new Error("Flight booking did not complete. Please try again."));
+    }, 45000);
+
+    const handleMessage = (event) => {
+      const unwrappedPayload = unwrapPricingPayload(event.data);
+      const parsedPayload =
+        unwrappedPayload && typeof unwrappedPayload === "object"
+          ? {
+              ...unwrappedPayload,
+              type:
+                unwrappedPayload.type ||
+                unwrappedPayload.data?.type ||
+                event.type,
+            }
+          : unwrappedPayload;
+      const payloadChannel = getPayloadChannel(parsedPayload);
+
+      if (payloadChannel && payloadChannel !== channel) return;
+
+      if (isPricingError(parsedPayload)) {
+        const error = new Error(getApiMessage(parsedPayload));
+        error.status =
+          parsedPayload?.error?.status ||
+          parsedPayload?.data?.error?.status;
+        settle(reject, error);
+        return;
+      }
+
+      const type = getPayloadType(parsedPayload);
+      const isBookingEvent = type.includes("BOOKING");
+      const hasPayload = hasCreateBookingPayload(parsedPayload);
+
+      if (isBookingEvent || hasPayload) {
+        chunks.push(parsedPayload);
+      }
+
+      if (isFlightCreateBookingComplete(parsedPayload) || hasPayload) {
+        scheduleResolve();
+      }
+    };
+
+    const startCreateBooking = async () => {
+      events = new EventSource(getPricingEventsUrl(channel), {
+        withCredentials: true,
+      });
+
+      events.addEventListener("message", handleMessage);
+      PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
+        events.addEventListener(eventName, handleMessage);
+      });
+      events.addEventListener("error", () => {
+        if (
+          chunks.some((chunk) =>
+            isFlightCreateBookingComplete(chunk) || hasCreateBookingPayload(chunk)
+          )
+        ) {
+          scheduleResolve();
+        }
+      });
+
+      try {
+        await waitForSseConnected(events, channel);
+        initResponse = await postCreateBooking();
+
+        if (isFlightCreateBookingComplete(initResponse) || hasCreateBookingPayload(initResponse)) {
+          chunks.push(initResponse);
+          scheduleResolve();
+        }
+      } catch (error) {
+        settle(reject, error);
+      }
+    };
+
+    startCreateBooking();
+  });
+};
+
 export const startFlightPayment = async (payload) => {
   const response = await api.post("/api/flights/start-pay", {
     ...payload,
@@ -1718,6 +1863,53 @@ export const startFlightPayment = async (payload) => {
   });
 
   return response?.data;
+};
+
+const normalizePaymentGatewayId = (paymentGateway) => {
+  if (paymentGateway && typeof paymentGateway === "object") {
+    return String(
+      paymentGateway.id ||
+        paymentGateway.slug ||
+        paymentGateway.code ||
+        paymentGateway.name ||
+        paymentGateway.payment_gateway ||
+        paymentGateway.paymentGateway ||
+        paymentGateway.gateway ||
+        ""
+    )
+      .trim()
+      .toLowerCase();
+  }
+
+  return String(paymentGateway || "").trim().toLowerCase();
+};
+
+export const startFlightGatewayPayment = async (paymentGateway, payload) => {
+  const gatewayId = normalizePaymentGatewayId(paymentGateway);
+  const gateway = encodeURIComponent(gatewayId);
+  if (!gateway) {
+    throw new Error("Payment gateway is required.");
+  }
+
+  const response = await fetch(`/api/flights/v2/${gateway}/pay`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(getApiMessage(data));
+    error.status = response.status;
+    error.response = { data };
+    throw error;
+  }
+
+  return data;
 };
 
 export const retrieveFlightBooking = async (payload) => {

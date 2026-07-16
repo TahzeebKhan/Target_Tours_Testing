@@ -428,7 +428,10 @@ const BaggageDetails = () => {
 
   // Sync with Context whenever quantities change
   React.useEffect(() => {
-    if (!Object.keys(quantities).length && baggage?.length) return;
+    if (!Object.keys(quantities).length) {
+      if (baggage?.length) setBaggage([]);
+      return;
+    }
 
     const newBaggageList = [];
     Object.entries(quantities).forEach(([key, qty]) => {

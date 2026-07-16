@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import {
   getFlightPrice,
-  getFlightTravelChecklist,
   getFlightFareOptions,
 } from "@/features/flights/services/flightBooking";
 import {
@@ -15,7 +14,6 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
-import { isFareExpiredPayload } from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -175,6 +173,33 @@ const getSelectedFlightNo = (flightNos, activeTab) => {
   }
 
   return flightNos.onwardFlightNo || flightNos.returnFlightNo || "";
+};
+
+const buildLegFareOptionsRequest = (priceRequest = {}, leg, flightNos = {}) => {
+  const trips = Array.isArray(priceRequest?.Trips) ? priceRequest.Trips : [];
+  const tripIndex = leg === "return" ? 1 : 0;
+  const selectedTrip = trips[tripIndex] || trips[0] || null;
+  const flightNo = getSelectedFlightNo(flightNos, leg);
+
+  return {
+    ...priceRequest,
+    Trips: selectedTrip ? [selectedTrip] : [],
+    ...(flightNo ? { flight_no: flightNo, flightNo } : {}),
+  };
+};
+
+const buildLegFareOptionsFlightData = (flightData, leg, flightNos = {}) => {
+  const flightNo = getSelectedFlightNo(flightNos, leg);
+
+  if (!flightNo) return flightData;
+
+  return {
+    ...flightData,
+    booking: {
+      ...(flightData?.booking || {}),
+      flightNo,
+    },
+  };
 };
 
 const readNumber = (...values) => {
@@ -427,20 +452,25 @@ const MobileFareComparisonModalRoundTrip = ({
     onward: null,
     return: null,
   });
-  const [fareOptionsPayload, setFareOptionsPayload] = useState(null);
-  const [isFareOptionsLoading, setIsFareOptionsLoading] = useState(false);
+  const [fareOptionsPayloads, setFareOptionsPayloads] = useState({
+    onward: null,
+    return: null,
+  });
+  const [fareOptionsLoading, setFareOptionsLoading] = useState({
+    onward: false,
+    return: false,
+  });
 
   const flightNos = React.useMemo(
     () => extractRoundTripFlightNos(flightData),
     [flightData]
   );
-  const activeFlightNo = getSelectedFlightNo(flightNos, activeTab);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    setFareOptionsPayload(null);
-    setIsFareOptionsLoading(false);
+    setFareOptionsPayloads({ onward: null, return: null });
+    setFareOptionsLoading({ onward: false, return: false });
     setActibeTab("onward");
     setSelectedFares({ onward: null, return: null });
 
@@ -450,26 +480,36 @@ const MobileFareComparisonModalRoundTrip = ({
     let cancelled = false;
 
     const loadFareOptions = async () => {
-      try {
-        setIsFareOptionsLoading(true);
-        const response = await getFlightFareOptions({
-          searchParams,
-          request: priceRequest,
-        });
-        if (!cancelled) {
-          if (isFareExpiredPayload(response)) {
-            setFareOptionsPayload(response);
-            return;
+      const loadLegFareOptions = async (leg) => {
+        try {
+          setFareOptionsLoading((prev) => ({ ...prev, [leg]: true }));
+          const response = await getFlightFareOptions({
+            searchParams,
+            request: buildLegFareOptionsRequest(priceRequest, leg, flightNos),
+            flight: buildLegFareOptionsFlightData(flightData, leg, flightNos),
+          });
+          if (!cancelled) {
+            setFareOptionsPayloads((prev) => ({ ...prev, [leg]: response }));
           }
-          setFareOptionsPayload(response);
+        } catch (error) {
+          if (!cancelled) {
+            console.error(`Failed to load mobile ${leg} round-trip fare options`, error);
+          }
+        } finally {
+          if (!cancelled) {
+            setFareOptionsLoading((prev) => ({ ...prev, [leg]: false }));
+          }
         }
+      };
+
+      try {
+        await Promise.all([
+          loadLegFareOptions("onward"),
+          loadLegFareOptions("return"),
+        ]);
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to load mobile round-trip fare options", error);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsFareOptionsLoading(false);
         }
       }
     };
@@ -479,7 +519,7 @@ const MobileFareComparisonModalRoundTrip = ({
     return () => {
       cancelled = true;
     };
-  }, [flightData, isOpen, searchParams]);
+  }, [flightData, flightNos, isOpen, searchParams]);
 
   const performBookNow = useCallback(async (selectedFare) => {
     const selectedPriceRequest = buildSelectedFarePriceRequest(
@@ -526,44 +566,13 @@ const MobileFareComparisonModalRoundTrip = ({
         selectedFare,
         formattedOnlyPriceResponse
       );
-      const checklistTui =
-        formattedOnlyPriceResponse?.data?.tui ||
-        formattedOnlyPriceResponse?.data?.TUI ||
-        formattedOnlyPriceResponse?.tui ||
-        formattedOnlyPriceResponse?.TUI ||
-        formattedOnlyPriceResponse?.data?.formatted?.TUI ||
-        formattedOnlyPriceResponse?.data?.formatted?.tui ||
-        formattedOnlyPriceResponse?.formatted?.TUI ||
-        formattedOnlyPriceResponse?.formatted?.tui;
-      const provider =
-        priceRequest?.provider ||
-        flightData?.booking?.provider ||
-        flightData?.provider ||
-        formattedOnlyPriceResponse?.data?.provider ||
-        formattedOnlyPriceResponse?.provider;
-
-      let checklistResponse = null;
-      if (checklistTui) {
-        try {
-          checklistResponse = await getFlightTravelChecklist({
-            TUI: checklistTui,
-            provider,
-            ClientID:
-              flightData?.booking?.clientId ||
-              priceRequest?.ClientID ||
-              "FVI6V120g22Ei5ztGK0FIQ==",
-          });
-        } catch (error) {
-          console.warn("Travel checklist unavailable", error);
-        }
-      }
       const nextSession = {
         selectedFlight: flightData,
         selectedFare: selectedFareFromFormattedPrice,
         routeContext,
         priceRequest,
         priceResponse: formattedOnlyPriceResponse,
-        checklistResponse,
+        checklistResponse: null,
         ssrRequest: null,
         ssrResponse: null,
       };
@@ -633,15 +642,12 @@ const MobileFareComparisonModalRoundTrip = ({
     return "BOOK NOW";
   };
   if (!isOpen) return null;
-  const fareOptionsFlightData = activeFlightNo
-    ? {
-        ...flightData,
-        booking: {
-          ...(flightData?.booking || {}),
-          flightNo: activeFlightNo,
-        },
-      }
-    : flightData;
+  const fareOptionsPayload = fareOptionsPayloads[activeTab] || null;
+  const fareOptionsFlightData = buildLegFareOptionsFlightData(
+    flightData,
+    activeTab,
+    flightNos
+  );
   const fareOptions = fareOptionsPayload
     ? buildFareOptions({
         flightData: fareOptionsFlightData,
@@ -651,6 +657,7 @@ const MobileFareComparisonModalRoundTrip = ({
         adults: searchParams?.get("adults") || 1,
       })
     : [];
+  const isFareOptionsLoading = Boolean(fareOptionsLoading[activeTab]);
 
   const flight = activeTab === "onward"
     ? buildMobileSegment(flightData?.outbound, flightData?.outbound?.dateLabel)

@@ -211,19 +211,25 @@ const TripCard = ({
     selectedDepart ||
     null;
 
+  const parseSelectedAmount = (value) => {
+    const amount = Number(String(value ?? "").replace(/[^\d.]/g, ""));
+    return Number.isFinite(amount) ? amount : null;
+  };
   const selectedDepartAmount =
-    selectedDepart?.depart?.flight?.fare?.displayAmount ??
-    selectedDepart?.booking?.priceRequest?.Trips?.[0]?.Amount ??
-    null;
+    parseSelectedAmount(selectedDepart?.depart?.flight?.fare?.displayAmount) ??
+    parseSelectedAmount(selectedDepart?.depart?.flight?.fare?.totalFare) ??
+    parseSelectedAmount(selectedDepart?.fare?.pricePerAdult) ??
+    parseSelectedAmount(selectedDepart?.booking?.priceRequest?.Trips?.[0]?.Amount);
   const selectedReturnAmount =
-    selectedReturn?.return?.flight?.fare?.displayAmount ??
-    selectedReturn?.booking?.priceRequest?.Trips?.[1]?.Amount ??
-    selectedReturn?.booking?.priceRequest?.Trips?.[0]?.Amount ??
-    null;
+    parseSelectedAmount(selectedReturn?.return?.flight?.fare?.displayAmount) ??
+    parseSelectedAmount(selectedReturn?.return?.flight?.fare?.totalFare) ??
+    parseSelectedAmount(selectedReturn?.fare?.pricePerAdult) ??
+    parseSelectedAmount(selectedReturn?.booking?.priceRequest?.Trips?.[1]?.Amount) ??
+    parseSelectedAmount(selectedReturn?.booking?.priceRequest?.Trips?.[0]?.Amount);
   const selectedTotalAmount =
-    Number.isFinite(Number(selectedDepartAmount)) &&
-    Number.isFinite(Number(selectedReturnAmount))
-      ? Number(selectedDepartAmount) + Number(selectedReturnAmount)
+    selectedDepartAmount !== null &&
+    selectedReturnAmount !== null
+      ? selectedDepartAmount + selectedReturnAmount
       : null;
   const formatCurrencyLabel = (value) => {
     const amount = Number(value);
@@ -720,27 +726,27 @@ const TripCard = ({
           <div className={styles.selectionBar}>
             <div className={styles.selectionLeg}>
               <span className={styles.selectionLabel}>Departure</span>
-              <strong>{selectedRoundTrip.depart.airline.name}</strong>
+              <strong>{selectedDepart?.depart?.airline?.name || "N/A"}</strong>
               <span>
-                {selectedRoundTrip.depart.flight.departure.time} →{" "}
-                {selectedRoundTrip.depart.flight.arrival.time}
+                {selectedDepart?.depart?.flight?.departure?.time || "N/A"} →{" "}
+                {selectedDepart?.depart?.flight?.arrival?.time || "N/A"}
               </span>
               <small>
-                {selectedRoundTrip.depart.flight.departure.city} to{" "}
-                {selectedRoundTrip.depart.flight.arrival.city}
+                {selectedDepart?.depart?.flight?.departure?.city || "N/A"} to{" "}
+                {selectedDepart?.depart?.flight?.arrival?.city || "N/A"}
               </small>
             </div>
             <div className={styles.selectionDivider} />
             <div className={styles.selectionLeg}>
               <span className={styles.selectionLabel}>Return</span>
-              <strong>{selectedRoundTrip.return.airline.name}</strong>
+              <strong>{selectedReturn?.return?.airline?.name || "N/A"}</strong>
               <span>
-                {selectedRoundTrip.return.flight.departure.time} →{" "}
-                {selectedRoundTrip.return.flight.arrival.time}
+                {selectedReturn?.return?.flight?.departure?.time || "N/A"} →{" "}
+                {selectedReturn?.return?.flight?.arrival?.time || "N/A"}
               </span>
               <small>
-                {selectedRoundTrip.return.flight.departure.city} to{" "}
-                {selectedRoundTrip.return.flight.arrival.city}
+                {selectedReturn?.return?.flight?.departure?.city || "N/A"} to{" "}
+                {selectedReturn?.return?.flight?.arrival?.city || "N/A"}
               </small>
             </div>
             <div className={styles.selectionFare}>

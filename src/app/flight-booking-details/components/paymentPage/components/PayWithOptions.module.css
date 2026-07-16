@@ -3,19 +3,19 @@
   flex-direction: column;
   padding: 16px 24px;
   padding-top: 0;
-  gap: 12px;
+  gap: 14px;
   background-color: white;
 }
 
 /* CARD */
 .card {
   border: 1px solid #d1d5dc;
-  height: 66px;
-  padding: 16px;
+  min-height: 76px;
+  padding: 18px 22px;
 
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 22px;
   cursor: pointer;
   background: #ffffff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -23,28 +23,61 @@
 
 /* RADIO */
 .card input {
-  width: 18px;
-
-  height: 18px;
-  cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 .card input:focus-visible {
   outline: none;
 }
+
+.radioIndicator {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #a7adb7;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: #ffffff;
+}
+
+.radioIndicator::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #000033;
+  opacity: 0;
+}
+
+.card.active .radioIndicator {
+  border-color: #000033;
+}
+
+.card.active .radioIndicator::after {
+  opacity: 1;
+}
+
 /* ICON */
 .card img {
-  height: 28px;
-  margin-right: -4px;
-  width: auto;
+  height: 42px;
+  width: 58px;
   object-fit: contain;
+  flex: 0 0 auto;
 }
 
 /* TEXT */
 .card span {
   font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
   color: #111827;
+}
+
+.card .radioIndicator {
+  color: inherit;
 }
 
 /* HOVER */
@@ -60,6 +93,13 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 51, 0.2);
 }
 
+.stateText {
+  padding: 16px 0;
+  color: #667085;
+  font-family: var(--font-inter);
+  font-size: 14px;
+}
+
 
 @media (max-width: 640px) {
   .wrapper {
@@ -70,17 +110,23 @@
   }
   .card {
     padding: 12px;
+    min-height: 68px;
+    gap: 14px;
   }
-  .card input {
+  .radioIndicator {
     width: 24px;
     height: 24px;
   }
+  .radioIndicator::after {
+    width: 12px;
+    height: 12px;
+  }
   .card img {
-    width: 54px;
-    height: 32px;
+    width: 48px;
+    height: 34px;
   }
   .card span{
-    font-weight: 400;
-    font-size: 12px;
+    font-weight: 600;
+    font-size: 14px;
   }
 }
