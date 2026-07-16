@@ -10,6 +10,8 @@ const ResultsBottomSheet = ({
   onOpenFilters,
 }) => {
   const [openSort, setOpenSort] = useState(false);
+  const resultCount = Number(resultsCount);
+  const shouldShowCount = Number.isFinite(resultCount) && resultCount > 0;
 
   return (
     <>
@@ -57,7 +59,9 @@ const ResultsBottomSheet = ({
             <span className={styles.resultsText}>
               {isLoading
                 ? "Loading results"
-                : `${resultsCount} Result${resultsCount === 1 ? "" : "s"}`}
+                : shouldShowCount
+                  ? `${resultCount} Result${resultCount === 1 ? "" : "s"}`
+                  : ""}
             </span>
           </div>
         </div>
