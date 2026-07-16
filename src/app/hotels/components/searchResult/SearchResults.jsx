@@ -12,12 +12,14 @@ const SearchResults = ({
   setSort,
 }) => {
   const placeName = locationLabel || "this location";
+  const resultCount = Number(totalResults);
+  const shouldShowCount = Number.isFinite(resultCount) && resultCount > 0;
 
   return (
     <div className={styles.searchResultsContainer}>
       <div className={styles.searchResultsLeft}>
         <div className={styles.result}>
-             <span>{totalResults}</span> Properties in {placeName}
+          {shouldShowCount && <span>{resultCount}</span>} Properties in {placeName}
         </div>
       </div>
 
