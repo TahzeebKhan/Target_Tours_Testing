@@ -65,6 +65,9 @@ const UpcomingDepartures = ({ data }) => {
     BookingData.length > 0
       ? [...new Set(BookingData.map((b) => b.month))]
       : ["NO DEPARTURES"];
+  const [swiperRef, setSwiperRef] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState(months[0] ?? "NO DEPARTURES");
 
   const groupedData =
     months[0] === "NO DEPARTURES"
@@ -76,10 +79,6 @@ const UpcomingDepartures = ({ data }) => {
   const hasDepartureMonths = BookingData.length > 0 && groupedData.length > 1;
   const canShowPrev = hasDepartureMonths && activeIndex > 0;
   const canShowNext = hasDepartureMonths && activeIndex < groupedData.length - 1;
-
-  const [swiperRef, setSwiperRef] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState(months[0] ?? "NO DEPARTURES");
 
   const tabsRef = useRef(null);
   const [offset, setOffset] = useState(0);
