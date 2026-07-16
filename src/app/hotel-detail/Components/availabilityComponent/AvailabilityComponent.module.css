@@ -1200,16 +1200,19 @@
 
 .descriptionList {
   gap: 10px;
-  padding: 14px 16px;
+  /* padding: 14px 16px; */
   font-family: var(--font-inter);
   border: none;
 }
 
 .descriptionList p {
   margin: 0;
-  color: #101828;
+  color: #4a5565;
+  font-family: Inter;
+  font-weight: 300;
   font-size: 14px;
-  line-height: 21px;
+  line-height: 150%;
+  letter-spacing: 0%;
 }
 
 .policyRow,
@@ -1236,8 +1239,12 @@
 
 .policyRow span,
 .infoRow span {
-  color: #667085;
-  font-size: 12px;
+  color: #4a5565;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .policyRow b {
@@ -1252,15 +1259,21 @@
 
 .infoRow p {
   margin: 0;
-  color: #101828;
-  font-size: 13px;
-  line-height: 20px;
+  color: #4a5565;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .detailsEmpty {
   margin: 0;
-  padding: 14px 16px;
-  color: #667085;
+  /* padding: 14px 16px; */
+  color: #4a5565;
   font-family: var(--font-inter);
-  font-size: 13px;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
