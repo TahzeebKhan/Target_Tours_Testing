@@ -8,7 +8,6 @@ import { buildFareOptions, normalizeFareFlightNo } from "../FareComparisonModal"
 import { toast } from "react-toastify";
 import {
   getFlightPrice,
-  getFlightTravelChecklist,
   getFlightFareOptions,
 } from "@/features/flights/services/flightBooking";
 import {
@@ -208,40 +207,13 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
       const priceResponse =
         prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
       const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
-      const checklistTui =
-        formattedOnlyPriceResponse?.data?.tui ||
-        formattedOnlyPriceResponse?.tui ||
-        getPricePayload(priceResponse)?.raw?.TUI ||
-        priceResponse?.raw?.TUI;
-      const provider =
-        priceRequest?.provider ||
-        flightData?.booking?.provider ||
-        flightData?.provider ||
-        formattedOnlyPriceResponse?.data?.provider ||
-        formattedOnlyPriceResponse?.provider;
-
-      let checklistResponse = prefetchedData?.checklistResponse || null;
-      if (!checklistResponse && checklistTui) {
-        try {
-          checklistResponse = await getFlightTravelChecklist({
-            TUI: checklistTui,
-            provider,
-            ClientID:
-              flightData?.booking?.clientId ||
-              priceRequest?.ClientID ||
-              "FVI6V120g22Ei5ztGK0FIQ==",
-          });
-        } catch (error) {
-          console.warn("Travel checklist unavailable", error);
-        }
-      }
       const nextSession = {
         selectedFlight: flightData,
         selectedFare,
         routeContext,
         priceRequest,
         priceResponse: formattedOnlyPriceResponse,
-        checklistResponse,
+        checklistResponse: null,
         ssrRequest: null,
         ssrResponse: null,
       };

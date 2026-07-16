@@ -836,6 +836,14 @@ const makeV2SeatLayoutChannel = () => {
   return `seatLayout-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const makeV2CreateBookingChannel = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `booking-${crypto.randomUUID()}`;
+  }
+
+  return `booking-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export const buildV2SsrPayload = (session = {}) => {
   const priceResponse = session?.priceResponse || {};
   const payload = unwrapPayload(priceResponse);
@@ -2112,6 +2120,295 @@ export const buildCreateItineraryPayload = (session, prices) => {
     DeviceID: "",
     AppVersion: "",
     CrossSellAmount: 0,
+  };
+};
+
+const readPassengerId = (item = {}, fallback = 1) =>
+  readNumber(
+    item?.PaxID,
+    item?.PaxId,
+    item?.paxID,
+    item?.paxId,
+    item?.PaxRefNumber,
+    item?.paxRefNumber,
+    item?.passengerId,
+    Number.isFinite(Number(item?.passengerIndex))
+      ? Number(item.passengerIndex) + 1
+      : undefined,
+    fallback
+  ) || fallback;
+
+const readSsrId = (item = {}) =>
+  pickFirst(
+    item?.ssid,
+    item?.SSID,
+    item?.SSRId,
+    item?.ssrId,
+    item?.SeatID,
+    item?.seatID,
+    item?.MealID,
+    item?.mealID,
+    item?.BaggageID,
+    item?.baggageID,
+    item?.rawId
+  );
+
+const readFuid = (item = {}) =>
+  pickFirst(
+    item?.fuid,
+    item?.FUID,
+    item?.flight_uid,
+    item?.flightUid,
+    item?.flightId,
+    item?.FlightID,
+    item?.FlightId,
+    Number.isFinite(Number(item?.journeyIndex))
+      ? Number(item.journeyIndex) + 1
+      : undefined,
+    "1"
+  );
+
+const normalizeCreateBookingSeat = (seat = {}, index = 0) => {
+  const seatNumber = String(
+    pickFirst(seat?.seat_no, seat?.seatNumber, seat?.number, seat?.id, "")
+  ).replace(/-/g, "");
+  const ssid = readSsrId(seat);
+
+  return {
+    seat_no: seatNumber,
+    status: seat?.status || seat?.statusLabel || "Open",
+    available: seat?.available ?? true,
+    type: seat?.type || "ALL",
+    price: readNumber(seat?.price) || 0,
+    row: readNumber(seat?.row, seat?.rowId) || 0,
+    col: readNumber(seat?.col, seat?.column, seat?.coordinateColumn) || 0,
+    ssid: readNumber(ssid) ?? ssid ?? "",
+    PaxID: readPassengerId(seat, index + 1),
+  };
+};
+
+const normalizeCreateBookingMeal = (meal = {}, index = 0) => {
+  const ssid = readSsrId(meal);
+
+  return {
+    id: readNumber(ssid, meal?.id) ?? ssid ?? meal?.id ?? "",
+    ssid: readNumber(ssid) ?? ssid ?? "",
+    fuid: String(readFuid(meal) || "1"),
+    name: meal?.name || meal?.title || meal?.label || "",
+    piece_description: meal?.piece_description ?? meal?.pieceDescription ?? null,
+    pieceDescription: meal?.pieceDescription ?? meal?.piece_description ?? null,
+    price: readNumber(meal?.price) || 0,
+    code: meal?.code || meal?.Code || "",
+    type: meal?.type || meal?.tag || "",
+    PaxID: readPassengerId(meal, index + 1),
+  };
+};
+
+const normalizeCreateBookingBaggage = (baggage = {}, index = 0) => {
+  const ssid = readSsrId(baggage);
+
+  return {
+    id: readNumber(ssid, baggage?.id) ?? ssid ?? baggage?.id ?? "",
+    ssid: readNumber(ssid) ?? ssid ?? "",
+    fuid: String(readFuid(baggage) || "1"),
+    name: baggage?.name || baggage?.label || "",
+    price: readNumber(baggage?.price) || 0,
+    code: baggage?.code || baggage?.Code || "",
+    weight: baggage?.weight || "",
+    PaxID: readPassengerId(baggage, index + 1),
+  };
+};
+
+export const buildCreateBookingPayload = (session = {}, prices = {}) => {
+  const priceResponse = unwrapPayload(session?.priceResponse);
+  const priceRequest = session?.priceRequest || {};
+  const travelers = Array.isArray(session?.travelerDetails)
+    ? session.travelerDetails
+    : [];
+  const contact = session?.bookingContactDetails || {};
+  const primaryTraveler = travelers[0] || {};
+  const searchKey = pickFirst(
+    priceRequest?.search_key,
+    priceRequest?.SearchKey,
+    priceRequest?.searchKey,
+    priceResponse?.search_key,
+    priceResponse?.SearchKey,
+    priceResponse?.data?.search_key,
+    session?.priceResponse?.search_key,
+    session?.priceResponse?.SearchKey,
+    session?.priceResponse?.data?.search_key,
+    session?.ssrResponse?.data?.search_key,
+    session?.ssrResponse?.search_key,
+    session?.selectedFlight?.booking?.searchKey,
+    ""
+  );
+  const tui = pickFirst(
+    priceResponse?.tui,
+    priceResponse?.TUI,
+    priceResponse?.raw?.TUI,
+    session?.priceResponse?.tui,
+    session?.priceResponse?.TUI,
+    session?.priceResponse?.data?.tui,
+    session?.priceResponse?.data?.TUI,
+    session?.ssrResponse?.data?.tui,
+    session?.ssrResponse?.data?.TUI,
+    session?.ssrResponse?.tui,
+    session?.ssrResponse?.TUI,
+    ""
+  );
+  const netAmount =
+    readNumber(
+      prices?.total,
+      priceResponse?.raw?.NetAmount,
+      priceResponse?.raw?.AirlineNetFare,
+      priceResponse?.NetAmount,
+      priceResponse?.AirlineNetFare,
+      priceResponse?.fare_breakdown?.[0]?.net,
+      priceResponse?.fare_breakdown?.[0]?.NetAmount,
+      priceResponse?.formatted?.base_price,
+      priceResponse?.formatted?.final_price,
+      priceResponse?.final_price,
+      priceResponse?.TotalAmount,
+      session?.selectedFare?.netAmount,
+      session?.selectedFare?.price,
+      session?.selectedFare?.pricePerAdult
+    ) || 0;
+  const contactPhone = String(
+    pickFirst(contact.MobileNumber, contact.Phone, primaryTraveler.MobileNumber, "")
+  );
+  const contactCountryCode = String(
+    pickFirst(contact.CountryCode, primaryTraveler.CountryCode, "IN")
+  );
+  const mobileCountryCode = String(
+    pickFirst(contact.MobileCountryCode, contact.CountryCode, primaryTraveler.CountryCode, "+91")
+  );
+  const selectedSeats = Array.isArray(session?.seats)
+    ? session.seats.map(normalizeCreateBookingSeat)
+    : [];
+  const selectedMeals = Array.isArray(session?.meals)
+    ? session.meals.map(normalizeCreateBookingMeal)
+    : [];
+  const selectedBaggage = Array.isArray(session?.baggage)
+    ? session.baggage.map(normalizeCreateBookingBaggage)
+    : [];
+
+  return {
+    search_key: searchKey,
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    channel: makeV2CreateBookingChannel(),
+    TUI: tui,
+    selectedSeats,
+    selectedMeals,
+    selectedBaggage,
+    otherSsr: Array.isArray(session?.otherSsr) ? session.otherSsr : [],
+    passengers: travelers.map((traveler, index) => ({
+      id: index + 1,
+      title: traveler?.Title || "",
+      firstName: traveler?.FName || "",
+      lastName: traveler?.LName || "",
+      type: traveler?.PTC || traveler?.type || "",
+      gender: normalizeGenderCode(traveler?.Gender),
+      dob: traveler?.DOB || "",
+    })),
+    contact: {
+      phone: contactPhone,
+      email: String(pickFirst(contact.Email, primaryTraveler.Email, "")),
+      address: String(pickFirst(contact.Address, "")),
+      countryCode: contactCountryCode,
+      state: String(pickFirst(contact.State, contact.state, "")),
+      city: String(pickFirst(contact.City, contact.city, "")),
+      pin: String(pickFirst(contact.Pin, contact.PIN, contact.pin, "")),
+    },
+    payment: {
+      netAmount,
+    },
+  };
+};
+
+const getCreateBookingRaw = (createBookingResponse = {}) =>
+  createBookingResponse?.data?.result?.raw ||
+  createBookingResponse?.data?.result?.data ||
+  createBookingResponse?.result?.raw ||
+  createBookingResponse?.result?.data ||
+  createBookingResponse?.data?.raw ||
+  createBookingResponse?.raw ||
+  {};
+
+const normalizePaymentGatewayId = (paymentGateway) => {
+  if (paymentGateway && typeof paymentGateway === "object") {
+    return String(
+      paymentGateway.id ||
+        paymentGateway.slug ||
+        paymentGateway.code ||
+        paymentGateway.name ||
+        paymentGateway.payment_gateway ||
+        paymentGateway.paymentGateway ||
+        paymentGateway.gateway ||
+        ""
+    )
+      .trim()
+      .toLowerCase();
+  }
+
+  return String(paymentGateway || "").trim().toLowerCase();
+};
+
+export const buildFlightGatewayPaymentPayload = ({
+  session = {},
+  createBookingPayload = {},
+  createBookingResponse = {},
+  paymentGateway = "",
+} = {}) => {
+  const gateway = normalizePaymentGatewayId(paymentGateway);
+  const responseData = createBookingResponse?.data || createBookingResponse || {};
+  const raw = getCreateBookingRaw(createBookingResponse);
+  const netAmount = readNumber(
+    raw?.NetAmount,
+    raw?.AirlineNetFare,
+    responseData?.result?.raw?.NetAmount,
+    responseData?.result?.data?.NetAmount,
+    responseData?.NetAmount,
+    createBookingPayload?.payment?.netAmount
+  ) || 0;
+  const redirectUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/payment-status?booking_type=flight`
+      : "https://target-tours.vercel.app/payment-status?booking_type=flight";
+
+  return {
+    domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+    booking_type: "flight",
+    payment_gateway: gateway,
+    payment_mode: gateway,
+    search_key: String(
+      pickFirst(
+        responseData?.search_key,
+        responseData?.searchKey,
+        createBookingPayload?.search_key,
+        session?.priceRequest?.search_key,
+        ""
+      )
+    ),
+    TUI: String(
+      pickFirst(
+        raw?.TUI,
+        responseData?.result?.raw?.TUI,
+        responseData?.result?.data?.TUI,
+        responseData?.TUI,
+        createBookingPayload?.TUI,
+        ""
+      )
+    ),
+    TransactionID:
+      raw?.TransactionID ??
+      responseData?.result?.raw?.TransactionID ??
+      responseData?.result?.data?.TransactionID ??
+      responseData?.TransactionID ??
+      "",
+    NetAmount: netAmount,
+    amount: netAmount,
+    redirectUrl: redirectUrl,
+    message: "Flight booking payment",
   };
 };
 

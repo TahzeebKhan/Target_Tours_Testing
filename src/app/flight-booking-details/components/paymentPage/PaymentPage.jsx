@@ -92,10 +92,11 @@ const PaymentPage = () => {
     meals,
     setMeals,
     setSeats,
+    paymentMethod,
+    setPaymentMethod,
   } = useFlightBooking();
   const router = useRouter();
   const [openTab, setOpenTab] = useState("passengerInfo");
-  const [paymentMethod, setPaymentMethod] = useState("credit");
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const selectedFare = bookingSession?.selectedFare || {};
   const header = bookingView?.header || {};
@@ -357,7 +358,10 @@ const PaymentPage = () => {
             </div>
 
             {/* RIGHT */}
-            <button className={styles.continueBtn} onClick={submitItinerary}>
+            <button
+              className={styles.continueBtn}
+              onClick={() => submitItinerary(paymentMethod)}
+            >
               {itineraryLoading ? "LOADING..." : "CONTINUE PAYMENT"}
             </button>
           </div>

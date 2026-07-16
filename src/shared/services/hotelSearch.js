@@ -13,6 +13,8 @@ export const HOTEL_BOOKING_SESSION_DURATION_MS = 20 * 60 * 1000;
 
 let inMemoryHotelBookingSession = null;
 let hotelBookingSessionExpiryTimer = null;
+const PAYMENT_GATEWAY_CACHE_TTL_MS = 5 * 60 * 1000;
+const paymentGatewayRequestCache = new Map();
 
 const normalizeBaseUrl = () => {
   const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
@@ -691,23 +693,55 @@ export const startHotelBooking = async (startHotelBookingPayload = {}) => {
 };
 
 export const getHotelPaymentGateways = async ({ domain } = {}) => {
-  const url = new URL("/api/payment-gateways", normalizeBaseUrl());
-  url.searchParams.set("domain", domain || getDomain());
+  const gatewayDomain = domain || getDomain();
+  const cacheKey = String(gatewayDomain || "").trim();
+  const cachedRequest = cacheKey ? paymentGatewayRequestCache.get(cacheKey) : null;
 
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: getHotelSearchHeaders(),
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw createApiError(data, "Unable to load payment gateways");
+  if (
+    cachedRequest &&
+    Date.now() - cachedRequest.createdAt <= PAYMENT_GATEWAY_CACHE_TTL_MS
+  ) {
+    return cachedRequest.promise;
   }
 
-  return data;
+  if (cacheKey && cachedRequest) {
+    paymentGatewayRequestCache.delete(cacheKey);
+  }
+
+  const url = new URL("/api/payment-gateways", normalizeBaseUrl());
+  url.searchParams.set("domain", gatewayDomain);
+
+  const requestPromise = (async () => {
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: getHotelSearchHeaders(),
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw createApiError(data, "Unable to load payment gateways");
+    }
+
+    return data;
+  })();
+
+  if (cacheKey) {
+    paymentGatewayRequestCache.set(cacheKey, {
+      createdAt: Date.now(),
+      promise: requestPromise,
+    });
+
+    requestPromise.catch(() => {
+      if (paymentGatewayRequestCache.get(cacheKey)?.promise === requestPromise) {
+        paymentGatewayRequestCache.delete(cacheKey);
+      }
+    });
+  }
+
+  return requestPromise;
 };
 
 export const HotelPaymentStart = async (payload = {}) => {

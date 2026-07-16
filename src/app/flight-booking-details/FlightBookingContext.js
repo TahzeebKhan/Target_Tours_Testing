@@ -1,12 +1,11 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createFlightItinerary, getFlightSeatLayout, getFlightSsr, getFlightV2Ssr, retrieveFlightBooking, startFlightPayment } from "@/features/flights/services/flightBooking";
+import { createFlightV2Booking, getFlightSeatLayout, getFlightSsr, getFlightV2Ssr, startFlightGatewayPayment } from "@/features/flights/services/flightBooking";
 import { toast } from "react-toastify";
 import {
-  buildCreateItineraryPayload,
-  buildRetrieveBookingPayload,
+  buildCreateBookingPayload,
+  buildFlightGatewayPaymentPayload,
   buildSeatLayoutPayload,
-  buildStartPaymentPayload,
   buildSsrPayload,
   buildV2SsrPayload,
   extractBaseFareAmount,
@@ -25,6 +24,245 @@ const getApiMessage = (payload, fallback) => {
     payload?.message ||
     fallback
   );
+};
+
+const getPaymentRedirectUrl = (payload = {}) => {
+  const data = payload?.data || {};
+  const nestedData = data?.data || {};
+  return (
+    payload?.redirecturl ||
+    payload?.redirectUrl ||
+    payload?.redirect_url ||
+    payload?.paymentUrl ||
+    payload?.payment_url ||
+    payload?.paymentLink ||
+    payload?.url ||
+    data?.redirecturl ||
+    data?.redirectUrl ||
+    data?.redirect_url ||
+    data?.paymentUrl ||
+    data?.payment_url ||
+    data?.paymentLink ||
+    data?.url ||
+    nestedData?.redirecturl ||
+    nestedData?.redirectUrl ||
+    nestedData?.redirect_url ||
+    nestedData?.paymentUrl ||
+    nestedData?.payment_url ||
+    nestedData?.paymentLink ||
+    nestedData?.url ||
+    ""
+  );
+};
+
+const getPaymentResponseData = (payload = {}) =>
+  payload?.data?.data && typeof payload.data.data === "object"
+    ? payload.data.data
+    : payload?.data && typeof payload.data === "object"
+      ? payload.data
+      : payload && typeof payload === "object"
+        ? payload
+        : {};
+
+const getCashfreePaymentSessionId = (payload = {}) => {
+  const data = payload?.data || {};
+  const nestedData = data?.data || {};
+  return (
+    payload?.payment_session_id ||
+    payload?.paymentSessionId ||
+    data?.payment_session_id ||
+    data?.paymentSessionId ||
+    nestedData?.payment_session_id ||
+    nestedData?.paymentSessionId ||
+    ""
+  );
+};
+
+const normalizePaymentGateway = (paymentGateway = "") =>
+  String(
+    paymentGateway && typeof paymentGateway === "object"
+      ? paymentGateway.id ||
+          paymentGateway.slug ||
+          paymentGateway.code ||
+          paymentGateway.name ||
+          paymentGateway.payment_gateway ||
+          paymentGateway.paymentGateway ||
+          paymentGateway.gateway ||
+          ""
+      : paymentGateway || ""
+  )
+    .trim()
+    .toLowerCase();
+
+let cashfreeSdkPromise;
+
+const loadCashfreeSdk = () => {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Cashfree checkout is only available in the browser."));
+  }
+
+  if (typeof window.Cashfree === "function") {
+    return Promise.resolve(window.Cashfree);
+  }
+
+  if (cashfreeSdkPromise) return cashfreeSdkPromise;
+
+  cashfreeSdkPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(
+      'script[src="https://sdk.cashfree.com/js/v3/cashfree.js"]'
+    );
+    const script = existingScript || document.createElement("script");
+
+    const handleLoad = () => {
+      if (typeof window.Cashfree === "function") {
+        resolve(window.Cashfree);
+        return;
+      }
+
+      cashfreeSdkPromise = null;
+      reject(new Error("Cashfree checkout SDK is unavailable."));
+    };
+
+    const handleError = () => {
+      cashfreeSdkPromise = null;
+      reject(new Error("Unable to load Cashfree checkout."));
+    };
+
+    script.addEventListener("load", handleLoad, { once: true });
+    script.addEventListener("error", handleError, { once: true });
+
+    if (!existingScript) {
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  });
+
+  return cashfreeSdkPromise;
+};
+
+const normalizeCashfreeMode = (value) => {
+  const mode = String(value || "").trim().toLowerCase();
+  if (mode === "sandbox" || mode === "production") return mode;
+  return "";
+};
+
+const getCashfreeMode = (paymentResponse = {}) => {
+  const data = paymentResponse?.data || {};
+  const nestedData = data?.data || {};
+  const responseMode = normalizeCashfreeMode(
+    paymentResponse?.environment ||
+      paymentResponse?.checkout_mode ||
+      paymentResponse?.checkoutMode ||
+      data?.environment ||
+      data?.checkout_mode ||
+      data?.checkoutMode ||
+      nestedData?.environment ||
+      nestedData?.checkout_mode ||
+      nestedData?.checkoutMode
+  );
+
+  if (responseMode) return responseMode;
+
+  if (process.env.NEXT_PUBLIC_CASHFREE_MODE) {
+    return normalizeCashfreeMode(process.env.NEXT_PUBLIC_CASHFREE_MODE) || "production";
+  }
+
+  return typeof window !== "undefined" &&
+    ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "sandbox"
+    : "production";
+};
+
+const writeFlightPaymentSnapshot = ({
+  paymentGateway,
+  paymentResponse,
+  gatewayPaymentPayload,
+  createBookingResponse,
+}) => {
+  if (typeof window === "undefined") return;
+
+  const paymentData = getPaymentResponseData(paymentResponse);
+  const createBookingData = getPaymentResponseData(createBookingResponse);
+
+  try {
+    window.localStorage.setItem(
+      "flightPaymentSnapshot",
+      JSON.stringify({
+        paymentGateway: normalizePaymentGateway(paymentGateway),
+        bookingId:
+          paymentData.booking_id ||
+          paymentData.bookingId ||
+          paymentData.merchant_order_id ||
+          paymentData.merchantOrderId ||
+          "",
+        merchantOrderId:
+          paymentData.merchant_order_id ||
+          paymentData.merchantOrderId ||
+          "",
+        orderId:
+          paymentData.order_id ||
+          paymentData.orderId ||
+          "",
+        paymentOrderId:
+          paymentData.payment_order_id ||
+          paymentData.paymentOrderId ||
+          "",
+        transactionId:
+          gatewayPaymentPayload?.TransactionID ||
+          paymentData.TransactionID ||
+          paymentData.transactionId ||
+          "",
+        TUI: gatewayPaymentPayload?.TUI || paymentData.TUI || createBookingData.TUI || "",
+        searchKey:
+          gatewayPaymentPayload?.search_key ||
+          paymentData.search_key ||
+          createBookingData.search_key ||
+          "",
+        amount:
+          gatewayPaymentPayload?.NetAmount ||
+          paymentData.amount ||
+          paymentData.NetAmount ||
+          "",
+        paymentResponse,
+        createdAt: Date.now(),
+      })
+    );
+  } catch {
+    // Best-effort storage for the return page.
+  }
+};
+
+const redirectToFlightGatewayPayment = async (paymentResponse, paymentGateway) => {
+  const gateway = normalizePaymentGateway(paymentGateway);
+
+  if (gateway === "cashfree") {
+    const paymentSessionId = getCashfreePaymentSessionId(paymentResponse);
+    if (!paymentSessionId) {
+      throw new Error("Cashfree payment session ID is missing.");
+    }
+
+    const Cashfree = await loadCashfreeSdk();
+    const cashfree = Cashfree({ mode: getCashfreeMode(paymentResponse) });
+    const checkoutResult = await cashfree.checkout({
+      paymentSessionId,
+      redirectTarget: "_self",
+    });
+
+    if (checkoutResult?.error) {
+      throw new Error(
+        checkoutResult.error.message || "Unable to open Cashfree checkout."
+      );
+    }
+    return;
+  }
+
+  const paymentRedirectUrl = getPaymentRedirectUrl(paymentResponse);
+  if (!paymentRedirectUrl) {
+    throw new Error("Payment URL is missing.");
+  }
+
+  window.open(paymentRedirectUrl, "_blank", "noopener,noreferrer");
 };
 
 const getSsrRequestKey = (payload = {}) => {
@@ -159,6 +397,7 @@ export function FlightBookingProvider({ children }) {
   const [seatLayoutLoading, setSeatLayoutLoading] = useState(false);
   const [itineraryLoading, setItineraryLoading] = useState(false);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
 
 
 
@@ -499,32 +738,39 @@ export function FlightBookingProvider({ children }) {
     };
   }, [baggage, bookingSession, meals, seats]);
 
-  const submitItinerary = async () => {
+  const submitItinerary = async (paymentGateway = "") => {
     if (itineraryLoading) return false;
+    const selectedPaymentGateway =
+      typeof paymentGateway === "string" && paymentGateway.trim()
+        ? paymentGateway.trim().toLowerCase()
+        : "";
 
-    const payload = buildCreateItineraryPayload(
-      {
-        ...(bookingSession || {}),
-        travelerDetails,
-        bookingContactDetails,
-        baggage,
-        meals,
-        seats,
-      },
+    if (!selectedPaymentGateway) {
+      setBookingError("Payment gateway is required.");
+      toast.error("Payment gateway is required.", {
+        toastId: "flight-payment-gateway-required",
+      });
+      return false;
+    }
+
+    const sessionPayload = {
+      ...(bookingSession || {}),
+      travelerDetails,
+      bookingContactDetails,
+      baggage,
+      meals,
+      seats,
+    };
+    const createBookingPayload = buildCreateBookingPayload(
+      sessionPayload,
       prices
     );
-    const provider = String(payload?.provider || payload?.Provider || "")
-      .trim()
-      .toLowerCase();
-    const hasAkbarPayload = Boolean(payload?.TUI && payload?.Travellers?.length);
-    const hasRiyaPayload = Boolean(
-      provider === "riya" &&
-        payload?.TrackId &&
-        payload?.ItineraryFlightsInfo?.length &&
-        payload?.PaxDetailsInfo?.length
-    );
 
-    if (!hasAkbarPayload && !hasRiyaPayload) {
+    if (
+      !createBookingPayload?.search_key ||
+      !createBookingPayload?.TUI ||
+      !createBookingPayload?.passengers?.length
+    ) {
       setBookingError("Passenger or booking data is incomplete.");
       return false;
     }
@@ -533,56 +779,59 @@ export function FlightBookingProvider({ children }) {
     setPaymentSuccessData(null);
     setItineraryLoading(true);
     try {
-      const createItineraryResponse = await createFlightItinerary(payload);
+      const createBookingResponse = await createFlightV2Booking(createBookingPayload);
       if (
-        createItineraryResponse?.success === false ||
-        createItineraryResponse?.data?.success === false
+        createBookingResponse?.success === false ||
+        createBookingResponse?.data?.success === false
       ) {
         throw new Error(
-          getApiMessage(createItineraryResponse, "Unable to create itinerary.")
+          getApiMessage(createBookingResponse, "Unable to create booking.")
+        );
+      }
+      const gatewayPaymentPayload = buildFlightGatewayPaymentPayload({
+        session: sessionPayload,
+        createBookingPayload,
+        createBookingResponse,
+        paymentGateway: selectedPaymentGateway,
+      });
+
+      if (
+        !gatewayPaymentPayload?.search_key ||
+        !gatewayPaymentPayload?.TUI ||
+        !gatewayPaymentPayload?.TransactionID ||
+        !gatewayPaymentPayload?.NetAmount
+      ) {
+        throw new Error("Payment payload is incomplete.");
+      }
+
+      const gatewayPaymentResponse = await startFlightGatewayPayment(
+        selectedPaymentGateway,
+        gatewayPaymentPayload
+      );
+      writeFlightPaymentSnapshot({
+        paymentGateway: selectedPaymentGateway,
+        paymentResponse: gatewayPaymentResponse,
+        gatewayPaymentPayload,
+        createBookingResponse,
+      });
+
+      setBookingSession((prev) => ({
+        ...(prev || {}),
+        createBookingRequest: createBookingPayload,
+        createBookingResponse,
+        gatewayPaymentRequest: gatewayPaymentPayload,
+        gatewayPaymentResponse,
+      }));
+      setPaymentSuccessData(null);
+      toast.success("Payment session started successfully");
+
+      if (typeof window !== "undefined") {
+        await redirectToFlightGatewayPayment(
+          gatewayPaymentResponse,
+          selectedPaymentGateway
         );
       }
 
-      const nextSession = {
-        ...(bookingSession || {}),
-        createItineraryRequest: payload,
-        createItineraryResponse,
-      };
-      const startPaymentPayload = buildStartPaymentPayload(nextSession);
-      if (!startPaymentPayload?.TUI) {
-        throw new Error("TUI missing in create-itinerary response.");
-      }
-      setBookingSession((prev) => ({
-        ...(prev || {}),
-        createItineraryRequest: payload,
-        createItineraryResponse,
-        startPaymentRequest: startPaymentPayload,
-      }));
-      const startPaymentResponse = await startFlightPayment(startPaymentPayload);
-      const retrieveBookingPayload = buildRetrieveBookingPayload({
-        ...(bookingSession || {}),
-        createItineraryRequest: payload,
-        createItineraryResponse,
-        startPaymentRequest: startPaymentPayload,
-        startPaymentResponse,
-      });
-      const retrieveBookingResponse = await retrieveFlightBooking(retrieveBookingPayload);
-
-      setBookingSession((prev) => ({
-        ...(prev || {}),
-        createItineraryRequest: payload,
-        createItineraryResponse,
-        startPaymentRequest: startPaymentPayload,
-        startPaymentResponse,
-        retrieveBookingRequest: retrieveBookingPayload,
-        retrieveBookingResponse,
-      }));
-      setPaymentSuccessData({
-        createItinerary: createItineraryResponse?.data || null,
-        startPayment: startPaymentResponse?.data || null,
-        retrieveBooking: retrieveBookingResponse || null,
-      });
-      toast.success("Payment session started successfully");
       return true;
     } catch (error) {
       const message =
@@ -628,6 +877,8 @@ export function FlightBookingProvider({ children }) {
         submitItinerary,
         paymentSuccessData,
         setPaymentSuccessData,
+        paymentMethod,
+        setPaymentMethod,
 
         prices,
       }}

@@ -36,6 +36,7 @@ export default function SidebarPriceSummaryCard() {
     itineraryLoading,
     travelerDetails,
     bookingSession,
+    paymentMethod,
   } = useFlightBooking();
   const passengerCounts = getPassengerCounts(travelerDetails, bookingSession);
   const totalPassengers =
@@ -104,7 +105,7 @@ export default function SidebarPriceSummaryCard() {
         <>
           <button
             className={styles.bookNowBtn}
-            onClick={submitItinerary}
+            onClick={() => submitItinerary(paymentMethod)}
             disabled={itineraryLoading}
           >
             {itineraryLoading ? "Loading..." : "Continue Payment"}
