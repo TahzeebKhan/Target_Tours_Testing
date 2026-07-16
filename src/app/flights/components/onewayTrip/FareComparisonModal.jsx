@@ -849,7 +849,7 @@ const FareComparisonModal = ({
                         <div className={styles.fareCard}>
 
                             <div className={styles.upperHalf}>
-                                <span className={styles.radioOutline}></span>
+                                {/* <span className={styles.radioOutline}></span> */}
                                 <div className={styles.fareHeader}>
 
 

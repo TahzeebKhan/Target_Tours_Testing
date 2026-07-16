@@ -5,7 +5,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
+import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
 
 const ratingToStars = {
   excellent: 5,
@@ -100,36 +101,65 @@ const formatDateTime = (value) => {
 };
 
 const formatPolicyValue = (rule = {}) => {
-  const value = Number(rule.value ?? rule.estimatedValue ?? 0);
+  if (!rule || (rule.value == null && rule.estimatedValue == null)) return "N/A";
+
+  const value = Number(rule.value ?? rule.estimatedValue);
   const valueType = String(rule.valueType || "").toLowerCase();
 
+  if (!Number.isFinite(value)) return "N/A";
   if (valueType === "percentage") return `${value}%`;
   if (valueType === "amount") return `₹ ${value.toLocaleString("en-IN")}`;
-  if (Number.isFinite(value) && value > 0) return String(value);
+  if (value > 0) return String(value);
 
   return "Free";
 };
 
+const getPolicyStatus = (rule) => {
+  if (!rule || (rule.value == null && rule.estimatedValue == null)) return "unknown";
+
+  const value = Number(rule.value ?? rule.estimatedValue);
+  if (!Number.isFinite(value)) return "unknown";
+
+  return value > 0 ? "charge" : "free";
+};
+
 const getCancellationPolicyRows = (room = {}) =>
-  toArray(room?.cancellationPolicies).flatMap((policy, policyIndex) =>
-    toArray(policy?.rules).map((rule, ruleIndex) => ({
+  toArray(room?.cancellationPolicies).flatMap((policy, policyIndex) => {
+    const rules = toArray(policy?.rules);
+
+    if (!rules.length) {
+      return [
+        {
+          id: `${policyIndex}-empty`,
+          title: policy?.text || "Cancellation policy",
+          value: "N/A",
+          start: "N/A",
+          end: "N/A",
+          status: "unknown",
+        },
+      ];
+    }
+
+    return rules.map((rule, ruleIndex) => ({
       id: `${policyIndex}-${ruleIndex}`,
       title: policy?.text || "Cancellation policy",
       value: formatPolicyValue(rule),
-      start: formatDateTime(rule?.start),
-      end: formatDateTime(rule?.end),
-    })),
-  );
+      start: formatDateTime(rule?.start) || "N/A",
+      end: formatDateTime(rule?.end) || "N/A",
+      status: getPolicyStatus(rule),
+    }));
+  });
+
+const getInclusionRows = (room = {}) =>
+  toArray(room?.includes)
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
 
 const getRoomInfoRows = (room = {}) => {
   const rows = [];
   const boardBasis = room?.boardBasis?.description || room?.boardBasis?.type;
 
   if (boardBasis) rows.push({ label: "Board basis", value: boardBasis });
-
-  toArray(room?.includes).forEach((item) => {
-    if (item) rows.push({ label: "Includes", value: String(item) });
-  });
 
   toArray(room?.additionalInformation).forEach((item) => {
     const text = item?.text || item?.value || "";
@@ -182,9 +212,12 @@ const getDescriptionRows = (room = {}) => {
 };
 
 const RoomDetailsModal = ({ room, onClose }) => {
+  useBodyScrollLock(Boolean(room));
+
   if (!room) return null;
 
   const descriptionRows = getDescriptionRows(room);
+  const inclusionRows = getInclusionRows(room);
   const policyRows = getCancellationPolicyRows(room);
   const infoRows = getRoomInfoRows(room);
 
@@ -232,22 +265,51 @@ const RoomDetailsModal = ({ room, onClose }) => {
           </section>
 
           <section className={styles.detailsSection}>
-            <h4>Cancellation Policies</h4>
-            {policyRows.length ? (
-              <div className={styles.policyList}>
-                {policyRows.map((policy) => (
-                  <div key={policy.id} className={styles.policyRow}>
-                    <div>
-                      <strong>{policy.title}</strong>
-                      <span>
-                        {policy.start || "Booking time"} to{" "}
-                        {policy.end || "check-in"}
-                      </span>
-                    </div>
-                    <b>{policy.value}</b>
-                  </div>
+            <h4>Inclusions</h4>
+            {inclusionRows.length ? (
+              <ul className={styles.inclusionList}>
+                {inclusionRows.map((item, index) => (
+                  <li key={`${item}-${index}`}>{item}</li>
                 ))}
-              </div>
+              </ul>
+            ) : (
+              <p className={styles.detailsEmpty}>N/A</p>
+            )}
+          </section>
+
+          <section className={styles.detailsSection}>
+            <h4>Cancellation Policy :</h4>
+            {policyRows.length ? (
+              <ul className={styles.policyList}>
+                {policyRows.map((policy) => (
+                  <li key={policy.id} className={styles.policyRow}>
+                    <span
+                      className={`${styles.policyIcon} ${
+                        policy.status === "charge"
+                          ? styles.policyIconWrong
+                          : policy.status === "free"
+                            ? styles.policyIconCorrect
+                            : styles.policyIconNeutral
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {policy.status === "charge" ? (
+                        <X size={18} strokeWidth={2.4} />
+                      ) : (
+                        <Check size={18} strokeWidth={2.4} />
+                      )}
+                    </span>
+                    <span className={styles.policyContent}>
+                      <span>{policy.title || "N/A"}</span>
+                      <small>
+                        Fee: {policy.value || "N/A"}
+                        {(policy.start !== "N/A" || policy.end !== "N/A") &&
+                          ` • ${policy.start || "N/A"} to ${policy.end || "N/A"}`}
+                      </small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             ) : (
               <p className={styles.detailsEmpty}>
                 Cancellation policy is not available for this room.

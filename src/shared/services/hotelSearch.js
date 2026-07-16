@@ -722,7 +722,7 @@ export const HotelPaymentStart = async (payload = {}) => {
   }
 
   const url = new URL(
-    `/api/payment-gateways/${paymentGateway}/pa`,
+    `/api/payment-gateways/${paymentGateway}/pay`,
     normalizeBaseUrl(),
   );
 
