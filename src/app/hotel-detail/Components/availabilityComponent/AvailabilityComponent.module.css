@@ -1187,11 +1187,11 @@
 }
 
 .policyList,
+.inclusionList,
 .infoList,
 .descriptionList {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e4e6e8;
 }
 
 /* .infoList {
@@ -1215,29 +1215,18 @@
   letter-spacing: 0%;
 }
 
-.policyRow,
 .infoRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
   padding: 14px 16px;
   border-bottom: 1px solid #e4e6e8;
   font-family: var(--font-inter);
 }
 
-.policyRow:last-child,
 .infoRow:last-child {
   border-bottom: 0;
 }
 
-.policyRow strong {
-  display: block;
-  margin-bottom: 5px;
-  color: #101828;
-  font-size: 14px;
-}
-
-.policyRow span,
 .infoRow span {
   color: #4a5565;
   font-family: Inter;
@@ -1247,10 +1236,65 @@
   letter-spacing: 0%;
 }
 
-.policyRow b {
-  color: #000033;
+.policyList,
+.inclusionList {
+  margin: 0;
+  gap: 12px;
+  color: #4a5565;
+  font-family: Inter;
+  font-weight: 300;
   font-size: 14px;
-  white-space: nowrap;
+  line-height: 150%;
+}
+
+.policyList {
+  padding: 0;
+  list-style: none;
+}
+
+.inclusionList {
+  padding: 0 0 0 20px;
+}
+
+.policyRow {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.policyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.policyIconCorrect {
+  color: #2e7d32;
+}
+
+.policyIconWrong {
+  color: #d92d20;
+}
+
+.policyIconNeutral {
+  color: #98a2b3;
+}
+
+.policyContent,
+.policyContent span {
+  display: block;
+}
+
+.policyContent small {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 13px;
+  line-height: 145%;
 }
 
 .infoRow {
