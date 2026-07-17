@@ -13,9 +13,6 @@ import {
     buildSelectedFarePriceRequest,
     writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
-import { useAuth } from "@/app/context/AuthContext";
-import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
-import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import {
     getCachedFareOptionsRequest,
     getFareOptionItems,
@@ -619,12 +616,8 @@ const FareComparisonModal = ({
     useLockBodyScroll(isOpen && !inline);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { isLoggedIn, loading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submittingFareId, setSubmittingFareId] = useState(null);
-    const [showLogin, setShowLogin] = useState(false);
-    const [authView, setAuthView] = useState("login");
-    const [pendingFare, setPendingFare] = useState(null);
     const [fareOptionsPayload, setFareOptionsPayload] = useState(prefetchedData?.fareOptionsResponse || null);
     const [isPollingFareOptions, setIsPollingFareOptions] = useState(false);
     const [hasResolvedFareOptions, setHasResolvedFareOptions] = useState(
@@ -737,7 +730,7 @@ const FareComparisonModal = ({
                 selectedFare,
                 formattedOnlyPriceResponse
             );
-             console.log("selectedFareFromFormattedPrice",selectedFareFromFormattedPrice)
+          
             const nextSession = {
                 selectedFlight: flightData,
                 selectedFare: selectedFareFromFormattedPrice,
@@ -748,7 +741,7 @@ const FareComparisonModal = ({
                 ssrRequest: null,
                 ssrResponse: null,
             };
-             console.log("nextSession",nextSession)
+    
             writeFlightBookingSession(nextSession);
             const fallbackQuery = buildBookingFallbackQuery(nextSession);
             router.push(
@@ -771,22 +764,7 @@ const FareComparisonModal = ({
         }
     }, [flightData, router, searchParams]);
 
-    useEffect(() => {
-        if (!pendingFare || !isLoggedIn) return;
-        const selectedFare = pendingFare;
-        setPendingFare(null);
-        setShowLogin(false);
-        performBookNow(selectedFare);
-    }, [isLoggedIn, pendingFare, performBookNow]);
-
     const handleBookNow = async (selectedFare) => {
-        if (loading) return;
-        if (!isLoggedIn) {
-            setPendingFare(selectedFare);
-            setAuthView("login");
-            setShowLogin(true);
-            return;
-        }
         performBookNow(selectedFare);
     };
 
@@ -952,24 +930,6 @@ const FareComparisonModal = ({
         return (
             <div className={styles.inlinePanel}>
                 {fareCards}
-                {showLogin && authView === "login" && (
-                    <LoginPopup
-                        onClose={() => {
-                            setShowLogin(false);
-                            setPendingFare(null);
-                        }}
-                        onNavigate={setAuthView}
-                    />
-                )}
-                {showLogin && authView === "signup" && (
-                    <SignupPopup
-                        onClose={() => {
-                            setShowLogin(false);
-                            setPendingFare(null);
-                        }}
-                        onNavigate={setAuthView}
-                    />
-                )}
             </div>
         );
     }
@@ -1068,24 +1028,6 @@ const FareComparisonModal = ({
                 {/* Fare Cards */}
                 {fareCards}
             </div>
-            {showLogin && authView === "login" && (
-                <LoginPopup
-                    onClose={() => {
-                        setShowLogin(false);
-                        setPendingFare(null);
-                    }}
-                    onNavigate={setAuthView}
-                />
-            )}
-            {showLogin && authView === "signup" && (
-                <SignupPopup
-                    onClose={() => {
-                        setShowLogin(false);
-                        setPendingFare(null);
-                    }}
-                    onNavigate={setAuthView}
-                />
-            )}
         </div>
     );
 };

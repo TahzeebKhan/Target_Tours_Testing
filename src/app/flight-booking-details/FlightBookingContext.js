@@ -27,30 +27,10 @@ const getApiMessage = (payload, fallback) => {
 };
 
 const getPaymentRedirectUrl = (payload = {}) => {
+   console.log("payload4",payload)
   const data = payload?.data || {};
-  const nestedData = data?.data || {};
   return (
-    payload?.redirecturl ||
-    payload?.redirectUrl ||
-    payload?.redirect_url ||
-    payload?.paymentUrl ||
-    payload?.payment_url ||
-    payload?.paymentLink ||
-    payload?.url ||
-    data?.redirecturl ||
     data?.redirectUrl ||
-    data?.redirect_url ||
-    data?.paymentUrl ||
-    data?.payment_url ||
-    data?.paymentLink ||
-    data?.url ||
-    nestedData?.redirecturl ||
-    nestedData?.redirectUrl ||
-    nestedData?.redirect_url ||
-    nestedData?.paymentUrl ||
-    nestedData?.payment_url ||
-    nestedData?.paymentLink ||
-    nestedData?.url ||
     ""
   );
 };
@@ -233,7 +213,35 @@ const writeFlightPaymentSnapshot = ({
   }
 };
 
-const redirectToFlightGatewayPayment = async (paymentResponse, paymentGateway) => {
+// 
+
+
+
+//   if (paymentWindow && !paymentWindow.closed) {
+//     paymentWindow.location.href = redirectUrl;
+//     paymentWindow.focus?.();
+//     return true;
+//   }
+
+//   const openedWindow = window.open(redirectUrl, "_blank", "noopener,noreferrer");
+//   if (openedWindow) return true;
+
+//   const link = document.createElement("a");
+//   link.href = redirectUrl;
+//   link.target = "_blank";
+//   link.rel = "noopener noreferrer";
+//   link.style.display = "none";
+//   document.body.appendChild(link);
+//   link.click();
+//   link.remove();
+//   return true;
+// };
+
+const redirectToFlightGatewayPayment = async (
+  paymentResponse,
+  paymentGateway,
+  paymentWindow = null
+) => {
   const gateway = normalizePaymentGateway(paymentGateway);
 
   if (gateway === "cashfree") {
@@ -258,10 +266,12 @@ const redirectToFlightGatewayPayment = async (paymentResponse, paymentGateway) =
   }
 
   const paymentRedirectUrl = getPaymentRedirectUrl(paymentResponse);
+   console.log("paymentRedirectUrl",paymentRedirectUrl)
   if (!paymentRedirectUrl) {
     throw new Error("Payment URL is missing.");
   }
 
+  // openPaymentRedirect(paymentRedirectUrl, paymentWindow);
   window.open(paymentRedirectUrl, "_blank", "noopener,noreferrer");
 };
 
@@ -399,11 +409,6 @@ export function FlightBookingProvider({ children }) {
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
 
-
-
-
-
-
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -476,7 +481,7 @@ export function FlightBookingProvider({ children }) {
     travelerDetailsOverride,
     includeSeatLayout = true,
   } = {}) => {
-    console.log("bookingSession?.priceResponse",bookingSession?.priceResponse)
+  
     if (!bookingSession?.priceResponse) return false;
     const activeTravelerDetails = Array.isArray(travelerDetailsOverride)
       ? travelerDetailsOverride
@@ -503,7 +508,7 @@ export function FlightBookingProvider({ children }) {
         const ssrResponse = canReuseV2SsrResponse
           ? bookingSession.ssrResponse
           : await getFlightV2Ssr(v2SsrPayload);
-           console.log("ssrResponse",ssrResponse)
+  
 
         let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
         let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
@@ -724,9 +729,9 @@ export function FlightBookingProvider({ children }) {
   const prices = useMemo(() => {
     const baseFare = extractBaseFareAmount(bookingSession);
     const tax = extractTaxAmount(bookingSession);
-    const baggagePrice = baggage.reduce((s, b) => s + b.price, 0);
-    const mealsPrice = meals.reduce((s, m) => s + m.price, 0);
-    const seatsPrice = seats.reduce((s, s1) => s + s1.price, 0);
+    const baggagePrice = baggage.reduce((s, b) => s + Number(b.price || 0), 0);
+    const mealsPrice = meals.reduce((s, m) => s + Number(m.price || 0), 0);
+    const seatsPrice = seats.reduce((s, s1) => s + Number(s1.price || 0), 0);
 
     return {
       baseFare,
@@ -774,6 +779,11 @@ export function FlightBookingProvider({ children }) {
       setBookingError("Passenger or booking data is incomplete.");
       return false;
     }
+
+    const paymentWindow =
+      selectedPaymentGateway !== "cashfree" && typeof window !== "undefined"
+        ? window.open("", "_blank")
+        : null;
 
     setBookingError("");
     setPaymentSuccessData(null);
@@ -828,12 +838,16 @@ export function FlightBookingProvider({ children }) {
       if (typeof window !== "undefined") {
         await redirectToFlightGatewayPayment(
           gatewayPaymentResponse,
-          selectedPaymentGateway
+          selectedPaymentGateway,
+          paymentWindow
         );
       }
 
       return true;
     } catch (error) {
+      if (paymentWindow && !paymentWindow.closed) {
+        paymentWindow.close();
+      }
       const message =
         error?.response?.data?.data?.message ||
         error?.response?.data?.message ||

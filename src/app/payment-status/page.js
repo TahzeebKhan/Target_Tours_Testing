@@ -51,6 +51,29 @@ const formatStatus = (value) =>
 const isSuccessFalse = (payload = {}) =>
   payload?.success === false || payload?.data?.success === false;
 
+const postFlightJson = async (url, payload, fallbackMessage) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        data?.data?.message ||
+        data?.error?.message ||
+        fallbackMessage
+    );
+  }
+
+  return data;
+};
+
 function PaymentStatusContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -82,6 +105,22 @@ function PaymentStatusContent() {
       ),
     [searchParams, snapshot]
   );
+  const confirmBookingId = useMemo(
+    () =>
+      pickFirst(
+        snapshot.bookingId,
+        getParamValue(searchParams, ["booking_id", "bookingId"])
+      ),
+    [searchParams, snapshot.bookingId]
+  );
+  const searchKey = useMemo(
+    () =>
+      pickFirst(
+        snapshot.searchKey,
+        getParamValue(searchParams, ["search_key", "searchKey"])
+      ),
+    [searchParams, snapshot.searchKey]
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -97,27 +136,28 @@ function PaymentStatusContent() {
       setErrorMessage("");
 
       try {
-        const response = await fetch("/api/flights/v2/retrieve-booking", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-          body: JSON.stringify({
-            domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
-            booking_id: bookingId,
-          }),
-        });
-        const data = await response.json().catch(() => ({}));
+        const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
 
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              data?.data?.message ||
-              data?.error?.message ||
-              "Unable to retrieve flight booking."
+        if (confirmBookingId && searchKey) {
+          await postFlightJson(
+            "/api/flights/v2/confirm-booking",
+            {
+              booking_id: confirmBookingId,
+              domain,
+              search_key: searchKey,
+            },
+            "Unable to confirm flight booking."
           );
         }
+
+        const data = await postFlightJson(
+          "/api/flights/v2/retrieve-booking",
+          {
+            domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+            booking_id: bookingId,
+          },
+          "Unable to retrieve flight booking."
+        );
 
         if (!isActive) return;
         if (isSuccessFalse(data)) {
@@ -140,7 +180,7 @@ function PaymentStatusContent() {
     return () => {
       isActive = false;
     };
-  }, [bookingId, snapshot.createdAt]);
+  }, [bookingId, confirmBookingId, searchKey, snapshot.createdAt]);
 
   const details = useMemo(() => {
     const data = getResponseData(retrieveResponse);
