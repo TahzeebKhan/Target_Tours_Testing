@@ -2370,10 +2370,8 @@ export const buildFlightGatewayPaymentPayload = ({
     responseData?.NetAmount,
     createBookingPayload?.payment?.netAmount
   ) || 0;
-  const redirectUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/payment-status?booking_type=flight`
-      : "https://target-tours.vercel.app/payment-status?booking_type=flight";
+  const configuredRedirectUrl = `${window.location.origin}/payment-status?booking_type=flight`
+  const redirectUrl = configuredRedirectUrl
 
   return {
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",

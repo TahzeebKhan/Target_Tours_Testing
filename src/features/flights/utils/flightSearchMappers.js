@@ -511,12 +511,32 @@ const getDefaultOrderId = (tripType) => {
 };
 
 const extractResponseBookingMeta = (payload, tripType) => ({
-  provider: pickFirst(getPrimaryV2Result(payload)?.meta?.provider),
+  provider: pickFirst(
+    getPrimaryV2Result(payload)?.meta?.provider,
+    payload?.data?.provider,
+    payload?.provider
+  ),
   searchKey: pickFirst(
     getPrimaryV2Result(payload)?.search_key,
-    getPrimaryV2Result(payload)?.meta?.search_key
+    getPrimaryV2Result(payload)?.meta?.search_key,
+    getPrimaryV2Result(payload)?.meta?.provider_search_key,
+    payload?.data?.search_key,
+    payload?.data?.provider_search_key,
+    payload?.search_key,
+    payload?.provider_search_key
   ),
-  tui: pickFirst(getPrimaryV2Result(payload)?.tui),
+  tui: pickFirst(
+    getPrimaryV2Result(payload)?.tui,
+    getPrimaryV2Result(payload)?.TUI,
+    getPrimaryV2Result(payload)?.meta?.tui,
+    getPrimaryV2Result(payload)?.meta?.TUI,
+    payload?.data?.result?.meta?.tui,
+    payload?.data?.result?.meta?.TUI,
+    payload?.data?.tui,
+    payload?.data?.TUI,
+    payload?.tui,
+    payload?.TUI
+  ),
   clientId: DEFAULT_BOOKING_CLIENT_ID,
   mode: DEFAULT_BOOKING_MODE,
   options: DEFAULT_BOOKING_OPTIONS,

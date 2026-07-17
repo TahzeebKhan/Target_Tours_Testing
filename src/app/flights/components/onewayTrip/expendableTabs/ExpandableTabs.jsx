@@ -493,8 +493,12 @@ const getFallbackCancellationTimeFrame = (rule = {}) => {
   const description = String(
     rule?.Description || rule?.description || ""
   ).trim();
+  const amountText = String(
+    rule?.adultAmount || rule?.AdultAmount || rule?.amount || rule?.Amount || ""
+  ).trim();
 
   if (!description || description.toLowerCase() === "cancellation") {
+    if (/non[-\s]?refundable/i.test(amountText)) return "Cancellation";
     return amount && amount <= 100
       ? "Cancellation"
       : "Before departure";
@@ -830,6 +834,15 @@ const getFareRuleFee = (rule = {}, platformCharges = null) => {
 
   if (amount) {
     return `ADULT : ${rule.CurrencyCode || rule.currencyCode || rule?.currency || "INR"} ${amount}${suffix}`;
+  }
+
+  const amountText =
+    rule?.AdultAmount ||
+    rule?.adultAmount ||
+    rule?.amount ||
+    rule?.Amount;
+  if (/non[-\s]?refundable/i.test(String(amountText || ""))) {
+    return displayValue(`ADULT : ${amountText}`);
   }
 
   const feeText =
@@ -1764,18 +1777,30 @@ const ExpandableTabs = ({
   const buildFareRulesPayload = () => {
     const priceRequest = flightData?.booking?.priceRequest || {};
     const trip = priceRequest?.Trips?.[0] || {};
+    const rawMeta =
+      flightData?.raw?.data?.result?.meta ||
+      flightData?.raw?.result?.meta ||
+      flightData?.raw?.meta ||
+      {};
     const displayedFareAmount = parseCurrencyAmount(flightData?.fare?.totalFare);
 
     return {
-      search_key: priceRequest?.search_key || flightData?.booking?.searchKey,
-      ClientID: "APITRAGET",
-      Source: priceRequest?.Source || flightData?.booking?.source || "SF",
+      domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+      search_key:
+        priceRequest?.search_key ||
+        flightData?.booking?.searchKey ||
+        rawMeta?.search_key ||
+        rawMeta?.provider_search_key,
       Trips: [
         {
           Amount: displayedFareAmount ?? trip?.Amount,
           Index: trip?.Index,
-          OrderID: trip?.OrderID,
-          TUI: trip?.TUI || flightData?.booking?.tui,
+          OrderID: trip?.OrderID || 1,
+          TUI:
+            trip?.TUI ||
+            flightData?.booking?.tui ||
+            rawMeta?.tui ||
+            rawMeta?.TUI,
         },
       ],
     };
@@ -1876,6 +1901,7 @@ const ExpandableTabs = ({
       trip.TUI;
 
     if (!hasRequiredPayload) {
+      console.warn("Cancellation fare-rule request missing required fields", payload);
       setFareRulesData(null);
       setFareRulesRequestKey("");
       setFareRulesError("Cancellation rules are not available for this flight.");

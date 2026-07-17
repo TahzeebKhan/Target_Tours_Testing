@@ -808,7 +808,7 @@ export const getFlightPrice = async (payload) => {
       if (seenChunkKeys.has(key)) return false;
 
       seenChunkKeys.add(key);
-      console.log("chunkpayload", payload);
+     
       chunks.push(payload);
       return true;
     };
@@ -874,15 +874,7 @@ export const getFlightPrice = async (payload) => {
       const extractedPricing = extractFlightPricingPayload(parsedPayload);
       const isCompletePricingEvent = isFlightPricingResult(parsedPayload);
 
-      console.log("[pricing:sse] event", {
-        rawType: event.type,
-        parsedType: type,
-        expectedChannel: channel,
-        payloadChannel,
-        channelMatched: isCurrentChannel,
-        pricingExtracted: Boolean(extractedPricing),
-        complete: isCompletePricingEvent,
-      });
+
 
       if (!isCurrentChannel) return;
 
@@ -1230,6 +1222,31 @@ export const getFlightInfo = async (payload) => {
 };
 
 export const getFlightFareRules = async (payload) => {
+  const response = await fetch("/api/flights/v2/fare-rule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      ...payload,
+      domain:
+        payload?.domain ||
+        process.env.NEXT_PUBLIC_DOMAIN ||
+        "localhost:1337",
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(getApiMessage(data));
+  }
+
+  return data;
+};
+
+export const getLegacyFlightFareRules = async (payload) => {
   const response = await api.post("/api/flights/fare-rule", {
     ...payload,
     domain: "localhost:1337",
@@ -1891,14 +1908,18 @@ export const startFlightGatewayPayment = async (paymentGateway, payload) => {
     throw new Error("Payment gateway is required.");
   }
 
-  const response = await fetch(`/api/flights/v2/${gateway}/pay`, {
+  const response = await fetch(`/api/payment-gateways/${gateway}/pay`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
     cache: "no-store",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      ...payload,
+      payment_gateway: gatewayId,
+      payment_mode: gatewayId,
+    }),
   });
   const data = await response.json().catch(() => ({}));
 
