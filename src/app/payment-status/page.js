@@ -43,8 +43,27 @@ const formatAmount = (value) => {
   return `INR ${amount.toLocaleString("en-IN")}`;
 };
 
+const formatDateTime = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
 const formatStatus = (value) =>
-  String(value || "SUCCESS")
+  String(
+    typeof value === "object"
+      ? pickFirst(
+          value?.booking_status,
+          value?.payment_status,
+          value?.provider_status_label,
+          value?.provider_status
+        )
+      : value || "SUCCESS"
+  )
     .replace(/[_-]+/g, " ")
     .toUpperCase();
 
@@ -65,6 +84,8 @@ const formatRoute = (value) => {
 
 const isSuccessFalse = (payload = {}) =>
   payload?.success === false || payload?.data?.success === false;
+
+const toArray = (value) => (Array.isArray(value) ? value : []);
 
 const postFlightJson = async (url, payload, fallbackMessage) => {
   const response = await fetch(url, {
@@ -198,9 +219,24 @@ function PaymentStatusContent() {
   }, [bookingId, confirmBookingId, searchKey, snapshot.createdAt]);
 
   const details = useMemo(() => {
+    const root = retrieveResponse || {};
     const data = getResponseData(retrieveResponse);
+    const raw = root.raw || data.raw || {};
+    const statusData =
+      data.status && typeof data.status === "object" ? data.status : {};
+    const statusMeta =
+      root.status_meta && typeof root.status_meta === "object"
+        ? root.status_meta
+        : {};
+    const pricing =
+      data.pricing && typeof data.pricing === "object" ? data.pricing : {};
     const paymentData = getResponseData(snapshot.paymentResponse);
     const status = pickFirst(
+      statusData.booking_status,
+      statusData.payment_status,
+      statusMeta.booking_status,
+      statusMeta.payment_status,
+      statusMeta.akbar_status_label,
       data.payment_status,
       data.paymentStatus,
       data.booking_status,
@@ -214,6 +250,7 @@ function PaymentStatusContent() {
     return {
       status,
       bookingId: pickFirst(
+        root.booking_id,
         data.booking_id,
         data.bookingId,
         data.id,
@@ -222,6 +259,10 @@ function PaymentStatusContent() {
         "N/A"
       ),
       merchantOrderId: pickFirst(
+        root.provider_reference,
+        root.reference_number,
+        data.provider_reference,
+        data.reference_number,
         data.merchant_order_id,
         data.merchantOrderId,
         snapshot.merchantOrderId,
@@ -229,6 +270,9 @@ function PaymentStatusContent() {
         "N/A"
       ),
       transactionId: pickFirst(
+        raw.TransactionID,
+        root.provider_reference,
+        root.reference_number,
         data.TransactionID,
         data.transactionId,
         snapshot.transactionId,
@@ -236,6 +280,12 @@ function PaymentStatusContent() {
       ),
       amount: formatAmount(
         pickFirst(
+          pricing.customer_fare,
+          pricing.gross,
+          pricing.net,
+          raw.CustomerFare,
+          raw.GrossAmount,
+          raw.NetAmount,
           data.amount,
           data.NetAmount,
           data.total_amount,
@@ -253,6 +303,32 @@ function PaymentStatusContent() {
           "Flight booking"
         )
       ),
+      provider: pickFirst(data.provider, root.provider, "N/A"),
+      pnr: pickFirst(data.pnr, raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Flight?.APNR, "N/A"),
+      bookingDate: formatDateTime(pickFirst(data.booking_date, raw.BookingDate)),
+      paymentStatus: formatStatus(
+        pickFirst(statusData.payment_status, statusMeta.payment_status, raw.PaymentStatus, "N/A")
+      ),
+      bookingStatus: formatStatus(
+        pickFirst(statusData.booking_status, statusMeta.booking_status, raw.Status, "N/A")
+      ),
+      providerStatus: pickFirst(
+        statusData.provider_status_label,
+        statusMeta.akbar_status_label,
+        raw.PGDescription,
+        "N/A"
+      ),
+      pricing: {
+        base: formatAmount(raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalBaseFare),
+        tax: formatAmount(raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalTax),
+        net: formatAmount(pickFirst(pricing.net, raw.NetAmount)),
+        gross: formatAmount(pickFirst(pricing.gross, raw.GrossAmount)),
+        customerFare: formatAmount(pickFirst(pricing.customer_fare, raw.CustomerFare)),
+        ssr: formatAmount(pickFirst(pricing.ssr_amount, raw.SSRAmount)),
+      },
+      journeys: toArray(data.journeys),
+      passengers: toArray(data.passengers),
+      baggage: toArray(data.baggage),
       message: pickFirst(
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.message,
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.data?.message,
@@ -335,6 +411,171 @@ function PaymentStatusContent() {
               <div className={styles.routeBox}>
                 <span>Flight</span>
                 <strong>{details.route}</strong>
+              </div>
+
+              <div className={styles.detailSections}>
+                <section className={styles.detailSection}>
+                  <h2>Booking Details</h2>
+                  <div className={styles.detailGrid}>
+                    <div>
+                      <span>Provider</span>
+                      <strong>{details.provider}</strong>
+                    </div>
+                    <div>
+                      <span>Reference Number</span>
+                      <strong>{details.merchantOrderId}</strong>
+                    </div>
+                    <div>
+                      <span>PNR</span>
+                      <strong>{details.pnr}</strong>
+                    </div>
+                    <div>
+                      <span>Booking Date</span>
+                      <strong>{details.bookingDate}</strong>
+                    </div>
+                    <div>
+                      <span>Payment Status</span>
+                      <strong>{details.paymentStatus}</strong>
+                    </div>
+                    <div>
+                      <span>Booking Status</span>
+                      <strong>{details.bookingStatus}</strong>
+                    </div>
+                    <div className={styles.fullWidth}>
+                      <span>Provider Status</span>
+                      <strong>{details.providerStatus}</strong>
+                    </div>
+                  </div>
+                </section>
+
+                <section className={styles.detailSection}>
+                  <h2>Price Details</h2>
+                  <div className={styles.detailGrid}>
+                    <div>
+                      <span>Base Fare</span>
+                      <strong>{details.pricing.base}</strong>
+                    </div>
+                    <div>
+                      <span>Taxes</span>
+                      <strong>{details.pricing.tax}</strong>
+                    </div>
+                    <div>
+                      <span>Net Amount</span>
+                      <strong>{details.pricing.net}</strong>
+                    </div>
+                    <div>
+                      <span>Gross Amount</span>
+                      <strong>{details.pricing.gross}</strong>
+                    </div>
+                    <div>
+                      <span>Customer Fare</span>
+                      <strong>{details.pricing.customerFare}</strong>
+                    </div>
+                    <div>
+                      <span>SSR Amount</span>
+                      <strong>{details.pricing.ssr}</strong>
+                    </div>
+                  </div>
+                </section>
+
+                {!!details.journeys.length && (
+                  <section className={styles.detailSection}>
+                    <h2>Journey Details</h2>
+                    {details.journeys.map((journey, journeyIndex) => (
+                      <div
+                        className={styles.journeyCard}
+                        key={`${journey.provider || "journey"}-${journeyIndex}`}
+                      >
+                        <div className={styles.journeyHeader}>
+                          <strong>
+                            {journey.provider || "Flight"} • {journey.duration || "N/A"}
+                          </strong>
+                          <span>
+                            {Number(journey.stops || 0)}{" "}
+                            {Number(journey.stops || 0) === 1 ? "stop" : "stops"}
+                          </span>
+                        </div>
+                        {toArray(journey.segments).map((segment, segmentIndex) => (
+                          <div
+                            className={styles.segmentRow}
+                            key={`${segment.flight_no || "segment"}-${segmentIndex}`}
+                          >
+                            <div>
+                              <span>Flight</span>
+                              <strong>
+                                {segment.airline || segment.provider || "N/A"}{" "}
+                                {segment.flight_no || ""}
+                              </strong>
+                            </div>
+                            <div>
+                              <span>Route</span>
+                              <strong>
+                                {segment.from_name || segment.from || "N/A"} →{" "}
+                                {segment.to_name || segment.to || "N/A"}
+                              </strong>
+                            </div>
+                            <div>
+                              <span>Departure</span>
+                              <strong>{formatDateTime(segment.departure)}</strong>
+                            </div>
+                            <div>
+                              <span>Arrival</span>
+                              <strong>{formatDateTime(segment.arrival)}</strong>
+                            </div>
+                            <div>
+                              <span>Duration</span>
+                              <strong>{segment.duration || "N/A"}</strong>
+                            </div>
+                            <div>
+                              <span>Status</span>
+                              <strong>{formatStatus(segment.status)}</strong>
+                            </div>
+                            <div>
+                              <span>PNR</span>
+                              <strong>{segment.pnr || "N/A"}</strong>
+                            </div>
+                            <div>
+                              <span>Ticket No.</span>
+                              <strong>{segment.ticket_no || "N/A"}</strong>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </section>
+                )}
+
+                {!!details.passengers.length && (
+                  <section className={styles.detailSection}>
+                    <h2>Passengers</h2>
+                    <div className={styles.listRows}>
+                      {details.passengers.map((passenger, index) => (
+                        <div className={styles.listRow} key={`${passenger.name || "pax"}-${index}`}>
+                          <strong>{passenger.name || "Passenger"}</strong>
+                          <span>
+                            {passenger.type || "N/A"} • {passenger.gender || "N/A"} • DOB{" "}
+                            {passenger.date_of_birth || "N/A"} • Ticket{" "}
+                            {passenger.ticket_no || "N/A"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {!!details.baggage.length && (
+                  <section className={styles.detailSection}>
+                    <h2>Baggage</h2>
+                    <div className={styles.listRows}>
+                      {details.baggage.map((bag, index) => (
+                        <div className={styles.listRow} key={`${bag.code || "bag"}-${index}`}>
+                          <strong>{bag.description || bag.code || "Baggage"}</strong>
+                          <span>Amount: {formatAmount(bag.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
               </div>
 
               <div className={styles.actions}>

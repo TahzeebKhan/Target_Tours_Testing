@@ -141,6 +141,114 @@
   margin-bottom: 28px;
 }
 
+.detailSections {
+  display: grid;
+  gap: 20px;
+}
+
+.detailSection {
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  padding: 20px;
+}
+
+.detailSection h2 {
+  margin: 0 0 16px;
+  font-family: "Antic Didone", serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #070733;
+}
+
+.detailGrid,
+.segmentRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detailGrid div,
+.segmentRow div {
+  min-width: 0;
+}
+
+.detailGrid span,
+.segmentRow span,
+.listRow span,
+.journeyHeader span {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.detailGrid strong,
+.segmentRow strong,
+.listRow strong,
+.journeyHeader strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #070733;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.journeyCard {
+  border: 1px solid #eef0f3;
+  background: #fbfcfe;
+}
+
+.journeyCard + .journeyCard {
+  margin-top: 14px;
+}
+
+.journeyHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.journeyHeader span {
+  margin-bottom: 0;
+}
+
+.segmentRow {
+  padding: 16px;
+}
+
+.segmentRow + .segmentRow {
+  border-top: 1px solid #eef0f3;
+}
+
+.listRows {
+  display: grid;
+  gap: 10px;
+}
+
+.listRow {
+  padding: 14px 16px;
+  border: 1px solid #eef0f3;
+  background: #fbfcfe;
+}
+
+.listRow span {
+  margin: 6px 0 0;
+  text-transform: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -186,6 +294,15 @@
 
   .summaryGrid {
     grid-template-columns: 1fr;
+  }
+
+  .detailGrid,
+  .segmentRow {
+    grid-template-columns: 1fr;
+  }
+
+  .journeyHeader {
+    flex-direction: column;
   }
 
   .actions button {
