@@ -406,6 +406,7 @@ const BaggageDetails = () => {
     () => buildRouteCards(bookingSession, bookingView),
     [bookingSession, bookingView]
   );
+
   const priceSummary = useMemo(
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
@@ -416,25 +417,11 @@ const BaggageDetails = () => {
   }, [bookingSession]);
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
-  // 🔥 Quantity state (per flight + per baggage)
-  const [quantities, setQuantities] = useState(() => buildQuantitiesFromSelections(baggage));
+  const quantities = useMemo(() => buildQuantitiesFromSelections(baggage), [baggage]);
 
-  React.useEffect(() => {
-    if (!baggage?.length) return;
-    setQuantities((current) =>
-      Object.keys(current).length ? current : buildQuantitiesFromSelections(baggage)
-    );
-  }, [baggage]);
-
-  // Sync with Context whenever quantities change
-  React.useEffect(() => {
-    if (!Object.keys(quantities).length) {
-      if (baggage?.length) setBaggage([]);
-      return;
-    }
-
+  const buildBaggageListFromQuantities = useCallback((nextQuantities = {}) => {
     const newBaggageList = [];
-    Object.entries(quantities).forEach(([key, qty]) => {
+    Object.entries(nextQuantities).forEach(([key, qty]) => {
       if (qty > 0) {
         const [segment, ...selectionParts] = key.split("::");
         const selectionKey = selectionParts.join("::");
@@ -456,11 +443,13 @@ const BaggageDetails = () => {
         }
       }
     });
-    setBaggage((current) => (areEqual(current, newBaggageList) ? current : newBaggageList));
-  }, [baggage?.length, quantities, routeCards, setBaggage]);
+
+    return newBaggageList;
+  }, [routeCards]);
 
   const increaseQty = useCallback((key) => {
-    setQuantities((prev) => {
+    setBaggage((currentBaggage) => {
+      const prev = buildQuantitiesFromSelections(currentBaggage);
       const segment = key.split("::")[0];
       const segmentSelected = Object.entries(prev).reduce(
         (sum, [entryKey, qty]) =>
@@ -472,22 +461,35 @@ const BaggageDetails = () => {
         toast.info(`Extra baggage can be added for up to ${baggageSelectionLimit} passenger(s).`, {
           toastId: "baggage-passenger-limit",
         });
-        return prev;
+        return currentBaggage;
       }
 
-      return {
+      const nextQuantities = {
         ...prev,
         [key]: (prev[key] || 0) + 1,
       };
+
+      const nextBaggage = buildBaggageListFromQuantities(nextQuantities);
+      return areEqual(currentBaggage, nextBaggage) ? currentBaggage : nextBaggage;
     });
-  }, [baggageSelectionLimit]);
+  }, [baggageSelectionLimit, buildBaggageListFromQuantities, setBaggage]);
 
   const decreaseQty = useCallback((key) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [key]: Math.max(0, (prev[key] || 0) - 1),
-    }));
-  }, []);
+    setBaggage((currentBaggage) => {
+      const prev = buildQuantitiesFromSelections(currentBaggage);
+      const nextQty = Math.max(0, (prev[key] || 0) - 1);
+      const nextQuantities = { ...prev };
+
+      if (nextQty === 0) {
+        delete nextQuantities[key];
+      } else {
+        nextQuantities[key] = nextQty;
+      }
+
+      const nextBaggage = buildBaggageListFromQuantities(nextQuantities);
+      return areEqual(currentBaggage, nextBaggage) ? currentBaggage : nextBaggage;
+    });
+  }, [buildBaggageListFromQuantities, setBaggage]);
 
   return (
     <>

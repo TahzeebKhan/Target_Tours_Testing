@@ -10,6 +10,7 @@ import {
 } from "./FlightBookingContext";
 import PassengerDetailsMobile from "./mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
 import CorporateSidebarSummary from "./CorporateSidebarSummary";
+import FlightPriceChangeModal from "./components/FlightPriceChangeModal";
 
 export default function FlightBookingDetailsLayout({ children }) {
   const isCorporate = false;
@@ -32,6 +33,7 @@ export default function FlightBookingDetailsLayout({ children }) {
       <div className={styles.mobileView}>
         <div className={styles.container}>{children}</div>
       </div>
+      <FlightPriceChangeModal />
     </FlightBookingProvider>
   );
 }

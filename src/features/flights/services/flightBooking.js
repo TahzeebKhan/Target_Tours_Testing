@@ -647,6 +647,7 @@ const PRICING_SSE_EVENT_NAMES = [
   "FLIGHT_V2_CREATE_BOOKING_ITINERARY_RESULT",
   "FLIGHT_V2_CREATE_BOOKING_COMPLETE",
   "FLIGHT_V2_CREATE_BOOKING_COMPLETED",
+  "FLIGHT_V2_CREATE_BOOKING_FAILED",
   "FLIGHT_V2_CREATE_BOOKING_ERROR",
   "pricing-result",
   "pricing-complete",
@@ -713,6 +714,17 @@ const isFlightCreateBookingComplete = (payload) => {
     type.includes("COMPLETE") ||
     type.includes("COMPLETED") ||
     type.includes("DONE")
+  );
+};
+
+const isFlightCreateBookingFailed = (payload) => {
+  const type = getPayloadType(payload);
+  return (
+    (type.includes("CREATE") && type.includes("BOOKING")) ||
+    type.includes("BOOKING")
+  ) && (
+    type.includes("FAILED") ||
+    type.includes("ERROR")
   );
 };
 
@@ -1828,6 +1840,11 @@ export const createFlightV2Booking = async (payload) => {
         chunks.push(parsedPayload);
       }
 
+      if (isFlightCreateBookingFailed(parsedPayload)) {
+        settle(resolve, buildResult());
+        return;
+      }
+
       if (isFlightCreateBookingComplete(parsedPayload) || hasPayload) {
         scheduleResolve();
       }
@@ -1856,7 +1873,11 @@ export const createFlightV2Booking = async (payload) => {
         await waitForSseConnected(events, channel);
         initResponse = await postCreateBooking();
 
-        if (isFlightCreateBookingComplete(initResponse) || hasCreateBookingPayload(initResponse)) {
+        if (
+          isFlightCreateBookingFailed(initResponse) ||
+          isFlightCreateBookingComplete(initResponse) ||
+          hasCreateBookingPayload(initResponse)
+        ) {
           chunks.push(initResponse);
           scheduleResolve();
         }
