@@ -48,6 +48,21 @@ const formatStatus = (value) =>
     .replace(/[_-]+/g, " ")
     .toUpperCase();
 
+const formatRoute = (value) => {
+  if (!value) return "Flight booking";
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  if (typeof value !== "object") return "Flight booking";
+
+  const from = pickFirst(value.from_name, value.fromName, value.from, value.origin, "");
+  const to = pickFirst(value.to_name, value.toName, value.to, value.destination, "");
+
+  if (from && to) return `${from} → ${to}`;
+  if (from || to) return String(from || to);
+  return "Flight booking";
+};
+
 const isSuccessFalse = (payload = {}) =>
   payload?.success === false || payload?.data?.success === false;
 
@@ -229,12 +244,14 @@ function PaymentStatusContent() {
           paymentData.amount
         )
       ),
-      route: pickFirst(
-        data.route,
-        data.sector,
-        data.trip,
-        snapshot.searchKey,
-        "Flight booking"
+      route: formatRoute(
+        pickFirst(
+          data.route,
+          data.sector,
+          data.trip,
+          snapshot.searchKey,
+          "Flight booking"
+        )
       ),
       message: pickFirst(
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.message,
