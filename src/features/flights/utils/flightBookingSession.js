@@ -2258,7 +2258,7 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
   );
   const netAmount =
     readNumber(
-      prices?.total,
+      prices?.baseFare,
       priceResponse?.raw?.NetAmount,
       priceResponse?.raw?.AirlineNetFare,
       priceResponse?.NetAmount,

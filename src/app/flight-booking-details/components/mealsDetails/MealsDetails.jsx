@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import styles from "./MealsDetails.module.css";
 import Expandable from "./Components/Expandable";
 import MealGuidelineExpandable from "./Components/mealGuidelineExpandable/MealGuidelineExpandable";
@@ -149,30 +149,18 @@ const MealsDetails = () => {
   }, [bookingSession]);
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
-  // State: { "DEL-BOM::meal-key": 1 }
-  const [mealQuantities, setMealQuantities] = useState(() =>
-    buildQuantitiesFromSelections(selectedMealsContext)
+  const mealQuantities = React.useMemo(
+    () => buildQuantitiesFromSelections(selectedMealsContext),
+    [selectedMealsContext]
   );
-
-  useEffect(() => {
-    if (!selectedMealsContext?.length) return;
-    setMealQuantities((current) =>
-      Object.keys(current).length
-        ? current
-        : buildQuantitiesFromSelections(selectedMealsContext)
-    );
-  }, [selectedMealsContext]);
 
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
 
-  // Sync with Context
-  useEffect(() => {
-    if (!Object.keys(mealQuantities).length && selectedMealsContext?.length) return;
-
+  const buildMealsListFromQuantities = useCallback((nextQuantities = {}) => {
     const selectedMeals = [];
-    Object.entries(mealQuantities).forEach(([key, qty]) => {
+    Object.entries(nextQuantities).forEach(([key, qty]) => {
       if (qty > 0) {
         const [segment, ...selectionParts] = key.split("::");
         const selectionKey = selectionParts.join("::");
@@ -190,12 +178,14 @@ const MealsDetails = () => {
         }
       }
     });
-    setMeals((current) => (areEqual(current, selectedMeals) ? current : selectedMeals));
-  }, [mealQuantities, routeCards, selectedMealsContext?.length, setMeals]);
+
+    return selectedMeals;
+  }, [routeCards]);
 
   const handleUpdateQuantity = useCallback((segment, selectionKey, newQty) => {
     const key = `${segment}::${selectionKey}`;
-    setMealQuantities((prev) => {
+    setMeals((currentMeals) => {
+      const prev = buildQuantitiesFromSelections(currentMeals);
       const currentQty = prev[key] || 0;
       const isIncreasing = newQty > currentQty;
       const requestedQty = Math.max(0, newQty);
@@ -211,22 +201,22 @@ const MealsDetails = () => {
         toast.info(`Meals can be added for up to ${mealSelectionLimit} passenger(s).`, {
           toastId: "meal-passenger-limit",
         });
-        return prev;
+        return currentMeals;
       }
 
       const nextQty = Math.min(requestedQty, Math.max(mealSelectionLimit - selectedTotal, 0));
+      const nextQuantities = { ...prev };
+
       if (nextQty === 0) {
-        const next = { ...prev };
-        delete next[key];
-        return next;
+        delete nextQuantities[key];
+      } else {
+        nextQuantities[key] = nextQty;
       }
 
-      return {
-        ...prev,
-        [key]: nextQty,
-      };
+      const nextMeals = buildMealsListFromQuantities(nextQuantities);
+      return areEqual(currentMeals, nextMeals) ? currentMeals : nextMeals;
     });
-  }, [mealSelectionLimit]);
+  }, [buildMealsListFromQuantities, mealSelectionLimit, setMeals]);
 
   // Filter quantities for a specific segment to pass to Expandable
   // Expandable expects { mealId: qty }

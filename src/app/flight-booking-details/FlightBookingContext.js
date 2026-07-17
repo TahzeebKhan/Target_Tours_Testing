@@ -26,6 +26,101 @@ const getApiMessage = (payload, fallback) => {
   );
 };
 
+const areSameJson = (left, right) => JSON.stringify(left) === JSON.stringify(right);
+const toArray = (value) => (Array.isArray(value) ? value : []);
+const toAmountNumber = (value) => {
+  const amount = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(amount) ? amount : 0;
+};
+
+const parseSsrFareChange = (payload = {}) => {
+  const candidates = [
+    payload,
+    payload?.data,
+    payload?.data?.result,
+    ...(Array.isArray(payload?.createBookingChunks) ? payload.createBookingChunks : []),
+    ...(Array.isArray(payload?.data?.createBookingChunks)
+      ? payload.data.createBookingChunks
+      : []),
+  ].filter(Boolean);
+
+  for (const candidate of candidates.reverse()) {
+    const message = String(
+      candidate?.data?.result?.message ||
+        candidate?.data?.message ||
+        candidate?.result?.message ||
+        candidate?.message ||
+        ""
+    );
+    const code = String(
+      candidate?.data?.result?.code ||
+        candidate?.result?.code ||
+        candidate?.data?.code ||
+        candidate?.code ||
+        ""
+    );
+    const match = message.match(/Previous\s*Amt:-?\s*([\d.]+)\s*\|\s*New\s*Amt:-?\s*([\d.]+)/i);
+
+    if (code === "8888" && match) {
+      const oldFare = toAmountNumber(match[1]);
+      const newFare = toAmountNumber(match[2]);
+      return {
+        oldFare,
+        newFare,
+        difference: newFare - oldFare,
+        message,
+      };
+    }
+  }
+
+  return null;
+};
+
+const adjustSelectionsToSsrFare = (
+  { baggage = [], meals = [], seats = [] },
+  { oldFare = 0, newFare = 0 } = {}
+) => {
+  const selected = [
+    ...baggage.map((item, index) => ({ type: "baggage", index, item })),
+    ...meals.map((item, index) => ({ type: "meals", index, item })),
+    ...seats.map((item, index) => ({ type: "seats", index, item })),
+  ];
+
+  if (!selected.length) return { baggage, meals, seats };
+
+  const next = {
+    baggage: baggage.map((item) => ({ ...item })),
+    meals: meals.map((item) => ({ ...item })),
+    seats: seats.map((item) => ({ ...item })),
+  };
+  const exactMatch = selected.find(
+    (entry) => Math.round(toAmountNumber(entry.item?.price)) === Math.round(oldFare)
+  );
+
+  if (exactMatch) {
+    next[exactMatch.type][exactMatch.index] = {
+      ...next[exactMatch.type][exactMatch.index],
+      price: newFare,
+    };
+    return next;
+  }
+
+  const currentSsrFare = selected.reduce(
+    (sum, entry) => sum + toAmountNumber(entry.item?.price),
+    0
+  );
+  const delta = Math.round(newFare - currentSsrFare);
+  if (!delta) return { baggage, meals, seats };
+
+  const target = selected[selected.length - 1];
+  next[target.type][target.index] = {
+    ...next[target.type][target.index],
+    price: Math.max(0, toAmountNumber(next[target.type][target.index]?.price) + delta),
+  };
+
+  return next;
+};
+
 const getPaymentRedirectUrl = (payload = {}) => {
    console.log("payload4",payload)
   const data = payload?.data || {};
@@ -408,6 +503,8 @@ export function FlightBookingProvider({ children }) {
   const [itineraryLoading, setItineraryLoading] = useState(false);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [flightPriceChange, setFlightPriceChange] = useState(null);
+  const [pendingPriceChangeRetry, setPendingPriceChangeRetry] = useState(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -469,8 +566,44 @@ export function FlightBookingProvider({ children }) {
         : null;
         console.log("nextSession2",nextSession)
     setBookingSession(nextSession);
+    setBaggage(toArray(nextSession?.baggage));
+    setMeals(toArray(nextSession?.meals));
+    setSeats(toArray(nextSession?.seats));
     setBookingSessionReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!bookingSessionReady) return;
+    setBookingSession((prev) => {
+      if (!prev || areSameJson(prev.baggage || [], baggage)) return prev;
+      return {
+        ...prev,
+        baggage,
+      };
+    });
+  }, [baggage, bookingSessionReady]);
+
+  useEffect(() => {
+    if (!bookingSessionReady) return;
+    setBookingSession((prev) => {
+      if (!prev || areSameJson(prev.meals || [], meals)) return prev;
+      return {
+        ...prev,
+        meals,
+      };
+    });
+  }, [bookingSessionReady, meals]);
+
+  useEffect(() => {
+    if (!bookingSessionReady) return;
+    setBookingSession((prev) => {
+      if (!prev || areSameJson(prev.seats || [], seats)) return prev;
+      return {
+        ...prev,
+        seats,
+      };
+    });
+  }, [bookingSessionReady, seats]);
 
   useEffect(() => {
     if (!bookingSessionReady) return;
@@ -743,8 +876,13 @@ export function FlightBookingProvider({ children }) {
     };
   }, [baggage, bookingSession, meals, seats]);
 
-  const submitItinerary = async (paymentGateway = "") => {
+  const submitItinerary = async (paymentGateway = "", options = {}) => {
     if (itineraryLoading) return false;
+    const effectiveBaggage = Array.isArray(options.baggage) ? options.baggage : baggage;
+    const effectiveMeals = Array.isArray(options.meals) ? options.meals : meals;
+    const effectiveSeats = Array.isArray(options.seats) ? options.seats : seats;
+    const effectivePrices = options.prices || prices;
+    const allowPriceChangePrompt = options.allowPriceChangePrompt !== false;
     const selectedPaymentGateway =
       typeof paymentGateway === "string" && paymentGateway.trim()
         ? paymentGateway.trim().toLowerCase()
@@ -762,13 +900,13 @@ export function FlightBookingProvider({ children }) {
       ...(bookingSession || {}),
       travelerDetails,
       bookingContactDetails,
-      baggage,
-      meals,
-      seats,
+      baggage: effectiveBaggage,
+      meals: effectiveMeals,
+      seats: effectiveSeats,
     };
     const createBookingPayload = buildCreateBookingPayload(
       sessionPayload,
-      prices
+      effectivePrices
     );
 
     if (
@@ -790,6 +928,28 @@ export function FlightBookingProvider({ children }) {
     setItineraryLoading(true);
     try {
       const createBookingResponse = await createFlightV2Booking(createBookingPayload);
+      const parsedPriceChange = allowPriceChangePrompt
+        ? parseSsrFareChange(createBookingResponse)
+        : null;
+
+      if (parsedPriceChange) {
+        if (paymentWindow && !paymentWindow.closed) {
+          paymentWindow.close();
+        }
+        setPendingPriceChangeRetry({
+          paymentGateway: selectedPaymentGateway,
+          sessionPayload,
+          createBookingPayload,
+        });
+        setFlightPriceChange(parsedPriceChange);
+        setBookingSession((prev) => ({
+          ...(prev || {}),
+          createBookingRequest: createBookingPayload,
+          createBookingResponse,
+        }));
+        return false;
+      }
+
       if (
         createBookingResponse?.success === false ||
         createBookingResponse?.data?.success === false
@@ -804,11 +964,10 @@ export function FlightBookingProvider({ children }) {
         createBookingResponse,
         paymentGateway: selectedPaymentGateway,
       });
-
+ console.log("gatewayPaymentPayload",gatewayPaymentPayload)
       if (
         !gatewayPaymentPayload?.search_key ||
         !gatewayPaymentPayload?.TUI ||
-        !gatewayPaymentPayload?.TransactionID ||
         !gatewayPaymentPayload?.NetAmount
       ) {
         throw new Error("Payment payload is incomplete.");
@@ -863,6 +1022,69 @@ export function FlightBookingProvider({ children }) {
     }
   };
 
+  const acceptFlightPriceChange = async () => {
+    if (!pendingPriceChangeRetry || !flightPriceChange || itineraryLoading) {
+      return false;
+    }
+
+    const pendingSession = pendingPriceChangeRetry.sessionPayload || {};
+    const adjustedSelections = adjustSelectionsToSsrFare(
+      {
+        baggage: toArray(pendingSession.baggage),
+        meals: toArray(pendingSession.meals),
+        seats: toArray(pendingSession.seats),
+      },
+      {
+        oldFare: flightPriceChange.oldFare,
+        newFare: flightPriceChange.newFare,
+      }
+    );
+    const nextBaggagePrice = adjustedSelections.baggage.reduce(
+      (sum, item) => sum + toAmountNumber(item?.price),
+      0
+    );
+    const nextMealsPrice = adjustedSelections.meals.reduce(
+      (sum, item) => sum + toAmountNumber(item?.price),
+      0
+    );
+    const nextSeatsPrice = adjustedSelections.seats.reduce(
+      (sum, item) => sum + toAmountNumber(item?.price),
+      0
+    );
+    const nextPrices = {
+      ...prices,
+      baggage: nextBaggagePrice,
+      meals: nextMealsPrice,
+      seats: nextSeatsPrice,
+      total: prices.baseFare + nextBaggagePrice + nextMealsPrice + nextSeatsPrice,
+    };
+    const paymentGateway = pendingPriceChangeRetry.paymentGateway;
+
+    setBaggage(adjustedSelections.baggage);
+    setMeals(adjustedSelections.meals);
+    setSeats(adjustedSelections.seats);
+    setBookingSession((prev) => ({
+      ...(prev || {}),
+      baggage: adjustedSelections.baggage,
+      meals: adjustedSelections.meals,
+      seats: adjustedSelections.seats,
+    }));
+    setFlightPriceChange(null);
+    setPendingPriceChangeRetry(null);
+
+    return submitItinerary(paymentGateway, {
+      ...adjustedSelections,
+      prices: nextPrices,
+      allowPriceChangePrompt: true,
+    });
+  };
+
+  const rejectFlightPriceChange = () => {
+    setFlightPriceChange(null);
+    setPendingPriceChangeRetry(null);
+    toast.info("Booking was not continued because the SSR fare changed.");
+  };
+
   return (
     <FlightBookingContext.Provider
       value={{
@@ -893,6 +1115,9 @@ export function FlightBookingProvider({ children }) {
         setPaymentSuccessData,
         paymentMethod,
         setPaymentMethod,
+        flightPriceChange,
+        acceptFlightPriceChange,
+        rejectFlightPriceChange,
 
         prices,
       }}
