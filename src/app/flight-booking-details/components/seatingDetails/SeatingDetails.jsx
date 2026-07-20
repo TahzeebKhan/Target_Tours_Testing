@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SeatingDetails.module.css";
 import { useFlightBooking } from "../../FlightBookingContext";
 import Plane from "@/app/flight-booking-details/mobileViewComponents/seatingDetailsMobileView/plane";
@@ -373,16 +373,37 @@ const getJourneyRouteLabel = (journey, fallback = "") => {
   return String(route || fallback || "N/A").toUpperCase();
 };
 
-const buildSeatLayoutGroups = (seatLayoutResponse, bookingDetailsView) => {
+const isOneWayBooking = (bookingSession = {}) => {
+  const tripType = String(
+    bookingSession?.routeContext?.tripType ||
+      bookingSession?.priceRequest?.tripType ||
+      bookingSession?.priceRequest?.TripType ||
+      bookingSession?.selectedFlight?.booking?.tripType ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+
+  return ["ONEWAY", "ONE-WAY", "ONE_WAY", "ON", "O"].includes(tripType);
+};
+
+const buildSeatLayoutGroups = (
+  seatLayoutResponse,
+  bookingDetailsView,
+  bookingSession
+) => {
   if (!seatLayoutResponse) return [];
 
   const journeys = getSeatLayoutJourneys(seatLayoutResponse);
+  const visibleJourneys = isOneWayBooking(bookingSession)
+    ? journeys.slice(0, 1)
+    : journeys;
   const fallbackFlights = [
     bookingDetailsView?.departureFlight,
     bookingDetailsView?.returnFlight,
   ];
 
-  return journeys.map((journey, index) => {
+  return visibleJourneys.map((journey, index) => {
     const { rows, seatsById } = buildFormattedSeatRows(journey);
     const prefix = `journey-${index + 1}:`;
     const fallbackFlight = fallbackFlights[index] || fallbackFlights[0] || {};
@@ -488,9 +509,10 @@ const SeatingDetails = () => {
     () =>
       buildSeatLayoutGroups(
         bookingSession?.seatLayoutResponse,
-        bookingDetailsView
+        bookingDetailsView,
+        bookingSession
       ),
-    [bookingDetailsView, bookingSession?.seatLayoutResponse]
+    [bookingDetailsView, bookingSession]
   );
   const seatsById = useMemo(
     () =>
@@ -580,25 +602,27 @@ const SeatingDetails = () => {
     setSelectedPassenger((prev) => Math.min(prev, passengerCount) || 1);
   }, [passengerCount, seatLayoutGroups.length]);
 
-  useEffect(() => {
-    setSeats(
-      selectedSeats
-        .filter(Boolean)
-        .map((seatId) => {
-          const seat = seatsById[seatId] || {};
+  const syncSelectedSeats = useCallback(
+    (seatIds, assignments) => {
+      setSeats(
+        seatIds.filter(Boolean).map((seatId) => {
+          const seat = seatsById[seatId];
+          if (!seat) return null;
           return {
             ...seat,
-            rawId: seat?.rawId,
-            ssid: seat?.ssid,
-            fuid: seat?.fuid ?? getJourneyFuid(seat?.journeyIndex),
+            rawId: seat.rawId,
+            ssid: seat.ssid,
+            fuid: seat.fuid ?? getJourneyFuid(seat.journeyIndex),
             id: seatId,
-            seatNumber: seat?.seatNumber || String(seatId).split(":").pop(),
-            price: seat.price || 0,
-            PaxRefNumber: String(selectedSeatAssignments[seatId] || ""),
+            seatNumber: seat.seatNumber || String(seatId).split(":").pop(),
+            price: Number(seat.price || 0),
+            PaxRefNumber: String(assignments[seatId] || ""),
           };
-        })
-    );
-  }, [selectedSeatAssignments, selectedSeats, seatsById, setSeats]);
+        }).filter(Boolean)
+      );
+    },
+    [seatsById, setSeats]
+  );
 
 
 
@@ -607,42 +631,39 @@ const SeatingDetails = () => {
     if (type === "taken" || type === "grey") return;
     const seatId = `${seatIdPrefix}${rowId}-${colLabel}`;
     const passengerIndex = Math.max(Number(selectedPassenger || 1) - 1, 0);
+    const selectedSeatIds = selectedSeats.filter(Boolean);
+    const selectedForJourney = seatIdPrefix
+      ? selectedSeatIds.filter((id) => id.startsWith(seatIdPrefix))
+      : selectedSeatIds;
+    const selectedForOtherJourneys = seatIdPrefix
+      ? selectedSeatIds.filter((id) => !id.startsWith(seatIdPrefix))
+      : [];
+    const nextAssignments = { ...selectedSeatAssignments };
 
-    setSelectedSeats((prev) => {
-      const selectedSeatIds = prev.filter(Boolean);
-      const selectedForJourney = seatIdPrefix
-        ? selectedSeatIds.filter((id) => id.startsWith(seatIdPrefix))
-        : selectedSeatIds;
-      const selectedForOtherJourneys = seatIdPrefix
-        ? selectedSeatIds.filter((id) => !id.startsWith(seatIdPrefix))
-        : [];
+    if (selectedSeatIds.includes(seatId)) {
+      const nextSelectedSeatIds = selectedSeatIds.filter((id) => id !== seatId);
+      delete nextAssignments[seatId];
+      setSelectedSeats(nextSelectedSeatIds);
+      setSelectedSeatAssignments(nextAssignments);
+      syncSelectedSeats(nextSelectedSeatIds, nextAssignments);
+      return;
+    }
 
-      if (selectedSeatIds.includes(seatId)) {
-        setSelectedSeatAssignments((current) => {
-          const next = { ...current };
-          delete next[seatId];
-          return next;
-        });
-        return selectedSeatIds.filter((id) => id !== seatId);
-      }
+    const nextSelectedForJourney = selectedForJourney
+      .filter((id) => id !== seatId)
+      .slice(0, passengerCount);
+    const replacedSeatId = nextSelectedForJourney[passengerIndex];
+    nextSelectedForJourney[passengerIndex] = seatId;
+    if (replacedSeatId) delete nextAssignments[replacedSeatId];
+    nextAssignments[seatId] = selectedPassenger;
+    const nextSelectedSeatIds = [
+      ...selectedForOtherJourneys,
+      ...nextSelectedForJourney.filter(Boolean),
+    ];
 
-      const nextSelectedForJourney = selectedForJourney
-        .filter((id) => id !== seatId)
-        .slice(0, passengerCount);
-      const replacedSeatId = nextSelectedForJourney[passengerIndex];
-      nextSelectedForJourney[passengerIndex] = seatId;
-      setSelectedSeatAssignments((current) => {
-        const next = { ...current };
-        if (replacedSeatId) delete next[replacedSeatId];
-        next[seatId] = selectedPassenger;
-        return next;
-      });
-
-      return [
-        ...selectedForOtherJourneys,
-        ...nextSelectedForJourney.filter(Boolean),
-      ];
-    });
+    setSelectedSeats(nextSelectedSeatIds);
+    setSelectedSeatAssignments(nextAssignments);
+    syncSelectedSeats(nextSelectedSeatIds, nextAssignments);
   };
 
   const scrollSeatLayouts = (direction) => {

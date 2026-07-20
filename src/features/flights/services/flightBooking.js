@@ -562,7 +562,7 @@ const buildV2PricePayload = (request = {}) => ({
   search_keys: buildV2PriceSearchKeys(request),
 });
 
-const postV2Price = async (payload) => {
+const postV2Price = async (payload, signal) => {
   const response = await fetch("/api/flights/v2/pricing", {
     method: "POST",
     headers: {
@@ -570,6 +570,7 @@ const postV2Price = async (payload) => {
     },
     credentials: "include",
     cache: "no-store",
+    signal,
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => ({}));
@@ -773,7 +774,7 @@ const hasCreateBookingPayload = (payload) => {
   );
 };
 
-export const getFlightPrice = async (payload) => {
+export const getFlightPrice = async (payload, { signal } = {}) => {
   const pricingPayload = buildV2PricePayload(payload);
   console.log("getFlightPrice pricingPayload:", pricingPayload);
   const channel = pricingPayload.channel;
@@ -783,7 +784,7 @@ export const getFlightPrice = async (payload) => {
   }
 
   if (typeof window === "undefined" || !window.EventSource) {
-    return postV2Price(pricingPayload);
+    return postV2Price(pricingPayload, signal);
   }
 
   return new Promise((resolve, reject) => {
@@ -793,11 +794,13 @@ export const getFlightPrice = async (payload) => {
     let initResponse = null;
     let idleTimer = null;
     let events = null;
+    let abortHandler = null;
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
       window.clearTimeout(hardTimer);
       events?.close();
+      if (abortHandler) signal?.removeEventListener("abort", abortHandler);
     };
 
     const settle = (callback, value) => {
@@ -886,6 +889,15 @@ export const getFlightPrice = async (payload) => {
 
       settle(reject, new Error("Flight pricing timed out. Please try again."));
     }, 45000);
+
+    abortHandler = () => {
+      settle(reject, new DOMException("Flight pricing was cancelled.", "AbortError"));
+    };
+    if (signal?.aborted) {
+      abortHandler();
+      return;
+    }
+    signal?.addEventListener("abort", abortHandler, { once: true });
 
     const handleMessage = (event) => {
       const unwrappedPayload = unwrapPricingPayload(event.data);
@@ -1009,7 +1021,7 @@ export const getFlightPrice = async (payload) => {
           pricingPayload,
         });
     
-        initResponse = await postV2Price(pricingPayload);
+        initResponse = await postV2Price(pricingPayload, signal);
     
         console.log("[Pricing] postV2Price response", {
           initResponse,

@@ -5,7 +5,22 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { Check, ChevronDown, X } from "lucide-react";
+import {
+  ArrowUpDown,
+  Car,
+  Check,
+  ChevronDown,
+  Droplet,
+  Flame,
+  Package,
+  Phone,
+  Sparkles,
+  Utensils,
+  Users,
+  Wifi,
+  Wind,
+  X,
+} from "lucide-react";
 import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
 
 const ratingToStars = {
@@ -109,9 +124,24 @@ const formatPolicyValue = (rule = {}) => {
   if (!Number.isFinite(value)) return "N/A";
   if (valueType === "percentage") return `${value}%`;
   if (valueType === "amount") return `₹ ${value.toLocaleString("en-IN")}`;
+  if (valueType === "nights") return `${value} night${value === 1 ? "" : "s"}`;
   if (value > 0) return String(value);
 
   return "Free";
+};
+
+const formatEstimatedDeduction = (rule = {}) => {
+  const valueType = String(rule?.valueType || "").toLowerCase();
+  const deduction = Number(
+    rule?.estimatedValue ?? (valueType === "amount" ? rule?.value : null),
+  );
+
+  if (!Number.isFinite(deduction)) return "";
+
+  return `₹ ${deduction.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
 };
 
 const getPolicyStatus = (rule) => {
@@ -144,11 +174,59 @@ const getCancellationPolicyRows = (room = {}) =>
       id: `${policyIndex}-${ruleIndex}`,
       title: policy?.text || "Cancellation policy",
       value: formatPolicyValue(rule),
+      deduction: formatEstimatedDeduction(rule),
       start: formatDateTime(rule?.start) || "N/A",
       end: formatDateTime(rule?.end) || "N/A",
       status: getPolicyStatus(rule),
     }));
   });
+
+const getFacilityRows = (room = {}) => {
+  const sources = [
+    room?.featuresLeft,
+    room?.featuresRight,
+    room?.facilities,
+    room?.amenities,
+    room?.raw?.facilities,
+    room?.raw?.amenities,
+  ];
+
+  return [
+    ...new Set(
+      sources
+        .flatMap(toArray)
+        .map((item) => {
+          if (typeof item === "string") return item.trim();
+          return String(
+            item?.text ||
+              item?.name ||
+              item?.label ||
+              item?.description ||
+              item?.value ||
+              "",
+          ).trim();
+        })
+        .filter(Boolean),
+    ),
+  ];
+};
+
+const getFacilityIcon = (label = "") => {
+  const normalized = label.toLowerCase();
+
+  if (normalized.includes("wifi") || normalized.includes("internet")) return Wifi;
+  if (normalized.includes("parking") || normalized.includes("car")) return Car;
+  if (normalized.includes("restaurant") || normalized.includes("food")) return Utensils;
+  if (normalized.includes("room service") || normalized.includes("phone")) return Phone;
+  if (normalized.includes("elevator") || normalized.includes("lift")) return ArrowUpDown;
+  if (normalized.includes("clean") || normalized.includes("laundry")) return Sparkles;
+  if (normalized.includes("air") || normalized.includes("conditioning")) return Wind;
+  if (normalized.includes("water") || normalized.includes("shower")) return Droplet;
+  if (normalized.includes("fire")) return Flame;
+  if (normalized.includes("toiletr") || normalized.includes("storage")) return Package;
+
+  return Users;
+};
 
 const getInclusionRows = (room = {}) =>
   toArray(room?.includes)
@@ -209,6 +287,62 @@ const getDescriptionRows = (room = {}) => {
 
 
   return [...new Set(rows.map((item) => item.trim()).filter(Boolean))];
+};
+
+const FacilitiesModal = ({ room, onClose }) => {
+  useBodyScrollLock(Boolean(room));
+
+  if (!room) return null;
+
+  const facilityRows = getFacilityRows(room);
+
+  return (
+    <div
+      className={styles.detailsOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${room.title || "Room"} facilities`}
+      onClick={onClose}
+    >
+      <div
+        className={`${styles.detailsModal} ${styles.facilitiesModal}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.detailsHeader}>
+          <h3>Facilities at {room.title || "Room"}</h3>
+          <button
+            type="button"
+            className={styles.detailsClose}
+            onClick={onClose}
+            aria-label="Close room facilities"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className={styles.detailsBody}>
+          {facilityRows.length ? (
+            <ul className={`${styles.facilityList} ${styles.facilitiesModalGrid}`}>
+              {facilityRows.map((facility) => {
+                const Icon = getFacilityIcon(facility);
+
+                return (
+                  <li key={facility}>
+                    <span className={styles.facilityIconBox}>
+                      <Icon size={20} strokeWidth={2} aria-hidden="true" />
+                    </span>
+                    <span>{facility}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={styles.detailsEmpty}>No facilities available.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const RoomDetailsModal = ({ room, onClose }) => {
@@ -303,6 +437,7 @@ const RoomDetailsModal = ({ room, onClose }) => {
                       <span>{policy.title || "N/A"}</span>
                       <small>
                         Fee: {policy.value || "N/A"}
+                        {policy.deduction && ` • Deduction: ${policy.deduction}`}
                         {(policy.start !== "N/A" || policy.end !== "N/A") &&
                           ` • ${policy.start || "N/A"} to ${policy.end || "N/A"}`}
                       </small>
@@ -387,6 +522,7 @@ const AvailabilityComponent = ({
   const [roomQty, setRoomQty] = useState({});
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
   const [detailsRoom, setDetailsRoom] = useState(null);
+  const [facilitiesRoom, setFacilitiesRoom] = useState(null);
   const [scrollState, setScrollState] = useState({
     scrollY: 0,
     viewportHeight: 900,
@@ -550,6 +686,11 @@ const AvailabilityComponent = ({
     setDetailsRoom(room);
   };
   const closeRoomDetails = () => setDetailsRoom(null);
+  const openRoomFacilities = (room) => {
+    if (actionDisabled) return;
+    setFacilitiesRoom(room);
+  };
+  const closeRoomFacilities = () => setFacilitiesRoom(null);
 
   return (
     <div className={styles.availabilitySection} ref={availabilityRef}>
@@ -862,7 +1003,7 @@ const AvailabilityComponent = ({
                               type="button"
                               className={styles.showMoreBtn}
                               disabled={actionDisabled}
-                              onClick={() => openRoomDetails(room)}
+                              onClick={() => openRoomFacilities(room)}
                             >
                               ...Show More
                             </button>
@@ -953,9 +1094,9 @@ const AvailabilityComponent = ({
                 </div>
 
                 <div className={styles.bookroomContainer}>
-                  <div className={styles.BookAmoutn}>
+                  {/* <div className={styles.BookAmoutn}>
                     Book with <span>{room.price.bookWith}</span>
-                  </div>
+                  </div> */}
 
                   <button
                     className={`${styles.addRoomBtn} ${
@@ -1031,6 +1172,7 @@ const AvailabilityComponent = ({
       )}
 
       <RoomDetailsModal room={detailsRoom} onClose={closeRoomDetails} />
+      <FacilitiesModal room={facilitiesRoom} onClose={closeRoomFacilities} />
     </div>
   );
 };

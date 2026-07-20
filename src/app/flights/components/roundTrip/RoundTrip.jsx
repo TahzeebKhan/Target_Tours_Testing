@@ -15,7 +15,8 @@ import FlightNoResults from "../FlightNoResults";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 
 const getAirportCode = (city = "") => {
   const match = String(city).match(/\(([^)]+)\)/);
@@ -758,7 +759,7 @@ const RoundTrip = ({
 }) => {
   const { committedSearches, refreshFlightSearch, setStartDate } = useTripType();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const [openSort, setOpenSort] = useState(false);
   const { from, to } = committedSearches.round;
   const [fareModalOpen, setFareModalOpen] = useState(null);

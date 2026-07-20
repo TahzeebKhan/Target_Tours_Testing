@@ -15,7 +15,7 @@ const getErrorMessage = (err) =>
   err?.message ||
   "Failed to create wishlist";
 
-export const createWishlist = async ({ type, name, ids }) => {
+export const createWishlist = async ({ type, name, ids, hotelSearchKey }) => {
   const token = Cookies.get("auth_token");
 
   if (!token) {
@@ -26,6 +26,9 @@ export const createWishlist = async ({ type, name, ids }) => {
     type,                 // 👈 from parent
     list_name: name || undefined,
     ids: ids.map(String), // ensure string ids
+    ...(type === "hotel" && hotelSearchKey
+      ? { hotel_search_key: hotelSearchKey }
+      : {}),
   };
 
   const res = await axios.post(
@@ -48,6 +51,7 @@ const CreateWishlistModal = ({
   onAuthRequired,
   type,        // 👈 package | hotel | travel_insurance
   ids = [],    // 👈 array of ids from parent
+  hotelSearchKey = "",
 }) => {
   const [name, setName] = useState("");
   const queryClient = useQueryClient();
@@ -141,7 +145,7 @@ const CreateWishlistModal = ({
           <button
             className={styles.primaryBtn}
             disabled={!name.trim() || isLoading}
-            onClick={() => mutate({ type, name, ids })}
+            onClick={() => mutate({ type, name, ids, hotelSearchKey })}
           >
             {isLoading ? "Creating…" : "Create"}
           </button>

@@ -2,7 +2,11 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import {
+  storeFlightSearchParams,
+  useFlightSearchParams,
+} from "./hooks/useFlightSearchParams";
 import {
   RECENT_SEARCHES_QUERY_KEY,
   saveRecentFlightSearch,
@@ -159,7 +163,7 @@ const getMultiSegmentsFromParams = (getParam, fallbackRoute, fallbackDate) => {
  * Provider
  */
 export function TripTypeProvider({ children }) {
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -508,7 +512,8 @@ export function TripTypeProvider({ children }) {
     }
     nextParams.delete("page");
 
-    router.push(`/flights?${nextParams.toString()}`);
+    storeFlightSearchParams(nextParams);
+    router.push("/flights");
 
     window.setTimeout(() => {
       setIsSearchSubmitting(false);

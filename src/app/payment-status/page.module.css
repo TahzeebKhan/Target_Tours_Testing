@@ -85,8 +85,14 @@
   color: #b42318;
 }
 
+.pendingIcon {
+  background: #fffaeb;
+  color: #b54708;
+}
+
 .successLabel,
-.errorLabel {
+.errorLabel,
+.pendingLabel {
   margin: 0 0 8px 0;
   font-family: var(--font-inter), sans-serif;
   font-size: 11px;
@@ -101,6 +107,10 @@
 
 .errorLabel {
   color: #b42318;
+}
+
+.pendingLabel {
+  color: #b54708;
 }
 
 .summaryGrid {
@@ -196,6 +206,43 @@
   font-size: 14px;
   line-height: 1.45;
   color: #070733;
+}
+
+.detailGrid strong.statusPill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 26px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statusPillSuccess {
+  border-color: #abefc6 !important;
+  background: #ecfdf3;
+  color: #067647 !important;
+}
+
+.statusPillPending {
+  border-color: #fedf89 !important;
+  background: #fffaeb;
+  color: #b54708 !important;
+}
+
+.statusPillFailed {
+  border-color: #fecdca !important;
+  background: #fef3f2;
+  color: #b42318 !important;
+}
+
+.statusPillNeutral {
+  border-color: #d0d5dd !important;
+  background: #f9fafb;
+  color: #475467 !important;
 }
 
 .fullWidth {

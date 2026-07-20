@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./TourListing.module.css";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -25,6 +26,7 @@ import {
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { useHotelsContext } from "../context/HotelsContext";
+import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
 
 const parseSocketValue = (value) => {
   if (typeof value !== "string") return value;
@@ -762,6 +764,14 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
       hotel.hotel_search_id ||
       hotel.HotelSearchId ||
       hotel.hotelSearchID ||
+      "",
+    hotelSearchKey:
+      hotel.hotelSearchKey ||
+      hotel.hotel_search_key ||
+      hotel.raw?.hotelSearchKey ||
+      hotel.raw?.hotel_search_key ||
+      hotel.hotelSearchId ||
+      hotel.hotel_search_id ||
       "",
     searchTracingKey:
       hotel.searchTracingKey ||
@@ -1509,10 +1519,9 @@ const normalizeHotelFacilities = (hotel = {}) => {
   }));
 };
 
-export const HotelFacilities = ({ facilities = [] }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+export const HotelFacilities = ({ facilities = [], onShowMore }) => {
   const hasMoreFacilities = facilities.length > 6;
-  const visibleFacilities = isExpanded ? facilities : facilities.slice(0, 6);
+  const visibleFacilities = facilities.slice(0, 6);
 
   if (!facilities.length) {
     return <div className={styles.noFacilities}>No facilities available</div>;
@@ -1531,17 +1540,57 @@ export const HotelFacilities = ({ facilities = [] }) => {
         <button
           type="button"
           className={styles.facilitiesToggle}
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
+            event.preventDefault();
             event.stopPropagation();
-            setIsExpanded((prev) => !prev);
+            onShowMore?.(facilities);
           }}
         >
-          {isExpanded ? "see less" : "...see more"}
+          ...see more
         </button>
       )}
+
     </div>
   );
 };
+
+const HotelFacilitiesModal = ({ facilities = [], onClose }) =>
+  createPortal(
+    <div
+      className={styles.facilitiesModalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label="All hotel facilities"
+      onClick={onClose}
+    >
+      <div
+        className={styles.facilitiesModal}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.facilitiesModalHeader}>
+          <h3>Amenities</h3>
+          <button type="button" aria-label="Close facilities" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className={styles.facilitiesModalBody}>
+          {facilities.map((facility, index) => (
+            <div
+              className={styles.facilitiesModalItem}
+              key={`${facility.name}-${index}`}
+            >
+              <span className={styles.facilitiesModalIcon}>
+                <img src={facility.icon} alt="" />
+              </span>
+              <span>{facility.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
 
 const getSearchLocationLabel = (searchParams) => {
   const rawLocation =
@@ -1556,7 +1605,7 @@ const getSearchLocationLabel = (searchParams) => {
     : "this location";
 };
 
-const EmptyHotelState = ({ locationLabel }) => (
+const EmptyHotelState = ({ locationLabel, searchText = "" }) => (
   <div className={styles.emptyState}>
     <img
       className={styles.emptyStateImage}
@@ -1564,10 +1613,15 @@ const EmptyHotelState = ({ locationLabel }) => (
       alt="No hotels found"
     />
     <div className={styles.emptyStateText}>
-      <h3>No hotels found for {locationLabel || "this location"}</h3>
+      <h3>
+        {searchText
+          ? `No hotels found matching “${searchText}”`
+          : `No hotels found for ${locationLabel || "this location"}`}
+      </h3>
       <p>
-        We could not find stays for this search. Try a nearby area, different
-        dates, or update your rooms and guests.
+        {searchText
+          ? "Try another hotel name or clear the search filter."
+          : "We could not find stays for this search. Try a nearby area, different dates, or update your rooms and guests."}
       </p>
     </div>
   </div>
@@ -1868,6 +1922,9 @@ const TourListing = () => {
   const [isSaveWishlistOpen, setIsSaveWishlistOpen] = useState(false);
   const [wishlists, setWishlists] = useState([]); // fetch later from backend
   const [selectedTourId, setSelectedTourId] = useState(null);
+  const [selectedHotelSearchKey, setSelectedHotelSearchKey] = useState("");
+  const [modalFacilities, setModalFacilities] = useState([]);
+  useBodyScrollLock(modalFacilities.length > 0);
   const [hotelResults, setHotelResults] = useState([]);
   const [apiFilterData, setApiFilterData] = useState(null);
   const [totalHotelResults, setTotalHotelResults] = useState(0);
@@ -2037,9 +2094,13 @@ const TourListing = () => {
 
   const { mutate: addHotelToWishlist, isPending: isAddingToWishlist } =
     useMutation({
-      mutationFn: (hotelId) =>
-        createWishlist({ type: "hotel", ids: [hotelId] }),
-      onSuccess: (_data, hotelId) => {
+      mutationFn: ({ hotelId, hotelSearchKey }) =>
+        createWishlist({
+          type: "hotel",
+          ids: [hotelId],
+          hotelSearchKey,
+        }),
+      onSuccess: (_data, { hotelId }) => {
         setLikedTours((prev) =>
           prev.includes(hotelId) ? prev : [...prev, hotelId],
         );
@@ -2058,7 +2119,8 @@ const TourListing = () => {
         }
 
         appToast.error(
-          error?.response?.data?.message ||
+          error?.response?.data?.error?.message ||
+            error?.response?.data?.message ||
             error?.message ||
             "Failed to add hotel to wishlist",
         );
@@ -2072,7 +2134,17 @@ const TourListing = () => {
     if (!wishlistHotelId) return;
 
     setSelectedTourId(wishlistHotelId);
-    addHotelToWishlist(wishlistHotelId);
+    const hotelSearchKey = String(
+      hotel?.hotelSearchKey ||
+        hotel?.hotel_search_key ||
+      hotel?.raw?.hotelSearchKey ||
+        hotel?.raw?.hotel_search_key ||
+        hotel?.hotelSearchId ||
+        hotel?.hotel_search_id ||
+        "",
+    );
+    setSelectedHotelSearchKey(hotelSearchKey);
+    addHotelToWishlist({ hotelId: wishlistHotelId, hotelSearchKey });
   };
 
   const handleCreateWishlist = () => {
@@ -2799,11 +2871,19 @@ const TourListing = () => {
     [displayHotels, virtualWindow.endIndex, virtualWindow.startIndex],
   );
 
+  const hotelNameSearchText = String(
+    appliedFilters.hotelSearchText || "",
+  ).trim();
+  const hasNoHotelNameMatches =
+    Boolean(hotelNameSearchText) &&
+    sourceHotels.length > 0 &&
+    displayHotels.length === 0;
   const showEmptyState =
-    shouldShowEmptyHotelState &&
     !isHotelLoading &&
     !displayHotels.length &&
-    Boolean(hotelSearchChannel || hotelResultSource);
+    (hasNoHotelNameMatches ||
+      (shouldShowEmptyHotelState &&
+        Boolean(hotelSearchChannel || hotelResultSource)));
 
   return (
     <>
@@ -2818,7 +2898,10 @@ const TourListing = () => {
         />
 
         {showEmptyState && (
-          <EmptyHotelState locationLabel={searchLocationLabel} />
+          <EmptyHotelState
+            locationLabel={searchLocationLabel}
+            searchText={hasNoHotelNameMatches ? hotelNameSearchText : ""}
+          />
         )}
 
         {/* =================card view==================================================================== */}
@@ -2945,7 +3028,10 @@ const TourListing = () => {
                           <span>{item.route}</span>
                         </div>
                       </div>
-                      <HotelFacilities facilities={item.facilities} />
+                      <HotelFacilities
+                        facilities={item.facilities}
+                        onShowMore={setModalFacilities}
+                      />
                       <HotelBenefits benefits={item.benefits} />
                     </div>
                   </div>
@@ -3101,7 +3187,10 @@ const TourListing = () => {
                           <span>{item.route}</span>
                         </div>
                       </div>
-                      <HotelFacilities facilities={item.facilities} />
+                      <HotelFacilities
+                        facilities={item.facilities}
+                        onShowMore={setModalFacilities}
+                      />
                       <HotelBenefits benefits={item.benefits} />
                     </div>
                   </div>
@@ -3151,6 +3240,13 @@ const TourListing = () => {
       </section>
       <section className={styles.tourListSectionMobileView}></section>
 
+      {modalFacilities.length > 0 && (
+        <HotelFacilitiesModal
+          facilities={modalFacilities}
+          onClose={() => setModalFacilities([])}
+        />
+      )}
+
       <CreateWishlistModal
         isOpen={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
@@ -3158,6 +3254,7 @@ const TourListing = () => {
         onAuthRequired={openLoginModal}
         type="hotel"
         ids={selectedTourId ? [selectedTourId] : []}
+        hotelSearchKey={selectedHotelSearchKey}
       />
 
       <SaveToWishlistModal

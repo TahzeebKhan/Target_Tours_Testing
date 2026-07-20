@@ -579,7 +579,21 @@ export function FlightBookingProvider({ children }) {
             ...(fallbackView ? { urlFallback: fallbackView } : {}),
           })
         : null;
-        console.log("nextSession2",nextSession)
+
+    if (nextSession) {
+      writeFlightBookingSession(nextSession);
+    }
+
+    if (fallbackView && typeof window !== "undefined") {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete("bookingFallback");
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`
+      );
+    }
+
     setBookingSession(nextSession);
     setCurrentStep(getRestoredBookingStep(nextSession));
     setBaggage(toArray(nextSession?.baggage));

@@ -168,6 +168,15 @@ const chunkImages = (images = [], size = 5) => {
   return chunks;
 };
 
+const getGallerySectionTitle = (images = [], fallbackTitle = "Hotel Gallery") => {
+  const titledImage = images.find((item) => {
+    const title = String(item?.title || "").trim();
+    return title && !isGeneratedPhotoTitle(title);
+  });
+
+  return String(titledImage?.title || fallbackTitle || "Hotel Gallery").trim();
+};
+
 const ViewGalleryPage = () => {
   const router = useRouter();
   const [galleryMeta, setGalleryMeta] = useState({
@@ -190,8 +199,8 @@ const ViewGalleryPage = () => {
       return [{ title: galleryMeta.title, images: getFallbackImages().map((item) => item.image) }];
     }
 
-    return chunks.map((chunk, index) => ({
-      title: index === 0 ? "Hotel Gallery" : `More Photos ${index}`,
+    return chunks.map((chunk) => ({
+      title: getGallerySectionTitle(chunk, galleryMeta.title),
       images: [
         ...chunk,
         ...getFallbackImages(Math.max(0, GALLERY_SECTION_SIZE - chunk.length)),

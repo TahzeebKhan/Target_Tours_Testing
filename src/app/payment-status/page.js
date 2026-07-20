@@ -38,9 +38,10 @@ const getResponseData = (payload = {}) =>
         : {};
 
 const formatAmount = (value) => {
+  if (value === null || value === undefined || value === "") return "N/A";
   const amount =
     typeof value === "string" ? Number(value.replace(/[^\d.]/g, "")) : Number(value);
-  if (!Number.isFinite(amount) || amount <= 0) return "N/A";
+  if (!Number.isFinite(amount) || amount < 0) return "N/A";
   return `INR ${amount.toLocaleString("en-IN")}`;
 };
 
@@ -67,6 +68,29 @@ const formatStatus = (value) =>
   )
     .replace(/[_-]+/g, " ")
     .toUpperCase();
+
+const getStatusPillClass = (value) => {
+  const status = formatStatus(value);
+  if (status.includes("FAIL") || status.includes("CANCEL")) {
+    return "statusPillFailed";
+  }
+  if (
+    status.includes("PENDING") ||
+    status.includes("PROCESS") ||
+    status.includes("HOLD")
+  ) {
+    return "statusPillPending";
+  }
+  if (
+    status.includes("SUCCESS") ||
+    status.includes("COMPLETE") ||
+    status.includes("CONFIRM") ||
+    status.includes("TICKET")
+  ) {
+    return "statusPillSuccess";
+  }
+  return "statusPillNeutral";
+};
 
 const formatRoute = (value) => {
   if (!value) return "Flight booking";
@@ -260,6 +284,17 @@ function PaymentStatusContent() {
       paymentData.status,
       "SUCCESS"
     );
+    const normalizedResponseStatus = formatStatus(status);
+    const isResponseFailed =
+      normalizedResponseStatus.includes("FAIL") ||
+      normalizedResponseStatus.includes("CANCEL");
+    const providerFailureMessage = pickFirst(
+      statusData.provider_status_label,
+      statusMeta.akbar_status_label,
+      data.provider_status_label,
+      raw.PGDescription,
+      "Flight booking failed."
+    );
 
     return {
       status,
@@ -344,6 +379,7 @@ function PaymentStatusContent() {
       passengers: toArray(data.passengers),
       baggage: toArray(data.baggage),
       message: pickFirst(
+        isResponseFailed ? providerFailureMessage : "",
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.message,
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.data?.message,
         isSuccessFalse(retrieveResponse) ? "" : data.message,
@@ -391,11 +427,27 @@ function PaymentStatusContent() {
           ) : (
             <>
               <div className={styles.header}>
-                <span className={`${styles.statusIcon} ${isFailed ? styles.errorIcon : ""}`}>
-                  {isFailed ? "!" : "OK"}
+                <span
+                  className={`${styles.statusIcon} ${
+                    isFailed
+                      ? styles.errorIcon
+                      : isPending
+                        ? styles.pendingIcon
+                        : ""
+                  }`}
+                >
+                  {isFailed ? "!" : isPending ? "…" : "OK"}
                 </span>
                 <div>
-                  <p className={isFailed ? styles.errorLabel : styles.successLabel}>
+                  <p
+                    className={
+                      isFailed
+                        ? styles.errorLabel
+                        : isPending
+                          ? styles.pendingLabel
+                          : styles.successLabel
+                    }
+                  >
                     {normalizedStatus}
                   </p>
                   <h1>{heading}</h1>
@@ -449,11 +501,19 @@ function PaymentStatusContent() {
                     </div>
                     <div>
                       <span>Payment Status</span>
-                      <strong>{details.paymentStatus}</strong>
+                      <strong
+                        className={`${styles.statusPill} ${styles[getStatusPillClass(details.paymentStatus)]}`}
+                      >
+                        {details.paymentStatus}
+                      </strong>
                     </div>
                     <div>
                       <span>Booking Status</span>
-                      <strong>{details.bookingStatus}</strong>
+                      <strong
+                        className={`${styles.statusPill} ${styles[getStatusPillClass(details.bookingStatus)]}`}
+                      >
+                        {details.bookingStatus}
+                      </strong>
                     </div>
                     <div className={styles.fullWidth}>
                       <span>Provider Status</span>
