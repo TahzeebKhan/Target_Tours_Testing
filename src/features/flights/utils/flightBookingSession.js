@@ -5,6 +5,10 @@ import { resolveAirlineLogo } from "./airlineLogos";
 let inMemoryFlightBookingSession = null;
 const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
 export const FLIGHT_PRICING_SESSION_DURATION_MS = 20 * 60 * 1000;
+const serializeFlightBookingSession = (value) =>
+  JSON.stringify(value, (key, nestedValue) =>
+    key.toLowerCase() === "raw" ? undefined : nestedValue
+  );
 
 const readNumber = (...values) => {
   for (const value of values) {
@@ -627,15 +631,12 @@ export const readFlightBookingSession = () => {
       return null;
     }
     inMemoryFlightBookingSession = parsed || null;
-
-
-    const sizeInBytes = new Blob([
-  JSON.stringify(inMemoryFlightBookingSession)
-]).size;
-
-console.log(`Size: ${sizeInBytes} bytes`);
-console.log(`Size: ${(sizeInBytes / 1024).toFixed(2)} KB`);
-     console.log("inMemoryFlightBookingSession", inMemoryFlightBookingSession);
+    if (parsed) {
+      window.sessionStorage.setItem(
+        FLIGHT_BOOKING_SESSION_KEY,
+        serializeFlightBookingSession(parsed)
+      );
+    }
     return inMemoryFlightBookingSession;
   } catch {
     return null;
@@ -658,7 +659,8 @@ export const clearFlightBookingSession = () => {
 const storeFlightBookingSession = (value) => {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(FLIGHT_BOOKING_SESSION_KEY, JSON.stringify(value));
+    const serializedValue = serializeFlightBookingSession(value);
+    window.sessionStorage.setItem(FLIGHT_BOOKING_SESSION_KEY, serializedValue);
   } catch {
   }
 };
@@ -2204,7 +2206,10 @@ const normalizeCreateBookingMeal = (meal = {}, index = 0) => {
   };
 };
 
-const normalizeCreateBookingBaggage = (baggage = {}, index = 0) => {
+const normalizeCreateBookingBaggage = (
+  baggage = {},
+  fallbackPassengerId = 1
+) => {
   const ssid = readSsrId(baggage);
 
   return {
@@ -2215,7 +2220,7 @@ const normalizeCreateBookingBaggage = (baggage = {}, index = 0) => {
     price: readNumber(baggage?.price) || 0,
     code: baggage?.code || baggage?.Code || "",
     weight: baggage?.weight || "",
-    PaxID: readPassengerId(baggage, index + 1),
+    PaxID: readPassengerId(baggage, fallbackPassengerId),
   };
 };
 
@@ -2288,8 +2293,18 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
   const selectedMeals = Array.isArray(session?.meals)
     ? session.meals.map(normalizeCreateBookingMeal)
     : [];
+  const baggagePassengerCountByFlight = {};
   const selectedBaggage = Array.isArray(session?.baggage)
-    ? session.baggage.map(normalizeCreateBookingBaggage)
+    ? session.baggage.map((item) => {
+        const flightId = String(readFuid(item) || "1");
+        const fallbackPassengerId =
+          (baggagePassengerCountByFlight[flightId] || 0) + 1;
+        baggagePassengerCountByFlight[flightId] = fallbackPassengerId;
+        return normalizeCreateBookingBaggage(
+          item,
+          fallbackPassengerId
+        );
+      })
     : [];
 
   return {

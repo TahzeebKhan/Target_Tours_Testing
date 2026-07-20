@@ -1130,6 +1130,11 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
 }
 
+.facilitiesModal {
+  width: min(760px, 100%);
+  max-height: min(78vh, 760px);
+}
+
 .detailsHeader {
   display: flex;
   align-items: flex-start;
@@ -1188,6 +1193,7 @@
 
 .policyList,
 .inclusionList,
+.facilityList,
 .infoList,
 .descriptionList {
   display: flex;
@@ -1237,7 +1243,8 @@
 }
 
 .policyList,
-.inclusionList {
+.inclusionList,
+.facilityList {
   margin: 0;
   gap: 12px;
   color: #4a5565;
@@ -1254,6 +1261,71 @@
 
 .inclusionList {
   padding: 0 0 0 20px;
+}
+
+.facilityList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.facilityList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.facilityList svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #2e7d32;
+}
+
+.facilityList.facilitiesModalGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.facilitiesModalGrid li {
+  align-items: center;
+  gap: 12px;
+  color: #000000;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.facilityIconBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  background: #f2f3f7;
+}
+
+.facilityList .facilityIconBox svg {
+  margin: 0;
+  color: #101828;
+}
+
+@media (max-width: 820px) {
+  .facilityList.facilitiesModalGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .facilityList,
+  .facilityList.facilitiesModalGrid {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 .policyRow {

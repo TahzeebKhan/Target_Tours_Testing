@@ -437,6 +437,8 @@ const BaggageDetails = () => {
               ...info,
               id: `${key}-${i}`, // unique id
               segment,
+              PaxID: i + 1,
+              PaxRefNumber: String(i + 1),
               label: `Extra Baggage ${info.weight}`,
             });
           }

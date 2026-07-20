@@ -1,7 +1,8 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./FareComparisonModal.module.css";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 import { getSelectedFlightSummary } from "./fareComparisonUtils";
 import { toast } from "react-toastify";
 import {
@@ -615,7 +616,7 @@ const FareComparisonModal = ({
 }) => {
     useLockBodyScroll(isOpen && !inline);
     const router = useRouter();
-    const searchParams = useSearchParams();
+    const searchParams = useFlightSearchParams();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submittingFareId, setSubmittingFareId] = useState(null);
     const [fareOptionsPayload, setFareOptionsPayload] = useState(prefetchedData?.fareOptionsResponse || null);

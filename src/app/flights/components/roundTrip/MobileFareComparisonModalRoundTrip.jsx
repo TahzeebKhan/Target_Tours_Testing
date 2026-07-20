@@ -2,7 +2,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./MobileFareComparisonModalRoundTrip.module.css";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 import { toast } from "react-toastify";
 import {
   getFlightPrice,
@@ -441,7 +442,7 @@ const MobileFareComparisonModalRoundTrip = ({
 }) => {
   useLockBodyScroll(isOpen);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);

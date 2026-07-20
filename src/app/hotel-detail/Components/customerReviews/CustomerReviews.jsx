@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./CustomerReviews.module.css";
 import { useHotelDetailData } from "../../HotelDetailDataContext";
+import { MessageSquareText } from "lucide-react";
 
 const CustomerReviews = () => {
   const { hotelDetail } = useHotelDetailData();
@@ -14,10 +15,10 @@ const CustomerReviews = () => {
         <h2 className={styles.heading}>Customer Reviews</h2>
 
         <div className={styles.reviewContainer}>
-          {/* LEFT SIDE */}
-          <div className={styles.leftSection}>
-            {ratingBars.map((item) => (
-              <div key={item.star} className={styles.ratingRow}>
+            {/* LEFT SIDE */}
+            <div className={styles.leftSection}>
+              {ratingBars.map((item) => (
+                <div key={item.star} className={styles.ratingRow}>
                 <span className={styles.star}>★ {item.star}</span>
 
                 <div className={styles.progressBar}>
@@ -28,26 +29,41 @@ const CustomerReviews = () => {
                 </div>
 
                 <span className={styles.count}>{item.value}</span>
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
 
           {/* RIGHT SIDE */}
-          <div className={styles.rightSection}>
-            {scoreDetails.map((item) => (
-              <div key={item.label} className={styles.scoreContainer}>
-                <div className={styles.scoreBox}>
-                  <div className={styles.scoreLabelBox}>
-                    <p className={styles.scoreLabel}>{item.label}</p>
+            <div className={styles.rightSection}>
+              {scoreDetails.map((item) => (
+                <div key={item.label} className={styles.scoreContainer}>
+                  <div className={styles.scoreBox}>
+                    <div className={styles.scoreLabelBox}>
+                      <p className={styles.scoreLabel}>{item.label}</p>
+                    </div>
+                    <p className={styles.scoreValue}>{item.score.toFixed(1)}</p>
                   </div>
-                  <p className={styles.scoreValue}>{item.score.toFixed(1)}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
         </div>
+
+        {!reviews.length && (
+          <div className={styles.emptyReviews}>
+            <span className={styles.emptyReviewsIcon} aria-hidden="true">
+              <MessageSquareText size={28} strokeWidth={1.7} />
+            </span>
+            <div>
+              <h3>No customer reviews yet</h3>
+              <p>
+                This hotel has not received any guest reviews. Be the first to
+                share your experience after your stay.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
-      <div className={styles.reviewList}>
+      {reviews.length > 0 && <div className={styles.reviewList}>
         {reviews.map((review) => (
           <div key={review.id} className={styles.reviewCard}>
             {/* LEFT AVATAR */}
@@ -82,10 +98,7 @@ const CustomerReviews = () => {
             </div>
           </div>
         ))}
-      </div>
-      {!reviews.length && (
-        <p className={styles.comment}>No customer reviews available for this hotel yet.</p>
-      )}
+      </div>}
     </div>
   );
 };

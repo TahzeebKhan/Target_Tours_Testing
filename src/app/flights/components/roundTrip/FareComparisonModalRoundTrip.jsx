@@ -1,7 +1,8 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./FareComparisonModalRoundTrip.module.css";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import { toast } from "react-toastify";
 import {
@@ -436,9 +437,10 @@ const FareComparisonModalRoundTrip = ({
   prefetchedData = null,
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const { isLoggedIn, loading } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingFareKey, setLoadingFareKey] = useState("");
+  const activeBookingRequestRef = useRef(null);
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
   const [pendingFare, setPendingFare] = useState(null);
@@ -519,7 +521,7 @@ const FareComparisonModalRoundTrip = ({
     };
   }, [flightData, flightNos, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
-  const performBookNow = useCallback(async (selectedFare) => {
+  const performBookNow = useCallback(async (selectedFare, fareKey = "pending") => {
     const selectedPriceRequest = buildSelectedFarePriceRequest(
       flightData?.booking?.priceRequest,
       selectedFare
@@ -556,9 +558,14 @@ const FareComparisonModalRoundTrip = ({
       return;
     }
 
-    setIsSubmitting(true);
+    activeBookingRequestRef.current?.abort();
+    const controller = new AbortController();
+    activeBookingRequestRef.current = controller;
+    setLoadingFareKey(fareKey);
     try {
-      const priceResponse = await getFlightPrice(priceRequest);
+      const priceResponse = await getFlightPrice(priceRequest, {
+        signal: controller.signal,
+      });
       const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
       const selectedFareFromFormattedPrice = buildRoundTripFareFromFormattedPrice(
         selectedFare,
@@ -582,15 +589,23 @@ const FareComparisonModalRoundTrip = ({
           : "/flight-booking-details"
       );
     } catch (error) {
+      if (error?.name === "AbortError") return;
       toast.error(
         error?.response?.data?.message ||
         error?.message ||
         "Unable to continue with this flight right now."
       );
     } finally {
-      setIsSubmitting(false);
+      if (activeBookingRequestRef.current === controller) {
+        activeBookingRequestRef.current = null;
+        setLoadingFareKey("");
+      }
     }
   }, [flightData, router, searchParams]);
+
+  useEffect(() => {
+    return () => activeBookingRequestRef.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (!pendingFare || !isLoggedIn) return;
@@ -630,11 +645,11 @@ const FareComparisonModalRoundTrip = ({
       setShowLogin(true);
       return;
     }
-    performBookNow(roundTripFare);
+    performBookNow(roundTripFare, `${selected}:${selectedFare?.id || "fare"}`);
   };
 
-  const getBookNowLabel = () => {
-    if (isSubmitting) return "LOADING...";
+  const getBookNowLabel = (fare) => {
+    if (loadingFareKey === `${selected}:${fare?.id || "fare"}`) return "LOADING...";
     if (selected === "onward" && !selectedFares.return) return "BOOK NOW";
     if (selected === "return" && !selectedFares.onward) return "BOOK NOW";
     return "BOOK NOW";
@@ -897,8 +912,12 @@ const FareComparisonModalRoundTrip = ({
                 {/* Action Buttons */}
                 <div className={styles.fareActions}>
                   {/* <button className={styles.lockPriceBtn}>LOCK PRICE</button> */}
-                  <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>
-                    {getBookNowLabel()}
+                  <button
+                    className={styles.bookNowBtn}
+                    disabled={loadingFareKey === `${selected}:${fare?.id || "fare"}`}
+                    onClick={() => handleBookNow(fare)}
+                  >
+                    {getBookNowLabel(fare)}
                   </button>
                 </div>
               </div>

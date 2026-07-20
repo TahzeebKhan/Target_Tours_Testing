@@ -1,5 +1,5 @@
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { useFlightSearchParams } from "../../../hooks/useFlightSearchParams";
 import styles from "./FlightFare.module.css";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
@@ -92,7 +92,7 @@ const getTaxAmount = (flightData, tripAmount) => {
 };
 
 const FlightFare = ({ flightData = null, leg = null, tripIndex = 0 }) => {
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const departure = parseCityLabel(leg?.flight?.departure?.city);
   const arrival = parseCityLabel(leg?.flight?.arrival?.city);
   const tripAmount = getTripAmount(flightData, tripIndex);

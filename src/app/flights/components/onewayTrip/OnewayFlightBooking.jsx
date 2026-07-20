@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useContext, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 import styles from "./OnewayFlightBooking.module.css";
 import ExpandableTabs from "./expendableTabs/ExpandableTabs";
 import OfferBanner from "../offerComponent/OfferBanner";
@@ -36,7 +37,7 @@ const OnewayFlightBooking = ({
   isRefreshing = false,
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const { committedSearches, refreshFlightSearch, setStartDate } = useTripType();
   const { from, to } = committedSearches.oneway;
   // track which flight's details are open (by id) so only that item expands

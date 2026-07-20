@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useFlightSearchParams } from "./hooks/useFlightSearchParams";
 import { toast } from "react-toastify";
 import MultiCityTrip from "./components/multiTrip/MultiCityTrip";
 import OnewayFlightBooking from "./components/onewayTrip/OnewayFlightBooking";
@@ -154,7 +154,7 @@ const sortCardsByFlightOrder = (cards = [], sortedFlights = []) => {
 const FlightsPageClient = () => {
   const { tripType, committedRequest, searchRefreshToken: contextSearchRefreshToken } = useTripType();
   const { filters, setApiFilterData } = useFlightFilters();
-  const urlSearchParams = useSearchParams();
+  const urlSearchParams = useFlightSearchParams();
 
   const request = committedRequest || {};
   const requestTripType = request.tripType || tripType;

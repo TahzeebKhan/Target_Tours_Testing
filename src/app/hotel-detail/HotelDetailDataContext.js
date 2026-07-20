@@ -1417,6 +1417,27 @@ const normalizeScoreDetails = (data = {}, hotel = {}) => {
   ];
 };
 
+const formatHotelAddress = (address) => {
+  if (!address) return "";
+  if (typeof address === "string") return address.trim();
+  if (typeof address !== "object") return "";
+
+  const parts = [
+    address.line1,
+    address.line2,
+    address.addressLine1,
+    address.addressLine2,
+    address.city,
+    address.state,
+    address.country,
+    address.postalCode || address.postCode || address.zipCode,
+  ]
+    .map((part) => String(part || "").trim())
+    .filter(Boolean);
+
+  return [...new Set(parts)].join(", ");
+};
+
 const normalizeHotelDetail = (
   stored,
   routeHotelId = "",
@@ -1467,7 +1488,17 @@ const normalizeHotelDetail = (
   return {
     id: String(getFirst(hotel.id, hotel.providerHotelId, routeHotelId, "")),
     name: getFirst(hotel.name, contentHotel.name, data.name, "Hotel"),
-    address: getFirst(hotel.addressLine1, contentHotel.addressLine1, data.addressLine1, ""),
+    address: getFirst(
+      hotel.addressLine1,
+      formatHotelAddress(hotel.contact?.address),
+      formatHotelAddress(contentHotel.contact?.address),
+      contentHotel.addressLine1,
+      formatHotelAddress(hotel.address),
+      formatHotelAddress(data.contact?.address),
+      data.addressLine1,
+      formatHotelAddress(data.address),
+      "",
+    ),
     rating: starRating,
     starRating,
     reviewScore: reviewSummary.score,

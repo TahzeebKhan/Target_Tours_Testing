@@ -2,7 +2,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./MobileFareComparisonModal.module.css";
 import FlightTimeline from "@/app/flight-booking-details/mobileViewComponents/components/flightTimeline/FlightTimeline";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useFlightSearchParams } from "../../../hooks/useFlightSearchParams";
 import { getSelectedFlightSummary } from "../fareComparisonUtils";
 import { buildFareOptions, normalizeFareFlightNo } from "../FareComparisonModal";
 import { toast } from "react-toastify";
@@ -106,7 +107,7 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
 const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData = null, isLoadingFareOptions = false }) => {
   useLockBodyScroll(isOpen);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useFlightSearchParams();
   const { isLoggedIn, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingFareId, setSubmittingFareId] = useState(null);
