@@ -24,6 +24,12 @@ export const AirlineLogoList = [
     "logo": "https://images.kiwi.com/airlines/64/SR.png"
   },
   {
+    "id": "QP",
+    "lcc": "1",
+    "name": "Akasa Airline",
+    "logo": "https://images.kiwi.com/airlines/64/QP.png"
+  },
+  {
     "id": "SAGALES",
     "lcc": "None",
     "name": "Sagales",

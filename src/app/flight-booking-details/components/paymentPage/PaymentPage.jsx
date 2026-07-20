@@ -15,6 +15,9 @@ import {
 } from "@/features/flights/utils/flightBookingSession";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 
 const formatSummaryDuration = (duration = {}) =>
   `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
@@ -74,6 +77,7 @@ const buildTripCardData = (flight, selectedFare) => {
 };
 
 const PaymentPage = () => {
+  const { isLoggedIn } = useAuth();
   const {
     setCurrentStep,
     submitItinerary,
@@ -97,6 +101,8 @@ const PaymentPage = () => {
   } = useFlightBooking();
   const router = useRouter();
   const [openTab, setOpenTab] = useState("passengerInfo");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const selectedFare = bookingSession?.selectedFare || {};
   const header = bookingView?.header || {};
@@ -111,6 +117,19 @@ const PaymentPage = () => {
   const summaryFlight = bookingView?.departureFlight;
 
   const [showPriceSummaryPopup, setShowPriceSummaryPopup] = useState(false);
+  const handleContinuePayment = () => {
+    if (!isLoggedIn) {
+      setAuthView("login");
+      setShowAuthModal(true);
+      return;
+    }
+
+    submitItinerary(paymentMethod);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
   const toggleTab = (tabName) => {
     setOpenTab((prev) => (prev === tabName ? null : tabName));
   };
@@ -139,6 +158,12 @@ const PaymentPage = () => {
         baggage={baggage}
         meals={meals}
       />
+      {showAuthModal && authView === "login" && (
+        <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
+      {showAuthModal && authView === "signup" && (
+        <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+      )}
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
           <img
@@ -360,7 +385,8 @@ const PaymentPage = () => {
             {/* RIGHT */}
             <button
               className={styles.continueBtn}
-              onClick={() => submitItinerary(paymentMethod)}
+              onClick={handleContinuePayment}
+              disabled={itineraryLoading}
             >
               {itineraryLoading ? "LOADING..." : "CONTINUE PAYMENT"}
             </button>

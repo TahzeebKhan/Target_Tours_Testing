@@ -16,7 +16,6 @@ import { SidebarContext } from "../../SidebarContext";
 import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
 import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
-import { getFlightWebSettings } from "@/features/flights/services/flightBooking";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 const MultiCityTrip = ({
   flightData = [],
@@ -58,22 +57,7 @@ const MultiCityTrip = ({
     direction: "asc",
   });
 
-  const openFareModal = async (flight) => {
-    const searchTui =
-      flight?.tripCard?.booking?.tui || flight?.booking?.tui;
-    const provider =
-      flight?.tripCard?.booking?.provider ||
-      flight?.booking?.provider ||
-      flight?.provider;
-
-    if (searchTui) {
-      try {
-        await getFlightWebSettings({ TUI: searchTui, provider });
-      } catch (error) {
-        console.error("Failed to fetch flight web settings", error);
-      }
-    }
-
+  const openFareModal = (flight) => {
     setSelectedFlightId(flight?.id ?? null);
     setFareModalOpen(flight?.id ?? null);
   };

@@ -128,6 +128,8 @@ const getPayloadType = (payload) =>
 const getApiMessage = (payload) =>
   payload?.error?.message ||
   payload?.data?.error?.message ||
+  payload?.data?.result?.message ||
+  payload?.result?.message ||
   payload?.message ||
   payload?.data?.message ||
   "Flight request failed. Please try again.";
@@ -719,14 +721,31 @@ const isFlightCreateBookingComplete = (payload) => {
 
 const isFlightCreateBookingFailed = (payload) => {
   const type = getPayloadType(payload);
-  return (
+  const isBookingFailureEvent = (
     (type.includes("CREATE") && type.includes("BOOKING")) ||
     type.includes("BOOKING")
   ) && (
     type.includes("FAILED") ||
     type.includes("ERROR")
   );
+
+  return (
+    isBookingFailureEvent ||
+    payload?.success === false ||
+    payload?.data?.success === false ||
+    payload?.result?.success === false ||
+    payload?.data?.result?.success === false
+  );
 };
+
+const isRecoverableCreateBookingFareChange = (payload) =>
+  String(
+    payload?.data?.result?.code ||
+    payload?.result?.code ||
+    payload?.data?.code ||
+    payload?.code ||
+    ""
+  ) === "8888";
 
 const hasCreateBookingPayload = (payload) => {
   const root = payload?.data || payload || {};
@@ -1233,48 +1252,47 @@ export const getFlightInfo = async (payload) => {
   return response?.data;
 };
 
+const fareRuleRequestCache = new Map();
+
 export const getFlightFareRules = async (payload) => {
-  const response = await fetch("/api/flights/v2/fare-rule", {
+  const requestPayload = {
+    ...payload,
+    domain:
+      payload?.domain ||
+      process.env.NEXT_PUBLIC_DOMAIN ||
+      "localhost:1337",
+  };
+  const requestKey = JSON.stringify(requestPayload);
+  const pendingRequest = fareRuleRequestCache.get(requestKey);
+  if (pendingRequest) return pendingRequest;
+
+  const request = fetch("/api/flights/v2/fare-rule", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
     cache: "no-store",
-    body: JSON.stringify({
-      ...payload,
-      domain:
-        payload?.domain ||
-        process.env.NEXT_PUBLIC_DOMAIN ||
-        "localhost:1337",
-    }),
+    body: JSON.stringify(requestPayload),
+  }).then(async (response) => {
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(getApiMessage(data));
+    }
+
+    return data;
+  }).finally(() => {
+    window.setTimeout(() => fareRuleRequestCache.delete(requestKey), 1000);
   });
-  const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(getApiMessage(data));
-  }
-
-  return data;
+  fareRuleRequestCache.set(requestKey, request);
+  return request;
 };
 
 export const getLegacyFlightFareRules = async (payload) => {
   const response = await api.post("/api/flights/fare-rule", {
     ...payload,
-    domain: "localhost:1337",
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response?.data;
-};
-
-export const getFlightWebSettings = async (payload) => {
-  const response = await api.post("/api/flights/web-settings", {
-    ...payload,
-    provider: normalizeProvider(payload?.provider || payload?.Provider),
     domain: "localhost:1337",
   }, {
     headers: {
@@ -1730,7 +1748,11 @@ export const createFlightV2Booking = async (payload) => {
     });
     const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
+    if (
+      !response.ok ||
+      (isFlightCreateBookingFailed(data) &&
+        !isRecoverableCreateBookingFareChange(data))
+    ) {
       const error = new Error(getApiMessage(data));
       error.status = response.status;
       throw error;
@@ -1767,6 +1789,9 @@ export const createFlightV2Booking = async (payload) => {
       const reversedChunks = [...chunks].reverse();
       return (
         reversedChunks.find((chunk) => isFlightCreateBookingComplete(chunk)) ||
+        reversedChunks.find((chunk) =>
+          isRecoverableCreateBookingFareChange(chunk)
+        ) ||
         reversedChunks.find((chunk) => hasCreateBookingPayload(chunk)) ||
         (isFlightCreateBookingComplete(initResponse) ||
         hasCreateBookingPayload(initResponse)
@@ -1841,7 +1866,11 @@ export const createFlightV2Booking = async (payload) => {
       }
 
       if (isFlightCreateBookingFailed(parsedPayload)) {
-        settle(resolve, buildResult());
+        if (isRecoverableCreateBookingFareChange(parsedPayload)) {
+          settle(resolve, buildResult());
+          return;
+        }
+        settle(reject, new Error(getApiMessage(parsedPayload)));
         return;
       }
 
@@ -1873,8 +1902,21 @@ export const createFlightV2Booking = async (payload) => {
         await waitForSseConnected(events, channel);
         initResponse = await postCreateBooking();
 
+        if (isRecoverableCreateBookingFareChange(initResponse)) {
+          chunks.push(initResponse);
+          settle(resolve, buildResult());
+          return;
+        }
+
         if (
-          isFlightCreateBookingFailed(initResponse) ||
+          isFlightCreateBookingFailed(initResponse) &&
+          !isRecoverableCreateBookingFareChange(initResponse)
+        ) {
+          settle(reject, new Error(getApiMessage(initResponse)));
+          return;
+        }
+
+        if (
           isFlightCreateBookingComplete(initResponse) ||
           hasCreateBookingPayload(initResponse)
         ) {
