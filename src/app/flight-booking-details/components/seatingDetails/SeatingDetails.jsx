@@ -443,10 +443,29 @@ const formatSeatingDate = (value) => {
 };
 
 const SeatingDetails = () => {
+  const {
+    setCurrentStep,
+    currentStep,
+    prices,
+    bookingSession,
+    travelerDetails,
+    seats,
+    setSeats,
+    seatLayoutLoading,
+  } = useFlightBooking();
   const [openTab, setOpenTab] = useState("flight");
   const [selectedPassenger, setSelectedPassenger] = useState(1);
-  const [selectedSeats, setSelectedSeats] = useState([]);
-  const [selectedSeatAssignments, setSelectedSeatAssignments] = useState({});
+  const [selectedSeats, setSelectedSeats] = useState(() =>
+    seats.map((seat) => seat?.id).filter(Boolean)
+  );
+  const [selectedSeatAssignments, setSelectedSeatAssignments] = useState(() =>
+    seats.reduce((assignments, seat) => {
+      if (seat?.id && seat?.PaxRefNumber) {
+        assignments[seat.id] = Number(seat.PaxRefNumber);
+      }
+      return assignments;
+    }, {})
+  );
   const seatLayoutsScrollerRef = useRef(null);
   const [activeSeatLayoutIndex, setActiveSeatLayoutIndex] = useState(0);
   const [seatNavState, setSeatNavState] = useState({
@@ -461,17 +480,6 @@ const SeatingDetails = () => {
   const toggleTab = (tab) => {
     if (openTab !== tab) setOpenTab(tab);
   };
-  const {
-    setCurrentStep,
-    currentStep,
-    prices,
-    bookingSession,
-    travelerDetails,
-    seats,
-    setSeats,
-    seatLayoutLoading,
-  } = useFlightBooking();
-
   const bookingDetailsView = useMemo(
     () => getBookingDetailsView(bookingSession || {}),
     [bookingSession]

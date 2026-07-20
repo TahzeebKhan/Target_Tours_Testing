@@ -1,5 +1,9 @@
 "use client"
+import { useState } from "react";
 import { useFlightBooking } from "./FlightBookingContext";
+import { useAuth } from "@/app/context/AuthContext";
+import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
+import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import styles from "./SidebarPriceSummaryCard.module.css";
 
@@ -29,6 +33,9 @@ const formatPassengerLabel = (counts) => {
 };
 
 export default function SidebarPriceSummaryCard() {
+  const { isLoggedIn } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState("login");
   const {
     prices,
     currentStep,
@@ -41,8 +48,22 @@ export default function SidebarPriceSummaryCard() {
   const passengerCounts = getPassengerCounts(travelerDetails, bookingSession);
   const totalPassengers =
     passengerCounts.adult + passengerCounts.child + passengerCounts.infant || 1;
+  const handleContinuePayment = () => {
+    if (!isLoggedIn) {
+      setAuthView("login");
+      setShowAuthModal(true);
+      return;
+    }
+
+    submitItinerary(paymentMethod);
+  };
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setAuthView("login");
+  };
 
   return (
+    <>
     <div className={styles.card}>
       <h3 className={styles.title}>PRICE SUMMARY</h3>
 
@@ -105,7 +126,7 @@ export default function SidebarPriceSummaryCard() {
         <>
           <button
             className={styles.bookNowBtn}
-            onClick={() => submitItinerary(paymentMethod)}
+            onClick={handleContinuePayment}
             disabled={itineraryLoading}
           >
             {itineraryLoading ? "Loading..." : "Continue Payment"}
@@ -129,5 +150,12 @@ export default function SidebarPriceSummaryCard() {
         <p className={styles.chat}>Live Chat Available</p>
       </div>
     </div>
+    {showAuthModal && authView === "login" && (
+      <LoginPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+    )}
+    {showAuthModal && authView === "signup" && (
+      <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
+    )}
+    </>
   );
 }

@@ -7,10 +7,7 @@ import OfferBanner from "../../offerComponent/OfferBanner";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "../MobileFareComparisonModalRoundTrip";
 import FareComparisonModalRoundTrip from "../FareComparisonModalRoundTrip";
-import {
-  getFlightInfo,
-  getFlightWebSettings,
-} from "@/features/flights/services/flightBooking";
+import { getFlightInfo } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
@@ -88,8 +85,6 @@ const TripCard = ({
     depart: {},
     return: {},
   });
-  const [prefetchedFareData, setPrefetchedFareData] = useState({});
-  const [prefetchingFlightId, setPrefetchingFlightId] = useState(null);
   const [flightInfoData, setFlightInfoData] = useState({});
   const [loadingFlightInfoId, setLoadingFlightInfoId] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
@@ -389,35 +384,10 @@ const TripCard = ({
     }
   };
 
-  const openFareModal = async (flight) => {
-    const searchTui = flight?.booking?.tui;
-    const provider = flight?.booking?.provider || flight?.provider;
-
-    setPrefetchingFlightId(flight?.id ?? null);
-
-    try {
-      const webSettingsResponse = searchTui
-        ? await getFlightWebSettings({ TUI: searchTui, provider })
-        : null;
-
-      setPrefetchedFareData((prev) => ({
-        ...prev,
-        [flight.id]: {
-          webSettingsResponse,
-        },
-      }));
-      setFareModalFlight(flight);
-      setSelectedFlightId(flight?.id ?? null);
-      setFareModalOpen(flight?.id ?? null);
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Unable to load fare details right now."
-      );
-    } finally {
-      setPrefetchingFlightId(null);
-    }
+  const openFareModal = (flight) => {
+    setFareModalFlight(flight);
+    setSelectedFlightId(flight?.id ?? null);
+    setFareModalOpen(flight?.id ?? null);
   };
 
   const handleViewFares = (flight) => {
@@ -756,11 +726,10 @@ const TripCard = ({
             </div>
             <button
               type="button"
-              disabled={prefetchingFlightId === selectedRoundTrip.id}
               onClick={() => handleViewFares(selectedRoundTrip)}
               className={styles.bookNowBtn}
             >
-              {prefetchingFlightId === selectedRoundTrip.id ? "Loading..." : "Book Now"}
+              Book Now
             </button>
           </div>
         )}
@@ -791,7 +760,7 @@ const TripCard = ({
             tripCardsData.find((item) => item.id === fareModalOpen) ||
             null
           }
-          prefetchedData={prefetchedFareData[fareModalOpen] || null}
+          prefetchedData={null}
         />
       )}
       {showLogin && authView === "login" && (

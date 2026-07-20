@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../flight-booking-details/Navbar";
 import styles from "./page.module.css";
+import { clearFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
 
 const pickFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
@@ -83,7 +84,18 @@ const formatRoute = (value) => {
 };
 
 const isSuccessFalse = (payload = {}) =>
-  payload?.success === false || payload?.data?.success === false;
+  payload?.success === false ||
+  payload?.data?.success === false ||
+  payload?.data?.data?.success === false;
+
+const getApiMessage = (payload = {}, fallbackMessage) =>
+  pickFirst(
+    payload?.message,
+    payload?.data?.message,
+    payload?.data?.data?.message,
+    payload?.error?.message,
+    fallbackMessage
+  );
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -98,13 +110,8 @@ const postFlightJson = async (url, payload, fallbackMessage) => {
   });
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(
-      data?.message ||
-        data?.data?.message ||
-        data?.error?.message ||
-        fallbackMessage
-    );
+  if (!response.ok || isSuccessFalse(data)) {
+    throw new Error(getApiMessage(data, fallbackMessage));
   }
 
   return data;
@@ -114,12 +121,19 @@ function PaymentStatusContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [snapshot, setSnapshot] = useState({});
+  const [isSnapshotReady, setIsSnapshotReady] = useState(false);
   const [retrieveResponse, setRetrieveResponse] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const finishBookingFlow = () => {
+    clearFlightBookingSession();
+    window.localStorage.removeItem("flightPaymentSnapshot");
+    router.push("/");
+  };
 
   useEffect(() => {
     setSnapshot(readFlightPaymentSnapshot());
+    setIsSnapshotReady(true);
   }, []);
 
   const bookingId = useMemo(
@@ -162,6 +176,8 @@ function PaymentStatusContent() {
     let isActive = true;
 
     const retrieveBooking = async () => {
+      if (!isSnapshotReady) return;
+
       if (!bookingId) {
         setErrorMessage("Flight booking id is missing from the payment response.");
         setIsLoading(false);
@@ -174,17 +190,19 @@ function PaymentStatusContent() {
       try {
         const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
 
-        if (confirmBookingId && searchKey) {
-          await postFlightJson(
-            "/api/flights/v2/confirm-booking",
-            {
-              booking_id: confirmBookingId,
-              domain,
-              search_key: searchKey,
-            },
-            "Unable to confirm flight booking."
-          );
+        if (!confirmBookingId || !searchKey) {
+          throw new Error("Flight booking confirmation details are missing.");
         }
+
+        await postFlightJson(
+          "/api/flights/v2/confirm-booking",
+          {
+            booking_id: confirmBookingId,
+            domain,
+            search_key: searchKey,
+          },
+          "Unable to confirm flight booking."
+        );
 
         const data = await postFlightJson(
           "/api/flights/v2/retrieve-booking",
@@ -196,10 +214,6 @@ function PaymentStatusContent() {
         );
 
         if (!isActive) return;
-        if (isSuccessFalse(data)) {
-          setRetrieveResponse(null);
-          return;
-        }
 
         setRetrieveResponse(data);
         window.localStorage.removeItem("flightPaymentSnapshot");
@@ -216,7 +230,7 @@ function PaymentStatusContent() {
     return () => {
       isActive = false;
     };
-  }, [bookingId, confirmBookingId, searchKey, snapshot.createdAt]);
+  }, [bookingId, confirmBookingId, isSnapshotReady, searchKey, snapshot.createdAt]);
 
   const details = useMemo(() => {
     const root = retrieveResponse || {};
@@ -579,10 +593,10 @@ function PaymentStatusContent() {
               </div>
 
               <div className={styles.actions}>
-                <button type="button" onClick={() => router.push("/profile")}>
+                <button type="button" onClick={finishBookingFlow}>
                   View bookings
                 </button>
-                <button type="button" onClick={() => router.push("/")}>
+                <button type="button" onClick={finishBookingFlow}>
                   Go home
                 </button>
               </div>

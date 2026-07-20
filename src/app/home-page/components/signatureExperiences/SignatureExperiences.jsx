@@ -125,7 +125,18 @@ const fetchAvailableRegions = async ({ signal }) => {
 
   const normalizedRegions = rawRegions
     .map(normalizeRegionOption)
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort((left, right) => {
+      const isLeftAsia = [left.value, left.title].some(
+        (value) => String(value).trim().toLowerCase() === "asia"
+      );
+      const isRightAsia = [right.value, right.title].some(
+        (value) => String(value).trim().toLowerCase() === "asia"
+      );
+
+      if (isLeftAsia === isRightAsia) return 0;
+      return isLeftAsia ? -1 : 1;
+    });
 
   return normalizedRegions;
 };

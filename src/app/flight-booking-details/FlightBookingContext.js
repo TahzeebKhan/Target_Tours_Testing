@@ -20,6 +20,8 @@ const FlightBookingContext = createContext(null);
 
 const getApiMessage = (payload, fallback) => {
   return (
+    payload?.data?.result?.message ||
+    payload?.result?.message ||
     payload?.data?.message ||
     payload?.message ||
     fallback
@@ -28,6 +30,16 @@ const getApiMessage = (payload, fallback) => {
 
 const areSameJson = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 const toArray = (value) => (Array.isArray(value) ? value : []);
+const getRestoredBookingStep = (session) => {
+  const savedStep = Number(session?.currentStep);
+  if (Number.isInteger(savedStep) && savedStep >= 2 && savedStep <= 6) {
+    return savedStep;
+  }
+  if (session?.gatewayPaymentRequest || session?.createBookingRequest) return 6;
+  if (session?.seatLayoutResponse || session?.seatLayoutRequest) return 5;
+  if (session?.ssrResponse || session?.ssrRequest) return 3;
+  return 2;
+};
 const toAmountNumber = (value) => {
   const amount = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
   return Number.isFinite(amount) ? amount : 0;
@@ -509,11 +521,13 @@ export function FlightBookingProvider({ children }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const savedStep = getRestoredBookingStep(readFlightBookingSession());
+    setCurrentStep(savedStep);
     const historyState = window.history.state || {};
     window.history.replaceState(
       {
         ...historyState,
-        flightBookingStep: 2,
+        flightBookingStep: savedStep,
       },
       ""
     );
@@ -534,6 +548,7 @@ export function FlightBookingProvider({ children }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!bookingSessionReady) return;
     if (skipNextHistoryPushRef.current) {
       skipNextHistoryPushRef.current = false;
       return;
@@ -549,7 +564,7 @@ export function FlightBookingProvider({ children }) {
       },
       ""
     );
-  }, [currentStep]);
+  }, [bookingSessionReady, currentStep]);
 
   useEffect(() => {
     const savedSession = readFlightBookingSession() || null;
@@ -566,11 +581,38 @@ export function FlightBookingProvider({ children }) {
         : null;
         console.log("nextSession2",nextSession)
     setBookingSession(nextSession);
+    setCurrentStep(getRestoredBookingStep(nextSession));
     setBaggage(toArray(nextSession?.baggage));
     setMeals(toArray(nextSession?.meals));
     setSeats(toArray(nextSession?.seats));
+    setTravelerDetails(toArray(nextSession?.travelerDetails));
+    setBookingContactDetails(nextSession?.bookingContactDetails || {});
+    setPaymentMethod(nextSession?.paymentMethod || "");
     setBookingSessionReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!bookingSessionReady) return;
+    setBookingSession((prev) => {
+      if (!prev) return prev;
+
+      const next = {
+        ...prev,
+        currentStep,
+        travelerDetails,
+        bookingContactDetails,
+        paymentMethod,
+      };
+
+      return areSameJson(prev, next) ? prev : next;
+    });
+  }, [
+    bookingContactDetails,
+    bookingSessionReady,
+    currentStep,
+    paymentMethod,
+    travelerDetails,
+  ]);
 
   useEffect(() => {
     if (!bookingSessionReady) return;
