@@ -878,6 +878,55 @@ const makeV2CreateBookingChannel = () => {
   return `booking-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const getMultiCityPricingRouteMap = (priceResponse = {}) => {
+  const routeMap = new Map();
+  const addPricingResult = (result) => {
+    const resultPayload = result?.payload || result?.data?.data || result?.data || {};
+    const searchKey = pickFirst(
+      result?.search_key,
+      result?.searchKey,
+      resultPayload?.search_key,
+      resultPayload?.searchKey
+    );
+    const tui = pickFirst(
+      resultPayload?.tui,
+      resultPayload?.TUI,
+      resultPayload?.raw?.TUI,
+      result?.tui,
+      result?.TUI
+    );
+
+    if (searchKey && tui) {
+      routeMap.set(String(searchKey).trim().toUpperCase(), String(tui));
+    }
+  };
+
+  const directPricingResults = [
+    priceResponse?.pricingResults,
+    priceResponse?.data?.pricingResults,
+    priceResponse?.results,
+    priceResponse?.data?.results,
+  ];
+  directPricingResults.forEach((results) => {
+    if (Array.isArray(results)) results.forEach(addPricingResult);
+  });
+
+  const pricingChunks = [
+    priceResponse?.pricingChunks,
+    priceResponse?.data?.pricingChunks,
+  ];
+  pricingChunks.forEach((chunks) => {
+    if (!Array.isArray(chunks)) return;
+    chunks.forEach((chunk) => {
+      if (Array.isArray(chunk?.data?.results)) {
+        chunk.data.results.forEach(addPricingResult);
+      }
+    });
+  });
+
+  return routeMap;
+};
+
 export const buildV2SsrPayload = (session = {}) => {
   const priceResponse = session?.priceResponse || {};
   const payload = unwrapPayload(priceResponse);
@@ -915,7 +964,51 @@ export const buildV2SsrPayload = (session = {}) => {
     : selectedFareIndex
       ? [{ Index: selectedFareIndex, Order: 1 }]
       : [];
-  const ssrRequests = [
+  const isMultiCity = String(
+    priceRequest?.TripType || priceRequest?.tripType || priceRequest?.FareType || ""
+  ).toUpperCase() === "DM";
+  const multiCitySearchKeys = Array.isArray(priceRequest?.search_keys)
+    ? priceRequest.search_keys
+    : [];
+  const multiCityPricingRouteMap = isMultiCity
+    ? getMultiCityPricingRouteMap(priceResponse)
+    : new Map();
+  const ssrRequests = isMultiCity && multiCitySearchKeys.length
+    ? multiCitySearchKeys.map((request, requestIndex) => {
+        const selectedRouteFare = selectedFare?.multiCityFares?.[requestIndex] || {};
+        const selectedRouteIndex = pickFirst(
+          selectedRouteFare?.rawFare?.index,
+          selectedRouteFare?.rawFare?.Index,
+          selectedRouteFare?.index,
+          selectedRouteFare?.Index,
+          request?.Trips?.[0]?.Index
+        );
+        const pricedRouteTui = multiCityPricingRouteMap.get(
+          String(pickFirst(request?.search_key, request?.SearchKey) || "")
+            .trim()
+            .toUpperCase()
+        );
+        const requestTui = multiCityPricingRouteMap.size
+          ? pricedRouteTui
+          : pickFirst(
+              request?.TUI,
+              request?.tui,
+              request?.Trips?.[0]?.TUI,
+              request?.Trips?.[0]?.tui
+            );
+
+        return {
+          search_key: pickFirst(request?.search_key, request?.SearchKey),
+          Trips: selectedRouteIndex && requestTui
+            ? [{
+                Index: String(selectedRouteIndex),
+                Order: 1,
+                TUI: requestTui,
+              }]
+            : [],
+        };
+      }).filter((request) => request.search_key && request.Trips.length > 0)
+    : [
     {
       search_key: searchKey,
       Trips: sourceTrips
@@ -1218,6 +1311,8 @@ const buildV2SeatLayoutPaxDetails = (travelerDetails = []) =>
 
 const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const priceRequest = session?.priceRequest || {};
+  const priceResponse = session?.priceResponse || {};
+  const selectedFare = session?.selectedFare || {};
   const ssrRequest = session?.ssrRequest || {};
   const ssrPayload = unwrapPayload(session?.ssrResponse);
   const pricePayload = unwrapPayload(session?.priceResponse);
@@ -1225,6 +1320,14 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const ssrRequests = Array.isArray(ssrRequest?.ssr_requests)
     ? ssrRequest.ssr_requests
     : [];
+  const isMultiCity =
+    ssrRequests.length > 1 &&
+    ssrRequests.every((request) =>
+      String(request?.search_key || "").toUpperCase().startsWith("DM_")
+    );
+  const multiCityPricingRouteMap = isMultiCity
+    ? getMultiCityPricingRouteMap(priceResponse)
+    : new Map();
   const primarySsrRequest = ssrRequests[0] || {};
   const searchKey = pickFirst(
     primarySsrRequest?.search_key,
@@ -1266,12 +1369,51 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
       TUI: pickFirst(trip?.TUI, trip?.tui, tui),
     }))
     .filter((trip) => trip.OrderID);
-  const seatLayoutRequests = [
-    {
-      search_key: searchKey,
-      Trips: trips,
-    },
-  ].filter((request) =>
+  const seatLayoutRequests = (isMultiCity
+    ? ssrRequests.map((request, requestIndex) => {
+        const selectedRouteFare = selectedFare?.multiCityFares?.[requestIndex] || {};
+        const selectedRouteIndex = pickFirst(
+          request?.Trips?.[0]?.Index,
+          request?.Trips?.[0]?.index,
+          selectedRouteFare?.rawFare?.index,
+          selectedRouteFare?.rawFare?.Index,
+          selectedRouteFare?.index,
+          selectedRouteFare?.Index
+        );
+        const normalizedSearchKey = String(request?.search_key || "")
+          .trim()
+          .toUpperCase();
+        const pricedRouteTui = multiCityPricingRouteMap.get(normalizedSearchKey);
+
+        return {
+          search_key: request?.search_key,
+          Trips: (Array.isArray(request?.Trips) ? request.Trips : [])
+            .map((trip, index) => ({
+              Index: String(
+                pickFirst(trip?.Index, trip?.index, selectedRouteIndex) || ""
+              ),
+              OrderID: String(
+                pickFirst(
+                  trip?.OrderID,
+                  trip?.OrderId,
+                  trip?.Order,
+                  trip?.orderId,
+                  trip?.order,
+                  index + 1
+                )
+              ),
+              TUI: pickFirst(pricedRouteTui, trip?.TUI, trip?.tui),
+            }))
+            .filter((trip) => trip.Index && trip.OrderID),
+        };
+      })
+    : [
+        {
+          search_key: searchKey,
+          Trips: trips,
+        },
+      ]
+  ).filter((request) =>
     request.search_key &&
     request.Trips.length &&
     request.Trips.every((trip) => trip.TUI)
@@ -1537,6 +1679,34 @@ export const getBookingDetailsView = (session) => {
   const selectedFare = session?.selectedFare || null;
   const selectedFlight = session?.selectedFlight || null;
   const routeContext = session?.routeContext || {};
+  const selectedTripType = String(
+    session?.priceRequest?.TripType ||
+      session?.priceRequest?.tripType ||
+      selectedFlight?.tripType ||
+      selectedFlight?.booking?.tripType ||
+      routeContext?.tripType ||
+      ""
+  ).toUpperCase();
+  const isMultiCity = selectedTripType === "DM";
+  const multiCityRoutes = Array.isArray(selectedFlight?.multiCityRoutes)
+    ? selectedFlight.multiCityRoutes
+    : [];
+  const multiCityFares = Array.isArray(selectedFare?.multiCityFares)
+    ? selectedFare.multiCityFares
+    : [];
+  const multiCityFlights = isMultiCity
+    ? multiCityRoutes
+        .map((route, index) =>
+          normalizeFlightCardLogo(
+            buildRoundSelectedFlightCard(
+              route,
+              multiCityFares[index] || selectedFare,
+              "depart"
+            ) || buildSelectedFlightCard(route, multiCityFares[index] || selectedFare)
+          )
+        )
+        .filter(Boolean)
+    : [];
   const journeys = getFormattedJourneys(payload);
   const departureJourney =
     journeys.find((journey) => String(journey?.journey_type || "").toUpperCase() === "ONWARD") ||
@@ -1551,8 +1721,8 @@ export const getBookingDetailsView = (session) => {
   const returnSource =
     returnJourney?.flight_details || payload?.return || payload?.return_details || null;
 
-  const isSelectedRoundTrip = Boolean(
-    selectedFlight?.outbound ||
+  const isSelectedRoundTrip = !isMultiCity && Boolean(
+      selectedFlight?.outbound ||
       selectedFlight?.inbound ||
       selectedFlight?.depart?.flight ||
       selectedFlight?.return?.flight ||
@@ -1566,11 +1736,13 @@ export const getBookingDetailsView = (session) => {
     ? buildRoundSelectedFlightCard(selectedFlight, selectedFare, "return")
     : null;
   const rawDepartureFlight =
+    multiCityFlights[0] ||
     selectedDepartureFlight ||
     fallbackView?.departureFlight ||
     buildFlightCard(departureSource, selectedFare);
-  const rawReturnFlight =
-    selectedReturnFlight ||
+  const rawReturnFlight = isMultiCity
+    ? null
+    : selectedReturnFlight ||
     fallbackView?.returnFlight ||
     buildFlightCard(returnSource, selectedFare);
   const departureFlight = normalizeFlightCardLogo(rawDepartureFlight);
@@ -1637,6 +1809,7 @@ export const getBookingDetailsView = (session) => {
 
   return {
     isRoundTrip: Boolean(returnFlight),
+    isMultiCity,
     header: {
       fromName: headerFrom,
       fromCode: routeFrom,
@@ -1654,6 +1827,7 @@ export const getBookingDetailsView = (session) => {
     },
     departureFlight,
     returnFlight,
+    multiCityFlights,
   };
 };
 
@@ -1665,6 +1839,7 @@ export const buildBookingFallbackQuery = (session) => {
     header: view?.header || null,
     departureFlight: view?.departureFlight || null,
     returnFlight: view?.returnFlight || null,
+    multiCityFlights: view?.multiCityFlights || [],
     priceSummary: {
       baseFare,
       tax,

@@ -22,6 +22,26 @@ import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 const formatSummaryDuration = (duration = {}) =>
   `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
 
+const cleanValue = (value) => {
+  const text = String(value || "").trim();
+  return text && text.toUpperCase() !== "N/A" ? text : "";
+};
+
+const getAirportCode = (airport) => {
+  const value = cleanValue(airport);
+  if (!value) return "";
+  return value.split(" - ")[0].split(" → ")[0].trim();
+};
+
+const formatAirportLabel = (endpoint = {}) => {
+  const code = getAirportCode(endpoint.airport);
+  const city = cleanValue(endpoint.city);
+  if (city && code && city.toUpperCase() !== code.toUpperCase()) {
+    return `${city} (${code})`;
+  }
+  return city || code || "Airport unavailable";
+};
+
 const getDynamicAirlineLogo = (airline = {}) =>
   resolveAirlineLogo({
     name: airline?.name,
@@ -43,7 +63,12 @@ const buildTripCardData = (flight, selectedFare) => {
       aircraft: flight.aircraft || "N/A",
       logo: getDynamicAirlineLogo(flight.airline),
     },
-    fareType: selectedFare?.name || flight.flexiPlusFare || "N/A",
+    fareType:
+      selectedFare?.name ||
+      selectedFare?.fareName ||
+      selectedFare?.FCType ||
+      flight.flexiPlusFare ||
+      "N/A",
     cabin: String(flight.travelClass || "N/A").toUpperCase(),
     segments: [
       {
@@ -106,10 +131,36 @@ const PaymentPage = () => {
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const selectedFare = bookingSession?.selectedFare || {};
   const header = bookingView?.header || {};
-  const tripSummaryData = useMemo(() => ({
-    onwardCards: [buildTripCardData(bookingView?.departureFlight, selectedFare)].filter(Boolean),
-    returnCards: [buildTripCardData(bookingView?.returnFlight, selectedFare)].filter(Boolean),
-  }), [bookingView, selectedFare]);
+  const isMultiCity = Boolean(bookingView?.isMultiCity);
+  const multiCityFlights = isMultiCity
+    ? bookingView?.multiCityFlights || []
+    : [];
+  const multiCityFares = Array.isArray(selectedFare?.multiCityFares)
+    ? selectedFare.multiCityFares
+    : [];
+  const tripSummaryData = useMemo(() => {
+    if (isMultiCity) {
+      return {
+        isMultiCity: true,
+        onwardCards: multiCityFlights
+          .map((flight, index) =>
+            buildTripCardData(flight, multiCityFares[index] || selectedFare)
+          )
+          .filter(Boolean),
+        returnCards: [],
+      };
+    }
+
+    return {
+      isMultiCity: false,
+      onwardCards: [
+        buildTripCardData(bookingView?.departureFlight, selectedFare),
+      ].filter(Boolean),
+      returnCards: [
+        buildTripCardData(bookingView?.returnFlight, selectedFare),
+      ].filter(Boolean),
+    };
+  }, [bookingView, isMultiCity, multiCityFares, multiCityFlights, selectedFare]);
   const priceSummary = useMemo(
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
     [bookingSession, prices, travelerDetails]
@@ -217,12 +268,58 @@ const PaymentPage = () => {
               </div>
 
               <div
-                className={`${styles.card} ${
+                className={`${styles.card} ${isMultiCity ? styles.multiCitySummaryList : ""} ${
                   openTab === "tripSummary"
                     ? styles.tripSummaryHidden
                     : styles.tripSummaryVisible
                 }`}
               >
+                {isMultiCity ? (
+                  multiCityFlights.map((flight, index) => (
+                    <div className={styles.multiCitySummaryCard} key={`summary-route-${index}`}>
+                      <div className={styles.left}>
+                        <img
+                          src={getDynamicAirlineLogo(flight?.airline)}
+                          alt={`${flight?.airline?.name || "Airline"} logo`}
+                          className={styles.logo}
+                        />
+                      </div>
+                      <div className={styles.right}>
+                        <span className={styles.routeNumber}>Route {index + 1}</span>
+                        <div className={styles.route}>
+                          <span className={styles.city}>
+                            {formatAirportLabel(flight?.departure)}
+                          </span>
+                          <span className={styles.arrowCard}>→</span>
+                          <span className={styles.city}>
+                            {formatAirportLabel(flight?.arrival)}
+                          </span>
+                        </div>
+                        <div className={styles.meta}>
+                          <span>{flight?.departure?.date || "Date unavailable"}</span>
+                          <span className={styles.dot}>|</span>
+                          <span>{flight?.airline?.name || "Airline unavailable"}</span>
+                          <span className={styles.dot}>•</span>
+                          <span>{`${flight?.departure?.time || "--:--"}-${flight?.arrival?.time || "--:--"}`}</span>
+                          <span className={styles.dot}>•</span>
+                          <span>
+                            {multiCityFares[index]?.name ||
+                              multiCityFares[index]?.fareName ||
+                              multiCityFares[index]?.FCType ||
+                              flight?.flexiPlusFare ||
+                              flight?.travelClass ||
+                              "Fare unavailable"}
+                          </span>
+                          <span className={styles.dot}>•</span>
+                          <span>{flight?.stops || "Stops unavailable"}</span>
+                          <span className={styles.dot}>•</span>
+                          <span>{formatSummaryDuration(flight?.duration)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
                 <div className={styles.left}>
                   <img
                     src={getDynamicAirlineLogo(summaryFlight?.airline)}
@@ -269,6 +366,8 @@ const PaymentPage = () => {
                     <span>{formatSummaryDuration(summaryFlight?.duration)}</span>
                   </div>
                 </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

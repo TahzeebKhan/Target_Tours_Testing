@@ -96,6 +96,11 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
   const header = bookingView?.header || {};
   const departureFlight = bookingView?.departureFlight || {};
   const returnFlight = bookingView?.returnFlight || null;
+  const multiCityFlightSections = bookingView?.isMultiCity
+    ? (bookingView?.multiCityFlights || []).map((flight, index) =>
+        getFlightSectionData(flight, `ROUTE ${index + 1}`)
+      )
+    : [];
   const summaryFlight = getFlightTimelineData(departureFlight);
   const departureFlightSection = getFlightSectionData(
     departureFlight,
@@ -306,8 +311,17 @@ const PassengerDetailsMobile = ({ fromBaggage }) => {
             ref={flightDetailsRef}
             className={styles.flightDepartureReturenDetailsContianer}
           >
-            <FlightSection flight={departureFlightSection} />
-            {returnFlightSection && (
+            {bookingView?.isMultiCity ? (
+              multiCityFlightSections.map((flightSection, index) => (
+                <React.Fragment key={`${flightSection?.type || "route"}-${index}`}>
+                  {index > 0 && <div className={styles.br}></div>}
+                  <FlightSection flight={flightSection} />
+                </React.Fragment>
+              ))
+            ) : (
+              <FlightSection flight={departureFlightSection} />
+            )}
+            {!bookingView?.isMultiCity && returnFlightSection && (
               <>
                 <div className={styles.br}></div>
                 <FlightSection flight={returnFlightSection} />

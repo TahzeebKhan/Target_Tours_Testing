@@ -443,7 +443,11 @@ const TripSummaryExpandable = ({ data }) => {
   const returnCards = Array.isArray(data?.returnCards)
     ? data.returnCards.filter(Boolean)
     : [data?.return].filter(Boolean);
-  const mobileOnwardFlight = toMobileFlight(onwardCards[0], "DEPARTURE");
+  const mobileOnwardFlights = data?.isMultiCity
+    ? onwardCards.map((card, index) =>
+        toMobileFlight(card, `ROUTE ${index + 1}`)
+      )
+    : [toMobileFlight(onwardCards[0], "DEPARTURE")].filter(Boolean);
   const mobileReturnFlight = toMobileFlight(returnCards[0], "RETURN");
 
   return (
@@ -481,7 +485,12 @@ const TripSummaryExpandable = ({ data }) => {
       <div className={styles.wrapperMobile}>
         <div className={styles.flightDepartureReturenDetailsContianerWrapper}>
           <div className={styles.flightDepartureReturenDetailsContianer}>
-            {mobileOnwardFlight && <FlightSection flight={mobileOnwardFlight} />}
+            {mobileOnwardFlights.map((flight, index) => (
+              <div key={`mobile-route-${index}`}>
+                {index > 0 && <div className={styles.dashedBorder}></div>}
+                <FlightSection flight={flight} />
+              </div>
+            ))}
             {mobileReturnFlight && (
               <>
                 <div className={styles.dashedBorder}></div>

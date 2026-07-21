@@ -462,6 +462,10 @@ const buildPricingSearchKeys = (request = {}, flight = {}) => {
   const flightContext = getPricingFlightContext(request, flight);
   const buildSearchKeyItem = (item = {}) => {
     const itemSearchKey = item?.search_key || item?.SearchKey || item?.searchKey || searchKey;
+    const itemTui =
+      String(request?.TripType || request?.tripType || "").toUpperCase() === "DM"
+        ? item?.TUI || item?.tui || request?.TUI || request?.tui || ""
+        : "";
     const itemFlightNo = normalizePricingFlightNo(
       item?.flight_no,
       item?.flightNo,
@@ -473,6 +477,7 @@ const buildPricingSearchKeys = (request = {}, flight = {}) => {
     return {
       search_key: itemSearchKey,
       ...(itemFlightNo ? { flight_no: itemFlightNo } : {}),
+      ...(itemTui ? { TUI: itemTui } : {}),
       cabin_class: normalizePricingCabinClass(
         item?.cabin_class,
         item?.cabinClass,
@@ -790,6 +795,8 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
   const pricingPayload = buildV2PricePayload(payload);
   console.log("getFlightPrice pricingPayload:", pricingPayload);
   const channel = pricingPayload.channel;
+  const isMultiCityPricing =
+    String(payload?.TripType || payload?.tripType || "").toUpperCase() === "DM";
 
   if (!pricingPayload.search_keys.length) {
     throw new Error("Missing v2 pricing payload for the selected fare.");
@@ -802,6 +809,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
   return new Promise((resolve, reject) => {
     const chunks = [];
     const seenChunkKeys = new Set();
+    const multiCityPricingResults = new Map();
     let settled = false;
     let initResponse = null;
     let idleTimer = null;
@@ -829,6 +837,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
 
     const getPricingChunkKey = (payload, eventType = "") => {
       const type = getPayloadType(payload) || eventType;
+      const eventData = payload?.data || payload || {};
       const resultKeys = toArray(payload?.data?.results || payload?.results)
         .map((result, index) =>
           [
@@ -844,6 +853,8 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       return [
         payload?.requestId || payload?.data?.requestId || "",
         type,
+        eventData?.tripIndex ?? eventData?.trip_index ?? eventData?.index ?? "",
+        eventData?.search_key || eventData?.searchKey || "",
         payload?.sent_at || payload?.data?.sent_at || "",
         resultKeys,
       ].join("::");
@@ -859,6 +870,39 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       return true;
     };
 
+    const storeMultiCityPricingResult = (payload) => {
+      if (!isMultiCityPricing) return;
+
+      const type = getPayloadType(payload);
+      if (!type.includes("PRICING_RESULT")) return;
+
+      const eventData = payload?.data || payload || {};
+      const extractedPricing = extractFlightPricingPayload(payload);
+      if (!extractedPricing) return;
+
+      const tripIndex = Number(
+        eventData?.tripIndex ??
+          eventData?.trip_index ??
+          eventData?.index ??
+          multiCityPricingResults.size + 1
+      );
+      const searchKey =
+        eventData?.search_key ||
+        eventData?.searchKey ||
+        extractedPricing?.search_key ||
+        extractedPricing?.searchKey ||
+        pricingPayload.search_keys[tripIndex - 1]?.search_key ||
+        "";
+      const resultKey = searchKey || `trip-${tripIndex}`;
+
+      multiCityPricingResults.set(resultKey, {
+        tripIndex,
+        search_key: searchKey,
+        payload: extractedPricing,
+        event: payload,
+      });
+    };
+
     const getCompletedPricingPayload = () => {
       const reversedChunks = [...chunks].reverse();
       for (const chunk of reversedChunks) {
@@ -871,6 +915,9 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
 
     const buildResult = () => {
       const pricingResult = getCompletedPricingPayload();
+      const pricingResults = [...multiCityPricingResults.values()].sort(
+        (left, right) => left.tripIndex - right.tripIndex
+      );
 
       return {
         ...(initResponse || {}),
@@ -879,8 +926,10 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
         data: {
           ...((initResponse || {})?.data || {}),
           ...(pricingResult || {}),
+          ...(isMultiCityPricing ? { pricingResults } : {}),
           pricingChunks: chunks,
         },
+        ...(isMultiCityPricing ? { pricingResults } : {}),
         pricingChunks: chunks,
       };
     };
@@ -894,7 +943,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
 
     const hardTimer = window.setTimeout(() => {
       const result = buildResult();
-      if (extractFlightPricingPayload(result)) {
+      if (!isMultiCityPricing && extractFlightPricingPayload(result)) {
         settle(resolve, result);
         return;
       }
@@ -944,14 +993,31 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
 
       if (type.includes("PRICING")) {
         pushPricingChunk(parsedPayload, event.type);
+        storeMultiCityPricingResult(parsedPayload);
       }
 
-      if (isCompletePricingEvent && extractedPricing) {
+      const isPricingCompleteEvent =
+        type.includes("PRICING") &&
+        (type.includes("COMPLETE") || type.includes("COMPLETED"));
+
+      if (
+        isPricingCompleteEvent &&
+        (extractedPricing || multiCityPricingResults.size > 0)
+      ) {
         settle(resolve, buildResult());
         return;
       }
 
-      if (type.includes("PRICING") && extractedPricing) {
+      if (
+        !isMultiCityPricing &&
+        isCompletePricingEvent &&
+        extractedPricing
+      ) {
+        settle(resolve, buildResult());
+        return;
+      }
+
+      if (!isMultiCityPricing && type.includes("PRICING") && extractedPricing) {
         scheduleResolve();
       }
     };
@@ -1012,7 +1078,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
           extractedPricing,
         });
     
-        if (extractedPricing) {
+        if (!isMultiCityPricing && extractedPricing) {
           settle(resolve, result);
         }
       });
@@ -1046,16 +1112,14 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
         const extractedPricing =
           extractFlightPricingPayload(initResponse);
     
-        if (
-          isFlightPricingResult(initResponse) ||
-          extractedPricing
-        ) {
+        if (isFlightPricingResult(initResponse) || extractedPricing) {
           pushPricingChunk(
             initResponse,
             "postV2Price"
           );
-    
-          scheduleResolve();
+          storeMultiCityPricingResult(initResponse);
+
+          if (!isMultiCityPricing) scheduleResolve();
         }
       } catch (error) {
         console.error("[Pricing] startPricing failed", {
@@ -1396,6 +1460,9 @@ export const getFlightV2Ssr = async (payload) => {
     channel: payload?.channel || makeSsrChannel(),
   };
   const channel = ssrPayload.channel;
+  const isMultiCitySsr = ssrPayload?.ssr_requests?.every((request) =>
+    String(request?.search_key || "").toUpperCase().startsWith("DM_")
+  ) && ssrPayload?.ssr_requests?.length > 1;
 
   if (!Array.isArray(ssrPayload?.ssr_requests) || !ssrPayload.ssr_requests.length) {
     throw new Error("Missing v2 SSR payload for the selected booking.");
@@ -1407,6 +1474,7 @@ export const getFlightV2Ssr = async (payload) => {
 
   return new Promise((resolve, reject) => {
     const chunks = [];
+    const multiCitySsrResults = new Map();
     let settled = false;
     let initResponse = null;
     let idleTimer = null;
@@ -1435,8 +1503,97 @@ export const getFlightV2Ssr = async (payload) => {
       return extractFlightSsrPayload(initResponse);
     };
 
+    const getSsrRouteKey = (searchKey = "", fallbackIndex = 0) => {
+      const parts = String(searchKey).split("_");
+      return parts.length >= 3
+        ? `${parts[1]}-${parts[2]}`
+        : `route-${fallbackIndex + 1}`;
+    };
+
+    const storeMultiCitySsrResult = (eventPayload) => {
+      if (!isMultiCitySsr || !eventPayload || typeof eventPayload !== "object") return;
+
+      const eventData = eventPayload?.data || eventPayload;
+      const type = getPayloadType(eventPayload);
+      const resultItems = type.includes("SSR_RESULT")
+        ? [eventData]
+        : toArray(eventData?.results || eventPayload?.results);
+
+      resultItems.forEach((result, resultIndex) => {
+        const status = String(result?.status || "").toLowerCase();
+        if (status && status !== "fulfilled" && status !== "success") return;
+        if (result?.success === false || result?.data?.success === false) return;
+
+        const extracted = [
+          result?.data?.data,
+          result?.data,
+          result?.result?.data,
+          result?.result,
+        ].find(hasSsrItems) || extractFlightSsrPayload(result);
+        if (!extracted) return;
+
+        const tripIndex = Number(
+          result?.tripIndex ??
+            result?.trip_index ??
+            result?.index ??
+            eventData?.tripIndex ??
+            eventData?.trip_index ??
+            eventData?.index ??
+            resultIndex + 1
+        );
+        const request = ssrPayload.ssr_requests[tripIndex - 1];
+        const searchKey =
+          result?.search_key ||
+          result?.searchKey ||
+          result?.data?.search_key ||
+          result?.data?.searchKey ||
+          extracted?.search_key ||
+          extracted?.searchKey ||
+          request?.search_key ||
+          "";
+        const resultKey = searchKey || `trip-${tripIndex}`;
+
+        multiCitySsrResults.set(resultKey, {
+          tripIndex,
+          search_key: searchKey,
+          routeKey: getSsrRouteKey(searchKey, tripIndex - 1),
+          payload: extracted,
+          event: eventPayload,
+        });
+      });
+    };
+
+    const getMultiCityFormattedRoutes = (results) =>
+      results.reduce((routes, result) => {
+        const payload = result?.payload || {};
+        const formatted = payload?.formatted || payload?.data?.formatted;
+
+        if (formatted && typeof formatted === "object" && !Array.isArray(formatted)) {
+          const entries = Object.entries(formatted);
+          const looksRouteKeyed = entries.some(([key]) => key.includes("-") || key.includes("→"));
+
+          if (looksRouteKeyed) {
+            entries.forEach(([key, value]) => {
+              routes[key] = value;
+            });
+          } else {
+            routes[result.routeKey] = formatted;
+          }
+        } else {
+          routes[result.routeKey] = payload;
+        }
+
+        return routes;
+      }, {});
+
     const buildResult = () => {
       const ssrResult = getCompletedSsrPayload();
+      const ssrResults = [...multiCitySsrResults.values()].sort(
+        (left, right) => left.tripIndex - right.tripIndex
+      );
+      const multiCityFormatted = isMultiCitySsr
+        ? getMultiCityFormattedRoutes(ssrResults)
+        : null;
 
       return {
         ...(initResponse || {}),
@@ -1445,8 +1602,15 @@ export const getFlightV2Ssr = async (payload) => {
         data: {
           ...((initResponse || {})?.data || {}),
           ...(ssrResult || {}),
+          ...(isMultiCitySsr
+            ? {
+                formatted: multiCityFormatted,
+                ssrResults,
+              }
+            : {}),
           ssrChunks: chunks,
         },
+        ...(isMultiCitySsr ? { ssrResults } : {}),
         ssrChunks: chunks,
       };
     };
@@ -1500,13 +1664,19 @@ export const getFlightV2Ssr = async (payload) => {
       if (isSsrEvent || hasItems) {
         chunks.push(parsedPayload);
       }
+      storeMultiCitySsrResult(parsedPayload);
 
-      if (isFlightSsrComplete(parsedPayload) && extractFlightSsrPayload(parsedPayload)) {
+      if (
+        isFlightSsrComplete(parsedPayload) &&
+        (isMultiCitySsr
+          ? multiCitySsrResults.size > 0
+          : extractFlightSsrPayload(parsedPayload))
+      ) {
         settle(resolve, buildResult());
         return;
       }
 
-      if (hasItems) {
+      if (hasItems && !isMultiCitySsr) {
         scheduleResolve();
       }
     };
@@ -1521,12 +1691,13 @@ export const getFlightV2Ssr = async (payload) => {
         events.addEventListener(eventName, handleMessage);
       });
       events.addEventListener("error", () => {
-        if (chunks.length) scheduleResolve();
+        if (chunks.length && !isMultiCitySsr) scheduleResolve();
       });
 
       try {
         await waitForSseConnected(events, channel);
         initResponse = await postV2Ssr(ssrPayload);
+        storeMultiCitySsrResult(initResponse);
         if (isFlightSsrComplete(initResponse)) {
           chunks.push(initResponse);
           settle(resolve, buildResult());
@@ -1534,7 +1705,7 @@ export const getFlightV2Ssr = async (payload) => {
         }
         if (hasSsrItems(initResponse)) {
           chunks.push(initResponse);
-          scheduleResolve();
+          if (!isMultiCitySsr) scheduleResolve();
         }
       } catch (error) {
         settle(reject, error);
@@ -1552,6 +1723,11 @@ export const getFlightSeatLayout = async (payload) => {
       channel: payload?.channel || makeSeatLayoutChannel(),
     };
     const channel = seatLayoutPayload.channel;
+    const isMultiCitySeatLayout =
+      seatLayoutPayload.seat_layout_requests.length > 1 &&
+      seatLayoutPayload.seat_layout_requests.every((request) =>
+        String(request?.search_key || "").toUpperCase().startsWith("DM_")
+      );
 
     if (typeof window === "undefined" || !window.EventSource) {
       return postV2SeatLayout(seatLayoutPayload);
@@ -1560,6 +1736,7 @@ export const getFlightSeatLayout = async (payload) => {
     return new Promise((resolve, reject) => {
       const chunks = [];
       const seenChunkKeys = new Set();
+      const multiCityResults = new Map();
       let settled = false;
       let initResponse = null;
       let idleTimer = null;
@@ -1609,6 +1786,129 @@ export const getFlightSeatLayout = async (payload) => {
         return true;
       };
 
+      const collectMultiCitySeatLayouts = (payload, eventType = "") => {
+        if (!isMultiCitySeatLayout || !payload || typeof payload !== "object") {
+          return;
+        }
+
+        const type = String(getPayloadType(payload) || eventType || "").toUpperCase();
+        const root = payload?.data || payload;
+        const resultItems = type.includes("RESULT")
+          ? [root]
+          : toArray(root?.results || payload?.results);
+        const seatLayoutRequests = seatLayoutPayload.seat_layout_requests;
+
+        resultItems.forEach((result, resultIndex) => {
+          const status = String(result?.status || "").toLowerCase();
+          if (status && status !== "fulfilled" && status !== "success") return;
+          if (result?.success === false || result?.data?.success === false) return;
+
+          const normalized = [
+            result?.data?.data,
+            result?.data,
+            result?.result?.data,
+            result?.result,
+            result,
+          ]
+            .map(normalizeSeatLayoutPayload)
+            .find(Boolean);
+          if (!normalized) return;
+
+          const responseSearchKey = [
+            result?.search_key,
+            result?.searchKey,
+            result?.data?.search_key,
+            result?.data?.searchKey,
+            result?.data?.data?.search_key,
+            result?.data?.data?.searchKey,
+            result?.result?.search_key,
+            result?.result?.searchKey,
+            result?.result?.data?.search_key,
+            result?.result?.data?.searchKey,
+            normalized?.search_key,
+            normalized?.searchKey,
+            normalized?.formatted?.search_key,
+          ].find((value) => typeof value === "string" && value.trim());
+
+          const responseTripIndex = Number(
+            result?.tripIndex ??
+              result?.trip_index ??
+              result?.index ??
+              root?.tripIndex ??
+              root?.trip_index ??
+              root?.index
+          );
+
+          let requestIndex = responseSearchKey
+            ? seatLayoutRequests.findIndex(
+                (request) => request?.search_key === responseSearchKey
+              )
+            : -1;
+
+          if (
+            requestIndex < 0 &&
+            Number.isInteger(responseTripIndex) &&
+            responseTripIndex >= 1 &&
+            responseTripIndex <= seatLayoutRequests.length
+          ) {
+            requestIndex = responseTripIndex - 1;
+          }
+
+          // COMPLETE events contain results in request order. Use that order only
+          // when the provider did not return a search key/trip index.
+          if (
+            requestIndex < 0 &&
+            !type.includes("RESULT") &&
+            resultIndex < seatLayoutRequests.length
+          ) {
+            requestIndex = resultIndex;
+          }
+
+          // Never create an additional synthetic route. A multi-city response may
+          // repeat a RESULT inside COMPLETE, but the UI must have one layout per
+          // requested route.
+          if (requestIndex < 0 || requestIndex >= seatLayoutRequests.length) return;
+
+          const tripIndex = requestIndex + 1;
+          const request = seatLayoutRequests[requestIndex];
+          const searchKey = request?.search_key || `trip-${tripIndex}`;
+
+          multiCityResults.set(searchKey, {
+            tripIndex,
+            searchKey,
+            payload: normalized,
+          });
+        });
+      };
+
+      const getMultiCityJourneys = () =>
+        [...multiCityResults.values()]
+          .sort((left, right) => left.tripIndex - right.tripIndex)
+          .map(({ payload: resultPayload, searchKey, tripIndex }) => {
+            const formatted = getSeatLayoutFormatted(resultPayload);
+            const withRouteMetadata = (journey) =>
+              journey && typeof journey === "object"
+                ? {
+                    ...journey,
+                    __seatLayoutSearchKey: searchKey,
+                    __seatLayoutTripIndex: tripIndex,
+                  }
+                : null;
+
+            if (Array.isArray(formatted)) {
+              return withRouteMetadata(formatted[0]);
+            }
+
+            const journeys =
+              formatted?.journeys || formatted?.Journeys || formatted?.Journey;
+            if (Array.isArray(journeys)) {
+              return withRouteMetadata(journeys[0]);
+            }
+
+            return withRouteMetadata(formatted);
+          })
+          .filter(Boolean);
+
       const getCompletedSeatLayoutPayload = () => {
         const reversedChunks = [...chunks].reverse();
         for (const chunk of reversedChunks) {
@@ -1621,14 +1921,23 @@ export const getFlightSeatLayout = async (payload) => {
 
       const buildResult = () => {
         const seatLayoutResult = getCompletedSeatLayoutPayload();
+        const multiCityJourneys = getMultiCityJourneys();
+        const resolvedSeatLayout =
+          isMultiCitySeatLayout && multiCityJourneys.length
+            ? {
+                ...(seatLayoutResult || {}),
+                formatted: { journeys: multiCityJourneys },
+                results: [...multiCityResults.values()].map((item) => item.payload),
+              }
+            : seatLayoutResult;
 
         return {
           ...(initResponse || {}),
           channel,
-          seatLayoutResult,
+          seatLayoutResult: resolvedSeatLayout,
           data: {
             ...((initResponse || {})?.data || {}),
-            ...(seatLayoutResult || {}),
+            ...(resolvedSeatLayout || {}),
             seatLayoutChunks: chunks,
           },
           seatLayoutChunks: chunks,
@@ -1684,13 +1993,17 @@ export const getFlightSeatLayout = async (payload) => {
         if (isSeatLayoutEvent || extractedSeatLayout) {
           pushSeatLayoutChunk(parsedPayload, event.type);
         }
+        collectMultiCitySeatLayouts(parsedPayload, event.type);
 
-        if (isFlightSeatLayoutComplete(parsedPayload) && extractedSeatLayout) {
+        if (
+          isFlightSeatLayoutComplete(parsedPayload) &&
+          (extractedSeatLayout || multiCityResults.size)
+        ) {
           settle(resolve, buildResult());
           return;
         }
 
-        if (extractedSeatLayout) {
+        if (extractedSeatLayout && !isMultiCitySeatLayout) {
           scheduleResolve();
         }
       };
@@ -1705,7 +2018,9 @@ export const getFlightSeatLayout = async (payload) => {
           events.addEventListener(eventName, handleMessage);
         });
         events.addEventListener("error", () => {
-          if (extractFlightSeatLayoutPayload(buildResult())) scheduleResolve();
+          if (!isMultiCitySeatLayout && extractFlightSeatLayoutPayload(buildResult())) {
+            scheduleResolve();
+          }
         });
 
         try {
@@ -1714,13 +2029,15 @@ export const getFlightSeatLayout = async (payload) => {
 
           if (isFlightSeatLayoutComplete(initResponse)) {
             pushSeatLayoutChunk(initResponse, "postV2SeatLayout");
+            collectMultiCitySeatLayouts(initResponse, "postV2SeatLayout");
             settle(resolve, buildResult());
             return;
           }
 
           if (extractFlightSeatLayoutPayload(initResponse)) {
             pushSeatLayoutChunk(initResponse, "postV2SeatLayout");
-            scheduleResolve();
+            collectMultiCitySeatLayouts(initResponse, "postV2SeatLayout");
+            if (!isMultiCitySeatLayout) scheduleResolve();
           }
         } catch (error) {
           settle(reject, error);

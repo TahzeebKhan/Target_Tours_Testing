@@ -9,39 +9,6 @@ import PriceSummary from "@/features/profile/components/PriceSummary";
 import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
-const rowData = [
-  { id: 1, seats: ["grey", "grey", "grey", "grey", "grey", "grey"] },
-  { id: 2, seats: ["blue", "blue", "blue", "blue", "blue", "blue"] },
-  { id: 3, seats: ["blue", "blue", "blue", "blue", "taken", "blue"] },
-  { id: 4, seats: ["blue", "taken", "taken", "blue", "taken", "blue"] },
-  {
-    id: 5,
-    seats: ["purple", "purple", "purple", "purple", "purple", "purple"],
-  },
-  { id: 6, seats: ["purple", "xl", "xl", "xl", "xl", "purple"] },
-  {
-    id: 7,
-    seats: ["purple", "taken", "taken", "purple", "purple", "purple"],
-  },
-  { id: 8, seats: ["red", "taken", "taken", "red", "red", "red"] },
-  { id: "exit1", type: "exit" },
-  { id: 9, seats: ["red", "red", "red", "red", "red", "red"] },
-  { id: 10, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
-  {
-    id: 11,
-    seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
-  },
-  {
-    id: 12,
-    seats: ["orange", "taken", "taken", "taken", "purple", "orange"],
-  },
-  { id: 13, seats: ["orange", "purple", "blue", "blue", "purple", "orange"] },
-  { id: 14, seats: ["red", "red", "red", "red", "red", "red"] },
-  { id: "exit2", type: "exit" },
-  { id: 15, seats: ["red", "red", "red", "red", "red", "red"] },
-  { id: 16, seats: ["xl", "xl", "xl", "xl", "xl", "xl"] },
-  { id: 17, seats: ["black", "black", "xl", "xl", "black", "black"] },
-];
 
 const SEAT_COLUMNS = ["A", "B", "C", "D", "E", "F"];
 
@@ -364,6 +331,7 @@ const getSeatLayoutJourneys = (seatLayoutResponse) => {
 
 const getJourneyRouteLabel = (journey, fallback = "") => {
   const route =
+    getRouteFromSearchKey(journey?.__seatLayoutSearchKey) ||
     journey?.OriginDestination ||
     journey?.originDestination ||
     journey?.Route ||
@@ -371,6 +339,12 @@ const getJourneyRouteLabel = (journey, fallback = "") => {
     [journey?.Origin, journey?.Destination].filter(Boolean).join("-");
 
   return String(route || fallback || "N/A").toUpperCase();
+};
+
+const getRouteFromSearchKey = (searchKey = "") => {
+  const parts = String(searchKey).trim().toUpperCase().split("_");
+  if (parts.length < 3 || parts[0] !== "DM") return "";
+  return [parts[1], parts[2]].filter(Boolean).join("-");
 };
 
 const isOneWayBooking = (bookingSession = {}) => {
@@ -385,6 +359,27 @@ const isOneWayBooking = (bookingSession = {}) => {
     .toUpperCase();
 
   return ["ONEWAY", "ONE-WAY", "ONE_WAY", "ON", "O"].includes(tripType);
+};
+
+const isMultiCityBooking = (bookingSession = {}) => {
+  const tripType = String(
+    bookingSession?.routeContext?.tripType ||
+      bookingSession?.priceRequest?.tripType ||
+      bookingSession?.priceRequest?.TripType ||
+      bookingSession?.selectedFlight?.booking?.tripType ||
+      ""
+  )
+    .trim()
+    .toUpperCase();
+
+  return [
+    "MULTI",
+    "MULTICITY",
+    "MULTI CITY",
+    "MULTI-CITY",
+    "MULTI_CITY",
+    "DM",
+  ].includes(tripType);
 };
 
 const buildSeatLayoutGroups = (
@@ -425,24 +420,78 @@ const buildSeatLayoutGroups = (
       }) === index
     );
   });
-  const visibleJourneys = isOneWayBooking(bookingSession)
-    ? uniqueJourneys.slice(0, 1)
-    : uniqueJourneys.slice(0, 2);
-  const fallbackFlights = [
-    bookingDetailsView?.departureFlight,
-    bookingDetailsView?.returnFlight,
-  ];
+  const isMultiCity =
+    bookingDetailsView?.isMultiCity || isMultiCityBooking(bookingSession);
+  const visibleJourneys = isMultiCity
+    ? uniqueJourneys
+    : isOneWayBooking(bookingSession)
+      ? uniqueJourneys.slice(0, 1)
+      : uniqueJourneys.slice(0, 2);
+  const fallbackFlights = isMultiCity
+    ? bookingDetailsView?.multiCityFlights || []
+    : [bookingDetailsView?.departureFlight, bookingDetailsView?.returnFlight];
 
   return visibleJourneys.map((journey, index) => {
     const { rows, seatsById } = buildFormattedSeatRows(journey);
     const prefix = `journey-${index + 1}:`;
-    const fallbackFlight = fallbackFlights[index] || fallbackFlights[0] || {};
-    const fallbackRoute = [
-      index === 1 ? bookingDetailsView?.header?.toCode : bookingDetailsView?.header?.fromCode,
-      index === 1 ? bookingDetailsView?.header?.fromCode : bookingDetailsView?.header?.toCode,
-    ]
+    const requestedTripIndex = Number(journey?.__seatLayoutTripIndex);
+    const fallbackFlightIndex =
+      isMultiCity && Number.isInteger(requestedTripIndex) && requestedTripIndex > 0
+        ? requestedTripIndex - 1
+        : index;
+    const fallbackFlight =
+      fallbackFlights[fallbackFlightIndex] || fallbackFlights[index] || {};
+    const fallbackDepartureCode = String(
+      fallbackFlight?.departure?.airport || ""
+    )
+      .split("-")[0]
+      .trim();
+    const fallbackArrivalCode = String(fallbackFlight?.arrival?.airport || "")
+      .split("-")[0]
+      .trim();
+    const fallbackRoute = (isMultiCity
+      ? [fallbackDepartureCode, fallbackArrivalCode]
+      : [
+          index === 1
+            ? bookingDetailsView?.header?.toCode
+            : bookingDetailsView?.header?.fromCode,
+          index === 1
+            ? bookingDetailsView?.header?.fromCode
+            : bookingDetailsView?.header?.toCode,
+        ])
       .filter(Boolean)
       .join("-");
+    const requestedRoute = isMultiCity
+      ? getRouteFromSearchKey(journey?.__seatLayoutSearchKey)
+      : "";
+    const journeyRoute = requestedRoute || getJourneyRouteLabel(journey, fallbackRoute);
+    const journeyFlightNo = String(
+      (isMultiCity && fallbackFlight?.airline?.code) ||
+        journey?.FlightNumber ||
+        journey?.flightNumber ||
+        journey?.FlightNo ||
+        journey?.flightNo ||
+        fallbackFlight?.airline?.code ||
+        ""
+    ).trim();
+    const journeyAirlineName = String(
+      (isMultiCity && fallbackFlight?.airline?.name) ||
+        journey?.AirlineName ||
+        journey?.airlineName ||
+        journey?.Airline ||
+        journey?.airline ||
+        fallbackFlight?.airline?.name ||
+        ""
+    ).trim();
+    const journeyAircraft = String(
+      (isMultiCity && fallbackFlight?.aircraft) ||
+        journey?.Aircraft ||
+        journey?.aircraft ||
+        journey?.EquipmentType ||
+        journey?.equipmentType ||
+        fallbackFlight?.aircraft ||
+        ""
+    ).trim();
 
     return {
       id: `journey-${index + 1}`,
@@ -459,13 +508,18 @@ const buildSeatLayoutGroups = (
             id: `${prefix}${seatId}`,
             seatNumber: seat?.seatNumber || seatId,
             journeyIndex: index,
-            journeyLabel: getJourneyRouteLabel(journey, fallbackRoute),
+            journeyLabel: journeyRoute,
           },
         ])
       ),
-      routeLabel: getJourneyRouteLabel(journey, fallbackRoute),
+      routeLabel: journeyRoute,
+      flightNo: journeyFlightNo,
+      airlineName: journeyAirlineName,
+      airlineLogo: fallbackFlight?.airline?.logo || "",
+      aircraft: journeyAircraft,
       date: formatSeatingDate(
-        journey?.DepartureTime ||
+        (isMultiCity && fallbackFlight?.departure?.date) ||
+          journey?.DepartureTime ||
           journey?.departureTime ||
           fallbackFlight?.departure?.date ||
           bookingDetailsView?.header?.date ||
@@ -573,10 +627,12 @@ const SeatingDetails = () => {
   );
   const hasActiveSeatSelection = activeSelectedSeats.length > 0;
   const seatingFlight =
-    [
-      bookingDetailsView?.departureFlight,
-      bookingDetailsView?.returnFlight,
-    ][activeSeatLayoutIndex] ||
+    (bookingDetailsView?.isMultiCity
+      ? bookingDetailsView?.multiCityFlights?.[activeSeatLayoutIndex]
+      : [
+          bookingDetailsView?.departureFlight,
+          bookingDetailsView?.returnFlight,
+        ][activeSeatLayoutIndex]) ||
     bookingDetailsView?.departureFlight ||
     {};
   const seatingAirline = seatingFlight?.airline || {};
@@ -592,16 +648,27 @@ const SeatingDetails = () => {
     .filter(Boolean)
     .join(" - ");
   const airlineLabel = [
-    seatingAirline?.name,
-    seatingAirline?.code ? `(${seatingAirline.code})` : "",
+    bookingDetailsView?.isMultiCity
+      ? activeSeatLayout?.airlineName || seatingAirline?.name
+      : seatingAirline?.name,
+    bookingDetailsView?.isMultiCity
+      ? activeSeatLayout?.flightNo
+        ? `(${activeSeatLayout.flightNo})`
+        : ""
+      : seatingAirline?.code
+        ? `(${seatingAirline.code})`
+        : "",
   ]
     .filter(Boolean)
     .join(" ");
-  const aircraftLabel = seatingFlight?.aircraft || "N/A";
+  const aircraftLabel =
+    (bookingDetailsView?.isMultiCity && activeSeatLayout?.aircraft) ||
+    seatingFlight?.aircraft ||
+    "N/A";
   const airlineLogo = resolveAirlineLogo({
-    name: seatingAirline?.name,
+    name: activeSeatLayout?.airlineName || seatingAirline?.name,
     code: seatingAirline?.code,
-    logo: seatingAirline?.logo,
+    logo: activeSeatLayout?.airlineLogo || seatingAirline?.logo,
   });
 
 
@@ -879,7 +946,7 @@ const SeatingDetails = () => {
                   <div className={styles.flightSeatingRightHeader}>
                     <img
                       src={airlineLogo}
-                      alt={seatingAirline?.name || "Airline"}
+                      alt={activeSeatLayout?.airlineName || seatingAirline?.name || "Airline"}
                     />
                     <div className={styles.flightSeatingRightHeaderInfo}>
                       <h3 className={styles.flightName}>
@@ -972,8 +1039,7 @@ const SeatingDetails = () => {
         </div>
         <div className={styles.detailsWrapper}>
           <div className={styles.fromTo}>
-            <span>{bookingDetailsView?.header?.fromCode || "N/A"}</span>–
-            <span>{bookingDetailsView?.header?.toCode || "N/A"}</span>
+            <span>{routeLabel || "N/A"}</span>
           </div>
           <div className={styles.dateTime}>
             <span>{flightDate}</span>
@@ -985,7 +1051,7 @@ const SeatingDetails = () => {
           toggleSeat={toggleSeat}
           selectedSeats={selectedSeats}
           setSelectedSeats={setSelectedSeats}
-          rowData={seatLayoutGroups[0]?.rows || rowData}
+          rowData={seatLayoutGroups[0]?.rows || []}
           seatIdPrefix={seatLayoutGroups[0]?.prefix || ""}
         />
         <BelowPlane />
