@@ -635,7 +635,7 @@ export default function HotelsFilters() {
             value={hotelSearchText}
             onChange={(event) => setHotelSearchText(event.target.value)}
           />
-          {hotelSearchText && (
+          {/* {hotelSearchText && (
             <button
               type="button"
               className={styles.searchClearButton}
@@ -644,7 +644,7 @@ export default function HotelsFilters() {
             >
               ×
             </button>
-          )}
+          )} */}
         </div>
       </section>
 
