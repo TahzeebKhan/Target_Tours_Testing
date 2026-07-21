@@ -3,6 +3,7 @@
 import { resolveAirlineLogo } from "./airlineLogos";
 
 let inMemoryFlightBookingSession = null;
+let flightBookingSessionExpiryTimer = null;
 const FLIGHT_BOOKING_SESSION_KEY = "target_tours_flight_booking_session";
 export const FLIGHT_PRICING_SESSION_DURATION_MS = 20 * 60 * 1000;
 const serializeFlightBookingSession = (value) =>
@@ -620,6 +621,7 @@ export const readFlightBookingSession = () => {
       clearFlightBookingSession();
       return null;
     }
+    scheduleFlightBookingSessionExpiry(inMemoryFlightBookingSession);
     return inMemoryFlightBookingSession;
   }
   if (typeof window === "undefined") return null;
@@ -636,6 +638,7 @@ export const readFlightBookingSession = () => {
         FLIGHT_BOOKING_SESSION_KEY,
         serializeFlightBookingSession(parsed)
       );
+      scheduleFlightBookingSessionExpiry(parsed);
     }
     return inMemoryFlightBookingSession;
   } catch {
@@ -651,7 +654,35 @@ const removeStoredFlightBookingSession = () => {
   }
 };
 
+const cancelFlightBookingSessionExpiryTimer = () => {
+  if (flightBookingSessionExpiryTimer === null) return;
+  window.clearTimeout(flightBookingSessionExpiryTimer);
+  flightBookingSessionExpiryTimer = null;
+};
+
+const scheduleFlightBookingSessionExpiry = (session) => {
+  if (typeof window === "undefined") return;
+
+  cancelFlightBookingSessionExpiryTimer();
+  const expiresAt = getFlightBookingSessionExpiry(session);
+  if (!expiresAt) return;
+
+  const remainingMs = expiresAt - Date.now();
+  if (remainingMs <= 0) {
+    clearFlightBookingSession();
+    return;
+  }
+
+  flightBookingSessionExpiryTimer = window.setTimeout(() => {
+    flightBookingSessionExpiryTimer = null;
+    clearFlightBookingSession();
+  }, remainingMs);
+};
+
 export const clearFlightBookingSession = () => {
+  if (typeof window !== "undefined") {
+    cancelFlightBookingSessionExpiryTimer();
+  }
   inMemoryFlightBookingSession = null;
   removeStoredFlightBookingSession();
 };
@@ -709,6 +740,7 @@ export const writeFlightBookingSession = (value) => {
 
   inMemoryFlightBookingSession = nextValue;
   storeFlightBookingSession(nextValue);
+  scheduleFlightBookingSessionExpiry(nextValue);
 };
 
 export const readFlightBookingSessionLegacy = () => {

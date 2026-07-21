@@ -144,6 +144,18 @@ const isPricingComplete = (payload) => {
   );
 };
 
+const isFareOptionsComplete = (payload) => {
+  const type = getPayloadType(payload);
+
+  return (
+    type.includes("FARE_OPTIONS") &&
+    !type.includes("PROVIDER") &&
+    (type.includes("COMPLETE") ||
+      type.includes("COMPLETED") ||
+      type.includes("DONE"))
+  );
+};
+
 const isPricingError = (payload) => {
   const type = getPayloadType(payload);
   return Boolean(payload?.error || payload?.data?.error) ||
@@ -1158,7 +1170,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
         settle(resolve, buildResult());
-      }, 900);
+      }, 4000);
     };
 
     const hardTimer = window.setTimeout(() => {
@@ -1203,11 +1215,11 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
     
       const hasItems = hasPricingItems(parsedPayload);
       const isComplete = isPricingComplete(parsedPayload);
-      const isPricingCompleteEvent = isFlightPricingResult(parsedPayload);
+      const isFareOptionsCompleteEvent = isFareOptionsComplete(parsedPayload);
     
       if (hasItems || isComplete) {
         chunks.push(parsedPayload);
-        if (isPricingCompleteEvent) {
+        if (isFareOptionsCompleteEvent) {
           settle(resolve, buildResult());
           return;
         }

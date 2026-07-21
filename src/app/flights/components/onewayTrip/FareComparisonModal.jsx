@@ -907,11 +907,11 @@ const FareComparisonModal = ({
                             <div className={styles.featureSection}>
                                 <div className={styles.featureTitle}>ADD-ONS AND SERVICES</div>
                                 <div className={styles.featureItem}>
-                                    <img src={fare.isPremium ? "/icons/MEAL.svg" : "/icons/change.svg"} alt="" />
+                                    <img src={fare.isPremium ? "/icons/couch.svg" : "/icons/change.svg"} alt="" />
                                     <span>{fare.addons.seats}</span>
                                 </div>
                                 <div className={styles.featureItem}>
-                                    <img src={fare.isPremium ? "/icons/couch.svg" : "/icons/cancellation.svg"} alt="" />
+                                    <img src={fare.isPremium ? "/icons/MEAL.svg" : "/icons/cancellation.svg"} alt="" />
                                     <span>{fare.addons.meals}</span>
                                 </div>
                             </div>

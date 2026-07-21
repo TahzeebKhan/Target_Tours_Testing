@@ -199,10 +199,33 @@ const buildLegFareOptionsRequest = (priceRequest = {}, leg, flightNos = {}) => {
   const tripIndex = leg === "return" ? 1 : 0;
   const selectedTrip = trips[tripIndex] || trips[0] || null;
   const flightNo = getSelectedFlightNo(flightNos, leg);
+  const providedSearchKeys = Array.isArray(
+    priceRequest?.search_keys || priceRequest?.searchKeys,
+  )
+    ? priceRequest.search_keys || priceRequest.searchKeys
+    : [];
+  const matchingSearchKeys = providedSearchKeys.filter((item) => {
+    const itemFlightNo = pickFlightNo(
+      item?.flight_no,
+      item?.flightNo,
+      item?.FlightNumber,
+      item?.FlightNo,
+    );
+
+    return flightNo && itemFlightNo === flightNo;
+  });
+  const legSearchKeys = matchingSearchKeys.length
+    ? matchingSearchKeys
+    : providedSearchKeys[tripIndex]
+      ? [providedSearchKeys[tripIndex]]
+      : [];
 
   return {
     ...priceRequest,
     Trips: selectedTrip ? [selectedTrip] : [],
+    ...(providedSearchKeys.length
+      ? { search_keys: legSearchKeys, searchKeys: undefined }
+      : {}),
     ...(flightNo ? { flight_no: flightNo, flightNo } : {}),
   };
 };
@@ -830,7 +853,7 @@ const FareComparisonModalRoundTrip = ({
 
                 <div className={styles.fareCard}>
                   <div className={styles.fareHeader}>
-                    <span className={styles.radioOutline}></span>
+                    {/* <span className={styles.radioOutline}></span> */}
                     <h3
                       className={`${styles.fareName} ${fare.isPremium ? styles.fareNamePremium : ""
                         }`}
