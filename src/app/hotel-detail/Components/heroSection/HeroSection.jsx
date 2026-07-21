@@ -6,11 +6,10 @@ import { useHotelDetailData } from "../../HotelDetailDataContext";
 
 const HeroSection = ({ liked, onLike }) => {
   const { hotelDetail } = useHotelDetailData();
-  const starRating = hotelDetail?.starRating || hotelDetail?.rating || 0;
-  const reviewScore = hotelDetail?.reviewScore || hotelDetail?.rating || 0;
-  const reviewScoreText = reviewScore
-    ? Number(reviewScore).toFixed(1).replace(/\.0$/, "")
-    : "-";
+  const starRating = Math.max(
+    0,
+    Math.min(5, Math.round(Number(hotelDetail?.starRating ?? 0) || 0)),
+  );
 
   return (
     <div className={styles.HeroSection}>
@@ -35,7 +34,7 @@ const HeroSection = ({ liked, onLike }) => {
                 ))}
               </div>
               <div className={styles.reviewCount}>
-                {reviewScoreText} ({hotelDetail?.reviewText || "No reviews yet"})
+                ({hotelDetail?.reviewText || "No reviews yet"})
               </div>
             </div>
           </div>

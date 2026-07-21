@@ -395,9 +395,39 @@ const buildSeatLayoutGroups = (
   if (!seatLayoutResponse) return [];
 
   const journeys = getSeatLayoutJourneys(seatLayoutResponse);
+  const uniqueJourneys = journeys.filter((journey, index, list) => {
+    const route = getJourneyRouteLabel(journey, "");
+    const flightNo = String(
+      journey?.FlightNumber ||
+        journey?.flightNumber ||
+        journey?.FlightNo ||
+        journey?.flightNo ||
+        "",
+    ).trim();
+    const departureTime = String(
+      journey?.DepartureTime || journey?.departureTime || "",
+    ).trim();
+    const identity = `${route}|${flightNo}|${departureTime}`;
+
+    return (
+      list.findIndex((candidate) => {
+        const candidateIdentity = `${getJourneyRouteLabel(candidate, "")}|${String(
+          candidate?.FlightNumber ||
+            candidate?.flightNumber ||
+            candidate?.FlightNo ||
+            candidate?.flightNo ||
+            "",
+        ).trim()}|${String(
+          candidate?.DepartureTime || candidate?.departureTime || "",
+        ).trim()}`;
+
+        return candidateIdentity === identity;
+      }) === index
+    );
+  });
   const visibleJourneys = isOneWayBooking(bookingSession)
-    ? journeys.slice(0, 1)
-    : journeys;
+    ? uniqueJourneys.slice(0, 1)
+    : uniqueJourneys.slice(0, 2);
   const fallbackFlights = [
     bookingDetailsView?.departureFlight,
     bookingDetailsView?.returnFlight,

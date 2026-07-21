@@ -364,7 +364,7 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/images/hotelImg.jpg";
+  return typeof image === "string" && image ? image : "/images/hotelFallback.png";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {

@@ -162,8 +162,10 @@ const HotelDetaislMobileView = () => {
         "HOTEL POLICY": useRef(null),
     };
     const router = useRouter();
-    const ratingValue = getRatingValue(hotelDetail?.rating);
-    const roundedRating = Math.round(ratingValue);
+    const roundedRating = Math.max(
+        0,
+        Math.min(5, Math.round(getRatingValue(hotelDetail?.starRating)))
+    );
     const reviewText = hotelDetail?.reviewText || "No reviews yet";
     const searchCity = getSearchCity(mobileSearchParams, hotelDetail);
 
@@ -565,7 +567,7 @@ const HotelDetaislMobileView = () => {
                                     ))}
                                 </div>
                                 <div className={styles.reviewCount}>
-                                    {ratingValue ? ratingValue.toFixed(1).replace(/\.0$/, "") : "-"} ({reviewText})
+                                    ({reviewText})
                                 </div>
                             </div>
                         </div>
