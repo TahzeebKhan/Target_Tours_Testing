@@ -943,6 +943,88 @@ const getMultiCityPricingRouteMap = (priceResponse = {}) => {
   return routeMap;
 };
 
+const readPricingToken = (payload = {}) => {
+  const journeys = Array.isArray(payload?.formatted?.journeys)
+    ? payload.formatted.journeys
+    : Array.isArray(payload?.journeys)
+      ? payload.journeys
+      : [];
+
+  return String(
+    pickFirst(
+      payload?.token,
+      payload?.Token,
+      journeys[0]?.Token,
+      journeys[0]?.token,
+      payload?.formatted?.Token,
+      payload?.formatted?.token,
+      payload?.raw?.Token,
+      payload?.raw?.token,
+      ""
+    )
+  ).trim();
+};
+
+const getMultiCityPricingTokenMap = (priceResponse = {}) => {
+  const tokenMap = new Map();
+  const addPricingResult = (result) => {
+    const resultPayload = result?.payload || result?.data?.data || result?.data || {};
+    const searchKey = pickFirst(
+      result?.search_key,
+      result?.searchKey,
+      resultPayload?.search_key,
+      resultPayload?.searchKey
+    );
+    const token = readPricingToken(resultPayload);
+
+    if (searchKey && token) {
+      tokenMap.set(String(searchKey).trim().toUpperCase(), token);
+    }
+  };
+
+  [
+    priceResponse?.pricingResults,
+    priceResponse?.data?.pricingResults,
+    priceResponse?.results,
+    priceResponse?.data?.results,
+  ].forEach((results) => {
+    if (Array.isArray(results)) results.forEach(addPricingResult);
+  });
+
+  [priceResponse?.pricingChunks, priceResponse?.data?.pricingChunks].forEach((chunks) => {
+    if (!Array.isArray(chunks)) return;
+    chunks.forEach((chunk) => {
+      if (Array.isArray(chunk?.data?.results)) {
+        chunk.data.results.forEach(addPricingResult);
+      }
+    });
+  });
+
+  return tokenMap;
+};
+
+const getCreateBookingPricingTokens = (priceResponse = {}) => {
+  const payload = unwrapPayload(priceResponse);
+  const journeys = getFormattedJourneys(priceResponse);
+  const getJourneyType = (journey) =>
+    String(journey?.journey_type || journey?.journeyType || journey?.type || "")
+      .trim()
+      .toUpperCase();
+  const onwardJourney =
+    journeys.find((journey) => getJourneyType(journey).includes("ONWARD")) ||
+    journeys[0];
+  const returnJourney =
+    journeys.find((journey) => getJourneyType(journey).includes("RETURN")) ||
+    journeys[1];
+  const readJourneyToken = (journey) =>
+    String(pickFirst(journey?.Token, journey?.token, "")).trim();
+
+  return {
+    onward: readJourneyToken(onwardJourney) || readPricingToken(payload),
+    return: readJourneyToken(returnJourney),
+  };
+};
+
 export const buildV2SsrPayload = (session = {}) => {
   const priceResponse = session?.priceResponse || {};
   const payload = unwrapPayload(priceResponse);
@@ -1335,6 +1417,7 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const ssrRequest = session?.ssrRequest || {};
   const ssrPayload = unwrapPayload(session?.ssrResponse);
   const pricePayload = unwrapPayload(session?.priceResponse);
+  const pricingJourneys = getFormattedJourneys(session?.priceResponse);
   const requestTrips = extractTrips(priceRequest);
   const ssrRequests = Array.isArray(ssrRequest?.ssr_requests)
     ? ssrRequest.ssr_requests
@@ -1380,6 +1463,8 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
           ? selectedFare?.roundTripFares?.return || selectedFare
           : selectedFare?.roundTripFares?.onward || selectedFare;
       const selectedTripIndex = pickFirst(
+        pricingJourneys?.[index]?.index,
+        pricingJourneys?.[index]?.Index,
         trip?.Index,
         trip?.index,
         requestTrips?.[index]?.Index,
@@ -2505,6 +2590,7 @@ const normalizeCreateBookingBaggage = (
 
 export const buildCreateBookingPayload = (session = {}, prices = {}) => {
   const priceResponse = unwrapPayload(session?.priceResponse);
+  const pricingTokens = getCreateBookingPricingTokens(session?.priceResponse);
   const priceRequest = session?.priceRequest || {};
   const travelers = Array.isArray(session?.travelerDetails)
     ? session.travelerDetails
@@ -2613,6 +2699,7 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
 
   if (isMultiCity) {
     const pricingRouteMap = getMultiCityPricingRouteMap(session?.priceResponse);
+    const pricingTokenMap = getMultiCityPricingTokenMap(session?.priceResponse);
     const routeKeys = Object.keys(session?.ssrResponse?.data?.formatted || {});
     const normalizeRouteKey = (value) =>
       String(value || "").trim().toUpperCase().replace(/[–—]/g, "-");
@@ -2637,6 +2724,8 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
         ) || 0;
 
       return {
+        Token_onward: pricingTokenMap.get(normalizedSearchKey) || "",
+        Token_return: "",
         search_key: routeSearchKey,
         TUI: pickFirst(
           pricingRouteMap.get(normalizedSearchKey),
@@ -2684,6 +2773,8 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
   }
 
   return {
+    Token_onward: pricingTokens.onward,
+    Token_return: pricingTokens.return,
     search_key: searchKey,
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
     channel: makeV2CreateBookingChannel(),

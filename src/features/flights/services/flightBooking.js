@@ -367,30 +367,57 @@ const isFlightSeatLayoutComplete = (payload) => {
 };
 
 const hasPricingItems = (payload) => {
-  const root = payload?.data || payload || {};
-  const containers = [
-    root,
-    root?.data,
-    root?.result,
-    root?.pricing,
-    root?.fare_options,
-    root?.fareOptions,
-    root?.merged,
-    root?.data?.merged,
-    root?.data?.fare_options,
-    root?.data?.fareOptions,
-  ].filter(Boolean);
+  const seen = new WeakSet();
+  const visit = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 10) return false;
+    if (seen.has(value)) return false;
+    seen.add(value);
 
-  return containers.some((container) =>
-    [
-      container?.fares,
-      container?.fare_options,
-      container?.fareOptions,
-      container?.flights,
-      container?.results,
-    ].some((value) => Array.isArray(value) && value.length > 0) ||
-    Object.values(container).some((value) => Array.isArray(value) && value.length > 0)
-  );
+    if (Array.isArray(value)) {
+      return value.some((item) => visit(item, depth + 1));
+    }
+
+    const directFareLists = [
+      value?.fares,
+      value?.fare_options,
+      value?.fareOptions,
+      value?.flights,
+    ];
+    if (directFareLists.some((list) => Array.isArray(list) && list.length > 0)) {
+      return true;
+    }
+
+    const looksLikeSingleFare = Boolean(
+      value?.FCType ||
+      value?.FareType ||
+      value?.fareType ||
+      value?.fareClass ||
+      value?.FareName ||
+      value?.DisplayName ||
+      value?.netAmount !== undefined ||
+      value?.NetAmount !== undefined ||
+      value?.totalFare !== undefined ||
+      value?.TotalFare !== undefined
+    );
+    if (looksLikeSingleFare) return true;
+
+    const fareMaps = [value?.merged, value?.fare_options, value?.fareOptions];
+    if (
+      fareMaps.some(
+        (map) =>
+          map &&
+          typeof map === "object" &&
+          !Array.isArray(map) &&
+          Object.values(map).some((list) => Array.isArray(list) && list.length > 0)
+      )
+    ) {
+      return true;
+    }
+
+    return Object.values(value).some((child) => visit(child, depth + 1));
+  };
+
+  return visit(payload);
 };
 
 const normalizePricingFlightNo = (...values) => {
@@ -1164,6 +1191,10 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
 
   const notifyFareOptionsSubscribers = (eventPayload, accumulatedPayload) => {
     requestEntry.lastResult = accumulatedPayload;
+    console.log("[fare-options:sse] notifyFareOptionsSubscribers", {
+      type: getPayloadType(eventPayload),
+      subscribers: requestEntry.subscribers.size,
+    });
     requestEntry.subscribers.forEach((subscriber) => {
       try {
         subscriber(eventPayload, accumulatedPayload);
@@ -1212,12 +1243,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       Object.entries(merged).forEach(([flightNo, fares]) => {
         const uniqueFares = new Map();
         fares.forEach((fare) => {
-          const key = [
-            fare?.Index ?? fare?.index ?? fare?.id ?? fare?.ID ?? "",
-            fare?.provider ?? fare?.Provider ?? "",
-            fare?.FCType ?? fare?.FareType ?? fare?.fareType ?? fare?.name ?? "",
-            fare?.price ?? fare?.Price ?? fare?.netAmount ?? fare?.NetAmount ?? "",
-          ].join("|");
+          const key = JSON.stringify(fare);
           uniqueFares.set(key, fare);
         });
         merged[flightNo] = Array.from(uniqueFares.values());
@@ -1226,13 +1252,30 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       return merged;
     };
 
-    const getChunkMergedFares = (chunk = {}) =>
-      mergeFareOptionMaps(
-        chunk?.merged,
-        chunk?.data?.merged,
-        ...toArray(chunk?.results).map((result) => result?.data?.merged || result?.merged),
-        ...toArray(chunk?.data?.results).map((result) => result?.data?.merged || result?.merged)
-      );
+    const getChunkMergedFares = (chunk = {}) => {
+      const fareMaps = [];
+      const seen = new WeakSet();
+      const collectFareMaps = (value, depth = 0) => {
+        if (!value || typeof value !== "object" || depth > 10) return;
+        if (seen.has(value)) return;
+        seen.add(value);
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => collectFareMaps(item, depth + 1));
+          return;
+        }
+
+        [value?.merged, value?.fare_options, value?.fareOptions].forEach((map) => {
+          if (map && typeof map === "object" && !Array.isArray(map)) {
+            fareMaps.push(map);
+          }
+        });
+        Object.values(value).forEach((child) => collectFareMaps(child, depth + 1));
+      };
+
+      collectFareMaps(chunk);
+      return mergeFareOptionMaps(...fareMaps);
+    };
 
     const buildResult = () => {
       const merged = mergeFareOptionMaps(
@@ -1241,6 +1284,13 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...chunks.map(getChunkMergedFares)
       );
       const hasMergedFares = Object.keys(merged).length > 0;
+
+      console.log("[fare-options:sse] buildResult", {
+        chunks: chunks.length,
+        faresByFlight: Object.fromEntries(
+          Object.entries(merged).map(([flightNo, fares]) => [flightNo, fares.length])
+        ),
+      });
 
       return {
         ...(initResponse || {}),
@@ -1280,6 +1330,14 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       const isCurrentChannel =
         !payloadChannel || payloadChannel === channel;
 
+      console.log("[fare-options:sse] EventSource -> handleMessage", {
+        eventType: event.type,
+        payloadType: getPayloadType(parsedPayload),
+        payloadChannel,
+        channel,
+        isCurrentChannel,
+      });
+
       if (!isCurrentChannel) return;
     
       if (isPricingError(parsedPayload)) {
@@ -1294,10 +1352,23 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       const hasItems = hasPricingItems(parsedPayload);
       const isComplete = isPricingComplete(parsedPayload);
       const isFareOptionsCompleteEvent = isFareOptionsComplete(parsedPayload);
+
+      console.log("[fare-options:sse] hasPricingItems", {
+        type: getPayloadType(parsedPayload),
+        hasItems,
+        isComplete,
+        isFareOptionsCompleteEvent,
+      });
     
       if (hasItems || isComplete) {
         chunks.push(parsedPayload);
-        notifyFareOptionsSubscribers(parsedPayload, buildResult());
+        const accumulatedPayload = buildResult();
+        console.log("[fare-options:sse] chunks.push -> notify", {
+          type: getPayloadType(parsedPayload),
+          chunks: chunks.length,
+          subscribers: requestEntry.subscribers.size,
+        });
+        notifyFareOptionsSubscribers(parsedPayload, accumulatedPayload);
         if (isFareOptionsCompleteEvent) {
           settle(resolve, buildResult());
           return;
@@ -1333,6 +1404,8 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
 
     startPricing();
   }).finally(() => {
+    requestEntry.subscribers.clear();
+    requestEntry.lastResult = null;
     fareOptionsRequestCache.delete(cacheKey);
   });
 

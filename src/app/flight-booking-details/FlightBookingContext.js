@@ -715,8 +715,7 @@ export function FlightBookingProvider({ children }) {
         let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
         if (
           includeSeatLayout &&
-          bookingSession?.seatLayoutRequest?.seat_layout_requests?.length &&
-          !hasCompleteSeatLayoutIndexes(bookingSession.seatLayoutRequest)
+          bookingSession?.seatLayoutRequest?.seat_layout_requests?.length
         ) {
           seatLayoutResponse = null;
           seatLayoutRequest = null;

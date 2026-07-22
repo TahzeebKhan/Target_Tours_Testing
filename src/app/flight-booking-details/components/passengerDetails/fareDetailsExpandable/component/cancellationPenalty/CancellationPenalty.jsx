@@ -112,6 +112,7 @@ const parseRawRows = (rawText, currency = "INR", platformCharges = null) => {
 
     if (
       upperLine === "CANCELLATIONS" ||
+      /^CANCELLATION\s*:/i.test(effectiveLine) ||
       upperEffectiveLine.includes("CANCEL/REFUND") ||
       upperEffectiveLine.includes("CANCELLATION CHARGES") ||
       upperEffectiveLine.includes("CANCELLATION FEE")
@@ -141,6 +142,21 @@ const parseRawRows = (rawText, currency = "INR", platformCharges = null) => {
     }
 
     if (!inCancellationSection) return;
+
+    const simpleWindowChargeMatch = effectiveLine.match(
+      /^(.+?)\s+([A-Z]{3})\s+([0-9][\d.,]*)\b/i
+    );
+    if (simpleWindowChargeMatch) {
+      rows.push({
+        timeFrame: normalizeTimeFrame(simpleWindowChargeMatch[1]),
+        penalty: formatPenalty(
+          simpleWindowChargeMatch[3],
+          simpleWindowChargeMatch[2] || currency,
+          platformCharges
+        ),
+      });
+      return;
+    }
 
     const chargeMatch =
       effectiveLine.match(
