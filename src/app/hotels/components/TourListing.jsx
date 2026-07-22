@@ -1688,6 +1688,46 @@ const sortHotels = (hotels = [], sortType = "recent") => {
   return hotels;
 };
 
+const normalizeHotelSearchText = (value = "") =>
+  String(value)
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const getHotelNameMatchScore = (hotel, selectedHotelName) => {
+  const hotelName = normalizeHotelSearchText(getHotelDisplayName(hotel));
+  const searchName = normalizeHotelSearchText(selectedHotelName);
+
+  if (!hotelName || !searchName) return 0;
+  if (hotelName === searchName) return 1000;
+  if (hotelName.startsWith(searchName)) return 800;
+  if (hotelName.includes(searchName)) return 600;
+
+  const searchWords = searchName.split(" ").filter(Boolean);
+  const matchingWordCount = searchWords.filter((word) =>
+    hotelName.includes(word),
+  ).length;
+
+  if (matchingWordCount === searchWords.length) return 400;
+  return matchingWordCount * 50;
+};
+
+const prioritizeSelectedHotel = (hotels = [], selectedHotelName = "") =>
+  hotels
+    .map((hotel, originalIndex) => ({
+      hotel,
+      originalIndex,
+      matchScore: getHotelNameMatchScore(hotel, selectedHotelName),
+    }))
+    .sort(
+      (left, right) =>
+        right.matchScore - left.matchScore ||
+        left.originalIndex - right.originalIndex,
+    )
+    .map(({ hotel }) => hotel);
+
 export const getStaySummary = (searchParams) => {
   const checkIn = searchParams.get("checkIn") || searchParams.get("checkin");
   const checkOut = searchParams.get("checkOut") || searchParams.get("checkout");
@@ -2031,6 +2071,33 @@ const TourListing = () => {
     () => getSearchLocationLabel(searchParams),
     [searchParams],
   );
+  const selectedHotelSearch = useMemo(() => {
+    const storedSearch = readStoredHotelSearch() || {};
+    const storedLocation = storedSearch.location || {};
+    const selectedType = String(
+      searchParams.get("searchType") ||
+        storedSearch.searchType ||
+        storedLocation.type ||
+        storedLocation.raw?.type ||
+        "",
+    )
+      .trim()
+      .toLowerCase();
+
+    if (selectedType !== "hotel") return null;
+
+    return {
+      name: String(
+        searchParams.get("hotelName") ||
+          storedSearch.selectedHotelName ||
+          storedLocation.value ||
+          storedLocation.label ||
+          storedLocation.name ||
+          filterSearchParams.city ||
+          "",
+      ).trim(),
+    };
+  }, [filterSearchParams.city, searchParams]);
   const filterDataPayload = useMemo(
     () => ({
       searchId: filterSearchId,
@@ -2730,10 +2797,18 @@ const TourListing = () => {
     [hasActiveHotelSearch, hotelResults],
   );
 
-  const sortedHotels = useMemo(
-    () => sortHotels(sourceHotels, sortType),
-    [sourceHotels, sortType],
-  );
+  const sortedHotels = useMemo(() => {
+    const normallySortedHotels = sortHotels(sourceHotels, sortType);
+
+    if (sortType !== "recent" || !selectedHotelSearch?.name) {
+      return normallySortedHotels;
+    }
+
+    return prioritizeSelectedHotel(
+      normallySortedHotels,
+      selectedHotelSearch.name,
+    );
+  }, [selectedHotelSearch, sourceHotels, sortType]);
 
   const displayHotels = useMemo(
     () =>

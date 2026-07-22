@@ -1607,7 +1607,67 @@ const buildMultiCard = (flight, index, options = {}) => {
     );
   }
 
-  return buildRoundCard(flight, index, options);
+  const mapped = buildRoundCard(flight, index, options);
+  const providerOption = toArray(
+    flight?.provider_options || flight?.providerOptions,
+  )[0];
+  const routeSearchKey = pickFirst(
+    providerOption?.search_key,
+    providerOption?.searchKey,
+    mapped?.tripCard?.booking?.priceRequest?.search_key,
+  );
+  const routeTui = pickFirst(
+    providerOption?.TUI,
+    providerOption?.tui,
+    flight?.TUI,
+    flight?.tui,
+    mapped?.tripCard?.booking?.tui,
+  );
+  const routeFlightNo = pickFirst(
+    flight?.flightNo,
+    flight?.FlightNo,
+    mapped?.tripCard?.booking?.flightNo,
+  );
+  const existingRequest = mapped?.tripCard?.booking?.priceRequest || {};
+  const providerOptions = toArray(
+    flight?.provider_options || flight?.providerOptions,
+  );
+  const routeSearchKeys = providerOptions
+    .map((option) => ({
+      search_key: pickFirst(option?.search_key, option?.searchKey),
+      flight_no: routeFlightNo,
+      cabin_class: pickFirst(flight?.Cabin, flight?.cabin, "E"),
+      TUI: pickFirst(option?.TUI, option?.tui),
+    }))
+    .filter((option) => option.search_key);
+
+  mapped.tripCard = {
+    ...mapped.tripCard,
+    booking: {
+      ...(mapped?.tripCard?.booking || {}),
+      flightNo: routeFlightNo,
+      tui: routeTui,
+      searchKey: routeSearchKey,
+      moreFares: Boolean(flight?.more_fares ?? flight?.moreFares),
+      providerOptions,
+      tripType: "DM",
+      priceRequest: {
+        ...existingRequest,
+        search_key: routeSearchKey,
+        search_keys: routeSearchKeys,
+        flight_no: routeFlightNo,
+        flightNo: routeFlightNo,
+        Trips: toArray(existingRequest?.Trips).map((trip) => ({
+          ...trip,
+          FlightNumber: routeFlightNo || trip?.FlightNumber,
+          TUI: routeTui || trip?.TUI,
+        })),
+        TripType: "DM",
+      },
+    },
+  };
+
+  return mapped;
 };
 
 const normalizeRouteKey = (value = "") =>
@@ -1642,6 +1702,7 @@ const buildMappedMultiRouteResult = ({
   return {
     route: routeText,
     trip: routePayload?.trip || null,
+    tripIndex: Number(routePayload?.tripIndex) || null,
     meta: routePayload?.meta || {},
     filters: routePayload?.filters || null,
     aircrafts: routePayload?.aircrafts || routePayload?.filters?.aircrafts || [],

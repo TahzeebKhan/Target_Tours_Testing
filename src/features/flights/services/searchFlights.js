@@ -7,7 +7,9 @@ const FLIGHT_SSE_EVENT_NAMES = [
   "PING",
   "FLIGHT_V2_SEARCH_ACCEPTED",
   "FLIGHT_V2_PROVIDER_STARTED",
+  "FLIGHT_V2_PROVIDER_TRIP_STARTED",
   "FLIGHT_V2_PROVIDER_AUTHENTICATED",
+  "FLIGHT_V2_PROVIDER_REFRESHING",
   "FLIGHT_V2_PROVIDER_RESULT",
   "FLIGHT_V2_PROVIDER_ERROR",
   "FLIGHT_V2_SEARCH_COMPLETE",
@@ -220,7 +222,7 @@ const toArray = (value) => (Array.isArray(value) ? value : []);
 const getFlightResultEntries = (payload) => {
   const entries = [];
 
-  const addTripResult = (tripItem) => {
+  const addTripResult = (tripItem, fallbackTripIndex = null) => {
     const tripData = tripItem?.data || {};
     const result = tripData?.result;
 
@@ -238,14 +240,33 @@ const getFlightResultEntries = (payload) => {
       routeKey: normalizeRouteKey(route),
       route: route || "",
       trip,
+      tripIndex:
+        Number(tripData?.tripIndex ?? tripItem?.tripIndex ?? fallbackTripIndex) ||
+        null,
       flights: toArray(result?.flights),
     });
   };
 
-  toArray(payload?.data?.mergedProviders?.trips).forEach(addTripResult);
+  toArray(payload?.data?.mergedProviders?.trips).forEach((tripItem) =>
+    addTripResult(tripItem),
+  );
   toArray(payload?.data?.providerResults).forEach((providerResult) => {
-    toArray(providerResult?.data?.trips).forEach(addTripResult);
+    toArray(providerResult?.data?.trips).forEach((tripItem) =>
+      addTripResult(tripItem),
+    );
   });
+
+  const directData = payload?.data || {};
+  const directResult = directData?.result;
+  if (directResult && typeof directResult === "object") {
+    addTripResult({
+      data: {
+        result: directResult,
+        trip: directData?.trip || null,
+        tripIndex: directData?.tripIndex,
+      },
+    });
+  }
 
   return entries;
 };
@@ -318,19 +339,30 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
   const tripResults = {};
   const seen = new Set();
   let latestPayload = initResponse || {};
+  const requestedTrips = buildSocketTrips(params);
 
   chunks.forEach((chunk) => {
     latestPayload = chunk || latestPayload;
     const resultEntries = getFlightResultEntries(chunk);
 
     resultEntries.forEach((entry) => {
-      const routeKey = entry.routeKey;
+      const requestedTrip = entry.tripIndex
+        ? requestedTrips[entry.tripIndex - 1]
+        : null;
+      const entryTrip = entry.trip || requestedTrip || null;
+      const fallbackRoute =
+        entryTrip?.origin && entryTrip?.destination
+          ? `${entryTrip.origin} -> ${entryTrip.destination}`
+          : "";
+      const route = entry.route || fallbackRoute;
+      const routeKey = entry.routeKey || normalizeRouteKey(route);
       const resultData = entry.result;
 
       if (routeKey && !tripResults[routeKey]) {
         tripResults[routeKey] = {
-          route: entry.route || routeKey,
-          trip: entry.trip,
+          route: route || routeKey,
+          trip: entryTrip,
+          tripIndex: entry.tripIndex,
           meta: resultData?.meta || {},
           cheapest: resultData?.cheapest || null,
           fastest: resultData?.fastest || null,
@@ -431,6 +463,7 @@ const searchFlightsViaSocket = async (params = {}) => {
     let idleTimer = null;
     let events = null;
     let completionReceived = false;
+    const isMultiCitySearch = searchPayload.fareType === "DM";
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
@@ -447,6 +480,11 @@ const searchFlightsViaSocket = async (params = {}) => {
 
     const scheduleIdleResolve = () => {
       if (!chunks.length && !completionReceived) return;
+
+      // Domestic multi-city results arrive one trip at a time. An idle gap
+      // between providers must not finalize the search before every trip has
+      // had a chance to emit its result.
+      if (isMultiCitySearch && !completionReceived) return;
 
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
@@ -498,6 +536,19 @@ const searchFlightsViaSocket = async (params = {}) => {
 
       if (isFlightSearchComplete(payload)) {
         completionReceived = true;
+        if (isMultiCitySearch) {
+          settle(
+            resolve,
+            mergeSocketPayloads({
+              chunks,
+              initResponse,
+              params,
+              channel,
+            }),
+          );
+          return;
+        }
+
         scheduleIdleResolve();
       }
     };

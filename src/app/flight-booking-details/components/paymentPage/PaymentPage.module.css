@@ -152,8 +152,33 @@
 /* OPEN STATE */
 .tripSummaryVisible {
   opacity: 1;
-  max-height: 200px; /* enough for the card */
+  max-height: 1000px;
   margin-top: 16px;
+}
+
+.multiCitySummaryList {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 0;
+}
+
+.multiCitySummaryCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.multiCitySummaryCard + .multiCitySummaryCard {
+  border-top: 1px solid #e5e7eb;
+}
+
+.routeNumber {
+  color: #667085;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .left {

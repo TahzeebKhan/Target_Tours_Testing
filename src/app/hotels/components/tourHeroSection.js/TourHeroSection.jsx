@@ -1009,6 +1009,13 @@ const TourHeroSection = ({ resultsPath = "/hotels" } = {}) => {
         adults,
         children,
         location: hotelLocation,
+        searchType: hotelLocation?.type || hotelLocation?.raw?.type || "",
+        selectedHotelName:
+          String(hotelLocation?.type || hotelLocation?.raw?.type || "")
+            .trim()
+            .toLowerCase() === "hotel"
+            ? hotelLocation?.value || hotelLocation?.label || from
+            : "",
       };
 
       if (typeof window !== "undefined") {

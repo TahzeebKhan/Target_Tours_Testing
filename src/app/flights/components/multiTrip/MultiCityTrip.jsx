@@ -13,7 +13,6 @@ import { useFlightFilters } from "@/app/context/FlightFilterContext";
 import { X } from "lucide-react";
 import FlightDetailsCard from "../PhoneViewComponents/multiTripPhoneView/FlightDetailsCard";
 import { SidebarContext } from "../../SidebarContext";
-import FareComparisonModalRoundTrip from "./FareComparisonModalMulticity";
 import FareComparisonModalMulticity from "./FareComparisonModalMulticity";
 import MobileFareComparisonModalMulticity from "./MobileFareComparisonModalMulticity";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
@@ -463,9 +462,11 @@ const MultiCityTrip = ({
   const activeRouteKey = normalizeRouteKey(
     `${routeShortLabel(activeRoute.from)} -> ${routeShortLabel(activeRoute.to)}`
   );
+  const routeResultEntries = Object.entries(routeResults || {});
+  const hasRouteResults = routeResultEntries.length > 0;
   const activeRouteResult =
     routeResults?.[activeRouteKey] ||
-    Object.entries(routeResults || {}).find(([routeKey, routeData]) => {
+    routeResultEntries.find(([routeKey, routeData]) => {
       const candidates = [
         routeKey,
         routeData?.route,
@@ -479,6 +480,10 @@ const MultiCityTrip = ({
         (candidate) => normalizeRouteKey(candidate) === activeRouteKey
       );
     })?.[1] ||
+    routeResultEntries.find(
+      ([, routeData]) =>
+        Number(routeData?.tripIndex) === selectedRouteIndex + 1,
+    )?.[1] ||
     null;
   useEffect(() => {
     if (!activeRouteResult) return;
@@ -522,13 +527,13 @@ const MultiCityTrip = ({
   const visibleFlights =
     activeRouteResult?.multi?.length > 0
       ? activeRouteResult.multi
-      : selectedRouteIndex === 0
+      : !hasRouteResults && selectedRouteIndex === 0
         ? resolvedFlightResults
         : [];
   const visibleTripCards =
     activeRouteResult?.multiTripCards?.length > 0
       ? activeRouteResult.multiTripCards
-      : selectedRouteIndex === 0
+      : !hasRouteResults && selectedRouteIndex === 0
         ? resolvedTripCards
         : [];
   const parseTimeToMinutes = (value = "") => {
@@ -653,7 +658,12 @@ const MultiCityTrip = ({
     price: activeSortHighlights?.fastest?.priceLabel || "N/A",
     duration: activeSortHighlights?.fastest?.durationLabel || "N/A",
   };
-  const totalResults = Number(pagination?.total || 0);
+  const totalResults = Number(
+    activeRouteResult?.meta?.total ??
+      activeRouteResult?.multi?.length ??
+      pagination?.total ??
+      0,
+  );
   const resultsText = `Total ${totalResults} result${totalResults === 1 ? "" : "s"}`;
   const applyQuickSort = (type) => {
     const targetSortBy = type === "cheapest" ? "lowest" : "shortest";
@@ -809,7 +819,7 @@ const MultiCityTrip = ({
           <FareComparisonModalMulticity
             isOpen={fareModalOpen}
             onClose={() => setFareModalOpen(null)}
-            flightData={resolvedFlightResults.find((f) => f.id === fareModalOpen)}
+            selectedRoutes={selectedCards}
           />
         }
         {selectedCards.length > 0 && (
