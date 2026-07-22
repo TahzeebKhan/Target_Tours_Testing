@@ -15,7 +15,10 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
-import { getFareOptionItems } from "../onewayTrip/fareOptionsStreaming";
+import {
+  getFareOptionItems,
+  mergeProviderFareOptionResponses,
+} from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -474,7 +477,7 @@ const FareComparisonModalRoundTrip = ({
     return: null,
   });
   const [fareOptionsPayloads, setFareOptionsPayloads] = useState({
-    onward: prefetchedData?.fareOptionsResponse || null,
+    onward: null,
     return: null,
   });
   const [fareOptionsLoading, setFareOptionsLoading] = useState({
@@ -482,7 +485,7 @@ const FareComparisonModalRoundTrip = ({
     return: false,
   });
   const [fareOptionsResolved, setFareOptionsResolved] = useState({
-    onward: Boolean(prefetchedData?.fareOptionsResponse),
+    onward: false,
     return: false,
   });
 
@@ -495,12 +498,12 @@ const FareComparisonModalRoundTrip = ({
     if (!isOpen) return;
 
     setFareOptionsPayloads({
-      onward: prefetchedData?.fareOptionsResponse || null,
+      onward: null,
       return: null,
     });
     setFareOptionsLoading({ onward: false, return: false });
     setFareOptionsResolved({
-      onward: Boolean(prefetchedData?.fareOptionsResponse),
+      onward: false,
       return: false,
     });
     setSelected("onward");
@@ -518,21 +521,34 @@ const FareComparisonModalRoundTrip = ({
       try {
         setFareOptionsLoading((prev) => ({ ...prev, [leg]: true }));
         const legRequest = buildLegFareOptionsRequest(priceRequest, leg, flightNos);
+        const legFlight = buildLegFareOptionsFlightData(flightData, leg, flightNos);
+        const legFlightNo =
+          legFlight?.booking?.flightNo ||
+          legFlight?.details?.flightNo ||
+          legFlight?.airlines?.[0]?.flightNo ||
+          legFlight?.airlines?.[0]?.code;
         const response = await getFlightFareOptions({
           searchParams,
           request: legRequest,
-          flight: buildLegFareOptionsFlightData(flightData, leg, flightNos),
+          flight: legFlight,
           onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
             if (cancelled || !accumulatedPayload) return;
             setFareOptionsPayloads((prev) => ({
               ...prev,
-              [leg]: accumulatedPayload,
+              [leg]: mergeProviderFareOptionResponses(
+                prev[leg],
+                accumulatedPayload,
+                legFlightNo
+              ),
             }));
           },
         });
 
         if (cancelled) return;
-        setFareOptionsPayloads((prev) => ({ ...prev, [leg]: response }));
+        setFareOptionsPayloads((prev) => ({
+          ...prev,
+          [leg]: mergeProviderFareOptionResponses(prev[leg], response, legFlightNo),
+        }));
       } catch (error) {
         if (!cancelled) {
           console.error(`Failed to load ${leg} round-trip fare options`, error);
@@ -703,9 +719,7 @@ const FareComparisonModalRoundTrip = ({
   const activeSegment = flightSegments[selected];
   const { flight } = activeSegment;
   const fareSourcePayload =
-    fareOptionsPayloads[selected] ||
-    (selected === "onward" ? prefetchedData?.fareOptionsResponse : null) ||
-    null;
+    fareOptionsPayloads[selected] || null;
   const fareOptionsFlightData = React.useMemo(() => {
     return buildLegFareOptionsFlightData(flightData, selected, flightNos);
   }, [flightData, flightNos, selected]);
@@ -958,8 +972,8 @@ const FareComparisonModalRoundTrip = ({
                 </div>
               </div>
             ))}
-            {isFareOptionsLoading
-              ? renderLoadingCards(styles, hasFareOptionItems ? 1 : 3)
+            {isFareOptionsLoading && fares.length === 0
+              ? renderLoadingCards(styles, 3)
               : null}
           </div>
         </div>

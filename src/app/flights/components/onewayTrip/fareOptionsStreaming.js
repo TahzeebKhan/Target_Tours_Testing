@@ -395,6 +395,64 @@ export const mergeFareOptionResponses = (previousPayload, nextPayload, flightNo)
   };
 };
 
+const getFareOptionsEventType = (payload) =>
+  String(payload?.type || payload?.data?.type || "").trim().toUpperCase();
+
+export const mergeProviderFareOptionResponses = (
+  previousPayload,
+  streamedPayload,
+  flightNo
+) => {
+  const providerPayloads = [];
+  const addProviderPayload = (payload) => {
+    if (getFareOptionsEventType(payload).includes("FARE_OPTIONS_PROVIDER")) {
+      providerPayloads.push(payload);
+    }
+  };
+
+  addProviderPayload(streamedPayload);
+  [streamedPayload?.pricingChunks, streamedPayload?.data?.pricingChunks].forEach(
+    (chunks) => toArray(chunks).forEach(addProviderPayload)
+  );
+
+  const mergedPayload = providerPayloads.reduce(
+    (mergedPayload, providerPayload) =>
+      mergeFareOptionResponses(mergedPayload, providerPayload, flightNo),
+    previousPayload
+  );
+  const isCombinedRoundTripFare = (fare) =>
+    [
+      fare?.FCType,
+      fare?.FCGroup,
+      fare?.FareType,
+      fare?.fareType,
+      fare?.FareName,
+      fare?.DisplayName,
+      fare?.name,
+      fare?.Name,
+    ].some((value) => String(value || "").trim().toUpperCase() === "RT");
+  const providerFares = getFareOptionItems(mergedPayload, flightNo).filter(
+    (fare) => !isCombinedRoundTripFare(fare)
+  );
+  const response = unwrapPayload(mergedPayload);
+  const flightKey = getFlightKey(flightNo);
+  const merged = {
+    ...(response?.merged || {}),
+    ...(flightKey ? { [flightKey]: providerFares } : {}),
+  };
+
+  return {
+    ...response,
+    merged,
+    flights: providerFares,
+    data: {
+      ...(response?.data || {}),
+      merged,
+      flights: providerFares,
+    },
+  };
+};
+
 export const getCachedFareOptionsRequest = (key, request) => {
   const requestKey = String(key || "").trim();
   if (!requestKey) return request();
