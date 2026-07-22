@@ -8,8 +8,8 @@ const toArray = (value) => (Array.isArray(value) ? value : []);
 
 const getFlightKey = (flightNo) => String(flightNo || "").trim();
 
-const getItemKey = (item, index) =>
-  String(
+const getItemKey = (item, index) => {
+  const identityParts = [
     item?.fare_id ??
       item?.FareId ??
       item?.fareId ??
@@ -18,14 +18,34 @@ const getItemKey = (item, index) =>
       item?.index ??
       item?.Index ??
       item?.flightId ??
-      item?.price ??
-      item?.Price ??
-      item?.FCType ??
+      "",
+    item?.FCType ??
+      item?.FCGroup ??
       item?.FareType ??
+      item?.fareType ??
       item?.FareName ??
+      item?.DisplayName ??
+      item?.name ??
       item?.Name ??
-      index
+      "",
+    item?.price ??
+      item?.Price ??
+      item?.netAmount ??
+      item?.NetAmount ??
+      item?.grossFare ??
+      item?.GrossFare ??
+      item?.totalFare ??
+      item?.TotalFare ??
+      "",
+  ];
+  const populatedParts = identityParts.filter(
+    (value) => value !== undefined && value !== null && String(value).trim() !== ""
   );
+
+  return populatedParts.length >= 2
+    ? identityParts.join("|")
+    : JSON.stringify(item) || String(index);
+};
 
 const isMetadataOnlyObject = (item = {}) => {
   const keys = Object.keys(item);
@@ -351,14 +371,25 @@ export const mergeFareOptionResponses = (previousPayload, nextPayload, flightNo)
     mergedItems.push(item);
   });
 
+  const previousResponse = unwrapPayload(previousPayload);
+  const nextResponse = unwrapPayload(nextPayload);
+  const flightKey = getFlightKey(flightNo);
+  const merged = {
+    ...(previousResponse?.merged || {}),
+    ...(nextResponse?.merged || {}),
+    ...(flightKey ? { [flightKey]: mergedItems } : {}),
+  };
+
   return {
-    ...unwrapPayload(previousPayload),
-    ...unwrapPayload(nextPayload),
+    ...previousResponse,
+    ...nextResponse,
     cached: isFareOptionsCached(nextPayload) || isFareOptionsCached(previousPayload),
+    merged,
     flights: mergedItems,
     data: {
-      ...(unwrapPayload(previousPayload)?.data || {}),
-      ...(unwrapPayload(nextPayload)?.data || {}),
+      ...(previousResponse?.data || {}),
+      ...(nextResponse?.data || {}),
+      merged,
       flights: mergedItems,
     },
   };

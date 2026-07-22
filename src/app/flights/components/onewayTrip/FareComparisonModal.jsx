@@ -15,9 +15,9 @@ import {
     writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import {
-    getCachedFareOptionsRequest,
     getFareOptionItems,
     isFareExpiredPayload,
+    mergeFareOptionResponses,
 } from "./fareOptionsStreaming";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
@@ -452,8 +452,8 @@ const getRuleLabel = (fare, type, fallback) => {
     return fallback;
 };
 
-const renderLoadingCards = (styles) =>
-    Array.from({ length: 3 }).map((_, index) => (
+const renderLoadingCards = (styles, count = 3) =>
+    Array.from({ length: count }).map((_, index) => (
         <div key={index} className={styles.loadingCard}>
             <div className={styles.loadingHeader}>
                 <div className={styles.skeletonLogo} />
@@ -493,6 +493,10 @@ export const buildFareOptions = ({
             flightData?.airlines?.[0]?.code
         )
     );
+    console.log("[fare-options:ui] buildFareOptions", {
+        flightNo: flightData?.booking?.flightNo,
+        fareOptionItems: fareOptionItems.length,
+    });
     const safeAdults = Math.max(Number(adults || 1), 1);
 
     if (fareOptionItems.length > 0) {
@@ -654,7 +658,9 @@ const FareComparisonModal = ({
 
         setFareOptionsPayload(prefetchedData?.fareOptionsResponse || null);
         setIsPollingFareOptions(false);
-        setHasResolvedFareOptions(Boolean(prefetchedData?.fareOptionsResponse));
+        setHasResolvedFareOptions(
+            Boolean(prefetchedData?.fareOptionsResponse) && !isLoadingFareOptions
+        );
 
         const priceRequest = flightData?.booking?.priceRequest;
         if (!priceRequest) {
@@ -667,14 +673,34 @@ const FareComparisonModal = ({
         const loadFareOptions = async () => {
             try {
                 setIsPollingFareOptions(true);
-                const response = await getCachedFareOptionsRequest(
-                    `pricing-v2:${priceRequest?.search_key || flightData?.id || "fare-options"}:${flightNo || "all"}`,
-                    () => getFlightFareOptions({
-                        searchParams,
-                        request: priceRequest,
-                        flight: flightData,
-                    })
-                );
+                const response = await getFlightFareOptions({
+                    searchParams,
+                    request: priceRequest,
+                    flight: flightData,
+                    onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+                        if (cancelled || !accumulatedPayload) return;
+                        console.log("[fare-options:ui] onFareOptionsEvent", {
+                            eventType: _eventPayload?.type || _eventPayload?.data?.type,
+                            accumulatedItems: getFareOptionItems(
+                                accumulatedPayload,
+                                flightNo
+                            ).length,
+                        });
+                        setFareOptionsPayload((previousPayload) => {
+                            const mergedPayload = mergeFareOptionResponses(
+                                previousPayload,
+                                accumulatedPayload,
+                                flightNo
+                            );
+                            console.log("[fare-options:ui] setFareOptionsPayload", {
+                                previousItems: getFareOptionItems(previousPayload, flightNo).length,
+                                nextItems: getFareOptionItems(accumulatedPayload, flightNo).length,
+                                mergedItems: getFareOptionItems(mergedPayload, flightNo).length,
+                            });
+                            return mergedPayload;
+                        });
+                    },
+                });
 
                 if (cancelled) return;
 
@@ -683,7 +709,9 @@ const FareComparisonModal = ({
                     return;
                 }
 
-                setFareOptionsPayload(response);
+                setFareOptionsPayload((previousPayload) =>
+                    mergeFareOptionResponses(previousPayload, response, flightNo)
+                );
             } catch (error) {
                 if (!cancelled) {
                     console.error("Failed to refresh fare options", error);
@@ -794,17 +822,26 @@ const FareComparisonModal = ({
     const fareSourcePayload = fareOptionsPayload || prefetchedData?.fareOptionsResponse || null;
     const hasFareOptionItems = getFareOptionItems(fareSourcePayload, flightNo).length > 0;
     const isStreamingFareOptions = isLoadingFareOptions || isPollingFareOptions;
-    const showFareSkeleton = !hasResolvedFareOptions && !hasFareOptionItems;
-    const fareOptions = !hasResolvedFareOptions && !hasFareOptionItems
-        ? []
-        : buildFareOptions({
+    const fareOptions = hasFareOptionItems
+        ? buildFareOptions({
             flightData,
             prefetchedData: {
                 ...(prefetchedData || {}),
                 fareOptionsResponse: fareSourcePayload,
             },
             adults: searchParams?.get("adults") || 1,
-        });
+        })
+        : [];
+    const showFareSkeleton =
+        fareOptions.length === 0 &&
+        (isStreamingFareOptions || !hasResolvedFareOptions);
+    console.log("[fare-options:ui] render", {
+        flightNo,
+        hasFareOptionItems,
+        cards: fareOptions.length,
+        isStreamingFareOptions,
+        hasResolvedFareOptions,
+    });
     const showEmptyFareOptions =
         hasResolvedFareOptions && !isStreamingFareOptions && fareOptions.length === 0;
 
@@ -815,7 +852,9 @@ const FareComparisonModal = ({
             ref={inline ? fareCardsRef : null}
             className={`${styles.fareCards} ${inline ? styles.inlineFareCards : ""}`}
         >
-            {showFareSkeleton ? renderLoadingCards(styles) : null}
+            {showFareSkeleton
+                ? renderLoadingCards(styles, 3)
+                : null}
             {showEmptyFareOptions ? (
                 <div className={styles.emptyFareOptions}>
                     No fare option available

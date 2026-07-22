@@ -127,3 +127,14 @@
   .tableHeader span:nth-child(n+3),
   .tableRow span:nth-child(n+3) { display: none; }
 }
+.rawText {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #e1e5ef;
+  background: #f8f9fc;
+  color: #20243a;
+  font: inherit;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

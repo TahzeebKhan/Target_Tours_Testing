@@ -17,6 +17,17 @@ const getRoutePolicies = (fareRulesData) => {
   const rules = fareRulesData?.data?.rules;
   if (!rules || typeof rules !== "object" || Array.isArray(rules)) return [];
 
+  if (typeof rules?.FareRuleText === "string" && rules.FareRuleText.trim()) {
+    return [{
+      route: rules?.FareRuleStock || "Fare Rules",
+      fareRules: [{
+        remark: "",
+        rawText: rules.FareRuleText.trim(),
+        groups: [],
+      }],
+    }];
+  }
+
   return Object.entries(rules).map(([route, fareRules]) => ({
     route,
     fareRules: toArray(fareRules).map((fareRule) => ({
@@ -63,6 +74,9 @@ const CancellationPolicyModal = ({ fareRulesData, onClose }) => {
               {policy.fareRules.map((fareRule, fareIndex) => (
                 <div key={`${policy.route}-${fareIndex}`}>
                   {fareRule.remark && <p className={styles.remark}>{fareRule.remark}</p>}
+                  {fareRule.rawText && (
+                    <pre className={styles.rawText}>{fareRule.rawText}</pre>
+                  )}
                   {fareRule.groups.map((group, groupIndex) => (
                     <div className={styles.ruleGroup} key={`${group.head}-${groupIndex}`}>
                       <h4>{group.head}</h4>
