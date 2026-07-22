@@ -1,0 +1,264 @@
+.month {
+  color: #000000;
+  font-family: Inter;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 0px;
+}
+
+.header h4 {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  color: #000000;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  margin-right: auto;
+  color: #FFFFFF;
+}
+
+.arrow {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  margin-right: auto;
+  justify-self: flex-start;
+  /* padding: 5px; */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 0.6px solid #FFFFFF;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.arrow svg path {
+  transition: all 0.3s ease;
+  fill: #FFFFFF;
+}
+
+.arrow:hover {
+  background: #FFFFFF;
+  border: 0.6px solid #FFFFFF
+}
+
+.arrow:hover svg path {
+  fill: #000000;
+}
+
+.arrowRight {
+  margin-left: auto;
+  margin-right: unset;
+}
+
+.rightHeading {
+  margin-left: auto;
+  margin-right: unset !important;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: #000000;
+  font-family: Inter;
+  column-gap: 14px;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: capitalize;
+  padding: 0px 7px;
+}
+
+.weekdays>span {
+  font-size: var(--font-inter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 18px;
+  color: #FFFFFF;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8px;
+  column-gap: px;
+}
+
+.grid>div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+}
+
+.RangeStartCell {
+  background-color: #FCC800 !important;
+}
+
+.RangeStartCell .day {
+  color: #000033 !important;
+  font-weight: 400 !important;
+}
+
+.RangeEndCell .day {
+  color: #000033 !important;
+}
+
+.RangeStartCell .price {
+  /* display: none !important; */
+  color: #14532D !important;
+}
+
+.RangeEndCell .price {
+  /* display: none !important; */
+  color: #14532D !important;
+}
+
+.RangeEndCell {
+  background-color: #FCC800 !important;
+}
+
+.RangeStartCell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background-color: #171717;
+}
+
+.RangeEndCell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  background-color: #171717;
+}
+
+.cell {
+  /* padding: 6px; */
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 32px;
+  height: 30px;
+  transition: all 0.6s ease;
+}
+
+.cell:hover {
+  background: #FCC800;
+}
+
+.cell:hover .day {
+  color: #000000;
+}
+
+.cell:hover .price {
+  color: #14532D;
+}
+
+.selected {
+  background: #FCC800;
+}
+
+.selected .day {
+  color: #000033 !important;
+}
+
+.range {
+  background: rgba(252, 200, 0, 0.22);
+}
+
+.day {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: Inter;
+  color: #FFFFFF;
+  transition: all 0.6s ease;
+}
+
+.price {
+  font-size: 8px;
+  font-weight: 500;
+  color: #3d6823;
+  transition: all 0.6s ease;
+}
+
+.muted {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.muted .day {
+  font-weight: 400 !important;
+}
+
+.sundayDate .day {
+  color: #ef4444 !important;
+}
+
+.muted .price {
+  display: none;
+}
+
+.satuday::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7px;
+  height: 100%;
+  background-color: #171717;
+}
+
+.sunday {
+  font-size: var(--font-inter);
+  color: #EF4444 !important;
+}
+
+.sunday::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7px;
+  height: 100%;
+  background-color: #171717;
+}
+
+.white {
+  height: 100%;
+  width: 6px;
+}
+
+.priceGreen {
+  color: #4ADE80;
+  /* your existing green */
+}
+
+.priceRed {
+  color: #EF4444;
+  /* red-600 (matches airline UI) */
+}

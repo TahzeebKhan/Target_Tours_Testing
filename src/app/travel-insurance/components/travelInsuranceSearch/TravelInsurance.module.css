@@ -1,0 +1,251 @@
+.glass_panel {
+  margin-top: 44px;
+  max-width: 1200px;
+  width: 100%;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  color: #fff;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+}
+
+.fromBtn {
+  /* height: 54px; */
+  width: 100%;
+  max-width: 262px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 0.5px solid #e6e8ec;
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  gap: 5px;
+  flex: 1;
+}
+
+.contant::placeholder {
+  color: #ffffff;
+}
+
+.fromBtn,
+.fromBtn2 {
+  /* width: 245.5px; */
+}
+
+.lable {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #c4c4c4;
+}
+
+.contant {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+}
+
+.dateInputWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendarIcon {
+  cursor: pointer;
+}
+
+.iconCont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chevron {
+  transition: transform 0.3s ease;
+}
+
+.openChevron {
+  transform: rotate(180deg);
+}
+
+.searchBtn {
+  min-width: 56px;
+  height: auto;
+  background: #000033;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  text-transform: uppercase;
+  transition: all 0.5s ease;
+}
+.searchBtn svg path {
+  transition: all 0.5s ease;
+}
+.searchBtn:hover {
+  background: #ffffff;
+  color: #000033;
+}
+
+.searchBtn:hover svg path {
+  fill: #000033;
+}
+
+.dateGroup {
+  position: relative;
+  display: flex;
+  gap: 12px;
+}
+
+.dateGroup .fromBtn {
+  flex: 1;
+}
+.destinationDropdown {
+  position: absolute;
+  top: calc(100% + 6px); /* ⬇️ below the button */
+  left: 0;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 8px 0;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.destinationItem {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.destinationItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.calendarAnchor {
+  position: relative;
+}
+.dateGroup {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+.calendarContainer {
+  position: absolute;
+  height: 100%;
+  left: 50%;
+  width: 100%;
+}
+@media (max-width: 991px) {
+  .fromBtn,
+  .fromBtn2 {
+    flex: 1 1 0;
+    min-width: 262px;
+    max-width: unset;
+  }
+  .searchBtn {
+    height: 58px;
+  }
+  .dateGroup {
+    width: 100%;
+  }
+  .dateGroup .fromBtn {
+    flex: 1 1 0;
+  }
+  .searchRow {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 1197px) {
+  .calendarContainer {
+    left: 34.7%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1156px) {
+    .calendarContainer {
+    left: 38.8%
+  }
+}
+@media (max-width: 1024px) {
+  .glass_panel {
+    max-width: 900px;
+    padding: 18px;
+  }
+
+  .searchRow {
+    gap: 10px;
+  }
+
+  .fromBtn {
+    padding: 8px 10px;
+    width: 180px;
+  }
+
+  .contant {
+    font-size: 13px;
+  }
+
+  .searchBtn {
+    /* min-width: 110px; */
+    font-size: 13px;
+  }
+  .calendarContainer {
+    display: none;
+  }
+}
+
+@media (max-width: 950px) {
+  .glass_panel {
+    margin-top: 32px;
+    padding: 0 16px;
+    max-width: 100%;
+    background: none;
+    border: none;
+  }
+
+  .dateGroup {
+    flex-direction: column;
+  }
+
+  .searchRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fromBtn,
+  .fromBtn2 {
+    width: 100%;
+    min-width: unset;
+    height: 51px;
+  }
+
+  .searchBtn {
+    width: 100%;
+    height: 48px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .glass_panel {
+    margin-top: 37px;
+    padding: 0px;
+    max-width: 100%;
+    background: none;
+    border: none;
+  }
+}

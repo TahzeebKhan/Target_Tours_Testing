@@ -1,0 +1,923 @@
+.tourListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.card {
+  /* max-width: 518px; */
+  width: 47%;
+  min-height: 350px;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.gridWrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 350px;
+  /* ✅ Fixed height for gradient only */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+.itemImage {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  background-position: center;
+}
+
+.cardItems {
+  width: 100%;
+  height: 350px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cardItemHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.heartIcon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+.ListViewHeartIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+}
+.CardViewCardHeader {
+  padding: 14px 20px !important;
+}
+
+.new {
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fcc800;
+
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+}
+
+.private {
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+}
+
+.cardItemCenterTextContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-direction: column;
+  gap: 31px;
+
+  margin-top: 55px;
+}
+
+.cardItemCenterText {
+  max-width: 370px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardItemCenterTextPara {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+}
+
+.cardItemCenterTextHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+}
+
+.cardFooter {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoRow span {
+  max-width: 185px;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 0px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #ffffff;
+}
+
+.bottomRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.price {
+  display: flex;
+  align-items: end;
+  color: #ffffff;
+  gap: 4px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price strong {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 16px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.viewDetails {
+  padding: 5px 0px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* <====================ListView Css====================> */
+.ListViewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ListViewCardContainer {
+  display: flex;
+  gap: 24px;
+  background-color: #ffffff;
+  transition: all 0.45s ease;
+}
+.ListViewCardContainer:hover {
+  box-shadow: 0px 1px 18.6px 0px #00000017;
+}
+
+.ListViewCardImageContainer {
+  max-width: 320px;
+  width: 100%;
+  height: 285px;
+  object-fit: cover;
+  background-position: center;
+  position: relative;
+}
+
+.ListViewCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-position: center;
+}
+
+.cartListTop {
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+.ListViewCardHeader {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 16px;
+}
+
+.ListViewCardText {
+  width: 100%;
+  padding: 24px 24px 24px 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ListViewCardTextTop {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.topTextHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.topTextHead h2 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+.featuresCont {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.featureItem p {
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+.featureItem span {
+  height: 5px;
+  background-color: #000000;
+  border-radius: 50%;
+  width: 5px;
+}
+.freeList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.freeList li {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #006e96;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tickCont {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.topTextHeadAddress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topTextHeadAddress img {
+  width: 18px;
+  height: 18px;
+}
+
+.topTextHeadAddress span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #4a5565;
+}
+
+.tagsContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag {
+  padding: 4px 9px;
+  background-color: #eff6ff;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  color: #000000;
+}
+
+.ListViewCardTextTopBottom {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.bottomItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  color: #006e96;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.infoRowGrid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.infoItem {
+  max-width: 210px;
+  width: 100%;
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 6px 0px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.ListViewCardTextBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.priceContainer {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+}
+
+.priceSec {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  text-align: end;
+  color: #000000;
+}
+
+.priceSec span {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #767676;
+}
+
+.totalPrice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.29;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #767676;
+}
+
+.totalPrice span {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #767676;
+}
+
+.bookNowBtn {
+  max-width: 210px;
+  width: 100%;
+  height: 41px;
+  padding: 12px 24px;
+  background-color: #000033;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.expandableContainer {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  z-index: 3;
+}
+
+.expandableContent {
+  padding: 14px 0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.expandableTopContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 0px 16px;
+}
+
+.expandableTop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expandableTopHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 18px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style-type: disc;
+  padding-left: 16px;
+}
+
+.list li {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.expandableCenter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expandableRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.expandableItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expandableItem span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #006e96;
+}
+
+.hr {
+  border: 0.5px solid #e4e6e8;
+}
+
+.expandableFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 16px;
+}
+
+.expandableFooterText {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+
+.expandableFooterText span {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.bookNow {
+  padding: 12px 24px;
+  background-color: #000033;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.bookNow:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.gridCard {
+  max-width: 446px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  transition: all 0.45s ease;
+}
+.gridCard:hover {
+  box-shadow: 0px 1px 18.6px 0px #00000017;
+}
+.gridCardImage {
+  position: relative;
+  width: 100%;
+  height: 285px;
+}
+.ListViewCardImage {
+  width: 100%;
+  height: 100%;
+}
+.gridCardText {
+  /* height: 285px; */
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.tourListSectionMobileView {
+  display: none;
+}
+
+@media (max-width: 1870px) {
+  .gridCardText {
+    height: auto;
+  }
+}
+@media (max-width: 1747px) {
+  .gridCardText {
+    padding: 22px;
+  }
+  .topTextHead h2 {
+    font-size: 19px;
+  }
+  .bookNowBtn {
+    max-width: 177px;
+    padding: 12px 9px;
+  }
+}
+
+@media (max-width: 1665px) {
+  .topTextHead h2 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 1600px) {
+  .topTextHead h2 {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 1520px) {
+  .gridCardText {
+    padding: 20px 16px;
+  }
+}
+@media (max-width: 1480px) {
+  .ListViewCardTextTop {
+    gap: 9px;
+  }
+  .gridCardText {
+    gap: 16px;
+    padding: 16px 16px;
+  }
+  .topTextHead h2 {
+    font-size: 16px;
+  }
+  .priceSec {
+    font-size: 26px;
+  }
+  .totalPrice span {
+    font-size: 13px;
+  }
+  .gridWrapper {
+    gap: 16px;
+  }
+  .bookNowBtn {
+    max-width: 144px;
+  }
+}
+@media (max-width: 1440px) {
+  .ListViewCardImageContainer {
+    height: auto;
+  }
+  .ListViewCardText {
+    justify-content: space-between;
+  }
+}
+@media (max-width: 1400px) {
+  .topTextHeadAddress span {
+    font-size: 11px;
+  }
+  .tourLayout {
+    gap: 16px;
+  }
+  .featureItem p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1386px) {
+  .gridCardText {
+    padding: 16px 0px;
+  }
+  /* .topTextHead h2{
+        font-size: 14px;
+    } */
+}
+
+@media (max-width: 1280px) {
+  .bookNowBtn {
+    max-width: 133px;
+    font-size: 12px;
+  }
+  .tourLayout {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 1168px) {
+  .topTextHead h2 {
+    font-size: 14px;
+  }
+  .topTextHeadAddress img {
+    width: 16px;
+    height: 16px;
+  }
+  .priceSec {
+    font-size: 24px;
+  }
+  .totalPrice span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .bookNowBtn {
+    max-width: 124px;
+  }
+  .priceSec {
+    font-size: 22px;
+  }
+  .totalPrice span {
+    font-size: 11px;
+  }
+  .gridWrapper {
+    /* grid-template-columns: repeat(1, 1fr); */
+  }
+  .ListViewCardContainer {
+    gap: 16px;
+  }
+  .ListViewCardText {
+    padding-right: 16px;
+  }
+  .ListViewCardImageContainer {
+    max-width: 212px;
+  }
+  .ListViewCardHeader {
+    padding: 10px 8px;
+  }
+}
+
+/* @media (max-width: 1024px) {
+    
+} */
+
+@media (max-width: 991px) {
+  .ListViewCardImageContainer {
+    max-width: 198px;
+  }
+  .ListViewCardText {
+    padding: 16px;
+    padding-left: 0;
+    gap: 14px;
+  }
+  .ListViewCardContainer {
+    gap: 12px;
+  }
+  .ListViewBookNowBtn {
+    max-width: 120px;
+    font-size: 10px;
+    height: 34px;
+  }
+  .gridWrapper {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .gridCard {
+    max-width: 100%;
+  }
+  .gridCardText {
+    gap: 6px;
+  }
+  .bookNowBtn {
+    max-width: 210px;
+    font-size: 14px;
+  }
+  .priceSec {
+    font-size: 24px;
+    margin-left: 31px;
+  }
+  .totalPrice,
+  .topTextHeadAddress span {
+    font-size: 12px;
+  }
+  .featureItem p {
+    font-size: 14px;
+  }
+  .topTextHead h2 {
+    font-size: 16px;
+  }
+  .gridWrapper {
+    gap: 32px;
+  }
+  .totalPrice span {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    
+    line-height: 14px;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #767676;
+  }
+}

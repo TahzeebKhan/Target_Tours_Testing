@@ -1,0 +1,24 @@
+
+.continueButtonContainer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+.continueButton{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;  
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+}

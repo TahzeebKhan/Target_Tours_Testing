@@ -1,0 +1,1527 @@
+.tourListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.emptyState {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  border: 1px solid #e6e6e6;
+  background: #ffffff;
+  color: #1a1f36;
+  font-family: Antic Didone;
+  font-size: 28px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.skeletonCard,
+.skeletonListCard {
+  width: 100%;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.skeletonCard {
+  max-width: 518px;
+  min-height: 350px;
+  position: relative;
+}
+
+.skeletonListCard {
+  min-height: 322px;
+  display: flex;
+  gap: 24px;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 350px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.25s ease-in-out infinite;
+}
+
+.skeletonListCard .skeletonImage {
+  max-width: 420px;
+  height: auto;
+  min-height: 322px;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.skeletonCard .skeletonContent {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 20px;
+  background: linear-gradient(to top, #ffffff 0%, rgba(255, 255, 255, 0.88) 72%, rgba(255, 255, 255, 0) 100%);
+}
+
+.skeletonListCard .skeletonContent {
+  flex: 1;
+  justify-content: center;
+}
+
+.skeletonLine,
+.skeletonButton {
+  display: block;
+  height: 14px;
+  max-width: 180px;
+  width: 58%;
+  background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.25s ease-in-out infinite;
+}
+
+.skeletonLineWide {
+  max-width: 320px;
+  width: 88%;
+  height: 28px;
+}
+
+.skeletonFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.skeletonButton {
+  max-width: 110px;
+  width: 34%;
+  height: 36px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* COMMON animation
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* GRID VIEW animation */
+/* .cardContainer {
+  animation: slideUpFade 0.45s ease-out;
+} */
+
+/* LIST VIEW animation */
+/* .ListViewWrapper {
+  animation: slideUpFade 0.45s ease-out;
+} */
+
+.card {
+  max-width: 518px;
+  width: 100%;
+  min-height: 350px;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 350px;
+  /* ✅ Fixed height for gradient only */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+.itemImage {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  background-position: center;
+}
+
+.cardItems {
+  width: 100%;
+  height: 350px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cardItemHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.heartIcon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+}
+
+.new {
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fcc800;
+
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+}
+
+.private {
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+}
+
+.cardItemCenterTextContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-direction: column;
+  gap: 31px;
+
+  margin-top: 55px;
+}
+
+.cardItemCenterText {
+  max-width: 370px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardItemCenterTextPara {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+}
+
+.cardItemCenterTextHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+}
+
+.cardFooter {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoRow span {
+  max-width: 185px;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 0px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  color: #ffffff;
+}
+
+.bottomRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.price {
+  display: flex;
+  align-items: end;
+  color: #ffffff;
+  gap: 4px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price strong {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 16px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.viewDetails {
+  padding: 5px 0;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  font-family: var(--font-inter);
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0);
+  transition: text-decoration-color 0.3s ease;
+}
+
+.viewDetails:hover {
+  text-decoration-color: rgba(255, 255, 255, 1);
+}
+
+/* <====================ListView Css====================> */
+.ListViewWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ListViewCardContainer {
+    /* height: 322px; */
+    display: flex;
+    gap: 24px;
+    background-color: #FFFFFF;
+
+}
+
+.ListViewCardImageContainer {
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+}
+
+.ListViewCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-position: center;
+}
+
+.cartListTop {
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+.ListViewCardHeader {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 16px;
+}
+
+.ListViewCardText {
+  width: 100%;
+  padding: 24px 24px 24px 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ListViewCardTextTop {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.topTextHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topTextHead h2 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.topTextHeadAddress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topTextHeadAddress img {
+  width: 18px;
+  height: 18px;
+}
+
+.topTextHeadAddress span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #4a5565;
+}
+
+.tagsContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag {
+  padding: 4px 9px;
+  background-color: #eff6ff;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  color: #000000;
+}
+
+.ListViewCardTextTopBottom {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    /* justify-content: start; */
+    gap: 20px;
+}
+
+.bottomItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1.18;
+  color: #006e96;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.infoRowGrid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.infoItem {
+  max-width: 210px;
+  width: 100%;
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 6px 0px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.ListViewCardTextBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.priceSec {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.priceSec span {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #767676;
+}
+
+.totalPrice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.29;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #767676;
+  justify-content: flex-end;
+}
+
+.totalPrice span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #0a0a0a;
+}
+
+.bookNowBtn {
+  max-width: 210px;
+  width: 100%;
+  height: 41px;
+  padding: 12px 24px;
+  background-color: #000033;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.expandableContainer {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  z-index: 3;
+}
+
+.expandableContent {
+  padding: 14px 0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.expandableTopContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 0px 16px;
+}
+
+.expandableTop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expandableTopHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 18px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style-type: disc;
+    padding-left: 14px;
+    flex-wrap: wrap;
+    gap: 6px 13px;
+
+
+
+}
+
+.list li {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.expandableCenter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expandableRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 0px;
+}
+
+.expandableItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expandableItem span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #006e96;
+}
+
+.hr {
+  border: 0.5px solid #e4e6e8;
+}
+
+.expandableFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 16px;
+}
+
+.expandableFooterText {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+
+.expandableFooterText span {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
+
+.bookNow {
+  padding: 12px 24px;
+  background-color: #000033;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.bookNow:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.tourListMobileSection {
+  display: none;
+}
+
+.ListViewCardContainerMobile {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  max-width: 398px;
+  width: 100%;
+}
+
+.ListViewCardImageContainerMobile {
+  max-width: unset !important;
+  width: 100% !important;
+}
+
+.ListViewWrapperMobile {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.ListViewCardTextMobile {
+  padding: 14px;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ListViewCardTextBottomMobile {
+  gap: 10px;
+}
+
+.minDash {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 15px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  position: sticky;
+  top: 62px;
+  background-color: #f9f9f9;
+  z-index: 99;
+  padding: 12px 0;
+
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.filterCard {
+  border: 1px solid #e4e6e8;
+  background-color: #ffffff;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobilePrice {
+  white-space: nowrap;
+}
+
+.ListViewCardTextTopMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tagsContainerMobile {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ListViewCardTextTopBottomMobile {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mainCotainer {
+  display: flex;
+  align-items: center;
+  gap: 8.5px;
+}
+
+.tripDetailsHeader {
+  background-color: #000033;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* Header container */
+.TripCardHeader {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Nav variant */
+.TripCardHeaderNav {
+  padding: 0;
+}
+
+/* Route section */
+.TripCardHeaderDetails {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.TripCardHeaderDetailsItemText,
+.TripCardHeaderDetailsItemCode {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* Booking info row */
+.TripCardHeaderBookingDate {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.TripCardHeaderBookingDate p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 20px;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.stickyHidden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+
+.stickyVisible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: all 0.35s ease;
+  z-index: 99;
+}
+
+/* Small dot */
+.navDot {
+  width: 4px;
+  height: 4px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+.tourListMobileWrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+}
+
+.optionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.optionSheet {
+  width: min(560px, calc(100vw - 32px));
+ 
+  overflow: hidden auto;
+  background: #ffffff;
+  padding: 32px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.optionHeader h3 {
+ font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 28px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #000033;
+}
+
+.optionClose {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #000000;
+  cursor: pointer;
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.optionCard {
+  width: 100%;
+  min-height: 165px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e3e5e8;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.optionCard:hover {
+  border-color: #000033;
+}
+
+.optionCardSelected {
+  background: #f1f6ff;
+  border-color: #000033;
+  border-width: 2px;
+}
+
+.optionRadio {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  /* margin-top: 5px; */
+  border: 2px solid #e1e4e8;
+  border-radius: 50%;
+  background: #ffffff;
+  position: relative;
+}
+
+.optionRadioSelected {
+  border-color: #000033;
+}
+
+.optionRadioSelected::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #000033;
+}
+
+.optionContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.optionTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.optionText,
+.optionPrice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.optionText {
+  gap: 5px;
+}
+
+.optionText span,
+.optionPrice span {
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #9CA3AF;
+}
+
+.optionText strong {
+font-family: Inter;
+font-weight: 700;
+font-style: Bold;
+font-size: 18px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #0F172A;
+}
+
+.optionPrice strong {
+ font-family: Inter;
+font-weight: 800;
+font-style: Extra Bold;
+font-size: 24px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #000033;
+}
+
+.optionPrice span {
+  font-family: Inter;
+font-weight: 600;
+font-style: Semi Bold;
+font-size: 12px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+color:#9CA3AF;
+}
+
+.optionPrice small {
+  font-family: Inter;
+font-weight: 500;
+font-style: Medium;
+font-size: 14px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #9CA3AF;
+}
+
+.optionBadge {
+  /* min-width: 72px; */
+  padding: 5px 12px;
+ font-family: Inter;
+font-weight: 700;
+font-style: Bold;
+font-size: 10px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.optionBadgePopular {
+  background: #000033;
+}
+
+.optionBadgeBudget {
+  background: #12b886;
+}
+
+.optionIncludes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 12px;
+}
+
+.optionIncludes span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+font-family: Inter;
+font-weight: 500;
+font-style: Medium;
+font-size: 12px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  color: #111827;
+}
+
+.optionIncludes svg {
+  /* flex: 0 0 auto; */
+  color: #000033;
+  height: 14px;
+  width: 14px;
+}
+
+.optionFooter {
+  margin-top: 32px;
+  padding-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.optionCancel,
+.optionContinue {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.optionCancel {
+  border: 1px solid #000033;
+  background: #ffffff;
+  color: #000033;
+}
+
+.optionContinue {
+  border: 1px solid #000033;
+  background: #000033;
+  color: #ffffff;
+}
+
+.optionContinue:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 1440px) {
+    .ListViewCardTextTopBottom {
+        gap: 5px;
+        /* justify-content: space-between; */
+    }
+}
+
+@media (max-width: 1400px) {
+  .ListViewCardTextTopBottom {
+    /* gap: 16px; */
+  }
+
+  .tagsContainer {
+    gap: 4px;
+  }
+
+  .ListViewCardContainer {
+    gap: 16px;
+  }
+
+  .tag {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 1367px) {
+  .cartListTop {
+    gap: 27px;
+  }
+
+  .ListViewCardImageContainer {
+    max-width: 400px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1280px) {
+  .ListViewCardImageContainer {
+    max-width: 330px;
+    width: 100%;
+  }
+
+    .ListViewCardContainer {
+        /* height: 300px; */
+    }
+
+  .ListViewCardText {
+    padding: 20px;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .ListViewCardText {
+    padding: 10px;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 1156px) {
+  .cardContainer {
+    gap: 16px;
+  }
+
+  .cardItemCenterTextContainer {
+    gap: 18px;
+  }
+
+  .cardItemCenterTextHeading {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tourListSection {
+    display: none;
+  }
+
+  .optionOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .optionSheet {
+    width: 100%;
+    max-height: 92vh;
+    padding: 28px 20px 24px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .optionHeader {
+    margin-bottom: 28px;
+  }
+
+  .optionHeader h3 {
+    font-size: 30px;
+  }
+
+  .optionList {
+    gap: 18px;
+  }
+
+  .optionCard {
+    min-height: auto;
+    padding: 22px 18px;
+    gap: 14px;
+  }
+
+  .optionCardSelected {
+    border-width: 3px;
+  }
+
+  .optionRadio {
+    width: 28px;
+    height: 28px;
+    margin-top: 8px;
+    border-width: 3px;
+  }
+
+  .optionRadioSelected::after {
+    inset: 5px;
+  }
+
+  .optionContent {
+    gap: 20px;
+  }
+
+  .optionTopRow {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .optionText span {
+    font-size: 17px;
+  }
+
+  .optionText strong {
+    font-size: 25px;
+  }
+
+  .optionPrice span {
+    font-size: 14px;
+  }
+
+  .optionPrice strong {
+    font-size: 31px;
+  }
+
+  .optionPrice small {
+    font-size: 17px;
+  }
+
+  .optionBadge {
+    min-width: 96px;
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .optionIncludes {
+    gap: 10px 16px;
+  }
+
+  .optionIncludes span {
+    font-size: 16px;
+  }
+
+  .optionFooter {
+    margin-top: 28px;
+    padding-top: 24px;
+    gap: 12px;
+  }
+
+  .optionCancel,
+  .optionContinue {
+    min-height: 54px;
+    font-size: 16px;
+  }
+
+    .tourListMobileSection {
+        display: block;
+    }
+    .priceSec{
+        font-size: 21px;
+    }
+    .bookNowBtn{
+        max-width: 138px;
+    }
+    .priceSec span{
+
+        font-size: 12px;
+    }
+    .totalPrice{
+        font-size: 12px;
+    }
+    .totalPrice span{
+        font-size: 12px;
+    }
+    .ListViewCardImageContainerMobile{
+        height: 280px;
+    }
+    .skeletonListCard {
+        min-height: auto;
+        flex-direction: column;
+        gap: 0;
+    }
+    .skeletonListCard .skeletonImage {
+        max-width: unset;
+        height: 280px;
+        min-height: 280px;
+    }
+}
+@media (max-width: 670px){
+    .topTextHead{
+        font-size: 18px;
+    }
+    .tag{
+        font-size: 10px;
+    }
+    .bottomItem{
+        font-size: 10px;
+    }
+    .bookNowBtn{
+        font-size: 12px;
+        padding: 12px 8px;
+    }
+
+}
+
+@media (max-width: 618px) {
+  .ListViewWrapperMobile {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .ListViewCardContainer {
+    max-width: unset;
+  }
+}
+
+@media (max-width: 430px) {
+  .optionHeader h3 {
+    font-size: 25px;
+  }
+
+  .optionCard {
+    padding: 18px 14px;
+  }
+
+  .optionText strong {
+    font-size: 22px;
+  }
+
+  .optionPrice strong {
+    font-size: 27px;
+  }
+
+  .optionPrice span {
+    font-size: 12px;
+  }
+
+  .optionFooter {
+    grid-template-columns: 1fr;
+  }
+
+  .bookNowBtn {
+    max-width: unset;
+  }
+  .infoRowGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .infoItem {
+    width: 100%;
+  }
+  .cartListTop {
+    gap: 12px;
+  }
+}

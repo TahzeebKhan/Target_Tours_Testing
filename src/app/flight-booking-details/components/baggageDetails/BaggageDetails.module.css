@@ -1,0 +1,531 @@
+/* Container */
+.container {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.flightExpandableContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.passengerDetailsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fromToContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.from,
+.to {
+  font-family: "Antic Didone";
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.18;
+  color: #070773;
+}
+
+/* Sub text */
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  height: fit-content;
+}
+
+.aboutFlightContainerRight span {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 100%;
+  color: #000000;
+}
+
+/* Optional utility */
+.subInfoText {
+  font-family: "Inter";
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #4A5565;
+  border-radius: 50%;
+  align-self: center;
+}
+
+/* Expandable Section */
+
+.flightExpandableCard {
+  padding: 16px 24px;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #E4E6E8;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 16px;
+
+}
+
+/* Header inside expandable */
+.flightExpandableHeader{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.flightExpandableHeader  h3{
+  font-family: "Antic Didone";
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.18;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+/* Expand animation */
+.expandWrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-in-out;
+}
+
+.expandOpen {
+  max-height: 1000px;
+}
+
+.flightActiveBorder {
+  border: 1px solid #e4e6e8;
+  transition: border 0.35s ease;
+}
+
+/* Arrow animation */
+.arrow {
+  transition: transform 0.35s ease;
+}
+
+.arrowRotate {
+  transform: rotate(180deg);
+}
+
+/* Continue Button */
+.continueButtonContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.continueButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.35s ease;
+}
+
+.continueButton:hover {
+  background-color: #FCC800;
+}
+
+.flightExpandableBottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+}
+
+.flightExpandableRows {
+  width: 100%;
+  display: flex;
+  gap: 76px;
+
+}
+
+.emptyState {
+  width: 100%;
+  min-height: 120px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.emptyIcon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.emptyTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-inter);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #111827;
+}
+
+.emptyText {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.baggageBottomCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.baggageGuide {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.CabinBaggageGuide,
+.CheckInBaggageGuide {
+  max-width: 418px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #E4E6E8;
+
+
+}
+
+.CabinBaggageGuideHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+}
+
+.CabinBaggageGuideHeader h3 {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-transform: uppercase;
+
+}
+
+.guideList {
+  display: flex;
+  flex-direction: column;
+  list-style-type: disc;
+  padding-left: 16px;
+}
+
+.guideList li {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.67;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.proTip {
+  padding: 12px 12px;
+  padding-right: 0px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #1E40AF;
+  background-color: #EFF6FF;
+}
+
+.proTipText {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #1E40AF;
+  white-space: nowrap;
+}
+
+.paraTipText {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #000000;
+}
+
+
+
+.tripDetailsContainer {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #000033;
+}
+
+.tripDetailsHeader {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.TripCard {
+  margin-bottom: 16px;
+}
+
+.tripDetails {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #FFFFFF;
+}
+
+/* @media (max-width: 1280px) {
+    .from {
+      font-size: 24px;
+    }
+} */
+.mobileView {
+  display: none;
+  flex-direction: column;
+}
+
+.mobileViewContainer {
+  padding: 16px;
+  background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 76px;
+
+  padding-bottom: 143px;
+}
+
+.mobileFlightDestinationName {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #070773;
+}
+.baggageMobileCard{
+  border: 1px solid #E4E6E8;
+  background: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+}
+.br {
+    width: 100%;
+    height: 1px;
+    /* border: .5px dashed #94A3B8; */
+    background-image: repeating-linear-gradient(to right,
+            #94A3B8 0,
+            #94A3B8 6px,
+            transparent 6px,
+            transparent 12px);
+    opacity: 0.74;
+    margin: 0 auto;
+}
+.baggageMobileItem{
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 2px;
+
+}
+.baggageMobileItems{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.baggageMobileItems .emptyState {
+  min-height: 112px;
+  padding: 18px 16px;
+}
+
+.footer {
+    padding: 24px 16px 55px;
+    background: #000033;
+    box-shadow: 0px -6px 10.2px 0px #0000001A;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9;
+}
+
+.footerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.amountSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    color: #FFFFFF;
+
+}
+
+.infoIcon {
+    border: 1.5px solid #7B8799;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #7B8799;
+}
+
+.amount {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 1.19;
+    color: #FFFFFF;
+}
+
+.continueBtn {
+    max-width: 240px;
+    width: 100%;
+    height: 48px;
+    padding: 10px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .container {
+    display: none;
+  }
+
+  .mobileView {
+    display: flex;
+  }
+  .aboutFlightContainerRight span{
+    font-size: 12px 
+  }
+
+  .flightExpandableRows{
+    flex-direction: column;
+    gap: 14px;
+  }
+  .emptyState {
+    flex-direction: column;
+    text-align: center;
+  }
+  .flightExpandableCard{
+    padding: 16px;
+
+  }
+  .baggageGuide{
+    flex-direction: column;
+  }
+
+  .CabinBaggageGuideHeader h3{
+    font-size: 12px;
+
+  }
+  .proTip{
+    align-items: start;
+  }
+  .CabinBaggageGuide, .CheckInBaggageGuide{
+    max-width: unset;
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .amountSection{
+    min-width: 148px;
+  }
+}

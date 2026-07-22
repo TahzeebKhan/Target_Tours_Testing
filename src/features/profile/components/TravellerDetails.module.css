@@ -1,0 +1,210 @@
+.container {
+  /* max-width: 600px; */
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Inter', sans-serif;
+  color: rgba(0, 0, 0, 1);
+    background: rgba(249, 249, 249, 1);
+    padding-top: 0;
+    padding-bottom: 140px;
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex: 1;
+}
+
+.stepLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  color: rgba(10, 10, 10, 1);
+}
+
+.stepDivider {
+  width: 90%;
+  height: 6px;
+  background-color: rgba(228, 230, 232, 1);
+  border-radius: 56px;
+}
+
+.stepDividerActive {
+  background-color: rgba(134, 197, 86, 1);
+}
+
+
+.mainTitle {
+  font-family: 'Antic Didone', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(0, 0, 51, 1);
+  text-transform: uppercase;
+}
+
+/* Cards */
+.card {
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background-color: #fff;
+}
+
+.extraCard {
+    gap: 16px;
+}
+
+.sectionTitle {
+  font-family: 'Antic Didone', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(7, 7, 115, 1);
+  text-transform: uppercase;
+}
+
+.summaryGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.label {
+  font-size: 15px;
+  color:rgba(67, 67, 67, 1);
+  font-weight: 400;
+}
+
+.value {
+  font-size: 15px;
+  color: rgba(0, 0, 51, 1);
+  font-weight: 500;
+}
+
+/* Accordion */
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+.arrow {
+    transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+.arrowUp {
+  transform: rotate(0deg);
+}
+
+/* Passenger List */
+.passengerList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.passengerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.passengerMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.nameBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passengerName {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 1);
+}
+
+.passengerMeta {
+  font-size: 14px;
+  color: rgba(123, 135, 153, 1);
+}
+
+.contactBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.emailText, .phoneText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 1);
+}
+
+.phoneText{
+    font-weight: 500;
+}
+
+.dashedDivider {
+  width: 100%;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(123, 135, 153, 1) 0,
+    rgba(123, 135, 153, 1) 8px,
+    transparent 8px,
+    transparent 12px
+  );
+}
+
+
+/* Responsiveness */
+@media (max-width: 400px) {
+  .passengerMain {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .contactBlock {
+    align-items: flex-start;
+  }
+  
+  .mainTitle {
+    font-size: 20px;
+  }
+}

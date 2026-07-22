@@ -1,0 +1,153 @@
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  /* max-width: 292px; */
+  width: 100%;
+  height: 436px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* LEFT COLLAGE */
+.collage {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.collage img {
+  /* max-width: 142px; */
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* RIGHT BIG IMAGES */
+.singleImage {
+  width: 100%;
+  height: 100%;
+  /* max-height: 292px; */
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* TEXT */
+.info h3 {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 15px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+}
+
+.info span {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #454c58;
+}
+.grid2 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+}
+.grdImgCIntainer{
+  height: 100%;
+}
+/* unified image height for all cards */
+.imageWrapper,
+.grid2,
+.grid3,
+.grid4 {
+  width: 100%;
+  height: 436px; /* same as design */
+}
+
+/* grid item must stretch */
+.gridItem {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* image MUST stretch */
+.gridItem img,
+.singleImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 783px) {
+  .wrapper {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .card {
+    width: 100%;
+    max-width: unset;
+    flex-direction: column-reverse;
+  }
+  .collage img {
+    max-width: unset;
+  }
+  .collage {
+    gap: 12px;
+  }
+  .info h3 {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    text-transform: capitalize;
+    
+    line-height: 28px;
+    letter-spacing: 0%;
+  }
+  .info span {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    
+    line-height: 20px;
+    letter-spacing: 0%;
+    color: #454c58;
+  }
+  .singleImage {
+    max-height: 398px;
+    height: 398px;
+  }
+}

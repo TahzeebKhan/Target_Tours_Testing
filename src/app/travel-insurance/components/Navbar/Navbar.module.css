@@ -1,0 +1,331 @@
+/* ================= HERO SECTION ================= */
+
+.homeSection {
+  position: relative;
+  width: 100%;
+  height: 656px;
+  overflow: visible;
+}
+
+/* Background video */
+.heroVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Dark overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+/* Gradient image */
+.gradient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ================= NAVBAR ================= */
+
+.navContainer {
+  width: 100%;
+  border-bottom: 1px solid #e3e3e380;
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.navbar {
+  max-width: 1520px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navRight {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+/* ================= HERO CONTENT ================= */
+
+.homePageContainer {
+  position: absolute;
+  z-index: 5;
+  top: 42px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 42px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.InspiredSection {
+  max-width: 870px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 44px;
+}
+
+.InspiredSection h1 {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 100%;
+  text-align: center;
+  text-transform: capitalize;
+  color: #ffffff;
+  max-width: 700px;
+}
+
+.InspiredSection p {
+  max-width: 636px;
+  width: 100%;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 160%;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.plans {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 11px 73px;
+
+  background-color: rgba(255, 255, 255, 1);
+  opacity: 1;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 160%;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-transform: uppercase;
+
+  color: rgba(0, 0, 51, 1);
+}
+
+/* ================= BUTTONS ================= */
+
+.glass_button {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(0.2px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+  color: #ffffff;
+  transition: all 0.45s ease;
+}
+
+.glass_button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+
+  background: conic-gradient(
+    from -90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 15%,
+    transparent 30%
+  );
+
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.glass_button:hover {
+  background-color: #ffffff;
+  color: #000033;
+}
+
+.downloadBtn {
+  padding: 8px 18px;
+  border: 0.5px solid #e4e6e8;
+  height: 37px;
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  text-transform: uppercase;
+  background: #15151512;
+  cursor: pointer;
+}
+
+.signInBtn {
+  padding: 7px 16px;
+  background-color: #000033;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.45s ease;
+}
+
+.signInBtn:hover {
+  background-color: #21347b;
+}
+
+/* ================= HAMBURGER ================= */
+
+.hamBurger {
+  display: none;
+  font-weight: 400;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #ffffff;
+
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heroTitle span {
+  display: inline;
+}
+
+.heroTitleMain {
+  display: block;
+}
+
+.heroTitleSub {
+  display: none;
+}
+
+.mobileNavBar {
+  display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1600px) {
+  .navbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 1262px) {
+  .homePageContainer {
+    padding: 0px 32px;
+  }
+}
+@media (max-width: 1024px) {
+  .homeSection {
+    height: 800px;
+  }
+}
+@media (max-width: 768px) {
+  .signInBtn {
+    display: none;
+  }
+  .homeSection {
+    height: 700px;
+  }
+
+  .plans {
+    padding: 10px 48px;
+    font-size: 18px;
+  }
+
+  .homePageContainer {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 24px;
+  }
+
+  .InspiredSection {
+    gap: 17px;
+  }
+
+  .InspiredSection h1 {
+    font-size: 42px;
+  }
+  .InspiredSection p {
+    display: none;
+  }
+  .heroTitleMain {
+    display: none;
+  }
+
+  .heroTitleSub {
+    display: block;
+  }
+
+  .heroTitleSub .line {
+    display: block;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 630px) {
+  .desktopNavbar {
+    display: none;
+  }
+  .mobileNavBar {
+    display: block;
+  }
+  .downloadBtn {
+    height: 35px;
+  }
+
+  .hamBurger {
+    display: flex !important;
+    align-items: center;
+    line-height: 125%;
+    justify-content: space-between;
+  }
+  .hamBurger img {
+    width: 24px;
+    height: 24px;
+  }
+}
+@media (max-width: 480px) {
+  .plans {
+    width: 100%;
+    max-width: 100%;
+    font-weight: 300;
+    padding: 10px 0px;
+    font-size: 16px;
+    line-height: 150%;
+  }
+}

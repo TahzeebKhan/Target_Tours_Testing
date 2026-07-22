@@ -1,0 +1,18 @@
+.months {
+  display: flex;
+  gap: 50px;
+}
+
+
+@media (max-width: 1156px){
+  .months{
+    gap: 6px;
+  }
+}
+
+
+@media (max-width: 1056px){
+  .months{
+    gap: 6px;
+  }
+}

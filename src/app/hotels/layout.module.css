@@ -1,0 +1,144 @@
+.tourContent {
+  --hotel-hero-sticky-offset: 200px;
+  width: 100%;
+  height: calc(100vh - var(--hotel-hero-sticky-offset));
+  overflow: hidden;
+  background-color: #F9F9F9;
+  position: relative;
+  /* z-index: -1; */
+}
+
+.tourLayout {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 356px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px 0px 0px;
+
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tourFilters {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.tourResults {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  align-self: start;
+}
+
+.tourListSectionMobileView{
+  display: none;
+}
+
+@media (max-width: 1500px) {
+    .tourLayout {
+      grid-template-columns: 300px minmax(0, 1fr);
+    padding: 24px 20px 20px;
+    }
+}
+
+@media (max-width: 1400px) {
+  .tourLayout {
+    /* grid-template-columns: 1fr minmax(0, 600px); */
+      grid-template-columns: 300px minmax(0, 1fr);
+  padding: 42px 40px 40px;
+  }
+}
+
+@media (max-width: 1331px) {
+  /* .tourLayout {
+    grid-template-columns: 1fr minmax(0, 560px);
+  } */
+}
+
+@media (max-width: 1288px) {
+  /* .tourLayout {
+    grid-template-columns: 1fr minmax(0, 520px);
+  } */
+}
+
+@media (max-width: 1241px) {
+  /* .tourLayout {
+    grid-template-columns: 1fr minmax(0, 430px);
+  } */
+}
+
+@media (max-width: 1280px) {
+  .tourLayout {
+    gap: 16px;
+  }
+
+  .tourLayout {
+    padding-inline: 24px;
+  }
+}
+
+@media (max-width: 1080px) {
+  /* .tourLayout {
+    grid-template-columns: 1fr minmax(0, 400px);
+  } */
+}
+
+@media (max-width: 1024px) {
+.tourLayout {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+}
+
+
+@media (max-width: 991px) {
+  .tourContent {
+    --hotel-hero-sticky-offset: 320px;
+  }
+
+  .tourLayout {
+    grid-template-columns: 300px minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+}
+@media (max-width: 831px) {
+  .tourLayout {
+    grid-template-columns: 280px minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+}
+@media (max-width: 768px) {
+  .tourContent {
+    height: auto;
+    overflow: visible;
+  }
+
+  .tourListSectionWrappper {
+    display: none;
+  }
+  .tourListSectionMobileView{
+    display: block;
+    width: 100%;
+  }
+  .tourListSectionMobileView :global([class*="MapSection_mapContainer"]) {
+    display: none !important;
+  }
+  .tourLayout {
+    height: auto;
+    overflow: visible;
+  }
+  .tourFilters {
+    overflow: visible;
+  }
+  .tourResults {
+    height: auto;
+    overflow: visible;
+  }
+}

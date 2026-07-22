@@ -1,0 +1,308 @@
+.wrapper {
+    padding: 80px 0;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Swiper container */
+.swiper {
+    width: 100%;
+    padding: 60px 0;
+}
+
+/* All slides - base styling */
+.slide {
+    width: 700px !important;
+    height: 550px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.imgeContainer {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.wrapper :global(.swiper-slide-active) .imgeContainer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Card styling */
+.card {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    color: white;
+    position: relative;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Content inside card */
+.content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.wrapper :global(.swiper-slide-active) .content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.newTag {
+    position: absolute;
+    top: 10px;
+    right: -108px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #000000;
+    background-color: #FFFFFF;
+}
+
+.content .country {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.content .title {
+    max-width: 634px;
+    width: 100%;
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
+
+.country {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 1;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.wrapper :global(.swiper-slide-active) {
+    transform: scaleX(1.31) !important;
+}
+
+/* Active (center) slide - fully visible and focused */
+.wrapper :global(.swiper-slide-active) .card {
+    outline-offset: -4px;
+    transform: scale(1.05);
+}
+
+.wrapper :global(.swiper-slide-active) .content {
+    transform: scaleX(0.727) scaleY(0.952) !important;
+}
+
+.wrapper :global(.swiper-slide-prev) .card {
+    transform: translateX(10%) scaleY(1.25) !important;
+}
+
+.wrapper :global(.swiper-slide-next) .card {
+    transform: translateX(-10%) scaleY(1.25) !important;
+}
+
+/* Counter-scale for bottom text on prev/next slides */
+.wrapper :global(.swiper-slide-prev) .bottomTextContainer,
+.wrapper :global(.swiper-slide-next) .bottomTextContainer {
+    transform: scaleY(0.8) !important;
+    transform-origin: top;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Prev of Prev slide */
+.wrapper :global(.swiper-slide):has(+ :global(.swiper-slide-prev)) .card {
+    transform: translateX(21%) translatey(-8%) scaleY(1.2) !important;
+}
+
+/* Next of Next slide */
+.wrapper :global(.swiper-slide-next) + :global(.swiper-slide) .card {
+    transform: translateX(-21%) translatey(-8%) scaleY(1.2) !important;
+}
+
+/* Counter-scale for bottom text on prev-prev/next-next slides */
+.wrapper :global(.swiper-slide):has(+ :global(.swiper-slide-prev)) .bottomTextContainer,
+.wrapper :global(.swiper-slide-next) + :global(.swiper-slide) .bottomTextContainer {
+    transform: scaleY(0.833) !important;
+    transform-origin: top;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Immediate neighbors (prev and next) - 50% behind */
+.wrapper :global(.swiper-slide-prev) .card,
+.wrapper :global(.swiper-slide-next) .card {
+    opacity: 1;
+    transform: scale(1.23);
+}
+
+/* Outer slides (2 positions away) - further behind */
+.wrapper :global(.swiper-slide) .card {
+    opacity: 1;
+}
+
+.wrapper :global(.swiper-slide-active) .card,
+.wrapper :global(.swiper-slide-prev) .card,
+.wrapper :global(.swiper-slide-next) .card {
+    opacity: 1;
+}
+
+.wrapper :global(.swiper-slide-active) .bottomTextContainer {
+    display: none;
+}
+
+.bottomTextContainer {
+    height: 105px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    text-align: left;
+    transition: all 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Right side alignment: next slide and any slide after it in the DOM */
+.wrapper :global(.swiper-slide-next) .bottomTextContainer,
+.wrapper :global(.swiper-slide-next) ~ :global(.swiper-slide) .bottomTextContainer {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.Bottomtitle {
+    width: 239px;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: black;
+    margin: 0;
+    text-align: start;
+}
+
+.priceContainer {
+    position: absolute;
+    display: flex;
+    align-items: end;
+    bottom: 15px;
+    gap: 3px;
+}
+
+.priceText {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.price {
+    font-weight: 600;
+    font-style: Bold;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.Bottomcountry {
+    width: 239px;
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 20px;
+    text-transform: capitalize;
+    color: #000000;
+    margin: 0;
+    white-space: wrap;
+    text-align: start;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .slide {
+        width: 600px !important;
+        height: 400px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .slide {
+        width: 400px !important;
+        height: 350px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .country {
+        font-size: 12px;
+    }
+}

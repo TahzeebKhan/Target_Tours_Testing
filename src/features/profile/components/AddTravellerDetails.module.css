@@ -1,0 +1,194 @@
+.container {
+    padding: 0 16px 32px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    font-family: 'Inter', sans-serif;
+    color: rgba(0, 0, 0, 1);
+    background: rgba(249, 249, 249, 1);
+    padding-bottom: 140px;
+}
+
+/* Stepper */
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.stepWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.stepLabel {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    color: rgba(10, 10, 10, 1);
+    line-height: 16px;
+}
+
+.stepDivider {
+    width: 100%;
+    height: 6px;
+    background-color: rgba(228, 230, 232, 1);
+    border-radius: 56px;
+}
+
+.stepDividerActive {
+    background-color: rgba(134, 197, 86, 1);
+}
+
+/* Header */
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.mainTitle {
+    font-family: 'Antic Didone', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(0, 0, 51, 1);
+    text-transform: uppercase;
+}
+
+.addBtn {
+    font-family: 'Antic Didone', serif;
+    font-size: 18px;
+    color: rgba(7, 7, 115, 1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Card Styling */
+.formList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    border: 1px solid rgba(228, 230, 232, 1);
+    padding: 16px;
+    background-color: #fff;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.cardTitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 1);
+    text-transform: uppercase;
+}
+
+.toggleIcon {
+    width: 18px;
+    height: 18px;
+    color: rgba(0, 0, 0, 1);
+}
+
+/* Input Styles */
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.open {
+    max-height: 800px;
+    padding-top: 14px;
+    opacity: 1;
+}
+
+.closed {
+    max-height: 0;
+    padding-top: 0;
+    opacity: 0;
+}
+
+.row {
+    display: flex;
+    gap: 12px;
+}
+
+.field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(26, 32, 41, 1);
+}
+
+.input,
+.select {
+    padding: 8px 12px;
+    border: 1px solid rgba(219, 226, 235, 1);
+    box-shadow: 0px 1px 1.5px 0px rgba(44, 54, 53, 0.03);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: rgba(123, 135, 153, 1);
+    outline: none;
+    width: 100%;
+}
+
+.input::placeholder {
+    color: rgba(123, 135, 153, 1);
+}
+
+/* Select Styling */
+.selectWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 32px;
+}
+
+.chevron {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 400px) {
+    .mainTitle {
+        font-size: 18px;
+    }
+
+    .addBtn {
+        font-size: 16px;
+    }
+}

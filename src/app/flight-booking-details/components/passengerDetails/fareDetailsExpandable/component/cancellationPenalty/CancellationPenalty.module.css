@@ -1,0 +1,296 @@
+.wrapper {
+    padding: 16px 24px;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E4E6E8;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.penaltyContainer {
+    position: relative;
+}
+
+.policyCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #E4E6E8;
+}
+
+.policyCard:last-of-type {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Remove .line class if present, cleaning up user's manual edit */
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.header img {
+    width: 40px;
+    height: 40px;
+}
+
+.header span {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}
+
+.route {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.airlineIcon {
+    width: 28px;
+}
+
+.viewPolicy {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #070773;
+}
+
+.gridOverlay {
+    position: absolute;
+    top: 0px;
+    bottom: 0;
+    left: 168px;
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    pointer-events: none;
+    margin-bottom: 23px;
+    z-index: 0;
+    /* Ensure grid lines are on top of other elements including the bar */
+}
+.mobileView{
+    display: none !important;
+}
+
+.gridOverlay div:not(:first-child) {
+    border-left: 1px dashed #b0b3b8;
+}
+
+.penaltyRow {
+    margin-bottom: 7px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Rows */
+.penaltyRow,
+.timelineRow {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 172px 1fr;
+    align-items: end;
+}
+
+.label {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    color: #767676;
+}
+
+/* Penalty values */
+.penaltyValues {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    font-weight: 500;
+}
+
+.penaltyValues span {
+    text-align: center;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+}
+
+.nonRefundable {
+    font-weight: 600;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+}
+
+.bar {
+    height: 9px;
+    background: linear-gradient(to right,
+            #6FC54C,
+            #FF0000);
+}
+
+.marks {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 20px;
+    font-size: 14px;
+    position: relative;
+}
+
+.marks span {
+    position: relative;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.9;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    display: block;
+    max-width: 128px;
+    text-align: right;
+    justify-self: end;
+}
+
+.now {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start !important;
+    text-align: left !important;
+}
+
+.durationMark {
+    grid-row: 1;
+}
+
+.durationMark:nth-of-type(2) {
+    grid-column: 1;
+}
+
+.durationMark:nth-of-type(3) {
+    grid-column: 2;
+}
+
+.durationMark:nth-of-type(4) {
+    grid-column: 3;
+}
+
+/* Removed previous ::before pseudo element block */
+
+.marks small {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #767676;
+}
+
+@media (max-width: 1200px) {
+    .marks {
+        column-gap: 0;
+    }
+}
+@media (max-width: 1156px) {
+    .marks {
+        column-gap: 0;
+    }
+}
+
+@media (max-width: 1080px) {
+    .wrapper{
+        padding: 16px 20px;
+    }
+
+    .penaltyValues span{
+        font-size: 13px;
+    }
+    /* .marks small{
+        font-size: 11px;
+    } */
+     .timelineRow, .penaltyRow{
+        grid-template-columns: 159px 1fr;
+    }
+    .gridOverlay{
+        left: 145px;
+    }
+}
+
+
+
+@media (max-width: 640px){
+    .wrapper{
+        padding: 0px;
+        border-top: none;
+    }
+    .marks{
+        margin-top: 6px;
+    }
+    .mobileView{
+        flex-direction: column;
+    }
+    .marks span{
+        font-size: 10px;
+        max-width: 76px;
+        
+    }
+    .marks small{
+        font-size: 10px;
+    }
+    .nonRefundable{
+        display: none !important;
+    }
+    .mobileView{
+        display: flex !important;
+        flex-direction: column;
+    }
+    .penaltyValues span{
+        font-size: 12px;
+        line-height: 19px;
+    }
+    .timelineRow, .penaltyRow{
+        grid-template-columns: 82px 1fr;
+    }
+    .gridOverlay{
+        left: 82px;
+        top: 19px;
+        height: 51px;
+    }
+    .penaltyRow{
+        margin-bottom: 0;
+    }
+    .now{
+        display: none !important;
+    }
+    .label{
+        font-size: 12px;
+    }
+    .header span{
+        font-size: 14px;
+    }
+    .viewPolicy{
+        display: none;
+    }
+}

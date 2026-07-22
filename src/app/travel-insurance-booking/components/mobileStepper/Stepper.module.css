@@ -1,0 +1,299 @@
+.container {
+    max-width: 600px;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    font-family: 'Inter', sans-serif;
+    color: rgba(0, 0, 0, 1);
+    background: rgba(249, 249, 249, 1);
+}
+
+/* Stepper Navigation */
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    padding: 32px 16px 24px 16px;
+    position: sticky;
+    top: 74px;
+    z-index: 9;
+ background: rgba(249, 249, 249, 1);
+}
+
+.step {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    color: rgba(16, 24, 40, 1);
+    line-height: 16px;
+    letter-spacing: -2%;
+}
+
+.stepWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    flex: 1;
+}
+
+.stepLabel {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    color: rgba(16, 24, 40, 1);
+    line-height: 16px;
+    letter-spacing: -2%;
+}
+
+.stepDivider {
+    width: 90%;
+    height: 6px;
+    background-color: rgba(228, 230, 232, 1);
+    border-radius: 56px;
+}
+
+.stepDividerActive {
+    background-color: rgba(134, 197, 86, 1);
+}
+
+.stepActive {
+    border-bottom-color: rgba(134, 197, 86, 1);
+}
+
+/* Header */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    font-family: 'Antic Didone', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(7, 7, 115, 1);
+}
+
+.subtitle {
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(0, 0, 51, 1);
+}
+
+/* Coverage Tabs */
+.coverageTabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.coverageBtn {
+    position: relative;
+    padding: 12px 4px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(0, 0, 0, 1);
+}
+
+.activeTab {
+    background: rgba(240, 243, 255, 1);
+    border-color: rgba(0, 0, 51, 1);
+}
+
+.recommendedBadge {
+    position: absolute;
+    top: -23px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #000033 0%, #000099 100%);
+    color: white;
+    font-size: 10px;
+    padding: 4px 1px;
+    text-align: center;
+}
+
+/* Plan Cards */
+.plansGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+}
+
+.planCard {
+    background-color: #ffffff;
+    border: 1px solid rgba(228, 230, 232, 1);
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color 0.2s ease;
+}
+
+.selectedPlanCard {
+    border-color: rgba(0, 0, 51, 1);
+}
+
+.planHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.planTitle {
+    font-family: 'Antic Didone', serif;
+    font-size: 20px;
+    color: rgba(7, 7, 115, 1);
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+.planSubtext {
+    font-size: 14px;
+    color: rgba(74, 85, 101, 1);
+}
+
+.radioCircle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 0, 51, 1);
+    border-radius: 50%;
+    position: relative;
+}
+
+.radioActive::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 0, 51, 1);
+    border-radius: 50%;
+}
+
+.featureList {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-bottom: 1px solid rgba(228, 230, 232, 1);
+    padding-bottom: 20px;
+}
+
+.featureText {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.featureLabel {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(54, 65, 83, 1);
+}
+
+.featureAmount {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 1);
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.planFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.priceSection {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.boldPrice {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(10, 10, 10, 1);
+}
+
+.priceLabel {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(118, 118, 118, 1);
+}
+
+.totalPriceRow {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.totalLabel {
+    font-family: Antic Didone;
+    font-size: 14px;
+    color: rgba(118, 118, 118, 1);
+}
+
+.totalAmount {
+    font-family: 'Antic Didone', serif;
+    font-size: 24px;
+    color: rgba(0, 0, 0, 1);
+}
+
+.benefitsBtn {
+    background: none;
+    border: none;
+    color: rgba(7, 7, 115, 1);
+    font-family: 'Antic Didone', serif;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Info Box */
+.infoBox {
+    background: rgba(245, 250, 255, 1);
+    border: 1px solid rgba(228, 230, 232, 1);
+    padding: 16px;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 1);
+}
+
+/* Responsiveness */
+@media (max-width: 400px) {
+    .coverageTabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .planFooter {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .totalAmount {
+        font-size: 20px;
+    }
+
+    .recommendedBadge {
+        bottom: -20px;
+        top: auto;
+    }
+}

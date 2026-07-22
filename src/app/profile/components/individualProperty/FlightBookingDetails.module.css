@@ -1,0 +1,788 @@
+.container {
+  font-family: "Inter", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1196px;
+  height: 100%;
+}
+
+.innerContainer {
+  /* max-height: 800px; */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: auto;
+}
+
+.backButton {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  background: #ffffff;
+  color: rgba(0, 0, 51, 1);
+  padding: 8px 16px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.backButton:hover {
+  background: rgba(0, 0, 51, 1);
+  color: #ffffff;
+}
+
+/* Header & Meta */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.hotelInfo {
+  display: flex;
+  gap: 12px;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 83px;
+  height: 83px;
+  flex-shrink: 0;
+}
+
+.objectFit {
+  object-fit: cover;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hotelName {
+  font-family: "Antic Didone", serif;
+  font-size: 18px;
+  color: rgba(31, 34, 38, 1);
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0%;
+}
+.hotelName span {
+  margin-left: 8px;
+}
+
+.textSecondary {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: rgba(31, 34, 38, 1);
+  white-space: nowrap;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.infoValue {
+  font-weight: 400;
+  color: rgba(101, 111, 129, 1);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.bookingMeta {
+  display: flex;
+  gap: 12px;
+}
+
+.metaBox {
+  display: flex;
+  min-width: 123px;
+  padding: 0px 3px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  justify-content: center;
+}
+
+.metaBox .label {
+  /* font-family: 'Roboto'; */
+  font-size: 14px;
+  color: rgba(69, 76, 88, 1);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.dateNumber {
+  font-family: Antic Didone;
+  font-size: 32px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 1);
+  line-height: 42px;
+  letter-spacing: 0%;
+}
+
+.month {
+  /* font-family: 'Roboto'; */
+  font-size: 14px;
+  color: rgba(31, 34, 38, 1);
+  line-height: 100%;
+  margin-top: -2px;
+  letter-spacing: 0%;
+}
+
+.timeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.time {
+  /* font-family: 'Roboto'; */
+  font-size: 14px;
+  color: rgba(0, 0, 0, 1);
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
+  white-space: nowrap;
+}
+
+.divider {
+  width: 1px;
+  height: 123px;
+  background-color: rgba(221, 223, 227, 1);
+}
+
+.statusSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.statusBadge {
+  background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
+  border: 1px solid rgba(4, 145, 83, 1);
+  color: rgba(4, 145, 83, 1);
+  padding: 0px 8px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 300;
+  cursor: pointer;
+  width: 100%;
+}
+
+.roomCount {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  align-items: center;
+}
+
+.countGroup {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.countGroup .label {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 1);
+}
+
+.value {
+  font-size: 32px;
+  color: rgba(31, 34, 38, 1);
+  font-family: Antic Didone;
+}
+
+.slash {
+  font-size: 32px;
+  color: rgba(221, 223, 227, 1);
+  line-height: 42px;
+  font-weight: 600;
+}
+
+.detailsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+/* Sections */
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(31, 34, 38, 1);
+  line-height: 24px;
+  letter-spacing: 0%;
+}
+
+.subTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(31, 34, 38, 1);
+}
+
+.textSecondary {
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(31, 34, 38, 1);
+  line-height: 160%;
+}
+.textSecondary2 {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px !important;
+  
+  line-height: 160%;
+  letter-spacing: 0%;
+  color: rgba(31, 34, 38, 1);
+}
+
+.textPrimary {
+  font-size: 16px;
+  color: rgba(31, 34, 38, 1);
+}
+
+.aboutSection {
+  display: grid;
+  grid-template-columns: 1fr 312px;
+  gap: 40px;
+  background-color: rgba(255, 255, 255, 1);
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding-bottom: 16px;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  max-width: 568px;
+  gap: 12px;
+}
+
+.mapWrapper {
+  position: relative;
+  height: 155px;
+  overflow: visible;
+}
+
+.mapPin {
+  position: absolute;
+  top: 34px;
+  left: 144px;
+  width: 24px;
+  height: 28px;
+  opacity: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Pricing Table */
+.summarySection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceTable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding-bottom: 16px;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.priceLabel {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: rgba(74, 85, 101, 1);
+}
+
+.textPrimary {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-align: right;
+  vertical-align: middle;
+  color: rgba(10, 10, 10, 1);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.totalLabel {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(10, 10, 10, 1);
+}
+
+.totalValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(0, 0, 51, 1);
+}
+
+/* Guest Info */
+.guestInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.infoAmenitiesWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.infoTitle {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: rgba(0, 0, 0, 1);
+}
+
+.infoText {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: rgba(56, 62, 72, 1);
+}
+
+/* Amenities */
+.amenitiesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.amenityCard {
+  border: 0.5px solid rgba(18, 19, 22, 1);
+  padding: 4px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(18, 19, 22, 1);
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.iconWrapper {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Footer Buttons */
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 30px;
+  gap: 14px;
+}
+
+.btnSecondary {
+  padding: 8px 24px;
+  background: white;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  color: rgba(0, 0, 0, 1);
+  font-weight: 300;
+  cursor: pointer;
+  font-size: 14px;
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out,
+    border-color 300ms ease-out;
+}
+
+.btnSecondary:hover {
+  background-color: rgba(0, 0, 51, 1);
+  color: white;
+  border-color: rgba(0, 0, 51, 1);
+}
+
+.btnPrimary {
+  padding: 8px 24px;
+  border: 0.5px solid rgba(0, 0, 51, 1);
+  background: rgba(0, 0, 51, 1);
+  color: white;
+  font-weight: 300;
+  cursor: pointer;
+  font-size: 14px;
+
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out,
+    border-color 300ms ease-out;
+}
+
+.btnPrimary:hover {
+  border-color: rgba(0, 0, 51, 1);
+  color: rgba(0, 0, 0, 1);
+  background-color: transparent;
+}
+.mobileView {
+  display: none;
+}
+/* Responsive */
+.flightSummarySection {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.flightSummaryTitle {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  color: #000033;
+}
+
+.flightSummaryCard {
+  display: grid;
+  grid-template-columns: 309px 1fr 330px;
+  gap: 32px;
+  /* padding: 20px; */
+  /* border: 1px solid #e5e7eb; */
+  /* border-radius: 8px; */
+  /* background: #fff; */
+}
+
+.flightPoint {
+  /* max-width: 288px; */
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 8px;
+}
+.flightPointRight {
+  align-items: flex-start;
+}
+
+.flightLabel {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.flightCity {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.flightCode {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.flightDate {
+  font-size: 13px;
+  color: #374151;
+}
+
+.flightTerminal {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #383e48;
+}
+
+.flightPoint > .flightTerminal {
+  text-align: end;
+}
+
+.flightPointRight > .flightTerminal {
+  text-align: start;
+}
+.flightTimeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.flightDuration {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.flightPath {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+.pathDot {
+  min-width: 12px;
+  height: 12px;
+  background: #7b8799;
+  border-radius: 50%;
+  margin: 0px -4px;
+}
+
+.pathLine {
+  width: 28px;
+  width: 100%;
+  height: 1px;
+  border: 1.48px dashed #94a3b8;
+}
+
+.flightIcon {
+  font-size: 14px;
+  color: #2563eb;
+}
+.flightIcon img {
+  min-width: 28px;
+  height: 28px;
+  width: 28px;
+}
+.passengerDetailsSection {
+}
+
+.passengerHeader {
+  margin-bottom: 12px;
+}
+
+.passengerTitle {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #000033;
+}
+
+.passengerCount {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #383e48;
+  margin-left: 8px;
+}
+
+.passengerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.passengerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.passengerInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.passengerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarIcon {
+  font-size: 14px;
+}
+
+.passengerName {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  
+  line-height: 100%;
+  letter-spacing: 2%;
+
+  color: #0a0a0a;
+}
+
+.passengerStatus {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  
+  line-height: 22px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #049153;
+}
+
+.mealPlanInfo {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #383e48;
+}
+
+.mealLabel {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  margin-right: 8px;
+}
+
+.mealText {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  
+  line-height: 24px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #383e48;
+}
+
+@media (max-width: 1024px) {
+  .aboutSection {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .header {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 895px) {
+  .mobileView {
+    display: block;
+  }
+  .container {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .header,
+  .aboutSection {
+    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+
+  .bookingMeta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mapWrapper {
+    height: 200px;
+    /* order: -1; */
+  }
+}

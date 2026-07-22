@@ -1,0 +1,306 @@
+.tourContent {
+  width: 100%;
+  padding-top: 78px;
+  /* padding-bottom: 98px; */
+  padding-left: 20px;
+  padding-right: 20px;
+  /* background-color: #f9f9f9; */
+}
+
+.tourLayout {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 356px 1fr;
+  gap: 24px;
+  position: relative;
+}
+
+.tourFilters {
+  max-width: 356px;
+  background: #fff;
+}
+
+.tourResults {
+  width: 100%;
+}
+
+.visaSolutions {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  overflow: hidden;
+  background-image: url("/images/whyChhose.jpg");
+  background-position: center;
+  background-size: cover;
+  color: #ffffff;
+}
+
+.visaSolutionsOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(1, 4, 22, 0.12) 0%, rgba(1, 4, 22, 0.9) 100%),
+    linear-gradient(
+      90deg,
+      rgba(1, 4, 22, 0.58) 0%,
+      rgba(1, 4, 22, 0.05) 58%,
+      rgba(1, 4, 22, 0.32) 100%
+    );
+}
+
+.visaSolutionsInner {
+  position: relative;
+  z-index: 1;
+  max-width: 1520px;
+  min-height: 620px;
+  margin: 0 auto;
+  padding: 94px 0px 90px;
+  display: flex;
+  flex-direction: column;
+}
+
+.visaSolutionsIntro {
+  max-width: 636px;
+}
+
+.visaSolutionsEyebrow {
+  margin: 0 0 22px;
+  font-family: Inter, sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.visaSolutionsTitle {
+  margin: 0;
+  font-family:
+    Antic Didone,
+    serif;
+  font-size: 54px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #ffffff;
+}
+
+.visaSolutionsFeatures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 52px;
+  margin-top: auto;
+}
+
+.visaSolutionsFeature h3 {
+  margin: 0 0 16px;
+  font-family:
+    Antic Didone,
+    serif;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 44px;
+  letter-spacing: 0%;
+  color: #ffffff;
+}
+
+.visaSolutionsFeature p {
+  margin: 0;
+  max-width: 311.31px;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -2%;
+
+  color: #ffffff;
+}
+
+.visaSolutionsFooter {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  align-items: end;
+  gap: 34px;
+}
+
+.visaSolutionsFooter img {
+  width: 124px;
+  height: auto;
+  display: block;
+}
+
+.visaSolutionsFooter p {
+  margin: 0;
+  max-width: 980px;
+  font-family: Inter, sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Toggle Button */
+.sidebarToggle {
+  padding: 12px 24px;
+  background-color: #000033;
+  height: 40px;
+  color: #ffffff;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.45s ease;
+  position: absolute;
+  right: 0;
+  top: -56px;
+}
+
+.sidebarToggle:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+/* Overlay */
+.sidebarOverlay {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a33;
+  backdrop-filter: blur(8px);
+  z-index: 55;
+  animation: overlayFadeIn 200ms ease forwards;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1156px) {
+  .tourLayout {
+    grid-template-columns: 337px 1fr;
+  }
+
+  .visaSolutionsInner {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+
+  .visaSolutionsFeatures {
+    gap: 28px;
+  }
+}
+
+/* RESPONSIVE (same as FlightsLayout) */
+@media (max-width: 1156px) {
+  .tourLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .tourFilters {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 356px;
+    height: 100vh;
+    z-index: 55;
+    transition:
+      transform 300ms ease,
+      opacity 200ms ease;
+  }
+
+  .sidebarCollapsed {
+    transform: translateX(-376px);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .tourResults {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .tourContent {
+    padding-top: 12px;
+  }
+
+  .visaSolutions {
+    min-height: auto;
+  }
+
+  .visaSolutionsInner {
+    min-height: auto;
+    padding: 56px 24px 42px;
+  }
+
+  .visaSolutionsTitle {
+    font-size: 32px;
+  }
+
+  .visaSolutionsFeatures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 84px;
+    padding-bottom: 56px;
+  }
+
+  .visaSolutionsFooter {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+/* MOBILE BOTTOM SHEET (same as FlightsLayout) */
+@media (max-width: 630px) {
+  .sidebarToggle {
+    display: none;
+  }
+
+  .tourFilters {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: auto;
+    transform: translateY(100vh);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+
+  .sidebarOpen {
+    transform: translateY(0);
+  }
+
+  .sidebarCollapsed {
+    transform: translateY(100vh);
+  }
+  .tourContent {
+    padding: 12px 0;
+  }
+
+  .visaSolutionsInner {
+    padding: 48px 18px 36px;
+  }
+
+  .visaSolutionsFeatures {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-top: 72px;
+  }
+
+  .visaSolutionsFeature p {
+    max-width: none;
+  }
+}

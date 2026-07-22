@@ -1,0 +1,70 @@
+.wrapper {
+  position: relative;
+  width: 160px;
+  font-family: var(--font-inter);
+}
+
+.trigger {
+  width: 100%;
+  height: 40px;
+  font-weight: 300;
+  padding: 12px 10px;
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: #000000;
+}
+
+.arrow {
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg), translateY(10px);
+  transition: transform 0.2s ease;
+}
+
+.rotate {
+  transform: rotate(-180deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  z-index: 10;
+}
+
+.option {
+  width: 100%;
+  padding: 12px 10px;
+  background: #ffffff;
+  border: none;
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.option:not(:last-child) {
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.option:hover {
+  background: #f5f7fa;
+}
+
+@media (max-width: 875px) {
+
+  .trigger{
+    height: 30px;
+  }
+}

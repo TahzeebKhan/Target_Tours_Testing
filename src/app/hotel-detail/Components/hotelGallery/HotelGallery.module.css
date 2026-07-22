@@ -1,0 +1,129 @@
+.bottomContainerRef {
+    display: flex;
+    gap: 16px;
+    max-width: 1920px;
+    width: 100%;
+    height: 581px;
+    margin: 0 auto;
+    margin-bottom: 32px !important;
+
+}
+
+.rightImage {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+}
+.galleryImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.imageLoading {
+    opacity: 0;
+}
+
+.imageLoader {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #eceff3 0%, #f8f8f8 45%, #eceff3 100%);
+    background-size: 220% 100%;
+    animation: imageLoading 1.1s ease-in-out infinite;
+    z-index: 1;
+}
+.viewGalleryBtnIcon{
+    width: 12px !important;
+    height: 12px !important;
+}
+
+
+
+.rightGrid {
+    width: 50%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 16px;
+}
+
+.imageBox {
+    position: relative;
+    overflow: hidden;
+}
+
+/* VIEW GALLERY BUTTON */
+.viewGalleryBtn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+@keyframes imageLoading {
+    0% {
+        background-position: 120% 0;
+    }
+
+    100% {
+        background-position: -120% 0;
+    }
+}
+
+@media (max-width: 1280px){
+    .rightGrid{
+        gap: 16px;
+    }
+    .bottomContainerRef{
+        gap: 16px;
+        /* height: 530px; */
+    }
+}
+
+@media (max-width: 991px){
+    .bottomContainerRef{
+        height: 530px;
+    }
+    .bottomContainerRef{
+        height: 460px;
+    }
+   
+}
+@media (max-width: 813px){
+    .bottomContainerRef{
+        height: 490px;
+    }
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .rightGrid{
+        gap: 12px;
+    }
+    .bottomContainerRef{
+        gap: 12px;
+    }
+    .galleryWrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .rightGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

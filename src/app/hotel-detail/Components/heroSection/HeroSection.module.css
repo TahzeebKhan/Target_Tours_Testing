@@ -1,0 +1,120 @@
+.HeroSection {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 40px;
+    background-color: #F9F9F9;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.container {
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.textSection {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.hotelName {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #1F2226;
+}
+.locationAndRating{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+}
+.hotelAddress{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #000000;
+
+}
+.ratingSection{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.stars{
+    display: flex;
+    align-items: center;
+}
+
+.reviewCount{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0px;
+    color: #000000;
+}
+
+.shareContainer{
+    display: flex;
+    gap: 11px;
+    align-items: center;
+}
+.iconsHeart{
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.45s ease;
+    cursor: pointer;
+}
+
+.iconsHeart:hover{
+    background: #F1F2F3;
+
+}
+
+
+@media (max-width: 1440px) {
+    .hotelName{
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .hotelName{
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 1280px){
+    .hotelName{
+        font-size: 25px;
+    }
+}
+
+@media (max-width: 1156px){
+    .hotelName{
+        font-size: 24px;
+    }
+}
+
+
+@media (max-width: 768px){
+    .hotelAddress{
+        font-size: 16px;
+    }
+}

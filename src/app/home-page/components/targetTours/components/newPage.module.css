@@ -1,0 +1,407 @@
+.carouselSection {
+  width: 100%;
+  padding: 60px 0;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hover-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+
+  max-width: 1920px;
+  height: 611px;
+  /* margin: 60px auto; */
+
+  padding: 0 32px;
+  gap: 32px; /* spacing between cards */
+  overflow: hidden;
+}
+
+/* Default card */
+.hover-card,
+.slide {
+  flex: 1 1 0;
+  position: relative;
+  max-width: 690px;
+  /* min-width: 597px; */
+  overflow: hidden;
+  cursor: pointer;
+  transition: flex 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+  filter: grayscale(100%);
+}
+
+.navButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 60px;
+}
+.bgGradient {
+  position: absolute;
+  bottom: 0;
+  height: 50% !important;
+  width: 100%;
+  transform: translateY(0);
+  transition: transform 0.45s ease;
+}
+
+.hover-card:hover .bgGradient {
+  transform: translateY(50%);
+}
+.navButton {
+  /* border-radius: 999px; */
+  background: transparent;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  padding: 9px;
+  height: 40px;
+  width: 40px;
+  border: 1px solid #fff;
+  border-radius: 100%;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid rgba(255, 255, 255, 1);
+  color: #000033;
+  /* transform: translateY(-2px); */
+}
+
+/* .navButton:hover svg path {
+  fill: #000033;
+} */
+
+/* Image */
+.hover-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+  transform-origin: center center;
+}
+
+/* Hovered card expands; neighbors automatically shrink because total width is fixed */
+.hover-card:hover {
+  flex: 1.5 1 0;
+  filter: grayscale(0);
+}
+.slide:hover {
+  flex: 1.5 1 0;
+  filter: grayscale(0);
+}
+
+/* Slight zoom on active */
+.hover-card:hover img {
+  transform: scale(1.05);
+}
+
+.hover-card:hover .leftImg {
+  transform: scale(1.09);
+}
+
+.leftImg {
+  transform-origin: left center !important;
+  object-position: 0% center !important;
+}
+
+.rightImg {
+  transform-origin: right center !important;
+  object-position: 100% center !important;
+}
+.hover-card:hover .rightImg {
+  transform: scale(1.09);
+}
+
+.centerImg {
+  object-position: center center !important;
+}
+
+/* Text overlay */
+.cardOverlay {
+  /* bottom: -32.9%; */
+  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  position: absolute;
+  bottom: -34.6%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 16px;
+  align-items: center;
+  color: #fff;
+  padding: 0px 5px;
+  padding-bottom: 23px;
+  transition: bottom 0.45s ease;
+}
+
+.duration {
+  align-self: center;
+  border-bottom: 0.5px solid #ffffff;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  letter-spacing: 1px;
+  backdrop-filter: blur(4px);
+  text-transform: uppercase;
+
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.cardTitle {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -2%;
+  text-align: center;
+  /* white-space: nowrap; */
+  text-transform: capitalize;
+}
+
+.cities {
+  max-width: 407px;
+
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price {
+  font-family: "Inter";
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price span {
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.hover-card:hover .cardOverlay {
+  bottom: 0;
+}
+
+.arrowBtn {
+  margin: 10px auto 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease;
+}
+
+.arrowBtn:hover {
+  cursor: pointer;
+  background-color: white;
+}
+.arrowBtn:hover svg,
+.arrowBtn:hover svg path {
+  transition: all 0.3s ease-in-out;
+}
+.arrowBtn:hover svg {
+  transform: rotate(45deg);
+}
+
+.arrowBtn:hover svg path {
+  stroke: black;
+}
+.scaleDown {
+  transform: scale(0.92);
+  filter: brightness(0.85);
+}
+
+.hover-card {
+  position: relative;
+  height: 611px; /* stays fixed */
+  flex: 1 1 0;
+  overflow: hidden;
+}
+.cardInner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+}
+.scaleDown {
+  transform: scale(0.92);
+  filter: brightness(0.85);
+}
+/* .hover-card:hover {
+  flex: 1.5 1 0;
+} */
+
+.hover-card:hover .cardInner {
+  transform: scale(1);
+}
+
+@media (max-width: 1822px) {
+  .cardTitle {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 1698px) {
+  .cardTitle {
+    font-size: 30px;
+  }
+  .duration {
+    font-size: 13px;
+  }
+  .price {
+    font-size: 20px;
+  }
+  .cardOverlay {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 1558px) {
+  .hover-card:hover {
+    flex: 1.2 1 0;
+  }
+}
+
+@media (max-width: 1558px) {
+  .hover-carousel {
+    gap: 28px;
+    padding: 0px 28px;
+  }
+  .hover-card:hover {
+    flex: 1.25 1 0;
+  }
+}
+
+@media (max-width: 1430px) {
+  .cardTitle {
+    font-size: 28px;
+  }
+  .hover-carousel {
+    gap: 20px;
+  }
+  .hover-card:hover {
+    flex: 1.3 1 0;
+  }
+  .cardOverlay {
+    gap: 9px;
+    bottom: -31.5%;
+  }
+}
+
+@media (max-width: 1430px) {
+  .hover-card:hover {
+    flex: 1.1 1 0;
+  }
+  .hover-carousel {
+    padding: 0px 20px;
+  }
+}
+
+@media (max-width: 1282px) {
+  .cardTitle {
+    font-size: 24px;
+  }
+  .cities {
+    font-size: 12px;
+  }
+  .cardOverlay {
+    bottom: -27.99%;
+  }
+}
+@media (max-width: 1200px) {
+  .cardOverlay {
+    bottom: -31.99%;
+  }
+}
+
+@media (max-width: 1160px) {
+  .hover-carousel {
+    justify-content: center;
+    gap: 24px;
+    height: auto; /* allow height to grow */
+  }
+  .hover-card {
+    /* flex: 0 0 calc(50% - 12px); 2 cards per row */
+    /* max-width: calc(50% - 12px); */
+    /* height: 420px; */
+  }
+  .hover-card {
+    /* flex: 0 0 calc(52% - 12px); 2 cards per row */
+    /* max-width: calc(50% - 12px); */
+    height: 420px;
+  }
+  .cardOverlay {
+    bottom: -47%;
+  }
+  .cardTitle {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hover-carousel {
+    gap: 16px;
+    padding: 0 16px;
+    height: auto;
+  }
+  .hover-card {
+    flex: 0 0 calc(84% - 12px); /* 2 cards per row */
+    max-width: calc(50% - 12px);
+    /* height: 420px; */
+  }
+  .hover-card:hover {
+    flex: 0 0 calc(88% - 12px); /* 2 cards per row */
+  }
+}
+@media (max-width: 539px) {
+  .hover-card{
+     max-width: calc(75% - 12px);
+  }
+  .cardOverlay {
+    bottom: -46%;
+  }
+}
+
+@media (max-width: 430px) {
+  .carouselSection {
+    display: none;
+  }
+}

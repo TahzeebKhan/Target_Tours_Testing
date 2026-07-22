@@ -1,0 +1,693 @@
+.heading {
+    font-family: "Antic Didone", serif;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    text-align: center;
+    color: #000033;
+    margin-bottom: 42px;
+    padding: 0 32px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.headingMult {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #FCC800;
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: 0%;
+    text-transform: capitalize;
+    position: relative;
+
+
+}
+
+.tabsWrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* max-width: ; */
+    /* width: 100%; */
+    border-bottom: 1px solid #C4C4C4;
+}
+
+.tabs {
+    display: flex;
+    color: #FFFFFF;
+    position: relative;
+}
+
+.tab {
+    padding: 8px 24px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.25;
+    letter-spacing: -2%;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #A8A8A8;
+    cursor: pointer;
+
+}
+
+.tab .tabBtn {
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
+}
+
+.active {
+    /* border-bottom: 2px solid #000033; */
+    color: #000033;
+}
+
+.carouselContainerMain {
+    margin-top: 34px;
+    padding: 0 32px;
+}
+
+.carouselContainer {
+    margin-top: 34px;
+    padding-top: 30px;
+    display: flex;
+    gap: 31px;
+    cursor: pointer;
+}
+
+.itemsCard {
+    position: relative;
+    max-width: 441px;
+    width: 100%;
+    max-height: 624px;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.35s ease;
+}
+
+.itemsCard img {
+    width: 100%;
+    height: 100%;
+
+    ¯ǎ.section {
+        padding: 100px 0;
+    }
+
+
+    .heading {
+        font-family: "Antic Didone", serif;
+        font-style: Regular;
+        font-size: 42px;
+        line-height: 1;
+        letter-spacing: 0%;
+        text-transform: capitalize;
+        text-align: center;
+        color: #000033;
+        margin-bottom: 42px;
+        padding: 0 32px;
+        display: flex;
+        gap: 2px;
+        justify-content: center;
+    }
+
+    .headingMult {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #FCC800;
+        font-family: Antic Didone;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 42px;
+        line-height: 1;
+        letter-spacing: 0%;
+        text-transform: capitalize;
+
+
+    }
+
+    .tabsWrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* max-width: ; */
+        /* width: 100%; */
+        border-bottom: 1px solid #C4C4C4;
+    }
+
+    .tabs {
+        display: flex;
+        color: #FFFFFF;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+    .tab {
+        padding: 8px 24px;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 14px;
+        line-height: 1.25;
+        letter-spacing: -2%;
+        text-align: center;
+        vertical-align: middle;
+        text-transform: capitalize;
+        color: #A8A8A8;
+        cursor: pointer;
+
+    }
+
+    .tab .tabBtn {
+        cursor: pointer;
+    }
+
+    .active {
+        border-bottom: 2px solid #000033;
+        color: #000033;
+    }
+
+    .carouselContainerMain {
+        margin-top: 34px;
+        padding: 0 32px;
+    }
+
+    .carouselContainer {
+        margin-top: 34px;
+        padding: 30px 0;
+        display: flex;
+        gap: 31px;
+    }
+
+    .itemsCard {
+        position: relative;
+        max-width: 441px;
+        width: 100%;
+        max-height: 624px;
+        height: 100%;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.35s ease;
+    }
+
+    .itemsCard img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .itemsCard:hover {
+        transform: translateY(-20px) scale(1.0);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
+    :global(.swiper-slide:nth-child(even)) .carouselContainer {
+        margin-top: 90px;
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, rgba(0, 0, 0, 0) 68.93%, rgba(0, 0, 0, 0.79) 100%),
+            linear-gradient(360deg, rgba(0, 0, 0, 0) 74.11%, rgba(0, 0, 0, 0.79) 100%);
+        pointer-events: none;
+    }
+
+
+
+    /* Odd items → top margin */
+    .itemsCard:nth-child(odd) {
+        margin-bottom: 60px;
+    }
+
+    /* Even items → bottom margin */
+    .itemsCard:nth-child(even) {
+        margin-top: 60px;
+    }
+
+    .btnContainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        /* margin-top: 40px; */
+    }
+
+    .btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #212121;
+        border-radius: 100%;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background: #000000;
+        color: white;
+    }
+
+    .btn img {
+        filter: invert(0);
+        transition: filter 0.2s ease;
+    }
+
+    .btn:hover img {
+        filter: invert(1);
+    }
+
+    .textContainer {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 24px;
+
+    }
+
+    .textTop,
+    .textBottom {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .textTop span {
+        font-family: Antic Didone;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 42px;
+        line-height: 1.2;
+        letter-spacing: -2%;
+        vertical-align: middle;
+        color: #FFFFFF;
+    }
+
+    .textTop p {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 14px;
+        line-height: 1.2;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        text-transform: uppercase;
+        color: #FFFFFF;
+    }
+
+    .economy {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 12px;
+        line-height: 1.2;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        text-transform: uppercase;
+        color: #ffff;
+        text-align: end;
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        gap: 3px;
+
+    }
+
+    .economy span {
+        font-weight: 500;
+        font-style: Medium;
+        font-size: 20px;
+        line-height: 100%;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        text-transform: capitalize;
+    }
+
+    .discoverText {
+        text-align: end;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 14px;
+
+        line-height: 1.2;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        text-transform: capitalize;
+        color: #FFFFFF;
+    }
+
+    object-fit: cover;
+    display: block;
+}
+
+.noImage {
+    width: 100%;
+    min-height: 416px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2f2f2;
+    color: #000033;
+    font-family: Antic Didone;
+    font-size: 42px;
+}
+
+.itemsCard:hover {
+    transform: translateY(-20px) scale(1.0);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Every even card (2nd, 4th, 6th, 8th, etc.) margin-top */
+:global(.swiper-slide:nth-child(even)) .carouselContainer {
+    margin-top: 90px;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0) 68.93%, rgba(0, 0, 0, 0.79) 100%),
+        linear-gradient(360deg, rgba(0, 0, 0, 0) 74.11%, rgba(0, 0, 0, 0.79) 100%);
+    pointer-events: none;
+}
+
+
+
+/* Odd items → top margin */
+.itemsCard:nth-child(odd) {
+    margin-bottom: 60px;
+}
+
+/* Even items → bottom margin */
+.itemsCard:nth-child(even) {
+    margin-top: 60px;
+}
+
+.btnContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    /* margin-top: 40px; */
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+
+.textContainer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+
+}
+
+.textTop,
+.textBottom {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.textTop span {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.2;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #FFFFFF;
+}
+
+.textTop p {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.economy {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #ffff;
+    text-align: end;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    gap: 3px;
+
+}
+
+.economy span {
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+}
+
+.discoverText {
+    text-align: end;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+
+    line-height: 1.2;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    color: #FFFFFF;
+}
+
+
+.cityBtnn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+}
+
+.rotate {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+.cityDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  padding: 8px 0;
+  width: 160px;
+  z-index: 10;
+}
+
+.cityDropdown li {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cityDropdown li:hover {
+  background: #f5f5f5;
+}
+
+
+@media (max-width: 1440px) {
+    .heading, .headingMult {
+        font-size: 38px;
+    }
+
+
+    .textTop span {
+        font-size: 38px;
+    }
+
+    .economy span {
+        font-size: 18px;
+    }
+
+    .textContainer {
+        padding: 20px;
+    }
+    .cityBtnn img{
+        width: 20px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .textTop {
+        gap: 6px;
+    }
+
+    .heading, .headingMult {
+        font-size: 32px;
+    }
+
+    .textTop span {
+        font-size: 32px;
+    }
+
+    :global(.swiper-slide:nth-child(even)) .carouselContainer {
+        margin-top: 30px;
+    }
+
+    .carouselContainer {
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 1200px){
+    .heading, .headingMult{
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 1156px) {
+    .textTop span {
+        font-size: 30px;
+    }
+
+    .economy span {
+        font-size: 16px;
+    }
+    .cityBtnn img{
+        width: 15px;
+    }
+
+}
+
+@media (max-width: 991px) {
+    :global(.swiper-slide:nth-child(even)) .carouselContainer {
+        margin-top: 0;
+    }
+
+    .carouselContainer {
+        margin-top: 0;
+    }
+
+    .heading, .headingMult {
+        font-size: 30px;
+    }
+
+    .textTop span {
+        font-size: 28px;
+    }
+
+    .economy span {
+        font-size: 14px;
+    }
+
+
+    .textContainer {
+        padding: 18px;
+    }
+    .heading{
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 767px ){
+     .heading, .headingMult {
+        font-size: 30px;
+    }
+    .itemsCard{
+        max-height: 416px;
+        height: 100%;
+    }
+    .btnContainer{
+        margin-top: -20px;
+    }
+}
+
+@media (max-width: 488px ){
+    .heading, .headingMult{
+        font-size: 28px;
+    }
+
+}
+
+@media (max-width: 430px){
+    .section{
+        padding-top: 32px;
+    }
+}
+
+
+/*  */

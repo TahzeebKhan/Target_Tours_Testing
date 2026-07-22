@@ -1,0 +1,100 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  padding-top: 0;
+  gap: 12px;
+  background-color: white;
+}
+
+/* CARD */
+.card {
+  border: 1px solid #d1d5dc;
+  height: 66px;
+  padding: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* RADIO */
+.card input {
+  width: 18px;
+
+  height: 18px;
+  cursor: pointer;
+}
+.card input:focus-visible{
+    outline: none;
+
+}
+/* ICON */
+.card img {
+  /* width: 128px; */
+  max-width: 34%;
+  height: 32px;
+  margin-right: -2px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* TEXT */
+.card span {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* HOVER */
+.card:hover {
+  border-color: #94a3b8;
+}
+
+/* ACTIVE / SELECTED */
+.active {
+  border-color: #000033;
+  box-shadow: 0 0 0 1px #000033;
+}
+
+.gatewayBadge {
+  width: 42px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5dc;
+  background: #f8fafc;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 700;
+  color: #000033;
+}
+
+.message,
+.error {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 13px;
+}
+
+.message {
+  color: #4b5563;
+}
+
+.error {
+  color: #b42318;
+}
+
+@media (max-width: 645px){
+    .wrapper{
+      border: 1px solid #E4E6E8;
+      border-top: 0;
+      padding: 12px;
+      padding-top:0 ;
+    }
+}

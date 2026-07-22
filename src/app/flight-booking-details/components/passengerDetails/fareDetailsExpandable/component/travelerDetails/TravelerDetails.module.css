@@ -1,0 +1,246 @@
+.wrapper {
+    padding: 16px 24px;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E4E6E8;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+}
+
+/* Add traveler */
+.addTraveler {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #070773;
+    cursor: pointer;
+}
+
+
+
+/* Card */
+.card {
+    border: 1px solid #E4E6E8;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    /* gap: 14px; */
+}
+
+/* Header */
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-bottom: 14px; */
+}
+
+.cardHeader h3 {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #000000;
+    text-transform: uppercase;
+
+}
+
+.label {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: -3%;
+    vertical-align: middle;
+
+}
+
+.collapse {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* Section title */
+.sectionTitle {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.travelerCards{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 400px;
+    overflow: scroll;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow: hidden;
+    padding-top: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, opacity 0.45s ease, padding-top 0.45s ease;
+    animation: slideFade 0.65s ease-in-out;
+}
+
+.iconWrapper {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  cursor: pointer;
+}
+
+.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hide {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.open {
+    max-height: 600px;
+    opacity: 1;
+    padding-top: 14px;
+}
+
+.closed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    pointer-events: none;
+}
+
+/* Grid */
+.grid {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Field */
+.field {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+.field input,
+.field select {
+    height: 33px;
+    padding: 8px 12px;
+    border: 1px solid #DBE2EB;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    outline: none;
+}
+
+.fieldError {
+    border-color: #E24C4B !important;
+}
+
+.errorText {
+    font-family: var(--font-inter);
+    font-size: 12px;
+    line-height: 1.2;
+    color: #E24C4B;
+}
+
+.input::placeholder {
+    color: #8b93a7;
+}
+
+.bookingInput::placeholder {
+    color: #C4C4C4;
+
+}
+
+.select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 100%;
+    padding-right: 44px;
+    /* arrow ke liye space */
+    cursor: pointer;
+}
+
+.selectField {
+    position: relative;
+}
+
+.selectField::after {
+    width: 14px;
+    height: 14px;
+    content: "";
+    position: absolute;
+    right: 12px;
+    top: 73%;
+    transform: translateY(-50%);
+
+    background-image: url("/icons/DownArrows.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    /* important */
+}
+
+
+
+@media(max-width: 1080px) {
+    .wrapper {
+        padding: 16px 20px;
+    }
+
+    .grid {
+        gap: 9px;
+    }
+
+    .field input,
+    .field select {
+        padding: 8px 7px;
+    }
+}

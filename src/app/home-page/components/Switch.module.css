@@ -1,0 +1,59 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hide real input */
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Switch background */
+.switch {
+  width: 28px;
+  height: 16px;
+  background-color: #E0E0E0;
+  border-radius: 50px;
+  position: relative;
+  transition: background-color 0.25s ease;
+}
+
+/* Knob */
+.knob {
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;     /* FIXED so knob stays centered */
+  left: 2px;
+  transition: transform 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+/* Active state */
+.active {
+  background-color: #000033;
+}
+
+.active .knob {
+  transform: translateX(12px); /* FIXED for correct width */
+}
+
+/* Label text */
+.label {
+  font-family: "Inter", sans-serif;
+font-weight: 400;
+font-style: Regular;
+font-size: 13px;
+line-height: 16px;
+text-align: center;
+text-transform: uppercase;
+color: #FFFFFF;
+
+}

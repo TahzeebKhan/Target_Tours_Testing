@@ -1,0 +1,1064 @@
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+/* Modal Content */
+.modalContent {
+  background: white;
+  max-width: 1200px;
+  width: 100%;
+  height: 90vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Close Button */
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
+/* Header */
+.header {
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.routeText {
+  font-weight: 500;
+  color: #000;
+}
+
+/* Flight Info */
+.flightInfo {
+  background: #f9fafb;
+  padding: 12px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fromToSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fromToSection span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -2%;
+  color: #000000;
+}
+
+/* ROOT */
+.expandableSection {
+  padding: 16px 24px 24px 24px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.expandableContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leftFlightInfoCont,
+.rightFlightInfoCont {
+  max-width: 494px;
+  width: 100%;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabContainer {
+  position: relative;
+  display: flex;
+  background-color: #f0f3ff;
+  padding: 6px;
+  justify-content: space-between;
+}
+
+.tabContainer::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  height: calc(100% - 12px);
+  width: var(--indicator-width);
+  transform: translateX(var(--indicator-left));
+  background-color: #000033;
+  transition: transform 0.35s cubic-bezier(0.16, 0.84, 0.24, 1),
+    width 0.35s cubic-bezier(0.16, 0.84, 0.24, 1);
+  z-index: 0;
+}
+
+.tabItem {
+  position: relative;
+  z-index: 1;
+  padding: 8px 24px;
+  max-width: 210px;
+  width: 100%;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.2s ease, color 0.25s ease;
+}
+
+.active {
+  color: #ffffff;
+  opacity: 1;
+}
+
+/* =========================
+   PANEL ANIMATION
+========================= */
+
+.tabPanel {
+  opacity: 0;
+}
+
+.fadeIn {
+  animation: fadeIn 420ms cubic-bezier(0.16, 0.84, 0.24, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  60% {
+    opacity: 0.6;
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   ABOUT FLIGHT (TOP ROW)
+========================= */
+
+.aboutFlightContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.aboutFlightContainerLeft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.flightIcon {
+  width: 30px;
+  height: 30px;
+}
+
+.flightInfoTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flightInfoTextTitle {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18.57px;
+  color: #000000;
+}
+
+.flightInfoTextChips {
+  padding: 3px 10px;
+  background-color: #f7f7f7;
+  border: 1px solid #c4c4c4;
+  color: #737373;
+  border-radius: 7px;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  width: fit-content;
+}
+
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.subInfoText {
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #000000;
+}
+
+/* =========================
+   TIMELINE
+========================= */
+.flightDuration {
+  max-width: 542px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e4e6e8;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.flightInfoStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flightIconStatus {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.flightInfoNameDatesContainer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.smallestDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #767676;
+}
+
+.flightInfoNameDates {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #343434;
+}
+
+.timelineContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sideRight {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+}
+
+.date {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #434343;
+}
+
+.time {
+  font-family: Antic Didone;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #000033;
+}
+
+.airport {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.terminal {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: #316cec;
+}
+
+.city {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: #a2a2a2;
+  white-space: nowrap;
+}
+
+/* =========================
+   CENTER ANIMATION
+========================= */
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flightAnimation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flightDotedcontainer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bigDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #000033;
+}
+
+.dashBorder {
+  width: clamp(32px, 6vw, 65px);
+  border-top: 1px dashed #94a3b8;
+}
+
+.flightSvg {
+  color: #000033;
+}
+
+/* =========================
+   DURATION / STOP INFO
+========================= */
+
+.priceContainer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.duration {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.hours {
+  color: #a3a3a3;
+}
+
+.nonStop {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  color: #000000;
+}
+
+.fareCards {
+  padding: 16px 32px 24px 32px;
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.inlinePanel {
+  width: 100%;
+  background: #ffffff;
+}
+
+.inlineFareCards {
+  padding: 24px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.inlineFareCards .fareCardContainer,
+.inlineFareCards .fareSkeletonCard,
+.inlineFareCards .loadingCard {
+  flex: 0 0 calc((100% - 48px) / 3);
+  min-width: 326px;
+  max-width: 380px;
+  padding: 24px;
+}
+
+.inlineFareCards .loadingCard {
+  width: auto;
+  min-height: 420px;
+  max-height: 520px;
+}
+
+.inlineFareCards .loadingActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.inlineFareCards .fareActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.inlineFareCards .price {
+  font-size: 32px;
+}
+
+.inlineFareCards .featureItem span {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.fareLoadingState {
+  padding: 16px 32px 24px 32px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.fareLoadingState::-webkit-scrollbar {
+  display: none;
+}
+
+.fareSkeletonCard {
+  min-width: 360px;
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fareSkeletonCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(247, 248, 252, 0.85) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: fareSkeletonShine 1.35s infinite;
+}
+
+.skeletonLine,
+.skeletonLineShort,
+.skeletonLineTiny,
+.skeletonPrice,
+.skeletonIcon,
+.skeletonButton {
+  background: #eef1f6;
+  border-radius: 4px;
+}
+
+.skeletonLineShort {
+  width: 42%;
+  height: 14px;
+}
+
+.skeletonLineTiny {
+  width: 28%;
+  height: 12px;
+}
+
+.skeletonLine {
+  width: 100%;
+  height: 10px;
+}
+
+.skeletonPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.skeletonPrice {
+  width: 48%;
+  height: 34px;
+}
+
+.skeletonIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.skeletonDivider {
+  width: 100%;
+  height: 1px;
+  background: #e4e6e8;
+}
+
+.skeletonBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonActions {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.skeletonButton {
+  flex: 1;
+  height: 42px;
+}
+
+@keyframes fareSkeletonShine {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.fareCardContainer {
+  min-width: 360px;
+  width: 100%;
+  border: 1px solid #e4e6e8;
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.45s ease;
+  cursor: pointer;
+
+  /* border: 2px solid transparent; */
+}
+
+/* pseudo border */
+.fareCardContainer::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  /* slightly outside */
+  border: 2px solid #000033;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  border-radius: 0;
+  /* match card if needed */
+}
+
+/* show border on hover */
+.fareCardContainer:hover::after {
+  opacity: 1;
+}
+
+.fareCard {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+}
+
+.fareHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.fareName {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #1f2937;
+}
+
+.upperHalf {
+  display: flex;
+  gap: 16px;
+}
+
+.radioOutline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 8px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.selectedFareCard .radioOutline {
+  border-color: #000000;
+  position: relative;
+}
+
+.selectedFareCard .radioOutline::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #000000;
+}
+
+.price {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000033;
+}
+
+.farePrice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+
+}
+
+.priceInfoTrigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  cursor: help;
+  outline: none;
+  z-index: 4;
+}
+
+.priceInfoTrigger img {
+  width: 18px;
+  height: 18px;
+}
+
+.priceInfoCard {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  width: 260px;
+  background: #ffffff;
+  border: 1px solid #d9dce5;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.priceInfoTrigger:hover .priceInfoCard,
+.priceInfoTrigger:focus .priceInfoCard,
+.priceInfoTrigger:focus-within .priceInfoCard {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.priceInfoTitle {
+  padding: 9px 12px;
+  background: #000033;
+  color: #ffffff;
+  font-family: Inter;
+  font-size: 12px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.priceInfoBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.priceInfoRow,
+.priceInfoTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-inter);
+  color: #000000;
+}
+
+
+.priceInfoRow span {
+  font-weight: 400;
+}
+
+.priceInfoRow strong {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.priceInfoDivider {
+  height: 1px;
+  background: #e4e6e8;
+}
+
+.priceInfoTotal span,
+.priceInfoTotal strong {
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.priceInfoBody p {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-style: italic;
+  color: #9aa0ad;
+}
+
+.pricePerAdult {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000033;
+}
+
+.priceInfoTotal {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.priceInfoTotal2 {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 14px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+
+.adult {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+}
+
+.featureSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.featureTitle {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-style: Bold;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.featureItem span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.fareActions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lockPriceBtn {
+  max-width: 156px;
+  width: 100%;
+  padding: 12px 24px;
+  border: 0.5px solid #000033;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.45s ease-in-out;
+}
+
+.bookNowBtn {
+  /* max-width: 156px; */
+  width: 100%;
+  padding: 12px 24px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #ffffff;
+  background-color: #000033;
+  cursor: pointer;
+  transition: all 0.45s ease-in-out;
+}
+
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.hr {
+  width: 100%;
+  border: 0.5px solid #e4e6e8;
+}
+
+.premiumBadge {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  padding: 7px 15px;
+  background: linear-gradient(to left, #00CDFC, #001996);
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: -2%;
+  color: #ffffff;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.premiumContainer {
+  background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%);
+}
+
+.loadingCard {
+  min-width: 360px;
+  max-width: 380px;
+  width: 100%;
+  min-height: 420px;
+  max-height: 520px;
+  flex-shrink: 0;
+  border: 1px solid #e4e6e8;
+  padding: 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loadingHeader,
+.loadingBaggage,
+.loadingActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loadingActions {
+  margin-top: auto;
+}
+
+.loadingHeader {
+  gap: 12px;
+}
+
+.loadingHeaderText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonLogo,
+.skeletonBadge,
+.skeletonButtonDark,
+.skeletonLineMedium,
+.loadingCard .skeletonButton,
+.loadingCard .skeletonLine,
+.loadingCard .skeletonLineShort,
+.loadingCard .skeletonLineTiny {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #eef1f6 25%, #e2e7f0 50%, #eef1f6 75%);
+  background-size: 200% 100%;
+  animation: loadingPulse 1.2s ease-in-out infinite;
+}
+
+.skeletonLogo {
+  width: 120px;
+  height: 18px;
+}
+
+.skeletonBadge {
+  width: 64px;
+  height: 22px;
+}
+
+.skeletonLineMedium {
+  width: 86%;
+  height: 10px;
+}
+
+.skeletonButtonDark {
+  width: 100%;
+  height: 40px;
+}
+
+.emptyFareOptions {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e4e6e8;
+  color: #5f6673;
+  font-family: var(--font-inter);
+  font-size: 14px;
+}
+
+@keyframes loadingPulse {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}

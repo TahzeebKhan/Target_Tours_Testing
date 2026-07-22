@@ -1,0 +1,247 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a33;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.sheet {
+  background: #fff;
+  width: 100%;
+  border-radius: 16px 16px 0px 0px;
+  padding-top: 24px;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px 16px 16px;
+  border-bottom: 1px solid #dbe2eb;
+}
+
+.label {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -3%;
+  text-transform: uppercase;
+  color: #7b8799;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.inputRow .selectedDate {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  color: #1a2029;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leftText {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -3%;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.sub {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: -3%;
+  color: #7b8799;
+}
+
+.counter {
+  max-width: 112px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.counterBtn {
+  width: 31px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000033;
+  transition: all 0.5s ease;
+  background: #ffffff;
+}
+
+.counterBtn:hover {
+  background-color: #000033;
+  color: white;
+}
+
+.counterBtn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.counterText {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.roomsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.roomCard {
+  border-top: 1px solid #dbe2eb;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.roomHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.roomTitle {
+  color: #000033;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.roomSummary {
+  color: #7b8799;
+  font-size: 12px;
+  text-align: right;
+}
+
+.childAgeSection {
+  padding-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.childAgeHeading {
+  color: #000033;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.childAgeHint {
+  color: #7b8799;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.childAgeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.childAgeField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #000033;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.childAgeField select {
+  height: 36px;
+  border: 1px solid #dbe2eb;
+  background: #ffffff;
+  color: #000033;
+  padding: 0 10px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.childAgeField select:focus {
+  border-color: #000033;
+}
+
+.doneBtn {
+  height: 48px;
+  padding: 10px 16px;
+  background: #000033;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: all 0.45s ease;
+}
+
+@media (max-width: 440px) {
+  .childAgeGrid {
+    grid-template-columns: 1fr;
+  }
+}

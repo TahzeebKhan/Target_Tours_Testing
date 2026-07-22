@@ -1,0 +1,108 @@
+.section {
+    background-image: var(--bg-image, url("/images/tripGighlights.jpg"));
+    height: 754px;
+    background-size: cover;
+    background-position: center;
+
+}
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 200px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+.containerMobile{
+    background-image: var(--bg-image, url("/images/tripGighlights.jpg"));
+    background-size: cover;
+    background-position: center;
+    display: none !important;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.overlayCard{
+    background-color: rgba(255, 255, 255, 0.77);
+    backdrop-filter: blur(8.2px);
+    -webkit-backdrop-filter: blur(8.2px);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.heading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.19;
+    text-transform: capitalize;
+
+}
+.list{
+    display: flex;
+    flex-direction: column;
+    list-style-type: disc;
+    padding-left: 16px;
+}
+
+.list li{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 31px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: rgba(33, 33, 33, 0.78);
+
+
+}
+
+@media (max-width: 768px) {
+    .container{
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .list li{
+        font-size: 14px;
+        line-height: 18px;
+    }
+    .heading{
+        font-size: 38px;
+    }
+}
+
+@media (max-width: 547px) {
+    .containerMobile{
+        display: flex !important;
+    }
+    .container{
+        display: none;
+    }
+    .overlayCard{
+       padding: 24px 16px;
+    }
+    .section{
+        height: 240px;
+    }
+    .heading{
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 400px) {
+    .heading{
+        font-size: 28px;
+    }
+    .list li{
+        font-size: 12px;
+    }
+}

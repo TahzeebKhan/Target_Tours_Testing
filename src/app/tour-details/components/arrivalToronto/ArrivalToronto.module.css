@@ -1,0 +1,1464 @@
+.section {
+    max-width: 1920px;
+    padding-top: 60px;
+    background-color: #F9F9F9;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin: 0 auto;
+}
+
+/* RIGHT SIDE */
+.rightContainer {
+    width: 50%;
+    height: 845px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* FULL BACKGROUND IMAGE */
+.dayImageContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.bgImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* FLOATING IMAGE */
+.dayImageCarousel {
+    position: absolute;
+    width: 192px;
+    height: 256px;
+    bottom: 58px;
+    right: 41px;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.carouselImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+/* DARK GRADIENT */
+.dayImageCarousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 1) 100%);
+    z-index: 1;
+}
+
+/* TEXT OVER IMAGE */
+.DayImageTextCont {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.textCont {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.textCont h4 {
+    font-family: Antic Didone;
+    font-size: 18px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+/* NEXT BUTTON */
+.leftRightBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0.8px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.leftRightBtn img {
+    width: 11px;
+    height: 11px;
+    filter: brightness(0) invert(1);
+}
+
+
+/* ================= TABS ================= */
+
+.tabsWrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #C4C4C4;
+}
+
+/* TABS CONTAINER */
+.tabs {
+    position: relative;
+    display: flex;
+    overflow: scroll;
+}
+
+/* MOVING UNDERLINE */
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
+}
+
+/* SINGLE TAB */
+.tab {
+    padding: 8px 30.5px;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.25;
+    text-transform: uppercase;
+    color: #A8A8A8;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* BUTTON INSIDE TAB */
+.tabBtn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-transform: uppercase;
+    color: inherit;
+}
+
+/* ACTIVE TAB */
+.active {
+    color: #000033;
+}
+
+/* ================= MOBILE DROPDOWN ================= */
+
+.mobileSelectWrap {
+    display: none;
+    width: 100%;
+    padding: 0 16px;
+    position: relative;
+}
+
+.mobileSelect {
+    width: 100%;
+    height: 48px;
+    background: #ffffff;
+    padding: 15px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-family: "Inter";
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #000033;
+
+    border: none;
+    cursor: pointer;
+}
+
+.mobileOptions {
+    position: absolute;
+    top: 52px;
+    left: 16px;
+    right: 16px;
+
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.mobileOptions li {
+    padding: 14px 16px;
+    font-family: "Inter";
+    font-size: 14px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    color: #000033;
+}
+
+.mobileOptions li:hover {
+    background: #f5f5f5;
+}
+
+.activeOption {
+    background: #000033;
+    color: #ffffff !important;
+}
+
+.container {
+    display: flex;
+    /* height: 845px; */
+
+}
+
+.leftContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+    align-items: end;
+    width: 50%;
+    background-color: #ffffff;
+    padding: 42px 48px 48px 20px;
+}
+
+.leftBottomCont {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+}
+
+.ArrivalContainer {
+    display: flex;
+    justify-content: space-between;
+    /* height: 41px; */
+    border-bottom: 1px solid #E4E6E8;
+}
+
+.ArrivalRight h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000033;
+
+}
+
+.slide {
+    width: 222px !important;
+    height: 263px;
+}
+
+.ArrivalLeft {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+
+}
+
+/* .expandableMainContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+} */
+.paraCoontainer p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.60;
+    letter-spacing: 0px;
+    color: #434343;
+
+}
+
+.expandableTab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 33px;
+    border-bottom: 1px solid #E4E6E8;
+    cursor: pointer;
+}
+
+.activeTabs {
+    border-bottom: none;
+    /* background-color: red; */
+
+}
+
+.expandableTab h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+}
+
+.expandableTab img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.expandableTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-top: 24px; */
+}
+
+
+.fromToContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expandableContent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+    /* collapse layout height when closed so no empty space remains */
+    max-height: 0;
+    transform-origin: top;
+    transform: scaleY(0);
+    opacity: 0;
+    transition: max-height 0.35s ease-in-out, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    will-change: max-height, transform, opacity;
+    border-bottom: 1px solid #E4E6E8;
+}
+
+/* scoped open state for accordion content */
+.expandableContent.open {
+    max-height: 800px;
+    /* large enough for content */
+    transform: scaleY(1);
+    opacity: 1;
+    /* border-bottom: 1px solid #E4E6E8; */
+}
+
+.arrow {
+    /* transition: transform 0.45s ease; */
+    transition: all 0.45s ease;
+    transform: rotate(180deg);
+}
+
+.rotate {
+    transform: rotate(0deg);
+}
+
+
+.fromToContainer span {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+
+}
+
+.viewDetails {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    text-transform: uppercase;
+    color: #000033;
+
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+
+}
+
+.flightDetailsCont {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px 12px 12px;
+    justify-content: space-between;
+    border: 1px solid #E4E6E8;
+    margin-bottom: 12px;
+
+}
+
+.flightDetailsSubCont {
+    max-width: 439px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 23px;
+}
+
+.flightDetails {
+    display: flex;
+    gap: 11px;
+    align-items: center;
+}
+
+.flightDetails img {
+    width: 35px;
+    height: 35px;
+}
+
+.flightNameContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.flightTimingContainer {
+    flex: 1;
+    /* 👈 ye sabse important */
+    min-width: 0;
+    max-width: 355px;
+    width: 100%;
+}
+
+.flightNameContainer h2 {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 18.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.flightNameContainer span {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 15.57px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #737373;
+}
+
+.rightContainer {
+    width: 50%;
+    max-height: 845px;
+    position: relative;
+}
+
+.rightContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dayImageCarousel {
+    position: absolute;
+    width: 192px;
+    height: 256px;
+    bottom: 58px;
+    right: 41px;
+    overflow: hidden;
+    /* 🔥 IMPORTANT */
+}
+
+.DayImageTextCont {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px;
+    z-index: 19;
+}
+
+.dayImageContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.textCont {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.textCont h4 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    white-space: wrap;
+
+}
+
+
+.dayImageCarousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 0;
+}
+
+.dayImageCarousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 1) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.leftRightBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    border: 0.8px solid #FFFFFF;
+
+}
+
+.leftRightBtn img {
+    width: 11px;
+    height: 11px;
+    filter: brightness(0) invert(1);
+}
+
+.br {
+    width: 1px;
+    height: 40px;
+    background-color: #E4E6E8;
+    /* margin-left: 38px; */
+}
+
+.cabinCont {
+    display: flex;
+    flex-direction: column;
+    /* margin-left: 33px; */
+    gap: 8px;
+
+}
+
+.cabinRow {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.cabinCont span {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #000000;
+}
+
+.PremiumContainer {
+    display: flex;
+    gap: 22px;
+    padding: 0 12px 12px 12px;
+
+}
+
+.PremiumTextContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.PremiumTextContainer h3 {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    color: #000000;
+}
+
+.PremiumTextContainer p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.60;
+    letter-spacing: 0px;
+    color: #434343;
+}
+
+.ApproximatelyTime {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ApproximatelyTime span {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0px;
+    color: #000000;
+
+}
+
+.btnContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+
+.disabledBtn,
+.disabledBtn:hover {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+.disabledBtn img,
+.disabledBtn:hover img {
+    filter: invert(0);
+}
+
+.yourActivityContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.yourActivityContainerTop {
+    display: flex;
+
+}
+
+.yourActivityContainerTopLeft {
+    max-width: 232px;
+    width: 232px;
+    flex: 0 0 232px;
+    padding-top: 5.5px;
+    padding-bottom: 9.5px;
+}
+
+.youHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
+}
+
+.yourActivityContainerTopRight {
+    height: 44px;
+    padding-left: 24px;
+    padding-top: 5.5px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    border-left: 1px solid #E4E6E8;
+}
+
+.yourActivityContainerBottom {
+    display: flex;
+    border-top: 1px solid #E4E6E8;
+}
+
+.yourActivityContainerBottomLeft {
+    width: 232px;
+    flex: 0 0 232px;
+    padding-top: 12px;
+    padding-right: 10px;
+    border-right: 1px solid #E4E6E8;
+}
+
+.card {
+    width: 222px;
+    height: 263px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #F9F9F9;
+    border: 1px solid #E4E6E8;
+    padding-bottom: 12px;
+}
+
+
+
+
+.cardImage {
+    width: 100%;
+    height: 116px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.cardTextContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0 8px;
+}
+
+.cardTextAddress {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.cardTextTitle {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+    display: -webkit-box;
+    min-height: 48px;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+}
+
+.cardTextButton {
+    padding: 6px 24px;
+    border: 0.5px solid #000033;
+
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+    cursor: pointer;
+    transition: all 0.45s ease;
+}
+
+.cardTextButton:hover {
+    background-color: #000033;
+    color: #FFFFFF;
+
+}
+
+.yourActivityContainerBottomRight {
+    max-width: 467px;
+    width: 100%;
+    padding-top: 12px;
+    padding-left: 10px;
+    display: flex;
+    gap: 12px;
+    overflow: hidden;
+    /* border-right: 1px solid #E4E6E8; */
+
+}
+
+.btnsCon {
+    display: flex;
+    justify-content: space-between;
+}
+
+.TextTitle {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #000000;
+    display: -webkit-box;
+    min-height: 43px;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.cardCarousell {
+    width: 222px;
+    height: 263px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #F9F9F9;
+    border: 1px solid #E4E6E8;
+    padding-bottom: 12px;
+}
+
+.cardButton {
+    padding: 8px 31px;
+    border: 0.5px solid #000033;
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.45s ease;
+}
+
+.cardButton:hover {
+    background-color: #000033;
+    color: #FFFFFF;
+}
+
+.cardTextContainer2 {
+    gap: 9px !important;
+    flex: 1;
+    min-height: 0;
+    justify-content: space-between;
+}
+
+.emptyActivityCard {
+    background: #FFFFFF;
+    border-color: #D9DDE5;
+}
+
+.emptyActivityImage {
+    object-fit: contain;
+    background: #F7F1F6;
+}
+
+.emptyActivityTextContainer {
+    justify-content: flex-start;
+    gap: 12px !important;
+    padding-top: 2px;
+}
+
+.emptyActivityLabel {
+    color: #6B7280;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.emptyActivityTitle {
+    min-height: auto;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #1F2937;
+    -webkit-line-clamp: 2;
+}
+
+
+
+
+
+.inclusionWrapper {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+.inclusionHeading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000033;
+
+    padding-bottom: 13px;
+    border-bottom: 1px solid #E4E6E8;
+}
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: 23px;
+}
+
+.inclusionSubHeading {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+
+.inclusionList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* padding: 9.9px 5px; */
+}
+
+.inclusionItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inclusionText {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+}
+
+.tourPolicyWrapper {
+    max-width: 712px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 29px;
+}
+
+.tourBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.tourPolicyPara p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
+}
+ .btnContainerMobileView{
+        display: none !important;
+    }
+.ArrivalContainerMobile{
+    display: none !important;
+    flex-direction: column;
+    gap: 4px;
+}
+.expandableMainContainerMobileWrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.paraCoontainerMobile{
+    display: none !important;
+}
+
+.list {
+    padding-left: 16px;
+    list-style-type: disc;
+}
+
+.list li strong {
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+}
+
+.list li {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
+}
+
+.tourPolicyList p {
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 16px;
+    line-height: 1.60;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    color: #434343;
+
+}
+.expandableContentWrapper{
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+.expandableMainContainerMobile {
+    display: none !important;
+}
+.expandableArrival{
+    display: none !important;
+}
+/* ================= RESPONSIVE ================= */
+
+
+@media (max-width: 1440px) {
+    .leftBottomCont {
+        gap: 16px;
+    }
+
+    .flightDetailsSubCont {
+        gap: 12px;
+    }
+
+    .flightDetailsSubCont {
+        max-width: 415px;
+        width: 100%;
+    }
+
+    .flightTimingContainer {
+        max-width: 314px;
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 1400px) {
+    .cabinCont span {
+        font-size: 10px;
+    }
+
+    .flightDetailsSubCont {
+        max-width: 388px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 1280px) {
+    .leftBottomCont {
+        gap: 16px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .flightDetailsCont {
+        flex-direction: column;
+        gap: 10px;
+
+    }
+
+    .cabinCont {
+        width: 100%;
+        flex-direction: row;
+
+
+
+    }
+
+    .br {
+        display: none;
+    }
+
+    .flightDetailsSubCont {
+        max-width: unset;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .flightTimingContainer {
+        max-width: unset;
+        width: 100%;
+    }
+}
+
+@media (max-width: 1156px) {
+    .ArrivalRight h2 {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .leftContainer {
+        padding-right: 36px;
+        gap: 30px;
+    }
+
+    .card {
+        width: 222px;
+    }
+
+    .inclusionText{
+        font-size: 14px;
+    }
+    .expandableContent {
+    /* padding-top: 12px; */
+}
+}
+
+
+@media (max-width: 1100px) {
+    /* .expandableTop {
+        margin-top: 8px;
+    } */
+
+    .ArrivalLeft {
+        font-size: 12px;
+    }
+
+    .ArrivalContainer {
+        height: 36px;
+    }
+
+    .PremiumContainer {
+        padding-top: 8px;
+    }
+
+    .wrapper {
+        gap: 19px;
+    }
+
+    .expandableMainContainerMobile {
+        display: block !important;
+    }
+
+    .yourActivityContainer {
+        display: none !important;
+    }
+
+    .btnContainer {
+        justify-content: flex-start;
+    }
+
+    .expandableContent {
+        /* padding-top: 16px; */
+        border-top: 1px solid #E4E6E8;
+        border-bottom: none !important;
+    }
+
+    .yourActivityContainerBottomRight {
+        padding: 0;
+    }
+
+}
+
+@media (max-width: 1025px) {
+    .ArrivalContainer {
+        height: 30px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 17px;
+    }
+
+    .ArrivalLeft {
+        font-size: 11px;
+    }
+
+}
+
+@media (max-width: 991px) {
+    .flightDetailsSubCont {
+        gap: 10px;
+    }
+
+    .flightDetails img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .PremiumTextContainer p {
+        font-size: 12px;
+    }
+
+    .leftContainer {
+        padding-left: 16px;
+        padding-right: 20px;
+    }
+
+    .dayNumber {
+        font-size: 18px;
+    }
+
+    .expandableTab {
+        height: auto;
+        padding-bottom: 6px;
+    }
+    .expandableTop{
+        margin-top: 0px;
+    }
+    .inclusionWrapper{
+        gap: 24px;
+    }
+    
+}
+
+@media (max-width: 768px) {
+    .tabsWrap {
+        justify-content: flex-start;
+    }
+    .PremiumContainer{
+        padding-top: 0;
+        padding-bottom:0px;
+    }
+
+    .expandableTab h2 {
+        font-size: 16px;
+    }
+    .ArrivalContainerDayIn{
+        display: none !important;
+    }
+    .leftContainer{
+        padding: 0 16px 20px 16px;
+    }
+    
+
+    .ArrivalContainer {
+        height: auto;
+        flex-direction: column;
+        gap: 4px;
+        padding-bottom: 6px;
+    }
+
+    .ArrivalLeft {
+        font-size: 12px;
+    }
+
+    .ArrivalRight h2 {
+        font-size: 16px;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .rightContainer {
+        display: none;
+    }
+    .ArrivalContainerMobile{
+        display: flex !important;
+        padding: 0;
+    }
+    .paraCoontainerMobile{
+        display: flex !important;
+    }
+    .paraCoontainer{
+        display: none ;
+    }
+    .yourActivityContainerBottomRight{
+        max-width: 100%;
+    }
+    .btnContainerMobileView{
+        display: flex !important;
+    }
+    .leftContainer {
+        width: 100%;
+    }
+
+    .section {
+        padding-bottom: 12px;
+        background-color: #FFFFFF;
+    }
+
+    .leftContainer {
+        padding-top: 0;
+    }
+
+    .section {
+        gap: 24px;
+    }
+
+    .card {
+        width: 222px;
+    }
+
+    .expandableMainContainerMobileWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .expandableArrival{
+        display: block !important;
+    }
+}
+
+@media (max-width: 488px) {
+    .tabs {
+        /* display: none; */
+    }
+
+    .tabsWrap {
+        /* border-bottom: none; */
+        justify-content: center;
+    }
+
+
+    .mobileSelectWrap {
+        display: flex;
+    }
+    .flightDetailsCont{
+padding-left: 5px;
+        padding-right: 5px;
+    }
+    .inclusionText{
+        font-size: 12px;
+    }
+    .icon{
+        width: 16px;
+        height: 16px;
+    }
+    .block{
+        gap: 16px;
+    }
+    .inclusionWrapper{
+        gap: 16px;
+    }
+    .tourPolicyWrapper{
+        gap: 16px;
+    }
+    .tourPolicyPara p{
+    font-size: 14px;
+   }
+   .list li{
+    font-size: 14px;
+   }
+}
+
+@media (max-width: 400px) {
+   .section{
+    padding-top: 20px;
+   }
+   .tab{
+    padding: 8px 11px;
+   }
+   .fromToContainer span{
+    font-size: 12px;
+   }
+   .flightDetails{
+    gap: 6px;
+   }
+   .cabinCont{
+    gap: 1px;
+   }
+   .list li{
+    font-size: 12px;
+   }
+   .PremiumTextContainer{
+    gap: 6px;
+   }
+   .PremiumTextContainer h3{
+    font-size: 12px;
+   }
+   .PremiumTextContainer p{
+    font-size: 9px;
+   }
+   .ApproximatelyTime span{
+    font-size: 10px;
+   }
+   .tourPolicyPara p{
+    font-size: 12px;
+   }
+}

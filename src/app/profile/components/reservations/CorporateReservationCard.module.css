@@ -1,0 +1,294 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  max-width: 1196px;
+  justify-self: center;
+  width: 100%;
+  gap: 24px;
+  font-family: "Inter";
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(255, 255, 255, 1);
+  height: 100%;
+}
+.mobileView {
+  display: none;
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  padding-bottom: 24px;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-size: 28px;
+  color: rgba(0, 0, 51, 1);
+}
+
+.subtitle {
+  font-size: 14px;
+}
+
+.tabsContainer {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background-color: rgba(240, 243, 255, 1);
+  width: 100%;
+  padding: 6px;
+  align-items: center;
+}
+
+.tabButton {
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(0, 0, 51, 1);
+  transition: all 0.3s ease;
+}
+
+.active {
+  background-color: rgba(0, 0, 51, 1);
+  color: rgba(255, 255, 255, 1);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 7px 10px;
+  border: 1px solid #e4e6e8;
+  /* gap: 20px; */
+  /* padding-bottom: 16px; */
+}
+
+.cardMain {
+  display: flex;
+  width: 100%;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #e4e6e8;
+  margin-bottom: 9px;
+  gap: 20px;
+  flex: 1;
+}
+.cardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.budgetUpdated {
+  background-color: #f2f3f7;
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 4px;
+
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  
+  line-height: 100%;
+  letter-spacing: 0px;
+  color: #000000;
+}
+.bottomRightBtnsConatiner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* width: 100%; */
+  /* max-width: 314px; */
+}
+.imageWrapper {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.viewBtn,
+.pdfBtn,
+.cancelBtn {
+  padding: 0 24px;
+  display: flex;
+  height: 36px;
+  align-items: center;
+  color: #000033;
+  font-family: Arial;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 20px;
+  letter-spacing: 0px;
+  text-align: center;
+
+  cursor: pointer;
+  gap: 8px;
+}
+.pdfBtn {
+  background-color: #f3f4f6;
+}
+.cancelBtn {
+  border: 1px solid #e4e6e8;
+}
+.viewBtn {
+  background-color: #e8effc;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.hotelName {
+  font-family: Antic Didone;
+  font-size: 20px;
+  color: rgba(0, 0, 51, 1);
+}
+
+.actionsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.statusGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid;
+}
+
+.confirmed {
+  background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
+  border: 1px solid #049153;
+  color: rgba(4, 145, 83, 1);
+}
+
+.pending {
+  background: var(--Color-Orange-50, rgba(255, 247, 237, 1));
+  border: 1px solid var(--Color-Orange-600, rgba(234, 88, 12, 1));
+  color: rgba(234, 88, 12, 1);
+}
+
+.idLabel {
+  font-size: 14px;
+  color: rgba(69, 76, 88, 1);
+  font-weight: 300;
+}
+
+.detailsGrid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  padding: 12px 0;
+  padding-bottom: 0;
+  flex-wrap: wrap;
+  /* grid-template-columns: repeat(7,1fr); */
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.label {
+  font-size: 12px;
+}
+
+.value {
+  font-size: 12px;
+  font-weight: 300;
+  color: black;
+}
+
+.checkDetails {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.flightCard {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.flightMain {
+  display: flex;
+  gap: 16px;
+}
+
+.flightContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flightTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.flightMeta {
+  font-size: 12px;
+  color: #666;
+}
+
+.flightActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.flightCardHeader {
+  gap: 8px;
+  justify-content: flex-start;
+}
+/* Responsiveness */
+
+.cancelBtn {
+  border: 1px solid #e4e6e8;
+}
+.valueBold {
+  font-weight: 700;
+}

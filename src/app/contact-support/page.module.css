@@ -1,0 +1,13 @@
+.desktop {
+}
+.mobileView {
+  display: none;
+}
+@media (max-width: 895px) {
+  .desktop {
+    display: none;
+  }
+  .mobileView {
+    display: block;
+  }
+}

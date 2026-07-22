@@ -1,0 +1,178 @@
+.overlay {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.2);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+
+.container {
+  background-color: #ffffff;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  /* max-width: 600px; */
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 16px;
+  background-color: white;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breadcrumbLabel {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: rgba(123, 135, 153, 1);
+  text-transform: uppercase;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(10, 10, 10, 1);
+}
+
+.sectionWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 16px;
+  padding-bottom: 102px;
+}
+
+.title {
+  font-family: "Antic Didone", serif;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 1);
+  text-transform: uppercase;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 5.4px;
+  cursor: pointer;
+}
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  border: 2px solid transparent;
+  transition: border-color 300ms ease-out;
+  line-height: 0;
+}
+
+.active .imageWrapper {
+  border: 2px solid rgba(0, 0, 51, 1);
+}
+.checkIcon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 16px;
+  height: 16px;
+
+  background: rgba(0, 0, 51, 1);
+  border-radius: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transform: scale(0.8);
+
+  animation: tickFadeIn 300ms ease-out forwards;
+}
+@keyframes tickFadeIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.image {
+  object-fit: cover;
+  display: block;
+}
+
+/* .selectedOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 51, 0.2);
+    border: 3px solid rgba(0, 0, 51, 1);
+} */
+
+.cardLabel {
+  font-family: "Antic Didone", serif;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 1);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 16px;
+  padding-top: 24px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(243, 244, 246, 1);
+  position: fixed;
+  bottom: 0;
+  background-color: white;
+  width: 100%;
+}
+
+.resetButton {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 16px;
+  cursor: pointer;
+  color: rgba(0, 0, 51, 1);
+}
+
+.searchButton {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(0, 0, 51, 1);
+  color: white;
+  border: none;
+  padding: 16px;
+  cursor: pointer;
+}

@@ -1,0 +1,98 @@
+.wrapper {
+  max-width: 388px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.imageInfoContainer {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.imageBox {
+  width: 75px;
+  height: 75px;
+  border: 1px solid #dbe2eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.imageBox img {
+  width: 41px;
+  height: auto;
+}
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.weight {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #364153;
+}
+.price {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.44px;
+  color: #0a0a0a;
+}
+.counter {
+  max-width: 86px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn {
+  padding: 8px 5px;
+  width: 24px;
+  height: 24px;
+  border: 0.75px solid #000033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.count {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+}
+.btn,
+.btn svg path {
+  transition: all 0.5s ease;
+}
+.btn:hover svg path {
+  fill: white;
+}
+
+.btn:hover {
+  background-color: #000033;
+}
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+@media (max-width: 1156px) {
+  .imageBox {
+    width: 56px;
+    height: 56px;
+  }
+  .imageInfoContainer {
+    gap: 12px;
+  }
+}
+@media (max-width: 640px) {
+  .wrapper {
+    max-width: unset;
+  }
+}

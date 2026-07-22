@@ -1,0 +1,200 @@
+.card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.rowWraper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.title {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  
+  line-height: 28px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #0a0a0a;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #4a5565;
+
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.price {
+  color: #0a0a0a;
+}
+.success {
+  color: #4e8729;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 16px 0;
+}
+
+.totalRow {
+  display: flex;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalRow span {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 24px;
+  
+  line-height: 32px;
+  letter-spacing: 0.07px;
+  color: #000033;
+}
+
+.totalRow span:first-child {
+  font-family: Inter;
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  
+  line-height: 28px;
+  letter-spacing: -0.44px;
+
+  color: #0a0a0a;
+}
+.totalPrice {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.note {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  
+  line-height: 150%;
+  letter-spacing: -3%;
+  text-align: left;
+  color: #7b8799;
+}
+
+.help {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  
+  line-height: 16px;
+  letter-spacing: 0px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  color: #4a5565;
+}
+
+.helpTitle {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  color: #0a0a0a;
+  margin-bottom: 7.5px;
+}
+
+.help p {
+  margin-bottom: 8px;
+}
+.chat {
+  margin-bottom: 0 !important;
+}
+
+.bookNowBtn {
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  height: 41px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  width: 100%;
+  transition: all 0.5s ease;
+}
+
+.bookNowBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+.safeBadge {
+  align-items: center;
+  display: flex;
+  padding: 5px 13px;
+  gap: 12px;
+  /* justify-content: space-between; */
+  width: 100%;
+  border: 1px solid var(--Color-Soft-Green-400, #86c556);
+  background-color: #f2faeb;
+}
+.safeBadge img {
+  width: 48px;
+  height: 100%;
+}
+.safeBadge .title {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  
+  line-height: 20px;
+  letter-spacing: -0.15px;
+  text-transform: uppercase;
+  color: #345321;
+}
+
+.safeBadge .content {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 11px;
+  
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #4a5565;
+  /* white-space: nowrap; */
+}
+
+.safeBadge .text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}

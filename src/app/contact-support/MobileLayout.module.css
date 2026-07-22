@@ -1,0 +1,51 @@
+.mobileLayout {
+  width: 100%;
+}
+
+/* FIXED NAVBAR */
+.navDetailsMobile {
+  height: 60px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: white;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 2000;
+}
+
+.backArrow {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 24px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #1f2226;
+}
+
+/* CONTENT OFFSET */
+.mobileContent {
+  padding-top: 92px; /* 👈 important so content doesn’t hide under navbar */
+}
+
+/* Desktop safeguard */
+@media (min-width: 896px) {
+  .navDetailsMobile {
+    display: none;
+  }
+
+  .mobileContent {
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,284 @@
+.container {
+  max-width: 1520px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0 auto;
+  margin-bottom: 47px;
+}
+
+.topContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 34px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
+}
+
+.subHeading {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0%;
+}
+
+.table {
+  border: 1px solid #dddfe3;
+}
+
+.row {
+  padding: 18px 24px;
+  display: grid;
+  grid-template-columns: 398px 1fr;
+  border-bottom: 1px solid #dddfe3;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.left {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+}
+
+.right {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #383e48;
+}
+
+.right ul,
+.right ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.right li + li {
+  margin-top: 4px;
+}
+
+.viewBtn {
+  width: fit-content;
+  display: block;
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.19;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: #000033;
+  cursor: pointer;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+  width: min(720px, 100%);
+  max-height: min(78vh, 760px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #000033;
+}
+
+.closeBtn {
+  border: 0;
+  background: transparent;
+  color: #000033;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modalBody {
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: var(--font-inter);
+  color: #383e48;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.instructionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.instructionSection h4 {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 30px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+
+  color: #000033;
+}
+
+.instructionList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    font-family: Inter;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0%;
+    color: #4A5565;
+}
+
+.modalBody ul,
+.modalBody ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.modalBody li + li {
+  margin-top: 8px;
+}
+
+@media (max-width: 1200px) {
+  .heading {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 1156px) {
+  .heading {
+    font-size: 28px;
+  }
+}
+@media (max-width: 1080px) {
+  .heading {
+    font-size: 26px;
+  }
+  .right {
+    font-size: 14px;
+  }
+  .left {
+    font-size: 14px;
+  }
+}
+@media (max-width: 991px) {
+  .heading {
+    font-size: 24px;
+  }
+  .left {
+    font-size: 12px;
+  }
+  .right {
+    font-size: 12px;
+  }
+  .row {
+    padding: 12px 16px;
+  }
+  .subHeading {
+    font-size: 16px;
+  }
+  .topContainer {
+    gap: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .left {
+    /* padding-bottom: 8px; */
+  }
+
+  .right {
+    padding-top: 0;
+    line-height: 19px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px;
+  }
+  .heading {
+    line-height: 1;
+  }
+  .subHeading {
+    font-size: 18px;
+  }
+  .topContainer {
+    gap: 12px;
+  }
+  .row {
+    padding: 12px;
+    gap: 12px;
+  }
+  .right {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .left {
+    font-size: 16px;
+  }
+}

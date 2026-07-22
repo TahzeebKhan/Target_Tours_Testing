@@ -1,0 +1,222 @@
+.layoutWrapper {
+    background-color: #F9F9F9;
+
+}
+
+.navBar {
+    /* margin-bottom: 73px; */
+    position: relative;
+}
+
+.pageSection {
+padding-top: 73px;
+}
+
+.contentWrapper {
+    max-width: 1520px;
+    width: 100%;
+    /* background-color: #F9F9F9; */
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto 1fr;
+    gap: 64px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.rightSidebar {
+    margin-top: 79px;
+    align-self: start;
+     position: sticky;
+    top: 150px;
+    min-width: 0;
+}
+
+.summarySidebar {
+    position: sticky;
+    top: 150px;
+    margin-top: 0;
+}
+
+/* ROOM CARD */
+.roomWrapper {
+    position: sticky;
+    top: 150px;
+    opacity: 1;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.roomWrapper.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+}
+
+.roomSearchToggle {
+    display: none;
+    border: 0;
+    background: #fcc800;
+    color: #000033;
+    font-family: var(--font-inter);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+/* BOOKING SUMMARY */
+.summaryWrapper {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    overflow: hidden;
+    transition:
+        max-height 0.6s ease,
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+.summaryWrapper.show {
+    max-height: 1200px;
+    /* safe height */
+    opacity: 1;
+    transform: translateY(0);
+}
+.policySection{
+    padding: 20px;
+}
+.Reviews{
+    padding: 20px;
+}
+
+.mobileView{
+    display: none;
+}
+
+@media (max-width: 1530px) {
+    .contentWrapper{
+        padding: 0 20px;
+    }
+}
+@media (max-width: 1500px) {
+    .contentWrapper{
+        gap: 50px;
+    }
+}
+@media (max-width: 1440px) {
+    .contentWrapper{
+        gap: 32px;
+    }
+}
+
+@media (max-width: 1200px){
+    .contentWrapper{
+        gap: 16px;
+        grid-template-columns: 1fr 360px;
+        
+    }
+
+}
+
+@media (max-width: 1280px) {
+    .contentWrapper {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+        overflow-x: hidden;
+    }
+
+    .rightSidebar {
+        position: static;
+        margin: 0;
+        width: 100%;
+    }
+
+    .roomSearchToggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 20px;
+        top: 112px;
+        z-index: 2500;
+        min-width: 150px;
+        height: 46px;
+        padding: 0 18px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    }
+
+    .roomWrapper {
+        position: fixed;
+        top: 185px;
+        right: 20px;
+        z-index: 2400;
+        width: min(400px, calc(100vw - 40px));
+        max-height: calc(100vh - 198px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    .roomWrapper.hide {
+        width: min(400px, calc(100vw - 40px));
+        height: 0;
+        overflow: hidden;
+    }
+}
+
+
+@media (max-width: 1040px){
+    .contentWrapper{
+        gap: 16px;
+        grid-template-columns: minmax(0, 1fr);
+        
+    }
+    .rightSidebar{
+        margin: 0;
+    }
+    .summarySidebar{
+        top: 120px;
+    }
+    
+
+}
+
+
+/* @media (max-width: 1040px){
+    .contentWrapper{
+        grid-template-columns: 1fr 316px;
+        
+    }
+    
+
+} */
+
+@media (max-width: 991px){
+    .contentWrapper{
+        display: flex;
+        flex-direction: column-reverse;
+        margin-top: 24px;
+        
+    }
+    .summarySidebar{
+        position: static;
+    }
+    
+
+}
+
+@media (max-width: 640px){
+    .layoutWrapper{
+        display: none;
+    }
+    .mobileView{
+        display: flex;
+        /* flex-direction: column; */
+    }
+
+}

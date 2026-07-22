@@ -1,0 +1,490 @@
+.carouselWrapper {
+  width: 100%;
+  max-width: 100%;
+  padding: 60px 0;
+  position: relative;
+  overflow-x: visible;
+  overflow-y: visible;
+  margin: 0 auto;
+  background: #0a1628;
+  min-height: 100vh;
+}
+
+.cardContainer1 {
+  width: 597px;
+  height: 611px;
+  transform: scaleX(1);
+  transform-origin: center;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  z-index: 1;
+}.cardContainer1.isHovered {
+  transform: scaleX(1.15);
+  z-index: 10;
+}
+.cardContainer1.isShrunk {
+  transform: scaleX(0.88);
+  z-index: 0;
+}
+
+
+/* Base styles for all card containers */
+.cardContainer1,
+.cardContainer2,
+.cardContainer3 {
+  margin-top: 60px;
+  background-color: #f5f5f5;
+  max-height: 100%;
+  max-width: 100%;
+  width: 597px;
+  height: 611px;
+  overflow: hidden;
+  transition: width 0.5s ease, height 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Images inside card containers */
+.cardContainer1 img,
+.cardContainer2 img,
+.cardContainer3 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(100%);
+  transition: width 0.5s ease, height 0.5s ease, filter 0.3s ease;
+}
+
+.btnContainer{
+  display: flex;
+  justify-content: end;
+
+  gap: 6.4px;
+}
+.btnContainerWrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 60px auto 0 auto;
+}
+.btn{
+  height: 32px;
+  width: 32px;
+  border: 0.9px solid #CCCCCC;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.cardContainer1 {
+  width: 597px;
+  height: 611px;
+
+  transform: scale(1);
+  transform-origin: center center;
+
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.3s ease;
+
+  will-change: transform;
+  z-index: 1;
+}
+
+/* When hovering over cardContainer1, expand it */
+.swaper.isHover{
+  width: 690px;
+  transition: width 0.5s ease, height 0.5s ease, filter 0.3s ease;
+}
+.cardContainer1.isHovered {
+  transform: scaleX(1.15); /* only width expand */
+  z-index: 10;
+}
+.cardContainer1.isShrunk {
+  transform: scaleX(0.88);
+  z-index: 0;
+}
+.leftCard {
+  transform-origin: left center;
+}
+.rightCard {
+  transform-origin: right center;
+}
+.centerCard {
+  transform-origin: center center;
+  margin: 0 auto
+}
+.cardOverlay {
+  bottom: -29.9%;
+  transition: bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cardContainer1.isHovered .cardOverlay {
+  bottom: 0;
+}
+
+/* Left card shrinks from right side */
+.leftCard.isShrunk {
+  margin-right: auto;
+}
+
+/* Right card shrinks from left side */
+.rightCard.isShrunk {
+  margin-left: auto;
+}
+
+.cardContainer1.isHovered img {
+  filter: grayscale(0%);
+  width: 100%;
+  height: 100%;
+}
+
+/* When hovering over swiper, reduce cards that are not being hovered */
+/* :global(.swiper:hover) .cardContainer1:not(:hover),
+:global(.swiper:hover) .cardContainer2:not(:hover),
+:global(.swiper:hover) .cardContainer3:not(:hover) {
+  width: 350px;
+} */
+
+/* Image hover effect - slight scale on card hover */
+.cardContainer1:hover img,
+.cardContainer2:hover img,
+.cardContainer3:hover img {
+  transform: scale(1.0);
+}
+
+.swiper {
+  width: 100%;
+  height: 650px;
+  padding: 20px 0;
+}
+
+.swiperSlide {
+  width: 750px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slideContent {
+  width: 100%;
+  height: auto;
+  position: relative;
+  border-radius: 12px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 550px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+
+.slideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(100%);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+/* Active slide - full color */
+:global(.swiper-slide-active) .slideImage {
+  filter: grayscale(0%);
+}
+
+.slideContent:hover .slideImage {
+  transform: scale(1.05);
+}
+
+/* Duration overlay on bottom of image for non-active slides */
+.durationOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 2;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Active slide - duration overlay at top right */
+:global(.swiper-slide-active) .durationOverlay {
+  bottom: auto;
+  top: 0;
+  left: auto;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 0;
+  border-top-right-radius: 12px;
+  border-bottom-left-radius: 0;
+  padding: 10px 15px;
+}
+
+/* Active slide content overlay */
+.activeContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px 25px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.5),
+    transparent
+  );
+  color: white;
+  z-index: 3;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:global(.swiper-slide-active) .activeContent {
+  display: flex;
+}
+
+.activeTitle {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.activeCities {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.activePrice {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.activeButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid white;
+  background: white;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.activeButton:hover {
+  background: transparent;
+  color: white;
+}
+
+.activeButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Title text below image - only for non-active slides */
+.titleText {
+  margin-top: 20px;
+  padding: 0 10px;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+  z-index: 15;
+  flex-shrink: 0;
+}
+
+/* Hide title below for active slide */
+:global(.swiper-slide-active) .titleText {
+  display: none;
+}
+
+/* Navigation buttons styling */
+.carouselWrapper :global(.swiper-button-next) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  margin-top: 0;
+  top: auto;
+  bottom: 20px;
+  right: calc(50% - 60px);
+}
+
+.carouselWrapper :global(.swiper-button-prev) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  margin-top: 0;
+  top: auto;
+  bottom: 20px;
+  left: calc(50% - 60px);
+}
+
+.carouselWrapper :global(.swiper-button-next::after) {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.carouselWrapper :global(.swiper-button-prev::after) {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.carouselWrapper :global(.swiper-button-next:hover) {
+  background: white;
+  color: #0a1628;
+  border-color: white;
+}
+
+.carouselWrapper :global(.swiper-button-prev:hover) {
+  background: white;
+  color: #0a1628;
+  border-color: white;
+}
+
+/* Hide navigation arrows when disabled */
+.carouselWrapper :global(.swiper-button-disabled) {
+  opacity: 0.35;
+  cursor: auto;
+  pointer-events: none;
+}
+.cardOverlay {
+  position: absolute;
+  bottom: -30.6%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%);
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 16px;
+  align-items: center;
+  color: #fff;
+  padding-bottom: 23px;
+  transition: bottom 0.45s ease;
+  /* max-width: 407px; */
+}
+.cardContainer1.isHovered .cardOverlay {
+  bottom: 0;
+}
+
+.duration {
+  align-self: center;
+  border-bottom: 0.5px solid #ffffff;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  letter-spacing: 1px;
+  backdrop-filter: blur(4px);
+  text-transform: uppercase;
+
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -2%;
+  text-align: center;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.cities {
+  max-width: 407px;
+
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price span {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.arrowBtn {
+  margin: 10px auto 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowBtn:hover {
+  cursor: pointer;
+}
+.arrowBtn:hover svg {
+  transition: all 0.3s ease-in-out;
+}
+.arrowBtn:hover svg {
+  transform: rotate(45deg);
+}
