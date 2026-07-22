@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./CancellationPenalty.module.css";
 import { getFlightFareRules } from "@/features/flights/services/flightBooking";
 import {
+  buildV2SsrPayload,
   getBookingDetailsView,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
@@ -391,6 +392,67 @@ const buildFareRulesPayload = (bookingSession) => {
   };
 };
 
+const buildFareRulesPayloads = (bookingSession) => {
+  const priceRequest = bookingSession?.priceRequest || {};
+  const isMultiCity =
+    String(priceRequest?.TripType || priceRequest?.tripType || "").toUpperCase() === "DM";
+
+  if (!isMultiCity) return [buildFareRulesPayload(bookingSession)];
+
+  const ssrRequests = toArray(buildV2SsrPayload(bookingSession)?.ssr_requests);
+  const routeRequests = toArray(priceRequest?.search_keys || priceRequest?.searchKeys);
+  const routeFares = toArray(bookingSession?.selectedFare?.multiCityFares);
+
+  return ssrRequests.map((ssrRequest, routeIndex) => {
+    const requestRoute = routeRequests[routeIndex] || {};
+    const routeFare = routeFares[routeIndex] || {};
+    const fallbackAmount = readNumber(
+      routeFare?.netAmount,
+      routeFare?.rawFare?.netAmount,
+      routeFare?.rawFare?.price,
+      routeFare?.rawFare?.grossFare,
+      routeFare?.price,
+      routeFare?.pricePerAdult,
+      requestRoute?.Trips?.[0]?.Amount
+    );
+
+    return {
+      search_key: ssrRequest?.search_key,
+      Trips: toArray(ssrRequest?.Trips).map((trip, tripIndex) => ({
+        Amount:
+          fallbackAmount ??
+          requestRoute?.Trips?.[tripIndex]?.Amount ??
+          requestRoute?.Trips?.[0]?.Amount,
+        Index: trip?.Index,
+        OrderID:
+          trip?.OrderID ||
+          trip?.OrderId ||
+          trip?.Order ||
+          requestRoute?.Trips?.[tripIndex]?.OrderID ||
+          1,
+        TUI: trip?.TUI,
+      })),
+    };
+  });
+};
+
+const mergeMultiCityFareRuleResponses = (responses) => {
+  const successfulResponses = toArray(responses).filter(Boolean);
+  const firstResponse = successfulResponses[0] || {};
+  const mergedRules = successfulResponses.reduce((rules, response) => ({
+    ...rules,
+    ...(response?.data?.rules || response?.data?.Rules || {}),
+  }), {});
+
+  return {
+    ...firstResponse,
+    data: {
+      ...(firstResponse?.data || {}),
+      rules: mergedRules,
+    },
+  };
+};
+
 const hasValidFareRulesPayload = (payload) =>
   payload?.search_key &&
   toArray(payload?.Trips).length > 0 &&
@@ -415,7 +477,8 @@ const CancellationPenalty = () => {
     () => getBookingDetailsView(bookingSession),
     [bookingSession]
   );
-  const payload = useMemo(() => buildFareRulesPayload(bookingSession), [bookingSession]);
+  const payloads = useMemo(() => buildFareRulesPayloads(bookingSession), [bookingSession]);
+  const isMultiCityFareRules = payloads.length > 1;
   const rows = useMemo(() => extractCancellationRows(fareRulesData), [fareRulesData]);
   const fallbackRows = rows.length
     ? rows
@@ -426,12 +489,18 @@ const CancellationPenalty = () => {
   );
 
   useEffect(() => {
-    if (bookingSession?.fareRulesResponse) {
+    const hasCompleteCachedMultiCityRules =
+      isMultiCityFareRules &&
+      toArray(bookingSession?.fareRulesResponses).length === payloads.length;
+    if (
+      bookingSession?.fareRulesResponse &&
+      (!isMultiCityFareRules || hasCompleteCachedMultiCityRules)
+    ) {
       setFareRulesData(bookingSession.fareRulesResponse);
       return;
     }
 
-    if (!hasValidFareRulesPayload(payload)) {
+    if (!payloads.length || !payloads.every(hasValidFareRulesPayload)) {
       setError("Cancellation rules are not available for this flight.");
       return;
     }
@@ -440,15 +509,20 @@ const CancellationPenalty = () => {
     setIsLoading(true);
     setError("");
 
-    getFlightFareRules(payload)
-      .then((response) => {
+    Promise.all(payloads.map((payload) => getFlightFareRules(payload)))
+      .then((responses) => {
         if (!isMounted) return;
+        const response = isMultiCityFareRules
+          ? mergeMultiCityFareRuleResponses(responses)
+          : responses[0];
         setFareRulesData(response);
         setBookingSession?.((prev) => {
           const next = {
             ...(prev || {}),
-            fareRulesRequest: payload,
+            fareRulesRequest: isMultiCityFareRules ? undefined : payloads[0],
+            fareRulesRequests: isMultiCityFareRules ? payloads : undefined,
             fareRulesResponse: response,
+            fareRulesResponses: isMultiCityFareRules ? responses : undefined,
           };
           writeFlightBookingSession(next);
           return next;
@@ -467,7 +541,13 @@ const CancellationPenalty = () => {
     return () => {
       isMounted = false;
     };
-  }, [bookingSession?.fareRulesResponse, payload, setBookingSession]);
+  }, [
+    bookingSession?.fareRulesResponse,
+    bookingSession?.fareRulesResponses,
+    isMultiCityFareRules,
+    payloads,
+    setBookingSession,
+  ]);
 
   return (
     <div className={styles.wrapper}>

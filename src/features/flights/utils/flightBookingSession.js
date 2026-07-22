@@ -1374,20 +1374,38 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
       ? primarySsrRequest.Trips
       : requestTrips;
   const trips = sourceTrips
-    .map((trip, index) => ({
-      OrderID: String(
-        pickFirst(
-          trip?.OrderID,
-          trip?.OrderId,
-          trip?.Order,
-          trip?.orderId,
-          trip?.order,
-          index + 1
-        )
-      ),
-      TUI: pickFirst(trip?.TUI, trip?.tui, tui),
-    }))
-    .filter((trip) => trip.OrderID);
+    .map((trip, index) => {
+      const selectedTripFare =
+        index === 1
+          ? selectedFare?.roundTripFares?.return || selectedFare
+          : selectedFare?.roundTripFares?.onward || selectedFare;
+      const selectedTripIndex = pickFirst(
+        trip?.Index,
+        trip?.index,
+        requestTrips?.[index]?.Index,
+        requestTrips?.[index]?.index,
+        selectedTripFare?.rawFare?.Index,
+        selectedTripFare?.rawFare?.index,
+        selectedTripFare?.Index,
+        selectedTripFare?.index
+      );
+
+      return {
+        Index: String(selectedTripIndex || ""),
+        OrderID: String(
+          pickFirst(
+            trip?.OrderID,
+            trip?.OrderId,
+            trip?.Order,
+            trip?.orderId,
+            trip?.order,
+            index + 1
+          )
+        ),
+        TUI: pickFirst(trip?.TUI, trip?.tui, tui),
+      };
+    })
+    .filter((trip) => trip.Index && trip.OrderID);
   const seatLayoutRequests = (isMultiCity
     ? ssrRequests.map((request, requestIndex) => {
         const selectedRouteFare = selectedFare?.multiCityFares?.[requestIndex] || {};

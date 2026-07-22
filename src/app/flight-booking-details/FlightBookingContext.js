@@ -30,6 +30,18 @@ const getApiMessage = (payload, fallback) => {
 
 const areSameJson = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 const toArray = (value) => (Array.isArray(value) ? value : []);
+const hasCompleteSeatLayoutIndexes = (request) => {
+  const requests = toArray(request?.seat_layout_requests);
+  return (
+    requests.length > 0 &&
+    requests.every((seatRequest) =>
+      toArray(seatRequest?.Trips).length > 0 &&
+      toArray(seatRequest.Trips).every((trip) =>
+        trip?.Index !== undefined && trip?.Index !== null && String(trip.Index).trim()
+      )
+    )
+  );
+};
 const getRestoredBookingStep = (session) => {
   const savedStep = Number(session?.currentStep);
   if (Number.isInteger(savedStep) && savedStep >= 2 && savedStep <= 6) {
@@ -701,7 +713,11 @@ export function FlightBookingProvider({ children }) {
 
         let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
         let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
-        if (includeSeatLayout && bookingSession?.seatLayoutRequest?.seat_layout_requests?.length) {
+        if (
+          includeSeatLayout &&
+          bookingSession?.seatLayoutRequest?.seat_layout_requests?.length &&
+          !hasCompleteSeatLayoutIndexes(bookingSession.seatLayoutRequest)
+        ) {
           seatLayoutResponse = null;
           seatLayoutRequest = null;
         }
@@ -755,6 +771,15 @@ export function FlightBookingProvider({ children }) {
     if (priceSsrResponse) {
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+      if (
+        includeSeatLayout &&
+        seatLayoutRequest?.seat_layout_requests?.length &&
+        !hasCompleteSeatLayoutIndexes(seatLayoutRequest)
+      ) {
+        seatLayoutResponse = null;
+        seatLayoutRequest = null;
+      }
 
       try {
         if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
@@ -842,6 +867,15 @@ export function FlightBookingProvider({ children }) {
       }
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+      if (
+        includeSeatLayout &&
+        seatLayoutRequest?.seat_layout_requests?.length &&
+        !hasCompleteSeatLayoutIndexes(seatLayoutRequest)
+      ) {
+        seatLayoutResponse = null;
+        seatLayoutRequest = null;
+      }
 
       if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
         seatLayoutRequestInFlightRef.current = true;
