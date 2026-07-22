@@ -497,7 +497,7 @@ export const buildFareOptions = ({
 
     if (fareOptionItems.length > 0) {
         const ruleSources = collectFareRuleSources(pricePayload);
-        return fareOptionItems.map((item, index) => {
+        const normalizedFares = fareOptionItems.map((item, index) => {
             const ruleSource = getMatchingRuleSource(item, index, ruleSources);
             const total = readNumber(
                 item?.price,
@@ -600,6 +600,20 @@ export const buildFareOptions = ({
                     meals: meals.length > 0 ? "Meals available" : "Meals as per airline rules",
                 },
             };
+        });
+        const seenCards = new Set();
+        return normalizedFares.filter((fare) => {
+            const visibleCardKey = JSON.stringify({
+                name: fare.name,
+                price: fare.price,
+                pricePerAdult: fare.pricePerAdult,
+                baggage: fare.baggage,
+                changes: fare.changes,
+                addons: fare.addons,
+            });
+            if (seenCards.has(visibleCardKey)) return false;
+            seenCards.add(visibleCardKey);
+            return true;
         });
     }
 
@@ -713,6 +727,7 @@ const FareComparisonModal = ({
             fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
             toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
             toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+            departureDate: String(searchParams?.get("start") || "").trim(),
         };
         if (!hasPricePayload) {
             toast.error("Missing booking payload for the selected flight.");

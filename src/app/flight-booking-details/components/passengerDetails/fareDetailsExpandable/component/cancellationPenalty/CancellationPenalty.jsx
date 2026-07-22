@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./CancellationPenalty.module.css";
 import { getFlightFareRules } from "@/features/flights/services/flightBooking";
 import {
+  buildV2SsrPayload,
   getBookingDetailsView,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
+import CancellationPolicyModal from "./CancellationPolicyModal";
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -18,11 +20,9 @@ const readNumber = (...values) => {
 };
 
 const unwrapFareRulesPayload = (fareRulesData) =>
-  fareRulesData?.data?.raw ||
-  fareRulesData?.raw ||
-  fareRulesData?.data ||
-  fareRulesData ||
-  {};
+  fareRulesData?.data && typeof fareRulesData.data === "object"
+    ? fareRulesData.data
+    : {};
 
 const getPlatformCharges = (fareRulesData) => {
   const payload = unwrapFareRulesPayload(fareRulesData);
@@ -198,7 +198,7 @@ const extractCancellationRowsFromNode = (payload, platformCharges, currency) => 
     });
 
     const rawRows = parseRawRows(
-      node?.rawText || node?.RawText || node?.FareRuleText,
+      node?.FareRuleText,
       currency,
       platformCharges
     );
@@ -242,6 +242,47 @@ const getRouteLabelForIndex = (bookingView, index) => {
 const getFlightForIndex = (bookingView, index) =>
   index === 1 ? bookingView?.returnFlight : bookingView?.departureFlight;
 
+const formatCompletePenalty = (amount, currency = "INR") => {
+  const text = String(amount ?? "").trim();
+  const numericText = text.replace(/[^\d.]/g, "");
+  const numericAmount = Number(numericText);
+  if (numericText && Number.isFinite(numericAmount)) {
+    const symbol = String(currency || "INR").toUpperCase() === "INR" ? "₹" : currency;
+    return `${symbol} ${numericAmount.toLocaleString("en-IN")}`;
+  }
+  return text || "Not Available";
+};
+
+const isCancellationPenaltyGroup = (heading) => {
+  const normalizedHeading = String(heading || "")
+    .replace(/[^a-z]+/gi, " ")
+    .trim()
+    .toLowerCase();
+
+  return (
+    /\bcancel(?:lation)?\b/.test(normalizedHeading) &&
+    /\b(?:fee|penalty|charge|charges)\b/.test(normalizedHeading) &&
+    !/\b(?:change|reissue|ato|service)\b/.test(normalizedHeading)
+  );
+};
+
+const getCompleteRouteRows = (routeRules = []) =>
+  toArray(routeRules).flatMap((fareRule) =>
+    toArray(fareRule?.Rule || fareRule?.rule)
+      .filter((ruleGroup) =>
+        isCancellationPenaltyGroup(ruleGroup?.Head || ruleGroup?.head)
+      )
+      .flatMap((ruleGroup) =>
+        toArray(ruleGroup?.Info || ruleGroup?.info).map((info) => ({
+          timeFrame: normalizeTimeFrame(info?.Description || info?.description),
+          penalty: formatCompletePenalty(
+            info?.AdultAmount ?? info?.adultAmount,
+            info?.CurrencyCode || info?.currencyCode || "INR"
+          ),
+        }))
+      )
+  );
+
 const normalizeRouteKey = (value) =>
   String(value || "")
     .trim()
@@ -259,6 +300,20 @@ const getRuleRouteLabel = (source) =>
 const buildCancellationCards = (fareRulesData, bookingView, fallbackRows) => {
   const payload = unwrapFareRulesPayload(fareRulesData);
   const rules = getRulesPayload(fareRulesData);
+  const routeEntries =
+    rules && typeof rules === "object" && !Array.isArray(rules)
+      ? Object.entries(rules).filter(([, value]) => Array.isArray(value))
+      : [];
+
+  if (routeEntries.length) {
+    return routeEntries.map(([routeLabel, routeRules], index) => ({
+      key: `${routeLabel}-${index}`,
+      routeLabel,
+      flight: getFlightForIndex(bookingView, index),
+      rows: getCompleteRouteRows(routeRules),
+    }));
+  }
+
   const trips = toArray(rules?.trips || rules?.Trips);
   const flatRules = toArray(rules?.flat || rules?.Flat);
   const platformCharges = getPlatformCharges(fareRulesData);
@@ -321,23 +376,80 @@ const buildFareRulesPayload = (bookingSession) => {
   );
   const tripSource = toArray(priceRequest?.Trips).length
     ? toArray(priceRequest.Trips)
-    : toArray(priceResponse?.data?.raw?.Trips || priceResponse?.raw?.Trips);
+    : toArray(priceResponse?.data?.Trips || priceResponse?.Trips);
   const rootTui =
-    priceResponse?.data?.raw?.TUI ||
-    priceResponse?.raw?.TUI ||
     priceResponse?.data?.TUI ||
     priceResponse?.TUI;
 
   return {
     search_key: priceRequest?.search_key || selectedFlight?.booking?.searchKey,
-    ClientID: priceRequest?.ClientID || selectedFlight?.booking?.clientId || "APITRAGET",
-    Source: priceRequest?.Source || selectedFlight?.booking?.source || "LV",
     Trips: tripSource.map((trip, index) => ({
       Amount: trip?.Amount ?? trip?.NetFare ?? trip?.GrossFare ?? fallbackAmount,
       Index: trip?.Index,
       OrderID: trip?.OrderID || trip?.orderId || index + 1,
       TUI: trip?.TUI || trip?.tui || rootTui,
     })),
+  };
+};
+
+const buildFareRulesPayloads = (bookingSession) => {
+  const priceRequest = bookingSession?.priceRequest || {};
+  const isMultiCity =
+    String(priceRequest?.TripType || priceRequest?.tripType || "").toUpperCase() === "DM";
+
+  if (!isMultiCity) return [buildFareRulesPayload(bookingSession)];
+
+  const ssrRequests = toArray(buildV2SsrPayload(bookingSession)?.ssr_requests);
+  const routeRequests = toArray(priceRequest?.search_keys || priceRequest?.searchKeys);
+  const routeFares = toArray(bookingSession?.selectedFare?.multiCityFares);
+
+  return ssrRequests.map((ssrRequest, routeIndex) => {
+    const requestRoute = routeRequests[routeIndex] || {};
+    const routeFare = routeFares[routeIndex] || {};
+    const fallbackAmount = readNumber(
+      routeFare?.netAmount,
+      routeFare?.rawFare?.netAmount,
+      routeFare?.rawFare?.price,
+      routeFare?.rawFare?.grossFare,
+      routeFare?.price,
+      routeFare?.pricePerAdult,
+      requestRoute?.Trips?.[0]?.Amount
+    );
+
+    return {
+      search_key: ssrRequest?.search_key,
+      Trips: toArray(ssrRequest?.Trips).map((trip, tripIndex) => ({
+        Amount:
+          fallbackAmount ??
+          requestRoute?.Trips?.[tripIndex]?.Amount ??
+          requestRoute?.Trips?.[0]?.Amount,
+        Index: trip?.Index,
+        OrderID:
+          trip?.OrderID ||
+          trip?.OrderId ||
+          trip?.Order ||
+          requestRoute?.Trips?.[tripIndex]?.OrderID ||
+          1,
+        TUI: trip?.TUI,
+      })),
+    };
+  });
+};
+
+const mergeMultiCityFareRuleResponses = (responses) => {
+  const successfulResponses = toArray(responses).filter(Boolean);
+  const firstResponse = successfulResponses[0] || {};
+  const mergedRules = successfulResponses.reduce((rules, response) => ({
+    ...rules,
+    ...(response?.data?.rules || response?.data?.Rules || {}),
+  }), {});
+
+  return {
+    ...firstResponse,
+    data: {
+      ...(firstResponse?.data || {}),
+      rules: mergedRules,
+    },
   };
 };
 
@@ -360,11 +472,13 @@ const CancellationPenalty = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
   const bookingView = useMemo(
     () => getBookingDetailsView(bookingSession),
     [bookingSession]
   );
-  const payload = useMemo(() => buildFareRulesPayload(bookingSession), [bookingSession]);
+  const payloads = useMemo(() => buildFareRulesPayloads(bookingSession), [bookingSession]);
+  const isMultiCityFareRules = payloads.length > 1;
   const rows = useMemo(() => extractCancellationRows(fareRulesData), [fareRulesData]);
   const fallbackRows = rows.length
     ? rows
@@ -375,12 +489,18 @@ const CancellationPenalty = () => {
   );
 
   useEffect(() => {
-    if (bookingSession?.fareRulesResponse) {
+    const hasCompleteCachedMultiCityRules =
+      isMultiCityFareRules &&
+      toArray(bookingSession?.fareRulesResponses).length === payloads.length;
+    if (
+      bookingSession?.fareRulesResponse &&
+      (!isMultiCityFareRules || hasCompleteCachedMultiCityRules)
+    ) {
       setFareRulesData(bookingSession.fareRulesResponse);
       return;
     }
 
-    if (!hasValidFareRulesPayload(payload)) {
+    if (!payloads.length || !payloads.every(hasValidFareRulesPayload)) {
       setError("Cancellation rules are not available for this flight.");
       return;
     }
@@ -389,15 +509,20 @@ const CancellationPenalty = () => {
     setIsLoading(true);
     setError("");
 
-    getFlightFareRules(payload)
-      .then((response) => {
+    Promise.all(payloads.map((payload) => getFlightFareRules(payload)))
+      .then((responses) => {
         if (!isMounted) return;
+        const response = isMultiCityFareRules
+          ? mergeMultiCityFareRuleResponses(responses)
+          : responses[0];
         setFareRulesData(response);
         setBookingSession?.((prev) => {
           const next = {
             ...(prev || {}),
-            fareRulesRequest: payload,
+            fareRulesRequest: isMultiCityFareRules ? undefined : payloads[0],
+            fareRulesRequests: isMultiCityFareRules ? payloads : undefined,
             fareRulesResponse: response,
+            fareRulesResponses: isMultiCityFareRules ? responses : undefined,
           };
           writeFlightBookingSession(next);
           return next;
@@ -416,7 +541,13 @@ const CancellationPenalty = () => {
     return () => {
       isMounted = false;
     };
-  }, [bookingSession?.fareRulesResponse, payload, setBookingSession]);
+  }, [
+    bookingSession?.fareRulesResponse,
+    bookingSession?.fareRulesResponses,
+    isMultiCityFareRules,
+    payloads,
+    setBookingSession,
+  ]);
 
   return (
     <div className={styles.wrapper}>
@@ -490,7 +621,19 @@ const CancellationPenalty = () => {
         );
       })}
 
-      <button className={styles.viewPolicy}>View Policy</button>
+      <button
+        type="button"
+        className={styles.viewPolicy}
+        onClick={() => setShowPolicyModal(true)}
+      >
+        View Policy
+      </button>
+      {showPolicyModal && (
+        <CancellationPolicyModal
+          fareRulesData={fareRulesData}
+          onClose={() => setShowPolicyModal(false)}
+        />
+      )}
     </div>
   );
 };

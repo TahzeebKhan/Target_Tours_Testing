@@ -38,6 +38,7 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
 
   const normalizeMealItem = (item, index) => {
     const title = String(item?.name || "").trim() || "Meal";
+    const mealType = String(item?.type || "").trim().toLowerCase();
     const isBeverage = /beverage|tea|coffee|drink|juice/i.test(title);
     const imagePool = isBeverage ? BEVERAGE_IMAGES : MAIN_MEAL_IMAGES;
     const mealId = pickFirst(
@@ -75,14 +76,18 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
       image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
       title,
       price: Number(item?.price || 0),
+      mealType,
       tag: item?.type ? String(item.type).replace(/(^\w|\-\w)/g, (match) => match.replace("-", " ").toUpperCase()) : "",
       isBeverage,
     };
   };
 
   const routeCards = entries.map(([routeKey, value], index) => {
-    const flight =
-      index === 0 ? bookingView?.departureFlight : bookingView?.returnFlight;
+    const flight = bookingView?.isMultiCity
+      ? bookingView?.multiCityFlights?.[index]
+      : index === 0
+        ? bookingView?.departureFlight
+        : bookingView?.returnFlight;
     const routeMeals = Array.isArray(value?.meals) ? value.meals.map(normalizeMealItem) : [];
 
     return {

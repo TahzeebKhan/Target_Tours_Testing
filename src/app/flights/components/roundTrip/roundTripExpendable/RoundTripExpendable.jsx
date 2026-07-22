@@ -542,6 +542,20 @@ const buildAncillaryPayload = (flightData, activeLeg = "both") => {
   };
 };
 
+const buildFareRulesPayload = (flightData, activeLeg = "both") => {
+  const ancillaryPayload = buildAncillaryPayload(flightData, activeLeg);
+
+  return {
+    search_key: ancillaryPayload.search_key,
+    Trips: toArray(ancillaryPayload.Trips).map((trip) => ({
+      Amount: trip?.Amount,
+      Index: trip?.Index,
+      OrderID: trip?.OrderID,
+      TUI: trip?.TUI,
+    })),
+  };
+};
+
 const getAncillaryRequestKey = (payload = {}) =>
   [
     payload.provider,
@@ -734,21 +748,21 @@ const RoundTripExpendable = ({
     flightData?.return,
     flightData?.return?.airline
   );
-  const departTimelines = departConnectionTimelines.length
-    ? departConnectionTimelines
-    : apiTimelines.depart.length > 1
-      ? apiTimelines.depart
-      : departSegmentTimelines.length
-        ? departSegmentTimelines
+  const departTimelines = apiTimelines.depart.length > 1
+    ? apiTimelines.depart
+    : departSegmentTimelines.length
+      ? departSegmentTimelines
+      : departConnectionTimelines.length
+        ? departConnectionTimelines
         : apiTimelines.depart.length
           ? apiTimelines.depart
           : [departTimeline || flight2];
-  const returnTimelines = returnConnectionTimelines.length
-    ? returnConnectionTimelines
-    : apiTimelines.return.length > 1
-      ? apiTimelines.return
-      : returnSegmentTimelines.length
-        ? returnSegmentTimelines
+  const returnTimelines = apiTimelines.return.length > 1
+    ? apiTimelines.return
+    : returnSegmentTimelines.length
+      ? returnSegmentTimelines
+      : returnConnectionTimelines.length
+        ? returnConnectionTimelines
         : apiTimelines.return.length
           ? apiTimelines.return
           : [returnTimeline || flight];
@@ -810,7 +824,7 @@ const RoundTripExpendable = ({
   useEffect(() => {
     if (activeTab !== "cancellation") return;
 
-    const payload = buildAncillaryPayload(flightData, activeLeg);
+    const payload = buildFareRulesPayload(flightData, activeLeg);
     const requestKey = getAncillaryRequestKey(payload);
 
     if (
