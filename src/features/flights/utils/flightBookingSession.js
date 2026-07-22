@@ -1031,6 +1031,7 @@ export const buildV2SsrPayload = (session = {}) => {
   const priceRequest = session?.priceRequest || {};
   const selectedFare = session?.selectedFare || {};
   const requestTrips = extractTrips(priceRequest);
+  const pricingJourneys = getFormattedJourneys(priceResponse);
   const rootTui = pickFirst(
     payload?.tui,
     payload?.TUI,
@@ -1112,7 +1113,13 @@ export const buildV2SsrPayload = (session = {}) => {
       Trips: sourceTrips
         .map((trip, index) => ({
           Index: String(
-            normalizeTripIndexForOrder(trip, index, sourceTrips) ||
+            (sourceTrips.length > 1
+              ? pickFirst(
+                  pricingJourneys?.[index]?.index,
+                  pricingJourneys?.[index]?.Index
+                )
+              : undefined) ||
+              normalizeTripIndexForOrder(trip, index, sourceTrips) ||
               selectedFareIndex ||
               ""
           ),
