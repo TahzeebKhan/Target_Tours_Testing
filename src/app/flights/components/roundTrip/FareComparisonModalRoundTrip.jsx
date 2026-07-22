@@ -15,6 +15,7 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import { getFareOptionItems } from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -100,8 +101,8 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
   };
 };
 
-const renderLoadingCards = (styles) =>
-  Array.from({ length: 3 }).map((_, index) => (
+const renderLoadingCards = (styles, count = 3) =>
+  Array.from({ length: count }).map((_, index) => (
     <div key={index} className={styles.loadingCard}>
       <div className={styles.loadingHeader}>
         <div className={styles.skeletonLogo} />
@@ -521,6 +522,13 @@ const FareComparisonModalRoundTrip = ({
           searchParams,
           request: legRequest,
           flight: buildLegFareOptionsFlightData(flightData, leg, flightNos),
+          onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+            if (cancelled || !accumulatedPayload) return;
+            setFareOptionsPayloads((prev) => ({
+              ...prev,
+              [leg]: accumulatedPayload,
+            }));
+          },
         });
 
         if (cancelled) return;
@@ -568,6 +576,8 @@ const FareComparisonModalRoundTrip = ({
         .replace(/\s*\([^)]+\)\s*$/, "")
         .trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+      departureDate: String(searchParams?.get("start") || "").trim(),
+      returnDate: String(searchParams?.get("end") || "").trim(),
     };
     const hasTripIndexes =
       Array.isArray(priceRequest?.Trips) &&
@@ -696,10 +706,16 @@ const FareComparisonModalRoundTrip = ({
     fareOptionsPayloads[selected] ||
     (selected === "onward" ? prefetchedData?.fareOptionsResponse : null) ||
     null;
-  const hasFareOptionItems = Boolean(fareSourcePayload);
   const fareOptionsFlightData = React.useMemo(() => {
     return buildLegFareOptionsFlightData(flightData, selected, flightNos);
   }, [flightData, flightNos, selected]);
+  const fareOptionsFlightNo =
+    fareOptionsFlightData?.booking?.flightNo ||
+    fareOptionsFlightData?.details?.flightNo ||
+    fareOptionsFlightData?.airlines?.[0]?.flightNo ||
+    fareOptionsFlightData?.airlines?.[0]?.code;
+  const hasFareOptionItems =
+    getFareOptionItems(fareSourcePayload, fareOptionsFlightNo).length > 0;
   const fares = hasFareOptionItems
     ? buildFareOptions({
       flightData: fareOptionsFlightData,
@@ -830,9 +846,6 @@ const FareComparisonModalRoundTrip = ({
         {/* Fare Cards */}
         <div className={styles.fareCardsOverflowAuto}>
           <div className={styles.fareCards}>
-            {isFareOptionsLoading && !hasFareOptionItems
-              ? renderLoadingCards(styles)
-              : null}
             {showEmptyFareOptions ? (
               <div className={styles.emptyFareOptions}>
                 No fare option available
@@ -945,6 +958,9 @@ const FareComparisonModalRoundTrip = ({
                 </div>
               </div>
             ))}
+            {isFareOptionsLoading
+              ? renderLoadingCards(styles, hasFareOptionItems ? 1 : 3)
+              : null}
           </div>
         </div>
         {showLogin && authView === "login" && (

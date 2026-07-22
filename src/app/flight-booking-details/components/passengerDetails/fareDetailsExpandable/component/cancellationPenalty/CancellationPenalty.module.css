@@ -69,6 +69,7 @@
     letter-spacing: 0%;
     text-align: right;
     color: #070773;
+    cursor: pointer;
 }
 
 .gridOverlay {

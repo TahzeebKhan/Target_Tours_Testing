@@ -693,7 +693,7 @@ export function FlightBookingProvider({ children }) {
       setBookingError("");
 
       try {
-        console.log("v2 SSR payload", v2SsrPayload);
+      
         const ssrResponse = canReuseV2SsrResponse
           ? bookingSession.ssrResponse
           : await getFlightV2Ssr(v2SsrPayload);
@@ -965,9 +965,16 @@ export function FlightBookingProvider({ children }) {
       effectivePrices
     );
 
+    const multiCityBookingRequests = createBookingPayload?.create_booking_requests;
+    const hasValidMultiCityRequests =
+      Array.isArray(multiCityBookingRequests) &&
+      multiCityBookingRequests.length > 0 &&
+      multiCityBookingRequests.every((request) => request?.search_key && request?.TUI);
+    const hasValidSingleBookingRequest =
+      createBookingPayload?.search_key && createBookingPayload?.TUI;
+
     if (
-      !createBookingPayload?.search_key ||
-      !createBookingPayload?.TUI ||
+      (!hasValidMultiCityRequests && !hasValidSingleBookingRequest) ||
       !createBookingPayload?.passengers?.length
     ) {
       setBookingError("Passenger or booking data is incomplete.");

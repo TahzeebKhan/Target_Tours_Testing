@@ -1,26 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./Expandable.module.css";
 
 const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }) => {
     const [vegOnly, setVegOnly] = useState(false);
-    const hasMeals = meals.length > 0;
-    const hasBeverages = beverages.length > 0;
+    const allMealProducts = useMemo(
+        () => [...meals, ...beverages],
+        [meals, beverages]
+    );
+
+    useEffect(() => {
+        console.warn("[Meals Expandable] meals:", meals);
+        console.warn("[Meals Expandable] allMealProducts:", allMealProducts);
+    }, [meals, allMealProducts]);
+
+    const hasMealProducts = allMealProducts.length > 0;
+    const isVegItem = (item) =>
+        String(item?.mealType || "").trim().toLowerCase() === "veg";
     const visibleMeals = vegOnly
-        ? meals.filter((meal) => {
-            const normalizedTag = String(meal.tag || "").toLowerCase();
-            return normalizedTag.includes("veg") && !normalizedTag.includes("non veg");
-        })
-        : meals;
+        ? allMealProducts.filter(isVegItem)
+        : allMealProducts;
 
     return (
         <div className={styles.expandWrap}>
             <div className={styles.expandHeader}>
-                {!hasMeals && !hasBeverages ? (
+                {!hasMealProducts ? (
                     <MealEmptyState />
                 ) : (
                     <>
-                        {hasMeals && (
+                        {hasMealProducts && (
                             <>
                                 <div className={styles.sectionHeader}>
                                     <h2>MAIN MEALS</h2>
@@ -61,33 +69,6 @@ const Expandable = ({ quantities, onUpdateQuantity, meals = [], beverages = [] }
                             </>
                         )}
 
-                        {hasBeverages && (
-                            <>
-                                <h2>BEVERAGES</h2>
-
-                                <div className={styles.mealGrid}>
-                                    {beverages.map((drink) => (
-                                        <MealItem
-                                            key={drink.selectionKey || drink.id}
-                                            {...drink}
-                                            quantity={quantities[drink.selectionKey || drink.id] || 0}
-                                            onIncrease={() =>
-                                                onUpdateQuantity(
-                                                    drink.selectionKey || drink.id,
-                                                    (quantities[drink.selectionKey || drink.id] || 0) + 1
-                                                )
-                                            }
-                                            onDecrease={() =>
-                                                onUpdateQuantity(
-                                                    drink.selectionKey || drink.id,
-                                                    (quantities[drink.selectionKey || drink.id] || 0) - 1
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </div>
-                            </>
-                        )}
                     </>
                 )}
             </div>

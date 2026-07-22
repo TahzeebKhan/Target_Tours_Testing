@@ -195,6 +195,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
       fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
       toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+      departureDate: String(searchParams?.get("start") || "").trim(),
     };
     if (!hasPricePayload) {
       toast.error("Missing booking payload for the selected flight.");

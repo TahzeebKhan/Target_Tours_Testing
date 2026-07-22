@@ -518,10 +518,9 @@ const buildSeatLayoutGroups = (
       airlineLogo: fallbackFlight?.airline?.logo || "",
       aircraft: journeyAircraft,
       date: formatSeatingDate(
-        (isMultiCity && fallbackFlight?.departure?.date) ||
+        fallbackFlight?.departure?.date ||
           journey?.DepartureTime ||
           journey?.departureTime ||
-          fallbackFlight?.departure?.date ||
           bookingDetailsView?.header?.date ||
           "N/A"
       ),

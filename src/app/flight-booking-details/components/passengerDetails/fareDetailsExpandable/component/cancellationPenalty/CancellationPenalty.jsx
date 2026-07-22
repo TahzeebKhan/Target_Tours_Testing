@@ -6,6 +6,7 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
+import CancellationPolicyModal from "./CancellationPolicyModal";
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -18,11 +19,9 @@ const readNumber = (...values) => {
 };
 
 const unwrapFareRulesPayload = (fareRulesData) =>
-  fareRulesData?.data?.raw ||
-  fareRulesData?.raw ||
-  fareRulesData?.data ||
-  fareRulesData ||
-  {};
+  fareRulesData?.data && typeof fareRulesData.data === "object"
+    ? fareRulesData.data
+    : {};
 
 const getPlatformCharges = (fareRulesData) => {
   const payload = unwrapFareRulesPayload(fareRulesData);
@@ -198,7 +197,7 @@ const extractCancellationRowsFromNode = (payload, platformCharges, currency) => 
     });
 
     const rawRows = parseRawRows(
-      node?.rawText || node?.RawText || node?.FareRuleText,
+      node?.FareRuleText,
       currency,
       platformCharges
     );
@@ -242,6 +241,47 @@ const getRouteLabelForIndex = (bookingView, index) => {
 const getFlightForIndex = (bookingView, index) =>
   index === 1 ? bookingView?.returnFlight : bookingView?.departureFlight;
 
+const formatCompletePenalty = (amount, currency = "INR") => {
+  const text = String(amount ?? "").trim();
+  const numericText = text.replace(/[^\d.]/g, "");
+  const numericAmount = Number(numericText);
+  if (numericText && Number.isFinite(numericAmount)) {
+    const symbol = String(currency || "INR").toUpperCase() === "INR" ? "₹" : currency;
+    return `${symbol} ${numericAmount.toLocaleString("en-IN")}`;
+  }
+  return text || "Not Available";
+};
+
+const isCancellationPenaltyGroup = (heading) => {
+  const normalizedHeading = String(heading || "")
+    .replace(/[^a-z]+/gi, " ")
+    .trim()
+    .toLowerCase();
+
+  return (
+    /\bcancel(?:lation)?\b/.test(normalizedHeading) &&
+    /\b(?:fee|penalty|charge|charges)\b/.test(normalizedHeading) &&
+    !/\b(?:change|reissue|ato|service)\b/.test(normalizedHeading)
+  );
+};
+
+const getCompleteRouteRows = (routeRules = []) =>
+  toArray(routeRules).flatMap((fareRule) =>
+    toArray(fareRule?.Rule || fareRule?.rule)
+      .filter((ruleGroup) =>
+        isCancellationPenaltyGroup(ruleGroup?.Head || ruleGroup?.head)
+      )
+      .flatMap((ruleGroup) =>
+        toArray(ruleGroup?.Info || ruleGroup?.info).map((info) => ({
+          timeFrame: normalizeTimeFrame(info?.Description || info?.description),
+          penalty: formatCompletePenalty(
+            info?.AdultAmount ?? info?.adultAmount,
+            info?.CurrencyCode || info?.currencyCode || "INR"
+          ),
+        }))
+      )
+  );
+
 const normalizeRouteKey = (value) =>
   String(value || "")
     .trim()
@@ -259,6 +299,20 @@ const getRuleRouteLabel = (source) =>
 const buildCancellationCards = (fareRulesData, bookingView, fallbackRows) => {
   const payload = unwrapFareRulesPayload(fareRulesData);
   const rules = getRulesPayload(fareRulesData);
+  const routeEntries =
+    rules && typeof rules === "object" && !Array.isArray(rules)
+      ? Object.entries(rules).filter(([, value]) => Array.isArray(value))
+      : [];
+
+  if (routeEntries.length) {
+    return routeEntries.map(([routeLabel, routeRules], index) => ({
+      key: `${routeLabel}-${index}`,
+      routeLabel,
+      flight: getFlightForIndex(bookingView, index),
+      rows: getCompleteRouteRows(routeRules),
+    }));
+  }
+
   const trips = toArray(rules?.trips || rules?.Trips);
   const flatRules = toArray(rules?.flat || rules?.Flat);
   const platformCharges = getPlatformCharges(fareRulesData);
@@ -321,17 +375,13 @@ const buildFareRulesPayload = (bookingSession) => {
   );
   const tripSource = toArray(priceRequest?.Trips).length
     ? toArray(priceRequest.Trips)
-    : toArray(priceResponse?.data?.raw?.Trips || priceResponse?.raw?.Trips);
+    : toArray(priceResponse?.data?.Trips || priceResponse?.Trips);
   const rootTui =
-    priceResponse?.data?.raw?.TUI ||
-    priceResponse?.raw?.TUI ||
     priceResponse?.data?.TUI ||
     priceResponse?.TUI;
 
   return {
     search_key: priceRequest?.search_key || selectedFlight?.booking?.searchKey,
-    ClientID: priceRequest?.ClientID || selectedFlight?.booking?.clientId || "APITRAGET",
-    Source: priceRequest?.Source || selectedFlight?.booking?.source || "LV",
     Trips: tripSource.map((trip, index) => ({
       Amount: trip?.Amount ?? trip?.NetFare ?? trip?.GrossFare ?? fallbackAmount,
       Index: trip?.Index,
@@ -360,6 +410,7 @@ const CancellationPenalty = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
   const bookingView = useMemo(
     () => getBookingDetailsView(bookingSession),
     [bookingSession]
@@ -490,7 +541,19 @@ const CancellationPenalty = () => {
         );
       })}
 
-      <button className={styles.viewPolicy}>View Policy</button>
+      <button
+        type="button"
+        className={styles.viewPolicy}
+        onClick={() => setShowPolicyModal(true)}
+      >
+        View Policy
+      </button>
+      {showPolicyModal && (
+        <CancellationPolicyModal
+          fareRulesData={fareRulesData}
+          onClose={() => setShowPolicyModal(false)}
+        />
+      )}
     </div>
   );
 };

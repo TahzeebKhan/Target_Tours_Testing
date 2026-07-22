@@ -4,12 +4,10 @@ import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
-const unwrapFareRulesPayload = (fareRulesData) =>
-    fareRulesData?.data?.raw ||
-    fareRulesData?.raw ||
-    fareRulesData?.data ||
-    fareRulesData ||
-    {};
+const unwrapFareRulesPayload = (fareRulesData) => {
+    const data = fareRulesData?.data;
+    return data && typeof data === "object" ? data : {};
+};
 
 const cleanRuleLines = (value) =>
     String(value || "")
@@ -38,7 +36,10 @@ const getPlatformCharges = (fareRulesData) => {
 const formatAmount = (amount, currency = "INR", platformCharges = null) => {
     const value = toAmount(amount);
     const platform = toAmount(platformCharges);
-    if (!value) return "ADULT : NON REFUNDABLE";
+    if (!value) {
+        const status = String(amount || "NON REFUNDABLE").trim().toUpperCase();
+        return `ADULT : ${status}`;
+    }
     return `ADULT : ${currency || "INR"} ${value}${platform ? ` + INR ${platform}` : ""}`;
 };
 
@@ -103,31 +104,37 @@ const parseRawCancellationRules = (rawText, currency = "INR", platformCharges = 
 
 const getFareRuleEntries = (fareRulesData) => {
     const payload = unwrapFareRulesPayload(fareRulesData);
-    const rulesRoot = fareRulesData?.data?.Rules || fareRulesData?.Rules || payload?.Rules || payload;
-    const structured = toArray(rulesRoot?.trips).flatMap((trip) =>
-        toArray(trip?.journeys).flatMap((journey) =>
-            toArray(journey?.segments).flatMap((segment) => toArray(segment?.fareRules))
-        )
-    );
-
-    if (structured.length) return structured;
-
-    return toArray(payload?.Trips).flatMap((trip) =>
-        toArray(trip?.Journey || trip?.Journeys).flatMap((journey) =>
-            toArray(journey?.Segments).flatMap((segment) => toArray(segment?.Rules))
-        )
-    );
+    const routeRules = payload?.rules || payload?.Rules;
+    if (routeRules && typeof routeRules === "object" && !Array.isArray(routeRules)) {
+        return Object.values(routeRules).flatMap(toArray);
+    }
+    return [];
 };
 
-const getStructuredCancellationRows = (fareRule = {}, platformCharges = null) =>
-    toArray(fareRule?.sections)
+const getStructuredCancellationRows = (fareRule = {}, platformCharges = null) => {
+    const providerRows = toArray(fareRule?.Rule || fareRule?.rule).flatMap((group) =>
+        toArray(group?.Info || group?.info).map((item) => ({
+            head: String(group?.Head || group?.head || "FARE RULE").trim(),
+            timeFrame: normalizeTimeFrame(item?.Description || item?.description || group?.Head),
+            fee: formatAmount(
+                item?.AdultAmount ?? item?.adultAmount,
+                item?.CurrencyCode || item?.currencyCode || "INR",
+                platformCharges
+            ),
+        }))
+    );
+    if (providerRows.length) return providerRows;
+
+    return toArray(fareRule?.sections)
         .filter((section) => /cancellation|ato service/i.test(section?.title || ""))
         .flatMap((section) =>
             toArray(section?.items).map((item) => ({
+                head: section?.title || "CANCELLATION RULES",
                 timeFrame: normalizeTimeFrame(item?.description || section?.title),
                 fee: formatAmount(item?.adultAmount, item?.currencyCode || "INR", platformCharges),
             }))
         );
+};
 
 const getActiveLegKeys = (activeLeg = "both") =>
     activeLeg === "depart" || activeLeg === "return"
@@ -241,14 +248,19 @@ const CancellationRules = ({
 
                         {/* Rows */}
                         {item.rules.map((rule, i) => (
-                            <div key={i} className={styles.tableRows}>
-                                <span className={styles.timeFrame}>
-                                    {rule.timeFrame}
-                                </span>
-                                <span className={styles.textRight}>
-                                    {rule.fee}
-                                </span>
-                            </div>
+                            <React.Fragment key={`${rule.head || "rule"}-${i}`}>
+                                {rule.head && rule.head !== item.rules[i - 1]?.head && (
+                                    <div className={styles.ruleHead}>{rule.head}</div>
+                                )}
+                                <div className={styles.tableRows}>
+                                    <span className={styles.timeFrame}>
+                                        {rule.timeFrame}
+                                    </span>
+                                    <span className={styles.textRight}>
+                                        {rule.fee}
+                                    </span>
+                                </div>
+                            </React.Fragment>
                         ))}
                     </div>
                 </div>

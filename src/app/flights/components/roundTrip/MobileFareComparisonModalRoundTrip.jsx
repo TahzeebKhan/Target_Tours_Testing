@@ -546,6 +546,8 @@ const MobileFareComparisonModalRoundTrip = ({
         .replace(/\s*\([^)]+\)\s*$/, "")
         .trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+      departureDate: String(searchParams?.get("start") || "").trim(),
+      returnDate: String(searchParams?.get("end") || "").trim(),
     };
     const hasTripIndexes =
       Array.isArray(priceRequest?.Trips) &&
