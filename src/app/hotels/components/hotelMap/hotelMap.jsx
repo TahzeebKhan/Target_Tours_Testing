@@ -258,14 +258,19 @@ const matchesMapFilters = (hotel, filters = {}, budget = null) => {
     if (!matchesPrice) return false;
   }
 
-  if (filters.suggested?.fiveStar && Math.round(rating) !== 5) return false;
-  if (filters.suggested?.fourStar && Math.round(rating) !== 4) return false;
+  if (hasSelectedValues(filters.suggested)) {
+    const matchesSuggested = selectedKeys(filters.suggested).some((key) => {
+      if (key === "fiveStar") return Math.round(rating) === 5;
+      if (key === "fourStar") return Math.round(rating) === 4;
 
-  return selectedKeys(filters.suggested).every((key) => {
-    if (["fiveStar", "fourStar"].includes(key)) return true;
-    const needles = TEXT_FILTER_NEEDLES[key] || [key];
-    return hasHotelText(hotel, ...needles);
-  });
+      const needles = TEXT_FILTER_NEEDLES[key] || [key];
+      return hasHotelText(hotel, ...needles);
+    });
+
+    if (!matchesSuggested) return false;
+  }
+
+  return true;
 };
 
 export default function HotelMap({ isOpen, onClose }) {

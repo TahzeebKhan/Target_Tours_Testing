@@ -1306,6 +1306,14 @@ const getPriceFilterRange = (key) => {
   return [];
 };
 
+const getFilterNumber = (value) => {
+  const directNumber = Number(value);
+  if (Number.isFinite(directNumber)) return directNumber;
+
+  const matchedNumber = String(value || "").match(/\d+(?:\.\d+)?/)?.[0];
+  return matchedNumber === undefined ? NaN : Number(matchedNumber);
+};
+
 const TEXT_FILTER_NEEDLES = {
   suggested: {
     lastMinuteDeals: ["deal", "discount"],
@@ -1390,8 +1398,11 @@ const TEXT_FILTER_NEEDLES = {
 
 const matchesAnyTextFilter = (hotel, group, keys) =>
   keys.some((key) => {
-    if (group === "suggested" && ["fiveStar", "fourStar"].includes(key)) {
-      return true;
+    if (group === "suggested" && key === "fiveStar") {
+      return Math.round(Number(hotel?.rating || 0)) === 5;
+    }
+    if (group === "suggested" && key === "fourStar") {
+      return Math.round(Number(hotel?.rating || 0)) === 4;
     }
 
     const needles = TEXT_FILTER_NEEDLES[group]?.[key] || [key];
@@ -1426,20 +1437,17 @@ export const matchesHotelFilters = (hotel, filters = {}) => {
 
   if (hasSelectedValues(filters.starCategory)) {
     const matchesStar = selectedKeys(filters.starCategory).some(
-      (key) => Math.round(rating) === Number(key),
+      (key) => Math.round(rating) === getFilterNumber(key),
     );
     if (!matchesStar) return false;
   }
 
   if (hasSelectedValues(filters.guestRating)) {
     const matchesGuestRating = selectedKeys(filters.guestRating).some(
-      (key) => rating >= Number(key),
+      (key) => rating >= getFilterNumber(key),
     );
     if (!matchesGuestRating) return false;
   }
-
-  if (filters.suggested?.fiveStar && Math.round(rating) !== 5) return false;
-  if (filters.suggested?.fourStar && Math.round(rating) !== 4) return false;
 
   return Object.keys(TEXT_FILTER_NEEDLES).every((group) => {
     if (!hasSelectedValues(filters[group])) return true;

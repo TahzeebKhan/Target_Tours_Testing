@@ -235,7 +235,12 @@ const ProfileSection = () => {
       isLocked: true,
     },
 
-    { label: "Phone Number", value: "", isEditing: false },
+    {
+      label: "Phone Number",
+      value: "",
+      isEditing: false,
+      isLocked: true,
+    },
     {
       label: "Date of Birth",
       value: "",
@@ -302,6 +307,7 @@ const ProfileSection = () => {
       label: "Phone Number",
       value: data.phone_no || "",
       isEditing: false,
+      isLocked: true,
     },
 
     {
