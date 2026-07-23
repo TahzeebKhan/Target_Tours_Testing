@@ -361,12 +361,19 @@ const getHotelFiltersFromMessage = (payload = {}) => {
   );
 
   const filters =
+    data?.filterData ||
     data?.filters ||
+    data?.content?.filterData ||
     data?.content?.filters ||
+    content?.filterData ||
     content?.filters ||
+    nestedData?.filterData ||
     nestedData?.filters ||
+    nestedData?.content?.filterData ||
     nestedData?.content?.filters ||
+    nestedContent?.filterData ||
     nestedContent?.filters ||
+    payload?.filterData ||
     payload?.filters;
 
   return filters && typeof filters === "object" ? filters : null;
