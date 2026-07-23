@@ -24,6 +24,71 @@ const PRICE_BUCKETS = [
   { key: "17000+", label: "₹17000+", min: 17000, max: null },
 ];
 
+const DEFAULT_FILTER_SECTIONS = [
+  {
+    key: "price",
+    title: "PRICE PER NIGHT",
+    options: PRICE_BUCKETS.map((bucket) => ({ ...bucket, count: 0 })),
+  },
+  {
+    key: "starCategory",
+    title: "STAR CATEGORY",
+    options: ["1", "2", "3", "4", "5"].map((value) => ({
+      key: value,
+      value,
+      label: value,
+      count: 0,
+    })),
+  },
+  {
+    key: "hotelAmenities",
+    title: "HOTEL AMENITIES",
+    searchable: true,
+    searchPlaceholder: "Search amenities",
+    options: [
+      "Air Conditioning",
+      "Airport Shuttle",
+      "Arcade/Game Room",
+      "ATM",
+      "Banquet",
+      "Breakfast",
+      "Parking",
+      "Restaurant",
+      "Swimming Pool",
+      "Wi-Fi",
+    ].map((label) => ({ key: label, value: label, label, count: 0 })),
+  },
+  {
+    key: "providers",
+    title: "PROVIDERS",
+    options: [{ key: "akbar", value: "akbar", label: "akbar", count: 0 }],
+  },
+  {
+    key: "refundable",
+    title: "REFUNDABLE",
+    options: [
+      {
+        key: "Refundable",
+        value: "Refundable",
+        label: "Refundable",
+        count: 0,
+      },
+    ],
+  },
+  {
+    key: "freeCancellation",
+    title: "CANCELLATION",
+    options: [
+      {
+        key: "FreeCancellation",
+        value: "FreeCancellation",
+        label: "Free Cancellation",
+        count: 0,
+      },
+    ],
+  },
+];
+
 const API_FILTER_SECTION_CONFIG = {
   PriceGroup: {
     key: "price",
@@ -55,15 +120,42 @@ const API_FILTER_SECTION_CONFIG = {
     searchable: true,
     searchPlaceholder: "Search landmarks",
   },
+  BreakfastIncluded: {
+    key: "breakfastIncluded",
+    title: "BREAKFAST",
+  },
+  FreeCancellation: {
+    key: "freeCancellation",
+    title: "CANCELLATION",
+  },
+  Refundable: {
+    key: "refundable",
+    title: "REFUNDABLE",
+  },
+  Neighbourhoods: {
+    key: "neighbourhoods",
+    title: "NEIGHBOURHOODS",
+    searchable: true,
+    searchPlaceholder: "Search neighbourhoods",
+  },
+  Providers: {
+    key: "providers",
+    title: "PROVIDERS",
+  },
 };
 
 const API_FILTER_CATEGORY_ALIASES = {
   PriceGroup: ["PriceGroup", "priceGroup", "priceGroups", "priceBuckets", "price_ranges", "priceRanges", "price"],
-  StarRating: ["StarRating", "starRating", "star_rating", "stars", "hotelStars", "starCategory"],
+  StarRating: ["StarRating", "starRating", "starRatings", "star_rating", "stars", "hotelStars", "starCategory"],
   Facilities: ["Facilities", "facilities", "hotelAmenities", "hotel_amenities", "amenities"],
   HotelChain: ["HotelChain", "hotelChain", "hotelChains", "hotel_chains", "chains", "brands"],
   PropertyType: ["PropertyType", "propertyType", "property_type", "propertyTypes", "property_types"],
   Attraction: ["Attraction", "attraction", "attractions", "nearByAttractions", "nearbyAttractions"],
+  BreakfastIncluded: ["BreakfastIncluded", "breakfastIncluded", "breakfast_included"],
+  FreeCancellation: ["FreeCancellation", "freeCancellation", "free_cancellation"],
+  Refundable: ["Refundable", "refundable"],
+  Neighbourhoods: ["Neighbourhoods", "neighbourhoods", "neighborhoods"],
+  Providers: ["Providers", "providers"],
 };
 
 const FILTER_GROUP_ALIASES = {
@@ -135,10 +227,33 @@ const mapObjectFilters = (filterData = {}) =>
   Object.entries(filterData)
     .map(([category, value]) => {
       const canonicalCategory = getCanonicalApiCategory(category);
-      const options =
+      let options =
         value && typeof value === "object" && !Array.isArray(value) && value.options
           ? value.options
           : value;
+
+      if (
+        options &&
+        typeof options === "object" &&
+        !Array.isArray(options) &&
+        "available" in options
+      ) {
+        options = options.available
+          ? [
+              {
+                key: canonicalCategory,
+                value: canonicalCategory,
+                label:
+                  canonicalCategory === "BreakfastIncluded"
+                    ? "Breakfast Included"
+                    : canonicalCategory === "FreeCancellation"
+                      ? "Free Cancellation"
+                      : "Refundable",
+                count: options.count || 0,
+              },
+            ]
+          : [];
+      }
 
       return {
         category: canonicalCategory,
@@ -424,7 +539,6 @@ export default function HotelsFilters() {
   const searchParams = useSearchParams();
   const {
     filterData,
-    isLoading,
     meta,
     setAppliedFilters,
     resetFilters: resetAppliedFilters,
@@ -453,10 +567,22 @@ export default function HotelsFilters() {
     getHotelSearchCenter(searchParams, meta?.channel || ""),
   );
   const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
-  const apiPriceSection = apiSections.find((section) => section.key === "price");
-  const renderedSections = apiSections.filter((section) => section.key !== "price");
-  const hasApiFilters = apiSections.length > 0;
-  const isFilterLoading = !hasApiFilters && (meta?.isFilterLoading || isLoading);
+  const filterSections = useMemo(() => {
+    const remainingApiSections = new Map(
+      apiSections.map((section) => [section.key, section]),
+    );
+    const mergedSections = DEFAULT_FILTER_SECTIONS.map((defaultSection) => {
+      const apiSection = remainingApiSections.get(defaultSection.key);
+      if (!apiSection) return defaultSection;
+
+      remainingApiSections.delete(defaultSection.key);
+      return apiSection;
+    });
+
+    return [...mergedSections, ...remainingApiSections.values()];
+  }, [apiSections]);
+  const priceSection = filterSections.find((section) => section.key === "price");
+  const renderedSections = filterSections.filter((section) => section.key !== "price");
   const mapPreviewUrl = getGoogleMapEmbedUrl(mapPreviewCenter, 13);
 
   const { min: minPrice, max: maxPrice } = getPriceRange(filterData);
@@ -477,14 +603,11 @@ export default function HotelsFilters() {
 
   const selectedChips = useMemo(() => {
     const chips = [];
-    const chipSections = apiPriceSection
-      ? [...apiSections, apiPriceSection]
-      : apiSections;
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
       Object.entries(values || {}).forEach(([key, isSelected]) => {
         if (!isSelected) return;
-        const section = chipSections.find((item) => item.key === group);
+        const section = filterSections.find((item) => item.key === group);
         const option =
           section?.options.find((item) => item.key === key) ||
           PRICE_BUCKETS.find((item) => item.key === key);
@@ -497,7 +620,7 @@ export default function HotelsFilters() {
     });
 
     return chips;
-  }, [apiPriceSection, apiSections, selectedFilters]);
+  }, [filterSections, selectedFilters]);
 
   const buildAppliedFilters = (filters, { includeBudget = false } = {}) => ({
     ...filters,
@@ -650,19 +773,11 @@ export default function HotelsFilters() {
 
       <div className={styles.border} />
 
-      {isFilterLoading && <FilterLoadingState />}
-
-      {!isFilterLoading && !hasApiFilters && (
-        <section className={styles.section}>
-          <p className={styles.emptyFilters}>No filters available.</p>
-        </section>
-      )}
-
-      {apiPriceSection && (
+      {priceSection && (
         <>
           <section className={styles.section}>
             <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
-            {apiPriceSection.options.map((bucket) => (
+            {priceSection.options.map((bucket) => (
               <CheckboxRow
                 key={bucket.key}
                 checked={!!selectedFilters.price?.[bucket.key]}
@@ -813,22 +928,6 @@ function FilterSection({
           {isExpanded ? "SEE LESS" : `SEE MORE (${visibleOptions.length - FILTER_OPTION_PREVIEW_LIMIT})`}
         </button>
       )}
-    </section>
-  );
-}
-
-function FilterLoadingState() {
-  return (
-    <section className={styles.section}>
-      <div className={styles.filterLoadingHeader}></div>
-      <div className={styles.filterLoadingSearch}></div>
-      {Array.from({ length: 8 }).map((_, index) => (
-        <div key={`filter-loading-${index}`} className={styles.filterLoadingRow}>
-          <span className={styles.filterLoadingBox}></span>
-          <span className={styles.filterLoadingLabel}></span>
-          <span className={styles.filterLoadingCount}></span>
-        </div>
-      ))}
     </section>
   );
 }
