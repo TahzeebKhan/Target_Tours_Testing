@@ -20,7 +20,6 @@ import {
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
   fetchHotelDetails,
-  fetchHotelFilterData,
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
@@ -351,6 +350,26 @@ export const getHotelsFromMessage = (payload = {}) => {
   );
   fallbackResult.meta = meta;
   return fallbackResult;
+};
+
+const getHotelFiltersFromMessage = (payload = {}) => {
+  const data = getMessageData(payload);
+  const content = getMessageContent(payload);
+  const nestedData = parseSocketValue(data?.data);
+  const nestedContent = parseSocketValue(
+    content?.content || content?.data?.content,
+  );
+
+  const filters =
+    data?.filters ||
+    data?.content?.filters ||
+    content?.filters ||
+    nestedData?.filters ||
+    nestedData?.content?.filters ||
+    nestedContent?.filters ||
+    payload?.filters;
+
+  return filters && typeof filters === "object" ? filters : null;
 };
 
 export const getHotelImage = (hotel = {}) => {
@@ -1394,6 +1413,17 @@ const TEXT_FILTER_NEEDLES = {
     taj: ["taj"],
   },
   attractions: {},
+  breakfastIncluded: {
+    BreakfastIncluded: ["breakfast"],
+  },
+  freeCancellation: {
+    FreeCancellation: ["free cancellation", "free cancellation available"],
+  },
+  refundable: {
+    Refundable: ["refundable"],
+  },
+  neighbourhoods: {},
+  providers: {},
 };
 
 const matchesAnyTextFilter = (hotel, group, keys) =>
@@ -2465,6 +2495,14 @@ const TourListing = () => {
       }
 
       const nextResults = getHotelsFromMessage(payload);
+      const streamedFilters = getHotelFiltersFromMessage(payload);
+
+      if (hasUsableFilterData(streamedFilters)) {
+        hasLoadedFilterDataRef.current = true;
+        setApiFilterData(streamedFilters);
+        setIsFilterLoading(false);
+      }
+
       const filterMeta = getFilterSearchMetaFromPayload(
         payload,
         nextResults.hotels,
@@ -2686,118 +2724,10 @@ const TourListing = () => {
   }, [hotelSearchChannel]);
 
   useEffect(() => {
-    if (hasLoadedFilterDataRef.current) {
-      setIsFilterLoading(false);
-      return;
-    }
-
-    if (
-      hotelSearchChannel &&
-      (!hasHotelInitComplete || !socketSearchMeta.searchId || !filterSearchId)
-    ) {
-      setIsFilterLoading(true);
-      lastFilterRequestKeyRef.current = "";
-      return;
-    }
-
-    if (
-      hotelSearchChannel &&
-      socketSearchMeta.searchId &&
-      filterSearchId !== socketSearchMeta.searchId
-    ) {
-      setIsFilterLoading(true);
-      lastFilterRequestKeyRef.current = "";
-      return;
-    }
-
-    if (!filterSearchId) {
-      setIsFilterLoading(Boolean(hotelSearchChannel));
-      if (!hotelSearchChannel) {
-        setApiFilterData(null);
-      }
-      lastFilterRequestKeyRef.current = "";
-      return;
-    }
-
-    const filterRequestSeriesKey = `${filterDataRequestKey}:${filterRefreshNonce}`;
-    if (filterRequestSeriesRef.current !== filterRequestSeriesKey) {
-      filterRequestSeriesRef.current = filterRequestSeriesKey;
-      filterRequestAttemptRef.current = 0;
-    }
-
-    const effectiveFilterDataRequestKey = `${filterRequestSeriesKey}:${filterRetryNonce}`;
-
-    if (lastFilterRequestKeyRef.current === effectiveFilterDataRequestKey) {
-      return;
-    }
-
-    const controller = new AbortController();
-    lastFilterRequestKeyRef.current = effectiveFilterDataRequestKey;
-    filterRequestAttemptRef.current += 1;
-    setIsFilterLoading(true);
-    const latestMeta = latestFilterSearchMetaRef.current;
-    const latestSearchId = hotelSearchChannel
-      ? socketSearchMeta.searchId
-      : latestMeta.searchId || filterSearchId;
-    const latestPayload = {
-      ...filterDataPayload,
-      searchId: latestSearchId,
-      hotelSearchId:
-        latestMeta.hotelSearchId || filterDataPayload.hotelSearchId,
-    };
-
-    fetchHotelFilterData(latestSearchId, {
-      signal: controller.signal,
-      payload: latestPayload,
-    })
-      .then((data) => {
-        if (hasUsableFilterData(data)) {
-          hasLoadedFilterDataRef.current = true;
-        }
-        setApiFilterData(data || null);
-        setIsFilterLoading(false);
-      })
-      .catch((error) => {
-        if (error?.name === "AbortError") return;
-
-        console.error("Hotel filter data request failed:", error);
-        const isRetryableFilterError = String(error?.code || "") === "1216";
-        if (lastFilterRequestKeyRef.current === effectiveFilterDataRequestKey) {
-          lastFilterRequestKeyRef.current = "";
-        }
-        if (
-          isRetryableFilterError &&
-          !hasLoadedFilterDataRef.current &&
-          filterRequestAttemptRef.current < MAX_FILTER_REQUEST_ATTEMPTS
-        ) {
-          setIsFilterLoading(true);
-          if (filterRetryTimerRef.current) {
-            window.clearTimeout(filterRetryTimerRef.current);
-          }
-          filterRetryTimerRef.current = window.setTimeout(() => {
-            filterRetryTimerRef.current = null;
-            setFilterRetryNonce((value) => value + 1);
-          }, 1000);
-          return;
-        }
-
-        toast.error(error.message || "Unable to load hotel filters.");
-        setIsFilterLoading(false);
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [
-    filterDataPayload,
-    filterRefreshNonce,
-    filterDataRequestKey,
-    filterRetryNonce,
-    filterSearchId,
-    hasHotelInitComplete,
-    hotelSearchChannel,
-    socketSearchMeta.searchId,
-  ]);
+    setIsFilterLoading(
+      Boolean(hotelSearchChannel) && !hasUsableFilterData(apiFilterData),
+    );
+  }, [apiFilterData, hotelSearchChannel]);
 
   const hasActiveHotelSearch = Boolean(hotelSearchChannel);
   const sourceHotels = useMemo(
