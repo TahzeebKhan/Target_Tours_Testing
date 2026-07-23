@@ -14,7 +14,14 @@ import {
   buildSelectedFarePriceRequest,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
-import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import {
+  buildFareOptions,
+  FarePriceDetailsPopover,
+} from "../onewayTrip/FareComparisonModal";
+import {
+  getFareOptionItems,
+  mergeProviderFareOptionResponses,
+} from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -100,8 +107,8 @@ const buildModalSegment = (item, labelPrefix, fallbackDate) => {
   };
 };
 
-const renderLoadingCards = (styles) =>
-  Array.from({ length: 3 }).map((_, index) => (
+const renderLoadingCards = (styles, count = 3) =>
+  Array.from({ length: count }).map((_, index) => (
     <div key={index} className={styles.loadingCard}>
       <div className={styles.loadingHeader}>
         <div className={styles.skeletonLogo} />
@@ -473,7 +480,7 @@ const FareComparisonModalRoundTrip = ({
     return: null,
   });
   const [fareOptionsPayloads, setFareOptionsPayloads] = useState({
-    onward: prefetchedData?.fareOptionsResponse || null,
+    onward: null,
     return: null,
   });
   const [fareOptionsLoading, setFareOptionsLoading] = useState({
@@ -481,7 +488,7 @@ const FareComparisonModalRoundTrip = ({
     return: false,
   });
   const [fareOptionsResolved, setFareOptionsResolved] = useState({
-    onward: Boolean(prefetchedData?.fareOptionsResponse),
+    onward: false,
     return: false,
   });
 
@@ -494,12 +501,12 @@ const FareComparisonModalRoundTrip = ({
     if (!isOpen) return;
 
     setFareOptionsPayloads({
-      onward: prefetchedData?.fareOptionsResponse || null,
+      onward: null,
       return: null,
     });
     setFareOptionsLoading({ onward: false, return: false });
     setFareOptionsResolved({
-      onward: Boolean(prefetchedData?.fareOptionsResponse),
+      onward: false,
       return: false,
     });
     setSelected("onward");
@@ -517,14 +524,34 @@ const FareComparisonModalRoundTrip = ({
       try {
         setFareOptionsLoading((prev) => ({ ...prev, [leg]: true }));
         const legRequest = buildLegFareOptionsRequest(priceRequest, leg, flightNos);
+        const legFlight = buildLegFareOptionsFlightData(flightData, leg, flightNos);
+        const legFlightNo =
+          legFlight?.booking?.flightNo ||
+          legFlight?.details?.flightNo ||
+          legFlight?.airlines?.[0]?.flightNo ||
+          legFlight?.airlines?.[0]?.code;
         const response = await getFlightFareOptions({
           searchParams,
           request: legRequest,
-          flight: buildLegFareOptionsFlightData(flightData, leg, flightNos),
+          flight: legFlight,
+          onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+            if (cancelled || !accumulatedPayload) return;
+            setFareOptionsPayloads((prev) => ({
+              ...prev,
+              [leg]: mergeProviderFareOptionResponses(
+                prev[leg],
+                accumulatedPayload,
+                legFlightNo
+              ),
+            }));
+          },
         });
 
         if (cancelled) return;
-        setFareOptionsPayloads((prev) => ({ ...prev, [leg]: response }));
+        setFareOptionsPayloads((prev) => ({
+          ...prev,
+          [leg]: mergeProviderFareOptionResponses(prev[leg], response, legFlightNo),
+        }));
       } catch (error) {
         if (!cancelled) {
           console.error(`Failed to load ${leg} round-trip fare options`, error);
@@ -568,6 +595,8 @@ const FareComparisonModalRoundTrip = ({
         .replace(/\s*\([^)]+\)\s*$/, "")
         .trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+      departureDate: String(searchParams?.get("start") || "").trim(),
+      returnDate: String(searchParams?.get("end") || "").trim(),
     };
     const hasTripIndexes =
       Array.isArray(priceRequest?.Trips) &&
@@ -693,13 +722,17 @@ const FareComparisonModalRoundTrip = ({
   const activeSegment = flightSegments[selected];
   const { flight } = activeSegment;
   const fareSourcePayload =
-    fareOptionsPayloads[selected] ||
-    (selected === "onward" ? prefetchedData?.fareOptionsResponse : null) ||
-    null;
-  const hasFareOptionItems = Boolean(fareSourcePayload);
+    fareOptionsPayloads[selected] || null;
   const fareOptionsFlightData = React.useMemo(() => {
     return buildLegFareOptionsFlightData(flightData, selected, flightNos);
   }, [flightData, flightNos, selected]);
+  const fareOptionsFlightNo =
+    fareOptionsFlightData?.booking?.flightNo ||
+    fareOptionsFlightData?.details?.flightNo ||
+    fareOptionsFlightData?.airlines?.[0]?.flightNo ||
+    fareOptionsFlightData?.airlines?.[0]?.code;
+  const hasFareOptionItems =
+    getFareOptionItems(fareSourcePayload, fareOptionsFlightNo).length > 0;
   const fares = hasFareOptionItems
     ? buildFareOptions({
       flightData: fareOptionsFlightData,
@@ -830,9 +863,6 @@ const FareComparisonModalRoundTrip = ({
         {/* Fare Cards */}
         <div className={styles.fareCardsOverflowAuto}>
           <div className={styles.fareCards}>
-            {isFareOptionsLoading && !hasFareOptionItems
-              ? renderLoadingCards(styles)
-              : null}
             {showEmptyFareOptions ? (
               <div className={styles.emptyFareOptions}>
                 No fare option available
@@ -862,7 +892,10 @@ const FareComparisonModalRoundTrip = ({
                     </h3>
                     <div className={styles.farePrice}>
                       <span className={styles.price}>{fare.price}</span>
-                      <img src="/icons/Group.svg" alt="" />
+                      <FarePriceDetailsPopover
+                        fare={fare}
+                        adults={searchParams?.get("adults") || 1}
+                      />
                     </div>
                     <span className={styles.pricePerAdult}>
                       {fare.pricePerAdult}{" "}
@@ -945,6 +978,9 @@ const FareComparisonModalRoundTrip = ({
                 </div>
               </div>
             ))}
+            {isFareOptionsLoading && fares.length === 0
+              ? renderLoadingCards(styles, 3)
+              : null}
           </div>
         </div>
         {showLogin && authView === "login" && (

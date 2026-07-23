@@ -367,30 +367,57 @@ const isFlightSeatLayoutComplete = (payload) => {
 };
 
 const hasPricingItems = (payload) => {
-  const root = payload?.data || payload || {};
-  const containers = [
-    root,
-    root?.data,
-    root?.result,
-    root?.pricing,
-    root?.fare_options,
-    root?.fareOptions,
-    root?.merged,
-    root?.data?.merged,
-    root?.data?.fare_options,
-    root?.data?.fareOptions,
-  ].filter(Boolean);
+  const seen = new WeakSet();
+  const visit = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 10) return false;
+    if (seen.has(value)) return false;
+    seen.add(value);
 
-  return containers.some((container) =>
-    [
-      container?.fares,
-      container?.fare_options,
-      container?.fareOptions,
-      container?.flights,
-      container?.results,
-    ].some((value) => Array.isArray(value) && value.length > 0) ||
-    Object.values(container).some((value) => Array.isArray(value) && value.length > 0)
-  );
+    if (Array.isArray(value)) {
+      return value.some((item) => visit(item, depth + 1));
+    }
+
+    const directFareLists = [
+      value?.fares,
+      value?.fare_options,
+      value?.fareOptions,
+      value?.flights,
+    ];
+    if (directFareLists.some((list) => Array.isArray(list) && list.length > 0)) {
+      return true;
+    }
+
+    const looksLikeSingleFare = Boolean(
+      value?.FCType ||
+      value?.FareType ||
+      value?.fareType ||
+      value?.fareClass ||
+      value?.FareName ||
+      value?.DisplayName ||
+      value?.netAmount !== undefined ||
+      value?.NetAmount !== undefined ||
+      value?.totalFare !== undefined ||
+      value?.TotalFare !== undefined
+    );
+    if (looksLikeSingleFare) return true;
+
+    const fareMaps = [value?.merged, value?.fare_options, value?.fareOptions];
+    if (
+      fareMaps.some(
+        (map) =>
+          map &&
+          typeof map === "object" &&
+          !Array.isArray(map) &&
+          Object.values(map).some((list) => Array.isArray(list) && list.length > 0)
+      )
+    ) {
+      return true;
+    }
+
+    return Object.values(value).some((child) => visit(child, depth + 1));
+  };
+
+  return visit(payload);
 };
 
 const normalizePricingFlightNo = (...values) => {
@@ -793,7 +820,7 @@ const hasCreateBookingPayload = (payload) => {
 
 export const getFlightPrice = async (payload, { signal } = {}) => {
   const pricingPayload = buildV2PricePayload(payload);
-  console.log("getFlightPrice pricingPayload:", pricingPayload);
+
   const channel = pricingPayload.channel;
   const isMultiCityPricing =
     String(payload?.TripType || payload?.tripType || "").toUpperCase() === "DM";
@@ -812,12 +839,10 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
     const multiCityPricingResults = new Map();
     let settled = false;
     let initResponse = null;
-    let idleTimer = null;
     let events = null;
     let abortHandler = null;
 
     const cleanup = () => {
-      window.clearTimeout(idleTimer);
       window.clearTimeout(hardTimer);
       events?.close();
       if (abortHandler) signal?.removeEventListener("abort", abortHandler);
@@ -934,20 +959,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       };
     };
 
-    const scheduleResolve = () => {
-      window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => {
-        settle(resolve, buildResult());
-      }, 300);
-    };
-
     const hardTimer = window.setTimeout(() => {
-      const result = buildResult();
-      if (!isMultiCityPricing && extractFlightPricingPayload(result)) {
-        settle(resolve, result);
-        return;
-      }
-
       settle(reject, new Error("Flight pricing timed out. Please try again."));
     }, 45000);
 
@@ -975,10 +987,6 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       const payloadChannel = getPayloadChannel(parsedPayload);
       const isCurrentChannel = !payloadChannel || payloadChannel === channel;
       const type = String(getPayloadType(parsedPayload) || event.type || "").toUpperCase();
-      const extractedPricing = extractFlightPricingPayload(parsedPayload);
-      const isCompletePricingEvent = isFlightPricingResult(parsedPayload);
-
-
 
       if (!isCurrentChannel) return;
 
@@ -1000,25 +1008,16 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
         type.includes("PRICING") &&
         (type.includes("COMPLETE") || type.includes("COMPLETED"));
 
-      if (
-        isPricingCompleteEvent &&
-        (extractedPricing || multiCityPricingResults.size > 0)
-      ) {
-        settle(resolve, buildResult());
-        return;
-      }
-
-      if (
-        !isMultiCityPricing &&
-        isCompletePricingEvent &&
-        extractedPricing
-      ) {
-        settle(resolve, buildResult());
-        return;
-      }
-
-      if (!isMultiCityPricing && type.includes("PRICING") && extractedPricing) {
-        scheduleResolve();
+      if (isPricingCompleteEvent) {
+        const result = buildResult();
+        if (extractFlightPricingPayload(result) || multiCityPricingResults.size > 0) {
+          settle(resolve, result);
+        } else {
+          settle(
+            reject,
+            new Error("Flight pricing completed without pricing details.")
+          );
+        }
       }
     };
 
@@ -1070,44 +1069,22 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
           settled,
         });
     
-        const result = buildResult();
-        const extractedPricing = extractFlightPricingPayload(result);
-    
-        console.log("[Pricing] Result after SSE error", {
-          result,
-          extractedPricing,
-        });
-    
-        if (!isMultiCityPricing && extractedPricing) {
-          settle(resolve, result);
-        }
+        // EventSource reconnects automatically after transient transport errors.
+        // Pricing is settled only by a terminal COMPLETE/COMPLETED event, an
+        // explicit pricing error event, cancellation, or the hard timeout.
       });
     
       try {
-        console.log("[Pricing] Waiting for SSE connection", {
-          channel,
-        });
+
     
         await waitForSseConnected(events, channel);
     
-        console.log("[Pricing] waitForSseConnected finished", {
-          channel,
-          readyState: events.readyState,
-        });
-    
-        console.log("[Pricing] Calling postV2Price", {
-          pricingPayload,
-        });
+
+
     
         initResponse = await postV2Price(pricingPayload, signal);
     
-        console.log("[Pricing] postV2Price response", {
-          initResponse,
-          isFlightPricingResult:
-            isFlightPricingResult(initResponse),
-          extractedPricing:
-            extractFlightPricingPayload(initResponse),
-        });
+
     
         const extractedPricing =
           extractFlightPricingPayload(initResponse);
@@ -1118,8 +1095,6 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
             "postV2Price"
           );
           storeMultiCityPricingResult(initResponse);
-
-          if (!isMultiCityPricing) scheduleResolve();
         }
       } catch (error) {
         console.error("[Pricing] startPricing failed", {
@@ -1148,7 +1123,13 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
 
   const inFlightRequest = cacheKey ? fareOptionsRequestCache.get(cacheKey) : null;
   if (inFlightRequest) {
-    return inFlightRequest;
+    if (typeof onFareOptionsEvent === "function") {
+      inFlightRequest.subscribers?.add(onFareOptionsEvent);
+      if (inFlightRequest.lastResult) {
+        onFareOptionsEvent(null, inFlightRequest.lastResult);
+      }
+    }
+    return inFlightRequest.promise || inFlightRequest;
   }
 
   if (!payload.search_keys.length) {
@@ -1161,6 +1142,29 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
     setCachedFareOptionsResponse(cacheKey, data);
     return data;
   }
+
+  const requestEntry = {
+    promise: null,
+    subscribers: new Set(
+      typeof onFareOptionsEvent === "function" ? [onFareOptionsEvent] : []
+    ),
+    lastResult: null,
+  };
+
+  const notifyFareOptionsSubscribers = (eventPayload, accumulatedPayload) => {
+    requestEntry.lastResult = accumulatedPayload;
+    console.log("[fare-options:sse] notifyFareOptionsSubscribers", {
+      type: getPayloadType(eventPayload),
+      subscribers: requestEntry.subscribers.size,
+    });
+    requestEntry.subscribers.forEach((subscriber) => {
+      try {
+        subscriber(eventPayload, accumulatedPayload);
+      } catch (callbackError) {
+        console.error("Fare-options event subscriber failed", callbackError);
+      }
+    });
+  };
 
   const fareOptionsPromise = new Promise((resolve, reject) => {
     const chunks = [];
@@ -1198,16 +1202,42 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         });
       });
 
+      Object.entries(merged).forEach(([flightNo, fares]) => {
+        const uniqueFares = new Map();
+        fares.forEach((fare) => {
+          const key = JSON.stringify(fare);
+          uniqueFares.set(key, fare);
+        });
+        merged[flightNo] = Array.from(uniqueFares.values());
+      });
+
       return merged;
     };
 
-    const getChunkMergedFares = (chunk = {}) =>
-      mergeFareOptionMaps(
-        chunk?.merged,
-        chunk?.data?.merged,
-        ...toArray(chunk?.results).map((result) => result?.data?.merged || result?.merged),
-        ...toArray(chunk?.data?.results).map((result) => result?.data?.merged || result?.merged)
-      );
+    const getChunkMergedFares = (chunk = {}) => {
+      const fareMaps = [];
+      const seen = new WeakSet();
+      const collectFareMaps = (value, depth = 0) => {
+        if (!value || typeof value !== "object" || depth > 10) return;
+        if (seen.has(value)) return;
+        seen.add(value);
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => collectFareMaps(item, depth + 1));
+          return;
+        }
+
+        [value?.merged, value?.fare_options, value?.fareOptions].forEach((map) => {
+          if (map && typeof map === "object" && !Array.isArray(map)) {
+            fareMaps.push(map);
+          }
+        });
+        Object.values(value).forEach((child) => collectFareMaps(child, depth + 1));
+      };
+
+      collectFareMaps(chunk);
+      return mergeFareOptionMaps(...fareMaps);
+    };
 
     const buildResult = () => {
       const merged = mergeFareOptionMaps(
@@ -1216,6 +1246,13 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         ...chunks.map(getChunkMergedFares)
       );
       const hasMergedFares = Object.keys(merged).length > 0;
+
+      console.log("[fare-options:sse] buildResult", {
+        chunks: chunks.length,
+        faresByFlight: Object.fromEntries(
+          Object.entries(merged).map(([flightNo, fares]) => [flightNo, fares.length])
+        ),
+      });
 
       return {
         ...(initResponse || {}),
@@ -1230,13 +1267,6 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       };
     };
 
-    const scheduleResolve = () => {
-      window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => {
-        settle(resolve, buildResult());
-      }, 4000);
-    };
-
     const hardTimer = window.setTimeout(() => {
       if (chunks.length || initResponse) {
         settle(resolve, buildResult());
@@ -1244,7 +1274,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       }
 
       settle(reject, new Error("Flight fare options timed out. Please try again."));
-    }, 45000);
+    }, 120000);
 
     const handleMessage = (event) => {
       const unwrappedPayload = unwrapPricingPayload(event.data);
@@ -1262,11 +1292,15 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       const isCurrentChannel =
         !payloadChannel || payloadChannel === channel;
 
+      console.log("[fare-options:sse] EventSource -> handleMessage", {
+        eventType: event.type,
+        payloadType: getPayloadType(parsedPayload),
+        payloadChannel,
+        channel,
+        isCurrentChannel,
+      });
+
       if (!isCurrentChannel) return;
-    
-      if (typeof onFareOptionsEvent === "function") {
-        onFareOptionsEvent(parsedPayload);
-      }
     
       if (isPricingError(parsedPayload)) {
         const error = new Error(getApiMessage(parsedPayload));
@@ -1280,14 +1314,27 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
       const hasItems = hasPricingItems(parsedPayload);
       const isComplete = isPricingComplete(parsedPayload);
       const isFareOptionsCompleteEvent = isFareOptionsComplete(parsedPayload);
+
+      console.log("[fare-options:sse] hasPricingItems", {
+        type: getPayloadType(parsedPayload),
+        hasItems,
+        isComplete,
+        isFareOptionsCompleteEvent,
+      });
     
       if (hasItems || isComplete) {
         chunks.push(parsedPayload);
+        const accumulatedPayload = buildResult();
+        console.log("[fare-options:sse] chunks.push -> notify", {
+          type: getPayloadType(parsedPayload),
+          chunks: chunks.length,
+          subscribers: requestEntry.subscribers.size,
+        });
+        notifyFareOptionsSubscribers(parsedPayload, accumulatedPayload);
         if (isFareOptionsCompleteEvent) {
           settle(resolve, buildResult());
           return;
         }
-        scheduleResolve();
       }
     };
 
@@ -1301,7 +1348,8 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         events.addEventListener(eventName, handleMessage);
       });
       events.addEventListener("error", () => {
-        if (chunks.length) scheduleResolve();
+        // EventSource reconnects automatically. Keep listening for the
+        // explicit fare-options COMPLETE event or the hard timeout.
       });
 
       try {
@@ -1309,7 +1357,7 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
         initResponse = await postV2Pricing(payload);
         if (hasPricingItems(initResponse)) {
           chunks.push(initResponse);
-          scheduleResolve();
+          notifyFareOptionsSubscribers(initResponse, buildResult());
         }
       } catch (error) {
         settle(reject, error);
@@ -1318,11 +1366,14 @@ export const getFlightFareOptions = async ({ request, flight, onFareOptionsEvent
 
     startPricing();
   }).finally(() => {
+    requestEntry.subscribers.clear();
+    requestEntry.lastResult = null;
     fareOptionsRequestCache.delete(cacheKey);
   });
 
   if (cacheKey) {
-    fareOptionsRequestCache.set(cacheKey, fareOptionsPromise);
+    requestEntry.promise = fareOptionsPromise;
+    fareOptionsRequestCache.set(cacheKey, requestEntry);
   }
   return fareOptionsPromise;
 };

@@ -30,6 +30,18 @@ const getApiMessage = (payload, fallback) => {
 
 const areSameJson = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 const toArray = (value) => (Array.isArray(value) ? value : []);
+const hasCompleteSeatLayoutIndexes = (request) => {
+  const requests = toArray(request?.seat_layout_requests);
+  return (
+    requests.length > 0 &&
+    requests.every((seatRequest) =>
+      toArray(seatRequest?.Trips).length > 0 &&
+      toArray(seatRequest.Trips).every((trip) =>
+        trip?.Index !== undefined && trip?.Index !== null && String(trip.Index).trim()
+      )
+    )
+  );
+};
 const getRestoredBookingStep = (session) => {
   const savedStep = Number(session?.currentStep);
   if (Number.isInteger(savedStep) && savedStep >= 2 && savedStep <= 6) {
@@ -693,7 +705,7 @@ export function FlightBookingProvider({ children }) {
       setBookingError("");
 
       try {
-        console.log("v2 SSR payload", v2SsrPayload);
+      
         const ssrResponse = canReuseV2SsrResponse
           ? bookingSession.ssrResponse
           : await getFlightV2Ssr(v2SsrPayload);
@@ -701,7 +713,10 @@ export function FlightBookingProvider({ children }) {
 
         let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
         let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
-        if (includeSeatLayout && bookingSession?.seatLayoutRequest?.seat_layout_requests?.length) {
+        if (
+          includeSeatLayout &&
+          bookingSession?.seatLayoutRequest?.seat_layout_requests?.length
+        ) {
           seatLayoutResponse = null;
           seatLayoutRequest = null;
         }
@@ -755,6 +770,15 @@ export function FlightBookingProvider({ children }) {
     if (priceSsrResponse) {
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+      if (
+        includeSeatLayout &&
+        seatLayoutRequest?.seat_layout_requests?.length &&
+        !hasCompleteSeatLayoutIndexes(seatLayoutRequest)
+      ) {
+        seatLayoutResponse = null;
+        seatLayoutRequest = null;
+      }
 
       try {
         if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
@@ -842,6 +866,15 @@ export function FlightBookingProvider({ children }) {
       }
       let seatLayoutResponse = bookingSession?.seatLayoutResponse || null;
       let seatLayoutRequest = bookingSession?.seatLayoutRequest || null;
+
+      if (
+        includeSeatLayout &&
+        seatLayoutRequest?.seat_layout_requests?.length &&
+        !hasCompleteSeatLayoutIndexes(seatLayoutRequest)
+      ) {
+        seatLayoutResponse = null;
+        seatLayoutRequest = null;
+      }
 
       if (includeSeatLayout && !seatLayoutResponse && !seatLayoutRequestInFlightRef.current) {
         seatLayoutRequestInFlightRef.current = true;
@@ -965,9 +998,16 @@ export function FlightBookingProvider({ children }) {
       effectivePrices
     );
 
+    const multiCityBookingRequests = createBookingPayload?.create_booking_requests;
+    const hasValidMultiCityRequests =
+      Array.isArray(multiCityBookingRequests) &&
+      multiCityBookingRequests.length > 0 &&
+      multiCityBookingRequests.every((request) => request?.search_key && request?.TUI);
+    const hasValidSingleBookingRequest =
+      createBookingPayload?.search_key && createBookingPayload?.TUI;
+
     if (
-      !createBookingPayload?.search_key ||
-      !createBookingPayload?.TUI ||
+      (!hasValidMultiCityRequests && !hasValidSingleBookingRequest) ||
       !createBookingPayload?.passengers?.length
     ) {
       setBookingError("Passenger or booking data is incomplete.");

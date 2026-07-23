@@ -15,9 +15,9 @@ import {
     writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import {
-    getCachedFareOptionsRequest,
     getFareOptionItems,
     isFareExpiredPayload,
+    mergeProviderFareOptionResponses,
 } from "./fareOptionsStreaming";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
@@ -307,6 +307,39 @@ const getFarePriceDetails = (fare, adults = 1) => {
     };
 };
 
+export const FarePriceDetailsPopover = ({ fare, adults = 1 }) => {
+    const priceDetails = getFarePriceDetails(fare, adults);
+
+    return (
+        <div className={styles.priceInfoTrigger} tabIndex={0}>
+            <img src="/icons/Group.svg" alt="Flight price details" />
+            <div className={styles.priceInfoCard}>
+                <div className={styles.priceInfoTitle}>FLIGHT PRICE DETAILS</div>
+                <div className={styles.priceInfoBody}>
+                    <div className={styles.priceInfoRow}>
+                        <span>{priceDetails.adultLine}</span>
+                        <strong className={styles.priceInfoTotal}>{priceDetails.adultAmount}</strong>
+                    </div>
+                    <div className={styles.priceInfoRow}>
+                        <span>Total (Base Fare)</span>
+                        <strong>{priceDetails.baseFare}</strong>
+                    </div>
+                    <div className={styles.priceInfoRow}>
+                        <span>Airline taxes and fees</span>
+                        <strong className={styles.priceInfoTotal2}>{priceDetails.taxes}</strong>
+                    </div>
+                    <div className={styles.priceInfoDivider} />
+                    <div className={styles.priceInfoTotal}>
+                        <span>Total</span>
+                        <strong>{priceDetails.total}</strong>
+                    </div>
+                    <p>Includes taxes and service fees</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const getNestedArray = (payload, paths) => {
     for (const path of paths) {
         let current = payload;
@@ -452,8 +485,8 @@ const getRuleLabel = (fare, type, fallback) => {
     return fallback;
 };
 
-const renderLoadingCards = (styles) =>
-    Array.from({ length: 3 }).map((_, index) => (
+const renderLoadingCards = (styles, count = 3) =>
+    Array.from({ length: count }).map((_, index) => (
         <div key={index} className={styles.loadingCard}>
             <div className={styles.loadingHeader}>
                 <div className={styles.skeletonLogo} />
@@ -493,11 +526,15 @@ export const buildFareOptions = ({
             flightData?.airlines?.[0]?.code
         )
     );
+    console.log("[fare-options:ui] buildFareOptions", {
+        flightNo: flightData?.booking?.flightNo,
+        fareOptionItems: fareOptionItems.length,
+    });
     const safeAdults = Math.max(Number(adults || 1), 1);
 
     if (fareOptionItems.length > 0) {
         const ruleSources = collectFareRuleSources(pricePayload);
-        return fareOptionItems.map((item, index) => {
+        const normalizedFares = fareOptionItems.map((item, index) => {
             const ruleSource = getMatchingRuleSource(item, index, ruleSources);
             const total = readNumber(
                 item?.price,
@@ -601,6 +638,20 @@ export const buildFareOptions = ({
                 },
             };
         });
+        const seenCards = new Set();
+        return normalizedFares.filter((fare) => {
+            const visibleCardKey = JSON.stringify({
+                name: fare.name,
+                price: fare.price,
+                pricePerAdult: fare.pricePerAdult,
+                baggage: fare.baggage,
+                changes: fare.changes,
+                addons: fare.addons,
+            });
+            if (seenCards.has(visibleCardKey)) return false;
+            seenCards.add(visibleCardKey);
+            return true;
+        });
     }
 
     return [];
@@ -619,7 +670,7 @@ const FareComparisonModal = ({
     const searchParams = useFlightSearchParams();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submittingFareId, setSubmittingFareId] = useState(null);
-    const [fareOptionsPayload, setFareOptionsPayload] = useState(prefetchedData?.fareOptionsResponse || null);
+    const [fareOptionsPayload, setFareOptionsPayload] = useState(null);
     const [isPollingFareOptions, setIsPollingFareOptions] = useState(false);
     const [hasResolvedFareOptions, setHasResolvedFareOptions] = useState(
         Boolean(prefetchedData?.fareOptionsResponse)
@@ -638,9 +689,17 @@ const FareComparisonModal = ({
     useEffect(() => {
         if (!isOpen) return;
 
-        setFareOptionsPayload(prefetchedData?.fareOptionsResponse || null);
+        setFareOptionsPayload(() =>
+            mergeProviderFareOptionResponses(
+                null,
+                prefetchedData?.fareOptionsResponse,
+                flightNo
+            )
+        );
         setIsPollingFareOptions(false);
-        setHasResolvedFareOptions(Boolean(prefetchedData?.fareOptionsResponse));
+        setHasResolvedFareOptions(
+            Boolean(prefetchedData?.fareOptionsResponse) && !isLoadingFareOptions
+        );
 
         const priceRequest = flightData?.booking?.priceRequest;
         if (!priceRequest) {
@@ -653,14 +712,34 @@ const FareComparisonModal = ({
         const loadFareOptions = async () => {
             try {
                 setIsPollingFareOptions(true);
-                const response = await getCachedFareOptionsRequest(
-                    `pricing-v2:${priceRequest?.search_key || flightData?.id || "fare-options"}:${flightNo || "all"}`,
-                    () => getFlightFareOptions({
-                        searchParams,
-                        request: priceRequest,
-                        flight: flightData,
-                    })
-                );
+                const response = await getFlightFareOptions({
+                    searchParams,
+                    request: priceRequest,
+                    flight: flightData,
+                    onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+                        if (cancelled || !accumulatedPayload) return;
+                        console.log("[fare-options:ui] onFareOptionsEvent", {
+                            eventType: _eventPayload?.type || _eventPayload?.data?.type,
+                            accumulatedItems: getFareOptionItems(
+                                accumulatedPayload,
+                                flightNo
+                            ).length,
+                        });
+                        setFareOptionsPayload((previousPayload) => {
+                            const mergedPayload = mergeProviderFareOptionResponses(
+                                previousPayload,
+                                accumulatedPayload,
+                                flightNo
+                            );
+                            console.log("[fare-options:ui] setFareOptionsPayload", {
+                                previousItems: getFareOptionItems(previousPayload, flightNo).length,
+                                nextItems: getFareOptionItems(accumulatedPayload, flightNo).length,
+                                mergedItems: getFareOptionItems(mergedPayload, flightNo).length,
+                            });
+                            return mergedPayload;
+                        });
+                    },
+                });
 
                 if (cancelled) return;
 
@@ -669,7 +748,9 @@ const FareComparisonModal = ({
                     return;
                 }
 
-                setFareOptionsPayload(response);
+                setFareOptionsPayload((previousPayload) =>
+                    mergeProviderFareOptionResponses(previousPayload, response, flightNo)
+                );
             } catch (error) {
                 if (!cancelled) {
                     console.error("Failed to refresh fare options", error);
@@ -713,6 +794,7 @@ const FareComparisonModal = ({
             fromCode: String(searchParams?.get("origin") || "").trim().toUpperCase(),
             toName: String(searchParams?.get("to") || "").replace(/\s*\([^)]+\)\s*$/, "").trim(),
             toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+            departureDate: String(searchParams?.get("start") || "").trim(),
         };
         if (!hasPricePayload) {
             toast.error("Missing booking payload for the selected flight.");
@@ -776,20 +858,29 @@ const FareComparisonModal = ({
 
     if (!isOpen) return null;
 
-    const fareSourcePayload = fareOptionsPayload || prefetchedData?.fareOptionsResponse || null;
+    const fareSourcePayload = fareOptionsPayload || null;
     const hasFareOptionItems = getFareOptionItems(fareSourcePayload, flightNo).length > 0;
     const isStreamingFareOptions = isLoadingFareOptions || isPollingFareOptions;
-    const showFareSkeleton = !hasResolvedFareOptions && !hasFareOptionItems;
-    const fareOptions = !hasResolvedFareOptions && !hasFareOptionItems
-        ? []
-        : buildFareOptions({
+    const fareOptions = hasFareOptionItems
+        ? buildFareOptions({
             flightData,
             prefetchedData: {
                 ...(prefetchedData || {}),
                 fareOptionsResponse: fareSourcePayload,
             },
             adults: searchParams?.get("adults") || 1,
-        });
+        })
+        : [];
+    const showFareSkeleton =
+        fareOptions.length === 0 &&
+        (isStreamingFareOptions || !hasResolvedFareOptions);
+    console.log("[fare-options:ui] render", {
+        flightNo,
+        hasFareOptionItems,
+        cards: fareOptions.length,
+        isStreamingFareOptions,
+        hasResolvedFareOptions,
+    });
     const showEmptyFareOptions =
         hasResolvedFareOptions && !isStreamingFareOptions && fareOptions.length === 0;
 
@@ -800,7 +891,9 @@ const FareComparisonModal = ({
             ref={inline ? fareCardsRef : null}
             className={`${styles.fareCards} ${inline ? styles.inlineFareCards : ""}`}
         >
-            {showFareSkeleton ? renderLoadingCards(styles) : null}
+            {showFareSkeleton
+                ? renderLoadingCards(styles, 3)
+                : null}
             {showEmptyFareOptions ? (
                 <div className={styles.emptyFareOptions}>
                     No fare option available

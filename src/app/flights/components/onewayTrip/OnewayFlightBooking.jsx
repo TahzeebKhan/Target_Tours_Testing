@@ -25,6 +25,38 @@ import {
 } from "@/features/flights/services/flightBooking";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 
+const getFareAccumulatorFlightKey = (flightNo) => {
+  const value = String(flightNo || "").trim();
+  const trailingNumber = value.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
+  return trailingNumber?.[1] || value || "all";
+};
+
+const mergeFareOptionPayloads = (previousPayload, incomingPayload, flightNo) => {
+  const flightKey = getFareAccumulatorFlightKey(flightNo);
+  const combinedItems = [
+    ...getFareOptionItems(previousPayload, flightKey),
+    ...getFareOptionItems(incomingPayload, flightKey),
+  ];
+  const uniqueItems = Array.from(
+    new Map(combinedItems.map((item) => [JSON.stringify(item), item])).values()
+  );
+  const incomingData = incomingPayload?.data || {};
+  const merged = {
+    ...(incomingPayload?.merged || {}),
+    ...(incomingData?.merged || {}),
+    [flightKey]: uniqueItems,
+  };
+
+  return {
+    ...(incomingPayload || {}),
+    merged,
+    data: {
+      ...incomingData,
+      merged,
+    },
+  };
+};
+
 const OnewayFlightBooking = ({
   flightData = [],
   datewiseFareTiles = [],
@@ -53,6 +85,7 @@ const OnewayFlightBooking = ({
   const [openSort, setOpenSort] = useState(false);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
+  const fareOptionsAccumulatorRef = useRef({});
   const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
 
   const [isMobile, setIsMobile] = useState(false);
@@ -137,13 +170,18 @@ const OnewayFlightBooking = ({
 
         if (!responseHasFareCards) return;
 
-        setPrefetchingFlightId((currentId) => (currentId === flightId ? null : currentId));
+        const accumulatedFareOptions = mergeFareOptionPayloads(
+          fareOptionsAccumulatorRef.current[flightId],
+          fareOptionsResponse,
+          flight?.booking?.flightNo
+        );
+        fareOptionsAccumulatorRef.current[flightId] = accumulatedFareOptions;
 
         setPrefetchedFareData((prev) => {
           const previousData = prev[flightId] || {};
           const nextPrefetchedData = {
             ...previousData,
-            fareOptionsResponse,
+            fareOptionsResponse: accumulatedFareOptions,
           };
 
           return {
@@ -159,7 +197,7 @@ const OnewayFlightBooking = ({
             ...baseFlight,
             prefetchedFareData: {
               ...(baseFlight?.prefetchedFareData || {}),
-              fareOptionsResponse,
+              fareOptionsResponse: accumulatedFareOptions,
             },
           };
         });
@@ -168,6 +206,7 @@ const OnewayFlightBooking = ({
       const initialPrefetchedData = {
         fareOptionsResponse: null,
       };
+      fareOptionsAccumulatorRef.current[flightId] = null;
 
       setPrefetchedFareData((prev) => ({
         ...prev,
@@ -183,22 +222,11 @@ const OnewayFlightBooking = ({
             searchParams,
             request: flight.booking.priceRequest,
             flight,
-            onFareOptionsEvent: updateFareOptionsPrefetch,
+            onFareOptionsEvent: (_eventPayload, accumulatedResponse) =>
+              updateFareOptionsPrefetch(accumulatedResponse),
           })
         : null;
-
-      const nextPrefetchedData = {
-        fareOptionsResponse,
-      };
-
-      setPrefetchedFareData((prev) => ({
-        ...prev,
-        [flightId]: nextPrefetchedData,
-      }));
-      setSelectedFareFlight({
-        ...flight,
-        prefetchedFareData: nextPrefetchedData,
-      });
+      updateFareOptionsPrefetch(fareOptionsResponse);
     } catch (error) {
       console.error("Failed to fetch fare details", error);
     } finally {

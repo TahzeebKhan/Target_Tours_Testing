@@ -8,8 +8,8 @@ const toArray = (value) => (Array.isArray(value) ? value : []);
 
 const getFlightKey = (flightNo) => String(flightNo || "").trim();
 
-const getItemKey = (item, index) =>
-  String(
+const getItemKey = (item, index) => {
+  const identityParts = [
     item?.fare_id ??
       item?.FareId ??
       item?.fareId ??
@@ -18,14 +18,34 @@ const getItemKey = (item, index) =>
       item?.index ??
       item?.Index ??
       item?.flightId ??
-      item?.price ??
-      item?.Price ??
-      item?.FCType ??
+      "",
+    item?.FCType ??
+      item?.FCGroup ??
       item?.FareType ??
+      item?.fareType ??
       item?.FareName ??
+      item?.DisplayName ??
+      item?.name ??
       item?.Name ??
-      index
+      "",
+    item?.price ??
+      item?.Price ??
+      item?.netAmount ??
+      item?.NetAmount ??
+      item?.grossFare ??
+      item?.GrossFare ??
+      item?.totalFare ??
+      item?.TotalFare ??
+      "",
+  ];
+  const populatedParts = identityParts.filter(
+    (value) => value !== undefined && value !== null && String(value).trim() !== ""
   );
+
+  return populatedParts.length >= 2
+    ? identityParts.join("|")
+    : JSON.stringify(item) || String(index);
+};
 
 const isMetadataOnlyObject = (item = {}) => {
   const keys = Object.keys(item);
@@ -351,15 +371,86 @@ export const mergeFareOptionResponses = (previousPayload, nextPayload, flightNo)
     mergedItems.push(item);
   });
 
+  const previousResponse = unwrapPayload(previousPayload);
+  const nextResponse = unwrapPayload(nextPayload);
+  const flightKey = getFlightKey(flightNo);
+  const merged = {
+    ...(previousResponse?.merged || {}),
+    ...(nextResponse?.merged || {}),
+    ...(flightKey ? { [flightKey]: mergedItems } : {}),
+  };
+
   return {
-    ...unwrapPayload(previousPayload),
-    ...unwrapPayload(nextPayload),
+    ...previousResponse,
+    ...nextResponse,
     cached: isFareOptionsCached(nextPayload) || isFareOptionsCached(previousPayload),
+    merged,
     flights: mergedItems,
     data: {
-      ...(unwrapPayload(previousPayload)?.data || {}),
-      ...(unwrapPayload(nextPayload)?.data || {}),
+      ...(previousResponse?.data || {}),
+      ...(nextResponse?.data || {}),
+      merged,
       flights: mergedItems,
+    },
+  };
+};
+
+const getFareOptionsEventType = (payload) =>
+  String(payload?.type || payload?.data?.type || "").trim().toUpperCase();
+
+export const mergeProviderFareOptionResponses = (
+  previousPayload,
+  streamedPayload,
+  flightNo
+) => {
+  const providerPayloads = [];
+  const addProviderPayload = (payload) => {
+    if (getFareOptionsEventType(payload).includes("FARE_OPTIONS_PROVIDER")) {
+      providerPayloads.push(payload);
+    }
+  };
+
+  addProviderPayload(streamedPayload);
+  [streamedPayload?.pricingChunks, streamedPayload?.data?.pricingChunks].forEach(
+    (chunks) => toArray(chunks).forEach(addProviderPayload)
+  );
+
+  const mergedPayload = providerPayloads.reduce(
+    (mergedPayload, providerPayload) =>
+      mergeFareOptionResponses(mergedPayload, providerPayload, flightNo),
+    previousPayload
+  );
+  const isSyntheticTripFare = (fare) =>
+    [
+      fare?.FCType,
+      fare?.FCGroup,
+      fare?.FareType,
+      fare?.fareType,
+      fare?.FareName,
+      fare?.DisplayName,
+      fare?.name,
+      fare?.Name,
+    ].some((value) =>
+      ["ON", "RT"].includes(String(value || "").trim().toUpperCase())
+    );
+  const providerFares = getFareOptionItems(mergedPayload, flightNo).filter(
+    (fare) => !isSyntheticTripFare(fare)
+  );
+  const response = unwrapPayload(mergedPayload);
+  const flightKey = getFlightKey(flightNo);
+  const merged = {
+    ...(response?.merged || {}),
+    ...(flightKey ? { [flightKey]: providerFares } : {}),
+  };
+
+  return {
+    ...response,
+    merged,
+    flights: providerFares,
+    data: {
+      ...(response?.data || {}),
+      merged,
+      flights: providerFares,
     },
   };
 };

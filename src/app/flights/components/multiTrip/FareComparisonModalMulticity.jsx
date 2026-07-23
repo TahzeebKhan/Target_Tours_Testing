@@ -12,7 +12,10 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { toast } from "react-toastify";
-import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import {
+  buildFareOptions,
+  FarePriceDetailsPopover,
+} from "../onewayTrip/FareComparisonModal";
 import styles from "./FareComparisonModalMulticity.module.css";
 
 const money = (value) => {
@@ -561,8 +564,13 @@ const FareComparisonModalMulticity = ({
                 {fare.isPremium && <div className={styles.premiumBadge}>PREMIUM</div>}
                 <div className={styles.fareCard}>
                   <div className={styles.fareHeader}>
-                    <h3 className={`${styles.fareName} ${fare.isPremium ? styles.fareNamePremium : ""}`}><span className={styles.radioOutline} />{fare.name}</h3>
-                    <div className={styles.farePrice}><span className={styles.price}>{fare.price || money(fare.netAmount)}</span><img src="/icons/Group.svg" alt="" /></div>
+                    <h3 className={`${styles.fareName} ${fare.isPremium ? styles.fareNamePremium : ""}`}>
+                    {/* <span className={styles.radioOutline} /> */}
+                    {fare.name}</h3>
+                    <div className={styles.farePrice}>
+                      <span className={styles.price}>{fare.price || money(fare.netAmount)}</span>
+                      <FarePriceDetailsPopover fare={fare} adults={adults} />
+                    </div>
                     <span className={styles.pricePerAdult}>{fare.pricePerAdult}<span className={styles.adult}> / ADULT</span></span>
                   </div>
                   <div className={styles.hr} />

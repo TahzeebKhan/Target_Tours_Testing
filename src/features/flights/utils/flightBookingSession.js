@@ -135,6 +135,22 @@ const formatRiyaSeatDateTime = (value) => {
   return `${day} ${month} ${year} ${hours}:${minutes}`;
 };
 
+const repairImplausibleFlightDate = (value, searchedDate) => {
+  if (!value || !searchedDate) return value;
+  const flightDate = new Date(value);
+  const expectedDate = new Date(searchedDate);
+  if (Number.isNaN(flightDate.getTime()) || Number.isNaN(expectedDate.getTime())) return value;
+  if (flightDate.getFullYear() >= expectedDate.getFullYear() - 1) return value;
+
+  expectedDate.setHours(
+    flightDate.getHours(),
+    flightDate.getMinutes(),
+    flightDate.getSeconds(),
+    flightDate.getMilliseconds()
+  );
+  return expectedDate.toISOString();
+};
+
 const safeEncodePayload = (value) => {
   try {
     return encodeURIComponent(JSON.stringify(value));
@@ -927,12 +943,105 @@ const getMultiCityPricingRouteMap = (priceResponse = {}) => {
   return routeMap;
 };
 
+const readPricingToken = (payload = {}) => {
+  const journeys = Array.isArray(payload?.formatted?.journeys)
+    ? payload.formatted.journeys
+    : Array.isArray(payload?.journeys)
+      ? payload.journeys
+      : [];
+
+  return String(
+    pickFirst(
+      payload?.token,
+      payload?.Token,
+      journeys[0]?.Token_onward,
+      journeys[0]?.token_onward,
+      journeys[0]?.Token,
+      journeys[0]?.token,
+      payload?.formatted?.Token,
+      payload?.formatted?.token,
+      payload?.raw?.Token,
+      payload?.raw?.token,
+      ""
+    ) || ""
+  ).trim();
+};
+
+const getMultiCityPricingTokenMap = (priceResponse = {}) => {
+  const tokenMap = new Map();
+  const addPricingResult = (result) => {
+    const resultPayload = result?.payload || result?.data?.data || result?.data || {};
+    const searchKey = pickFirst(
+      result?.search_key,
+      result?.searchKey,
+      resultPayload?.search_key,
+      resultPayload?.searchKey
+    );
+    const token = readPricingToken(resultPayload);
+
+    if (searchKey && token) {
+      tokenMap.set(String(searchKey).trim().toUpperCase(), token);
+    }
+  };
+
+  [
+    priceResponse?.pricingResults,
+    priceResponse?.data?.pricingResults,
+    priceResponse?.results,
+    priceResponse?.data?.results,
+  ].forEach((results) => {
+    if (Array.isArray(results)) results.forEach(addPricingResult);
+  });
+
+  [priceResponse?.pricingChunks, priceResponse?.data?.pricingChunks].forEach((chunks) => {
+    if (!Array.isArray(chunks)) return;
+    chunks.forEach((chunk) => {
+      if (Array.isArray(chunk?.data?.results)) {
+        chunk.data.results.forEach(addPricingResult);
+      }
+    });
+  });
+
+  return tokenMap;
+};
+
+const getCreateBookingPricingTokens = (priceResponse = {}) => {
+  const payload = unwrapPayload(priceResponse);
+  const journeys = getFormattedJourneys(priceResponse);
+  const getJourneyType = (journey) =>
+    String(journey?.journey_type || journey?.journeyType || journey?.type || "")
+      .trim()
+      .toUpperCase();
+  const onwardJourney =
+    journeys.find((journey) => getJourneyType(journey).includes("ONWARD")) ||
+    journeys[0];
+  const returnJourney =
+    journeys.find((journey) => getJourneyType(journey).includes("RETURN")) ||
+    journeys[1];
+  const readJourneyToken = (journey, direction) =>
+    String(
+      pickFirst(
+        direction === "onward" ? journey?.Token_onward : journey?.Token_return,
+        direction === "onward" ? journey?.token_onward : journey?.token_return,
+        journey?.Token,
+        journey?.token,
+        ""
+      ) || ""
+    ).trim();
+
+  return {
+    onward: readJourneyToken(onwardJourney, "onward") || readPricingToken(payload),
+    return: readJourneyToken(returnJourney, "return"),
+  };
+};
+
 export const buildV2SsrPayload = (session = {}) => {
   const priceResponse = session?.priceResponse || {};
   const payload = unwrapPayload(priceResponse);
   const priceRequest = session?.priceRequest || {};
   const selectedFare = session?.selectedFare || {};
   const requestTrips = extractTrips(priceRequest);
+  const pricingJourneys = getFormattedJourneys(priceResponse);
   const rootTui = pickFirst(
     payload?.tui,
     payload?.TUI,
@@ -1014,7 +1123,13 @@ export const buildV2SsrPayload = (session = {}) => {
       Trips: sourceTrips
         .map((trip, index) => ({
           Index: String(
-            normalizeTripIndexForOrder(trip, index, sourceTrips) ||
+            (sourceTrips.length > 1
+              ? pickFirst(
+                  pricingJourneys?.[index]?.index,
+                  pricingJourneys?.[index]?.Index
+                )
+              : undefined) ||
+              normalizeTripIndexForOrder(trip, index, sourceTrips) ||
               selectedFareIndex ||
               ""
           ),
@@ -1224,13 +1339,16 @@ const buildRiyaSeatLayoutPayload = (session = {}, travelerDetails = []) => {
         )
       ).trim(),
       DepartureDateTime: formatRiyaSeatDateTime(
-        pickFirst(
-          flightDetails?.departure,
-          journey?.departure,
-          trip?.DepartureDateTime,
-          trip?.departureDateTime,
-          selectedFlight?.details?.departureDateTime,
-          fallbackDeparture?.date
+        repairImplausibleFlightDate(
+          pickFirst(
+            flightDetails?.departure,
+            journey?.departure,
+            trip?.DepartureDateTime,
+            trip?.departureDateTime,
+            selectedFlight?.details?.departureDateTime,
+            fallbackDeparture?.date
+          ),
+          index === 0 ? routeContext?.departureDate : routeContext?.returnDate
         )
       ),
       ArrivalDateTime: formatRiyaSeatDateTime(
@@ -1316,6 +1434,7 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const ssrRequest = session?.ssrRequest || {};
   const ssrPayload = unwrapPayload(session?.ssrResponse);
   const pricePayload = unwrapPayload(session?.priceResponse);
+  const pricingJourneys = getFormattedJourneys(session?.priceResponse);
   const requestTrips = extractTrips(priceRequest);
   const ssrRequests = Array.isArray(ssrRequest?.ssr_requests)
     ? ssrRequest.ssr_requests
@@ -1355,20 +1474,40 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
       ? primarySsrRequest.Trips
       : requestTrips;
   const trips = sourceTrips
-    .map((trip, index) => ({
-      OrderID: String(
-        pickFirst(
-          trip?.OrderID,
-          trip?.OrderId,
-          trip?.Order,
-          trip?.orderId,
-          trip?.order,
-          index + 1
-        )
-      ),
-      TUI: pickFirst(trip?.TUI, trip?.tui, tui),
-    }))
-    .filter((trip) => trip.OrderID);
+    .map((trip, index) => {
+      const selectedTripFare =
+        index === 1
+          ? selectedFare?.roundTripFares?.return || selectedFare
+          : selectedFare?.roundTripFares?.onward || selectedFare;
+      const selectedTripIndex = pickFirst(
+        pricingJourneys?.[index]?.index,
+        pricingJourneys?.[index]?.Index,
+        trip?.Index,
+        trip?.index,
+        requestTrips?.[index]?.Index,
+        requestTrips?.[index]?.index,
+        selectedTripFare?.rawFare?.Index,
+        selectedTripFare?.rawFare?.index,
+        selectedTripFare?.Index,
+        selectedTripFare?.index
+      );
+
+      return {
+        Index: String(selectedTripIndex || ""),
+        OrderID: String(
+          pickFirst(
+            trip?.OrderID,
+            trip?.OrderId,
+            trip?.Order,
+            trip?.orderId,
+            trip?.order,
+            index + 1
+          )
+        ),
+        TUI: pickFirst(trip?.TUI, trip?.tui, tui),
+      };
+    })
+    .filter((trip) => trip.Index && trip.OrderID);
   const seatLayoutRequests = (isMultiCity
     ? ssrRequests.map((request, requestIndex) => {
         const selectedRouteFare = selectedFare?.multiCityFares?.[requestIndex] || {};
@@ -1745,8 +1884,36 @@ export const getBookingDetailsView = (session) => {
     : selectedReturnFlight ||
     fallbackView?.returnFlight ||
     buildFlightCard(returnSource, selectedFare);
-  const departureFlight = normalizeFlightCardLogo(rawDepartureFlight);
-  const returnFlight = normalizeFlightCardLogo(rawReturnFlight);
+  const normalizedDepartureFlight = normalizeFlightCardLogo(rawDepartureFlight);
+  const normalizedReturnFlight = normalizeFlightCardLogo(rawReturnFlight);
+  const departureFlight = normalizedDepartureFlight
+    ? {
+        ...normalizedDepartureFlight,
+        departure: {
+          ...normalizedDepartureFlight.departure,
+          date: formatDateLabel(
+            repairImplausibleFlightDate(
+              normalizedDepartureFlight?.departure?.date,
+              routeContext?.departureDate
+            )
+          ),
+        },
+      }
+    : normalizedDepartureFlight;
+  const returnFlight = normalizedReturnFlight
+    ? {
+        ...normalizedReturnFlight,
+        departure: {
+          ...normalizedReturnFlight.departure,
+          date: formatDateLabel(
+            repairImplausibleFlightDate(
+              normalizedReturnFlight?.departure?.date,
+              routeContext?.returnDate
+            )
+          ),
+        },
+      }
+    : normalizedReturnFlight;
   const selectedDepartureRoute = isSelectedRoundTrip
     ? parseRouteLabel(
         selectedFlight?.outbound?.departure?.city ||
@@ -1816,7 +1983,10 @@ export const getBookingDetailsView = (session) => {
       toName: headerTo,
       toCode: routeTo,
       date: formatHeaderDate(
-        selectedFlight?.details?.departureDateTime ||
+        repairImplausibleFlightDate(
+          selectedFlight?.details?.departureDateTime,
+          routeContext?.departureDate
+        ) ||
           fallbackView?.header?.date ||
           selectedDepartureFlight?.departure?.date ||
           departureSource?.departure
@@ -1847,7 +2017,11 @@ export const buildBookingFallbackQuery = (session) => {
     },
   };
   const encoded = safeEncodePayload(payload);
-  return encoded ? `bookingFallback=${encoded}` : "";
+  // Next.js includes the current URL in router headers. A large multi-city
+  // fallback can therefore exceed the server's header limit and cause 431.
+  // The complete booking session is already persisted in sessionStorage.
+  const query = encoded ? `bookingFallback=${encoded}` : "";
+  return query.length <= 4000 ? query : "";
 };
 
 const readSsrAmount = (item) =>
@@ -2433,6 +2607,7 @@ const normalizeCreateBookingBaggage = (
 
 export const buildCreateBookingPayload = (session = {}, prices = {}) => {
   const priceResponse = unwrapPayload(session?.priceResponse);
+  const pricingTokens = getCreateBookingPricingTokens(session?.priceResponse);
   const priceRequest = session?.priceRequest || {};
   const travelers = Array.isArray(session?.travelerDetails)
     ? session.travelerDetails
@@ -2514,7 +2689,109 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
       })
     : [];
 
+  const passengers = travelers.map((traveler, index) => ({
+    id: index + 1,
+    title: traveler?.Title || "",
+    firstName: traveler?.FName || "",
+    lastName: traveler?.LName || "",
+    type: traveler?.PTC || traveler?.type || "",
+    gender: normalizeGenderCode(traveler?.Gender),
+    dob: traveler?.DOB || "",
+  }));
+  const contactPayload = {
+    phone: contactPhone,
+    email: String(pickFirst(contact.Email, primaryTraveler.Email, "")),
+    address: String(pickFirst(contact.Address, "")),
+    countryCode: contactCountryCode,
+    state: String(pickFirst(contact.State, contact.state, "")),
+    city: String(pickFirst(contact.City, contact.city, "")),
+    pin: String(pickFirst(contact.Pin, contact.PIN, contact.pin, "")),
+  };
+  const multiCityRequests = Array.isArray(priceRequest?.search_keys)
+    ? priceRequest.search_keys
+    : [];
+  const isMultiCity =
+    String(priceRequest?.TripType || priceRequest?.tripType || "").toUpperCase() === "DM" &&
+    multiCityRequests.length > 0;
+
+  if (isMultiCity) {
+    const pricingRouteMap = getMultiCityPricingRouteMap(session?.priceResponse);
+    const pricingTokenMap = getMultiCityPricingTokenMap(session?.priceResponse);
+    const routeKeys = Object.keys(session?.ssrResponse?.data?.formatted || {});
+    const normalizeRouteKey = (value) =>
+      String(value || "").trim().toUpperCase().replace(/[–—]/g, "-");
+    const belongsToRoute = (item, routeKey) => {
+      const itemRoute = normalizeRouteKey(item?.segment || item?.journeyLabel);
+      return itemRoute ? itemRoute === normalizeRouteKey(routeKey) : false;
+    };
+    const createBookingRequests = multiCityRequests.map((request, index) => {
+      const routeSearchKey = pickFirst(request?.search_key, request?.SearchKey, "");
+      const normalizedSearchKey = String(routeSearchKey).trim().toUpperCase();
+      const routeKey = routeKeys[index] || "";
+      const routeFare = session?.selectedFare?.multiCityFares?.[index] || {};
+      const routeNetAmount =
+        readNumber(
+          routeFare?.netAmount,
+          routeFare?.rawFare?.netAmount,
+          routeFare?.rawFare?.price,
+          routeFare?.rawFare?.grossFare,
+          routeFare?.price,
+          routeFare?.pricePerAdult,
+          request?.Trips?.[0]?.Amount
+        ) || 0;
+
+      return {
+        Token_onward: pricingTokenMap.get(normalizedSearchKey) || "",
+        Token_return: "",
+        search_key: routeSearchKey,
+        TUI: pickFirst(
+          pricingRouteMap.get(normalizedSearchKey),
+          request?.TUI,
+          request?.tui,
+          request?.Trips?.[0]?.TUI,
+          request?.Trips?.[0]?.tui,
+          ""
+        ),
+        selectedSeats: (Array.isArray(session?.seats) ? session.seats : [])
+          .filter((item) => belongsToRoute(item, routeKey))
+          .map(normalizeCreateBookingSeat),
+        selectedMeals: (Array.isArray(session?.meals) ? session.meals : [])
+          .filter((item) => belongsToRoute(item, routeKey))
+          .map(normalizeCreateBookingMeal),
+        selectedBaggage: (Array.isArray(session?.baggage) ? session.baggage : [])
+          .filter((item) => belongsToRoute(item, routeKey))
+          .map((item, baggageIndex) =>
+            normalizeCreateBookingBaggage(item, baggageIndex + 1)
+          ),
+        otherSsr: (Array.isArray(session?.otherSsr) ? session.otherSsr : []).filter(
+          (item) => belongsToRoute(item, routeKey)
+        ),
+        payment: { netAmount: routeNetAmount },
+      };
+    });
+
+    return {
+      domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+      channel: makeV2CreateBookingChannel(),
+      provider: normalizeProviderCode(
+        pickFirst(
+          priceRequest?.provider,
+          session?.selectedFlight?.booking?.provider,
+          getProviderFromSearchKey(createBookingRequests[0]?.search_key)
+        )
+      ),
+      create_booking_requests: createBookingRequests,
+      passengers,
+      contact: {
+        phone: contactPayload.phone,
+        email: contactPayload.email,
+      },
+    };
+  }
+
   return {
+    Token_onward: pricingTokens.onward,
+    Token_return: pricingTokens.return,
     search_key: searchKey,
     domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
     channel: makeV2CreateBookingChannel(),
@@ -2523,24 +2800,8 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
     selectedMeals,
     selectedBaggage,
     otherSsr: Array.isArray(session?.otherSsr) ? session.otherSsr : [],
-    passengers: travelers.map((traveler, index) => ({
-      id: index + 1,
-      title: traveler?.Title || "",
-      firstName: traveler?.FName || "",
-      lastName: traveler?.LName || "",
-      type: traveler?.PTC || traveler?.type || "",
-      gender: normalizeGenderCode(traveler?.Gender),
-      dob: traveler?.DOB || "",
-    })),
-    contact: {
-      phone: contactPhone,
-      email: String(pickFirst(contact.Email, primaryTraveler.Email, "")),
-      address: String(pickFirst(contact.Address, "")),
-      countryCode: contactCountryCode,
-      state: String(pickFirst(contact.State, contact.state, "")),
-      city: String(pickFirst(contact.City, contact.city, "")),
-      pin: String(pickFirst(contact.Pin, contact.PIN, contact.pin, "")),
-    },
+    passengers,
+    contact: contactPayload,
     payment: {
       netAmount,
     },

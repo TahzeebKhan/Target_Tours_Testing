@@ -211,8 +211,11 @@ const buildRouteCards = (bookingSession, bookingView) => {
   const entries = Object.entries(formatted);
   const routes = entries.map(([routeKey, value], index) => {
     const journey = routeKey.split("-");
-    const departureFlight =
-      index === 0 ? bookingView?.departureFlight : bookingView?.returnFlight;
+    const departureFlight = bookingView?.isMultiCity
+      ? bookingView?.multiCityFlights?.[index]
+      : index === 0
+        ? bookingView?.departureFlight
+        : bookingView?.returnFlight;
     const departureCode = journey[0] || "";
     const arrivalCode = journey[1] || "";
 
@@ -281,21 +284,36 @@ const FlightExpandableCard = ({
   quantities,
   onIncrease,
   onDecrease,
+  isOpen,
+  onToggle,
 }) => {
   const hasExtraBaggage = flightCard.baggageRows.length > 0;
 
   return (
     <div className={styles.flightExpandableCard}>
-      <div className={styles.flightExpandableHeader}>
-        <h3>{flightCard.routeLabel}</h3>
-        <div className={styles.aboutFlightContainerRight}>
-          <span>{flightCard.date}</span>
-          <div className={styles.dot}></div>
-          <span>{flightCard.time}</span>
+      <button
+        type="button"
+        className={styles.flightExpandableToggle}
+        onClick={onToggle}
+        aria-expanded={isOpen}
+      >
+        <div className={styles.flightExpandableHeader}>
+          <h3>{flightCard.routeLabel}</h3>
+          <div className={styles.aboutFlightContainerRight}>
+            <span>{flightCard.date}</span>
+            <div className={styles.dot}></div>
+            <span>{flightCard.time}</span>
+          </div>
         </div>
-      </div>
+        <img
+          src="/icons/DownArrows.svg"
+          alt=""
+          className={`${styles.arrow} ${isOpen ? styles.arrowRotate : ""}`}
+        />
+      </button>
 
-      <div className={styles.flightExpandableBottom}>
+      <div className={`${styles.expandWrap} ${isOpen ? styles.expandOpen : ""}`}>
+        <div className={styles.flightExpandableBottom}>
         {/* Cabin baggage */}
         <div className={styles.flightExpandableRows}>
           <CabinBaggageInfo data={flightCard.includedBaggage?.cabin || cabinBagData} />
@@ -325,6 +343,7 @@ const FlightExpandableCard = ({
         ) : (
           <BaggageEmptyState />
         )}
+        </div>
       </div>
     </div>
   );
@@ -406,6 +425,7 @@ const BaggageDetails = () => {
     () => buildRouteCards(bookingSession, bookingView),
     [bookingSession, bookingView]
   );
+  const [openRoute, setOpenRoute] = useState(() => routeCards[0]?.key || null);
 
   const priceSummary = useMemo(
     () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
@@ -518,6 +538,12 @@ const BaggageDetails = () => {
               quantities={quantities}
               onIncrease={increaseQty}
               onDecrease={decreaseQty}
+              isOpen={openRoute === flightCard.key}
+              onToggle={() =>
+                setOpenRoute((current) =>
+                  current === flightCard.key ? null : flightCard.key
+                )
+              }
             />
           ))}
 

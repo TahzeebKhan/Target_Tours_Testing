@@ -15,6 +15,7 @@ import {
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
 import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import { mergeProviderFareOptionResponses } from "../onewayTrip/fareOptionsStreaming";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
@@ -484,13 +485,33 @@ const MobileFareComparisonModalRoundTrip = ({
       const loadLegFareOptions = async (leg) => {
         try {
           setFareOptionsLoading((prev) => ({ ...prev, [leg]: true }));
+          const legFlight = buildLegFareOptionsFlightData(flightData, leg, flightNos);
+          const legFlightNo =
+            legFlight?.booking?.flightNo ||
+            legFlight?.details?.flightNo ||
+            legFlight?.airlines?.[0]?.flightNo ||
+            legFlight?.airlines?.[0]?.code;
           const response = await getFlightFareOptions({
             searchParams,
             request: buildLegFareOptionsRequest(priceRequest, leg, flightNos),
-            flight: buildLegFareOptionsFlightData(flightData, leg, flightNos),
+            flight: legFlight,
+            onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+              if (cancelled || !accumulatedPayload) return;
+              setFareOptionsPayloads((prev) => ({
+                ...prev,
+                [leg]: mergeProviderFareOptionResponses(
+                  prev[leg],
+                  accumulatedPayload,
+                  legFlightNo
+                ),
+              }));
+            },
           });
           if (!cancelled) {
-            setFareOptionsPayloads((prev) => ({ ...prev, [leg]: response }));
+            setFareOptionsPayloads((prev) => ({
+              ...prev,
+              [leg]: mergeProviderFareOptionResponses(prev[leg], response, legFlightNo),
+            }));
           }
         } catch (error) {
           if (!cancelled) {
@@ -546,6 +567,8 @@ const MobileFareComparisonModalRoundTrip = ({
         .replace(/\s*\([^)]+\)\s*$/, "")
         .trim(),
       toCode: String(searchParams?.get("destination") || "").trim().toUpperCase(),
+      departureDate: String(searchParams?.get("start") || "").trim(),
+      returnDate: String(searchParams?.get("end") || "").trim(),
     };
     const hasTripIndexes =
       Array.isArray(priceRequest?.Trips) &&
