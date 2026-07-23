@@ -943,6 +943,51 @@ const getMultiCityPricingRouteMap = (priceResponse = {}) => {
   return routeMap;
 };
 
+const getMultiCityPricingJourneyMap = (priceResponse = {}) => {
+  const journeyMap = new Map();
+  const addPricingResult = (result) => {
+    const resultPayload = result?.payload || result?.data?.data || result?.data || {};
+    const searchKey = pickFirst(
+      result?.search_key,
+      result?.searchKey,
+      resultPayload?.search_key,
+      resultPayload?.searchKey
+    );
+    const journeys = Array.isArray(resultPayload?.formatted?.journeys)
+      ? resultPayload.formatted.journeys
+      : Array.isArray(resultPayload?.journeys)
+        ? resultPayload.journeys
+        : [];
+    const journey = journeys[0];
+
+    if (searchKey && journey) {
+      journeyMap.set(String(searchKey).trim().toUpperCase(), journey);
+    }
+  };
+
+  [
+    priceResponse?.pricingResults,
+    priceResponse?.data?.pricingResults,
+    priceResponse?.results,
+    priceResponse?.data?.results,
+  ].forEach((results) => {
+    if (Array.isArray(results)) results.forEach(addPricingResult);
+  });
+
+  [priceResponse?.pricingChunks, priceResponse?.data?.pricingChunks].forEach((chunks) => {
+    if (!Array.isArray(chunks)) return;
+    chunks.forEach((chunk) => {
+      if (Array.isArray(chunk?.data?.results)) {
+        chunk.data.results.forEach(addPricingResult);
+      } else {
+        addPricingResult(chunk);
+      }
+    });
+  });
+
+  return journeyMap;
+};
+
 const readPricingToken = (payload = {}) => {
   const journeys = Array.isArray(payload?.formatted?.journeys)
     ? payload.formatted.journeys
@@ -1041,7 +1086,6 @@ export const buildV2SsrPayload = (session = {}) => {
   const priceRequest = session?.priceRequest || {};
   const selectedFare = session?.selectedFare || {};
   const requestTrips = extractTrips(priceRequest);
-  const pricingJourneys = getFormattedJourneys(priceResponse);
   const rootTui = pickFirst(
     payload?.tui,
     payload?.TUI,
@@ -1123,13 +1167,7 @@ export const buildV2SsrPayload = (session = {}) => {
       Trips: sourceTrips
         .map((trip, index) => ({
           Index: String(
-            (sourceTrips.length > 1
-              ? pickFirst(
-                  pricingJourneys?.[index]?.index,
-                  pricingJourneys?.[index]?.Index
-                )
-              : undefined) ||
-              normalizeTripIndexForOrder(trip, index, sourceTrips) ||
+            normalizeTripIndexForOrder(trip, index, sourceTrips) ||
               selectedFareIndex ||
               ""
           ),
@@ -1447,6 +1485,9 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const multiCityPricingRouteMap = isMultiCity
     ? getMultiCityPricingRouteMap(priceResponse)
     : new Map();
+  const multiCityPricingJourneyMap = isMultiCity
+    ? getMultiCityPricingJourneyMap(priceResponse)
+    : new Map();
   const primarySsrRequest = ssrRequests[0] || {};
   const searchKey = pickFirst(
     primarySsrRequest?.search_key,
@@ -1523,13 +1564,24 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
           .trim()
           .toUpperCase();
         const pricedRouteTui = multiCityPricingRouteMap.get(normalizedSearchKey);
+        const pricedRouteJourney =
+          multiCityPricingJourneyMap.get(normalizedSearchKey) || {};
+        const pricedRouteIndex = pickFirst(
+          pricedRouteJourney?.index,
+          pricedRouteJourney?.Index
+        );
 
         return {
           search_key: request?.search_key,
           Trips: (Array.isArray(request?.Trips) ? request.Trips : [])
             .map((trip, index) => ({
               Index: String(
-                pickFirst(trip?.Index, trip?.index, selectedRouteIndex) || ""
+                pickFirst(
+                  pricedRouteIndex,
+                  trip?.Index,
+                  trip?.index,
+                  selectedRouteIndex
+                ) || ""
               ),
               OrderID: String(
                 pickFirst(
@@ -1567,6 +1619,13 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
 };
 
 export const buildSeatLayoutPayload = (session, travelerDetails = []) => {
+  // A v2 SSR request must continue through the v2 seat-layout contract,
+  // including for Riya. SSR keeps the original pricing-request index while
+  // seat layout uses the repriced formatted journey index.
+  if (Array.isArray(session?.ssrRequest?.ssr_requests)) {
+    return buildV2SeatLayoutPayload(session, travelerDetails);
+  }
+
   const provider = resolveFlightProvider(session);
   const providerPayloadBuilders = {
     riya: buildRiyaSeatLayoutPayload,
@@ -1575,10 +1634,6 @@ export const buildSeatLayoutPayload = (session, travelerDetails = []) => {
 
   if (providerPayloadBuilder) {
     return providerPayloadBuilder(session, travelerDetails);
-  }
-
-  if (Array.isArray(session?.ssrRequest?.ssr_requests)) {
-    return buildV2SeatLayoutPayload(session, travelerDetails);
   }
 
   const priceRequest = session?.priceRequest || {};
