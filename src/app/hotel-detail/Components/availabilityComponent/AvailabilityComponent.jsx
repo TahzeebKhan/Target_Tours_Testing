@@ -1,7 +1,13 @@
 "use client";
 import "swiper/css";
 import "swiper/css/navigation";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -10,6 +16,8 @@ import {
   Car,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Droplet,
   Flame,
   Package,
@@ -74,10 +82,39 @@ const getImageSrc = (image = {}) => {
   return image.img || image.image || image.url || image.src || "";
 };
 
+const getImageLabel = (image = {}) => {
+  const explicitLabel =
+    typeof image === "object"
+      ? image.label ||
+        image.caption ||
+        image.category ||
+        image.imageType ||
+        image.image_type ||
+        image.type ||
+        image.title ||
+        image.name
+      : "";
+
+  if (String(explicitLabel || "").trim()) return String(explicitLabel).trim();
+
+  const imageSource = getImageSrc(image).toLowerCase();
+
+  if (/(washroom|bathroom|toilet|shower)/.test(imageSource)) return "Washroom";
+  if (/(balcony|terrace)/.test(imageSource)) return "Balcony";
+  if (/(lobby|reception)/.test(imageSource)) return "Lobby";
+  if (/(exterior|facade|outside)/.test(imageSource)) return "Exterior";
+  if (/(view|window)/.test(imageSource)) return "View";
+
+  return "Room Image";
+};
+
 const getImageList = (...imageGroups) =>
   imageGroups
     .flatMap((group) => (Array.isArray(group) ? group : [group]))
-    .map((image) => ({ img: getImageSrc(image) }))
+    .map((image) => ({
+      img: getImageSrc(image),
+      label: getImageLabel(image),
+    }))
     .filter((image) => image.img);
 
 const getComboHeaderTitle = (comboRoom = {}, comboDetailRows = []) => {
@@ -93,6 +130,10 @@ const getComboHeaderTitle = (comboRoom = {}, comboDetailRows = []) => {
 
 const ROOM_CARD_ESTIMATED_HEIGHT = 343;
 const VIRTUAL_OVERSCAN_COUNT = 4;
+const getVirtualRoomKey = (room = {}, index = 0) =>
+  room.isCombo
+    ? `combo:${room.id || index}`
+    : `room:${room.id || index}`;
 
 const toArray = (value) => {
   if (!value) return [];
@@ -289,6 +330,18 @@ const getDescriptionRows = (room = {}) => {
   return [...new Set(rows.map((item) => item.trim()).filter(Boolean))];
 };
 
+const hasHtmlContent = (value = "") =>
+  /<\/?[a-z][\s\S]*>/i.test(String(value));
+
+const sanitizeDescriptionHtml = (value = "") =>
+  String(value)
+    .replace(/<(script|iframe|object|embed|style)[\s\S]*?>[\s\S]*?<\/\1>/gi, "")
+    .replace(/<(script|iframe|object|embed|style)\b[^>]*\/?>/gi, "")
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, "")
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, "")
+    .replace(/\son\w+\s*=\s*[^\s>]+/gi, "")
+    .replace(/javascript\s*:/gi, "");
+
 const FacilitiesModal = ({ room, onClose }) => {
   useBodyScrollLock(Boolean(room));
 
@@ -388,7 +441,17 @@ const RoomDetailsModal = ({ room, onClose }) => {
             {descriptionRows.length ? (
               <div className={styles.descriptionList}>
                 {descriptionRows.map((description, index) => (
-                  <p key={index}>{description}</p>
+                  hasHtmlContent(description) ? (
+                    <div
+                      key={index}
+                      className={styles.htmlRoomDescription}
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeDescriptionHtml(description),
+                      }}
+                    />
+                  ) : (
+                    <p key={index}>{description}</p>
+                  )
                 ))}
               </div>
             ) : (
@@ -475,6 +538,124 @@ const RoomDetailsModal = ({ room, onClose }) => {
   );
 };
 
+const RoomImageGalleryModal = ({ gallery, onClose }) => {
+  const [activeIndex, setActiveIndex] = useState(gallery?.initialIndex || 0);
+  const images = gallery?.images || [];
+
+  useBodyScrollLock(Boolean(gallery));
+
+  useEffect(() => {
+    if (!gallery) return;
+
+    setActiveIndex(gallery.initialIndex || 0);
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowLeft") {
+        setActiveIndex((current) => (current - 1 + images.length) % images.length);
+      }
+      if (event.key === "ArrowRight") {
+        setActiveIndex((current) => (current + 1) % images.length);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [gallery, images.length, onClose]);
+
+  if (!gallery || !images.length) return null;
+
+  const showPrevious = () =>
+    setActiveIndex((current) => (current - 1 + images.length) % images.length);
+  const showNext = () =>
+    setActiveIndex((current) => (current + 1) % images.length);
+
+  return (
+    <div
+      className={styles.imageGalleryOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${gallery.title || "Room"} image gallery`}
+      onClick={onClose}
+    >
+      <div
+        className={styles.imageGalleryModal}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.imageGalleryHeader}>
+          <div>
+            <h3>{gallery.title || "Room images"}</h3>
+            <div className={styles.imageGalleryMeta}>
+              <span className={styles.imageGalleryLabel}>
+                {images[activeIndex]?.label || "Room Image"}
+              </span>
+              <span>
+                {activeIndex + 1} / {images.length}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className={styles.imageGalleryClose}
+            onClick={onClose}
+            aria-label="Close room image gallery"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className={styles.imageGalleryViewer}>
+          {images.length > 1 && (
+            <button
+              type="button"
+              className={`${styles.imageGalleryArrow} ${styles.imageGalleryPrevious}`}
+              onClick={showPrevious}
+              aria-label="Previous room image"
+            >
+              <ChevronLeft size={28} />
+            </button>
+          )}
+
+          <img
+            src={images[activeIndex].img}
+            alt={`${gallery.title || "Room"} ${
+              images[activeIndex]?.label || "image"
+            } ${activeIndex + 1}`}
+          />
+
+          {images.length > 1 && (
+            <button
+              type="button"
+              className={`${styles.imageGalleryArrow} ${styles.imageGalleryNext}`}
+              onClick={showNext}
+              aria-label="Next room image"
+            >
+              <ChevronRight size={28} />
+            </button>
+          )}
+        </div>
+
+        {images.length > 1 && (
+          <div className={styles.imageGalleryThumbnails}>
+            {images.map((image, index) => (
+              <button
+                type="button"
+                key={`${image.img}-${index}`}
+                className={index === activeIndex ? styles.activeThumbnail : ""}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`View ${image.label || "room image"} ${index + 1}`}
+                title={image.label || "Room Image"}
+              >
+                <img src={image.img} alt="" />
+                <span>{image.label || "Room Image"}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AvailabilitySkeleton = () => (
   <div className={styles.skeletonList} aria-label="Loading available rooms">
     {[0, 1].map((item) => (
@@ -523,10 +704,12 @@ const AvailabilityComponent = ({
   const [expandedComboRooms, setExpandedComboRooms] = useState({});
   const [detailsRoom, setDetailsRoom] = useState(null);
   const [facilitiesRoom, setFacilitiesRoom] = useState(null);
+  const [imageGallery, setImageGallery] = useState(null);
   const [scrollState, setScrollState] = useState({
     scrollY: 0,
     viewportHeight: 900,
   });
+  const [multiRoomItemHeights, setMultiRoomItemHeights] = useState({});
 
   const roomUnitMap = useMemo(() => rooms.reduce((unitMap, room) => {
     unitMap[room.id] = getRoomUnitCount(room);
@@ -543,12 +726,20 @@ const AvailabilityComponent = ({
     [rooms],
   );
   const firstComboRoomId = comboRooms[0]?.id || "";
+  const hasMultiRoomResults = comboRooms.length > 0;
   const renderableRooms = useMemo(
     () =>
-      rooms.filter(
-        (room) => !room.isCombo || room.id === firstComboRoomId,
-      ),
-    [firstComboRoomId, rooms],
+      hasMultiRoomResults
+        ? rooms
+        : rooms.filter(
+            (room) => !room.isCombo || room.id === firstComboRoomId,
+          ),
+    [firstComboRoomId, hasMultiRoomResults, rooms],
+  );
+  const virtualRoomKeys = useMemo(
+    () =>
+      renderableRooms.map((room, index) => getVirtualRoomKey(room, index)),
+    [renderableRooms],
   );
   const virtualWindow = useMemo(() => {
     const itemCount = renderableRooms.length;
@@ -562,6 +753,56 @@ const AvailabilityComponent = ({
       ? section.getBoundingClientRect().top + scrollState.scrollY
       : 0;
     const relativeScrollTop = Math.max(0, scrollState.scrollY - sectionTop);
+
+    // Preserve the existing fixed-height virtualizer for the normal,
+    // single-room flow. Combo/multi-room results can have very different
+    // heights, so use their measured cumulative offsets instead.
+    if (hasMultiRoomResults) {
+      const itemHeights = virtualRoomKeys.map(
+        (roomKey) =>
+          multiRoomItemHeights[roomKey] || ROOM_CARD_ESTIMATED_HEIGHT,
+      );
+      const offsets = [0];
+
+      itemHeights.forEach((height) => {
+        offsets.push(offsets[offsets.length - 1] + height);
+      });
+
+      let firstVisibleIndex = 0;
+      while (
+        firstVisibleIndex < itemCount &&
+        offsets[firstVisibleIndex + 1] <= relativeScrollTop
+      ) {
+        firstVisibleIndex += 1;
+      }
+
+      const viewportBottom = relativeScrollTop + scrollState.viewportHeight;
+      let lastVisibleIndex = firstVisibleIndex;
+      while (
+        lastVisibleIndex < itemCount &&
+        offsets[lastVisibleIndex] < viewportBottom
+      ) {
+        lastVisibleIndex += 1;
+      }
+
+      const startIndex = Math.max(
+        0,
+        firstVisibleIndex - VIRTUAL_OVERSCAN_COUNT,
+      );
+      const endIndex = Math.min(
+        itemCount,
+        lastVisibleIndex + VIRTUAL_OVERSCAN_COUNT,
+      );
+      const totalHeight = offsets[itemCount];
+
+      return {
+        startIndex,
+        endIndex,
+        paddingTop: offsets[startIndex],
+        paddingBottom: Math.max(0, totalHeight - offsets[endIndex]),
+      };
+    }
+
     const startIndex = Math.max(
       0,
       Math.floor(relativeScrollTop / ROOM_CARD_ESTIMATED_HEIGHT) -
@@ -581,11 +822,86 @@ const AvailabilityComponent = ({
         (itemCount - endIndex) * ROOM_CARD_ESTIMATED_HEIGHT,
       ),
     };
-  }, [renderableRooms.length, scrollState]);
+  }, [
+    hasMultiRoomResults,
+    multiRoomItemHeights,
+    renderableRooms,
+    scrollState,
+    virtualRoomKeys,
+  ]);
   const visibleRooms = useMemo(
     () => renderableRooms.slice(virtualWindow.startIndex, virtualWindow.endIndex),
     [renderableRooms, virtualWindow.endIndex, virtualWindow.startIndex],
   );
+
+  useEffect(() => {
+    if (!hasMultiRoomResults) {
+      setMultiRoomItemHeights((currentHeights) =>
+        Object.keys(currentHeights).length ? {} : currentHeights,
+      );
+      return;
+    }
+
+    const activeKeys = new Set(virtualRoomKeys);
+    setMultiRoomItemHeights((currentHeights) => {
+      const retainedHeights = Object.fromEntries(
+        Object.entries(currentHeights).filter(([roomKey]) =>
+          activeKeys.has(roomKey),
+        ),
+      );
+
+      return Object.keys(retainedHeights).length ===
+        Object.keys(currentHeights).length
+        ? currentHeights
+        : retainedHeights;
+    });
+  }, [hasMultiRoomResults, virtualRoomKeys]);
+
+  useLayoutEffect(() => {
+    if (!hasMultiRoomResults || typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
+
+    const section = availabilityRef.current;
+    if (!section) return undefined;
+
+    const updateHeight = (entry) => {
+      const roomKey = entry.target.dataset.virtualRoomKey;
+      const borderSize = Array.isArray(entry.borderBoxSize)
+        ? entry.borderBoxSize[0]
+        : entry.borderBoxSize;
+      const nextHeight = Math.ceil(
+        borderSize?.blockSize || entry.contentRect.height,
+      );
+
+      if (!roomKey || nextHeight <= 0) return;
+
+      setMultiRoomItemHeights((currentHeights) => {
+        if (Math.abs((currentHeights[roomKey] || 0) - nextHeight) < 1) {
+          return currentHeights;
+        }
+
+        return {
+          ...currentHeights,
+          [roomKey]: nextHeight,
+        };
+      });
+    };
+
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach(updateHeight);
+    });
+    const renderedItems = section.querySelectorAll("[data-virtual-room-key]");
+
+    renderedItems.forEach((item) => observer.observe(item));
+
+    return () => observer.disconnect();
+  }, [
+    expandedComboRooms,
+    hasMultiRoomResults,
+    virtualWindow.endIndex,
+    virtualWindow.startIndex,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -691,6 +1007,17 @@ const AvailabilityComponent = ({
     setFacilitiesRoom(room);
   };
   const closeRoomFacilities = () => setFacilitiesRoom(null);
+  const openImageGallery = (title, images, initialIndex = 0) => {
+    const normalizedImages = getImageList(images);
+    if (!normalizedImages.length) return;
+
+    setImageGallery({
+      title,
+      images: normalizedImages,
+      initialIndex,
+    });
+  };
+  const closeImageGallery = () => setImageGallery(null);
 
   return (
     <div className={styles.availabilitySection} ref={availabilityRef}>
@@ -699,9 +1026,76 @@ const AvailabilityComponent = ({
       {loading && <AvailabilitySkeleton />}
 
       {!loading && !rooms.length && (
-        <p className={errorMessage ? styles.errorText : styles.statusText}>
-          {errorMessage || "No available rooms found."}
-        </p>
+        <div
+          role={errorMessage ? "alert" : "status"}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "14px",
+            marginTop: "18px",
+            padding: "20px",
+            border: "1px solid #e1e5ec",
+            borderLeft: "4px solid #000033",
+            background: "#f8f9fc",
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: "0 0 42px",
+              width: "42px",
+              height: "42px",
+              color: "#000033",
+              background: "#ffffff",
+              border: "1px solid #e1e5ec",
+              borderRadius: "50%",
+            }}
+          >
+            <Package size={21} strokeWidth={1.8} />
+          </span>
+
+          <div>
+            <p
+              style={{
+                margin: "0 0 5px",
+                fontFamily: "var(--font-inter)",
+                fontSize: "16px",
+                fontWeight: 600,
+                lineHeight: 1.4,
+                color: "#000033",
+              }}
+            >
+              No rooms available
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-inter)",
+                fontSize: "14px",
+                lineHeight: 1.6,
+                color: "#667085",
+              }}
+            >
+              {errorMessage || "No available rooms found."}
+            </p>
+            {!String(errorMessage || "").toLowerCase().includes("try") && (
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontFamily: "var(--font-inter)",
+                  fontSize: "13px",
+                  lineHeight: 1.5,
+                  color: "#8a94a6",
+                }}
+              >
+                Try changing your dates, room count, or guest occupancy.
+              </p>
+            )}
+          </div>
+        </div>
       )}
 
       {!loading && Boolean(renderableRooms.length) && (
@@ -712,7 +1106,9 @@ const AvailabilityComponent = ({
             paddingBottom: virtualWindow.paddingBottom,
           }}
         >
-      {visibleRooms.map((room) => {
+      {visibleRooms.map((room, visibleIndex) => {
+        const virtualRoomIndex = virtualWindow.startIndex + visibleIndex;
+        const virtualRoomKey = virtualRoomKeys[virtualRoomIndex];
         const roomImages = Array.isArray(room.image) ? room.image : [];
         const features = Array.isArray(room.featuresLeft) ? room.featuresLeft : [];
         const benefits = Array.isArray(room.benefits) ? room.benefits : [];
@@ -737,8 +1133,17 @@ const AvailabilityComponent = ({
 
         if (isCombo) {
           return (
-            <div key="combo-room-list" className={styles.comboSection}>
-              {comboRooms.map((comboRoom, comboIndex) => {
+            <div
+              key={virtualRoomKey || room.id}
+              className={styles.comboSection}
+              data-virtual-room-key={
+                hasMultiRoomResults ? virtualRoomKey : undefined
+              }
+            >
+              {[room].map((comboRoom) => {
+                const comboIndex = comboRooms.findIndex(
+                  (candidateRoom) => candidateRoom.id === comboRoom.id,
+                );
                 const comboQty = roomQuantities[comboRoom.id] ?? roomQty[comboRoom.id] ?? 0;
                 const comboUnitCount = getRoomUnitCount(comboRoom);
                 const comboSelectedOtherTotal =
@@ -842,7 +1247,17 @@ const AvailabilityComponent = ({
                                           className={styles.slide}
                                           style={{ height: "100%" }}
                                         >
-                                          <img src={item.img} alt="" />
+                                          <img
+                                            src={item.img}
+                                            alt=""
+                                            onClick={() =>
+                                              openImageGallery(
+                                                detailRoom.title,
+                                                detailImages,
+                                                imageIndex,
+                                              )
+                                            }
+                                          />
                                         </SwiperSlide>
                                       ))}
                                     </Swiper>
@@ -934,7 +1349,13 @@ const AvailabilityComponent = ({
         }
 
         return (
-          <div key={room.id} className={styles.CardSection}>
+          <div
+            key={room.id}
+            className={styles.CardSection}
+            data-virtual-room-key={
+              hasMultiRoomResults ? virtualRoomKey : undefined
+            }
+          >
             <div className={styles.imagesNestedCarousel}>
               <Swiper
                 modules={[Navigation]}
@@ -945,7 +1366,14 @@ const AvailabilityComponent = ({
               >
                 {roomImages.map((item, index) => (
                   <SwiperSlide key={`${room.id}-image-${index}`} className={styles.slide}>
-                    <img key={index} src={item.img} alt="" />
+                    <img
+                      key={index}
+                      src={item.img}
+                      alt=""
+                      onClick={() =>
+                        openImageGallery(room.title, roomImages, index)
+                      }
+                    />
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -1173,6 +1601,10 @@ const AvailabilityComponent = ({
 
       <RoomDetailsModal room={detailsRoom} onClose={closeRoomDetails} />
       <FacilitiesModal room={facilitiesRoom} onClose={closeRoomFacilities} />
+      <RoomImageGalleryModal
+        gallery={imageGallery}
+        onClose={closeImageGallery}
+      />
     </div>
   );
 };

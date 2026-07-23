@@ -2323,7 +2323,7 @@ const TourListing = () => {
       if (hotelDetailsRequestRef.current !== requestId) return;
 
       writeHotelDetailsForNavigation({ payload, hotel, details });
-      router.push(getHotelDetailUrl(payload));
+      router.push(getHotelDetailUrl(payload), { scroll: true });
     } catch (error) {
       if (error?.name === "AbortError") return;
 

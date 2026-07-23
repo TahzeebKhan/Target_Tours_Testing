@@ -82,7 +82,6 @@ const getPhoneCountryCode = (value, fallbackCountry) => {
 const ProfileSection = () => {
   const fileInputRef = useRef(null);
   const { setProfilePhoto, setActiveMenu, activeMenu } = useProfile();
-  const [phoneError, setPhoneError] = useState(false);
   const { setProfile, profile, user } = useAuth();
   const [avatarPreview, setAvatarPreview] = useState("/images/profilePlaceholder.avif");
   const [uploading, setUploading] = useState(false);
@@ -106,14 +105,6 @@ const ProfileSection = () => {
   const handleChangePhotoClick = () => {
     fileInputRef.current?.click();
   };
-  const isValidPhoneNumber = (phone) => {
-    if (phoneCountry === "IN") {
-      return /^[6-9]\d{9}$/.test(phone);
-    }
-
-    return /^\d{6,15}$/.test(phone);
-  };
-
   const handlePhotoSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -485,18 +476,6 @@ const ProfileSection = () => {
         return false;
       }
 
-      const phone = profileFields
-        .find((f) => f.label === "Phone Number")
-        ?.value?.trim();
-
-      // 🔥 PHONE VALIDATION
-      if (phone && !isValidPhoneNumber(phone)) {
-        setPhoneError(true);
-        toast.error("Enter a valid phone number");
-        return false;
-      }
-
-      setPhoneError(false);
       const payload = buildPayload();
 
       // 🔥 nothing to update
@@ -831,8 +810,7 @@ const ProfileSection = () => {
 
                 <div
                   className={`${styles.inputContainer} ${
-                    validationErrors[field.label] ||
-                    (field.label === "Phone Number" && phoneError)
+                    validationErrors[field.label]
                       ? styles.inputError
                       : ""
                   } ${field.label === "Phone Number" ? styles.phoneContainer : ""}`}
@@ -871,11 +849,7 @@ const ProfileSection = () => {
                       />
                     </div>
                   ) : field.label === "Phone Number" ? (
-                    <div
-                      className={`${styles.phoneInputWrap} ${
-                        phoneError ? styles.inputError : ""
-                      }`}
-                    >
+                    <div className={styles.phoneInputWrap}>
                       <div
                         className={styles.countryDropdown}
                         ref={phoneCountryDropdownRef}
@@ -933,7 +907,6 @@ const ProfileSection = () => {
                                           .replace(/[^\d]/g, "")
                                           .slice(0, option.maxLength),
                                       );
-                                      setPhoneError(false);
                                     }}
                                   >
                                     <CountryFlagIcon
