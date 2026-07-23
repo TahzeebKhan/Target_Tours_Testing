@@ -253,7 +253,18 @@ const hasSeatLayoutItems = (payload) => {
   if (!payload || typeof payload !== "object") return false;
 
   if (Array.isArray(payload)) {
-    return payload.some((item) => hasSeatLayoutItems(item));
+    const hasSeatRecord = payload.some((item) =>
+      Boolean(
+        item &&
+          typeof item === "object" &&
+          (item?.SeatNumber ||
+            item?.seatNumber ||
+            item?.seat_no ||
+            item?.seatNo)
+      )
+    );
+
+    return hasSeatRecord || payload.some((item) => hasSeatLayoutItems(item));
   }
 
   const containers = [
@@ -290,6 +301,8 @@ const hasSeatLayoutItems = (payload) => {
       Array.isArray(value)
         ? value.length > 0 && value.some((item) => hasSeatLayoutItems(item) || Boolean(item))
         : Boolean(value)
+    ) || Object.values(container).some((value) =>
+      value && typeof value === "object" ? hasSeatLayoutItems(value) : false
     );
   });
 };
@@ -1790,11 +1803,9 @@ export const getFlightSeatLayout = async (payload) => {
       const multiCityResults = new Map();
       let settled = false;
       let initResponse = null;
-      let idleTimer = null;
       let events = null;
 
       const cleanup = () => {
-        window.clearTimeout(idleTimer);
         window.clearTimeout(hardTimer);
         events?.close();
       };
@@ -1995,13 +2006,6 @@ export const getFlightSeatLayout = async (payload) => {
         };
       };
 
-      const scheduleResolve = () => {
-        window.clearTimeout(idleTimer);
-        idleTimer = window.setTimeout(() => {
-          settle(resolve, buildResult());
-        }, 300);
-      };
-
       const hardTimer = window.setTimeout(() => {
         const result = buildResult();
         if (extractFlightSeatLayoutPayload(result)) {
@@ -2046,16 +2050,9 @@ export const getFlightSeatLayout = async (payload) => {
         }
         collectMultiCitySeatLayouts(parsedPayload, event.type);
 
-        if (
-          isFlightSeatLayoutComplete(parsedPayload) &&
-          (extractedSeatLayout || multiCityResults.size)
-        ) {
+        if (isFlightSeatLayoutComplete(parsedPayload)) {
           settle(resolve, buildResult());
           return;
-        }
-
-        if (extractedSeatLayout && !isMultiCitySeatLayout) {
-          scheduleResolve();
         }
       };
 
@@ -2068,11 +2065,9 @@ export const getFlightSeatLayout = async (payload) => {
         PRICING_SSE_EVENT_NAMES.forEach((eventName) => {
           events.addEventListener(eventName, handleMessage);
         });
-        events.addEventListener("error", () => {
-          if (!isMultiCitySeatLayout && extractFlightSeatLayoutPayload(buildResult())) {
-            scheduleResolve();
-          }
-        });
+        // EventSource reconnects automatically after transient transport errors.
+        // The stream is settled by COMPLETE/COMPLETED, an explicit error, or timeout.
+        events.addEventListener("error", () => {});
 
         try {
           await waitForSseConnected(events, channel);
@@ -2088,7 +2083,6 @@ export const getFlightSeatLayout = async (payload) => {
           if (extractFlightSeatLayoutPayload(initResponse)) {
             pushSeatLayoutChunk(initResponse, "postV2SeatLayout");
             collectMultiCitySeatLayouts(initResponse, "postV2SeatLayout");
-            if (!isMultiCitySeatLayout) scheduleResolve();
           }
         } catch (error) {
           settle(reject, error);
