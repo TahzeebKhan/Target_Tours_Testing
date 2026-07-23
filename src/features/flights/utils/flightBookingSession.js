@@ -954,6 +954,8 @@ const readPricingToken = (payload = {}) => {
     pickFirst(
       payload?.token,
       payload?.Token,
+      journeys[0]?.Token_onward,
+      journeys[0]?.token_onward,
       journeys[0]?.Token,
       journeys[0]?.token,
       payload?.formatted?.Token,
@@ -961,7 +963,7 @@ const readPricingToken = (payload = {}) => {
       payload?.raw?.Token,
       payload?.raw?.token,
       ""
-    )
+    ) || ""
   ).trim();
 };
 
@@ -1016,12 +1018,20 @@ const getCreateBookingPricingTokens = (priceResponse = {}) => {
   const returnJourney =
     journeys.find((journey) => getJourneyType(journey).includes("RETURN")) ||
     journeys[1];
-  const readJourneyToken = (journey) =>
-    String(pickFirst(journey?.Token, journey?.token, "")).trim();
+  const readJourneyToken = (journey, direction) =>
+    String(
+      pickFirst(
+        direction === "onward" ? journey?.Token_onward : journey?.Token_return,
+        direction === "onward" ? journey?.token_onward : journey?.token_return,
+        journey?.Token,
+        journey?.token,
+        ""
+      ) || ""
+    ).trim();
 
   return {
-    onward: readJourneyToken(onwardJourney) || readPricingToken(payload),
-    return: readJourneyToken(returnJourney),
+    onward: readJourneyToken(onwardJourney, "onward") || readPricingToken(payload),
+    return: readJourneyToken(returnJourney, "return"),
   };
 };
 

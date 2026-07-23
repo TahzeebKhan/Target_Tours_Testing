@@ -14,7 +14,10 @@ import {
   buildSelectedFarePriceRequest,
   writeFlightBookingSession,
 } from "@/features/flights/utils/flightBookingSession";
-import { buildFareOptions } from "../onewayTrip/FareComparisonModal";
+import {
+  buildFareOptions,
+  FarePriceDetailsPopover,
+} from "../onewayTrip/FareComparisonModal";
 import {
   getFareOptionItems,
   mergeProviderFareOptionResponses,
@@ -889,7 +892,10 @@ const FareComparisonModalRoundTrip = ({
                     </h3>
                     <div className={styles.farePrice}>
                       <span className={styles.price}>{fare.price}</span>
-                      <img src="/icons/Group.svg" alt="" />
+                      <FarePriceDetailsPopover
+                        fare={fare}
+                        adults={searchParams?.get("adults") || 1}
+                      />
                     </div>
                     <span className={styles.pricePerAdult}>
                       {fare.pricePerAdult}{" "}

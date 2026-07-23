@@ -420,7 +420,7 @@ export const mergeProviderFareOptionResponses = (
       mergeFareOptionResponses(mergedPayload, providerPayload, flightNo),
     previousPayload
   );
-  const isCombinedRoundTripFare = (fare) =>
+  const isSyntheticTripFare = (fare) =>
     [
       fare?.FCType,
       fare?.FCGroup,
@@ -430,9 +430,11 @@ export const mergeProviderFareOptionResponses = (
       fare?.DisplayName,
       fare?.name,
       fare?.Name,
-    ].some((value) => String(value || "").trim().toUpperCase() === "RT");
+    ].some((value) =>
+      ["ON", "RT"].includes(String(value || "").trim().toUpperCase())
+    );
   const providerFares = getFareOptionItems(mergedPayload, flightNo).filter(
-    (fare) => !isCombinedRoundTripFare(fare)
+    (fare) => !isSyntheticTripFare(fare)
   );
   const response = unwrapPayload(mergedPayload);
   const flightKey = getFlightKey(flightNo);

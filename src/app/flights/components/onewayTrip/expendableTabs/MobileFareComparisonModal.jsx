@@ -23,6 +23,7 @@ import {
   getCachedFareOptionsRequest,
   getFareOptionItems,
   isFareExpiredPayload,
+  mergeProviderFareOptionResponses,
 } from "../fareOptionsStreaming";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 
@@ -114,7 +115,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
   const [showLogin, setShowLogin] = useState(false);
   const [authView, setAuthView] = useState("login");
   const [pendingFare, setPendingFare] = useState(null);
-  const [fareOptionsPayload, setFareOptionsPayload] = useState(prefetchedData?.fareOptionsResponse || null);
+  const [fareOptionsPayload, setFareOptionsPayload] = useState(null);
   const [isPollingFareOptions, setIsPollingFareOptions] = useState(false);
 
   const flightNo = useMemo(() => {
@@ -129,7 +130,13 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
   useEffect(() => {
     if (!isOpen) return;
 
-    setFareOptionsPayload(prefetchedData?.fareOptionsResponse || null);
+    setFareOptionsPayload(() =>
+      mergeProviderFareOptionResponses(
+        null,
+        prefetchedData?.fareOptionsResponse,
+        flightNo
+      )
+    );
     setIsPollingFareOptions(false);
 
     const priceRequest = flightData?.booking?.priceRequest;
@@ -146,6 +153,16 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
             searchParams,
             request: priceRequest,
             flight: flightData,
+            onFareOptionsEvent: (_eventPayload, accumulatedPayload) => {
+              if (cancelled || !accumulatedPayload) return;
+              setFareOptionsPayload((previousPayload) =>
+                mergeProviderFareOptionResponses(
+                  previousPayload,
+                  accumulatedPayload,
+                  flightNo
+                )
+              );
+            },
           })
         );
 
@@ -156,7 +173,9 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
           return;
         }
 
-        setFareOptionsPayload(response);
+        setFareOptionsPayload((previousPayload) =>
+          mergeProviderFareOptionResponses(previousPayload, response, flightNo)
+        );
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to refresh fare options", error);
@@ -262,7 +281,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
 
   if (!isOpen) return null;
 
-  const fareSourcePayload = fareOptionsPayload || prefetchedData?.fareOptionsResponse || null;
+  const fareSourcePayload = fareOptionsPayload || null;
   const hasFareOptionItems = getFareOptionItems(fareSourcePayload, flightNo).length > 0;
   const isStreamingFareOptions = isLoadingFareOptions || isPollingFareOptions;
   const showFareSkeleton = isStreamingFareOptions && !hasFareOptionItems;

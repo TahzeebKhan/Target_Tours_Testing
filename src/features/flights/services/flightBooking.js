@@ -839,12 +839,10 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
     const multiCityPricingResults = new Map();
     let settled = false;
     let initResponse = null;
-    let idleTimer = null;
     let events = null;
     let abortHandler = null;
 
     const cleanup = () => {
-      window.clearTimeout(idleTimer);
       window.clearTimeout(hardTimer);
       events?.close();
       if (abortHandler) signal?.removeEventListener("abort", abortHandler);
@@ -961,20 +959,7 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       };
     };
 
-    const scheduleResolve = () => {
-      window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => {
-        settle(resolve, buildResult());
-      }, 300);
-    };
-
     const hardTimer = window.setTimeout(() => {
-      const result = buildResult();
-      if (!isMultiCityPricing && extractFlightPricingPayload(result)) {
-        settle(resolve, result);
-        return;
-      }
-
       settle(reject, new Error("Flight pricing timed out. Please try again."));
     }, 45000);
 
@@ -1002,10 +987,6 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
       const payloadChannel = getPayloadChannel(parsedPayload);
       const isCurrentChannel = !payloadChannel || payloadChannel === channel;
       const type = String(getPayloadType(parsedPayload) || event.type || "").toUpperCase();
-      const extractedPricing = extractFlightPricingPayload(parsedPayload);
-      const isCompletePricingEvent = isFlightPricingResult(parsedPayload);
-
-
 
       if (!isCurrentChannel) return;
 
@@ -1027,25 +1008,16 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
         type.includes("PRICING") &&
         (type.includes("COMPLETE") || type.includes("COMPLETED"));
 
-      if (
-        isPricingCompleteEvent &&
-        (extractedPricing || multiCityPricingResults.size > 0)
-      ) {
-        settle(resolve, buildResult());
-        return;
-      }
-
-      if (
-        !isMultiCityPricing &&
-        isCompletePricingEvent &&
-        extractedPricing
-      ) {
-        settle(resolve, buildResult());
-        return;
-      }
-
-      if (!isMultiCityPricing && type.includes("PRICING") && extractedPricing) {
-        scheduleResolve();
+      if (isPricingCompleteEvent) {
+        const result = buildResult();
+        if (extractFlightPricingPayload(result) || multiCityPricingResults.size > 0) {
+          settle(resolve, result);
+        } else {
+          settle(
+            reject,
+            new Error("Flight pricing completed without pricing details.")
+          );
+        }
       }
     };
 
@@ -1097,17 +1069,9 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
           settled,
         });
     
-        const result = buildResult();
-        const extractedPricing = extractFlightPricingPayload(result);
-    
-        console.log("[Pricing] Result after SSE error", {
-          result,
-          extractedPricing,
-        });
-    
-        if (!isMultiCityPricing && extractedPricing) {
-          settle(resolve, result);
-        }
+        // EventSource reconnects automatically after transient transport errors.
+        // Pricing is settled only by a terminal COMPLETE/COMPLETED event, an
+        // explicit pricing error event, cancellation, or the hard timeout.
       });
     
       try {
@@ -1131,8 +1095,6 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
             "postV2Price"
           );
           storeMultiCityPricingResult(initResponse);
-
-          if (!isMultiCityPricing) scheduleResolve();
         }
       } catch (error) {
         console.error("[Pricing] startPricing failed", {
