@@ -3,6 +3,39 @@ import styles from "./CancellationPolicyModal.module.css";
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
+const decodeEscapedHtml = (value) => {
+  const text = String(value || "");
+  if (!/&lt;\s*\/?\s*[a-z][\s\S]*?&gt;/i.test(text)) return text;
+
+  return text
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, "&");
+};
+
+const containsHtml = (value) =>
+  /<\s*\/?\s*[a-z][^>]*>/i.test(decodeEscapedHtml(value));
+
+const sanitizeFareRuleHtml = (value) => {
+  const allowedTags = new Set([
+    "p", "br", "hr", "span", "strong", "b", "em", "i", "u",
+    "ul", "ol", "li", "div", "table", "thead", "tbody",
+    "tr", "th", "td", "h1", "h2", "h3", "h4", "h5", "h6",
+  ]);
+
+  return decodeEscapedHtml(value)
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(script|style|iframe|object|embed|form|svg|math)[^>]*>[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<\s*(\/?)\s*([a-z][\w-]*)\b[^>]*>/gi, (tag, closing, tagName) => {
+      const normalizedTag = String(tagName).toLowerCase();
+      if (!allowedTags.has(normalizedTag)) return "";
+      if (closing) return `</${normalizedTag}>`;
+      return `<${normalizedTag}>`;
+    });
+};
+
 const formatAmount = (value, currency = "INR") => {
   const text = String(value ?? "").trim();
   const amount = Number(text.replace(/[^\d.]/g, ""));
@@ -75,7 +108,16 @@ const CancellationPolicyModal = ({ fareRulesData, onClose }) => {
                 <div key={`${policy.route}-${fareIndex}`}>
                   {fareRule.remark && <p className={styles.remark}>{fareRule.remark}</p>}
                   {fareRule.rawText && (
-                    <pre className={styles.rawText}>{fareRule.rawText}</pre>
+                    containsHtml(fareRule.rawText) ? (
+                      <div
+                        className={styles.rawHtml}
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeFareRuleHtml(fareRule.rawText),
+                        }}
+                      />
+                    ) : (
+                      <pre className={styles.rawText}>{fareRule.rawText}</pre>
+                    )
                   )}
                   {fareRule.groups.map((group, groupIndex) => (
                     <div className={styles.ruleGroup} key={`${group.head}-${groupIndex}`}>

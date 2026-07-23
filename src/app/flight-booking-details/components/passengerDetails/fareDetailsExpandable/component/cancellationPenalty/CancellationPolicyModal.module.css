@@ -138,3 +138,53 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.rawHtml {
+  padding: 16px;
+  border: 1px solid #e1e5ef;
+  background: #f8f9fc;
+  color: #20243a;
+  font: inherit;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rawHtml :first-child { margin-top: 0; }
+.rawHtml :last-child { margin-bottom: 0; }
+.rawHtml h1,
+.rawHtml h2,
+.rawHtml h3,
+.rawHtml h4,
+.rawHtml h5,
+.rawHtml h6 {
+  margin: 22px 0 10px;
+  color: #070773;
+  font-family: var(--font-inter);
+}
+.rawHtml p { margin: 10px 0; }
+.rawHtml ul,
+.rawHtml ol { margin: 10px 0; padding-left: 24px; }
+.rawHtml li { margin: 5px 0; }
+.rawHtml hr { margin: 22px 0; border: 0; border-top: 1px solid #d9dce5; }
+.rawHtml table {
+  width: 100%;
+  margin: 16px 0 22px;
+  border-collapse: collapse;
+  white-space: normal;
+  font-family: var(--font-inter);
+  font-size: 13px;
+}
+.rawHtml th,
+.rawHtml td {
+  padding: 10px 12px;
+  border: 1px solid #d9dce5;
+  text-align: left;
+  vertical-align: top;
+}
+.rawHtml th {
+  background: #000033;
+  color: #fff;
+  font-weight: 600;
+}
+.rawHtml tr:nth-child(even) td { background: #f3f5fa; }
