@@ -545,6 +545,21 @@ const collectGalleryItems = (value, items = [], depth = 0, seen = new WeakSet())
   return items;
 };
 
+const collectLabeledRoomImages = (value) => {
+  const uniqueImages = new Map();
+
+  collectGalleryItems(value).forEach((item) => {
+    if (!item?.image || uniqueImages.has(item.image)) return;
+
+    uniqueImages.set(item.image, {
+      img: item.image,
+      label: item.title || "Room Image",
+    });
+  });
+
+  return [...uniqueImages.values()];
+};
+
 const extractGalleryImages = (stored = {}, routeHotelId = "") => {
   const detailsPayload = stored?.details || stored || {};
   const data = detailsPayload.data || detailsPayload;
@@ -819,6 +834,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         ? primaryRoomGroup.room
         : primaryRoomGroup;
     const roomImages = collectImages(roomDetail);
+    const labeledRoomImages = collectLabeledRoomImages(roomDetail);
     const roomPrice =
       getRateValue(primaryRoomGroup) ||
       getRateValue(roomDetail) ||
@@ -936,6 +952,7 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         `Room ${comboIndex + 1}`,
       );
       const comboImages = collectImages(comboRoomDetail);
+      const labeledComboImages = collectLabeledRoomImages(comboRoomDetail);
       const comboRoomPrice = getRateValue(comboRoom) || getRateValue(comboRoomDetail) || 0;
       const comboTaxes = getTaxValue(
         comboRoomDetail.rate?.taxes,
@@ -957,9 +974,16 @@ const normalizeRooms = (data = {}, hotel = {}) => {
         count: repeatCount,
         roomCount: repeatCount,
         title: `${repeatCount} x ${comboTitle}`,
-        image: (comboImages.length ? comboImages : roomImages.length ? roomImages : images).map(
-          (img) => ({ img }),
-        ),
+        image: labeledComboImages.length
+          ? labeledComboImages
+          : labeledRoomImages.length
+            ? labeledRoomImages
+            : (comboImages.length
+                ? comboImages
+                : roomImages.length
+                  ? roomImages
+                  : images
+              ).map((img) => ({ img, label: "Room Image" })),
         beds: getFirst(
           Array.isArray(comboRoomDetail.beds) && comboRoomDetail.beds.length
             ? comboRoomDetail.beds
@@ -1063,7 +1087,12 @@ const normalizeRooms = (data = {}, hotel = {}) => {
       raw: primaryRoomGroup,
       rawRecommendation: recommendation,
       rawRoomGroup: roomGroup,
-      image: (roomImages.length ? roomImages : images).map((img) => ({ img })),
+      image: labeledRoomImages.length
+        ? labeledRoomImages
+        : (roomImages.length ? roomImages : images).map((img) => ({
+            img,
+            label: "Room Image",
+          })),
       beds: getFirst(
         Array.isArray(roomDetail.beds) && roomDetail.beds.length
           ? roomDetail.beds

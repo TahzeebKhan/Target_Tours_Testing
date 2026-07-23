@@ -263,7 +263,7 @@ const MobileHotelDetails = () => {
           details,
         }),
       );
-      router.push(getHotelDetailUrl(payload));
+      router.push(getHotelDetailUrl(payload), { scroll: true });
     } catch (error) {
       console.error("Hotel details request failed:", error);
       if (isMissingHotelAuthTokenError(error)) {

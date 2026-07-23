@@ -319,6 +319,11 @@ const Page = () => {
   const searchRequest = useMemo(() => hotelDetail?.request || {}, [hotelDetail?.request]);
   const storedHotelSearch = useMemo(() => readStoredHotelSearch() || {}, []);
   const availabilityResponseRef = useRef(storedHotelSearch.availabilityResponse || null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const urlSearchValues = useMemo(
     () => ({
       searchId: getSearchParamValue("searchId"),
