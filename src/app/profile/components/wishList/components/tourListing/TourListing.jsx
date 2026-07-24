@@ -119,10 +119,10 @@ const TourListing = () => {
                     <div
                       className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
                     >
-                      <div className={styles.headerLeft}>
+                      {/* <div className={styles.headerLeft}>
                         <div className={styles.new}>New</div>
                         <div className={styles.private}>Flagship</div>
-                      </div>
+                      </div> */}
 
                       <img
                         src={
@@ -254,10 +254,10 @@ const TourListing = () => {
                     <div
                       className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
                     >
-                      <div className={styles.headerLeft}>
+                      {/* <div className={styles.headerLeft}>
                         <div className={styles.new}>New</div>
                         <div className={styles.private}>Flagship</div>
-                      </div>
+                      </div> */}
 
                       <img
                         src={

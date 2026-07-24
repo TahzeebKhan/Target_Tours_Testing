@@ -22,7 +22,7 @@ import {
 
 const roomsRequestCache = new Map();
 
-const FALLBACK_IMAGE = "/fallback.png";
+const FALLBACK_IMAGE = "/images/hotelFallback.png";
 
 const normalizeImageUrl = (value = "") => {
   const rawUrl = String(value || "").trim();

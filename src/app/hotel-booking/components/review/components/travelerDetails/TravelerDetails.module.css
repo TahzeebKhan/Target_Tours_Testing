@@ -327,3 +327,10 @@
         grid-template-columns: 1fr;
     }
 }
+
+.errorMessage {
+  color: #d92d20;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}

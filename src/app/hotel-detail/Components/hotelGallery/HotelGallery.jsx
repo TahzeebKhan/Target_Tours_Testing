@@ -3,7 +3,7 @@ import styles from './HotelGallery.module.css'
 import { useRouter } from 'next/navigation';
 import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch';
 
-const FALLBACK_IMAGE = "/fallback.png";
+const FALLBACK_IMAGE = "/images/hotelFallback.png";
 const GALLERY_SLOT_COUNT = 5;
 
 const stripRawFields = (value, depth = 0) => {
@@ -76,11 +76,10 @@ const GalleryImage = ({ image, title = "" }) => {
                 alt={title}
                 onLoad={() => setIsLoading(false)}
                 onError={() => {
+                    setIsLoading(false);
                     if (src !== FALLBACK_IMAGE) {
                         setSrc(FALLBACK_IMAGE);
-                        return;
                     }
-                    setIsLoading(false);
                 }}
             />
         </>
