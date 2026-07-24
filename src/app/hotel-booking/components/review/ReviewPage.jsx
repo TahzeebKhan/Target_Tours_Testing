@@ -27,6 +27,8 @@ import {
   markHotelBookingPaymentStarted,
   markHotelBookingSubmitStarted,
   writePendingHotelConfirmBooking,
+  readPendingHotelConfirmBooking,
+  clearPendingHotelConfirmBooking,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
@@ -100,6 +102,39 @@ const readStoredHotelDetails = () => {
   } catch {
     return null;
   }
+};
+
+const clearHotelSessionData = () => {
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem("hotelSearchContext");
+    window.sessionStorage.removeItem("hotelBooking");
+    window.sessionStorage.removeItem("hotelSearchResults");
+    window.sessionStorage.removeItem("hotelDetails");
+    window.sessionStorage.removeItem("hotelSidebarFilters");
+  }
+};
+
+const checkIsPricingError5102 = (errOrData) => {
+  if (!errOrData) return false;
+  const res = errOrData.response || errOrData.data || errOrData.details || errOrData;
+  const providerCode =
+    errOrData.provider_code ||
+    res?.provider_code ||
+    res?.details?.provider_code ||
+    res?.data?.Code ||
+    res?.raw?.Code;
+  const msg =
+    errOrData.message ||
+    res?.message ||
+    res?.provider_message ||
+    res?.details?.provider_message ||
+    res?.data?.Msg?.[0];
+
+  return (
+    String(providerCode) === "5102" ||
+    (res?.success === false &&
+      String(msg || "").toLowerCase().includes("pricing response failure"))
+  );
 };
 
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
@@ -1271,6 +1306,25 @@ const ReviewPage = () => {
     () => (pricingDetailsPayload ? JSON.stringify(pricingDetailsPayload) : ""),
     [pricingDetailsPayload],
   );
+  const [showPricing5102Error, setShowPricing5102Error] = useState(false);
+
+  useEffect(() => {
+    const storedBooking = restoreBookingSession();
+    const storedDetails = readStoredHotelDetails();
+    if (checkIsPricingError5102(storedBooking) || checkIsPricingError5102(storedDetails)) {
+      setShowPricing5102Error(true);
+      return;
+    }
+
+    const pendingBooking = readPendingHotelConfirmBooking();
+    if (pendingBooking) {
+      clearPendingHotelConfirmBooking();
+      clearHotelBookingStatus();
+      clearHotelSessionData();
+      toast.error("Booking Failed: Payment was not completed.");
+      router.push("/hotels");
+    }
+  }, [router]);
 
   const handleGuestDetailsChange = useCallback((value) => {
     setGuestDetails(value);
@@ -1381,9 +1435,18 @@ const ReviewPage = () => {
 
     pricingDetailsRequestKeyRef.current = pricingDetailsRequestKey;
     pricingDetailsPromiseRef.current = fetchHotelPricingDetails(pricingDetailsPayload);
-    pricingDetailsPromiseRef.current.catch((error) => {
-      console.error("Hotel pricing details request failed:", error);
-    });
+    pricingDetailsPromiseRef.current
+      .then((res) => {
+        if (checkIsPricingError5102(res)) {
+          setShowPricing5102Error(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Hotel pricing details request failed:", error);
+        if (checkIsPricingError5102(error)) {
+          setShowPricing5102Error(true);
+        }
+      });
   }, [pricingDetailsPayload, pricingDetailsRequestKey]);
 
   const handleAcceptPriceChange = async () => {
@@ -1490,6 +1553,12 @@ const ReviewPage = () => {
       !contact.countryCode
     ) {
       toast.error("Please complete booking contact details.");
+      setOpenTab("guestDetails");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(String(contact.pin || "").trim())) {
+      toast.error("Please enter a valid 6-digit PIN code.");
       setOpenTab("guestDetails");
       return;
     }
@@ -1853,7 +1922,11 @@ const ReviewPage = () => {
       );
     } catch (error) {
       clearHotelBookingStatus();
-      toast.error(error.message || "Unable to start hotel booking.");
+      if (checkIsPricingError5102(error)) {
+        setShowPricing5102Error(true);
+      } else {
+        toast.error(error.message || "Unable to start hotel booking.");
+      }
     } finally {
       setBookingLoading(false);
     }
@@ -2148,6 +2221,44 @@ const ReviewPage = () => {
         onCancel={handleRejectPriceChange}
         onConfirm={handleAcceptPriceChange}
       />
+
+      {showPricing5102Error && (
+        <div className={styles.pricingErrorOverlay}>
+          <div className={styles.pricingErrorBox}>
+            <img
+              src="/images/CouldntFind.svg"
+              alt="Pricing error"
+              className={styles.pricingErrorIcon}
+            />
+            <h2 className={styles.pricingErrorTitle}>Oops! Something went wrong</h2>
+            <p className={styles.pricingErrorSubtitle}>
+              We were unable to verify hotel pricing for your selection. The room price or availability may have changed.
+            </p>
+            <div className={styles.pricingErrorActions}>
+              <button
+                type="button"
+                className={styles.pricingErrorPrimaryBtn}
+                onClick={() => {
+                  clearHotelSessionData();
+                  router.push("/hotels");
+                }}
+              >
+                Hotel Search Again
+              </button>
+              <button
+                type="button"
+                className={styles.pricingErrorSecondaryBtn}
+                onClick={() => {
+                  clearHotelSessionData();
+                  router.push("/");
+                }}
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

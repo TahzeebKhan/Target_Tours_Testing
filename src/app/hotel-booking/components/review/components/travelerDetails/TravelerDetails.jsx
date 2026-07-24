@@ -570,8 +570,11 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 if (travelerIndex !== index) return traveler;
                 const updated = { ...traveler, [field]: sanitizedValue };
                 if (field === "title") {
-                    if (sanitizedValue === "Mr") updated.gender = "male";
-                    else if (sanitizedValue === "Ms" || sanitizedValue === "Mrs") updated.gender = "female";
+                    if (["Mr", "Master"].includes(sanitizedValue)) {
+                        updated.gender = "male";
+                    } else if (["Ms", "Mrs", "Miss"].includes(sanitizedValue)) {
+                        updated.gender = "female";
+                    }
                 }
                 return updated;
             }),
@@ -579,7 +582,11 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     };
 
     const updateBookingContact = (field, value) => {
-        setBookingContact(prev => ({ ...prev, [field]: value }));
+        let sanitizedValue = value;
+        if (field === "pin") {
+          sanitizedValue = value.replace(/\D/g, "").slice(0, 6);
+        }
+        setBookingContact(prev => ({ ...prev, [field]: sanitizedValue }));
     };
 
     return (
@@ -986,6 +993,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
             <div className={styles.field}>
               <label className={styles.label}>PIN</label>
               <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
                 value={bookingContact.pin}
@@ -994,6 +1004,11 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 }
                 placeholder="Enter PIN"
               />
+              {Boolean(bookingContact.pin && bookingContact.pin.length < 6) && (
+                <span className={styles.errorMessage}>
+                  PIN code must be 6 digits
+                </span>
+              )}
             </div>
           </div>
         </div>

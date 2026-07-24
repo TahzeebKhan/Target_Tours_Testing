@@ -506,9 +506,9 @@ function HotelBookingSuccessContent() {
           </div>
         ) : error ? (
           <div className={styles.errorContainer}>
-            <p className={styles.errorStatus}>Error occurred</p>
-            <h1 className={styles.title}>Unable to load details</h1>
-            <p className={styles.subtitle}>{error}</p>
+            <p className={styles.errorStatus} style={{ color: "#d92d20" }}>Booking Failed</p>
+            <h1 className={styles.title}>Booking Failed</h1>
+            <p className={styles.subtitle}>{error || "Payment was not completed. Booking session has been cleared."}</p>
             <div className={styles.infoGrid} style={{ marginTop: "20px", marginBottom: "20px" }}>
               <div>
                 <span>{bookingId ? "Booking ID Requested" : "Merchant Order ID"}</span>
@@ -518,8 +518,14 @@ function HotelBookingSuccessContent() {
               </div>
             </div>
             <div className={styles.actions}>
-              <button type="button" onClick={() => router.push("/")}>
-                Back to Home
+              <button
+                type="button"
+                onClick={() => {
+                  clearCompletedHotelFlowStorage();
+                  router.push("/hotels");
+                }}
+              >
+                Search Hotels Again
               </button>
             </div>
           </div>
