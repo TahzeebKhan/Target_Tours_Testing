@@ -18,6 +18,7 @@ import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
+  HOTEL_BOOKING_SESSION_KEY,
   fetchHotelPricingDetails,
   startHotelBooking,
   HotelPaymentStart,
@@ -67,6 +68,17 @@ const readStoredHotelSearch = () => {
     return null;
   }
 };
+ const restoreBookingSession = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+
+ }
 
 const readStoredHotelResults = () => {
   if (typeof window === "undefined") return null;
@@ -653,6 +665,7 @@ const buildRefreshSessionPayload = ({
     lat: lat !== "" ? Number(lat) : "",
     long: long !== "" ? Number(long) : "",
   };
+ 
 
   return {
     domain: getFirstValue(sourcePayload.domain, process.env.NEXT_PUBLIC_DOMAIN, "localhost:1337"),
@@ -991,6 +1004,7 @@ const buildHotelPricingDetailsPayload = ({
   const storedHotelSearch = readStoredHotelSearch() || {};
   const storedHotelResults = readStoredHotelResults() || {};
   const storedHotelDetails = readStoredHotelDetails() || {};
+  const BookingSession =restoreBookingSession() || {};
   const initSearchContext = {
     request,
     storedHotelSearch,
@@ -1014,6 +1028,9 @@ const buildHotelPricingDetailsPayload = ({
     storedHotelSearch,
     storedHotelResults,
   });
+
+  // const hotelPolicy =storedHotelDetails?.details?.data?.content?.hotel?.policies
+  
   const searchId = getFirstValue(
     firstRoom.roomsSearchId,
     firstRoom.searchId,
@@ -1133,10 +1150,22 @@ const ReviewPage = () => {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const hotel = bookingSession?.hotel || {};
   const request = bookingSession?.request || {};
+  
   const selectedRooms = useMemo(
     () => roomList.filter((room) => room.quantity > 0),
     [roomList],
   );
+  //  console.log("selectedRooms",selectedRooms)
+  const storedHotelDetails = useMemo(() => readStoredHotelDetails(), []);
+   const hotelPolicies = useMemo(() => {
+     console.log("hotelPolicy running",storedHotelDetails.details)
+    return (
+      storedHotelDetails?.details?.data?.content?.hotel?.policies ||
+      storedHotelDetails?.content?.hotel?.policies ||
+      storedHotelDetails?.hotel?.policies ||
+      []
+    );
+  }, [storedHotelDetails]);
   const visibleRooms = roomList.length ? roomList : [];
   const checkInSource = getFirstValue(
     request.checkInDate,
@@ -1163,6 +1192,7 @@ const ReviewPage = () => {
     request.searchContext?.nights ||
     (bookingSession ? selectedRooms[0]?.nights : "") ||
     1;
+   console.log("bookingSession2",bookingSession) 
   const hotelName =
     getDisplayValue(
       hotel.name,
@@ -1218,8 +1248,10 @@ const ReviewPage = () => {
     hotel.raw?.mainImage,
     hotel.raw?.images?.[0],
   );
+  
   const checkInDisplay = formatBookingDisplayDate(checkInSource, "Check-in");
   const checkOutDisplay = formatBookingDisplayDate(checkOutSource, "Check-out");
+
   const totalAmount = selectedRooms.reduce(
     (sum, room) => sum + getRoomTotal(room, nights),
     0,
@@ -2042,7 +2074,7 @@ const ReviewPage = () => {
           }`}
         >
           {/* <CancellationPenalty /> */}
-          <CancellationPolicy />
+          <CancellationPolicy selectedRooms={selectedRooms} />
         </div>
       </div>
 
@@ -2071,7 +2103,7 @@ const ReviewPage = () => {
           }`}
         >
           {/* <CancellationPenalty /> */}
-          <HotelPolicy />
+          <HotelPolicy hotelPolicy={hotelPolicies} />
         </div>
       </div>
 
