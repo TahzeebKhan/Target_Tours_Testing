@@ -209,7 +209,7 @@ const buildTravelersFromRoom = (room = {}, roomIndex = 0) => {
     const resolvedChildAges = childAges.length ? childAges : fallbackChildAges;
 
     return [
-      ...Array.from({ length: adults }, () => createTraveler({ passengerType: "A", age: "25" })),
+      ...Array.from({ length: adults }, () => createTraveler()),
       ...Array.from({ length: children }, (_, childIndex) =>
         createTraveler({
           passengerType: "C",
@@ -226,8 +226,6 @@ const mergeTravelers = (current = [], expected = []) =>
   expected.map((traveler, index) => ({
     ...traveler,
     ...(current[index] || {}),
-    passengerType: traveler.passengerType,
-    age: traveler.passengerType === "C" ? traveler.age : current[index]?.age || traveler.age,
   }));
 
 const getOccupancyGuestCount = (occupancy = {}) =>
@@ -453,7 +451,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     const [roomGuests, setRoomGuests] = useState({});
     const [collapsedGuests, setCollapsedGuests] = useState({});
     const [bookingContact, setBookingContact] = useState({
-        title: "",
+        title: "Mr",
         firstName: "",
         lastName: "",
         countryCode: "IN",
@@ -568,9 +566,15 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
   }
         setRoomGuests(prev => ({
             ...prev,
-            [roomId]: (prev[roomId] || []).map((traveler, travelerIndex) =>
-                travelerIndex === index ? { ...traveler, [field]: value } : traveler,
-            ),
+            [roomId]: (prev[roomId] || []).map((traveler, travelerIndex) => {
+                if (travelerIndex !== index) return traveler;
+                const updated = { ...traveler, [field]: sanitizedValue };
+                if (field === "title") {
+                    if (sanitizedValue === "Mr") updated.gender = "male";
+                    else if (sanitizedValue === "Ms" || sanitizedValue === "Mrs") updated.gender = "female";
+                }
+                return updated;
+            }),
         }));
     };
 
@@ -658,6 +662,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                             )
                           }
                         >
+                          <option value="" disabled hidden>
+                            Select
+                          </option>
                           <option value="Mr">Mr</option>
                           <option value="Ms">Ms</option>
                           <option value="Mrs">Mrs</option>
@@ -811,7 +818,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
-                          placeholder="Mobile number (optional)"
+                          placeholder="Enter Mobile Number"
                         />
                       </div>
 
@@ -832,7 +839,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
-                          placeholder="Email (Optional)"
+                          placeholder="Enter Email"
                         />
                       </div>
                     </div>
@@ -863,6 +870,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                   updateBookingContact("title", event.target.value)
                 }
               >
+                <option value="" disabled hidden>
+                  Select
+                </option>
                 <option value="Mr">Mr</option>
                 <option value="Ms">Ms</option>
                 <option value="Mrs">Mrs</option>
@@ -917,7 +927,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("mobile", event.target.value)
                 }
-                placeholder="Mobile number (optional)"
+                placeholder="Enter Mobile Number"
               />
             </div>
 
@@ -931,7 +941,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("email", event.target.value)
                 }
-                placeholder="Email (Optional)"
+                placeholder="Enter Email"
               />
             </div>
           </div>
