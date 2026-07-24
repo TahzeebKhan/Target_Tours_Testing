@@ -447,20 +447,40 @@ const StateDropdown = ({ value, onChange, required }) => {
   );
 };
 
+const GUEST_DETAILS_CACHE_KEY = "hotelGuestDetailsCache";
+
+const readGuestDetailsCache = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(GUEST_DETAILS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const TravelerDetails = ({ rooms = [], onChange }) => {
-    const [roomGuests, setRoomGuests] = useState({});
+    const [roomGuests, setRoomGuests] = useState(() => {
+      const cached = readGuestDetailsCache();
+      return cached?.roomGuests || {};
+    });
     const [collapsedGuests, setCollapsedGuests] = useState({});
-    const [bookingContact, setBookingContact] = useState({
-        title: "Mr",
-        firstName: "",
-        lastName: "",
-        countryCode: "IN",
-        mobile: "",
-        email: "",
-        address: "",
-        state: "",
-        city: "",
-        pin: "",
+    const [bookingContact, setBookingContact] = useState(() => {
+      const cached = readGuestDetailsCache();
+      return (
+        cached?.bookingContact || {
+          title: "Mr",
+          firstName: "",
+          lastName: "",
+          countryCode: "IN",
+          mobile: "",
+          email: "",
+          address: "",
+          state: "",
+          city: "",
+          pin: "",
+        }
+      );
     });
 
     useEffect(() => {
@@ -505,6 +525,16 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
 
     useEffect(() => {
         onChange?.({ roomGuests, bookingContact });
+        if (typeof window !== "undefined") {
+          try {
+            window.sessionStorage.setItem(
+              GUEST_DETAILS_CACHE_KEY,
+              JSON.stringify({ roomGuests, bookingContact }),
+            );
+          } catch {
+            // Ignore storage failures.
+          }
+        }
     }, [roomGuests, bookingContact, onChange]);
 
     const addTraveler = (room, roomIndex = 0, maxGuests = Infinity) => {

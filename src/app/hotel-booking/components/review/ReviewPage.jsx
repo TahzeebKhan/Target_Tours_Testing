@@ -12,6 +12,7 @@ import CancellationPolicy from "./components/cancellationPolicy/CancellationPoli
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
+import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import {
@@ -29,6 +30,7 @@ import {
   writePendingHotelConfirmBooking,
   readPendingHotelConfirmBooking,
   clearPendingHotelConfirmBooking,
+  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
@@ -1320,11 +1322,10 @@ const ReviewPage = () => {
     if (pendingBooking) {
       clearPendingHotelConfirmBooking();
       clearHotelBookingStatus();
-      clearHotelSessionData();
-      toast.error("Booking Failed: Payment was not completed.");
-      router.push("/hotels");
+      setBookingLoading(false);
+      toast.error("Payment was not completed.");
     }
-  }, [router]);
+  }, []);
 
   const handleGuestDetailsChange = useCallback((value) => {
     setGuestDetails(value);
@@ -1507,7 +1508,9 @@ const ReviewPage = () => {
       toast.error("Please select a payment option.");
       return;
     }
-    if (!isLoggedIn) {
+    const hasAuthToken = Boolean(Cookies.get("auth_token"));
+    if (!isLoggedIn || !hasAuthToken) {
+      toast.info("Please log in to complete your hotel booking.");
       openLoginModal?.();
       return;
     }
@@ -1924,6 +1927,26 @@ const ReviewPage = () => {
       clearHotelBookingStatus();
       if (checkIsPricingError5102(error)) {
         setShowPricing5102Error(true);
+      } else if (
+        isMissingHotelAuthTokenError(error) ||
+        error?.message === "JWT token missing" ||
+        Number(error?.status || error?.code) === 401
+      ) {
+        toast.info("Please log in to complete your hotel booking.");
+        openLoginModal?.();
+      } else if (
+        String(error?.message || "").toLowerCase().includes("hotel search not found") ||
+        Number(error?.status || error?.code) === 404
+      ) {
+        toast.error("Your search session has expired. Redirecting to refresh rooms...");
+        const city = request.city || request.searchContext?.city || "";
+        const checkIn = checkInSource || "";
+        const checkOut = checkOutSource || "";
+        const params = new URLSearchParams();
+        if (city) params.set("city", city);
+        if (checkIn) params.set("checkIn", checkIn);
+        if (checkOut) params.set("checkOut", checkOut);
+        router.push(`/hotels?${params.toString()}`);
       } else {
         toast.error(error.message || "Unable to start hotel booking.");
       }
