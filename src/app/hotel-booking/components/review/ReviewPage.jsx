@@ -1029,7 +1029,7 @@ const buildHotelPricingDetailsPayload = ({
     storedHotelResults,
   });
 
-  // const hotelPolicy =storedHotelDetails?.details?.data?.content?.hotel?.policies
+
   
   const searchId = getFirstValue(
     firstRoom.roomsSearchId,
@@ -1158,7 +1158,7 @@ const ReviewPage = () => {
   //  console.log("selectedRooms",selectedRooms)
   const storedHotelDetails = useMemo(() => readStoredHotelDetails(), []);
    const hotelPolicies = useMemo(() => {
-     console.log("hotelPolicy running",storedHotelDetails.details)
+   
     return (
       storedHotelDetails?.details?.data?.content?.hotel?.policies ||
       storedHotelDetails?.content?.hotel?.policies ||
