@@ -381,6 +381,47 @@ const getRangeNumber = (value, fallback) => {
   return Number.isFinite(number) ? number : fallback;
 };
 
+const extractPriceNumber = (hotel = {}) => {
+  const rawPrice =
+    hotel.price ??
+    hotel.amount ??
+    hotel.minRate ??
+    hotel.totalRate ??
+    hotel.baseRate ??
+    hotel.rate ??
+    hotel.raw?.price ??
+    hotel.raw?.amount ??
+    hotel.raw?.minRate;
+
+  if (rawPrice === null || rawPrice === undefined) return null;
+  if (typeof rawPrice === "number") return rawPrice;
+
+  if (typeof rawPrice === "object") {
+    return extractPriceNumber(rawPrice);
+  }
+
+  const numeric = Number(String(rawPrice).replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
+const getPriceBucketLiveCount = (hotels = [], bucket) => {
+  if (!Array.isArray(hotels) || !hotels.length) return 0;
+
+  return hotels.filter((hotel) => {
+    const price = extractPriceNumber(hotel);
+    if (price === null) return false;
+
+    const min = bucket.min ?? 0;
+    const max = bucket.max;
+
+    if (max === null || max === undefined) {
+      return price >= min;
+    }
+
+    return price >= min && price < max;
+  }).length;
+};
+
 const getApiOptionKey = (option = {}, category = "") => {
   if (category === "PriceGroup") {
     const min = Number(option.min || 0);
@@ -555,6 +596,7 @@ export default function HotelsFilters() {
   const searchParams = useSearchParams();
   const {
     filterData,
+    hotels,
     meta,
     setAppliedFilters,
     resetFilters: resetAppliedFilters,
@@ -591,6 +633,10 @@ export default function HotelsFilters() {
       apiSections.map((section) => [section.key, section]),
     );
     const mergedSections = DEFAULT_FILTER_SECTIONS.map((defaultSection) => {
+      if (defaultSection.key === "price") {
+        remainingApiSections.delete("price");
+        return defaultSection;
+      }
       const apiSection = remainingApiSections.get(defaultSection.key);
       if (!apiSection) return defaultSection;
 
@@ -890,15 +936,25 @@ export default function HotelsFilters() {
         <>
           <section className={styles.section}>
             <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
-            {priceSection.options.map((bucket) => (
-              <CheckboxRow
-                key={bucket.key}
-                checked={!!selectedFilters.price?.[bucket.key]}
-                label={bucket.label}
-                count={bucket.count ?? getCount(filterData, "priceBuckets", bucket.key, bucket.label)}
-                onChange={() => toggleFilter("price", bucket.key)}
-              />
-            ))}
+            {PRICE_BUCKETS.map((bucket) => {
+              const apiCount = getCount(
+                filterData,
+                "priceBuckets",
+                bucket.key,
+                bucket.label,
+              );
+              const count = apiCount || getPriceBucketLiveCount(hotels, bucket);
+
+              return (
+                <CheckboxRow
+                  key={bucket.key}
+                  checked={!!selectedFilters.price?.[bucket.key]}
+                  label={bucket.label}
+                  count={count}
+                  onChange={() => toggleFilter("price", bucket.key)}
+                />
+              );
+            })}
           </section>
 
           <div className={styles.border} />

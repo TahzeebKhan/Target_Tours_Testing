@@ -823,6 +823,13 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
     reviewText: reviewSummary.text,
     latitude: coordinates?.latitude,
     longitude: coordinates?.longitude,
+    freeCancellation: Boolean(
+      hotel.freeCancellation ??
+        hotel.free_cancellation ??
+        hotel.isFreeCancellation,
+    ),
+    isRefundable: Boolean(hotel.isRefundable ?? hotel.refundable),
+    freeBreakfast: Boolean(hotel.freeBreakfast ?? hotel.breakfastIncluded),
     raw: hotel,
   };
 };
@@ -1442,6 +1449,116 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
       return Math.round(Number(hotel?.rating || 0)) === 4;
     }
 
+    if (group === "freeCancellation") {
+      const val =
+        hotel?.freeCancellation ??
+        hotel?.raw?.freeCancellation ??
+        hotel?.raw?.free_cancellation;
+      if (val !== undefined && val !== null) {
+        return Boolean(val);
+      }
+    }
+
+    if (group === "refundable") {
+      const val =
+        hotel?.isRefundable ??
+        hotel?.raw?.isRefundable ??
+        hotel?.raw?.refundable;
+      if (val !== undefined && val !== null) {
+        return Boolean(val);
+      }
+    }
+
+    if (group === "breakfastIncluded") {
+      const val =
+        hotel?.freeBreakfast ??
+        hotel?.raw?.freeBreakfast ??
+        hotel?.raw?.breakfastIncluded;
+      if (val !== undefined && val !== null) {
+        return Boolean(val);
+      }
+    }
+
+    if (group === "propertyType") {
+      const propType = String(
+        hotel?.propertyType ||
+          hotel?.raw?.propertyType ||
+          hotel?.raw?.property_type ||
+          hotel?.raw?.type ||
+          "",
+      )
+        .trim()
+        .toLowerCase();
+      const targetKey = String(key || "").trim().toLowerCase();
+
+      if (propType) {
+        return propType === targetKey;
+      }
+    }
+
+    if (group === "providers") {
+      const provider = String(
+        hotel?.priceProvider ||
+          hotel?.raw?.sourceProvider ||
+          hotel?.raw?.provider ||
+          "",
+      )
+        .trim()
+        .toLowerCase();
+      const rawProviders = Array.isArray(hotel?.raw?.providers)
+        ? hotel.raw.providers.map((p) => String(p).trim().toLowerCase())
+        : [];
+      const targetKey = String(key || "").trim().toLowerCase();
+
+      return provider === targetKey || rawProviders.includes(targetKey);
+    }
+
+    if (group === "hotelChains") {
+      const chain = String(
+        hotel?.raw?.chainName ||
+          hotel?.raw?.brandName ||
+          hotel?.raw?.hotelChain ||
+          hotel?.raw?.chain ||
+          "",
+      )
+        .trim()
+        .toLowerCase();
+      const targetKey = String(key || "").trim().toLowerCase();
+
+      if (chain) {
+        return chain.includes(targetKey);
+      }
+    }
+
+    if (group === "hotelAmenities") {
+      const targetKey = String(key || "").trim().toLowerCase();
+      const needles = TEXT_FILTER_NEEDLES.hotelAmenities?.[key] || [targetKey];
+      const rawFacilities = Array.isArray(hotel?.raw?.facilities)
+        ? hotel.raw.facilities
+        : Array.isArray(hotel?.raw?.amenities)
+          ? hotel.raw.amenities
+          : [];
+
+      const facilityNames = [
+        ...(hotel?.facilities || []).map((f) =>
+          String(f.name || f).toLowerCase(),
+        ),
+        ...rawFacilities.map((f) =>
+          typeof f === "string"
+            ? f.toLowerCase()
+            : String(
+                f?.name || f?.facilityName || f?.label || f?.description || "",
+              ).toLowerCase(),
+        ),
+      ].filter(Boolean);
+
+      if (facilityNames.length) {
+        return facilityNames.some((name) =>
+          needles.some((needle) => name.includes(needle.toLowerCase())),
+        );
+      }
+    }
+
     const needles = TEXT_FILTER_NEEDLES[group]?.[key] || [key];
     return hasText(hotel, ...needles);
   });
@@ -1651,7 +1768,11 @@ const getSearchLocationLabel = (searchParams) => {
     : "this location";
 };
 
-const EmptyHotelState = ({ locationLabel, searchText = "" }) => (
+const EmptyHotelState = ({
+  locationLabel,
+  searchText = "",
+  hasActiveFilters = false,
+}) => (
   <div className={styles.emptyState}>
     <img
       className={styles.emptyStateImage}
@@ -1662,12 +1783,16 @@ const EmptyHotelState = ({ locationLabel, searchText = "" }) => (
       <h3>
         {searchText
           ? `No hotels found matching “${searchText}”`
-          : `No hotels found for ${locationLabel || "this location"}`}
+          : hasActiveFilters
+            ? "No hotels found matching your selected filters"
+            : `No hotels found for ${locationLabel || "this location"}`}
       </h3>
       <p>
         {searchText
           ? "Try another hotel name or clear the search filter."
-          : "We could not find stays for this search. Try a nearby area, different dates, or update your rooms and guests."}
+          : hasActiveFilters
+            ? "Try clearing or adjusting some of your sidebar filters to see more results."
+            : "We could not find stays for this search. Try a nearby area, different dates, or update your rooms and guests."}
       </p>
     </div>
   </div>
@@ -2899,12 +3024,18 @@ const TourListing = () => {
     Boolean(hotelNameSearchText) &&
     sourceHotels.length > 0 &&
     displayHotels.length === 0;
+  const hasActiveFilters = Boolean(
+    hotelNameSearchText ||
+      Object.values(appliedFilters).some((group) => {
+        if (!group) return false;
+        if (typeof group === "object") {
+          return Object.values(group).some(Boolean);
+        }
+        return Boolean(group);
+      }),
+  );
   const showEmptyState =
-    !isHotelLoading &&
-    !displayHotels.length &&
-    (hasNoHotelNameMatches ||
-      (shouldShowEmptyHotelState &&
-        Boolean(hotelSearchChannel || hotelResultSource)));
+    !isHotelLoading && displayHotels.length === 0;
 
   return (
     <>
@@ -2922,6 +3053,7 @@ const TourListing = () => {
           <EmptyHotelState
             locationLabel={searchLocationLabel}
             searchText={hasNoHotelNameMatches ? hotelNameSearchText : ""}
+            hasActiveFilters={hasActiveFilters}
           />
         )}
 
@@ -2995,10 +3127,10 @@ const TourListing = () => {
                   <div
                     className={`${styles.cardItemHeader} ${styles.ListViewCardHeader} ${styles.CardViewCardHeader}`}
                   >
-                    <div className={styles.headerLeft}>
+                    {/* <div className={styles.headerLeft}>
                       <div className={styles.new}>New</div>
                       <div className={styles.private}>Flagship</div>
-                    </div>
+                    </div> */}
 
                     <img
                       src={
@@ -3157,10 +3289,10 @@ const TourListing = () => {
                   <div
                     className={`${styles.cardItemHeader} ${styles.ListViewCardHeader}`}
                   >
-                    <div className={styles.headerLeft}>
+                    {/* <div className={styles.headerLeft}>
                       <div className={styles.new}>New</div>
                       <div className={styles.private}>Flagship</div>
-                    </div>
+                    </div> */}
 
                     <img
                       src={
