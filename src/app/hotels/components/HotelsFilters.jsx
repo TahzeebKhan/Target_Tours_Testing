@@ -600,6 +600,8 @@ export default function HotelsFilters() {
 
     return [...mergedSections, ...remainingApiSections.values()];
   }, [apiSections]);
+
+  
   const priceSection = filterSections.find((section) => section.key === "price");
   const renderedSections = filterSections.filter(
     (section) =>

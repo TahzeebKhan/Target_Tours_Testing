@@ -477,9 +477,9 @@ export const getHotelRating = (hotel = {}) => {
       hotel.rate?.starRating ||
       hotel.rate?.star_rating ||
       hotel.rating ||
-      5,
+      0,
   );
-  if (!Number.isFinite(rating)) return 5;
+  if (!Number.isFinite(rating)) return 0;
   return Math.max(0, Math.min(5, Math.round(rating)));
 };
 
@@ -1473,6 +1473,7 @@ export const matchesHotelFilters = (hotel, filters = {}) => {
   }
 
   if (hasSelectedValues(filters.starCategory)) {
+     console.log("start rating",filters.starCategory)
     const matchesStar = selectedKeys(filters.starCategory).some(
       (key) => Math.round(rating) === getFilterNumber(key),
     );
