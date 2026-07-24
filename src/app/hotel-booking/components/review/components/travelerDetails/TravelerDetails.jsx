@@ -6,16 +6,16 @@ import {
 } from "@/app/profile/components/profileSection/CountryName";
 
 const createTraveler = (overrides = {}) => ({
-    title: "Mr",
-    firstName: "Mukul",
-    middleName: "Kumar",
-    lastName: "Mishra",
-    gender: "male",
-    passengerType: "A",
-    age: "25",
-    countryCode: "IN",
-    mobile: "8532907106",
-    email: "mukul.mishra@webninjaz.com",
+    title: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    passengerType: "",
+    age: "",
+    countryCode: "",
+    mobile: "",
+    email: "",
     ...overrides,
 });
 const states = [
@@ -453,16 +453,16 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     const [roomGuests, setRoomGuests] = useState({});
     const [collapsedGuests, setCollapsedGuests] = useState({});
     const [bookingContact, setBookingContact] = useState({
-        title: "Mr",
-        firstName: "Mukul",
-        lastName: "Mishra",
+        title: "",
+        firstName: "",
+        lastName: "",
         countryCode: "IN",
-        mobile: "8532907106",
-        email: "mukul.mishra@webninjaz.com",
-        address: "Noida",
-        state: "delhi",
-        city: "Noida",
-        pin: "207001",
+        mobile: "",
+        email: "",
+        address: "",
+        state: "",
+        city: "",
+        pin: "",
     });
 
     useEffect(() => {
@@ -545,6 +545,27 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     };
 
     const updateTraveler = (roomId, index, field, value) => {
+      let sanitizedValue = value;
+
+  // 1. Name fields: allow only letters and spaces
+  if (["firstName", "middleName", "lastName"].includes(field)) {
+    sanitizedValue = value.replace(/[^a-zA-Z\s]/g, "");
+  }
+
+  // 2. Numeric fields: allow only positive digits (removes negative signs, letters, and decimals)
+  if (["age", "mobile"].includes(field)) {
+    sanitizedValue = value.replace(/\D/g, "");
+
+    // Optional limit: cap mobile numbers at 15 digits
+    if (field === "mobile") {
+      sanitizedValue = sanitizedValue.slice(0, 15);
+    }
+  }
+
+  // 3. Email field: remove spaces
+  if (field === "email") {
+    sanitizedValue = value.trim();
+  }
         setRoomGuests(prev => ({
             ...prev,
             [roomId]: (prev[roomId] || []).map((traveler, travelerIndex) =>
@@ -780,6 +801,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                         <input
                           className={styles.input}
                           type="text"
+                           inputMode="numeric"
                           value={traveler.mobile}
                           onChange={(event) =>
                             updateTraveler(
@@ -887,6 +909,8 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
             <div className={styles.field}>
               <label className={styles.label}>Mobile Number</label>
               <input
+              type="text"
+  inputMode="numeric"
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
                 value={bookingContact.mobile}
