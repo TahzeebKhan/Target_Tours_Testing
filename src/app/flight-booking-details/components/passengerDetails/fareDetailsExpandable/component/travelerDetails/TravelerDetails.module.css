@@ -150,7 +150,7 @@
 /* Grid */
 .grid {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
 }
 
@@ -218,7 +218,7 @@
     content: "";
     position: absolute;
     right: 12px;
-    top: 73%;
+    top: 39px;
     transform: translateY(-50%);
 
     background-image: url("/icons/DownArrows.svg");

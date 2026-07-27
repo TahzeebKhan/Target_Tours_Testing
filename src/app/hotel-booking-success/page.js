@@ -557,6 +557,7 @@ function HotelBookingSuccessContent() {
                     <h2>{details.hotelName}</h2>
                     {details.hotelRating > 0 && (
                       <div className={styles.ratingStars}>
+                        
                         {Array.from({ length: Math.round(details.hotelRating) }).map((_, i) => (
                           <span key={i} className={styles.star}>★</span>
                         ))}

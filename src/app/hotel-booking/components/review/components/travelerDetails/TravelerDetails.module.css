@@ -121,7 +121,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: end;
+  align-items: start;
   gap: 16px;
 }
 
@@ -293,7 +293,7 @@
   content: "";
   position: absolute;
   right: 12px;
-  top: 73%;
+  top: 39px;
   transform: translateY(-50%);
 
   background-image: url("/icons/DownArrows.svg");

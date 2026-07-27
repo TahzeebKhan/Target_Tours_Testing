@@ -93,10 +93,16 @@ const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
   };
 
   try {
-    window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(fullDetail));
+    window.sessionStorage.setItem(
+      HOTEL_DETAILS_KEY,
+      JSON.stringify(fullDetail),
+    );
     return;
   } catch (error) {
-    console.warn("Hotel details payload exceeded session storage; storing slim payload.", error);
+    console.warn(
+      "Hotel details payload exceeded session storage; storing slim payload.",
+      error,
+    );
   }
 
   try {
@@ -321,7 +327,10 @@ export const getHotelsFromMessage = (payload = {}) => {
   }
 
   if (Array.isArray(payload?.hotels) && payload.hotels.length) {
-    const result = sanitizeHotelResult(payload.source || "hotels", payload.hotels);
+    const result = sanitizeHotelResult(
+      payload.source || "hotels",
+      payload.hotels,
+    );
     result.meta = meta;
     if (result.hotels.length) return result;
   }
@@ -390,7 +399,9 @@ export const getHotelImage = (hotel = {}) => {
     hotel.images?.[0]?.imageUrl ||
     hotel.images?.[0];
 
-  return typeof image === "string" && image ? image : "/images/hotelFallback.png";
+  return typeof image === "string" && image
+    ? image
+    : "/images/hotelFallback.png";
 };
 
 const findPriceValue = (value, depth = 0, visitedCount = { current: 0 }) => {
@@ -825,8 +836,8 @@ export const normalizeHotelCard = (hotel = {}, index = 0) => {
     longitude: coordinates?.longitude,
     freeCancellation: Boolean(
       hotel.freeCancellation ??
-        hotel.free_cancellation ??
-        hotel.isFreeCancellation,
+      hotel.free_cancellation ??
+      hotel.isFreeCancellation,
     ),
     isRefundable: Boolean(hotel.isRefundable ?? hotel.refundable),
     freeBreakfast: Boolean(hotel.freeBreakfast ?? hotel.breakfastIncluded),
@@ -868,7 +879,7 @@ const getInitCompleteSearchMeta = (payload = {}) => {
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
   const init = data?.init || content?.init || payload?.init || {};
-  console.log("init",init)
+  console.log("init", init);
   const searchId =
     init.searchId ||
     init.search_id ||
@@ -883,7 +894,7 @@ const getInitCompleteSearchMeta = (payload = {}) => {
     data?.search_id ||
     data?.searchid ||
     "";
-    console.log("searchId",searchId)
+  console.log("searchId", searchId);
   const hotelSearchId =
     init.hotelSearchId ||
     init.hotel_search_id ||
@@ -1489,7 +1500,9 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
       )
         .trim()
         .toLowerCase();
-      const targetKey = String(key || "").trim().toLowerCase();
+      const targetKey = String(key || "")
+        .trim()
+        .toLowerCase();
 
       if (propType) {
         return propType === targetKey;
@@ -1508,7 +1521,9 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
       const rawProviders = Array.isArray(hotel?.raw?.providers)
         ? hotel.raw.providers.map((p) => String(p).trim().toLowerCase())
         : [];
-      const targetKey = String(key || "").trim().toLowerCase();
+      const targetKey = String(key || "")
+        .trim()
+        .toLowerCase();
 
       return provider === targetKey || rawProviders.includes(targetKey);
     }
@@ -1523,7 +1538,9 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
       )
         .trim()
         .toLowerCase();
-      const targetKey = String(key || "").trim().toLowerCase();
+      const targetKey = String(key || "")
+        .trim()
+        .toLowerCase();
 
       if (chain) {
         return chain.includes(targetKey);
@@ -1531,7 +1548,9 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
     }
 
     if (group === "hotelAmenities") {
-      const targetKey = String(key || "").trim().toLowerCase();
+      const targetKey = String(key || "")
+        .trim()
+        .toLowerCase();
       const needles = TEXT_FILTER_NEEDLES.hotelAmenities?.[key] || [targetKey];
       const rawFacilities = Array.isArray(hotel?.raw?.facilities)
         ? hotel.raw.facilities
@@ -1590,7 +1609,7 @@ export const matchesHotelFilters = (hotel, filters = {}) => {
   }
 
   if (hasSelectedValues(filters.starCategory)) {
-     console.log("start rating",filters.starCategory)
+    console.log("start rating", filters.starCategory);
     const matchesStar = selectedKeys(filters.starCategory).some(
       (key) => Math.round(rating) === getFilterNumber(key),
     );
@@ -1713,7 +1732,6 @@ export const HotelFacilities = ({ facilities = [], onShowMore }) => {
           ...see more
         </button>
       )}
-
     </div>
   );
 };
@@ -2153,9 +2171,8 @@ const TourListing = () => {
     hotelSearchId: "",
   });
   const [hasMergedHotelResponse, setHasMergedHotelResponse] = useState(false);
-  const [hasHotelInitComplete, setHasHotelInitComplete] = useState(
-    !hotelSearchChannel,
-  );
+  const [hasHotelInitComplete, setHasHotelInitComplete] =
+    useState(!hotelSearchChannel);
   const [shouldShowEmptyHotelState, setShouldShowEmptyHotelState] =
     useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(
@@ -2375,7 +2392,7 @@ const TourListing = () => {
     const hotelSearchKey = String(
       hotel?.hotelSearchKey ||
         hotel?.hotel_search_key ||
-      hotel?.raw?.hotelSearchKey ||
+        hotel?.raw?.hotelSearchKey ||
         hotel?.raw?.hotel_search_key ||
         hotel?.hotelSearchId ||
         hotel?.hotel_search_id ||
@@ -3026,16 +3043,15 @@ const TourListing = () => {
     displayHotels.length === 0;
   const hasActiveFilters = Boolean(
     hotelNameSearchText ||
-      Object.values(appliedFilters).some((group) => {
-        if (!group) return false;
-        if (typeof group === "object") {
-          return Object.values(group).some(Boolean);
-        }
-        return Boolean(group);
-      }),
+    Object.values(appliedFilters).some((group) => {
+      if (!group) return false;
+      if (typeof group === "object") {
+        return Object.values(group).some(Boolean);
+      }
+      return Boolean(group);
+    }),
   );
-  const showEmptyState =
-    !isHotelLoading && displayHotels.length === 0;
+  const showEmptyState = !isHotelLoading && displayHotels.length === 0;
 
   return (
     <>
@@ -3156,23 +3172,23 @@ const TourListing = () => {
                         <div className={styles.rating}>
                           <div>
                             {[...Array(5)].map((_, index) => (
-                            <img
-                              key={index}
-                              src={
-                                index < (item.rating ?? rating)
-                                  ? "/icons/conicstar.svg"
-                                  : "/icons/star-gray.svg"
-                              }
-                              alt="star"
-                            />
-                          ))}
-                          <div className={styles.ReviewCount}>
-                            <span>{item.reviewScoreText}</span>
-                          </div>
+                              <img
+                                key={index}
+                                src={
+                                  index < (item.rating ?? rating)
+                                    ? "/icons/conicstar.svg"
+                                    : "/icons/star-gray.svg"
+                                }
+                                alt="star"
+                              />
+                            ))}
+                            <div className={styles.ReviewCount}>
+                              <span>{item.reviewScoreText}</span>
+                            </div>
                           </div>
                           <div className={styles.ReviewCount}>
                             ({item.reviewText})
-                            </div>
+                          </div>
                         </div>
                         <h2>{item.title}</h2>
 
