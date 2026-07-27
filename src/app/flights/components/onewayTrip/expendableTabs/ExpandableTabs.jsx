@@ -330,8 +330,12 @@ const cleanRuleText = (value) =>
 const cleanRuleLines = (value) =>
   String(value || "")
     .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/?(?:Table1|RULE|TEXT|SEGMENT|FAREBASIS|IMPORTANT_NOTE|NOTE|NewDataSet)[^>]*>/gi, "\n")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
     .split(/\r?\n/)
     .map((line) => line.replace(/\s+/g, " ").trim())
     .filter(Boolean);
@@ -355,135 +359,81 @@ const parseRawCancellationRuleRows = (text, context = {}) => {
   const lines = Array.isArray(text)
     ? text.map(cleanRuleText).filter(Boolean)
     : cleanRuleLines(text);
-  const rows = [];
+
+  const directRows = [];
   let inCancellationSection = false;
-  let pendingCancellationDescription = "";
-  let cancellationFeeIndex = 0;
+  let inChangeSection = false;
 
   lines.forEach((line, index) => {
     const nextLine = lines[index + 1] || "";
-    const contextText = lines.slice(index, index + 6).join(" ");
-    const effectiveLine =
-      /\bFOR$/i.test(line) && nextLine
-        ? `${line} ${nextLine}`
-        : line;
-    const upperLine = line.toUpperCase();
-    const upperEffectiveLine = effectiveLine.toUpperCase();
+    const isCancellationHeader = /\b(CANCELLATIONS?|CANCEL|REFUND|PENALTY|PENALTIES|CANCELLATION\s+FEES?)\b/i.test(line);
+    const isChangeHeader = /\b(CHANGES?|RESCHEDULE|REISSUANCE|MODIFICATION|CHANGE\s+FEES?)\b/i.test(line);
 
-    if (/^-+$/.test(line)) return;
-    if (
-      upperLine === "CANCELLATIONS" ||
-      upperEffectiveLine.includes("CANCEL/REFUND") ||
-      upperEffectiveLine.includes("CANCELLATION CHARGES") ||
-      upperEffectiveLine.includes("CANCELLATION FEE")
-    ) {
+    if (isCancellationHeader) {
       inCancellationSection = true;
+      inChangeSection = false;
     }
-    if (inCancellationSection && upperLine.includes("NO SHOW")) {
+    if (isChangeHeader) {
+      inChangeSection = true;
       inCancellationSection = false;
     }
 
-    const bookingWindowMatch = effectiveLine.match(
-      /(?:BOOKED|WITHIN|MORE THAN)\s+(.+?)\s+(?:PRIOR TO|OF)\s+COMMENCEMENT/i
-    );
-    if (inCancellationSection && bookingWindowMatch) {
-      pendingCancellationDescription = cleanRuleText(
-        bookingWindowMatch[1].replace(/\bWITHIN\b/i, "")
-      );
-    }
+    const effectiveLine = (isCancellationHeader || isChangeHeader) && !/(?:INR|RS\.?|₹|\d+\/\-)\s*[\d,]+/i.test(line) && nextLine
+      ? `${line} ${nextLine}`
+      : line;
 
-    const atoMatch = effectiveLine.match(
-      /cancellation\s*:\s*adult\s*([0-9][\d.,]*)\s*([A-Z]{3})?/i
-    );
-    if (atoMatch) {
-      rows.push({
-        ...context,
-        head: "ATO Service Fee(Per Pax/ Per Journey)",
-        Description: "Cancellation",
-        adultAmount: toFareRuleAmount(atoMatch[1]),
-        currencyCode: atoMatch[2] || "INR",
-      });
+    const isCancellationLine = inCancellationSection || /\b(cancellation|cancel|refund)\b/i.test(effectiveLine);
+    const isChangeLine = inChangeSection || /\b(change|reschedule|reissuance|modification)\b/i.test(effectiveLine);
+
+    if (!isCancellationLine && !isChangeLine && !/\b(departure|days?|hrs?|hours?|pax|sector)\b/i.test(effectiveLine)) {
       return;
     }
 
-    if (!inCancellationSection) return;
+    const amountMatch =
+      effectiveLine.match(/(?:INR|RS\.?|₹)\s*([\d,]+)(?:\/\-)?/i) ||
+      effectiveLine.match(/([\d,]+)\s*(?:\/\-)?\s*(?:INR|RS\.?|₹)/i) ||
+      effectiveLine.match(/(?:CHARGE|FEE|COST|PENALTY)\s*(?:INR|RS\.?|₹)?\s*([\d,]+)/i) ||
+      effectiveLine.match(/([\d,]+)\/\-/);
 
-    if (
-      upperEffectiveLine.includes("TO DEPARTURE") ||
-      /^TILL\s+/i.test(effectiveLine)
-    ) {
-      pendingCancellationDescription = cleanRuleText(
-        effectiveLine.replace(/\bCHARGE\b.*$/i, "")
-      );
+    if (amountMatch) {
+      const rawAmount = amountMatch[1].replace(/,/g, "");
+      const amount = Number(rawAmount);
+
+      if (Number.isFinite(amount) && amount > 0) {
+        const timeMatch =
+          effectiveLine.match(/(departure\s+(?:within|on)\s+[\d\w\s]+(?:days?|hrs?|hours?|later)?)/i) ||
+          effectiveLine.match(/(\d+\s*(?:hrs?|hours?|days?)\s*(?:prior to|before)\s*(?:departure|flight|departure date)?.*)/i) ||
+          effectiveLine.match(/((?:before|within|till|up to)\s*\d+\s*(?:hrs?|hours?|days?)[^,.;]*)/i) ||
+          effectiveLine.match(/(prior to departure date.*)/i);
+
+        const isChange = isChangeLine || /\bchange\b/i.test(effectiveLine);
+        const isCancel = !isChange;
+
+        const timeFrame = timeMatch
+          ? cleanRuleText(timeMatch[1])
+          : isCancel
+            ? "Before departure"
+            : "Change / Reschedule";
+
+        const head = isCancel
+          ? "Cancellation Fee(Per Pax/ Per Journey)"
+          : "Reschedule / Change Fee(Per Pax/ Per Journey)";
+
+        const currencyMatch = effectiveLine.match(/(INR|USD|EUR|GBP|AED|SAR)/i);
+        const currencyCode = currencyMatch ? currencyMatch[1].toUpperCase() : "INR";
+
+        directRows.push({
+          ...context,
+          head,
+          Description: timeFrame,
+          adultAmount: amount,
+          currencyCode,
+        });
+      }
     }
-
-    const isExplicitCancellationCharge =
-      /FOR\s+(?:CANCEL|CANCELLATION|REFUND)/i.test(effectiveLine);
-    const chargeMatch = isExplicitCancellationCharge
-      ? effectiveLine.match(
-          /^(?:(TILL\s+[^,.;]+?)\s+)?CHARGE\s+([A-Z]{3})?\s*([0-9][\d.,]*)\s+(?:PER\s+COMPONENT\s+)?FOR\s+(?:CANCEL|CANCELLATION|REFUND)/i
-        )
-      : null;
-    const genericCancellationAmountMatch = !chargeMatch
-      ? effectiveLine.match(
-          /(?:CANCELLATION|CANCEL|REFUND)[^0-9A-Z]*(?:CHARGE|FEE|FEES)?[^0-9A-Z]*([A-Z]{3})?\s*([0-9][\d.,]*)/i
-        )
-      : null;
-    const cancellationMadeMatch =
-      !chargeMatch && !genericCancellationAmountMatch
-        ? contextText.match(
-            /CHARGE\s+([A-Z]{3})?\s*([0-9][\d.,]*)\s+WHEN\s+CANCELLATION\s+ARE\s+MADE/i
-          )
-        : null;
-    const againstChargeMatch =
-      !chargeMatch && !genericCancellationAmountMatch
-        ? contextText.match(/AGAINST\s+A\s+CHARGE\s+OF\s+([A-Z]{3})?\s*([0-9][\d.,]*)/i)
-        : null;
-
-    if (
-      !chargeMatch &&
-      !genericCancellationAmountMatch &&
-      !cancellationMadeMatch &&
-      !againstChargeMatch
-    ) {
-      return;
-    }
-
-    const amount =
-      cancellationMadeMatch?.[2] ||
-      againstChargeMatch?.[2] ||
-      chargeMatch?.[3] ||
-      genericCancellationAmountMatch?.[2];
-    const currency =
-      cancellationMadeMatch?.[1] ||
-      againstChargeMatch?.[1] ||
-      chargeMatch?.[2] ||
-      genericCancellationAmountMatch?.[1] ||
-      "INR";
-    const contextualDescription =
-      contextText.match(/BEFORE\s+24\s+HOURS\s+OF\s+DEPARTURE/i)
-        ? "Before 24 hours of departure"
-        : contextText.match(/WITHIN\s+24\s+HRS?.*?(?:02|2)\s+HRS?.*?DEPARTURE/i)
-          ? "Within 24 hrs until 02 hrs before departure"
-          : "";
-
-    const parsedDescription =
-      contextualDescription ||
-      cleanRuleText(chargeMatch?.[1]) ||
-      pendingCancellationDescription ||
-      (cancellationFeeIndex === 0 ? "Before departure" : "Cancellation");
-    cancellationFeeIndex += 1;
-
-    rows.push({
-      ...context,
-      head: "Cancellation Fee(Per Pax/ Per Journey)",
-      Description: parsedDescription,
-      adultAmount: toFareRuleAmount(amount),
-      currencyCode: currency,
-    });
   });
 
-  return rows.filter((row) => row.adultAmount);
+  return directRows.filter((row) => row.adultAmount);
 };
 
 const getFallbackCancellationTimeFrame = (rule = {}) => {
@@ -2191,10 +2141,10 @@ const ExpandableTabs = ({
                 cancellationFareRuleRows.length === 0 && (
                 <div className={styles.tableRows}>
                   <span className={styles.timeFrame}>
-                    {fareRulesMessage || "Cancellation rules"}
+                    Cancellation rules
                   </span>
                   <span className={styles.textRight}>
-                    {fareRulesMessage ? "PLEASE SEARCH AGAIN" : "NOT AVAILABLE"}
+                    AS PER AIRLINE POLICY
                   </span>
                 </div>
               )}

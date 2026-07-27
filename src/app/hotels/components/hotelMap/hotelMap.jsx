@@ -556,16 +556,10 @@ export default function HotelMap({ isOpen, onClose }) {
         },
       };
 
+      setAppliedMapFilters(nextFilters);
+      syncAppliedFilters(nextFilters, budget, budgetTouched);
       return nextFilters;
     });
-  };
-
-  const applyFilters = () => {
-    setBudgetTouched(true);
-    setAppliedMapFilters(selectedFilters);
-    setAppliedBudget(budget);
-    setAppliedBudgetTouched(true);
-    syncAppliedFilters(selectedFilters, budget, true);
   };
 
   useEffect(() => {
@@ -696,11 +690,16 @@ export default function HotelMap({ isOpen, onClose }) {
                     type="number"
                     min="0"
                     max={budget[1]}
-                  value={budget[0]}
-                  onChange={(event) => {
-                    setBudgetTouched(true);
-                    setBudget([Math.min(Number(event.target.value || 0), budget[1]), budget[1]])
-                  }}
+                    value={budget[0]}
+                    onChange={(event) => {
+                      const minVal = Math.min(Number(event.target.value || 0), budget[1]);
+                      const nextBudget = [minVal, budget[1]];
+                      setBudgetTouched(true);
+                      setAppliedBudgetTouched(true);
+                      setBudget(nextBudget);
+                      setAppliedBudget(nextBudget);
+                      syncAppliedFilters(selectedFilters, nextBudget, true);
+                    }}
                   />
                 </label>
                 <label className={styles.budgetBox}>
@@ -708,17 +707,19 @@ export default function HotelMap({ isOpen, onClose }) {
                   <input
                     type="number"
                     min={budget[0]}
-                  value={budget[1]}
-                  onChange={(event) => {
-                    setBudgetTouched(true);
-                    setBudget([budget[0], Math.max(Number(event.target.value || 0), budget[0])])
-                  }}
+                    value={budget[1]}
+                    onChange={(event) => {
+                      const maxVal = Math.max(Number(event.target.value || 0), budget[0]);
+                      const nextBudget = [budget[0], maxVal];
+                      setBudgetTouched(true);
+                      setAppliedBudgetTouched(true);
+                      setBudget(nextBudget);
+                      setAppliedBudget(nextBudget);
+                      syncAppliedFilters(selectedFilters, nextBudget, true);
+                    }}
                   />
                 </label>
               </div>
-              <button type="button" className={styles.submitButton} onClick={applyFilters}>
-                Submit
-              </button>
             </section>
           </aside>
 
