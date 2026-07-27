@@ -86,6 +86,8 @@ const stripRawFields = (value, depth = 0) => {
 };
 
 const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
+  if (typeof window === "undefined" || !hotel) return;
+
   const fullDetail = {
     request: payload,
     hotel: stripRawFields(hotel),
@@ -93,10 +95,7 @@ const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
   };
 
   try {
-    window.sessionStorage.setItem(
-      HOTEL_DETAILS_KEY,
-      JSON.stringify(fullDetail),
-    );
+    setSessionItem(HOTEL_DETAILS_KEY, fullDetail, 30);
     return;
   } catch (error) {
     console.warn(
@@ -106,16 +105,17 @@ const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
   }
 
   try {
-    window.sessionStorage.setItem(
+    setSessionItem(
       HOTEL_DETAILS_KEY,
-      JSON.stringify({
+      {
         request: payload,
-        hotel,
-      }),
+        hotel: stripRawFields(hotel),
+      },
+      30,
     );
   } catch {
     try {
-      window.sessionStorage.removeItem(HOTEL_DETAILS_KEY);
+      removeSessionItem(HOTEL_DETAILS_KEY);
     } catch {
       // Ignore storage cleanup failures.
     }
@@ -1984,17 +1984,25 @@ const writeSlimStoredHotelResults = (payload = {}, result = {}, meta = {}) => {
   if (typeof window === "undefined" || !result?.hotels?.length) return;
 
   try {
+    const dataObj = {
+      channel: payload?.channel || "",
+      type: getHotelSocketType(payload) || payload?.type || "HOTEL_RESULTS",
+      source: result.source || "hotels",
+      hotelCount: result.hotels.length,
+      searchId: meta.searchId || result.meta?.searchId || "",
+      hotelSearchId: meta.hotelSearchId || result.meta?.hotelSearchId || "",
+      searchTracingKey:
+        meta.searchTracingKey || result.meta?.searchTracingKey || "",
+    };
+    const bytes = new Blob([JSON.stringify(dataObj)]).size;
+    const dataSizeMb = Number((bytes / (1024 * 1024)).toFixed(6));
+
     window.sessionStorage.setItem(
       HOTEL_SEARCH_RESULTS_KEY,
       JSON.stringify({
-        channel: payload?.channel || "",
-        type: getHotelSocketType(payload) || payload?.type || "HOTEL_RESULTS",
-        source: result.source || "hotels",
-        hotelCount: result.hotels.length,
-        searchId: meta.searchId || result.meta?.searchId || "",
-        hotelSearchId: meta.hotelSearchId || result.meta?.hotelSearchId || "",
-        searchTracingKey:
-          meta.searchTracingKey || result.meta?.searchTracingKey || "",
+        ...dataObj,
+        dataSizeMb,
+        dataSize: `${dataSizeMb} MB`,
       }),
     );
   } catch {

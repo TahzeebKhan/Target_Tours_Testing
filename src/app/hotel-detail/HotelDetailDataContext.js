@@ -19,6 +19,7 @@ import {
   fetchHotelRooms,
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
+import { getSessionItem, setSessionItem } from "@/shared/utils/sessionStorage";
 
 const roomsRequestCache = new Map();
 
@@ -64,15 +65,9 @@ const readStoredHotelDetail = () => {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-    const sanitized = stripRawFields(parsed);
-
-    if (raw && JSON.stringify(sanitized) !== raw) {
-      window.sessionStorage.setItem(HOTEL_DETAILS_KEY, JSON.stringify(sanitized));
-    }
-
-    return sanitized;
+    const raw = getSessionItem(HOTEL_DETAILS_KEY);
+    if (!raw) return null;
+    return stripRawFields(raw);
   } catch {
     return null;
   }
@@ -82,10 +77,7 @@ const writeStoredHotelDetail = (hotelDetailData) => {
   if (typeof window === "undefined") return;
 
   try {
-    window.sessionStorage.setItem(
-      HOTEL_DETAILS_KEY,
-      JSON.stringify(stripRawFields(hotelDetailData)),
-    );
+    setSessionItem(HOTEL_DETAILS_KEY, stripRawFields(hotelDetailData), 30);
   } catch {
     // Ignore storage failures and keep the in-memory response.
   }

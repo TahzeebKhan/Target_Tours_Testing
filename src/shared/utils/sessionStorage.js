@@ -5,15 +5,32 @@
 const DEFAULT_TTL_MINUTES = 30;
 
 /**
+ * Calculates the size of a data payload in Megabytes (MB)
+ */
+export const calculateDataSizeMb = (data) => {
+  try {
+    const stringified = typeof data === "string" ? data : JSON.stringify(data ?? "");
+    const bytes = new Blob([stringified]).size;
+    const mb = bytes / (1024 * 1024);
+    return Number(mb.toFixed(6));
+  } catch {
+    return 0;
+  }
+};
+
+/**
  * Set an item in sessionStorage with an optional Time-To-Live (TTL) in minutes.
- * Default TTL is 30 minutes. Pass ttlInMinutes = 0 or null for no expiry within the tab session.
+ * Includes `dataSizeMb` and `dataSize` to track the payload size in MB.
  */
 export const setSessionItem = (key, data, ttlInMinutes = DEFAULT_TTL_MINUTES) => {
   if (typeof window === "undefined" || !window.sessionStorage) return;
 
   try {
+    const dataSizeMb = calculateDataSizeMb(data);
     const payload = {
       value: data,
+      dataSizeMb: dataSizeMb,
+      dataSize: `${dataSizeMb} MB`,
       createdAt: Date.now(),
       expiresAt: ttlInMinutes ? Date.now() + ttlInMinutes * 60 * 1000 : null,
     };

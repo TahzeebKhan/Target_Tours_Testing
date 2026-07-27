@@ -18,6 +18,11 @@ import {
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import {
+  clearHotelBookingSession,
+  clearHotelSearchSession,
+} from "@/shared/services/hotelSearch";
+import { setSessionItem } from "@/shared/utils/sessionStorage";
+import {
   getStaySummary,
   getMessageData,
   getHotelsFromMessage,
@@ -255,13 +260,14 @@ const MobileHotelDetails = () => {
 
     try {
       const details = await fetchHotelDetails(payload);
-      window.sessionStorage.setItem(
+      setSessionItem(
         HOTEL_DETAILS_KEY,
-        JSON.stringify({
+        {
           request: payload,
           hotel,
           details,
-        }),
+        },
+        30,
       );
       router.push(getHotelDetailUrl(payload), { scroll: true });
     } catch (error) {
