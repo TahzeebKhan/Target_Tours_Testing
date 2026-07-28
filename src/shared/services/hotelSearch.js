@@ -361,6 +361,9 @@ const createApiError = (data, fallbackMessage) => {
   error.code = apiError.code || data?.code || nestedData?.code;
   error.name = apiError.name || error.name;
   error.details = apiError.details || nestedData || {};
+  error.data = data;
+  error.provider_code =
+    data?.provider_code || data?.details?.provider_code || data?.data?.Code;
 
   return error;
 };
@@ -662,7 +665,12 @@ export const fetchHotelPricingDetails = async (hotelPricingDetailsPayload = {}) 
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+  if (
+    !response.ok ||
+    data?.success === false ||
+    String(data?.provider_code) === "5102" ||
+    String(data?.details?.provider_code) === "5102"
+  ) {
     throw createApiError(data, "Hotel pricing details failed");
   }
 
@@ -685,7 +693,12 @@ export const startHotelBooking = async (startHotelBookingPayload = {}) => {
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+  if (
+    !response.ok ||
+    data?.success === false ||
+    String(data?.provider_code) === "5102" ||
+    String(data?.details?.provider_code) === "5102"
+  ) {
     throw createApiError(data, "Hotel booking failed");
   }
 

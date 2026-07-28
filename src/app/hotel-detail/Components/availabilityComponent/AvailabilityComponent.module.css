@@ -25,16 +25,18 @@
   object-fit: cover;
   background-position: center;
   height: 100%;
+  cursor: zoom-in;
 }
 
 .heading {
   font-family: Antic Didone;
   font-weight: 400;
   font-size: 24px;
-  line-height: 1.19;
+  line-height: 100%;
   letter-spacing: 0%;
   text-transform: uppercase;
   color: #000033;
+  padding-top: 48px;
 }
 
 .statusText {
@@ -177,7 +179,7 @@
   flex: 1 1 auto;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 150px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(150px, max-content);
   gap: 16px;
   padding: 24px;
   padding-left: 0 !important;
@@ -194,6 +196,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  text-transform: capitalize;
 }
 
 .hotelTitle {
@@ -474,7 +477,6 @@
   gap: 26px;
   flex-direction: column;
   align-items: flex-end;
-  width: 150px;
   min-width: 150px;
 }
 
@@ -1177,6 +1179,192 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.imageGalleryOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.imageGalleryModal {
+  width: min(780px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+.imageGalleryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.imageGalleryHeader h3 {
+  margin: 0;
+  font-family: Antic Didone;
+  font-size: 24px;
+  font-weight: 400;
+  color: #000033;
+}
+
+.imageGalleryMeta {
+  margin: 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: #667085;
+}
+
+.imageGalleryLabel {
+  color: #000033;
+  font-weight: 600;
+}
+
+.imageGalleryLabel::after {
+  content: "•";
+  margin-left: 10px;
+  color: #98a2b3;
+}
+
+.imageGalleryClose {
+  border: 0;
+  background: transparent;
+  color: #000033;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.imageGalleryViewer {
+  position: relative;
+  min-height: 280px;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 24px 72px;
+  background: #f5f6f8;
+}
+
+.imageGalleryViewer > img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 250px);
+  object-fit: contain;
+}
+
+.imageGalleryArrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #d9dde5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #000033;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.imageGalleryPrevious {
+  left: 16px;
+}
+
+.imageGalleryNext {
+  right: 16px;
+}
+
+.imageGalleryThumbnails {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 14px 20px 18px;
+  border-top: 1px solid #e4e6e8;
+  background: #ffffff;
+}
+
+.imageGalleryThumbnails button {
+  width: 96px;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 2px solid transparent;
+  background: #f5f6f8;
+  color: #667085;
+  cursor: pointer;
+}
+
+.imageGalleryThumbnails button.activeThumbnail {
+  border-color: #000033;
+  color: #000033;
+  background: #eef1f8;
+}
+
+.imageGalleryThumbnails img {
+  display: block;
+  width: 100%;
+  height: 66px;
+  object-fit: contain;
+}
+
+.imageGalleryThumbnails span {
+  display: block;
+  overflow: hidden;
+  margin-top: 5px;
+  padding: 0 2px 2px;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .imageGalleryOverlay {
+    padding: 0;
+  }
+
+  .imageGalleryModal {
+    width: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
+  }
+
+  .imageGalleryViewer {
+    padding: 20px 52px;
+  }
+
+  .imageGalleryViewer > img {
+    max-height: calc(100vh - 220px);
+  }
+
+  .imageGalleryArrow {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 .detailsSection h4 {

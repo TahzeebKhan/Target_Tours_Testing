@@ -79,6 +79,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  max-width: 150px;
+  width: 100%;
 }
 .stars {
   display: flex;
@@ -684,4 +686,96 @@
     justify-content: space-between;
     gap: 4px;
   }
+}
+
+.pricingErrorOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pricingErrorBox {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pricingErrorIcon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  object-fit: contain;
+}
+
+.pricingErrorTitle {
+  font-family: var(--font-antic-didone, serif);
+  font-size: 26px;
+  font-weight: 600;
+  color: #101828;
+  margin: 0 0 10px 0;
+}
+
+.pricingErrorSubtitle {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 15px;
+  line-height: 1.5;
+  color: #475467;
+  margin: 0 0 28px 0;
+}
+
+.pricingErrorActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.pricingErrorPrimaryBtn {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #000033;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pricingErrorPrimaryBtn:hover {
+  background-color: #1a1a52;
+}
+
+.pricingErrorSecondaryBtn {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #f2f4f7;
+  color: #344054;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pricingErrorSecondaryBtn:hover {
+  background-color: #e4e7ec;
 }

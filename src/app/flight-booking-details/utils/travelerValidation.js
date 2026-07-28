@@ -33,6 +33,10 @@ const getTravelerAgeError = (traveler) => {
     return "Age is required.";
   }
 
+  if (ageValue > 150) {
+    return "Age cannot be greater than 150.";
+  }
+
   const type = traveler?.type || traveler?.PTC || "ADULT";
   if ((type === "ADULT" || type === "ADT") && ageValue < 12) {
     return "Adult age must be 12 or above.";

@@ -7,7 +7,7 @@ import GallerySection from "./gallerySection/GallerySection";
 import { HOTEL_DETAILS_KEY } from "@/shared/services/hotelSearch";
 import { useRouter } from "next/navigation";
 
-const FALLBACK_IMAGE = "/fallback.png";
+const FALLBACK_IMAGE = "/images/hotelFallback.png";
 const GALLERY_SECTION_SIZE = 5;
 
 const getFallbackImages = (count = GALLERY_SECTION_SIZE) =>

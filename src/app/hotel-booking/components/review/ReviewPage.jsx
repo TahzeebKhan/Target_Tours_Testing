@@ -12,12 +12,14 @@ import CancellationPolicy from "./components/cancellationPolicy/CancellationPoli
 import HotelPolicy from "./components/hotelPolicy/HotelPolicy";
 import PriceChangeModal from "./components/priceChangeModal/PriceChangeModal";
 import { useRoom } from "@/app/context/RoomContext";
+import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import useLockBodyScroll from "@/app/hooks/useLockBodyScroll";
 import {
   HOTEL_DETAILS_KEY,
   HOTEL_SEARCH_RESULTS_KEY,
   HOTEL_SEARCH_SESSION_KEY,
+  HOTEL_BOOKING_SESSION_KEY,
   fetchHotelPricingDetails,
   startHotelBooking,
   HotelPaymentStart,
@@ -26,6 +28,9 @@ import {
   markHotelBookingPaymentStarted,
   markHotelBookingSubmitStarted,
   writePendingHotelConfirmBooking,
+  readPendingHotelConfirmBooking,
+  clearPendingHotelConfirmBooking,
+  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import { CountryCodes } from "@/app/profile/components/profileSection/CountryName";
 
@@ -67,6 +72,17 @@ const readStoredHotelSearch = () => {
     return null;
   }
 };
+ const restoreBookingSession = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(HOTEL_BOOKING_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+
+ }
 
 const readStoredHotelResults = () => {
   if (typeof window === "undefined") return null;
@@ -88,6 +104,39 @@ const readStoredHotelDetails = () => {
   } catch {
     return null;
   }
+};
+
+const clearHotelSessionData = () => {
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem("hotelSearchContext");
+    window.sessionStorage.removeItem("hotelBooking");
+    window.sessionStorage.removeItem("hotelSearchResults");
+    window.sessionStorage.removeItem("hotelDetails");
+    window.sessionStorage.removeItem("hotelSidebarFilters");
+  }
+};
+
+const checkIsPricingError5102 = (errOrData) => {
+  if (!errOrData) return false;
+  const res = errOrData.response || errOrData.data || errOrData.details || errOrData;
+  const providerCode =
+    errOrData.provider_code ||
+    res?.provider_code ||
+    res?.details?.provider_code ||
+    res?.data?.Code ||
+    res?.raw?.Code;
+  const msg =
+    errOrData.message ||
+    res?.message ||
+    res?.provider_message ||
+    res?.details?.provider_message ||
+    res?.data?.Msg?.[0];
+
+  return (
+    String(providerCode) === "5102" ||
+    (res?.success === false &&
+      String(msg || "").toLowerCase().includes("pricing response failure"))
+  );
 };
 
 const findDeepValue = (value, key, depth = 0, seen = new WeakSet()) => {
@@ -653,6 +702,7 @@ const buildRefreshSessionPayload = ({
     lat: lat !== "" ? Number(lat) : "",
     long: long !== "" ? Number(long) : "",
   };
+ 
 
   return {
     domain: getFirstValue(sourcePayload.domain, process.env.NEXT_PUBLIC_DOMAIN, "localhost:1337"),
@@ -991,6 +1041,7 @@ const buildHotelPricingDetailsPayload = ({
   const storedHotelSearch = readStoredHotelSearch() || {};
   const storedHotelResults = readStoredHotelResults() || {};
   const storedHotelDetails = readStoredHotelDetails() || {};
+  const BookingSession =restoreBookingSession() || {};
   const initSearchContext = {
     request,
     storedHotelSearch,
@@ -1014,6 +1065,9 @@ const buildHotelPricingDetailsPayload = ({
     storedHotelSearch,
     storedHotelResults,
   });
+
+
+  
   const searchId = getFirstValue(
     firstRoom.roomsSearchId,
     firstRoom.searchId,
@@ -1133,10 +1187,22 @@ const ReviewPage = () => {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const hotel = bookingSession?.hotel || {};
   const request = bookingSession?.request || {};
+  
   const selectedRooms = useMemo(
     () => roomList.filter((room) => room.quantity > 0),
     [roomList],
   );
+  //  console.log("selectedRooms",selectedRooms)
+  const storedHotelDetails = useMemo(() => readStoredHotelDetails(), []);
+   const hotelPolicies = useMemo(() => {
+   
+    return (
+      storedHotelDetails?.details?.data?.content?.hotel?.policies ||
+      storedHotelDetails?.content?.hotel?.policies ||
+      storedHotelDetails?.hotel?.policies ||
+      []
+    );
+  }, [storedHotelDetails]);
   const visibleRooms = roomList.length ? roomList : [];
   const checkInSource = getFirstValue(
     request.checkInDate,
@@ -1163,6 +1229,7 @@ const ReviewPage = () => {
     request.searchContext?.nights ||
     (bookingSession ? selectedRooms[0]?.nights : "") ||
     1;
+   console.log("bookingSession2",bookingSession) 
   const hotelName =
     getDisplayValue(
       hotel.name,
@@ -1218,8 +1285,10 @@ const ReviewPage = () => {
     hotel.raw?.mainImage,
     hotel.raw?.images?.[0],
   );
+  
   const checkInDisplay = formatBookingDisplayDate(checkInSource, "Check-in");
   const checkOutDisplay = formatBookingDisplayDate(checkOutSource, "Check-out");
+
   const totalAmount = selectedRooms.reduce(
     (sum, room) => sum + getRoomTotal(room, nights),
     0,
@@ -1239,6 +1308,24 @@ const ReviewPage = () => {
     () => (pricingDetailsPayload ? JSON.stringify(pricingDetailsPayload) : ""),
     [pricingDetailsPayload],
   );
+  const [showPricing5102Error, setShowPricing5102Error] = useState(false);
+
+  useEffect(() => {
+    const storedBooking = restoreBookingSession();
+    const storedDetails = readStoredHotelDetails();
+    if (checkIsPricingError5102(storedBooking) || checkIsPricingError5102(storedDetails)) {
+      setShowPricing5102Error(true);
+      return;
+    }
+
+    const pendingBooking = readPendingHotelConfirmBooking();
+    if (pendingBooking) {
+      clearPendingHotelConfirmBooking();
+      clearHotelBookingStatus();
+      setBookingLoading(false);
+      toast.error("Payment was not completed.");
+    }
+  }, []);
 
   const handleGuestDetailsChange = useCallback((value) => {
     setGuestDetails(value);
@@ -1349,9 +1436,18 @@ const ReviewPage = () => {
 
     pricingDetailsRequestKeyRef.current = pricingDetailsRequestKey;
     pricingDetailsPromiseRef.current = fetchHotelPricingDetails(pricingDetailsPayload);
-    pricingDetailsPromiseRef.current.catch((error) => {
-      console.error("Hotel pricing details request failed:", error);
-    });
+    pricingDetailsPromiseRef.current
+      .then((res) => {
+        if (checkIsPricingError5102(res)) {
+          setShowPricing5102Error(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Hotel pricing details request failed:", error);
+        if (checkIsPricingError5102(error)) {
+          setShowPricing5102Error(true);
+        }
+      });
   }, [pricingDetailsPayload, pricingDetailsRequestKey]);
 
   const handleAcceptPriceChange = async () => {
@@ -1412,7 +1508,9 @@ const ReviewPage = () => {
       toast.error("Please select a payment option.");
       return;
     }
-    if (!isLoggedIn) {
+    const hasAuthToken = Boolean(Cookies.get("auth_token"));
+    if (!isLoggedIn || !hasAuthToken) {
+      toast.info("Please log in to complete your hotel booking.");
       openLoginModal?.();
       return;
     }
@@ -1458,6 +1556,12 @@ const ReviewPage = () => {
       !contact.countryCode
     ) {
       toast.error("Please complete booking contact details.");
+      setOpenTab("guestDetails");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(String(contact.pin || "").trim())) {
+      toast.error("Please enter a valid 6-digit PIN code.");
       setOpenTab("guestDetails");
       return;
     }
@@ -1821,7 +1925,31 @@ const ReviewPage = () => {
       );
     } catch (error) {
       clearHotelBookingStatus();
-      toast.error(error.message || "Unable to start hotel booking.");
+      if (checkIsPricingError5102(error)) {
+        setShowPricing5102Error(true);
+      } else if (
+        isMissingHotelAuthTokenError(error) ||
+        error?.message === "JWT token missing" ||
+        Number(error?.status || error?.code) === 401
+      ) {
+        toast.info("Please log in to complete your hotel booking.");
+        openLoginModal?.();
+      } else if (
+        String(error?.message || "").toLowerCase().includes("hotel search not found") ||
+        Number(error?.status || error?.code) === 404
+      ) {
+        toast.error("Your search session has expired. Redirecting to refresh rooms...");
+        const city = request.city || request.searchContext?.city || "";
+        const checkIn = checkInSource || "";
+        const checkOut = checkOutSource || "";
+        const params = new URLSearchParams();
+        if (city) params.set("city", city);
+        if (checkIn) params.set("checkIn", checkIn);
+        if (checkOut) params.set("checkOut", checkOut);
+        router.push(`/hotels?${params.toString()}`);
+      } else {
+        toast.error(error.message || "Unable to start hotel booking.");
+      }
     } finally {
       setBookingLoading(false);
     }
@@ -2042,7 +2170,7 @@ const ReviewPage = () => {
           }`}
         >
           {/* <CancellationPenalty /> */}
-          <CancellationPolicy />
+          <CancellationPolicy selectedRooms={selectedRooms} />
         </div>
       </div>
 
@@ -2071,7 +2199,7 @@ const ReviewPage = () => {
           }`}
         >
           {/* <CancellationPenalty /> */}
-          <HotelPolicy />
+          <HotelPolicy hotelPolicy={hotelPolicies} />
         </div>
       </div>
 
@@ -2116,6 +2244,44 @@ const ReviewPage = () => {
         onCancel={handleRejectPriceChange}
         onConfirm={handleAcceptPriceChange}
       />
+
+      {showPricing5102Error && (
+        <div className={styles.pricingErrorOverlay}>
+          <div className={styles.pricingErrorBox}>
+            <img
+              src="/images/CouldntFind.svg"
+              alt="Pricing error"
+              className={styles.pricingErrorIcon}
+            />
+            <h2 className={styles.pricingErrorTitle}>Oops! Something went wrong</h2>
+            <p className={styles.pricingErrorSubtitle}>
+              We were unable to verify hotel pricing for your selection. The room price or availability may have changed.
+            </p>
+            <div className={styles.pricingErrorActions}>
+              <button
+                type="button"
+                className={styles.pricingErrorPrimaryBtn}
+                onClick={() => {
+                  clearHotelSessionData();
+                  router.push("/hotels");
+                }}
+              >
+                Hotel Search Again
+              </button>
+              <button
+                type="button"
+                className={styles.pricingErrorSecondaryBtn}
+                onClick={() => {
+                  clearHotelSessionData();
+                  router.push("/");
+                }}
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

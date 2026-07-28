@@ -305,6 +305,7 @@ const DEFAULT_ROOM_LIST = [];
 const Page = () => {
   const { hotelDetail, roomsLoading, refreshHotelAvailability } = useHotelDetailData();
   const [activeTab, setActiveTab] = useState("Description");
+  const isClickScrollingRef = useRef(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showRoomSearchCard, setShowRoomSearchCard] = useState(true);
   const [availabilityChecking, setAvailabilityChecking] = useState(false);
@@ -319,6 +320,11 @@ const Page = () => {
   const searchRequest = useMemo(() => hotelDetail?.request || {}, [hotelDetail?.request]);
   const storedHotelSearch = useMemo(() => readStoredHotelSearch() || {}, []);
   const availabilityResponseRef = useRef(storedHotelSearch.availabilityResponse || null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const urlSearchValues = useMemo(
     () => ({
       searchId: getSearchParamValue("searchId"),
@@ -883,16 +889,79 @@ const Page = () => {
     });
   }, [maxSelectableRoomCount]);
 
-  const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
+  const handleTabChange = useCallback(
+    (tab) => {
+      setActiveTab(tab);
+      isClickScrollingRef.current = true;
 
-    const section = sectionRefs[tab]?.current;
-    if (!section || typeof window === "undefined") return;
+      const section = sectionRefs[tab]?.current;
+      if (!section || typeof window === "undefined") return;
 
-    window.scrollTo({
-      top: section.getBoundingClientRect().top + window.scrollY - TAB_SCROLL_OFFSET,
-      behavior: "smooth",
-    });
+      window.scrollTo({
+        top: section.getBoundingClientRect().top + window.scrollY - TAB_SCROLL_OFFSET,
+        behavior: "smooth",
+      });
+
+      setTimeout(() => {
+        isClickScrollingRef.current = false;
+      }, 800);
+    },
+    [sectionRefs],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    let animId = null;
+
+    const handleScroll = () => {
+      if (isClickScrollingRef.current) return;
+
+      const scrollPosition = window.scrollY + TAB_SCROLL_OFFSET + 30;
+      const entries = Object.entries(sectionRefs)
+        .map(([name, ref]) => {
+          if (!ref.current) return null;
+          const rect = ref.current.getBoundingClientRect();
+          const top = rect.top + window.scrollY;
+          return { name, top };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.top - b.top);
+
+      if (!entries.length) return;
+
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60;
+
+      if (isAtBottom) {
+        setActiveTab(entries[entries.length - 1].name);
+        return;
+      }
+
+      let currentTab = entries[0].name;
+      for (let i = 0; i < entries.length; i++) {
+        if (scrollPosition >= entries[i].top) {
+          currentTab = entries[i].name;
+        } else {
+          break;
+        }
+      }
+
+      setActiveTab(currentTab);
+    };
+
+    const onScroll = () => {
+      if (animId) cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(handleScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (animId) cancelAnimationFrame(animId);
+    };
   }, [sectionRefs]);
 
   useEffect(() => {

@@ -29,6 +29,128 @@ const PRICE_FILTERS = [
   { key: "17000+", label: "₹17000+", min: 17000, max: Infinity },
 ];
 
+const normalizeFilterKey = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+
+const getLiveFilterRoot = (filterData) =>
+  filterData?.filters ||
+  filterData?.data?.filters ||
+  filterData?.filterData ||
+  filterData?.data ||
+  filterData ||
+  {};
+
+const getLiveFilterValue = (filterData, aliases) => {
+  const root = getLiveFilterRoot(filterData);
+  const wantedAliases = aliases.map(normalizeFilterKey);
+
+  return Object.entries(root || {}).find(([key]) =>
+    wantedAliases.includes(normalizeFilterKey(key)),
+  )?.[1];
+};
+
+const getLiveOptionCount = (options, wantedValue) => {
+  if (!Array.isArray(options)) return null;
+
+  const wanted = normalizeFilterKey(wantedValue);
+  const option = options.find((item) =>
+    [
+      item?.value,
+      item?.key,
+      item?.label,
+      item?.name,
+      item?.title,
+    ].some((value) => normalizeFilterKey(value) === wanted),
+  );
+
+  if (!option) return null;
+  const count = Number(option.count ?? option.total ?? option.hotelCount);
+  return Number.isFinite(count) ? count : 0;
+};
+
+const getLiveBooleanCount = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  if (value.available === false) return 0;
+
+  const count = Number(value.count ?? value.total ?? value.hotelCount);
+  return Number.isFinite(count) ? count : null;
+};
+
+const getLivePriceFilters = (filterData) => {
+  const groups = getLiveFilterValue(filterData, [
+    "priceGroups",
+    "priceGroup",
+    "priceBuckets",
+    "priceRanges",
+  ]);
+
+  if (!Array.isArray(groups) || !groups.length) return PRICE_FILTERS;
+
+  const options = groups
+    .map((group) => {
+      const min = Number(group?.min ?? group?.from ?? 0);
+      const rawMax = group?.max ?? group?.to;
+      const max = rawMax === null || rawMax === undefined ? Infinity : Number(rawMax);
+      if (!Number.isFinite(min) || (!Number.isFinite(max) && max !== Infinity)) {
+        return null;
+      }
+
+      const key = Number.isFinite(max) ? `${min}-${max}` : `${min}+`;
+      const count = Number(group?.count ?? group?.total ?? group?.hotelCount);
+
+      return {
+        key,
+        label:
+          group?.label ||
+          (Number.isFinite(max) ? `₹${min}-${max}` : `₹${min}+`),
+        min,
+        max,
+        count: Number.isFinite(count) ? count : 0,
+      };
+    })
+    .filter(Boolean);
+
+  return options.length ? options : PRICE_FILTERS;
+};
+
+const getLiveBudgetRange = (filterData, priceFilters) => {
+  const range = getLiveFilterValue(filterData, ["priceRange", "price_range"]);
+  const min = Number(range?.min ?? range?.minimum);
+  const max = Number(range?.max ?? range?.maximum);
+
+  if (Number.isFinite(min) && Number.isFinite(max) && max >= min) {
+    return [Math.floor(min), Math.ceil(max)];
+  }
+
+  const filterMinimums = priceFilters
+    .map((option) => Number(option.min))
+    .filter(Number.isFinite);
+  const filterMaximums = priceFilters
+    .map((option) => Number(option.max))
+    .filter(Number.isFinite);
+
+  if (filterMinimums.length && filterMaximums.length) {
+    return [Math.min(...filterMinimums), Math.max(...filterMaximums)];
+  }
+
+  return DEFAULT_BUDGET;
+};
+
+const getPriceBucketByKey = (key) => {
+  const configuredBucket = PRICE_FILTERS.find((item) => item.key === key);
+  if (configuredBucket) return configuredBucket;
+
+  const match = String(key).match(/^(\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?)|\+)$/);
+  if (!match) return null;
+
+  return {
+    min: Number(match[1]),
+    max: match[2] ? Number(match[2]) : Infinity,
+  };
+};
+
 const TEXT_FILTER_NEEDLES = {
   lastMinuteDeals: ["deal", "discount"],
   breakfastIncluded: ["breakfast"],
@@ -250,7 +372,7 @@ const matchesMapFilters = (hotel, filters = {}, budget = null) => {
 
   if (hasSelectedValues(filters.price)) {
     const matchesPrice = selectedKeys(filters.price).some((key) => {
-      const bucket = PRICE_FILTERS.find((item) => item.key === key);
+      const bucket = getPriceBucketByKey(key);
       if (!bucket || price === null) return false;
       return price >= bucket.min && price < bucket.max;
     });
@@ -258,20 +380,31 @@ const matchesMapFilters = (hotel, filters = {}, budget = null) => {
     if (!matchesPrice) return false;
   }
 
-  if (filters.suggested?.fiveStar && Math.round(rating) !== 5) return false;
-  if (filters.suggested?.fourStar && Math.round(rating) !== 4) return false;
+  if (hasSelectedValues(filters.suggested)) {
+    const matchesSuggested = selectedKeys(filters.suggested).some((key) => {
+      if (key === "fiveStar") return Math.round(rating) === 5;
+      if (key === "fourStar") return Math.round(rating) === 4;
 
-  return selectedKeys(filters.suggested).every((key) => {
-    if (["fiveStar", "fourStar"].includes(key)) return true;
-    const needles = TEXT_FILTER_NEEDLES[key] || [key];
-    return hasHotelText(hotel, ...needles);
-  });
+      const needles = TEXT_FILTER_NEEDLES[key] || [key];
+      return hasHotelText(hotel, ...needles);
+    });
+
+    if (!matchesSuggested) return false;
+  }
+
+  return true;
 };
 
 export default function HotelMap({ isOpen, onClose }) {
   const searchParams = useSearchParams();
   const hotelSearchChannel = searchParams.get("channel") || "";
-  const { appliedFilters, displayHotels, hotels, setAppliedFilters } = useHotelsContext();
+  const {
+    appliedFilters,
+    displayHotels,
+    filterData,
+    hotels,
+    setAppliedFilters,
+  } = useHotelsContext();
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({ suggested: {}, price: {} });
   const [appliedMapFilters, setAppliedMapFilters] = useState({ suggested: {}, price: {} });
@@ -330,6 +463,36 @@ export default function HotelMap({ isOpen, onClose }) {
     const guests = Number.isFinite(adults) && adults > 0 ? adults : 1;
     return `/1 night, ${guests} ${guests === 1 ? "guest" : "guests"}`;
   }, [searchParams]);
+  const livePriceFilters = useMemo(
+    () => getLivePriceFilters(filterData),
+    [filterData],
+  );
+  const liveBudgetRange = useMemo(
+    () => getLiveBudgetRange(filterData, livePriceFilters),
+    [filterData, livePriceFilters],
+  );
+  const liveSuggestedFilters = useMemo(() => {
+    const starRatings = getLiveFilterValue(filterData, [
+      "starRatings",
+      "starRating",
+      "stars",
+    ]);
+    const breakfastIncluded = getLiveFilterValue(filterData, [
+      "breakfastIncluded",
+      "breakfast_included",
+    ]);
+
+    return SUGGESTED_FILTERS.map((option) => {
+      let count = null;
+      if (option.key === "fiveStar") count = getLiveOptionCount(starRatings, "5");
+      if (option.key === "fourStar") count = getLiveOptionCount(starRatings, "4");
+      if (option.key === "breakfastIncluded") {
+        count = getLiveBooleanCount(breakfastIncluded);
+      }
+
+      return { ...option, count };
+    });
+  }, [filterData]);
 
   const filterCounts = useMemo(() => {
     const sourceHotels = hotels?.length ? hotels : displayHotels || [];
@@ -347,7 +510,7 @@ export default function HotelMap({ isOpen, onClose }) {
         }),
         {},
       ),
-      price: PRICE_FILTERS.reduce(
+      price: livePriceFilters.reduce(
         (counts, option) => ({
           ...counts,
           [option.key]: sourceHotels.filter((hotel) =>
@@ -360,7 +523,14 @@ export default function HotelMap({ isOpen, onClose }) {
         {},
       ),
     };
-  }, [displayHotels, hotels]);
+  }, [displayHotels, hotels, livePriceFilters]);
+
+  useEffect(() => {
+    if (budgetTouched) return;
+
+    setBudget(liveBudgetRange);
+    setAppliedBudget(liveBudgetRange);
+  }, [budgetTouched, liveBudgetRange]);
 
   const syncAppliedFilters = (nextFilters, nextBudget = budget, includeBudget = budgetTouched) => {
     setAppliedFilters((prevFilters = {}) => ({
@@ -442,12 +612,12 @@ export default function HotelMap({ isOpen, onClose }) {
       setBudgetTouched(true);
       setAppliedBudgetTouched(true);
     } else {
-      setBudget(DEFAULT_BUDGET);
-      setAppliedBudget(DEFAULT_BUDGET);
+      setBudget(liveBudgetRange);
+      setAppliedBudget(liveBudgetRange);
       setBudgetTouched(false);
       setAppliedBudgetTouched(false);
     }
-  }, [appliedFilters, isOpen]);
+  }, [appliedFilters, isOpen, liveBudgetRange]);
 
   if (!isOpen) return null;
 
@@ -483,7 +653,7 @@ export default function HotelMap({ isOpen, onClose }) {
 
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>Suggested For You</h3>
-              {SUGGESTED_FILTERS.map((option) => (
+              {liveSuggestedFilters.map((option) => (
                 <label key={option.key} className={styles.filterRow}>
                   <input
                     type="checkbox"
@@ -492,14 +662,16 @@ export default function HotelMap({ isOpen, onClose }) {
                   />
                   <span className={styles.checkbox} />
                   <span>{option.label}</span>
-                  <span className={styles.count}>{filterCounts.suggested[option.key] || 0}</span>
+                  <span className={styles.count}>
+                    {option.count ?? filterCounts.suggested[option.key] ?? 0}
+                  </span>
                 </label>
               ))}
             </section>
 
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>Price Per Night</h3>
-              {PRICE_FILTERS.map((option) => (
+              {livePriceFilters.map((option) => (
                 <label key={option.key} className={styles.filterRow}>
                   <input
                     type="checkbox"
@@ -508,7 +680,9 @@ export default function HotelMap({ isOpen, onClose }) {
                   />
                   <span className={styles.checkbox} />
                   <span>{option.label}</span>
-                  <span className={styles.count}>{filterCounts.price[option.key] || 0}</span>
+                  <span className={styles.count}>
+                    {option.count ?? filterCounts.price[option.key] ?? 0}
+                  </span>
                 </label>
               ))}
             </section>
@@ -522,10 +696,11 @@ export default function HotelMap({ isOpen, onClose }) {
                     type="number"
                     min="0"
                     max={budget[1]}
-                    value={budget[0]}
-                    onChange={(event) =>
-                      setBudget([Math.min(Number(event.target.value || 0), budget[1]), budget[1]])
-                    }
+                  value={budget[0]}
+                  onChange={(event) => {
+                    setBudgetTouched(true);
+                    setBudget([Math.min(Number(event.target.value || 0), budget[1]), budget[1]])
+                  }}
                   />
                 </label>
                 <label className={styles.budgetBox}>
@@ -533,10 +708,11 @@ export default function HotelMap({ isOpen, onClose }) {
                   <input
                     type="number"
                     min={budget[0]}
-                    value={budget[1]}
-                    onChange={(event) =>
-                      setBudget([budget[0], Math.max(Number(event.target.value || 0), budget[0])])
-                    }
+                  value={budget[1]}
+                  onChange={(event) => {
+                    setBudgetTouched(true);
+                    setBudget([budget[0], Math.max(Number(event.target.value || 0), budget[0])])
+                  }}
                   />
                 </label>
               </div>

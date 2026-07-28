@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './HotelDetaislMobileView.module.css'
 import MobileTab from './mobileTab/MobileTab'
 import DescriptionComponent from '../descriptionComponent/DescriptionComponent'
@@ -154,13 +154,23 @@ const HotelDetaislMobileView = () => {
     const [selectedRoomQty, setSelectedRoomQty] = useState({});
     const [selectionMessage, setSelectionMessage] = useState("");
     const [activeTab, setActiveTab] = useState("Description");
-    const sectionRefs = {
-        Description: useRef(null),
-        Amenities: useRef(null),
-        Rooms: useRef(null),
-        Reviews: useRef(null),
-        "HOTEL POLICY": useRef(null),
-    };
+    const isClickScrollingRef = useRef(false);
+    const descriptionRef = useRef(null);
+    const amenitiesRef = useRef(null);
+    const roomsRef = useRef(null);
+    const reviewsRef = useRef(null);
+    const policyRef = useRef(null);
+
+    const sectionRefs = useMemo(
+        () => ({
+            Description: descriptionRef,
+            Amenities: amenitiesRef,
+            Rooms: roomsRef,
+            "HOTEL POLICY": policyRef,
+            Reviews: reviewsRef,
+        }),
+        [],
+    );
     const router = useRouter();
     const roundedRating = Math.max(
         0,
@@ -516,14 +526,74 @@ const HotelDetaislMobileView = () => {
     }
 
 
-    const handleTabChange = (tab) => {
+    const handleTabChange = useCallback((tab) => {
         setActiveTab(tab);
+        isClickScrollingRef.current = true;
 
         sectionRefs[tab]?.current?.scrollIntoView({
             behavior: "smooth",
             block: "start",
         });
-    };
+
+        setTimeout(() => {
+            isClickScrollingRef.current = false;
+        }, 800);
+    }, [sectionRefs]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return undefined;
+
+        let animId = null;
+
+        const handleScroll = () => {
+            if (isClickScrollingRef.current) return;
+
+            const scrollPosition = window.scrollY + 180;
+            const entries = Object.entries(sectionRefs)
+                .map(([name, ref]) => {
+                    if (!ref.current) return null;
+                    const rect = ref.current.getBoundingClientRect();
+                    const top = rect.top + window.scrollY;
+                    return { name, top };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.top - b.top);
+
+            if (!entries.length) return;
+
+            const isAtBottom =
+                window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50;
+
+            if (isAtBottom) {
+                setActiveTab(entries[entries.length - 1].name);
+                return;
+            }
+
+            let currentTab = entries[0].name;
+            for (let i = 0; i < entries.length; i++) {
+                if (scrollPosition >= entries[i].top) {
+                    currentTab = entries[i].name;
+                } else {
+                    break;
+                }
+            }
+
+            setActiveTab(currentTab);
+        };
+
+        const onScroll = () => {
+            if (animId) cancelAnimationFrame(animId);
+            animId = requestAnimationFrame(handleScroll);
+        };
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        handleScroll();
+
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            if (animId) cancelAnimationFrame(animId);
+        };
+    }, [sectionRefs]);
     return (
         <div className={styles.HotelDetaislMobileViewWrapper}>
             <div className={styles.HotelDetaislMobileViewContainer}>

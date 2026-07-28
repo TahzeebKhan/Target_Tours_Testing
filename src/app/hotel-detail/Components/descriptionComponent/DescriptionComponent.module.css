@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 48px;
 }
 .heading {
   font-family: Antic Didone;

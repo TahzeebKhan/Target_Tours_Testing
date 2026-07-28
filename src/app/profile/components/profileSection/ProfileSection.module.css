@@ -217,6 +217,12 @@ color:#1A2029;
   background: white;
 }
 
+.phoneInputWrap:has(.phoneInput:disabled) {
+  background: #fafbfc;
+  color: rgba(26, 32, 41, 0.72);
+  cursor: not-allowed;
+}
+
 .countryDropdown {
   position: relative;
   height: 100%;
@@ -242,7 +248,8 @@ color:#1A2029;
 }
 
 .countryTrigger:disabled {
-  cursor: default;
+  color: rgba(26, 32, 41, 0.72);
+  cursor: not-allowed;
 }
 
 .countryTrigger::after {

@@ -24,6 +24,71 @@ const PRICE_BUCKETS = [
   { key: "17000+", label: "₹17000+", min: 17000, max: null },
 ];
 
+const DEFAULT_FILTER_SECTIONS = [
+  {
+    key: "price",
+    title: "PRICE PER NIGHT",
+    options: PRICE_BUCKETS.map((bucket) => ({ ...bucket, count: 0 })),
+  },
+  {
+    key: "starCategory",
+    title: "STAR CATEGORY",
+    options: ["1", "2", "3", "4", "5"].map((value) => ({
+      key: value,
+      value,
+      label: value,
+      count: 0,
+    })),
+  },
+  {
+    key: "hotelAmenities",
+    title: "HOTEL AMENITIES",
+    searchable: true,
+    searchPlaceholder: "Search amenities",
+    options: [
+      "Air Conditioning",
+      "Airport Shuttle",
+      "Arcade/Game Room",
+      "ATM",
+      "Banquet",
+      "Breakfast",
+      "Parking",
+      "Restaurant",
+      "Swimming Pool",
+      "Wi-Fi",
+    ].map((label) => ({ key: label, value: label, label, count: 0 })),
+  },
+  {
+    key: "providers",
+    title: "PROVIDERS",
+    options: [{ key: "akbar", value: "akbar", label: "akbar", count: 0 }],
+  },
+  {
+    key: "refundable",
+    title: "REFUNDABLE",
+    options: [
+      {
+        key: "Refundable",
+        value: "Refundable",
+        label: "Refundable",
+        count: 0,
+      },
+    ],
+  },
+  {
+    key: "freeCancellation",
+    title: "CANCELLATION",
+    options: [
+      {
+        key: "FreeCancellation",
+        value: "FreeCancellation",
+        label: "Free Cancellation",
+        count: 0,
+      },
+    ],
+  },
+];
+
 const API_FILTER_SECTION_CONFIG = {
   PriceGroup: {
     key: "price",
@@ -55,15 +120,42 @@ const API_FILTER_SECTION_CONFIG = {
     searchable: true,
     searchPlaceholder: "Search landmarks",
   },
+  BreakfastIncluded: {
+    key: "breakfastIncluded",
+    title: "BREAKFAST",
+  },
+  FreeCancellation: {
+    key: "freeCancellation",
+    title: "CANCELLATION",
+  },
+  Refundable: {
+    key: "refundable",
+    title: "REFUNDABLE",
+  },
+  Neighbourhoods: {
+    key: "neighbourhoods",
+    title: "NEIGHBOURHOODS",
+    searchable: true,
+    searchPlaceholder: "Search neighbourhoods",
+  },
+  Providers: {
+    key: "providers",
+    title: "PROVIDERS",
+  },
 };
 
 const API_FILTER_CATEGORY_ALIASES = {
   PriceGroup: ["PriceGroup", "priceGroup", "priceGroups", "priceBuckets", "price_ranges", "priceRanges", "price"],
-  StarRating: ["StarRating", "starRating", "star_rating", "stars", "hotelStars", "starCategory"],
+  StarRating: ["StarRating", "starRating", "starRatings", "star_rating", "stars", "hotelStars", "starCategory"],
   Facilities: ["Facilities", "facilities", "hotelAmenities", "hotel_amenities", "amenities"],
   HotelChain: ["HotelChain", "hotelChain", "hotelChains", "hotel_chains", "chains", "brands"],
   PropertyType: ["PropertyType", "propertyType", "property_type", "propertyTypes", "property_types"],
   Attraction: ["Attraction", "attraction", "attractions", "nearByAttractions", "nearbyAttractions"],
+  BreakfastIncluded: ["BreakfastIncluded", "breakfastIncluded", "breakfast_included"],
+  FreeCancellation: ["FreeCancellation", "freeCancellation", "free_cancellation"],
+  Refundable: ["Refundable", "refundable"],
+  Neighbourhoods: ["Neighbourhoods", "neighbourhoods", "neighborhoods"],
+  Providers: ["Providers", "providers"],
 };
 
 const FILTER_GROUP_ALIASES = {
@@ -135,10 +227,33 @@ const mapObjectFilters = (filterData = {}) =>
   Object.entries(filterData)
     .map(([category, value]) => {
       const canonicalCategory = getCanonicalApiCategory(category);
-      const options =
+      let options =
         value && typeof value === "object" && !Array.isArray(value) && value.options
           ? value.options
           : value;
+
+      if (
+        options &&
+        typeof options === "object" &&
+        !Array.isArray(options) &&
+        "available" in options
+      ) {
+        options = options.available
+          ? [
+              {
+                key: canonicalCategory,
+                value: canonicalCategory,
+                label:
+                  canonicalCategory === "BreakfastIncluded"
+                    ? "Breakfast Included"
+                    : canonicalCategory === "FreeCancellation"
+                      ? "Free Cancellation"
+                      : "Refundable",
+                count: options.count || 0,
+              },
+            ]
+          : [];
+      }
 
       return {
         category: canonicalCategory,
@@ -147,18 +262,34 @@ const mapObjectFilters = (filterData = {}) =>
     })
     .filter((filter) => getApiCategoryConfig(filter.category) && filter.options.length);
 
+const getFilterRoot = (filterData) =>
+  filterData?.data?.filterData ||
+  filterData?.filterData ||
+  filterData?.data ||
+  filterData ||
+  {};
+
 const getApiFilterList = (filterData) => {
-  if (Array.isArray(filterData?.filters)) return filterData.filters;
-  if (Array.isArray(filterData?.data?.filters)) return filterData.data.filters;
-  if (Array.isArray(filterData?.filterData?.filters)) return filterData.filterData.filters;
-  if (Array.isArray(filterData)) return filterData;
-  if (filterData?.filterData && typeof filterData.filterData === "object") {
-    return mapObjectFilters(filterData.filterData);
+  const root = getFilterRoot(filterData);
+
+  if (Array.isArray(root?.filters)) return root.filters;
+  if (Array.isArray(root)) return root;
+  if (root?.filters && typeof root.filters === "object") {
+    const nestedFilters = mapObjectFilters(root.filters);
+    const rootFilters = mapObjectFilters(root);
+    const nestedCategories = new Set(
+      nestedFilters.map((filter) => normalizeFilterKey(filter.category)),
+    );
+
+    return [
+      ...nestedFilters,
+      ...rootFilters.filter(
+        (filter) =>
+          !nestedCategories.has(normalizeFilterKey(filter.category)),
+      ),
+    ];
   }
-  if (filterData?.data && typeof filterData.data === "object") {
-    return mapObjectFilters(filterData.data);
-  }
-  if (filterData && typeof filterData === "object") return mapObjectFilters(filterData);
+  if (root && typeof root === "object") return mapObjectFilters(root);
   return [];
 };
 
@@ -167,9 +298,6 @@ const getApiFilterByCategory = (filterData, category) =>
     (item) => normalizeFilterKey(item?.category) === normalizeFilterKey(category),
   );
 
-const getFilterRoot = (filterData) =>
-  filterData?.filterData || filterData?.filters || filterData?.data || filterData || {};
-
 const getFilterGroup = (filterData, group) => {
   if (group === "priceBuckets") {
     const priceFilter = getApiFilterByCategory(filterData, "PriceGroup");
@@ -177,15 +305,18 @@ const getFilterGroup = (filterData, group) => {
   }
 
   const root = getFilterRoot(filterData);
+  const nestedRoot =
+    root?.filters && !Array.isArray(root.filters) ? root.filters : null;
   const aliases = FILTER_GROUP_ALIASES[group] || [group];
 
   for (const alias of aliases) {
     const apiFilter = getApiFilterByCategory(filterData, alias);
     if (apiFilter?.options) return apiFilter.options;
     if (root?.[alias] !== undefined) return root[alias];
+    if (nestedRoot?.[alias] !== undefined) return nestedRoot[alias];
   }
 
-  return root?.[group];
+  return root?.[group] ?? nestedRoot?.[group];
 };
 
 const getOptionCount = (option) =>
@@ -248,6 +379,47 @@ const getCount = (filterData, group, key, label = key) => {
 const getRangeNumber = (value, fallback) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+};
+
+const extractPriceNumber = (hotel = {}) => {
+  const rawPrice =
+    hotel.price ??
+    hotel.amount ??
+    hotel.minRate ??
+    hotel.totalRate ??
+    hotel.baseRate ??
+    hotel.rate ??
+    hotel.raw?.price ??
+    hotel.raw?.amount ??
+    hotel.raw?.minRate;
+
+  if (rawPrice === null || rawPrice === undefined) return null;
+  if (typeof rawPrice === "number") return rawPrice;
+
+  if (typeof rawPrice === "object") {
+    return extractPriceNumber(rawPrice);
+  }
+
+  const numeric = Number(String(rawPrice).replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
+const getPriceBucketLiveCount = (hotels = [], bucket) => {
+  if (!Array.isArray(hotels) || !hotels.length) return 0;
+
+  return hotels.filter((hotel) => {
+    const price = extractPriceNumber(hotel);
+    if (price === null) return false;
+
+    const min = bucket.min ?? 0;
+    const max = bucket.max;
+
+    if (max === null || max === undefined) {
+      return price >= min;
+    }
+
+    return price >= min && price < max;
+  }).length;
 };
 
 const getApiOptionKey = (option = {}, category = "") => {
@@ -424,7 +596,7 @@ export default function HotelsFilters() {
   const searchParams = useSearchParams();
   const {
     filterData,
-    isLoading,
+    hotels,
     meta,
     setAppliedFilters,
     resetFilters: resetAppliedFilters,
@@ -436,6 +608,9 @@ export default function HotelsFilters() {
     filterMemoryRef.current?.selectedFilters || {},
   );
   const [budget, setBudget] = useState(getStoredBudget(filterMemoryRef.current));
+  const [budgetDraft, setBudgetDraft] = useState(() =>
+    getStoredBudget(filterMemoryRef.current).map(String),
+  );
   const [budgetTouched, setBudgetTouched] = useState(
     Boolean(filterMemoryRef.current?.budgetTouched),
   );
@@ -453,23 +628,86 @@ export default function HotelsFilters() {
     getHotelSearchCenter(searchParams, meta?.channel || ""),
   );
   const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
-  const apiPriceSection = apiSections.find((section) => section.key === "price");
-  const renderedSections = apiSections.filter((section) => section.key !== "price");
-  const hasApiFilters = apiSections.length > 0;
-  const isFilterLoading = !hasApiFilters && (meta?.isFilterLoading || isLoading);
+  const filterSections = useMemo(() => {
+    const remainingApiSections = new Map(
+      apiSections.map((section) => [section.key, section]),
+    );
+    const mergedSections = DEFAULT_FILTER_SECTIONS.map((defaultSection) => {
+      if (defaultSection.key === "price") {
+        remainingApiSections.delete("price");
+        return defaultSection;
+      }
+      const apiSection = remainingApiSections.get(defaultSection.key);
+      if (!apiSection) return defaultSection;
+
+      remainingApiSections.delete(defaultSection.key);
+      return apiSection;
+    });
+
+    return [...mergedSections, ...remainingApiSections.values()];
+  }, [apiSections]);
+
+  
+  const priceSection = filterSections.find((section) => section.key === "price");
+  const renderedSections = filterSections.filter(
+    (section) =>
+      section.key !== "price" &&
+      section.key !== "providers" &&
+      section.key !== "refundable",
+  );
   const mapPreviewUrl = getGoogleMapEmbedUrl(mapPreviewCenter, 13);
 
   const { min: minPrice, max: maxPrice } = getPriceRange(filterData);
-  const safeBudget = [
-    Math.min(Math.max(budget[0], minPrice), maxPrice),
-    Math.min(Math.max(budget[1], minPrice), maxPrice),
-  ];
+  const safeBudget = useMemo(
+    () => [
+      Math.min(Math.max(budget[0], minPrice), maxPrice),
+      Math.min(Math.max(budget[1], minPrice), maxPrice),
+    ],
+    [budget, maxPrice, minPrice],
+  );
 
   useEffect(() => {
-    if (budgetTouched) return;
+    if (budgetTouched) {
+      // A stale/equal saved range can collapse to the new socket minimum and
+      // silently exclude every hotel. Drop only that invalid saved budget.
+      if (
+        filterData &&
+        maxPrice > minPrice &&
+        safeBudget[1] <= safeBudget[0]
+      ) {
+        const nextBudget = [minPrice, maxPrice];
+        setBudget(nextBudget);
+        setBudgetDraft(nextBudget.map(String));
+        setBudgetTouched(false);
+        setAppliedFilters((currentFilters) => {
+          const { budget: ignoredBudget, ...filtersWithoutBudget } =
+            currentFilters || {};
+          void ignoredBudget;
+          return filtersWithoutBudget;
+        });
+      }
+      return;
+    }
 
-    setBudget([minPrice, maxPrice]);
-  }, [budgetTouched, maxPrice, minPrice]);
+    setBudget((currentBudget) =>
+      currentBudget[0] === minPrice && currentBudget[1] === maxPrice
+        ? currentBudget
+        : [minPrice, maxPrice],
+    );
+    setBudgetDraft((currentDraft) =>
+      currentDraft[0] === String(minPrice) &&
+      currentDraft[1] === String(maxPrice)
+        ? currentDraft
+        : [String(minPrice), String(maxPrice)],
+    );
+  }, [
+    budgetTouched,
+    filterData,
+    maxPrice,
+    minPrice,
+    safeBudget,
+    setAppliedFilters,
+  ]);
 
   useEffect(() => {
     setMapPreviewCenter(getHotelSearchCenter(searchParams, meta?.channel || ""));
@@ -477,14 +715,11 @@ export default function HotelsFilters() {
 
   const selectedChips = useMemo(() => {
     const chips = [];
-    const chipSections = apiPriceSection
-      ? [...apiSections, apiPriceSection]
-      : apiSections;
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
       Object.entries(values || {}).forEach(([key, isSelected]) => {
         if (!isSelected) return;
-        const section = chipSections.find((item) => item.key === group);
+        const section = filterSections.find((item) => item.key === group);
         const option =
           section?.options.find((item) => item.key === key) ||
           PRICE_BUCKETS.find((item) => item.key === key);
@@ -497,20 +732,27 @@ export default function HotelsFilters() {
     });
 
     return chips;
-  }, [apiPriceSection, apiSections, selectedFilters]);
+  }, [filterSections, selectedFilters]);
 
-  const buildAppliedFilters = (filters, { includeBudget = false } = {}) => ({
-    ...filters,
-    ...(hotelSearchText.trim() && {
-      hotelSearchText: hotelSearchText.trim(),
-    }),
-    ...((budgetTouched || includeBudget) && {
-      budget: {
-        min: safeBudget[0],
-        max: safeBudget[1],
-      },
-    }),
-  });
+  const buildAppliedFilters = (
+    filters,
+    { includeBudget = false, budgetOverride = null } = {},
+  ) => {
+    const appliedBudget = budgetOverride || safeBudget;
+
+    return {
+      ...filters,
+      ...(hotelSearchText.trim() && {
+        hotelSearchText: hotelSearchText.trim(),
+      }),
+      ...((budgetTouched || includeBudget) && {
+        budget: {
+          min: appliedBudget[0],
+          max: appliedBudget[1],
+        },
+      }),
+    };
+  };
 
   useEffect(() => {
     if (hasRestoredFiltersRef.current) return;
@@ -557,8 +799,10 @@ export default function HotelsFilters() {
   };
 
   const resetFilters = () => {
+    const nextBudget = [minPrice, maxPrice];
     setSelectedFilters({});
-    setBudget([minPrice, maxPrice]);
+    setBudget(nextBudget);
+    setBudgetDraft(nextBudget.map(String));
     setBudgetTouched(false);
     setHotelSearchText("");
     setSearchTerms({});
@@ -567,8 +811,46 @@ export default function HotelsFilters() {
     resetAppliedFilters();
   };
 
-  const applyFilters = ({ includeBudget = false } = {}) => {
-    setAppliedFilters(buildAppliedFilters(selectedFilters, { includeBudget }));
+  const normalizeBudgetDraft = () => {
+    const parsedMin =
+      String(budgetDraft[0]).trim() === "" ? Number.NaN : Number(budgetDraft[0]);
+    const parsedMax =
+      String(budgetDraft[1]).trim() === "" ? Number.NaN : Number(budgetDraft[1]);
+    const nextMin = Math.min(
+      Math.max(Number.isFinite(parsedMin) ? parsedMin : minPrice, minPrice),
+      maxPrice,
+    );
+    const nextMax = Math.min(
+      Math.max(Number.isFinite(parsedMax) ? parsedMax : maxPrice, nextMin),
+      maxPrice,
+    );
+
+    return [nextMin, nextMax];
+  };
+
+  const commitBudgetDraft = () => {
+    const nextBudget = normalizeBudgetDraft();
+    setBudget(nextBudget);
+    setBudgetDraft(nextBudget.map(String));
+    return nextBudget;
+  };
+
+  const applyFilters = ({
+    includeBudget = false,
+    budgetOverride = null,
+  } = {}) => {
+    setAppliedFilters(
+      buildAppliedFilters(selectedFilters, {
+        includeBudget,
+        budgetOverride,
+      }),
+    );
+  };
+
+  const submitBudget = () => {
+    const nextBudget = commitBudgetDraft();
+    setBudgetTouched(true);
+    applyFilters({ includeBudget: true, budgetOverride: nextBudget });
   };
 
   return (
@@ -650,27 +932,29 @@ export default function HotelsFilters() {
 
       <div className={styles.border} />
 
-      {isFilterLoading && <FilterLoadingState />}
-
-      {!isFilterLoading && !hasApiFilters && (
-        <section className={styles.section}>
-          <p className={styles.emptyFilters}>No filters available.</p>
-        </section>
-      )}
-
-      {apiPriceSection && (
+      {priceSection && (
         <>
           <section className={styles.section}>
             <h4 className={styles.sectionTitle}>PRICE PER NIGHT</h4>
-            {apiPriceSection.options.map((bucket) => (
-              <CheckboxRow
-                key={bucket.key}
-                checked={!!selectedFilters.price?.[bucket.key]}
-                label={bucket.label}
-                count={bucket.count ?? getCount(filterData, "priceBuckets", bucket.key, bucket.label)}
-                onChange={() => toggleFilter("price", bucket.key)}
-              />
-            ))}
+            {PRICE_BUCKETS.map((bucket) => {
+              const apiCount = getCount(
+                filterData,
+                "priceBuckets",
+                bucket.key,
+                bucket.label,
+              );
+              const count = apiCount || getPriceBucketLiveCount(hotels, bucket);
+
+              return (
+                <CheckboxRow
+                  key={bucket.key}
+                  checked={!!selectedFilters.price?.[bucket.key]}
+                  label={bucket.label}
+                  count={count}
+                  onChange={() => toggleFilter("price", bucket.key)}
+                />
+              );
+            })}
           </section>
 
           <div className={styles.border} />
@@ -684,11 +968,15 @@ export default function HotelsFilters() {
                   type="number"
                   min={minPrice}
                   max={safeBudget[1]}
-                  value={safeBudget[0]}
+                  value={budgetDraft[0]}
                   onChange={(event) => {
                     setBudgetTouched(true);
-                    setBudget([Math.min(Number(event.target.value), safeBudget[1]), safeBudget[1]]);
+                    setBudgetDraft((currentBudget) => [
+                      event.target.value,
+                      currentBudget[1],
+                    ]);
                   }}
+                  onBlur={commitBudgetDraft}
                 />
               </label>
               <label className={styles.budgetInput}>
@@ -697,11 +985,15 @@ export default function HotelsFilters() {
                   type="number"
                   min={safeBudget[0]}
                   max={maxPrice}
-                  value={safeBudget[1]}
+                  value={budgetDraft[1]}
                   onChange={(event) => {
                     setBudgetTouched(true);
-                    setBudget([safeBudget[0], Math.max(Number(event.target.value), safeBudget[0])]);
+                    setBudgetDraft((currentBudget) => [
+                      currentBudget[0],
+                      event.target.value,
+                    ]);
                   }}
+                  onBlur={commitBudgetDraft}
                 />
               </label>
             </div>
@@ -709,7 +1001,7 @@ export default function HotelsFilters() {
             <button
               type="button"
               className={styles.budgetSubmit}
-              onClick={() => applyFilters({ includeBudget: true })}
+              onClick={submitBudget}
             >
               SUBMIT
             </button>
@@ -813,22 +1105,6 @@ function FilterSection({
           {isExpanded ? "SEE LESS" : `SEE MORE (${visibleOptions.length - FILTER_OPTION_PREVIEW_LIMIT})`}
         </button>
       )}
-    </section>
-  );
-}
-
-function FilterLoadingState() {
-  return (
-    <section className={styles.section}>
-      <div className={styles.filterLoadingHeader}></div>
-      <div className={styles.filterLoadingSearch}></div>
-      {Array.from({ length: 8 }).map((_, index) => (
-        <div key={`filter-loading-${index}`} className={styles.filterLoadingRow}>
-          <span className={styles.filterLoadingBox}></span>
-          <span className={styles.filterLoadingLabel}></span>
-          <span className={styles.filterLoadingCount}></span>
-        </div>
-      ))}
     </section>
   );
 }

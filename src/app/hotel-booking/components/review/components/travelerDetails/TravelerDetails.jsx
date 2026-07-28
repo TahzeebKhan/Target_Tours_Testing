@@ -6,16 +6,16 @@ import {
 } from "@/app/profile/components/profileSection/CountryName";
 
 const createTraveler = (overrides = {}) => ({
-    title: "Mr",
-    firstName: "Mukul",
-    middleName: "Kumar",
-    lastName: "Mishra",
-    gender: "male",
-    passengerType: "A",
-    age: "25",
-    countryCode: "IN",
-    mobile: "8532907106",
-    email: "mukul.mishra@webninjaz.com",
+    title: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    passengerType: "",
+    age: "",
+    countryCode: "",
+    mobile: "",
+    email: "",
     ...overrides,
 });
 const states = [
@@ -209,7 +209,7 @@ const buildTravelersFromRoom = (room = {}, roomIndex = 0) => {
     const resolvedChildAges = childAges.length ? childAges : fallbackChildAges;
 
     return [
-      ...Array.from({ length: adults }, () => createTraveler({ passengerType: "A", age: "25" })),
+      ...Array.from({ length: adults }, () => createTraveler()),
       ...Array.from({ length: children }, (_, childIndex) =>
         createTraveler({
           passengerType: "C",
@@ -226,8 +226,6 @@ const mergeTravelers = (current = [], expected = []) =>
   expected.map((traveler, index) => ({
     ...traveler,
     ...(current[index] || {}),
-    passengerType: traveler.passengerType,
-    age: traveler.passengerType === "C" ? traveler.age : current[index]?.age || traveler.age,
   }));
 
 const getOccupancyGuestCount = (occupancy = {}) =>
@@ -449,21 +447,104 @@ const StateDropdown = ({ value, onChange, required }) => {
   );
 };
 
+const GUEST_DETAILS_CACHE_KEY = "hotelGuestDetailsCache";
+
+const readGuestDetailsCache = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(GUEST_DETAILS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 const TravelerDetails = ({ rooms = [], onChange }) => {
-    const [roomGuests, setRoomGuests] = useState({});
-    const [collapsedGuests, setCollapsedGuests] = useState({});
-    const [bookingContact, setBookingContact] = useState({
-        title: "Mr",
-        firstName: "Mukul",
-        lastName: "Mishra",
-        countryCode: "IN",
-        mobile: "8532907106",
-        email: "mukul.mishra@webninjaz.com",
-        address: "Noida",
-        state: "delhi",
-        city: "Noida",
-        pin: "207001",
+    const [roomGuests, setRoomGuests] = useState(() => {
+      const cached = readGuestDetailsCache();
+      return cached?.roomGuests || {};
     });
+    const [collapsedGuests, setCollapsedGuests] = useState({});
+    const [bookingContact, setBookingContact] = useState(() => {
+      const cached = readGuestDetailsCache();
+      return (
+        cached?.bookingContact || {
+          title: "Mr",
+          firstName: "",
+          lastName: "",
+          countryCode: "IN",
+          mobile: "",
+          email: "",
+          address: "",
+          state: "",
+          city: "",
+          pin: "",
+        }
+      );
+    });
+    const [touched, setTouched] = useState({});
+    const [showAllErrors, setShowAllErrors] = useState(false);
+
+    useEffect(() => {
+        const handleStartBookingEvent = () => {
+            setShowAllErrors(true);
+        };
+        window.addEventListener("hotel-start-booking", handleStartBookingEvent);
+        return () => window.removeEventListener("hotel-start-booking", handleStartBookingEvent);
+    }, []);
+
+    const handleBlur = (fieldKey) => {
+        setTouched((prev) => ({ ...prev, [fieldKey]: true }));
+    };
+
+    const getGuestFieldError = (traveler, field) => {
+        if (field === "title" && !traveler.title) return "Title is required";
+        if (field === "firstName" && !traveler.firstName) return "First name is required";
+        if (field === "lastName" && !traveler.lastName) return "Last name is required";
+        if (field === "gender" && !traveler.gender) return "Gender is required";
+        if (field === "passengerType" && !traveler.passengerType) return "Passenger type is required";
+        if (field === "age") {
+            if (!traveler.age) return "Age is required";
+            const ageNum = Number(traveler.age);
+            if (isNaN(ageNum) || ageNum <= 0) return "Please enter a valid age";
+            if (ageNum > 150) return "Age cannot be greater than 150";
+        }
+        if (field === "email" && traveler.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(traveler.email)) {
+            return "Please enter a valid email address (e.g., name@example.com)";
+        }
+        if (field === "mobile" && traveler.mobile && traveler.mobile.length < 7) {
+            return "Please enter a valid mobile number";
+        }
+        return "";
+    };
+
+    const getBookingContactFieldError = (field) => {
+        const val = bookingContact[field] || "";
+        if (field === "title" && !val) return "Title is required";
+        if (field === "firstName" && !val) return "First name is required";
+        if (field === "lastName" && !val) return "Last name is required";
+        if (field === "countryCode" && !val) return "Country code is required";
+        if (field === "mobile") {
+            if (!val) return "Mobile number is required";
+            if (val.length < 7) return "Please enter a valid mobile number";
+        }
+        if (field === "email") {
+            if (!val) return "Email address is required";
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Please enter a valid email address (e.g., name@example.com)";
+        }
+        if (field === "address" && !val) return "Address is required";
+        if (field === "state" && !val) return "State is required";
+        if (field === "city" && !val) return "City is required";
+        if (field === "pin") {
+            if (!val) return "PIN is required";
+            if (val.length < 6) return "PIN code must be 6 digits";
+        }
+        return "";
+    };
+
+    const shouldShowFieldError = (key, errorMsg) => {
+        return errorMsg && (touched[key] || showAllErrors);
+    };
 
     useEffect(() => {
         setRoomGuests(prev => {
@@ -507,6 +588,16 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
 
     useEffect(() => {
         onChange?.({ roomGuests, bookingContact });
+        if (typeof window !== "undefined") {
+          try {
+            window.sessionStorage.setItem(
+              GUEST_DETAILS_CACHE_KEY,
+              JSON.stringify({ roomGuests, bookingContact }),
+            );
+          } catch {
+            // Ignore storage failures.
+          }
+        }
     }, [roomGuests, bookingContact, onChange]);
 
     const addTraveler = (room, roomIndex = 0, maxGuests = Infinity) => {
@@ -545,16 +636,50 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
     };
 
     const updateTraveler = (roomId, index, field, value) => {
+      let sanitizedValue = value;
+
+  // 1. Name fields: allow only letters and spaces
+  if (["firstName", "middleName", "lastName"].includes(field)) {
+    sanitizedValue = value.replace(/[^a-zA-Z\s]/g, "");
+  }
+
+  // 2. Numeric fields: allow only positive digits (removes negative signs, letters, and decimals)
+  if (["age", "mobile"].includes(field)) {
+    sanitizedValue = value.replace(/\D/g, "");
+
+    // Optional limit: cap mobile numbers at 15 digits
+    if (field === "mobile") {
+      sanitizedValue = sanitizedValue.slice(0, 15);
+    }
+  }
+
+  // 3. Email field: remove spaces
+  if (field === "email") {
+    sanitizedValue = value.trim();
+  }
         setRoomGuests(prev => ({
             ...prev,
-            [roomId]: (prev[roomId] || []).map((traveler, travelerIndex) =>
-                travelerIndex === index ? { ...traveler, [field]: value } : traveler,
-            ),
+            [roomId]: (prev[roomId] || []).map((traveler, travelerIndex) => {
+                if (travelerIndex !== index) return traveler;
+                const updated = { ...traveler, [field]: sanitizedValue };
+                if (field === "title") {
+                    if (["Mr", "Master"].includes(sanitizedValue)) {
+                        updated.gender = "male";
+                    } else if (["Ms", "Mrs", "Miss"].includes(sanitizedValue)) {
+                        updated.gender = "female";
+                    }
+                }
+                return updated;
+            }),
         }));
     };
 
     const updateBookingContact = (field, value) => {
-        setBookingContact(prev => ({ ...prev, [field]: value }));
+        let sanitizedValue = value;
+        if (field === "pin") {
+          sanitizedValue = value.replace(/\D/g, "").slice(0, 6);
+        }
+        setBookingContact(prev => ({ ...prev, [field]: sanitizedValue }));
     };
 
     return (
@@ -623,7 +748,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                   <div className={styles.cardBody}>
                     <div className={styles.grid}>
                       <div className={`${styles.field} ${styles.selectField}`}>
-                        <label className={styles.label}>Title</label>
+                        <label className={styles.label}>
+                          Title <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <select
                           className={styles.select}
                           required
@@ -636,14 +763,23 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-title`)}
                         >
+                          <option value="" disabled hidden>
+                            Select
+                          </option>
                           <option value="Mr">Mr</option>
                           <option value="Ms">Ms</option>
                           <option value="Mrs">Mrs</option>
                         </select>
+                        {shouldShowFieldError(`guest-${room.id}-${index}-title`, getGuestFieldError(traveler, "title")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "title")}</span>
+                        )}
                       </div>
                       <div className={styles.field}>
-                        <label className={styles.label}>First Name</label>
+                        <label className={styles.label}>
+                          First Name <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <input
                           className={styles.input}
                           type="text"
@@ -657,8 +793,12 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-firstName`)}
                           placeholder="Enter First Name"
                         />
+                        {shouldShowFieldError(`guest-${room.id}-${index}-firstName`, getGuestFieldError(traveler, "firstName")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "firstName")}</span>
+                        )}
                       </div>
                       <div className={styles.field}>
                         <label className={styles.label}>Middle Name</label>
@@ -674,12 +814,15 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-middleName`)}
                           placeholder="Enter Middle Name"
                         />
                       </div>
 
                       <div className={styles.field}>
-                        <label className={styles.label}>Last Name</label>
+                        <label className={styles.label}>
+                          Last Name <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <input
                           className={styles.input}
                           type="text"
@@ -693,12 +836,18 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-lastName`)}
                           placeholder="Enter Last Name"
                         />
+                        {shouldShowFieldError(`guest-${room.id}-${index}-lastName`, getGuestFieldError(traveler, "lastName")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "lastName")}</span>
+                        )}
                       </div>
 
                       <div className={`${styles.field} ${styles.selectField}`}>
-                        <label className={styles.label}>Gender</label>
+                        <label className={styles.label}>
+                          Gender <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <select
                           className={styles.select}
                           required
@@ -711,6 +860,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-gender`)}
                         >
                           <option value="" disabled hidden>
                             Select
@@ -718,9 +868,14 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           <option value="male">Male</option>
                           <option value="female">Female</option>
                         </select>
+                        {shouldShowFieldError(`guest-${room.id}-${index}-gender`, getGuestFieldError(traveler, "gender")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "gender")}</span>
+                        )}
                       </div>
                       <div className={`${styles.field} ${styles.selectField}`}>
-                        <label className={styles.label}>Passenger Type</label>
+                        <label className={styles.label}>
+                          Passenger Type <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <select
                           className={styles.select}
                           required
@@ -733,6 +888,7 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-passengerType`)}
                         >
                           <option value="" disabled hidden>
                             Select
@@ -740,15 +896,21 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           <option value="A">Adult</option>
                           <option value="C">Child</option>
                         </select>
+                        {shouldShowFieldError(`guest-${room.id}-${index}-passengerType`, getGuestFieldError(traveler, "passengerType")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "passengerType")}</span>
+                        )}
                       </div>
 
 
                       <div className={styles.field}>
-                        <label className={styles.label}>Age</label>
+                        <label className={styles.label}>
+                          Age <span style={{ color: "#d92d20" }}>*</span>
+                        </label>
                         <input
                           className={styles.input}
                           type="number"
-                          min="0"
+                          min="1"
+                          max="150"
                           value={traveler.age}
                           onChange={(event) =>
                             updateTraveler(
@@ -758,10 +920,14 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-age`)}
                           placeholder="Enter Age"
                         />
+                        {shouldShowFieldError(`guest-${room.id}-${index}-age`, getGuestFieldError(traveler, "age")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "age")}</span>
+                        )}
                       </div>
-                        <div className={styles.field}>
+                      <div className={styles.field}>
                         <label className={styles.label}>Country Code</label>
                         <CountryCodeDropdown
                           value={traveler.countryCode}
@@ -775,11 +941,12 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                           }
                         />
                       </div>
-                            <div className={styles.field}>
+                      <div className={styles.field}>
                         <label className={styles.label}>Mobile Number</label>
                         <input
                           className={styles.input}
                           type="text"
+                          inputMode="numeric"
                           value={traveler.mobile}
                           onChange={(event) =>
                             updateTraveler(
@@ -789,8 +956,12 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
-                          placeholder="Mobile number (optional)"
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-mobile`)}
+                          placeholder="Enter Mobile Number"
                         />
+                        {shouldShowFieldError(`guest-${room.id}-${index}-mobile`, getGuestFieldError(traveler, "mobile")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "mobile")}</span>
+                        )}
                       </div>
 
                     </div>
@@ -810,8 +981,12 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                               event.target.value,
                             )
                           }
-                          placeholder="Email (Optional)"
+                          onBlur={() => handleBlur(`guest-${room.id}-${index}-email`)}
+                          placeholder="Enter Email"
                         />
+                        {shouldShowFieldError(`guest-${room.id}-${index}-email`, getGuestFieldError(traveler, "email")) && (
+                          <span className={styles.errorMessage}>{getGuestFieldError(traveler, "email")}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -832,7 +1007,9 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
 
           <div className={styles.grid}>
             <div className={`${styles.field} ${styles.selectField}`}>
-              <label className={styles.label}>Title</label>
+              <label className={styles.label}>
+                Title <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <select
                 className={styles.select}
                 required
@@ -840,15 +1017,24 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("title", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-title")}
               >
+                <option value="" disabled hidden>
+                  Select
+                </option>
                 <option value="Mr">Mr</option>
                 <option value="Ms">Ms</option>
                 <option value="Mrs">Mrs</option>
               </select>
+              {shouldShowFieldError("contact-title", getBookingContactFieldError("title")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("title")}</span>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>First Name</label>
+              <label className={styles.label}>
+                First Name <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
@@ -856,12 +1042,18 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("firstName", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-firstName")}
                 placeholder="Enter First Name"
               />
+              {shouldShowFieldError("contact-firstName", getBookingContactFieldError("firstName")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("firstName")}</span>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Last Name</label>
+              <label className={styles.label}>
+                Last Name <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
@@ -869,36 +1061,58 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("lastName", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-lastName")}
                 placeholder="Enter Last Name"
               />
+              {shouldShowFieldError("contact-lastName", getBookingContactFieldError("lastName")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("lastName")}</span>
+              )}
             </div>
           </div>
 
           <div className={styles.grid}>
             <div className={styles.field}>
-              <label className={styles.label}>Country Code</label>
+              <label className={styles.label}>
+                Country Code <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <CountryCodeDropdown
                 required
                 value={bookingContact.countryCode}
-                onChange={(value) => updateBookingContact("countryCode", value)}
+                onChange={(value) => {
+                  updateBookingContact("countryCode", value);
+                  handleBlur("contact-countryCode");
+                }}
               />
+              {shouldShowFieldError("contact-countryCode", getBookingContactFieldError("countryCode")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("countryCode")}</span>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Mobile Number</label>
+              <label className={styles.label}>
+                Mobile Number <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
+                type="text"
+                inputMode="numeric"
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
                 value={bookingContact.mobile}
                 onChange={(event) =>
                   updateBookingContact("mobile", event.target.value)
                 }
-                placeholder="Mobile number (optional)"
+                onBlur={() => handleBlur("contact-mobile")}
+                placeholder="Enter Mobile Number"
               />
+              {shouldShowFieldError("contact-mobile", getBookingContactFieldError("mobile")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("mobile")}</span>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Email</label>
+              <label className={styles.label}>
+                Email <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
@@ -907,14 +1121,20 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("email", event.target.value)
                 }
-                placeholder="Email (Optional)"
+                onBlur={() => handleBlur("contact-email")}
+                placeholder="Enter Email"
               />
+              {shouldShowFieldError("contact-email", getBookingContactFieldError("email")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("email")}</span>
+              )}
             </div>
           </div>
 
           <div className={styles.grid}>
             <div className={styles.field}>
-              <label className={styles.label}>Address</label>
+              <label className={styles.label}>
+                Address <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
@@ -922,20 +1142,34 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("address", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-address")}
                 placeholder="Enter Address"
               />
+              {shouldShowFieldError("contact-address", getBookingContactFieldError("address")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("address")}</span>
+              )}
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>State</label>
+              <label className={styles.label}>
+                State <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <StateDropdown
                 required
                 value={bookingContact.state}
-                onChange={(value) => updateBookingContact("state", value)}
+                onChange={(value) => {
+                  updateBookingContact("state", value);
+                  handleBlur("contact-state");
+                }}
               />
+              {shouldShowFieldError("contact-state", getBookingContactFieldError("state")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("state")}</span>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>City</label>
+              <label className={styles.label}>
+                City <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
@@ -943,23 +1177,38 @@ const TravelerDetails = ({ rooms = [], onChange }) => {
                 onChange={(event) =>
                   updateBookingContact("city", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-city")}
                 placeholder="Enter City"
               />
+              {shouldShowFieldError("contact-city", getBookingContactFieldError("city")) && (
+                <span className={styles.errorMessage}>{getBookingContactFieldError("city")}</span>
+              )}
             </div>
           </div>
 
           <div className={styles.grid}>
             <div className={styles.field}>
-              <label className={styles.label}>PIN</label>
+              <label className={styles.label}>
+                PIN <span style={{ color: "#d92d20" }}>*</span>
+              </label>
               <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
                 className={`${styles.input} ${styles.bookingInput}`}
                 required
                 value={bookingContact.pin}
                 onChange={(event) =>
                   updateBookingContact("pin", event.target.value)
                 }
+                onBlur={() => handleBlur("contact-pin")}
                 placeholder="Enter PIN"
               />
+              {shouldShowFieldError("contact-pin", getBookingContactFieldError("pin")) && (
+                <span className={styles.errorMessage}>
+                  {getBookingContactFieldError("pin")}
+                </span>
+              )}
             </div>
           </div>
         </div>
