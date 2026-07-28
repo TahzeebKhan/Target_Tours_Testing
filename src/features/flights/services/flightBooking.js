@@ -310,10 +310,24 @@ const hasSeatLayoutItems = (payload) => {
 const getSeatLayoutFormatted = (payload) => {
   if (!payload || typeof payload !== "object") return null;
 
+  const resultFormattedCandidates = [
+    payload?.results,
+    payload?.data?.results,
+    payload?.data?.data?.results,
+  ].flatMap((results) =>
+    toArray(results).flatMap((result) => [
+      result?.data?.data?.formatted,
+      result?.data?.formatted,
+      result?.result?.data?.formatted,
+      result?.result?.formatted,
+      result?.formatted,
+    ])
+  );
   const candidates = [
     payload?.formatted,
     payload?.data?.formatted,
     payload?.data?.data?.formatted,
+    ...resultFormattedCandidates,
     payload,
   ];
 
