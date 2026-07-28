@@ -1474,6 +1474,9 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
   const pricePayload = unwrapPayload(session?.priceResponse);
   const pricingJourneys = getFormattedJourneys(session?.priceResponse);
   const requestTrips = extractTrips(priceRequest);
+  const searchResponseTrips = extractTrips(
+    session?.selectedFlight?.booking?.priceRequest
+  );
   const ssrRequests = Array.isArray(ssrRequest?.ssr_requests)
     ? ssrRequest.ssr_requests
     : [];
@@ -1532,9 +1535,20 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
         selectedTripFare?.Index,
         selectedTripFare?.index
       );
+      const searchResponseTripIndex = pickFirst(
+        searchResponseTrips?.[index]?.Index,
+        searchResponseTrips?.[index]?.index,
+        index === 0
+          ? session?.selectedFlight?.booking?.index
+          : null,
+        index === 1
+          ? session?.selectedFlight?.inbound?.booking?.index
+          : session?.selectedFlight?.outbound?.booking?.index
+      );
 
       return {
         Index: String(selectedTripIndex || ""),
+        old_Index: String(searchResponseTripIndex || ""),
         OrderID: String(
           pickFirst(
             trip?.OrderID,
@@ -1560,6 +1574,10 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
           selectedRouteFare?.index,
           selectedRouteFare?.Index
         );
+        const searchResponseRouteIndex = pickFirst(
+          searchResponseTrips?.[requestIndex]?.Index,
+          searchResponseTrips?.[requestIndex]?.index
+        );
         const normalizedSearchKey = String(request?.search_key || "")
           .trim()
           .toUpperCase();
@@ -1583,6 +1601,7 @@ const buildV2SeatLayoutPayload = (session = {}, travelerDetails = []) => {
                   selectedRouteIndex
                 ) || ""
               ),
+              old_Index: String(searchResponseRouteIndex || ""),
               OrderID: String(
                 pickFirst(
                   trip?.OrderID,
