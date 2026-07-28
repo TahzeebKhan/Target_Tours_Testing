@@ -1454,10 +1454,10 @@ const TEXT_FILTER_NEEDLES = {
 const matchesAnyTextFilter = (hotel, group, keys) =>
   keys.some((key) => {
     if (group === "suggested" && key === "fiveStar") {
-      return Math.round(Number(hotel?.rating || 0)) === 5;
+      return getHotelRating(hotel) === 5;
     }
     if (group === "suggested" && key === "fourStar") {
-      return Math.round(Number(hotel?.rating || 0)) === 4;
+      return getHotelRating(hotel) === 4;
     }
 
     if (group === "freeCancellation") {
@@ -1584,7 +1584,7 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
 
 export const matchesHotelFilters = (hotel, filters = {}) => {
   const price = getHotelPriceNumber(hotel);
-  const rating = Number(hotel.rating || 0);
+  const rating = getHotelRating(hotel);
   const hotelSearchText = String(filters.hotelSearchText || "").trim();
 
   if (hotelSearchText && !hasText(hotel, hotelSearchText)) {

@@ -9,6 +9,7 @@ import HotelMap, {
   getGoogleMapEmbedUrl,
   getHotelSearchCenter,
 } from "./hotelMap/hotelMap";
+import { getHotelRating, matchesHotelFilters } from "./TourListing";
 
 const DEFAULT_PRICE_RANGE = [0, 25000];
 const HOTEL_FILTER_MEMORY_KEY = "hotelSidebarFilters";
@@ -24,7 +25,7 @@ const PRICE_BUCKETS = [
   { key: "17000+", label: "₹17000+", min: 17000, max: null },
 ];
 
-const DEFAULT_FILTER_SECTIONS = [
+export const DEFAULT_FILTER_SECTIONS = [
   {
     key: "price",
     title: "PRICE PER NIGHT",
@@ -354,26 +355,46 @@ const getArrayCount = (list, key, label) => {
   return toCount(getOptionCount(option));
 };
 
-const getCount = (filterData, group, key, label = key) => {
+const getCount = (filterData, group, key, label = key, hotels = []) => {
   if (group === "suggested") {
-    if (key === "fiveStar") return getArrayCount(getFilterGroup(filterData, "starCategory"), "5", "5 Star");
-    if (key === "fourStar") return getArrayCount(getFilterGroup(filterData, "starCategory"), "4", "4 Star");
+    if (key === "fiveStar") {
+      const apiCount = getArrayCount(getFilterGroup(filterData, "starCategory"), "5", "5 Star");
+      return apiCount || (Array.isArray(hotels) ? hotels.filter((h) => getHotelRating(h) === 5).length : 0);
+    }
+    if (key === "fourStar") {
+      const apiCount = getArrayCount(getFilterGroup(filterData, "starCategory"), "4", "4 Star");
+      return apiCount || (Array.isArray(hotels) ? hotels.filter((h) => getHotelRating(h) === 4).length : 0);
+    }
     if (key === "breakfastIncluded") {
-      return getArrayCount(getFilterGroup(filterData, "hotelAmenities"), "Breakfast", "Breakfast");
+      const apiCount = getArrayCount(getFilterGroup(filterData, "hotelAmenities"), "Breakfast", "Breakfast");
+      return apiCount || (Array.isArray(hotels) ? hotels.filter((h) => matchesHotelFilters(h, { suggested: { breakfastIncluded: true } })).length : 0);
     }
   }
 
   const groupData = getFilterGroup(filterData, group);
+  let count = 0;
 
-  if (Array.isArray(groupData)) return getArrayCount(groupData, key, label);
+  if (Array.isArray(groupData)) {
+    count = getArrayCount(groupData, key, label);
+  } else {
+    count = toCount(
+      groupData?.[key] ??
+        groupData?.[String(key).toLowerCase()] ??
+        groupData?.[normalizeFilterKey(key)] ??
+        groupData?.[label] ??
+        getFilterRoot(filterData)?.[key],
+    );
+  }
 
-  return toCount(
-    groupData?.[key] ??
-      groupData?.[String(key).toLowerCase()] ??
-      groupData?.[normalizeFilterKey(key)] ??
-      groupData?.[label] ??
-      getFilterRoot(filterData)?.[key],
-  );
+  if (count > 0) return count;
+
+  if (Array.isArray(hotels) && hotels.length) {
+    return hotels.filter((hotel) =>
+      matchesHotelFilters(hotel, { [group]: { [key]: true } }),
+    ).length;
+  }
+
+  return 0;
 };
 
 const getRangeNumber = (value, fallback) => {
@@ -467,7 +488,7 @@ const sortFilterOptions = (options = [], sectionKey = "") => {
   );
 };
 
-const getApiFilterSections = (filterData) =>
+export const getApiFilterSections = (filterData) =>
   getApiFilterList(filterData)
     .map((filter) => {
       const category = getCanonicalApiCategory(filter?.category);
@@ -516,7 +537,7 @@ const getPriceRange = (filterData) => {
 
 const formatPrice = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
-const getStarText = (sectionKey, optionKey) => {
+export const getStarText = (sectionKey, optionKey) => {
   if (sectionKey !== "starCategory") return "";
 
   const starCount = Number(optionKey);
@@ -595,6 +616,7 @@ const getStoredBudget = (memory) => {
 export default function HotelsFilters() {
   const searchParams = useSearchParams();
   const {
+    appliedFilters = {},
     filterData,
     hotels,
     meta,
@@ -607,6 +629,15 @@ export default function HotelsFilters() {
   const [selectedFilters, setSelectedFilters] = useState(
     filterMemoryRef.current?.selectedFilters || {},
   );
+
+  useEffect(() => {
+    if (!appliedFilters) return;
+    const { budget: appliedBudgetObj, hotelSearchText: appliedText, ...filtersWithoutBudget } = appliedFilters;
+    setSelectedFilters((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(filtersWithoutBudget)) return prev;
+      return filtersWithoutBudget;
+    });
+  }, [appliedFilters]);
   const [budget, setBudget] = useState(getStoredBudget(filterMemoryRef.current));
   const [budgetDraft, setBudgetDraft] = useState(() =>
     getStoredBudget(filterMemoryRef.current).map(String),
@@ -786,13 +817,33 @@ export default function HotelsFilters() {
   }, [hotelSearchText]);
 
   const toggleFilter = (group, key) => {
+    const currentVal = Boolean(selectedFilters[group]?.[key] || appliedFilters[group]?.[key]);
+    const nextVal = !currentVal;
+
     const nextFilters = {
       ...selectedFilters,
       [group]: {
-        ...selectedFilters[group],
-        [key]: !selectedFilters[group]?.[key],
+        ...(selectedFilters[group] || {}),
+        [key]: nextVal,
       },
     };
+
+    if (group === "suggested" && key === "fourStar") {
+      nextFilters.starCategory = { ...(selectedFilters.starCategory || {}), "4": nextVal };
+    } else if (group === "starCategory" && String(key) === "4") {
+      nextFilters.suggested = { ...(selectedFilters.suggested || {}), fourStar: nextVal };
+    } else if (group === "suggested" && key === "fiveStar") {
+      nextFilters.starCategory = { ...(selectedFilters.starCategory || {}), "5": nextVal };
+    } else if (group === "starCategory" && String(key) === "5") {
+      nextFilters.suggested = { ...(selectedFilters.suggested || {}), fiveStar: nextVal };
+    } else if (group === "freeCancellation" || group === "cancellation") {
+      nextFilters.freeCancellation = { ...(selectedFilters.freeCancellation || {}), FreeCancellation: nextVal };
+      nextFilters.cancellation = { ...(selectedFilters.cancellation || {}), FreeCancellation: nextVal };
+    } else if (group === "suggested" && key === "breakfastIncluded") {
+      nextFilters.hotelAmenities = { ...(selectedFilters.hotelAmenities || {}), Breakfast: nextVal };
+    } else if (group === "hotelAmenities" && key === "Breakfast") {
+      nextFilters.suggested = { ...(selectedFilters.suggested || {}), breakfastIncluded: nextVal };
+    }
 
     setSelectedFilters(nextFilters);
     setAppliedFilters(buildAppliedFilters(nextFilters));
@@ -1015,6 +1066,8 @@ export default function HotelsFilters() {
           <FilterSection
             section={section}
             filterData={filterData}
+            hotels={hotels}
+            appliedFilters={appliedFilters}
             selectedFilters={selectedFilters}
             searchTerms={searchTerms}
             setSearchTerms={setSearchTerms}
@@ -1043,9 +1096,51 @@ export default function HotelsFilters() {
   );
 }
 
+export const isOptionChecked = (appliedFilters = {}, selectedFilters = {}, group, key) => {
+  if (appliedFilters[group]?.[key] || selectedFilters[group]?.[key]) {
+    return true;
+  }
+
+  if (group === "starCategory" && String(key) === "4") {
+    return Boolean(appliedFilters.suggested?.fourStar || selectedFilters.suggested?.fourStar);
+  }
+  if (group === "suggested" && key === "fourStar") {
+    return Boolean(appliedFilters.starCategory?.["4"] || selectedFilters.starCategory?.["4"]);
+  }
+
+  if (group === "starCategory" && String(key) === "5") {
+    return Boolean(appliedFilters.suggested?.fiveStar || selectedFilters.suggested?.fiveStar);
+  }
+  if (group === "suggested" && key === "fiveStar") {
+    return Boolean(appliedFilters.starCategory?.["5"] || selectedFilters.starCategory?.["5"]);
+  }
+
+  if (group === "freeCancellation" || group === "cancellation") {
+    return Boolean(
+      appliedFilters.freeCancellation?.FreeCancellation ||
+      appliedFilters.cancellation?.FreeCancellation ||
+      selectedFilters.freeCancellation?.FreeCancellation ||
+      selectedFilters.cancellation?.FreeCancellation
+    );
+  }
+
+  if ((group === "hotelAmenities" && key === "Breakfast") || (group === "suggested" && key === "breakfastIncluded")) {
+    return Boolean(
+      appliedFilters.suggested?.breakfastIncluded ||
+      appliedFilters.hotelAmenities?.Breakfast ||
+      selectedFilters.suggested?.breakfastIncluded ||
+      selectedFilters.hotelAmenities?.Breakfast
+    );
+  }
+
+  return false;
+};
+
 function FilterSection({
   section,
   filterData,
+  hotels,
+  appliedFilters = {},
   selectedFilters,
   searchTerms,
   setSearchTerms,
@@ -1089,10 +1184,10 @@ function FilterSection({
       {displayedOptions.map((option) => (
         <CheckboxRow
           key={option.key}
-          checked={!!selectedFilters[section.key]?.[option.key]}
+          checked={isOptionChecked(appliedFilters, selectedFilters, section.key, option.key)}
           label={option.label}
           stars={getStarText(section.key, option.key)}
-          count={option.count ?? getCount(filterData, section.key, option.key, option.label)}
+          count={option.count ?? getCount(filterData, section.key, option.key, option.label, hotels)}
           onChange={() => onToggle(section.key, option.key)}
         />
       ))}
