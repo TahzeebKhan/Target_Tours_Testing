@@ -551,8 +551,8 @@ const Page = () => {
       Description: descriptionRef,
       Amenities: amenitiesRef,
       Rooms: roomsRef,
-      Reviews: reviewsRef,
       "HOTEL POLICY": policyRef,
+      Reviews: reviewsRef,
     }),
     [],
   );

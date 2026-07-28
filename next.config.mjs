@@ -39,6 +39,51 @@ const nextConfig = {
         hostname: "image-cdn.didatravel.com",
         pathname: "/Image/**", // Allows all images under the /Image directory
       },
+      {
+        protocol: "https",
+        hostname: "i.travelapi.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.travelapi.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "i.travelapi.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.giata.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.expediapartnercatalog.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.worldota.net",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.worldota.net",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "cdn.worldota.net",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "rukmini-ct.flixcart.com",
+        pathname: "/**",
+      },
     ],
   },
 };

@@ -77,14 +77,9 @@ const Amenities = ({ amenities = [] }) => {
     const visibleAmenities = amenityItems.slice(0, 7);
     const hasMoreAmenities = amenityItems.length > visibleAmenities.length;
     const renderAmenityItem = (item) => {
-        const Icon = ICONS[item.icon];
-        if (!Icon) return null;
-
         return (
             <div key={item.label} className={styles.item}>
-                <div className={styles.iconBox}>
-                    <Icon size={20} />
-                </div>
+                <span className={styles.bullet}>•</span>
                 <span>{item.label}</span>
             </div>
         );

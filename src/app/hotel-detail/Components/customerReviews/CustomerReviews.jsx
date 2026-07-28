@@ -8,6 +8,7 @@ const CustomerReviews = () => {
   const ratingBars = hotelDetail?.ratingBars || [];
   const scoreDetails = hotelDetail?.scoreDetails || [];
   const reviews = hotelDetail?.reviews || [];
+  const reviewCount = Number(hotelDetail?.reviewCount || 0);
   
   return (
     <div className={styles.wrapper}>
@@ -54,11 +55,26 @@ const CustomerReviews = () => {
               <MessageSquareText size={28} strokeWidth={1.7} />
             </span>
             <div>
-              <h3>No customer reviews yet</h3>
-              <p>
-                This hotel has not received any guest reviews. Be the first to
-                share your experience after your stay.
-              </p>
+              {reviewCount > 0 ? (
+                <>
+                  <h3>
+                    {reviewCount.toLocaleString("en-IN")} customer{" "}
+                    {reviewCount === 1 ? "review" : "reviews"}
+                  </h3>
+                  <p>
+                    The provider supplied aggregate ratings, but individual
+                    review comments are not available.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3>No customer reviews yet</h3>
+                  <p>
+                    This hotel has not received any guest reviews. Be the first
+                    to share your experience after your stay.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -529,21 +529,24 @@ export const initHotelSearch = async (payload) => {
 
 export const fetchHotelDetails = async (fetchHotelDetailsPayload = {}) => {
   const { searchId, hotelSearchId, hotelId, priceProvider, signal } = fetchHotelDetailsPayload;
-  const url = new URL("/api/hotel-search/hotel-details", normalizeBaseUrl());
+  const baseUrl = normalizeBaseUrl();
+  const primaryUrl = baseUrl ? new URL("/api/hotel-search/hotel-details", baseUrl).toString() : "/api/hotel-search/hotel-details";
 
-  const response = await fetch(url.toString(), {
+  const requestBody = JSON.stringify({
+    domain: getDomain(),
+    searchId: String(searchId || "").trim(),
+    hotelSearchId: String(hotelSearchId || searchId || "").trim(),
+    hotelId: String(hotelId || "").trim(),
+    priceProvider: String(priceProvider || "akbar").trim(),
+  });
+
+  const response = await fetch(primaryUrl, {
     method: "POST",
     headers: getHotelSearchHeaders(),
     credentials: "include",
     cache: "no-store",
     signal,
-    body: JSON.stringify({
-      domain: getDomain(),
-      searchId,
-      hotelSearchId,
-      hotelId,
-      priceProvider,
-    }),
+    body: requestBody,
   });
 
   const data = await response.json().catch(() => ({}));

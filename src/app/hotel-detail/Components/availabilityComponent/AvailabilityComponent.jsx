@@ -12,21 +12,11 @@ import styles from "./AvailabilityComponent.module.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import {
-  ArrowUpDown,
-  Car,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Droplet,
-  Flame,
   Package,
-  Phone,
-  Sparkles,
-  Utensils,
-  Users,
-  Wifi,
-  Wind,
   X,
 } from "lucide-react";
 import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
@@ -252,23 +242,6 @@ const getFacilityRows = (room = {}) => {
   ];
 };
 
-const getFacilityIcon = (label = "") => {
-  const normalized = label.toLowerCase();
-
-  if (normalized.includes("wifi") || normalized.includes("internet")) return Wifi;
-  if (normalized.includes("parking") || normalized.includes("car")) return Car;
-  if (normalized.includes("restaurant") || normalized.includes("food")) return Utensils;
-  if (normalized.includes("room service") || normalized.includes("phone")) return Phone;
-  if (normalized.includes("elevator") || normalized.includes("lift")) return ArrowUpDown;
-  if (normalized.includes("clean") || normalized.includes("laundry")) return Sparkles;
-  if (normalized.includes("air") || normalized.includes("conditioning")) return Wind;
-  if (normalized.includes("water") || normalized.includes("shower")) return Droplet;
-  if (normalized.includes("fire")) return Flame;
-  if (normalized.includes("toiletr") || normalized.includes("storage")) return Package;
-
-  return Users;
-};
-
 const getInclusionRows = (room = {}) =>
   toArray(room?.includes)
     .map((item) => String(item || "").trim())
@@ -376,18 +349,9 @@ const FacilitiesModal = ({ room, onClose }) => {
         <div className={styles.detailsBody}>
           {facilityRows.length ? (
             <ul className={`${styles.facilityList} ${styles.facilitiesModalGrid}`}>
-              {facilityRows.map((facility) => {
-                const Icon = getFacilityIcon(facility);
-
-                return (
-                  <li key={facility}>
-                    <span className={styles.facilityIconBox}>
-                      <Icon size={20} strokeWidth={2} aria-hidden="true" />
-                    </span>
-                    <span>{facility}</span>
-                  </li>
-                );
-              })}
+              {facilityRows.map((facility) => (
+                <li key={facility}>{facility}</li>
+              ))}
             </ul>
           ) : (
             <p className={styles.detailsEmpty}>No facilities available.</p>

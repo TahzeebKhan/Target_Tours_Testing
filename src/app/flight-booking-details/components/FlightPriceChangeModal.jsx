@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useFlightBooking } from "../FlightBookingContext";
 import styles from "./FlightPriceChangeModal.module.css";
 
@@ -16,6 +16,21 @@ const FlightPriceChangeModal = () => {
     acceptFlightPriceChange,
     rejectFlightPriceChange,
   } = useFlightBooking();
+
+  useEffect(() => {
+    if (!flightPriceChange) return undefined;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [flightPriceChange]);
 
   if (!flightPriceChange) return null;
 

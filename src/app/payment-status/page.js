@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../flight-booking-details/Navbar";
 import styles from "./page.module.css";
 import { clearFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
+import { clearBookingSession } from "@/shared/utils/sessionStorage";
 
 const pickFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
@@ -151,6 +152,7 @@ function PaymentStatusContent() {
   const [isLoading, setIsLoading] = useState(true);
   const finishBookingFlow = () => {
     clearFlightBookingSession();
+    clearBookingSession();
     window.localStorage.removeItem("flightPaymentSnapshot");
     router.push("/");
   };

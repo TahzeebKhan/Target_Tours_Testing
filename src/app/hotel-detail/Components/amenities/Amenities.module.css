@@ -39,27 +39,24 @@
 .item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 16px;
   color: #000;
 }
 .item span {
   font-family: var(--font-inter);
-  font-weight: 300;
-  font-style: Light;
+  font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -2%;
   color: #000000;
 }
 
-.iconBox {
-  width: 32px;
-  height: 32px;
-  background: #f2f3f7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.bullet {
+  color: #000033;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 700;
+  display: inline-block;
 }
 
 .seeMoreBtn {

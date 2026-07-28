@@ -7,6 +7,8 @@ import ProfileModal from "../home-page/components/homePage/modals/ProfileModal";
 import { getAuthDisplayName, useAuth } from "../context/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import BrandLogo from "@/shared/components/BrandLogo";
+import { clearBookingSession } from "@/shared/utils/sessionStorage";
+
 const Navbar = ({ scrollProgress = { scrollProgress } }) => {
   const { isLoggedIn, profile: userProfile, user } = useAuth();
   const profileBtnRef = useRef(null);
@@ -16,6 +18,7 @@ const Navbar = ({ scrollProgress = { scrollProgress } }) => {
   const [authView, setAuthView] = useState("login");
   const router = useRouter();
   const handleLogoClick = () => {
+    clearBookingSession();
     router.push("/");
   };
   const openLoginModal = () => {
