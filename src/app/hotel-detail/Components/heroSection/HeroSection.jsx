@@ -5,7 +5,7 @@ import HotelGallery from "../hotelGallery/HotelGallery";
 import { useHotelDetailData } from "../../HotelDetailDataContext";
 
 const HeroSection = ({ liked, onLike }) => {
-  const { hotelDetail } = useHotelDetailData();
+  const { hotelDetail, loading } = useHotelDetailData();
   const starRating = Math.max(
     0,
     Math.min(5, Math.round(Number(hotelDetail?.starRating ?? 0) || 0)),
@@ -54,7 +54,10 @@ const HeroSection = ({ liked, onLike }) => {
           </div>
         </div>
       </div>
-      <HotelGallery images={hotelDetail?.galleryImages || hotelDetail?.images} />
+      <HotelGallery
+        images={hotelDetail?.galleryImages || hotelDetail?.images}
+        loading={loading}
+      />
     </div>
   );
 };

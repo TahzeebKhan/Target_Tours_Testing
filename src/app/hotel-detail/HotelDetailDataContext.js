@@ -7,6 +7,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { toast } from "react-toastify";
@@ -19,6 +20,7 @@ import {
   fetchHotelRooms,
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
+import { isHotelUnavailableResponse } from "@/app/hotels/components/TourListing";
 import { getSessionItem, setSessionItem } from "@/shared/utils/sessionStorage";
 
 const roomsRequestCache = new Map();
@@ -26,18 +28,22 @@ const roomsRequestCache = new Map();
 const FALLBACK_IMAGE = "/images/hotelFallback.png";
 
 const normalizeImageUrl = (value = "") => {
-  const rawUrl = String(value || "").trim();
+  let rawUrl = String(value || "").trim();
   if (!rawUrl) return "";
+
+  if (rawUrl.startsWith("//")) {
+    rawUrl = `https:${rawUrl}`;
+  }
 
   let url = rawUrl.replace(/\\\//g, "/").replace(/\s/g, "%20");
 
   try {
-    url = decodeURI(url);
+    url = encodeURI(decodeURI(url));
   } catch {
     // Keep the original URL if it is not safely decodable.
   }
 
-  return url.replace(/\s/g, "%20");
+  return url;
 };
 
 const HotelDetailDataContext = createContext({
@@ -145,8 +151,11 @@ const getStoredHotelId = (stored) =>
       stored?.hotel?.hotelId ||
       stored?.hotel?.id ||
       stored?.hotel?.raw?.id ||
+      stored?.details?.data?.content?.hotel?.id ||
+      stored?.details?.data?.hotelId ||
+      stored?.details?.hotelId ||
       "",
-  );
+  ).trim();
 
 const getFirst = (...values) =>
   values.find((value) => value !== undefined && value !== null && value !== "");
@@ -1283,13 +1292,11 @@ const normalizeReviewRating = (rating) => {
 };
 
 const normalizeReviewSummary = (data = {}, hotel = {}) => {
-   console.log("data3", data);
   const reviews = Array.isArray(data.reviews)
     ? data.reviews
     : Array.isArray(hotel.reviews)
       ? hotel.reviews
       : [];
-       console.log("reviews2", reviews);
   const firstReview = reviews[0] || {};
   const summary =
     data.reviewSummary ||
@@ -1297,7 +1304,6 @@ const normalizeReviewSummary = (data = {}, hotel = {}) => {
     hotel.reviewSummary ||
     hotel.review_summary ||
     {};
-     console.log("summary2", summary);
   const score = getNumericValue(
     data.reviewRating,
     data.review_rating,
@@ -1327,6 +1333,7 @@ const normalizeReviewSummary = (data = {}, hotel = {}) => {
 
   return {
     score,
+    count,
     text: formatReviewText(count),
   };
 };
@@ -1374,13 +1381,20 @@ const normalizeReviews = (data = {}, hotel = {}) => {
     .filter((review) => review.comment);
 };
 
-const normalizeRatingBars = (data = {}, reviews = []) => {
+const normalizeRatingBars = (
+  data = {},
+  reviews = [],
+  hotel = {},
+  reviewSummary = {},
+) => {
   const histogram =
     data.ratingBars ||
     data.ratingHistogram ||
     data.reviewSummary?.ratingBars ||
     data.reviewSummary?.ratingHistogram ||
-    data.ratings;
+    data.ratings ||
+    hotel.ratingBars ||
+    hotel.ratingHistogram;
 
   if (Array.isArray(histogram) && histogram.length) {
     const maxValue = Math.max(
@@ -1398,6 +1412,14 @@ const normalizeRatingBars = (data = {}, reviews = []) => {
     });
   }
 
+  if (!reviews.length && reviewSummary.count && reviewSummary.score) {
+    return [{
+      star: reviewSummary.score,
+      value: reviewSummary.count,
+      percent: 100,
+    }];
+  }
+
   const counts = [5, 4, 3, 2, 1].map((star) => ({
     star,
     value: reviews.filter((review) => review.rating === star).length,
@@ -1411,13 +1433,18 @@ const normalizeRatingBars = (data = {}, reviews = []) => {
 };
 
 const normalizeScoreDetails = (data = {}, hotel = {}) => {
+  const providerReview = [
+    ...(Array.isArray(data.reviews) ? data.reviews : []),
+    ...(Array.isArray(hotel.reviews) ? hotel.reviews : []),
+  ].find((review) => Array.isArray(review?.categoryRatings));
   const scores =
     data.scoreDetails ||
     data.reviewSummary?.scoreDetails ||
     data.reviewSummary?.categories ||
     data.ratingCategories ||
     data.categoryRatings ||
-    hotel.ratingCategories;
+    hotel.ratingCategories ||
+    providerReview?.categoryRatings;
 
   if (Array.isArray(scores) && scores.length) {
     return scores
@@ -1492,7 +1519,7 @@ const normalizeHotelDetail = (
   );
   const reviews = normalizeReviews(data, hotel);
   const reviewSummary = normalizeReviewSummary(data, hotel);
-  const ratingBars = normalizeRatingBars(data, reviews);
+  const ratingBars = normalizeRatingBars(data, reviews, hotel, reviewSummary);
   const scoreDetails = normalizeScoreDetails(data, hotel);
   const starRating = normalizeRating(
     getFirst(
@@ -1523,6 +1550,7 @@ const normalizeHotelDetail = (
     rating: starRating,
     starRating,
     reviewScore: reviewSummary.score,
+    reviewCount: reviewSummary.count,
     reviewText: getFirst(data.reviewText, data.reviewsText, reviewSummary.text),
     images: uniqueImages.length ? uniqueImages : [FALLBACK_IMAGE],
     descriptions: getDescriptionItems(
@@ -1583,6 +1611,10 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
   const [roomsErrorMessage, setRoomsErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [roomsLoading, setRoomsLoading] = useState(false);
+  const detailRequestRef = useRef({
+    key: "",
+    promise: null,
+  });
 
   const redirectToHotelListing = useCallback(() => {
     toast.warn("This hotel is not available", {
@@ -1649,8 +1681,9 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
     const hotelId = hotelDetailPayload?.hotelId || params.get("hotelId") || "";
     const stored = readStoredHotelDetail();
     const storedHotelId = getStoredHotelId(stored);
-    const canUseStored =
-      stored && (!hotelId || !storedHotelId || storedHotelId === String(hotelId));
+    const storedSearchId = String(stored?.request?.searchId || "").trim();
+    const currentSearchId = String(hotelDetailPayload?.searchId || params.get("searchId") || "").trim();
+
     const hasStoredDetails = Boolean(
       stored?.details ||
         stored?.data ||
@@ -1658,6 +1691,13 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
         stored?.hotel?.raw ||
         stored?.hotel?.addressLine1,
     );
+
+    const canUseStored =
+      Boolean(stored) &&
+      hasStoredDetails &&
+      (!hotelId || !storedHotelId || storedHotelId === String(hotelId)) &&
+      (!currentSearchId || !storedSearchId || storedSearchId === String(currentSearchId));
+
     const storedAvailabilityPayload = canUseStored
       ? stored?.latestAvailabilityResponse ||
         stored?.availabilityResponse ||
@@ -1668,7 +1708,7 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
 
     setRouteHotelId(hotelId);
 
-    if (canUseStored && (hasStoredDetails || !hotelDetailPayload)) {
+    if (canUseStored) {
       setStoredDetail(stored);
       if (storedAvailabilityPayload) {
         setRoomsPayload(storedAvailabilityPayload);
@@ -1679,16 +1719,30 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
       setStoredDetail(stored);
       setLoading(false);
     } else {
+      const detailKey = JSON.stringify(hotelDetailPayload);
       const loadHotelDetails = async () => {
         setLoading(true);
 
         try {
-          const details = await fetchHotelDetails(hotelDetailPayload);
+          if (
+            detailRequestRef.current.key !== detailKey ||
+            !detailRequestRef.current.promise
+          ) {
+            detailRequestRef.current = {
+              key: detailKey,
+              promise: fetchHotelDetails(hotelDetailPayload),
+            };
+          }
+
+          const details = await detailRequestRef.current.promise;
           const nextStoredDetail = {
             request: hotelDetailPayload,
             hotel: {},
             details,
-            galleryImages: extractGalleryImages({ request: hotelDetailPayload, hotel: {}, details }, hotelId),
+            galleryImages: extractGalleryImages(
+              { request: hotelDetailPayload, hotel: {}, details },
+              hotelId,
+            ),
           };
 
           writeStoredHotelDetail(nextStoredDetail);
@@ -1726,6 +1780,18 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
 
           roomsRequestCache.set(requestKey, roomsPromise);
           const rooms = await roomsPromise;
+
+          if (isHotelUnavailableResponse(rooms)) {
+            if (isMounted) {
+              setRoomsPayload(rooms);
+              setRoomsErrorMessage("This hotel is not available for booking now");
+              toast.error("This hotel is not available for booking now", {
+                toastId: "hotel-rooms-not-available",
+              });
+            }
+            return;
+          }
+
           if (isMounted) {
             setRoomsPayload(rooms);
             setRoomsErrorMessage("");
@@ -1736,17 +1802,16 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
           if (isMissingHotelAuthTokenError(error)) {
             onUnauthorized?.();
           }
-          if (String(error?.code || "") === "1211") {
-            if (isMounted) {
-              setRoomsPayload(null);
-              setRoomsErrorMessage("This hotel is not available");
-            }
-            redirectToHotelListing();
-            return;
-          }
+
+          const isUnavailable = isHotelUnavailableResponse(error?.data || error?.raw || error);
+          const userMsg = isUnavailable
+            ? "This hotel is not available for booking now"
+            : error?.message || "Unable to load available rooms.";
+
           if (isMounted) {
             setRoomsPayload(null);
-            setRoomsErrorMessage(error.message || "Unable to load available rooms.");
+            setRoomsErrorMessage(userMsg);
+            toast.error(userMsg, { toastId: "hotel-rooms-error" });
           }
         } finally {
           if (isMounted) setRoomsLoading(false);
