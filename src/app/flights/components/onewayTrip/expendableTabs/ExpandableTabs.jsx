@@ -3,8 +3,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ExpandableTabs.module.css";
 import {
+  getFlightBaggageInfo,
   getFlightFareRules,
-  getFlightSsr,
 } from "@/features/flights/services/flightBooking";
 
 const parseCityLabel = (label = "") => {
@@ -930,6 +930,21 @@ const splitBaggageName = (name) => {
 
 const extractBaggageRows = (ssrData, fallbackRow) => {
   const payload = unwrapSsrPayload(ssrData);
+  const baggageInfoRoutes = Array.isArray(payload?.routes) ? payload.routes : [];
+  const baggageInfoRows = baggageInfoRoutes.map((routeItem, index) => {
+    const includedBaggage = splitBaggageName(getIncludedBaggageName(routeItem));
+
+    return {
+      ...fallbackRow,
+      id: `baggage-${routeItem?.route || index}`,
+      route: routeItem?.route || "",
+      checkin: includedBaggage.checkin,
+      cabin: includedBaggage.cabin,
+    };
+  });
+
+  if (baggageInfoRows.length) return baggageInfoRows;
+
   const formatted =
     ssrData?.data?.formatted ||
     ssrData?.formatted ||
@@ -1807,7 +1822,7 @@ const ExpandableTabs = ({
     setSsrData(null);
     setSsrRequestKey(requestKey);
 
-    getFlightSsr(payload)
+    getFlightBaggageInfo(payload)
       .then((response) => {
         if (!isMounted) return;
         setSsrData(response);

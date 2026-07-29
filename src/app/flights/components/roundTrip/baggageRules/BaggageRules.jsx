@@ -116,6 +116,24 @@ const buildFallbackRows = (flightData, activeLeg = "both") =>
 
 const extractBaggageRows = (ssrData, fallbackRows) => {
     const payload = unwrapSsrPayload(ssrData);
+    const baggageInfoRoutes = Array.isArray(payload?.routes) ? payload.routes : [];
+    const baggageInfoRows = baggageInfoRoutes.map((routeItem, index) => {
+        const fallback = fallbackRows[index] || fallbackRows[0] || {};
+        const includedBaggage = splitBaggageName(getIncludedBaggageName(routeItem));
+
+        return {
+            ...fallback,
+            id: `baggage-${routeItem?.route || index}`,
+            airlineCodes: routeItem?.route
+                ? `${routeItem.route} • ${fallback.airlineCodes}`
+                : fallback.airlineCodes,
+            checkin: includedBaggage.checkin,
+            cabin: includedBaggage.cabin,
+        };
+    });
+
+    if (baggageInfoRows.length) return baggageInfoRows;
+
     const formatted =
         ssrData?.data?.formatted ||
         ssrData?.formatted ||

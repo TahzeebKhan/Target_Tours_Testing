@@ -7,8 +7,8 @@ import BaggageRules from "../baggageRules/BaggageRules";
 import CancellationRules from "../cancellationRules/CancellationRules";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import {
+  getFlightBaggageInfo,
   getFlightFareRules,
-  getFlightSsr,
 } from "@/features/flights/services/flightBooking";
 
 const parseAirportLabel = (value = "") => {
@@ -801,7 +801,7 @@ const RoundTripExpendable = ({
     setSsrData(null);
     setSsrRequestKey(requestKey);
 
-    getFlightSsr(payload)
+    getFlightBaggageInfo(payload)
       .then((response) => {
         if (!isMounted) return;
         setSsrData(response);

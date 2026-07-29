@@ -420,8 +420,8 @@ export function TripTypeProvider({ children }) {
 
     try {
       await saveRecentFlightSearch({
-        origin: normalizedFromCode || fallbackFrom,
-        destination: normalizedToCode || fallbackTo,
+        origin: fallbackFrom,
+        destination: fallbackTo,
         departureDate: searchStartDate,
         returnDate: tripType === "round" ? endDate : null,
       });
