@@ -773,21 +773,33 @@ const MobileHotelDetails = () => {
     <div className={styles.hotelDetailsMobileContainer}>
       <div className={`${styles.tripDetailsHeader}`}>
         <div className={styles.mainCotainer}>
-          {/* <img src="/icons/leftArrowTrip.svg" alt="" /> */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            class="lucide lucide-chevron-left-icon lucide-chevron-left"
+          <button
+            type="button"
+            className={styles.backButton}
+            aria-label="Go back"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
           <div
             className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
           >

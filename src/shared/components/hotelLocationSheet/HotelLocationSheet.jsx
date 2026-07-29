@@ -86,7 +86,6 @@ export default function HotelLocationSheet({
         <div className={styles.header}>
           <span className={styles.label}>{inputType}</span>
           <div className={styles.inputRow}>
-            <img src="/icons/fromFlight.svg" alt="" />
             <input
               type="text"
               placeholder="City or hotel"
