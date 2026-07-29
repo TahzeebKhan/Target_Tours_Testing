@@ -1814,9 +1814,6 @@ const HotelFacilitiesModal = ({ facilities = [], onClose }) =>
               className={styles.facilitiesModalItem}
               key={`${facility.name}-${index}`}
             >
-              <span className={styles.facilitiesModalIcon}>
-                <img src={facility.icon} alt="" />
-              </span>
               <span>{facility.name}</span>
             </div>
           ))}
@@ -3089,37 +3086,27 @@ const TourListing = () => {
   useEffect(() => {
     const updateScrollState = () => {
       const scrollContainer = listSectionRef.current;
+      const windowScrollY = window.scrollY || window.pageYOffset || 0;
+      const listTop = scrollContainer
+        ? scrollContainer.getBoundingClientRect().top + windowScrollY
+        : 0;
 
       setScrollState({
-        scrollY:
-          scrollContainer?.scrollTop ||
-          window.scrollY ||
-          window.pageYOffset ||
-          0,
-        viewportHeight:
-          scrollContainer?.clientHeight || window.innerHeight || 0,
+        scrollY: Math.max(0, windowScrollY - listTop),
+        viewportHeight: window.innerHeight || 0,
         viewportWidth: window.innerWidth || 0,
       });
     };
 
-    const scrollContainer = listSectionRef.current;
-
     updateScrollState();
-    scrollContainer?.addEventListener("scroll", updateScrollState, {
-      passive: true,
-    });
+    window.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("resize", updateScrollState);
 
     return () => {
-      scrollContainer?.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    listSectionRef.current?.scrollTo({ top: 0, behavior: "auto" });
-  }, [sortType, viewType, hotelSearchChannel]);
 
   const virtualWindow = useMemo(() => {
     const itemCount = displayHotels.length;
