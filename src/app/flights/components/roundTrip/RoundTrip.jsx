@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./RoundTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
@@ -17,16 +17,12 @@ import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRound
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { useRouter } from "next/navigation";
 import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
+import { CompactRoundTripCard } from "./SplitRoundTripView";
+import CombinedRoundTripCards from "./CombinedRoundTripCards";
 
 const getAirportCode = (city = "") => {
   const match = String(city).match(/\(([^)]+)\)/);
   return match?.[1] || String(city).split(" ")[0] || "";
-};
-
-const formatSegmentDuration = (duration = {}) => {
-  const hours = Number(duration.hours || 0);
-  const minutes = Number(duration.minutes || 0);
-  return `${hours ? `${hours} h ` : ""}${minutes} m`.trim() || "0 m";
 };
 
 const parseAmount = (value) => {
@@ -92,67 +88,6 @@ const buildMobileRoundTripSelection = (departFlight, returnFlight) => {
       },
     },
   };
-};
-
-const CompactRoundTripCard = ({
-  segment,
-  priceLabel,
-  selected,
-  onSelect,
-  onDetail,
-}) => {
-  const airline = segment?.airlines?.[0] || {};
-  const logo = resolveAirlineLogo({
-    name: airline.name,
-    code: airline.code,
-    logo: airline.logo,
-  });
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      className={`${styles.mobileSegmentCard} ${selected ? styles.mobileSegmentCardSelected : ""}`}
-      onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSelect();
-        }
-      }}
-    >
-      <div className={styles.mobileSegmentTop}>
-        <div className={styles.mobileAirline}>
-          <img src={logo} alt="" />
-          <div>
-            <p>{airline.name || "Airline"}</p>
-            <span>{airline.code || ""}</span>
-          </div>
-        </div>
-        <strong>{priceLabel || "N/A"}</strong>
-      </div>
-
-      <div className={styles.mobileSegmentTimes}>
-        <span>{segment?.departure?.time || "--:--"}</span>
-        <div className={styles.mobileSegmentMeta}>
-          <span>{formatSegmentDuration(segment?.duration)}</span>
-          <i />
-          <small>{segment?.stops?.type || "Non-Stop"}</small>
-        </div>
-        <span>{segment?.arrival?.time || "--:--"}</span>
-      </div>
-      <button
-        type="button"
-        className={styles.mobileSeeDetailBtn}
-        onClick={(event) => {
-          event.stopPropagation();
-          onDetail();
-        }}
-      >
-        SEE DETAIL
-      </button>
-    </div>
-  );
 };
 
 const flightResults = [
@@ -767,6 +702,7 @@ const RoundTrip = ({
   const [selectedMobileDepartId, setSelectedMobileDepartId] = useState(null);
   const [selectedMobileReturnId, setSelectedMobileReturnId] = useState(null);
   const [mobileFareModalFlight, setMobileFareModalFlight] = useState(null);
+  const [combinedFlights, setCombinedFlights] = useState(true);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
   const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
@@ -855,6 +791,16 @@ const RoundTrip = ({
   const fastestFlight = fastestHighlightedFlight || fastestFallback;
   const visibleFlights = resolvedFlightResults;
   const visibleTripCards = resolvedTripCards;
+  const apiAllowsIndependentBooking =
+    visibleFlights.length > 0 &&
+    visibleFlights.every(
+      (flight) =>
+        flight?.canBookIndependently === true &&
+        flight?.requiresPairBooking !== true,
+    );
+  useEffect(() => {
+    setCombinedFlights(apiAllowsIndependentBooking);
+  }, [apiAllowsIndependentBooking]);
   const cheapestMeta = {
     price: sortHighlights?.cheapest?.priceLabel || "N/A",
     duration: sortHighlights?.cheapest?.durationLabel || "N/A",
@@ -923,19 +869,29 @@ const RoundTrip = ({
     <>
       {" "}
       <section className={styles.container}>
-        <div className={styles.FlightBookingTextContainer}>
-          <h2 className={styles.heading}>
-            Flight from <span>{from || "Jakarta (CGK)"}</span> to{" "}
-            <span>{to || "Singapore (SIN)"}</span>
-          </h2>
-          <div className={styles.subTextContainer}>
-            <span className={styles.priceInfo}>
-              The price is average for one person. Included all taxes and fees.
-            </span>
-            {/* <span className={styles.itemsResult}>
-              {resultsText}
-            </span> */}
+        <div className={styles.roundTripHeader}>
+          <div className={styles.FlightBookingTextContainer}>
+            <h2 className={styles.heading}>
+              Flight from <span>{from || "Jakarta (CGK)"}</span> to{" "}
+              <span>{to || "Singapore (SIN)"}</span>
+            </h2>
+            <div className={styles.subTextContainer}>
+              <span className={styles.priceInfo}>
+                The price is average for one person. Included all taxes and fees.
+              </span>
+            </div>
           </div>
+          <label className={styles.combinedFlightsToggle}>
+            <input
+              type="checkbox"
+              checked={combinedFlights}
+              onChange={(event) => setCombinedFlights(event.target.checked)}
+            />
+            <span className={styles.toggleTrack} aria-hidden="true">
+              <span className={styles.toggleThumb} />
+            </span>
+            <span>COMBINED FLIGHTS</span>
+          </label>
         </div>
         {/* <DatePriceSlider
           tiles={datewiseFareTiles}
@@ -995,6 +951,20 @@ const RoundTrip = ({
             <FlightSearchLoader />
           ) : hasNoData ? (
             <FlightNoResults />
+          ) : !combinedFlights ? (
+            <CombinedRoundTripCards
+              tripCardsData={visibleTripCards}
+              onViewFares={(item) => {
+                const flightIndex = visibleTripCards.indexOf(item);
+                const matchingFlight =
+                  visibleFlights.find(
+                    (flight) => String(flight?.id) === String(item?.id),
+                  ) || visibleFlights[flightIndex];
+                if (!matchingFlight) return;
+                setMobileFareModalFlight(matchingFlight);
+                setFareModalOpen(matchingFlight.id);
+              }}
+            />
           ) : (
             <TripCard
               fareModalOpen={fareModalOpen}
@@ -1002,7 +972,7 @@ const RoundTrip = ({
               setSelectedFlightId={setSelectedFlightId}
               setFareModalOpen={setFareModalOpen}
               tripCardsData={visibleTripCards}
-            ></TripCard>
+            />
           )}
         </div>
       </section>
@@ -1179,21 +1149,18 @@ const RoundTrip = ({
             </button>
           </div>
         )}
-        {fareModalOpen && (
-          <MobileFareComparisonModalRoundTrip
-            isOpen={fareModalOpen}
-            onClose={() => {
-              setFareModalOpen(null);
-              setSelectedFlightId(null);
-              setMobileFareModalFlight(null);
-            }}
-            flightData={
-              mobileFareModalFlight ||
-              resolvedFlightResults.find((f) => f.id === fareModalOpen)
-            }
-          />
-        )}
       </section>
+      {fareModalOpen && mobileFareModalFlight && (
+        <MobileFareComparisonModalRoundTrip
+          isOpen={fareModalOpen}
+          onClose={() => {
+            setFareModalOpen(null);
+            setSelectedFlightId(null);
+            setMobileFareModalFlight(null);
+          }}
+          flightData={mobileFareModalFlight}
+        />
+      )}
       {isSortSheetMobile ? (
         <SortBySheet
           open={openSort}

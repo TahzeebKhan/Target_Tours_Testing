@@ -13,6 +13,201 @@
   gap: 4px;
 }
 
+.roundTripHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.combinedFlightsToggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #2b3037;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  user-select: none;
+}
+
+.combinedFlightsToggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggleTrack {
+  width: 38px;
+  height: 22px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #c7cbd1;
+  transition: background-color 0.2s ease;
+}
+
+.toggleThumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: translateX(0);
+  transition: transform 0.2s ease;
+}
+
+.combinedFlightsToggle input:checked + .toggleTrack {
+  background: #fcc800;
+}
+
+.combinedFlightsToggle input:checked + .toggleTrack .toggleThumb {
+  transform: translateX(16px);
+}
+
+.combinedFlightsToggle input:focus-visible + .toggleTrack {
+  outline: 2px solid #000033;
+  outline-offset: 2px;
+}
+
+.desktopSplitResults {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding-bottom: 92px;
+}
+
+.desktopSplitColumn {
+  min-width: 0;
+  background: #f8f8f8;
+}
+
+.desktopSplitHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e7ed;
+  font-family: var(--font-inter);
+  text-transform: uppercase;
+}
+
+.desktopSplitHeader strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: #222938;
+}
+
+.desktopSplitHeader span {
+  font-size: 10px;
+  color: #687384;
+}
+
+.desktopSplitSortHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f1f3f8;
+  color: #687384;
+  font-family: var(--font-inter);
+  font-size: 9px;
+}
+
+.desktopSplitColumn .mobileSegmentCard {
+  position: relative;
+  min-height: 126px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid transparent;
+}
+
+.desktopSplitColumn .mobileSegmentCardSelected {
+  border-color: #000033;
+}
+
+.desktopSplitColumn .mobileSegmentCardSelected::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #000033;
+  box-shadow: 0 0 0 1px #000033;
+}
+
+.desktopSplitColumn .mobileSegmentTimes {
+  margin-top: 22px;
+}
+
+.desktopBookingBar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr)) minmax(150px, 0.65fr) 180px;
+  align-items: center;
+  gap: 24px;
+  padding: 14px max(28px, calc((100vw - 1440px) / 2));
+  background: #000033;
+  color: #ffffff;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.desktopBookingLeg,
+.desktopBookingTotal {
+  min-width: 0;
+  font-family: var(--font-inter);
+}
+
+.desktopBookingLeg span,
+.desktopBookingTotal span {
+  display: block;
+  overflow: hidden;
+  color: #c8cad8;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desktopBookingLeg strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.desktopBookingTotal strong {
+  display: block;
+  margin-top: 4px;
+  font-family: Antic Didone;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.desktopBookingBar button {
+  min-height: 44px;
+  border: 0;
+  background: #fcc800;
+  color: #000033;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .heading {
   font-family: Antic Didone;
   font-weight: 400;
@@ -696,6 +891,14 @@
 }
 
 @media (max-width: 780px) {
+  .desktopBookingBar {
+    display: none;
+  }
+
+  .combinedFlightsToggle {
+    display: none;
+  }
+
   .departureDetail {
     margin-left: 15px;
   }
