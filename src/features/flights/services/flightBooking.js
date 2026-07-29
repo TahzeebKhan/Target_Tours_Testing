@@ -1504,6 +1504,36 @@ const ensureV2SsrPayload = (payload) => {
   };
 };
 
+<<<<<<< HEAD
+=======
+export const getFlightBaggageInfo = async (payload = {}) => {
+  const trip = Array.isArray(payload?.Trips) ? payload.Trips[0] || {} : payload;
+  const response = await fetch("/api/flights/v2/baggage-info", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      domain: payload?.domain || process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+      search_key: payload?.search_key || payload?.SearchKey || "",
+      TUI: trip?.TUI || trip?.tui || "",
+      Index: String(trip?.Index ?? trip?.index ?? ""),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(getApiMessage(data));
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+};
+
+>>>>>>> live/main
 export const getFlightSsr = async (payload) => {
   return getFlightV2Ssr(payload);
 };

@@ -3,8 +3,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ExpandableTabs.module.css";
 import {
+<<<<<<< HEAD
   getFlightFareRules,
   getFlightSsr,
+=======
+  getFlightBaggageInfo,
+  getFlightFareRules,
+>>>>>>> live/main
 } from "@/features/flights/services/flightBooking";
 
 const parseCityLabel = (label = "") => {
@@ -930,6 +935,24 @@ const splitBaggageName = (name) => {
 
 const extractBaggageRows = (ssrData, fallbackRow) => {
   const payload = unwrapSsrPayload(ssrData);
+<<<<<<< HEAD
+=======
+  const baggageInfoRoutes = Array.isArray(payload?.routes) ? payload.routes : [];
+  const baggageInfoRows = baggageInfoRoutes.map((routeItem, index) => {
+    const includedBaggage = splitBaggageName(getIncludedBaggageName(routeItem));
+
+    return {
+      ...fallbackRow,
+      id: `baggage-${routeItem?.route || index}`,
+      route: routeItem?.route || "",
+      checkin: includedBaggage.checkin,
+      cabin: includedBaggage.cabin,
+    };
+  });
+
+  if (baggageInfoRows.length) return baggageInfoRows;
+
+>>>>>>> live/main
   const formatted =
     ssrData?.data?.formatted ||
     ssrData?.formatted ||
@@ -1807,7 +1830,11 @@ const ExpandableTabs = ({
     setSsrData(null);
     setSsrRequestKey(requestKey);
 
+<<<<<<< HEAD
     getFlightSsr(payload)
+=======
+    getFlightBaggageInfo(payload)
+>>>>>>> live/main
       .then((response) => {
         if (!isMounted) return;
         setSsrData(response);

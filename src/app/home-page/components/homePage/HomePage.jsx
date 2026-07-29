@@ -1358,8 +1358,13 @@ const HomePage = ({
 
       try {
         await saveRecentFlightSearch({
+<<<<<<< HEAD
           origin: fromCode || from,
           destination: toCode || to,
+=======
+          origin: from,
+          destination: to,
+>>>>>>> live/main
           departureDate: startDate,
           returnDate: endDate,
         });
@@ -3174,4 +3179,8 @@ const HomePage = ({
   );
 };
 
+<<<<<<< HEAD
 export default HomePage;
+=======
+export default HomePage;
+>>>>>>> live/main
