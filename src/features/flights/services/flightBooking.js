@@ -310,10 +310,24 @@ const hasSeatLayoutItems = (payload) => {
 const getSeatLayoutFormatted = (payload) => {
   if (!payload || typeof payload !== "object") return null;
 
+  const resultFormattedCandidates = [
+    payload?.results,
+    payload?.data?.results,
+    payload?.data?.data?.results,
+  ].flatMap((results) =>
+    toArray(results).flatMap((result) => [
+      result?.data?.data?.formatted,
+      result?.data?.formatted,
+      result?.result?.data?.formatted,
+      result?.result?.formatted,
+      result?.formatted,
+    ])
+  );
   const candidates = [
     payload?.formatted,
     payload?.data?.formatted,
     payload?.data?.data?.formatted,
+    ...resultFormattedCandidates,
     payload,
   ];
 
@@ -1455,25 +1469,43 @@ export const getLegacyFlightFareRules = async (payload) => {
   return response?.data;
 };
 
-export const getFlightSsr = async (payload) => {
-  const provider = String(
-    payload?.provider ||
-      payload?.Provider ||
-      getProviderFromSearchKey(payload?.search_key || payload?.SearchKey) ||
-      ""
-  )
-    .trim()
-    .toLowerCase();
-  const response = await api.post("/api/flights/ssr", {
-    ...payload,
-    ...(provider ? { provider } : {}),
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+const ensureV2SsrPayload = (payload) => {
+  if (Array.isArray(payload?.ssr_requests) && payload.ssr_requests.length > 0) {
+    return {
+      channel: payload.channel || makeSsrChannel(),
+      domain: payload.domain || (typeof window !== "undefined" ? window.location.host : "localhost:3000"),
+      PaidSSR: String(payload.PaidSSR ?? "true"),
+      search_key: payload.search_key || payload.SearchKey || "",
+      ssr_requests: payload.ssr_requests,
+    };
+  }
 
-  return response?.data;
+  const searchKey = payload?.search_key || payload?.SearchKey || "";
+  const index = String(payload?.Index || payload?.index || "0");
+  const tui = payload?.TUI || payload?.tui || "";
+
+  return {
+    channel: payload?.channel || makeSsrChannel(),
+    domain: typeof window !== "undefined" ? window.location.host : "localhost:3000",
+    PaidSSR: "true",
+    search_key: searchKey,
+    ssr_requests: [
+      {
+        search_key: searchKey,
+        Trips: [
+          {
+            Index: index,
+            Order: 1,
+            TUI: tui,
+          },
+        ],
+      },
+    ],
+  };
+};
+
+export const getFlightSsr = async (payload) => {
+  return getFlightV2Ssr(payload);
 };
 
 const postV2Ssr = async (payload) => {
@@ -1519,10 +1551,7 @@ const postV2SeatLayout = async (payload) => {
 };
 
 export const getFlightV2Ssr = async (payload) => {
-  const ssrPayload = {
-    ...payload,
-    channel: payload?.channel || makeSsrChannel(),
-  };
+  const ssrPayload = ensureV2SsrPayload(payload);
   const channel = ssrPayload.channel;
   const isMultiCitySsr = ssrPayload?.ssr_requests?.every((request) =>
     String(request?.search_key || "").toUpperCase().startsWith("DM_")

@@ -1475,11 +1475,13 @@
 .facilityList.facilitiesModalGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px 20px;
+  padding-left: 20px;
+  list-style: disc;
 }
 
 .facilitiesModalGrid li {
-  align-items: center;
-  gap: 12px;
+  display: list-item;
+  padding-left: 2px;
   color: #000000;
   font-family: var(--font-inter);
   font-size: 14px;
@@ -1487,19 +1489,8 @@
   line-height: 20px;
 }
 
-.facilityIconBox {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  background: #f2f3f7;
-}
-
-.facilityList .facilityIconBox svg {
-  margin: 0;
-  color: #101828;
+.facilitiesModalGrid li::marker {
+  color: #000000;
 }
 
 @media (max-width: 820px) {

@@ -23,18 +23,22 @@ const stripRawFields = (value, depth = 0) => {
 const isRemoteImage = (image = "") => /^https?:\/\//.test(String(image || ""));
 
 const normalizeImageUrl = (value = "") => {
-    const rawUrl = String(value || "").trim();
+    let rawUrl = String(value || "").trim();
     if (!rawUrl) return "";
+
+    if (rawUrl.startsWith("//")) {
+        rawUrl = `https:${rawUrl}`;
+    }
 
     let url = rawUrl.replace(/\\\//g, "/").replace(/\s/g, "%20");
 
     try {
-        url = decodeURI(url);
+        url = encodeURI(decodeURI(url));
     } catch {
         // Keep the original URL if it is not safely decodable.
     }
 
-    return url.replace(/\s/g, "%20");
+    return url;
 };
 
 const isGeneratedPhotoTitle = (value = "") =>
@@ -86,7 +90,7 @@ const GalleryImage = ({ image, title = "" }) => {
     );
 };
 
-const HotelGallery = ({ images = [] }) => {
+const HotelGallery = ({ images = [], loading = false }) => {
 
      const router = useRouter();
      const normalizedImages = useMemo(() => (Array.isArray(images) ? images : []).map(
@@ -112,6 +116,23 @@ const HotelGallery = ({ images = [] }) => {
      const visibleImages = Array.from({ length: GALLERY_SLOT_COUNT }, (_, index) => (
         galleryImages[index] || { image: FALLBACK_IMAGE, title: `Photo ${index + 1}` }
      ));
+
+        if (loading) {
+            return (
+                <div className={styles.bottomContainerRef} aria-busy="true" aria-label="Loading hotel images">
+                    <div className={styles.rightImage}>
+                        <span className={styles.imageLoader} aria-hidden="true" />
+                    </div>
+                    <div className={styles.rightGrid}>
+                        {Array.from({ length: GALLERY_SLOT_COUNT - 1 }).map((_, index) => (
+                            <div className={styles.imageBox} key={`gallery-skeleton-${index}`}>
+                                <span className={styles.imageLoader} aria-hidden="true" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
 
         const goToGallery = () => {
             if (typeof window !== "undefined") {

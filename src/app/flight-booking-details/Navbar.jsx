@@ -13,6 +13,7 @@ import {
   getFlightBookingSessionExpiry,
 } from "@/features/flights/utils/flightBookingSession";
 import SessionExpiredModal from "../flights/components/SessionExpiredModal";
+import { clearBookingSession } from "@/shared/utils/sessionStorage";
 
 const formatRemainingTime = (milliseconds) => {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -114,7 +115,10 @@ const Navbar = ({
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
           <BrandLogo
-            onClick={() => router.push("/")}
+            onClick={() => {
+              clearBookingSession();
+              router.push("/");
+            }}
             style={{ cursor: "pointer" }}
             fallbackSrc="/Logo.svg"
             alt="Target Tours Logo"

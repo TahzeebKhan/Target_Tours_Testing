@@ -86,6 +86,8 @@ const stripRawFields = (value, depth = 0) => {
 };
 
 const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
+  if (typeof window === "undefined" || !hotel) return;
+
   const fullDetail = {
     request: payload,
     hotel: stripRawFields(hotel),
@@ -93,10 +95,7 @@ const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
   };
 
   try {
-    window.sessionStorage.setItem(
-      HOTEL_DETAILS_KEY,
-      JSON.stringify(fullDetail),
-    );
+    setSessionItem(HOTEL_DETAILS_KEY, fullDetail, 30);
     return;
   } catch (error) {
     console.warn(
@@ -106,16 +105,17 @@ const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
   }
 
   try {
-    window.sessionStorage.setItem(
+    setSessionItem(
       HOTEL_DETAILS_KEY,
-      JSON.stringify({
+      {
         request: payload,
-        hotel,
-      }),
+        hotel: stripRawFields(hotel),
+      },
+      30,
     );
   } catch {
     try {
-      window.sessionStorage.removeItem(HOTEL_DETAILS_KEY);
+      removeSessionItem(HOTEL_DETAILS_KEY);
     } catch {
       // Ignore storage cleanup failures.
     }
@@ -677,6 +677,30 @@ export const getHotelPriceProvider = (hotel = {}) => {
   return "";
 };
 
+export const isHotelUnavailableResponse = (response = {}) => {
+  if (!response || typeof response !== "object") return false;
+
+  const data = response.data || response;
+  const raw = response.raw || {};
+  const status = String(data.status || response.status || raw.status || "").toLowerCase().trim();
+  const code = String(data.code || response.code || raw.code || "").trim();
+  const message = String(
+    data.message || response.message || raw.message || data.error || response.error || "",
+  ).toLowerCase();
+
+  if (code === "1211") return true;
+  if (status === "failure" || status === "failed" || status === "error") return true;
+  if (
+    message.includes("search key expired") ||
+    message.includes("no rooms found") ||
+    message.includes("not available")
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const getHotelDetailsPayload = (hotel = {}) => ({
   searchId: String(
     hotel.searchId ||
@@ -872,42 +896,71 @@ const getHotelSocketType = (payload = {}) => {
 };
 
 const getInitCompleteSearchMeta = (payload = {}) => {
-  if (getHotelSocketType(payload) !== "HOTEL_INIT_COMPLETE") {
-    return { searchId: "", hotelSearchId: "" };
+  const socketType = getHotelSocketType(payload);
+  const validTypes = new Set([
+    "HOTEL_INIT_COMPLETE",
+    "HOTEL_INIT_RESPONSE",
+    "HOTEL_INIT_STARTED",
+    "HOTEL_STREAM_ACCEPTED",
+    "HOTEL_RATE_RESPONSE",
+    "HOTEL_MERGED_RESPONSE",
+    "HOTEL_CONTENT_RESPONSE",
+    "HOTEL_CONTENT_CACHE_SAVED",
+  ]);
+
+  if (
+    !validTypes.has(socketType) &&
+    !payload?.data?.init?.searchId &&
+    !payload?.data?.hotelSearchId &&
+    !payload?.data?.hotel_search_id
+  ) {
+    return { searchId: "", hotelSearchId: "", searchTracingKey: "" };
   }
 
   const data = getMessageData(payload);
   const content = getMessageContent(payload);
   const init = data?.init || content?.init || payload?.init || {};
-  console.log("init", init);
+
   const searchId =
     init.searchId ||
     init.search_id ||
+    init.searchKey ||
+    init.search_key ||
     init.searchid ||
     content?.searchId ||
     content?.search_id ||
+    content?.searchKey ||
+    content?.search_key ||
     content?.searchid ||
     data?.content?.searchId ||
     data?.content?.search_id ||
+    data?.content?.searchKey ||
+    data?.content?.search_key ||
     data?.content?.searchid ||
     data?.searchId ||
     data?.search_id ||
+    data?.searchKey ||
+    data?.search_key ||
     data?.searchid ||
     "";
-  console.log("searchId", searchId);
+
   const hotelSearchId =
     init.hotelSearchId ||
     init.hotel_search_id ||
     init.hotel_search_key ||
+    init.hotelSearchKey ||
     content?.hotelSearchId ||
     content?.hotel_search_id ||
     content?.hotel_search_key ||
+    content?.hotelSearchKey ||
     data?.content?.hotelSearchId ||
     data?.content?.hotel_search_id ||
     data?.content?.hotel_search_key ||
+    data?.content?.hotelSearchKey ||
     data?.hotelSearchId ||
     data?.hotel_search_id ||
     data?.hotel_search_key ||
+    data?.hotelSearchKey ||
     "";
 
   const searchTracingKey =
@@ -1454,10 +1507,10 @@ const TEXT_FILTER_NEEDLES = {
 const matchesAnyTextFilter = (hotel, group, keys) =>
   keys.some((key) => {
     if (group === "suggested" && key === "fiveStar") {
-      return Math.round(Number(hotel?.rating || 0)) === 5;
+      return getHotelRating(hotel) === 5;
     }
     if (group === "suggested" && key === "fourStar") {
-      return Math.round(Number(hotel?.rating || 0)) === 4;
+      return getHotelRating(hotel) === 4;
     }
 
     if (group === "freeCancellation") {
@@ -1584,7 +1637,7 @@ const matchesAnyTextFilter = (hotel, group, keys) =>
 
 export const matchesHotelFilters = (hotel, filters = {}) => {
   const price = getHotelPriceNumber(hotel);
-  const rating = Number(hotel.rating || 0);
+  const rating = getHotelRating(hotel);
   const hotelSearchText = String(filters.hotelSearchText || "").trim();
 
   if (hotelSearchText && !hasText(hotel, hotelSearchText)) {
@@ -1609,7 +1662,7 @@ export const matchesHotelFilters = (hotel, filters = {}) => {
   }
 
   if (hasSelectedValues(filters.starCategory)) {
-    console.log("start rating", filters.starCategory);
+   
     const matchesStar = selectedKeys(filters.starCategory).some(
       (key) => Math.round(rating) === getFilterNumber(key),
     );
@@ -1984,17 +2037,25 @@ const writeSlimStoredHotelResults = (payload = {}, result = {}, meta = {}) => {
   if (typeof window === "undefined" || !result?.hotels?.length) return;
 
   try {
+    const dataObj = {
+      channel: payload?.channel || "",
+      type: getHotelSocketType(payload) || payload?.type || "HOTEL_RESULTS",
+      source: result.source || "hotels",
+      hotelCount: result.hotels.length,
+      searchId: meta.searchId || result.meta?.searchId || "",
+      hotelSearchId: meta.hotelSearchId || result.meta?.hotelSearchId || "",
+      searchTracingKey:
+        meta.searchTracingKey || result.meta?.searchTracingKey || "",
+    };
+    const bytes = new Blob([JSON.stringify(dataObj)]).size;
+    const dataSizeMb = Number((bytes / (1024 * 1024)).toFixed(6));
+
     window.sessionStorage.setItem(
       HOTEL_SEARCH_RESULTS_KEY,
       JSON.stringify({
-        channel: payload?.channel || "",
-        type: getHotelSocketType(payload) || payload?.type || "HOTEL_RESULTS",
-        source: result.source || "hotels",
-        hotelCount: result.hotels.length,
-        searchId: meta.searchId || result.meta?.searchId || "",
-        hotelSearchId: meta.hotelSearchId || result.meta?.hotelSearchId || "",
-        searchTracingKey:
-          meta.searchTracingKey || result.meta?.searchTracingKey || "",
+        ...dataObj,
+        dataSizeMb,
+        dataSize: `${dataSizeMb} MB`,
       }),
     );
   } catch {
@@ -2435,9 +2496,25 @@ const TourListing = () => {
     setAuthView("login");
   };
 
+  const extractSearchIdFromChannel = (channel = "") => {
+    if (!channel) return "";
+    try {
+      const decoded = decodeURIComponent(channel);
+      const parts = decoded.split(":");
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const part = parts[i].trim();
+        if (part.startsWith("hotel-") || part.includes("-")) {
+          return part;
+        }
+      }
+      return parts[parts.length - 1] || "";
+    } catch {
+      return "";
+    }
+  };
+
   const handleBookNow = async (hotel) => {
     if (!hotel) return;
-    if (hotelSearchChannel && !hasHotelInitComplete) return;
 
     hotelDetailsAbortRef.current?.abort();
 
@@ -2446,22 +2523,68 @@ const TourListing = () => {
     hotelDetailsRequestRef.current = requestId;
     hotelDetailsAbortRef.current = controller;
 
-    const payload = getHotelDetailsRequest(hotel, searchParams);
-    const loadingKey = getHotelLoadingKey(hotel);
+    const channelSearchId = extractSearchIdFromChannel(
+      hotelSearchChannel || searchParams.get("channel") || "",
+    );
+    const querySearchId =
+      searchParams.get("searchId") || searchParams.get("search_id") || "";
 
-    if (
-      !payload.searchId ||
-      !payload.hotelSearchId ||
-      !payload.hotelId ||
-      !payload.priceProvider
-    ) {
-      console.warn("Missing hotel details payload fields:", payload);
-      if (hotelDetailsRequestRef.current === requestId) {
-        setLoadingHotelDetailsId("");
-      }
-      return;
+    const searchId =
+      hotel.searchId ||
+      hotel.search_id ||
+      hotel.raw?.searchId ||
+      hotel.raw?.search_id ||
+      querySearchId ||
+      socketSearchMeta.searchId ||
+      latestFilterSearchMetaRef.current.searchId ||
+      channelSearchId;
+
+    const hotelSearchId =
+      hotel.hotelSearchId ||
+      hotel.hotel_search_id ||
+      hotel.hotel_search_key ||
+      hotel.raw?.hotelSearchId ||
+      hotel.raw?.hotel_search_id ||
+      hotel.raw?.hotel_search_key ||
+      socketSearchMeta.hotelSearchId ||
+      latestFilterSearchMetaRef.current.hotelSearchId ||
+      searchId ||
+      channelSearchId;
+
+    const searchTracingKey =
+      hotel.searchTracingKey ||
+      hotel.search_tracing_key ||
+      hotel.raw?.searchTracingKey ||
+      socketSearchMeta.searchTracingKey ||
+      latestFilterSearchMetaRef.current.searchTracingKey ||
+      "";
+
+    const priceProvider =
+      getHotelPriceProvider(hotel) ||
+      getHotelPriceProvider(hotel.raw) ||
+      hotel.priceProvider ||
+      hotel.provider ||
+      "akbar";
+
+    const hotelWithMeta = {
+      ...hotel,
+      searchId,
+      hotelSearchId,
+      searchTracingKey,
+      priceProvider,
+    };
+
+    const payload = getHotelDetailsRequest(hotelWithMeta, searchParams);
+    if (!payload.searchId) payload.searchId = searchId || channelSearchId;
+    if (!payload.hotelSearchId) payload.hotelSearchId = payload.searchId || channelSearchId;
+    if (!payload.priceProvider) payload.priceProvider = "akbar";
+    if (!payload.hotelId) {
+      payload.hotelId = String(hotel.id || hotel.hotelId || hotel.code || "").trim();
     }
 
+    console.log("[SEE AVAILABILITY CLICKED] Hitting hotel details API immediately with payload:", payload);
+
+    const loadingKey = getHotelLoadingKey(hotel) || payload.hotelId;
     setLoadingHotelDetailsId(loadingKey);
 
     try {
@@ -2472,6 +2595,13 @@ const TourListing = () => {
 
       if (hotelDetailsRequestRef.current !== requestId) return;
 
+      if (isHotelUnavailableResponse(details)) {
+        toast.error("This hotel is not available to book now", {
+          toastId: "hotel-not-available",
+        });
+        return;
+      }
+
       writeHotelDetailsForNavigation({ payload, hotel, details });
       router.push(getHotelDetailUrl(payload), { scroll: true });
     } catch (error) {
@@ -2480,8 +2610,17 @@ const TourListing = () => {
       if (hotelDetailsRequestRef.current !== requestId) return;
 
       console.error("Hotel details request failed:", error);
-      if (isMissingHotelAuthTokenError(error)) {
+      if (isHotelUnavailableResponse(error?.data || error)) {
+        toast.error("This hotel is not available to book now", {
+          toastId: "hotel-not-available",
+        });
+      } else if (isMissingHotelAuthTokenError(error)) {
         openLoginModal();
+      } else {
+        toast.error(
+          error?.message || error?.title || "Unable to fetch hotel details. Please try again.",
+          { toastId: "hotel-details-error" }
+        );
       }
     } finally {
       if (hotelDetailsRequestRef.current === requestId) {
@@ -3225,11 +3364,11 @@ const TourListing = () => {
 
                     <button
                       className={`${styles.bookNowBtn} ${styles.bookNowBtn2}`}
-                      disabled={
-                        (hotelSearchChannel && !hasHotelInitComplete) ||
-                        loadingHotelDetailsId === getHotelLoadingKey(item)
-                      }
-                      onClick={() => handleBookNow(item)}
+                      disabled={false}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookNow(item);
+                      }}
                     >
                       {loadingHotelDetailsId === getHotelLoadingKey(item)
                         ? "LOADING..."
@@ -3390,11 +3529,11 @@ const TourListing = () => {
 
                     <button
                       className={`${styles.bookNowBtn} ${styles.ListViewBookNowBtn}`}
-                      disabled={
-                        (hotelSearchChannel && !hasHotelInitComplete) ||
-                        loadingHotelDetailsId === getHotelLoadingKey(item)
-                      }
-                      onClick={() => handleBookNow(item)}
+                      disabled={false}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookNow(item);
+                      }}
                     >
                       {loadingHotelDetailsId === getHotelLoadingKey(item)
                         ? "LOADING..."

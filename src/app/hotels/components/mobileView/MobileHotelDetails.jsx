@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MobileHotelDetails.module.css";
 import { Pencil } from "lucide-react";
+import { toast } from "react-toastify";
 import ResultsBottomSheet from "./ResultsBottomSheet";
 import HotelFilterSheet from "./HotelFilterSheet";
 import MobileHotelEditSheet from "./MobileHotelEditSheet";
@@ -18,6 +19,11 @@ import {
   isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import {
+  clearHotelBookingSession,
+  clearHotelSearchSession,
+} from "@/shared/services/hotelSearch";
+import { setSessionItem } from "@/shared/utils/sessionStorage";
+import {
   getStaySummary,
   getMessageData,
   getHotelsFromMessage,
@@ -28,6 +34,7 @@ import {
   matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
+  isHotelUnavailableResponse,
 } from "../TourListing";
 import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
 import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
@@ -239,36 +246,78 @@ const MobileHotelDetails = () => {
   const handleBookNow = async (hotel) => {
     if (!hotel || loadingHotelDetailsId) return;
 
-    const payload = getHotelDetailsRequest(hotel, searchParams);
-
-    if (
-      !payload.searchId ||
-      !payload.hotelSearchId ||
-      !payload.hotelId ||
-      !payload.priceProvider
-    ) {
-      console.warn("Missing hotel details payload fields:", payload);
-      return;
+    let fallbackSearchId = "";
+    const hotelSearchChannel = searchParams.get("channel") || "";
+    if (hotelSearchChannel) {
+      try {
+        const decoded = decodeURIComponent(hotelSearchChannel);
+        const parts = decoded.split(":");
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const part = parts[i].trim();
+          if (part.startsWith("hotel-") || part.includes("-")) {
+            fallbackSearchId = part;
+            break;
+          }
+        }
+        if (!fallbackSearchId) fallbackSearchId = parts[parts.length - 1] || "";
+      } catch {
+        fallbackSearchId = "";
+      }
     }
 
-    setLoadingHotelDetailsId(hotel.id);
+    const searchId = hotel.searchId || hotel.search_id || fallbackSearchId;
+    const hotelSearchId = hotel.hotelSearchId || hotel.hotel_search_id || searchId || fallbackSearchId;
+    const priceProvider = hotel.priceProvider || hotel.provider || "akbar";
+
+    const hotelWithMeta = {
+      ...hotel,
+      searchId,
+      hotelSearchId,
+      priceProvider,
+    };
+
+    const payload = getHotelDetailsRequest(hotelWithMeta, searchParams);
+    if (!payload.searchId) payload.searchId = searchId || fallbackSearchId;
+    if (!payload.hotelSearchId) payload.hotelSearchId = payload.searchId || fallbackSearchId;
+    if (!payload.priceProvider) payload.priceProvider = "akbar";
+    if (!payload.hotelId) payload.hotelId = String(hotel.id || hotel.hotelId || hotel.code || "").trim();
+
+    setLoadingHotelDetailsId(hotel.id || payload.hotelId);
 
     try {
       const details = await fetchHotelDetails(payload);
-      window.sessionStorage.setItem(
+
+      if (isHotelUnavailableResponse(details)) {
+        toast.error("This hotel is not available to book now", {
+          toastId: "mobile-hotel-not-available",
+        });
+        return;
+      }
+
+      setSessionItem(
         HOTEL_DETAILS_KEY,
-        JSON.stringify({
+        {
           request: payload,
           hotel,
           details,
-        }),
+        },
+        30,
       );
       router.push(getHotelDetailUrl(payload), { scroll: true });
     } catch (error) {
       console.error("Hotel details request failed:", error);
-      if (isMissingHotelAuthTokenError(error)) {
+      if (isHotelUnavailableResponse(error?.data || error)) {
+        toast.error("This hotel is not available to book now", {
+          toastId: "mobile-hotel-not-available",
+        });
+      } else if (isMissingHotelAuthTokenError(error)) {
         setAuthView("login");
         setShowAuthModal(true);
+      } else {
+        toast.error(
+          error?.message || error?.title || "Unable to fetch hotel details. Please try again.",
+          { toastId: "mobile-hotel-details-error" }
+        );
       }
     } finally {
       setLoadingHotelDetailsId("");

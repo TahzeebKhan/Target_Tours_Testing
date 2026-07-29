@@ -99,91 +99,79 @@ const formatPenalty = (amount, currency) => {
 
 const parseRawRows = (rawText, currency = "INR", platformCharges = null) => {
   const lines = cleanRuleLines(rawText);
-  const rows = [];
+  const directRows = [];
   let inCancellationSection = false;
-  let pendingDescription = "";
+  let inChangeSection = false;
 
   lines.forEach((line, index) => {
-    const nextLine = lines[index + 1] || "";
-    const contextText = lines.slice(index, index + 5).join(" ");
-    const effectiveLine = /\bFOR$/i.test(line) && nextLine ? `${line} ${nextLine}` : line;
-    const upperLine = line.toUpperCase();
-    const upperEffectiveLine = effectiveLine.toUpperCase();
-
-    if (
-      upperLine === "CANCELLATIONS" ||
-      /^CANCELLATION\s*:/i.test(effectiveLine) ||
-      upperEffectiveLine.includes("CANCEL/REFUND") ||
-      upperEffectiveLine.includes("CANCELLATION CHARGES") ||
-      upperEffectiveLine.includes("CANCELLATION FEE")
-    ) {
-      inCancellationSection = true;
+    if (/\b(facilitation fee|additional sum|tele check-in|desk|counter|baggage)\b/i.test(line)) {
+      return;
     }
-    if (inCancellationSection && upperLine.includes("NO SHOW")) {
+
+    const isCancellationHeader = /\b(CANCELLATIONS?|CANCEL|REFUND|PENALTY|PENALTIES|CANCELLATION\s+FEES?)\b/i.test(line);
+    const isChangeHeader = /\b(CHANGES?|RESCHEDULE|REISSUANCE|MODIFICATION|CHANGE\s+FEES?)\b/i.test(line);
+
+    if (isCancellationHeader) {
+      inCancellationSection = true;
+      inChangeSection = false;
+    }
+    if (isChangeHeader) {
+      inChangeSection = true;
       inCancellationSection = false;
     }
 
-    const bookingWindowMatch = effectiveLine.match(
-      /(?:BOOKED|WITHIN|MORE THAN)\s+(.+?)\s+(?:PRIOR TO|OF)\s+COMMENCEMENT/i
-    );
-    if (inCancellationSection && bookingWindowMatch) {
-      pendingDescription = cleanRuleText(bookingWindowMatch[1].replace(/\bWITHIN\b/i, ""));
-    }
+    const nextLine = lines[index + 1] || "";
+    const hasAmount = /(?:INR|RS\.?|₹|\d+\/\-)\s*[\d,]+/i.test(line);
 
-    const atoMatch = effectiveLine.match(
-      /cancellation\s*:\s*adult\s*([0-9][\d.,]*)\s*([A-Z]{3})?/i
-    );
-    if (atoMatch) {
-      rows.push({
-        timeFrame: "Cancellation",
-        penalty: formatPenalty(atoMatch[1], atoMatch[2] || currency, platformCharges),
-      });
+    const effectiveLine = (isCancellationHeader || isChangeHeader) && !hasAmount && nextLine
+      ? `${line} ${nextLine}`
+      : line;
+
+    const isCancellationLine = inCancellationSection || /\b(cancellation|cancel|refund)\b/i.test(effectiveLine);
+    const isChangeLine = inChangeSection || /\b(change|reschedule|reissuance|modification)\b/i.test(effectiveLine);
+
+    if (!isCancellationLine && !isChangeLine && !/\b(departure|days?|hrs?|hours?|pax|sector)\b/i.test(effectiveLine)) {
       return;
     }
 
-    if (!inCancellationSection) return;
+    const amountMatch =
+      effectiveLine.match(/(?:INR|RS\.?|₹)\s*([\d,]+)(?:\/\-)?/i) ||
+      effectiveLine.match(/([\d,]+)\s*(?:\/\-)?\s*(?:INR|RS\.?|₹)/i) ||
+      effectiveLine.match(/(?:CHARGE|FEE|COST|PENALTY)\s*(?:INR|RS\.?|₹)?\s*([\d,]+)/i) ||
+      effectiveLine.match(/([\d,]+)\/\-/);
 
-    const simpleWindowChargeMatch = effectiveLine.match(
-      /^(.+?)\s+([A-Z]{3})\s+([0-9][\d.,]*)\b/i
-    );
-    if (simpleWindowChargeMatch) {
-      rows.push({
-        timeFrame: normalizeTimeFrame(simpleWindowChargeMatch[1]),
-        penalty: formatPenalty(
-          simpleWindowChargeMatch[3],
-          simpleWindowChargeMatch[2] || currency,
-          platformCharges
-        ),
-      });
-      return;
+    if (amountMatch) {
+      const rawAmount = amountMatch[1].replace(/,/g, "");
+      const amount = Number(rawAmount);
+
+      if (Number.isFinite(amount) && amount > 0) {
+        const timeMatch =
+          effectiveLine.match(/(departure\s+(?:within|on)\s+[\d\w\s]+(?:days?|hrs?|hours?|later)?)/i) ||
+          effectiveLine.match(/(\d+\s*(?:hrs?|hours?|days?)\s*(?:prior to|before)\s*(?:departure|flight|departure date)?.*)/i) ||
+          effectiveLine.match(/((?:before|within|till|up to)\s*\d+\s*(?:hrs?|hours?|days?)[^,.;]*)/i) ||
+          effectiveLine.match(/(prior to departure date.*)/i);
+
+        const isChange = isChangeLine || /\bchange\b/i.test(effectiveLine);
+        const isCancel = !isChange;
+
+        const timeFrame = timeMatch
+          ? normalizeTimeFrame(timeMatch[1])
+          : isCancel
+            ? "Cancel (Before departure)"
+            : "Reschedule / Date Change";
+
+        const currencyMatch = effectiveLine.match(/(INR|USD|EUR|GBP|AED|SAR)/i);
+        const rowCurrency = currencyMatch ? currencyMatch[1].toUpperCase() : currency;
+
+        directRows.push({
+          timeFrame,
+          penalty: formatPenalty(amount, rowCurrency, platformCharges),
+        });
+      }
     }
-
-    const chargeMatch =
-      effectiveLine.match(
-        /^(?:(TILL\s+[^,.;]+?)\s+)?CHARGE\s+([A-Z]{3})?\s*([0-9][\d.,]*)\s+(?:PER\s+COMPONENT\s+)?FOR\s+(?:CANCEL|CANCELLATION|REFUND)/i
-      ) ||
-      contextText.match(/AGAINST\s+A\s+CHARGE\s+OF\s+([A-Z]{3})?\s*([0-9][\d.,]*)/i) ||
-      effectiveLine.match(
-        /(?:CANCELLATION|CANCEL|REFUND)[^0-9A-Z]*(?:CHARGE|FEE|FEES)?[^0-9A-Z]*([A-Z]{3})?\s*([0-9][\d.,]*)/i
-      );
-
-    if (!chargeMatch) return;
-
-    const amount = chargeMatch[3] || chargeMatch[2];
-    const rowCurrency = chargeMatch[2] && chargeMatch[3] ? chargeMatch[2] : chargeMatch[1] || currency;
-    const description =
-      cleanRuleText(chargeMatch[1]) ||
-      pendingDescription ||
-      contextText.match(/BEFORE\s+24\s+HOURS\s+OF\s+DEPARTURE/i)?.[0] ||
-      "Before departure";
-
-    rows.push({
-      timeFrame: normalizeTimeFrame(description),
-      penalty: formatPenalty(amount, rowCurrency, platformCharges),
-    });
   });
 
-  return rows;
+  return directRows;
 };
 
 const extractCancellationRowsFromNode = (payload, platformCharges, currency) => {

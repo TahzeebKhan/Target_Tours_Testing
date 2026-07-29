@@ -1,161 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, RotateCcw } from "lucide-react";
 import { GoogleMap, LoadScriptNext, OverlayView } from "@react-google-maps/api";
 import { useSearchParams } from "next/navigation";
 import styles from "./hotelMap.module.css";
 import { useHotelsContext } from "../../context/HotelsContext";
 import { HOTEL_SEARCH_SESSION_KEY } from "@/shared/services/hotelSearch";
+import { matchesHotelFilters } from "../TourListing";
+import {
+  DEFAULT_FILTER_SECTIONS,
+  getApiFilterSections,
+  getStarText,
+  isOptionChecked,
+} from "../HotelsFilters";
 
 const DEFAULT_CENTER = { lat: 28.6139, lng: 77.209 };
 const DEFAULT_BUDGET = [0, 25000];
 const mapContainerStyle = { width: "100%", height: "100%" };
+const FILTER_OPTION_PREVIEW_LIMIT = 5;
 
 const SUGGESTED_FILTERS = [
   { key: "lastMinuteDeals", label: "Last Minute Deals" },
   { key: "fiveStar", label: "5 Star" },
   { key: "fourStar", label: "4 Star" },
   { key: "breakfastIncluded", label: "Breakfast Included" },
-  { key: "oneClickRewards", label: "OneCircle Rewards" },
+  { key: "oneCircleRewards", label: "OneCircle Rewards" },
 ];
-
-const PRICE_FILTERS = [
-  { key: "0-2500", label: "₹0-2500", min: 0, max: 2500 },
-  { key: "2500-4500", label: "₹2500-4500", min: 2500, max: 4500 },
-  { key: "4500-7000", label: "₹4500-7000", min: 4500, max: 7000 },
-  { key: "7000-11000", label: "₹7000-11000", min: 7000, max: 11000 },
-  { key: "11000-17000", label: "₹11000-17000", min: 11000, max: 17000 },
-  { key: "17000+", label: "₹17000+", min: 17000, max: Infinity },
-];
-
-const normalizeFilterKey = (value) =>
-  String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
-
-const getLiveFilterRoot = (filterData) =>
-  filterData?.filters ||
-  filterData?.data?.filters ||
-  filterData?.filterData ||
-  filterData?.data ||
-  filterData ||
-  {};
-
-const getLiveFilterValue = (filterData, aliases) => {
-  const root = getLiveFilterRoot(filterData);
-  const wantedAliases = aliases.map(normalizeFilterKey);
-
-  return Object.entries(root || {}).find(([key]) =>
-    wantedAliases.includes(normalizeFilterKey(key)),
-  )?.[1];
-};
-
-const getLiveOptionCount = (options, wantedValue) => {
-  if (!Array.isArray(options)) return null;
-
-  const wanted = normalizeFilterKey(wantedValue);
-  const option = options.find((item) =>
-    [
-      item?.value,
-      item?.key,
-      item?.label,
-      item?.name,
-      item?.title,
-    ].some((value) => normalizeFilterKey(value) === wanted),
-  );
-
-  if (!option) return null;
-  const count = Number(option.count ?? option.total ?? option.hotelCount);
-  return Number.isFinite(count) ? count : 0;
-};
-
-const getLiveBooleanCount = (value) => {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  if (value.available === false) return 0;
-
-  const count = Number(value.count ?? value.total ?? value.hotelCount);
-  return Number.isFinite(count) ? count : null;
-};
-
-const getLivePriceFilters = (filterData) => {
-  const groups = getLiveFilterValue(filterData, [
-    "priceGroups",
-    "priceGroup",
-    "priceBuckets",
-    "priceRanges",
-  ]);
-
-  if (!Array.isArray(groups) || !groups.length) return PRICE_FILTERS;
-
-  const options = groups
-    .map((group) => {
-      const min = Number(group?.min ?? group?.from ?? 0);
-      const rawMax = group?.max ?? group?.to;
-      const max = rawMax === null || rawMax === undefined ? Infinity : Number(rawMax);
-      if (!Number.isFinite(min) || (!Number.isFinite(max) && max !== Infinity)) {
-        return null;
-      }
-
-      const key = Number.isFinite(max) ? `${min}-${max}` : `${min}+`;
-      const count = Number(group?.count ?? group?.total ?? group?.hotelCount);
-
-      return {
-        key,
-        label:
-          group?.label ||
-          (Number.isFinite(max) ? `₹${min}-${max}` : `₹${min}+`),
-        min,
-        max,
-        count: Number.isFinite(count) ? count : 0,
-      };
-    })
-    .filter(Boolean);
-
-  return options.length ? options : PRICE_FILTERS;
-};
-
-const getLiveBudgetRange = (filterData, priceFilters) => {
-  const range = getLiveFilterValue(filterData, ["priceRange", "price_range"]);
-  const min = Number(range?.min ?? range?.minimum);
-  const max = Number(range?.max ?? range?.maximum);
-
-  if (Number.isFinite(min) && Number.isFinite(max) && max >= min) {
-    return [Math.floor(min), Math.ceil(max)];
-  }
-
-  const filterMinimums = priceFilters
-    .map((option) => Number(option.min))
-    .filter(Number.isFinite);
-  const filterMaximums = priceFilters
-    .map((option) => Number(option.max))
-    .filter(Number.isFinite);
-
-  if (filterMinimums.length && filterMaximums.length) {
-    return [Math.min(...filterMinimums), Math.max(...filterMaximums)];
-  }
-
-  return DEFAULT_BUDGET;
-};
-
-const getPriceBucketByKey = (key) => {
-  const configuredBucket = PRICE_FILTERS.find((item) => item.key === key);
-  if (configuredBucket) return configuredBucket;
-
-  const match = String(key).match(/^(\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?)|\+)$/);
-  if (!match) return null;
-
-  return {
-    min: Number(match[1]),
-    max: match[2] ? Number(match[2]) : Infinity,
-  };
-};
-
-const TEXT_FILTER_NEEDLES = {
-  lastMinuteDeals: ["deal", "discount"],
-  breakfastIncluded: ["breakfast"],
-  oneClickRewards: ["reward"],
-};
 
 const getNumber = (value) => {
   const number = Number(value);
@@ -163,7 +34,8 @@ const getNumber = (value) => {
 };
 
 const getCoordinatePair = (source = {}) => {
-  const coordinates = source.coordinates || source.geoCode || source.geo_code || source;
+  if (!source) return null;
+  const coordinates = source.coordinates || source.geoCode || source.geo_code || source.location || source.position || source;
   const lat = getNumber(
     coordinates.lat ??
       coordinates.latitude ??
@@ -198,61 +70,56 @@ export const getHotelSearchCenter = (searchParams, channel = "") => {
   if (typeof window !== "undefined") {
     try {
       const storedSearch = window.sessionStorage.getItem(HOTEL_SEARCH_SESSION_KEY);
-      const searchContext = storedSearch ? JSON.parse(storedSearch) : null;
-
-      if (!channel || searchContext?.channel === channel) {
-        const sessionCenter = getCoordinatePair(
-          searchContext?.initPayload?.geoCode ||
-            searchContext?.location?.geoCode ||
-            searchContext?.location?.raw?.coordinates ||
-            searchContext?.initPayload?.locations?.[0]?.coordinates ||
-            {},
+      if (storedSearch) {
+        const parsedSearch = JSON.parse(storedSearch);
+        const center = getCoordinatePair(
+          parsedSearch?.location?.geoCode || parsedSearch?.location,
         );
-
-        if (sessionCenter) return sessionCenter;
+        if (center) return center;
       }
     } catch {
-      // Ignore malformed session storage.
+      // Fall through to searchParams parsing.
     }
   }
 
-  const urlCenter = getCoordinatePair({
-    lat: searchParams?.get("lat") || searchParams?.get("latitude"),
-    lng:
-      searchParams?.get("lng") ||
-      searchParams?.get("long") ||
-      searchParams?.get("longitude"),
-  });
+  const rawLocation = searchParams.get("location");
+  const searchCenter = parseLocationParam(rawLocation);
+  if (searchCenter) return searchCenter;
 
-  return (
-    urlCenter ||
-    parseLocationParam(searchParams?.get("location")) ||
-    parseLocationParam(searchParams?.get("locationPayload")) ||
-    DEFAULT_CENTER
-  );
+  if (channel.includes("noida")) {
+    return { lat: 28.5355, lng: 77.391 };
+  }
+
+  return DEFAULT_CENTER;
 };
 
 export const getGoogleMapEmbedUrl = (center = DEFAULT_CENTER, zoom = 13) => {
-  const lat = Number(center.lat || DEFAULT_CENTER.lat);
-  const lng = Number(center.lng || DEFAULT_CENTER.lng);
-
+  const lat = center?.lat ?? DEFAULT_CENTER.lat;
+  const lng = center?.lng ?? DEFAULT_CENTER.lng;
   return `https://www.google.com/maps?q=${lat},${lng}&z=${zoom}&output=embed`;
 };
 
-const getHotelCoordinates = (hotel = {}) => {
-  const pair = getCoordinatePair({
-    coordinates: hotel.coordinates,
-    geoCode: hotel.geoCode,
-    lat: hotel.latitude ?? hotel.lat,
-    lng: hotel.longitude ?? hotel.lng ?? hotel.long,
-  });
+const getHotelCoordinates = (hotel = {}, fallbackCenter = null) => {
+  const raw = hotel.raw || {};
+  const pair =
+    getCoordinatePair(hotel.coordinates) ||
+    getCoordinatePair(hotel.geoCode) ||
+    getCoordinatePair(hotel.geo_code) ||
+    getCoordinatePair(raw.geoCode) ||
+    getCoordinatePair(raw.geo_code) ||
+    getCoordinatePair(raw.coordinates) ||
+    getCoordinatePair(raw.location) ||
+    getCoordinatePair(raw.position) ||
+    getCoordinatePair(hotel);
 
-  return pair;
+  if (pair) return pair;
+  if (fallbackCenter) return fallbackCenter;
+  return null;
 };
 
 const getHotelPrice = (hotel = {}) => {
   if (hotel.price && String(hotel.price).trim()) return hotel.price;
-  const price = hotel.amount || hotel.minRate || hotel.totalRate || hotel.baseRate;
+  const price = hotel.amount || hotel.minRate || hotel.totalRate || hotel.baseRate || hotel.raw?.price || hotel.raw?.amount;
   if (!price) return "₹ --";
   return `₹ ${Math.round(Number(price || 0)).toLocaleString("en-IN")}`;
 };
@@ -272,70 +139,6 @@ const getHotelImage = (hotel = {}) => {
   return typeof image === "string" ? image : "";
 };
 
-const getHotelPriceNumber = (hotel = {}) => {
-  const priceText = String(
-    hotel.price || hotel.amount || hotel.minRate || hotel.totalRate || hotel.baseRate || "",
-  ).replace(/[^\d.]/g, "");
-  if (!priceText) return null;
-
-  const price = Number(priceText);
-  return Number.isFinite(price) ? price : null;
-};
-
-const hasSelectedValues = (group = {}) =>
-  Object.values(group || {}).some(Boolean);
-
-const selectedKeys = (group = {}) =>
-  Object.entries(group || {})
-    .filter(([, isSelected]) => isSelected)
-    .map(([key]) => key);
-
-const hasHotelText = (hotel = {}, ...needles) => {
-  const raw = hotel.raw || {};
-  const rawFacilities = Array.isArray(raw.facilities)
-    ? raw.facilities
-    : Array.isArray(raw.amenities)
-      ? raw.amenities
-      : [];
-  const rawFacilityText = rawFacilities
-    .map((facility) =>
-      typeof facility === "string"
-        ? facility
-        : facility?.name ||
-          facility?.facilityName ||
-          facility?.label ||
-          facility?.description ||
-          "",
-    )
-    .filter(Boolean);
-  const text = [
-    hotel.title,
-    hotel.name,
-    hotel.hotelName,
-    hotel.route,
-    hotel.address,
-    raw.propertyType,
-    raw.type,
-    raw.chainName,
-    raw.brandName,
-    raw.hotelChain,
-    raw.chain,
-    raw.name,
-    raw.hotelName,
-    raw.address,
-    raw.city,
-    raw.locality,
-    ...rawFacilityText,
-    ...(hotel.facilities || []).map((facility) => facility.name || facility.label || ""),
-    ...(hotel.benefits || []),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return needles.some((needle) => text.includes(String(needle || "").toLowerCase()));
-};
-
 const getHotelAmenities = (hotel = {}) => {
   const rawFacilities = Array.isArray(hotel.raw?.facilities)
     ? hotel.raw.facilities
@@ -347,9 +150,8 @@ const getHotelAmenities = (hotel = {}) => {
     ...rawFacilities.map((facility) =>
       typeof facility === "string"
         ? facility
-        : facility?.name || facility?.facilityName || facility?.label,
+        : facility?.name || facility?.facilityName || facility?.label || "",
     ),
-    ...(hotel.benefits || []),
   ]
     .filter(Boolean)
     .map((amenity) => String(amenity).trim())
@@ -358,61 +160,20 @@ const getHotelAmenities = (hotel = {}) => {
   return [...new Set(amenities)].slice(0, 3);
 };
 
-const matchesMapFilters = (hotel, filters = {}, budget = null) => {
-  const price = getHotelPriceNumber(hotel);
-  const rating = Number(hotel.rating || hotel.starRating || hotel.raw?.starRating || 0);
-
-  if (
-    budget &&
-    price !== null &&
-    (price < Number(budget[0] || 0) || price > Number(budget[1] || Infinity))
-  ) {
-    return false;
-  }
-
-  if (hasSelectedValues(filters.price)) {
-    const matchesPrice = selectedKeys(filters.price).some((key) => {
-      const bucket = getPriceBucketByKey(key);
-      if (!bucket || price === null) return false;
-      return price >= bucket.min && price < bucket.max;
-    });
-
-    if (!matchesPrice) return false;
-  }
-
-  if (hasSelectedValues(filters.suggested)) {
-    const matchesSuggested = selectedKeys(filters.suggested).some((key) => {
-      if (key === "fiveStar") return Math.round(rating) === 5;
-      if (key === "fourStar") return Math.round(rating) === 4;
-
-      const needles = TEXT_FILTER_NEEDLES[key] || [key];
-      return hasHotelText(hotel, ...needles);
-    });
-
-    if (!matchesSuggested) return false;
-  }
-
-  return true;
-};
-
 export default function HotelMap({ isOpen, onClose }) {
   const searchParams = useSearchParams();
   const hotelSearchChannel = searchParams.get("channel") || "";
   const {
-    appliedFilters,
+    appliedFilters = {},
     displayHotels,
     filterData,
     hotels,
     setAppliedFilters,
+    resetFilters,
   } = useHotelsContext();
-  const [searchText, setSearchText] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState({ suggested: {}, price: {} });
-  const [appliedMapFilters, setAppliedMapFilters] = useState({ suggested: {}, price: {} });
-  const [budget, setBudget] = useState(DEFAULT_BUDGET);
-  const [budgetTouched, setBudgetTouched] = useState(false);
-  const [appliedBudget, setAppliedBudget] = useState(DEFAULT_BUDGET);
-  const [appliedBudgetTouched, setAppliedBudgetTouched] = useState(false);
   const [selectedHotelId, setSelectedHotelId] = useState("");
+  const [searchTerms, setSearchTerms] = useState({});
+  const [expandedSections, setExpandedSections] = useState({});
   const mapRef = useRef(null);
 
   const searchCenter = useMemo(
@@ -420,41 +181,50 @@ export default function HotelMap({ isOpen, onClose }) {
     [hotelSearchChannel, searchParams],
   );
 
+  const apiSections = useMemo(() => getApiFilterSections(filterData), [filterData]);
+  const filterSections = useMemo(() => {
+    const remainingApiSections = new Map(
+      apiSections.map((section) => [section.key, section]),
+    );
+    const mergedSections = DEFAULT_FILTER_SECTIONS.map((defaultSection) => {
+      if (defaultSection.key === "price") {
+        remainingApiSections.delete("price");
+        return defaultSection;
+      }
+      const apiSection = remainingApiSections.get(defaultSection.key);
+      if (!apiSection) return defaultSection;
+
+      remainingApiSections.delete(defaultSection.key);
+      return apiSection;
+    });
+
+    return [
+      {
+        key: "suggested",
+        title: "SUGGESTED FOR YOU",
+        options: SUGGESTED_FILTERS,
+      },
+      ...mergedSections,
+      ...remainingApiSections.values(),
+    ];
+  }, [apiSections]);
+
   const markerHotels = useMemo(() => {
     const sourceHotels = hotels?.length ? hotels : displayHotels || [];
-    const normalizedSearch = searchText.trim().toLowerCase();
 
     return sourceHotels
-      .filter((hotel) => {
-        if (!matchesMapFilters(hotel, appliedMapFilters, appliedBudgetTouched ? appliedBudget : null)) {
-          return false;
-        }
-
-        if (!normalizedSearch) return true;
-        const haystack = [
-          hotel.title,
-          hotel.name,
-          hotel.hotelName,
-          hotel.route,
-          hotel.address,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return haystack.includes(normalizedSearch);
-      })
+      .filter((hotel) => matchesHotelFilters(hotel, appliedFilters))
       .map((hotel, index) => ({
         ...hotel,
         markerId: String(hotel.id || hotel.hotelId || index),
-        coordinates: getHotelCoordinates(hotel),
+        coordinates: getHotelCoordinates(hotel, searchCenter),
         image: getHotelImage(hotel),
         mapAmenities: getHotelAmenities(hotel),
         priceLabel: getHotelPrice(hotel),
       }))
       .filter((hotel) => hotel.coordinates)
       .slice(0, 200);
-  }, [appliedBudget, appliedBudgetTouched, appliedMapFilters, displayHotels, hotels, searchText]);
+  }, [appliedFilters, displayHotels, hotels, searchCenter]);
 
   const mapCenter = markerHotels[0]?.coordinates || searchCenter;
   const selectedHotel = markerHotels.find((hotel) => hotel.markerId === selectedHotelId);
@@ -463,109 +233,60 @@ export default function HotelMap({ isOpen, onClose }) {
     const guests = Number.isFinite(adults) && adults > 0 ? adults : 1;
     return `/1 night, ${guests} ${guests === 1 ? "guest" : "guests"}`;
   }, [searchParams]);
-  const livePriceFilters = useMemo(
-    () => getLivePriceFilters(filterData),
-    [filterData],
-  );
-  const liveBudgetRange = useMemo(
-    () => getLiveBudgetRange(filterData, livePriceFilters),
-    [filterData, livePriceFilters],
-  );
-  const liveSuggestedFilters = useMemo(() => {
-    const starRatings = getLiveFilterValue(filterData, [
-      "starRatings",
-      "starRating",
-      "stars",
-    ]);
-    const breakfastIncluded = getLiveFilterValue(filterData, [
-      "breakfastIncluded",
-      "breakfast_included",
-    ]);
 
-    return SUGGESTED_FILTERS.map((option) => {
-      let count = null;
-      if (option.key === "fiveStar") count = getLiveOptionCount(starRatings, "5");
-      if (option.key === "fourStar") count = getLiveOptionCount(starRatings, "4");
-      if (option.key === "breakfastIncluded") {
-        count = getLiveBooleanCount(breakfastIncluded);
-      }
-
-      return { ...option, count };
-    });
-  }, [filterData]);
-
-  const filterCounts = useMemo(() => {
-    const sourceHotels = hotels?.length ? hotels : displayHotels || [];
-
-    return {
-      suggested: SUGGESTED_FILTERS.reduce(
-        (counts, option) => ({
-          ...counts,
-          [option.key]: sourceHotels.filter((hotel) =>
-            matchesMapFilters(hotel, {
-              suggested: { [option.key]: true },
-              price: {},
-            }),
-          ).length,
-        }),
-        {},
-      ),
-      price: livePriceFilters.reduce(
-        (counts, option) => ({
-          ...counts,
-          [option.key]: sourceHotels.filter((hotel) =>
-            matchesMapFilters(hotel, {
-              suggested: {},
-              price: { [option.key]: true },
-            }),
-          ).length,
-        }),
-        {},
-      ),
-    };
-  }, [displayHotels, hotels, livePriceFilters]);
-
-  useEffect(() => {
-    if (budgetTouched) return;
-
-    setBudget(liveBudgetRange);
-    setAppliedBudget(liveBudgetRange);
-  }, [budgetTouched, liveBudgetRange]);
-
-  const syncAppliedFilters = (nextFilters, nextBudget = budget, includeBudget = budgetTouched) => {
-    setAppliedFilters((prevFilters = {}) => ({
-      ...prevFilters,
-      suggested: nextFilters.suggested || {},
-      price: nextFilters.price || {},
-      ...(includeBudget && {
-        budget: {
-          min: Number(nextBudget[0] || DEFAULT_BUDGET[0]),
-          max: Number(nextBudget[1] || DEFAULT_BUDGET[1]),
-        },
-      }),
-    }));
-  };
+  const searchText = appliedFilters.hotelSearchText || "";
+  const minBudget = appliedFilters.budget?.min ?? DEFAULT_BUDGET[0];
+  const maxBudget = appliedFilters.budget?.max ?? DEFAULT_BUDGET[1];
 
   const toggleFilter = (group, key) => {
-    setSelectedFilters((prev) => {
+    setAppliedFilters((prev = {}) => {
+      const currentVal = Boolean(prev[group]?.[key]);
+      const nextVal = !currentVal;
+
       const nextFilters = {
         ...prev,
         [group]: {
-          ...prev[group],
-          [key]: !prev[group]?.[key],
+          ...(prev[group] || {}),
+          [key]: nextVal,
         },
       };
+
+      if (group === "suggested" && key === "fourStar") {
+        nextFilters.starCategory = { ...(prev.starCategory || {}), "4": nextVal };
+      } else if (group === "starCategory" && String(key) === "4") {
+        nextFilters.suggested = { ...(prev.suggested || {}), fourStar: nextVal };
+      } else if (group === "suggested" && key === "fiveStar") {
+        nextFilters.starCategory = { ...(prev.starCategory || {}), "5": nextVal };
+      } else if (group === "starCategory" && String(key) === "5") {
+        nextFilters.suggested = { ...(prev.suggested || {}), fiveStar: nextVal };
+      } else if (group === "freeCancellation" || group === "cancellation") {
+        nextFilters.freeCancellation = { ...(prev.freeCancellation || {}), FreeCancellation: nextVal };
+        nextFilters.cancellation = { ...(prev.cancellation || {}), FreeCancellation: nextVal };
+      } else if (group === "suggested" && key === "breakfastIncluded") {
+        nextFilters.hotelAmenities = { ...(prev.hotelAmenities || {}), Breakfast: nextVal };
+      } else if (group === "hotelAmenities" && key === "Breakfast") {
+        nextFilters.suggested = { ...(prev.suggested || {}), breakfastIncluded: nextVal };
+      }
 
       return nextFilters;
     });
   };
 
-  const applyFilters = () => {
-    setBudgetTouched(true);
-    setAppliedMapFilters(selectedFilters);
-    setAppliedBudget(budget);
-    setAppliedBudgetTouched(true);
-    syncAppliedFilters(selectedFilters, budget, true);
+  const handleSearchTextChange = (text) => {
+    setAppliedFilters((prev = {}) => ({
+      ...prev,
+      hotelSearchText: text,
+    }));
+  };
+
+  const handleBudgetChange = (minVal, maxVal) => {
+    setAppliedFilters((prev = {}) => ({
+      ...prev,
+      budget: {
+        min: Number(minVal),
+        max: Number(maxVal),
+      },
+    }));
   };
 
   useEffect(() => {
@@ -589,43 +310,39 @@ export default function HotelMap({ isOpen, onClose }) {
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    setSelectedFilters({
-      suggested: appliedFilters?.suggested || {},
-      price: appliedFilters?.price || {},
-    });
-    setAppliedMapFilters({
-      suggested: appliedFilters?.suggested || {},
-      price: appliedFilters?.price || {},
-    });
-
-    if (appliedFilters?.budget) {
-      const nextBudget = [
-        Number(appliedFilters.budget.min || DEFAULT_BUDGET[0]),
-        Number(appliedFilters.budget.max || DEFAULT_BUDGET[1]),
-      ];
-
-      setBudget(nextBudget);
-      setAppliedBudget(nextBudget);
-      setBudgetTouched(true);
-      setAppliedBudgetTouched(true);
-    } else {
-      setBudget(liveBudgetRange);
-      setAppliedBudget(liveBudgetRange);
-      setBudgetTouched(false);
-      setAppliedBudgetTouched(false);
-    }
-  }, [appliedFilters, isOpen, liveBudgetRange]);
-
   if (!isOpen) return null;
 
+  const countForOption = (group, key) => {
+    const source = hotels?.length ? hotels : displayHotels || [];
+    const testFilter = { [group]: { [key]: true } };
+    if (group === "suggested") {
+      if (key === "fiveStar") testFilter.starCategory = { "5": true };
+      if (key === "fourStar") testFilter.starCategory = { "4": true };
+    }
+    return source.filter((hotel) => matchesHotelFilters(hotel, testFilter)).length;
+  };
+
+  const renderedSections = filterSections.filter(
+    (section) =>
+      section.key !== "price" &&
+      section.key !== "providers" &&
+      section.key !== "refundable",
+  );
+
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true">
-      <div className={styles.modal}>
+    <div
+      className={styles.backdrop}
+      role="dialog"
+      aria-modal="true"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose?.();
+        }
+      }}
+    >
+      <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
         <header className={styles.header}>
-          <h2 className={styles.title}>Explore On Map</h2>
+          <h2 className={styles.title}>Explore On Map ({markerHotels.length} Properties)</h2>
           <button
             type="button"
             className={styles.closeButton}
@@ -638,6 +355,27 @@ export default function HotelMap({ isOpen, onClose }) {
 
         <div className={styles.body}>
           <aside className={styles.sidebar}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px 0" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#111827" }}>FILTERS</span>
+              <button
+                type="button"
+                onClick={resetFilters}
+                style={{
+                  border: 0,
+                  background: "transparent",
+                  color: "#000033",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px"
+                }}
+              >
+                <RotateCcw size={12} /> RESET
+              </button>
+            </div>
+
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>Search Hotels</h3>
               <label className={styles.searchBox}>
@@ -646,45 +384,9 @@ export default function HotelMap({ isOpen, onClose }) {
                   type="search"
                   placeholder="Search locality / hotel name"
                   value={searchText}
-                  onChange={(event) => setSearchText(event.target.value)}
+                  onChange={(event) => handleSearchTextChange(event.target.value)}
                 />
               </label>
-            </section>
-
-            <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Suggested For You</h3>
-              {liveSuggestedFilters.map((option) => (
-                <label key={option.key} className={styles.filterRow}>
-                  <input
-                    type="checkbox"
-                    checked={!!selectedFilters.suggested?.[option.key]}
-                    onChange={() => toggleFilter("suggested", option.key)}
-                  />
-                  <span className={styles.checkbox} />
-                  <span>{option.label}</span>
-                  <span className={styles.count}>
-                    {option.count ?? filterCounts.suggested[option.key] ?? 0}
-                  </span>
-                </label>
-              ))}
-            </section>
-
-            <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Price Per Night</h3>
-              {livePriceFilters.map((option) => (
-                <label key={option.key} className={styles.filterRow}>
-                  <input
-                    type="checkbox"
-                    checked={!!selectedFilters.price?.[option.key]}
-                    onChange={() => toggleFilter("price", option.key)}
-                  />
-                  <span className={styles.checkbox} />
-                  <span>{option.label}</span>
-                  <span className={styles.count}>
-                    {option.count ?? filterCounts.price[option.key] ?? 0}
-                  </span>
-                </label>
-              ))}
             </section>
 
             <section className={styles.section}>
@@ -695,50 +397,52 @@ export default function HotelMap({ isOpen, onClose }) {
                   <input
                     type="number"
                     min="0"
-                    max={budget[1]}
-                  value={budget[0]}
-                  onChange={(event) => {
-                    setBudgetTouched(true);
-                    setBudget([Math.min(Number(event.target.value || 0), budget[1]), budget[1]])
-                  }}
+                    max={maxBudget}
+                    value={minBudget}
+                    onChange={(event) => handleBudgetChange(event.target.value, maxBudget)}
                   />
                 </label>
                 <label className={styles.budgetBox}>
                   <span>Max Price</span>
                   <input
                     type="number"
-                    min={budget[0]}
-                  value={budget[1]}
-                  onChange={(event) => {
-                    setBudgetTouched(true);
-                    setBudget([budget[0], Math.max(Number(event.target.value || 0), budget[0])])
-                  }}
+                    min={minBudget}
+                    value={maxBudget}
+                    onChange={(event) => handleBudgetChange(minBudget, event.target.value)}
                   />
                 </label>
               </div>
-              <button type="button" className={styles.submitButton} onClick={applyFilters}>
-                Submit
-              </button>
             </section>
+
+            {renderedSections.map((section) => (
+              <MapSection
+                key={section.key}
+                section={section}
+                appliedFilters={appliedFilters}
+                searchTerms={searchTerms}
+                setSearchTerms={setSearchTerms}
+                isExpanded={!!expandedSections[section.key]}
+                onExpandedChange={(nextValue) =>
+                  setExpandedSections((prev) => ({
+                    ...prev,
+                    [section.key]: nextValue,
+                  }))
+                }
+                onToggle={toggleFilter}
+                countForOption={countForOption}
+              />
+            ))}
           </aside>
 
           <div className={styles.mapShell}>
-            <label className={styles.mapSearch}>
-              <Search size={18} />
-              <input
-                type="search"
-                placeholder="Search locality / hotel name"
-                value={searchText}
-                onChange={(event) => setSearchText(event.target.value)}
-              />
-            </label>
-
             <LoadScriptNext
-              googleMapsApiKey={process.env.NEXT_PUBLIC_MAP_KEY}
-              loadingElement={<div className={styles.emptyMap}>Loading map...</div>}
+              googleMapsApiKey={
+                process.env.NEXT_PUBLIC_MAP_KEY ||
+                process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+                ""
+              }
             >
               <GoogleMap
-                mapContainerClassName={styles.mapCanvas}
                 mapContainerStyle={mapContainerStyle}
                 center={mapCenter}
                 zoom={12}
@@ -822,5 +526,91 @@ export default function HotelMap({ isOpen, onClose }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function MapSection({
+  section,
+  appliedFilters,
+  searchTerms,
+  setSearchTerms,
+  isExpanded,
+  onExpandedChange,
+  onToggle,
+  countForOption,
+}) {
+  const searchTerm = searchTerms[section.key] || "";
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const visibleOptions = normalizedSearch
+    ? section.options.filter((option) =>
+        (option.label || option.key || "").toLowerCase().includes(normalizedSearch),
+      )
+    : section.options;
+  const shouldLimitOptions =
+    !normalizedSearch && visibleOptions.length > FILTER_OPTION_PREVIEW_LIMIT;
+  const displayedOptions =
+    shouldLimitOptions && !isExpanded
+      ? visibleOptions.slice(0, FILTER_OPTION_PREVIEW_LIMIT)
+      : visibleOptions;
+
+  return (
+    <section className={styles.section}>
+      <h3 className={styles.sectionTitle}>{section.title}</h3>
+      {section.searchable && (
+        <label className={styles.searchBox} style={{ marginBottom: "8px" }}>
+          <Search size={18} />
+          <input
+            type="search"
+            placeholder={section.searchPlaceholder || "Search..."}
+            value={searchTerm}
+            onChange={(event) =>
+              setSearchTerms((prev) => ({
+                ...prev,
+                [section.key]: event.target.value,
+              }))
+            }
+          />
+        </label>
+      )}
+      {displayedOptions.map((option) => {
+        const stars = getStarText(section.key, option.key);
+        return (
+          <label key={option.key} className={styles.filterRow}>
+            <input
+              type="checkbox"
+              checked={isOptionChecked(appliedFilters, {}, section.key, option.key)}
+              onChange={() => onToggle(section.key, option.key)}
+            />
+            <span className={styles.checkbox} />
+            <span>
+              {stars ? `${stars} ${option.label}` : option.label}
+            </span>
+            <span className={styles.count}>
+              {countForOption(section.key, option.key)}
+            </span>
+          </label>
+        );
+      })}
+      {shouldLimitOptions && (
+        <button
+          type="button"
+          onClick={() => onExpandedChange(!isExpanded)}
+          style={{
+            border: 0,
+            background: "transparent",
+            color: "#000033",
+            fontSize: "12px",
+            fontWeight: 600,
+            cursor: "pointer",
+            marginTop: "6px",
+            padding: 0,
+          }}
+        >
+          {isExpanded
+            ? "SEE LESS"
+            : `SEE MORE (${visibleOptions.length - FILTER_OPTION_PREVIEW_LIMIT})`}
+        </button>
+      )}
+    </section>
   );
 }
