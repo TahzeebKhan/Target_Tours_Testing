@@ -15,9 +15,7 @@ const getAuthToken = () => {
 };
 
 const normalizeBaseUrl = () => {
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
-  if (base) return base;
-  return `http://${process.env.NEXT_PUBLIC_DOMAIN}`;
+  return String(process.env.NEXT_PUBLIC_BACKEND_URL || "").trim().replace(/\/$/, "");
 };
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
@@ -77,15 +75,34 @@ const pickFirst = (...values) => {
 
 const toRecord = (item = {}) => item?.attributes || item;
 
-const toAirportPayload = (airport = {}, fallbackCode = "") => ({
-  name: String(airport?.name || "").trim(),
-  city: String(airport?.city || "").trim(),
-  country: String(airport?.country || "").trim(),
-  iata_code: String(airport?.iata_code || fallbackCode || "").trim().toUpperCase(),
-});
+const toAirportPayload = (airport = {}, fallbackCode = "") => {
+  const record = airport?.attributes || airport;
 
-const getAirportCode = (airport = {}, fallbackCode = "") =>
-  String(airport?.iata_code || fallbackCode || "").trim().toUpperCase();
+  return {
+    name: String(record?.name || "").trim(),
+    city: String(record?.city || "").trim(),
+    country: String(record?.country || "").trim(),
+    iata_code: String(
+      record?.iata_code ||
+        record?.iataCode ||
+        record?.code ||
+        fallbackCode ||
+        "",
+    ).trim().toUpperCase(),
+  };
+};
+
+const getAirportCode = (airport = {}, fallbackCode = "") => {
+  const record = airport?.attributes || airport;
+
+  return String(
+    record?.iata_code ||
+      record?.iataCode ||
+      record?.code ||
+      fallbackCode ||
+      "",
+  ).trim().toUpperCase();
+};
 
 const getAirportDisplayValue = (airport = {}, fallbackCode = "") => {
   const code = getAirportCode(airport, fallbackCode);
@@ -98,12 +115,15 @@ const getAirportDisplayValue = (airport = {}, fallbackCode = "") => {
   return name || code;
 };
 
-const fetchAirportByCode = async (code = "") => {
+const fetchAirportByCode = async (code = "", searchLabel = "") => {
   const normalizedCode = String(code || "").trim().toLowerCase();
   if (!normalizedCode) return null;
+  const normalizedSearchLabel = String(searchLabel || "")
+    .replace(/\s*\([^)]+\)\s*$/, "")
+    .trim();
 
   const url = new URL("/api/airports/search", normalizeBaseUrl());
-  url.searchParams.set("q", normalizedCode);
+  url.searchParams.set("q", normalizedSearchLabel || normalizedCode);
 
   const response = await fetch(url.toString(), {
     method: "GET",
@@ -120,16 +140,18 @@ const fetchAirportByCode = async (code = "") => {
     ? payload
     : Array.isArray(payload?.data)
       ? payload.data
-      : [];
+      : Array.isArray(payload?.data?.results)
+        ? payload.data.results
+        : Array.isArray(payload?.results)
+          ? payload.results
+          : [];
 
   const match = list.find(
     (airport) =>
-      String(airport?.iata_code || "")
-        .trim()
-        .toUpperCase() === normalizedCode.toUpperCase(),
+      getAirportCode(airport) === normalizedCode.toUpperCase(),
   );
 
-  return match || list[0] || null;
+  return match || null;
 };
 
 const normalizeLabel = (city, country, fallback) => {
@@ -357,11 +379,22 @@ export const saveRecentFlightSearch = async ({
     return null;
   }
 
-  const url = new URL("/api/recent-search", normalizeBaseUrl());
+  const liveBaseUrl = normalizeBaseUrl();
+  if (!liveBaseUrl) {
+    throw new Error("NEXT_PUBLIC_BACKEND_URL is required to save recent searches.");
+  }
+
+  const url = new URL("/api/recent-search", liveBaseUrl);
   const [originAirport, destinationAirport] = await Promise.all([
-    fetchAirportByCode(normalizedOrigin),
-    fetchAirportByCode(normalizedDestination),
+    fetchAirportByCode(normalizedOrigin, origin),
+    fetchAirportByCode(normalizedDestination, destination),
   ]);
+  const matchedOriginAirport =
+    getAirportCode(originAirport) === normalizedOrigin ? originAirport : null;
+  const matchedDestinationAirport =
+    getAirportCode(destinationAirport) === normalizedDestination
+      ? destinationAirport
+      : null;
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -379,8 +412,11 @@ export const saveRecentFlightSearch = async ({
         departure_date: departureDate,
         return_date: returnDate || null,
       },
-      origin: toAirportPayload(originAirport, normalizedOrigin),
-      destination: toAirportPayload(destinationAirport, normalizedDestination),
+      origin: toAirportPayload(matchedOriginAirport, normalizedOrigin),
+      destination: toAirportPayload(
+        matchedDestinationAirport,
+        normalizedDestination,
+      ),
     }),
   });
 

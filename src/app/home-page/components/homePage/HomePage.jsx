@@ -1358,8 +1358,8 @@ const HomePage = ({
 
       try {
         await saveRecentFlightSearch({
-          origin: fromCode || from,
-          destination: toCode || to,
+          origin: from,
+          destination: to,
           departureDate: startDate,
           returnDate: endDate,
         });
