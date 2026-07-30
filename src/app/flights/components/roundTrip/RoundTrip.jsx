@@ -21,6 +21,7 @@ import FlightSearchLoader from "../FlightSearchLoader";
 import FlightNoResults from "../FlightNoResults";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import MobileFareComparisonModalRoundTrip from "./MobileFareComparisonModalRoundTrip";
+import FareComparisonModalRoundTrip from "./FareComparisonModalRoundTrip";
 import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import { useRouter } from "next/navigation";
 import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
@@ -751,6 +752,7 @@ const RoundTrip = ({
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
   const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
+  const isMobileFareViewport = useMediaQuery("(max-width: 430px)");
   const {
     filters,
     filterChips,
@@ -976,15 +978,12 @@ const RoundTrip = ({
   };
   const openCombinedFareDetails = useCallback(
     (item) => {
-      const matchingFlight = visibleFlights.find(
-        (flight) => String(flight?.id) === String(item?.id),
-      );
-      if (!matchingFlight) return;
+      if (!item) return;
 
-      setMobileFareModalFlight(matchingFlight);
-      setFareModalOpen(matchingFlight.id);
+      setMobileFareModalFlight(item);
+      setFareModalOpen(item.id);
     },
-    [visibleFlights],
+    [],
   );
   const outboundRouteLabel = visibleFlights[0]?.outbound
     ? `${getAirportCode(visibleFlights[0].outbound.departure?.city)} -> ${getAirportCode(visibleFlights[0].outbound.arrival?.city)}`
@@ -1273,15 +1272,28 @@ const RoundTrip = ({
         )}
       </section>
       {fareModalOpen && mobileFareModalFlight && (
-        <MobileFareComparisonModalRoundTrip
-          isOpen={fareModalOpen}
-          onClose={() => {
-            setFareModalOpen(null);
-            setSelectedFlightId(null);
-            setMobileFareModalFlight(null);
-          }}
-          flightData={mobileFareModalFlight}
-        />
+        isMobileFareViewport ? (
+          <MobileFareComparisonModalRoundTrip
+            isOpen={fareModalOpen}
+            onClose={() => {
+              setFareModalOpen(null);
+              setSelectedFlightId(null);
+              setMobileFareModalFlight(null);
+            }}
+            flightData={mobileFareModalFlight}
+          />
+        ) : (
+          <FareComparisonModalRoundTrip
+            isOpen={fareModalOpen}
+            onClose={() => {
+              setFareModalOpen(null);
+              setSelectedFlightId(null);
+              setMobileFareModalFlight(null);
+            }}
+            flightData={mobileFareModalFlight}
+            prefetchedData={null}
+          />
+        )
       )}
       {isSortSheetMobile ? (
         <SortBySheet
