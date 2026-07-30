@@ -464,6 +464,7 @@ const searchFlightsViaSocket = async (params = {}) => {
     let events = null;
     let completionReceived = false;
     const isMultiCitySearch = searchPayload.fareType === "DM";
+    const isRoundTripSearch = searchPayload.fareType === "RT";
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
@@ -481,10 +482,12 @@ const searchFlightsViaSocket = async (params = {}) => {
     const scheduleIdleResolve = () => {
       if (!chunks.length && !completionReceived) return;
 
-      // Domestic multi-city results arrive one trip at a time. An idle gap
-      // between providers must not finalize the search before every trip has
-      // had a chance to emit its result.
-      if (isMultiCitySearch && !completionReceived) return;
+      // Round-trip and domestic multi-city providers can emit results many
+      // seconds apart. Do not treat that gap as the end of the search; keep
+      // listening until the backend explicitly completes the whole search.
+      if ((isRoundTripSearch || isMultiCitySearch) && !completionReceived) {
+        return;
+      }
 
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {

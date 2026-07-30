@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import styles from "../fromLocationSheet/FromLocationSheet.module.css";
-import CouldntFindPopup from "../couldntFindPop/CouldntFindPopup";
 import { fetchHotelSearchSuggestions } from "@/shared/services/hotelSearch";
 
 const HotelLocationRow = ({ item, onSelect }) => (
@@ -30,7 +29,6 @@ export default function HotelLocationSheet({
 }) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [currentLocation, setCurrentLocation] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -76,9 +74,16 @@ export default function HotelLocationSheet({
     raw: item.raw,
     hotelLocation: item,
   }));
-  const isLoading = shouldFetchSuggestions && isFetching;
+  const normalizedSearch = search.trim();
+  const isWaitingForDebounce =
+    normalizedSearch.length >= 2 && normalizedSearch !== debouncedSearch;
+  const isLoading =
+    normalizedSearch.length >= 2 &&
+    (isWaitingForDebounce || (shouldFetchSuggestions && isFetching));
   const showEmptyState =
-    shouldFetchSuggestions && !isLoading && suggestions.length === 0;
+    normalizedSearch.length >= 2 &&
+    !isLoading &&
+    suggestions.length === 0;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -97,30 +102,16 @@ export default function HotelLocationSheet({
         </div>
 
         <div className={styles.section}>
-          <div
-            className={styles.section2}
-            onClick={() => setCurrentLocation(true)}
-          >
-            <div className={styles.row}>
-              <div className={styles.iconBox}>
-                <img src="/icons/locationIcon.svg" alt="" />
-              </div>
-              <div className={styles.rowContent}>
-                <p className={styles.title}>Use Current Location</p>
-                <p className={styles.sub}>Turn on Location Access</p>
-              </div>
+          {isLoading && (
+            <div
+              className={styles.locationLoading}
+              role="status"
+              aria-live="polite"
+            >
+              <span className={styles.locationSpinner} aria-hidden="true" />
+              <span>Searching destinations...</span>
             </div>
-          </div>
-
-          {currentLocation && (
-            <CouldntFindPopup
-              open={currentLocation}
-              onAllow={() => setCurrentLocation(false)}
-              onClose={() => setCurrentLocation(false)}
-            />
           )}
-
-          {isLoading && <p className={styles.sub}>Loading...</p>}
 
           {!isLoading && suggestions.length > 0 && (
             <>
