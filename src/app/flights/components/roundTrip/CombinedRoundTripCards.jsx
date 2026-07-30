@@ -118,10 +118,44 @@ const buildRankedPairs = (items = []) => {
     const returnTrip =
       returnItem?.booking?.priceRequest?.Trips?.[1] ||
       returnItem?.booking?.priceRequest?.Trips?.[0];
+    const departPriceRequest = departItem?.booking?.priceRequest || {};
+    const returnPriceRequest = returnItem?.booking?.priceRequest || {};
+    const cabinClass =
+      departItem?.fare?.cabinClass ||
+      returnItem?.fare?.cabinClass ||
+      "E";
+    const searchKeys = [
+      {
+        search_key:
+          departPriceRequest?.search_key ||
+          departItem?.booking?.searchKey,
+        flight_no:
+          departTrip?.flight_no ||
+          departTrip?.FlightNumber ||
+          departItem?.depart?.airline?.flightNo ||
+          departItem?.depart?.airline?.code,
+        cabin_class: cabinClass,
+      },
+      {
+        search_key:
+          returnPriceRequest?.search_key ||
+          returnItem?.booking?.searchKey,
+        flight_no:
+          returnTrip?.flight_no ||
+          returnTrip?.FlightNumber ||
+          returnItem?.return?.airline?.flightNo ||
+          returnItem?.return?.airline?.code,
+        cabin_class: cabinClass,
+      },
+    ].filter((entry) => entry.search_key && entry.flight_no);
 
     return {
       ...departItem,
       id: `ranked-${departItem?.id || index}-${returnItem?.id || index}`,
+      rankedPairSourceIds: {
+        depart: departItem?.id,
+        return: returnItem?.id,
+      },
       return: returnItem?.return,
       fare: {
         ...(departItem?.fare || {}),
@@ -135,8 +169,9 @@ const buildRankedPairs = (items = []) => {
       booking: {
         ...(departItem?.booking || {}),
         priceRequest: {
-          ...(departItem?.booking?.priceRequest || {}),
+          ...departPriceRequest,
           Trips: [departTrip, returnTrip].filter(Boolean),
+          search_keys: searchKeys,
         },
       },
     };
