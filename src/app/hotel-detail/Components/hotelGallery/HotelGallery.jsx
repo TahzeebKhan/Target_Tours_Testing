@@ -90,6 +90,13 @@ const GalleryImage = ({ image, title = "" }) => {
     );
 };
 
+const GallerySlot = ({ item }) =>
+    item?.isPlaceholder ? (
+        <span className={styles.imageLoader} aria-hidden="true" />
+    ) : (
+        <GalleryImage image={item?.image} title={item?.title} />
+    );
+
 const HotelGallery = ({ images = [], loading = false }) => {
 
      const router = useRouter();
@@ -114,10 +121,13 @@ const HotelGallery = ({ images = [], loading = false }) => {
      const localImages = normalizedImages.filter((item) => !isRemoteImage(item.image));
      const galleryImages = remoteImages.length ? [...remoteImages, ...localImages] : normalizedImages;
      const visibleImages = Array.from({ length: GALLERY_SLOT_COUNT }, (_, index) => (
-        galleryImages[index] || { image: FALLBACK_IMAGE, title: `Photo ${index + 1}` }
+        galleryImages[index] ||
+        (loading
+            ? { image: "", title: `Photo ${index + 1}`, isPlaceholder: true }
+            : { image: FALLBACK_IMAGE, title: `Photo ${index + 1}` })
      ));
 
-        if (loading) {
+        if (loading && galleryImages.length === 0) {
             return (
                 <div className={styles.bottomContainerRef} aria-busy="true" aria-label="Loading hotel images">
                     <div className={styles.rightImage}>
@@ -162,23 +172,23 @@ const HotelGallery = ({ images = [], loading = false }) => {
     return (
         <div className={styles.bottomContainerRef}>
             <div className={styles.rightImage}>
-                <GalleryImage image={visibleImages[0]?.image} title={visibleImages[0]?.title} />
+                <GallerySlot item={visibleImages[0]} />
             </div>
             <div className={styles.rightGrid}>
                 <div className={styles.imageBox}>
-                    <GalleryImage image={visibleImages[1]?.image} title={visibleImages[1]?.title} />
+                    <GallerySlot item={visibleImages[1]} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <GalleryImage image={visibleImages[2]?.image} title={visibleImages[2]?.title} />
+                    <GallerySlot item={visibleImages[2]} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <GalleryImage image={visibleImages[3]?.image} title={visibleImages[3]?.title} />
+                    <GallerySlot item={visibleImages[3]} />
                 </div>
 
                 <div className={styles.imageBox}>
-                    <GalleryImage image={visibleImages[4]?.image} title={visibleImages[4]?.title} />
+                    <GallerySlot item={visibleImages[4]} />
                     <button className={styles.viewGalleryBtn} onClick={goToGallery} >
                         <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
                     </button>
