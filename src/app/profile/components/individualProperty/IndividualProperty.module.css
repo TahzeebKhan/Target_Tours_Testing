@@ -686,8 +686,18 @@
   .mobileView {
     display: block;
   }
+
   .container {
-    display: none;
+    width: 100%;
+    max-width: none;
+    padding: 16px;
+  }
+
+  .innerContainer,
+  .detailsWrapper {
+    width: 100%;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -700,7 +710,25 @@
 
   .bookingMeta {
     width: 100%;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metaBox {
+    min-width: 0;
+  }
+
+  .bookingMeta .divider {
+    display: none;
+  }
+
+  .statusSection {
+    grid-column: 1 / -1;
+  }
+
+  .roomTabs {
+    width: 100%;
+    overflow-x: auto;
   }
 
   .mapWrapper {

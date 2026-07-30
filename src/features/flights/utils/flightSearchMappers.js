@@ -1563,6 +1563,83 @@ const hasGroupedRoundTripLegs = (flight) =>
   Array.isArray(flight?.outbound) ||
   Array.isArray(flight?.inbound);
 
+const collectRoundLegValues = (value, values = new Set()) => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectRoundLegValues(item, values));
+  } else if (value && typeof value === "object") {
+    Object.values(value).forEach((item) => collectRoundLegValues(item, values));
+  } else if (value !== undefined && value !== null) {
+    const normalizedValue = String(value).trim();
+    if (normalizedValue) values.add(normalizedValue);
+  }
+
+  return values;
+};
+
+const getRoundLegPairIds = (leg) => {
+  const pairIds = [
+    leg?.pairedId,
+    leg?.pairedIds,
+    ...toArray(leg?.provider_options).map(
+      (option) => option?.pairedId ?? option?.pairedIds,
+    ),
+    ...toArray(leg?.providerOptions).map(
+      (option) => option?.pairedId ?? option?.pairedIds,
+    ),
+  ];
+
+  return [...collectRoundLegValues(pairIds)];
+};
+
+const getRoundLegIds = (leg) => {
+  const directIds = [
+    leg?.id,
+    leg?.ID,
+    leg?._id,
+    leg?.key,
+    leg?.pairId,
+    leg?.index,
+    leg?.flight_id,
+    leg?.flightId,
+    leg?.FlightID,
+    leg?.recommendationId,
+    ...toArray(leg?.provider_options).flatMap((option) => [
+      option?.id,
+      option?.ID,
+      option?.pairId,
+      option?.index,
+    ]),
+    ...toArray(leg?.providerOptions).flatMap((option) => [
+      option?.id,
+      option?.ID,
+      option?.pairId,
+      option?.index,
+    ]),
+  ];
+
+  return directIds
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+};
+
+const roundLegsArePaired = (onwardLeg, returnLeg) => {
+  const onwardPairIds = new Set(getRoundLegPairIds(onwardLeg));
+  const returnIds = getRoundLegIds(returnLeg);
+  if (returnIds.some((id) => onwardPairIds.has(id))) return true;
+
+  // Some providers put the shared pair token on both legs instead of using it
+  // as the return leg's primary id.
+  if (getRoundLegPairIds(returnLeg).some((id) => onwardPairIds.has(id))) {
+    return true;
+  }
+
+  // Provider payloads are not consistent about the field containing the
+  // return-box id, so check all primitive values without relying on a key name.
+  return [...collectRoundLegValues(returnLeg)].some((id) =>
+    onwardPairIds.has(id),
+  );
+};
+
 const normalizeGroupedRoundTripFlights = (flights = []) =>
   flights.flatMap((flight, groupIndex) => {
     if (!hasGroupedRoundTripLegs(flight)) return [flight];
@@ -1577,15 +1654,33 @@ const normalizeGroupedRoundTripFlights = (flights = []) =>
     ];
     if (!onwardLegs.length && !returnLegs.length) return [flight];
 
-    const legPairs = Array.from(
-      { length: Math.max(onwardLegs.length, returnLegs.length) },
-      (_, legIndex) => ({
-        onwardLeg: onwardLegs[legIndex] || onwardLegs[0] || {},
-        returnLeg: returnLegs[legIndex] || returnLegs[0] || {},
-      }),
-    );
+    const legPairs = onwardLegs.flatMap((onwardLeg, onwardIndex) => {
+      const requiresPairBooking = Boolean(
+        onwardLeg?.requiresPairBooking ?? flight?.requiresPairBooking,
+      );
+      const canBookIndependently = Boolean(
+        onwardLeg?.canBookIndependently ??
+          flight?.canBookIndependently ??
+          true,
+      );
 
-    return legPairs.map(({ onwardLeg, returnLeg }, legIndex) => {
+      if (requiresPairBooking && !canBookIndependently) {
+        return returnLegs
+          .filter((returnLeg) => roundLegsArePaired(onwardLeg, returnLeg))
+          .map((returnLeg) => ({ onwardLeg, returnLeg }));
+      }
+
+      return [{
+        onwardLeg,
+        returnLeg: returnLegs[onwardIndex] || returnLegs[0] || {},
+      }];
+    });
+
+    const resolvedLegPairs = onwardLegs.length
+      ? legPairs
+      : returnLegs.map((returnLeg) => ({ onwardLeg: {}, returnLeg }));
+
+    return resolvedLegPairs.map(({ onwardLeg, returnLeg }, legIndex) => {
       const canBookIndependently = Boolean(
         onwardLeg?.canBookIndependently ??
           returnLeg?.canBookIndependently ??

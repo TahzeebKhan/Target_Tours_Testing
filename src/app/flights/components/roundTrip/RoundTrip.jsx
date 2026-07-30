@@ -1,5 +1,13 @@
 "use client";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import styles from "./RoundTrip.module.css";
 import TripCard from "./tripCard/TripCard";
 import OfferBanner from "../offerComponent/OfferBanner";
@@ -19,6 +27,43 @@ import { useRouter } from "next/navigation";
 import { useFlightSearchParams } from "../../hooks/useFlightSearchParams";
 import { CompactRoundTripCard } from "./SplitRoundTripView";
 import CombinedRoundTripCards from "./CombinedRoundTripCards";
+
+const MemoizedTripCard = React.memo(TripCard);
+const MemoizedCombinedRoundTripCards = React.memo(CombinedRoundTripCards);
+
+const getLegIdentity = (leg = {}) => {
+  const flight = leg?.flight || {};
+  const departure = flight?.departure || {};
+  const arrival = flight?.arrival || {};
+
+  return [
+    leg?.airline?.carrierCode,
+    leg?.airline?.flightNo,
+    leg?.airline?.code,
+    departure?.airportCode,
+    departure?.date,
+    departure?.time,
+    arrival?.airportCode,
+    arrival?.date,
+    arrival?.time,
+  ]
+    .map((value) => String(value ?? "").trim().toLowerCase())
+    .join("|");
+};
+
+const deduplicateTripCards = (cards = []) => {
+  const seenTrips = new Set();
+
+  return cards.filter((card) => {
+    const identity = `${getLegIdentity(card?.depart)}::${getLegIdentity(
+      card?.return,
+    )}`;
+    if (seenTrips.has(identity)) return false;
+
+    seenTrips.add(identity);
+    return true;
+  });
+};
 
 const getAirportCode = (city = "") => {
   const match = String(city).match(/\(([^)]+)\)/);
@@ -703,6 +748,7 @@ const RoundTrip = ({
   const [selectedMobileReturnId, setSelectedMobileReturnId] = useState(null);
   const [mobileFareModalFlight, setMobileFareModalFlight] = useState(null);
   const [combinedFlights, setCombinedFlights] = useState(true);
+  const deferredCombinedFlights = useDeferredValue(combinedFlights);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
   const isSortSheetMobile = useMediaQuery("(max-width: 629px)");
@@ -791,33 +837,114 @@ const RoundTrip = ({
   const fastestFlight = fastestHighlightedFlight || fastestFallback;
   const visibleFlights = resolvedFlightResults;
   const visibleTripCards = resolvedTripCards;
+  const { allTripCards, pairBookingTripCards, independentTripCards } = useMemo(
+    () => {
+      const isPairBookingOnly = (flight) =>
+        flight?.canBookIndependently === false &&
+        flight?.requiresPairBooking === true;
+      const deduplicatedCards = deduplicateTripCards(visibleTripCards);
+
+      return {
+        allTripCards: deduplicatedCards,
+        pairBookingTripCards: deduplicateTripCards(
+          deduplicatedCards.filter(isPairBookingOnly),
+        ),
+        independentTripCards: deduplicateTripCards(
+          deduplicatedCards.filter((flight) => !isPairBookingOnly(flight)),
+        ),
+      };
+    },
+    [visibleTripCards],
+  );
   const apiAllowsIndependentBooking =
-    visibleFlights.length > 0 &&
-    visibleFlights.every(
-      (flight) =>
-        flight?.canBookIndependently === true &&
-        flight?.requiresPairBooking !== true,
-    );
+    independentTripCards.length > 0 && pairBookingTripCards.length === 0;
   useEffect(() => {
     setCombinedFlights(apiAllowsIndependentBooking);
   }, [apiAllowsIndependentBooking]);
+  const getTripCardDurationMinutes = (card) => {
+    const getLegMinutes = (leg) =>
+      Number(leg?.flight?.duration?.hours || 0) * 60 +
+      Number(leg?.flight?.duration?.minutes || 0);
+
+    const totalMinutes =
+      getLegMinutes(card?.depart) + getLegMinutes(card?.return);
+    return totalMinutes > 0 ? totalMinutes : Number.MAX_SAFE_INTEGER;
+  };
+  const formatDuration = (minutes) => {
+    if (
+      !Number.isFinite(minutes) ||
+      minutes <= 0 ||
+      minutes === Number.MAX_SAFE_INTEGER
+    ) {
+      return "N/A";
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours} h ${remainingMinutes} m`;
+  };
+  const cheapestTripCard =
+    allTripCards.length > 0
+      ? allTripCards.reduce((cheapest, current) =>
+          parseFareValue(current?.fare) < parseFareValue(cheapest?.fare)
+            ? current
+            : cheapest,
+        )
+      : null;
+  const fastestTripCard =
+    allTripCards.length > 0
+      ? allTripCards.reduce((fastest, current) => {
+          const currentDuration = getTripCardDurationMinutes(current);
+          const fastestDuration = getTripCardDurationMinutes(fastest);
+          if (currentDuration < fastestDuration) return current;
+          if (
+            currentDuration === fastestDuration &&
+            parseFareValue(current?.fare) < parseFareValue(fastest?.fare)
+          ) {
+            return current;
+          }
+          return fastest;
+        })
+      : null;
   const cheapestMeta = {
-    price: sortHighlights?.cheapest?.priceLabel || "N/A",
-    duration: sortHighlights?.cheapest?.durationLabel || "N/A",
+    price:
+      cheapestTripCard?.fare?.totalFare ||
+      sortHighlights?.cheapest?.priceLabel ||
+      "N/A",
+    duration: cheapestTripCard
+      ? formatDuration(getTripCardDurationMinutes(cheapestTripCard))
+      : sortHighlights?.cheapest?.durationLabel || "N/A",
   };
   const fastestMeta = {
-    price: sortHighlights?.fastest?.priceLabel || "N/A",
-    duration: sortHighlights?.fastest?.durationLabel || "N/A",
+    price:
+      fastestTripCard?.fare?.totalFare ||
+      sortHighlights?.fastest?.priceLabel ||
+      "N/A",
+    duration: fastestTripCard
+      ? formatDuration(getTripCardDurationMinutes(fastestTripCard))
+      : sortHighlights?.fastest?.durationLabel || "N/A",
   };
   const cheapestLogo = resolveAirlineLogo({
-    name: cheapestFlight?.outbound?.airlines?.[0]?.name,
-    code: cheapestFlight?.outbound?.airlines?.[0]?.code,
-    logo: cheapestFlight?.outbound?.airlines?.[0]?.logo,
+    name:
+      cheapestTripCard?.depart?.airline?.name ||
+      cheapestFlight?.outbound?.airlines?.[0]?.name,
+    code:
+      cheapestTripCard?.depart?.airline?.carrierCode ||
+      cheapestFlight?.outbound?.airlines?.[0]?.code,
+    logo:
+      cheapestTripCard?.depart?.airline?.logo ||
+      cheapestFlight?.outbound?.airlines?.[0]?.logo,
   });
   const fastestLogo = resolveAirlineLogo({
-    name: fastestFlight?.outbound?.airlines?.[0]?.name,
-    code: fastestFlight?.outbound?.airlines?.[0]?.code,
-    logo: fastestFlight?.outbound?.airlines?.[0]?.logo,
+    name:
+      fastestTripCard?.depart?.airline?.name ||
+      fastestFlight?.outbound?.airlines?.[0]?.name,
+    code:
+      fastestTripCard?.depart?.airline?.carrierCode ||
+      fastestFlight?.outbound?.airlines?.[0]?.code,
+    logo:
+      fastestTripCard?.depart?.airline?.logo ||
+      fastestFlight?.outbound?.airlines?.[0]?.logo,
   });
   const resultsText = pagination
     ? `Showing ${pagination.from}-${pagination.to} of ${pagination.total} results`
@@ -856,6 +983,18 @@ const RoundTrip = ({
     setMobileFareModalFlight(nextFlight);
     setFareModalOpen(nextFlight.id);
   };
+  const openCombinedFareDetails = useCallback(
+    (item) => {
+      const matchingFlight = visibleFlights.find(
+        (flight) => String(flight?.id) === String(item?.id),
+      );
+      if (!matchingFlight) return;
+
+      setMobileFareModalFlight(matchingFlight);
+      setFareModalOpen(matchingFlight.id);
+    },
+    [visibleFlights],
+  );
   const outboundRouteLabel = visibleFlights[0]?.outbound
     ? `${getAirportCode(visibleFlights[0].outbound.departure?.city)} -> ${getAirportCode(visibleFlights[0].outbound.arrival?.city)}`
     : "Departure";
@@ -885,7 +1024,8 @@ const RoundTrip = ({
             <input
               type="checkbox"
               checked={combinedFlights}
-              onChange={(event) => setCombinedFlights(event.target.checked)}
+              disabled
+              aria-disabled="true"
             />
             <span className={styles.toggleTrack} aria-hidden="true">
               <span className={styles.toggleThumb} />
@@ -951,27 +1091,18 @@ const RoundTrip = ({
             <FlightSearchLoader />
           ) : hasNoData ? (
             <FlightNoResults />
-          ) : !combinedFlights ? (
-            <CombinedRoundTripCards
-              tripCardsData={visibleTripCards}
-              onViewFares={(item) => {
-                const flightIndex = visibleTripCards.indexOf(item);
-                const matchingFlight =
-                  visibleFlights.find(
-                    (flight) => String(flight?.id) === String(item?.id),
-                  ) || visibleFlights[flightIndex];
-                if (!matchingFlight) return;
-                setMobileFareModalFlight(matchingFlight);
-                setFareModalOpen(matchingFlight.id);
-              }}
+          ) : !deferredCombinedFlights ? (
+            <MemoizedCombinedRoundTripCards
+              tripCardsData={allTripCards}
+              onViewFares={openCombinedFareDetails}
             />
           ) : (
-            <TripCard
+            <MemoizedTripCard
               fareModalOpen={fareModalOpen}
               selectedFlightId={selectedFlightId}
               setSelectedFlightId={setSelectedFlightId}
               setFareModalOpen={setFareModalOpen}
-              tripCardsData={visibleTripCards}
+              tripCardsData={independentTripCards}
             />
           )}
         </div>
