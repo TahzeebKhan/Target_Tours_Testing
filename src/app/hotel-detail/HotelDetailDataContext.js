@@ -577,6 +577,7 @@ const extractGalleryImages = (stored = {}, routeHotelId = "") => {
     ...(stored?.hotel || {}),
   };
   const preferredGalleryItems = [
+    stored?.previewHeroImage,
     contentHotel.images,
     contentHotel.galleryImages,
     contentHotel.gallery,
@@ -1514,9 +1515,10 @@ const normalizeHotelDetail = (
   };
   const galleryImages = extractGalleryImages(stored, routeHotelId);
   const uniqueImages = galleryImages.map((item) => item.image);
-  const facilities = normalizeFacilities(
-    collectFacilities(data),
-  );
+  const facilities = normalizeFacilities([
+    ...collectFacilities(data),
+    ...collectFacilities(stored?.hotel),
+  ]);
   const reviews = normalizeReviews(data, hotel);
   const reviewSummary = normalizeReviewSummary(data, hotel);
   const ratingBars = normalizeRatingBars(data, reviews, hotel, reviewSummary);
@@ -1694,6 +1696,7 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
 
     const canUseStored =
       Boolean(stored) &&
+      stored?.isPreviewOnly !== true &&
       hasStoredDetails &&
       (!hotelId || !storedHotelId || storedHotelId === String(hotelId)) &&
       (!currentSearchId || !storedSearchId || storedSearchId === String(currentSearchId));
@@ -1720,6 +1723,9 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
       setLoading(false);
     } else {
       const detailKey = JSON.stringify(hotelDetailPayload);
+      if (stored) {
+        setStoredDetail(stored);
+      }
       const loadHotelDetails = async () => {
         setLoading(true);
 
@@ -1736,6 +1742,8 @@ export const HotelDetailDataProvider = ({ children, onUnauthorized }) => {
 
           const details = await detailRequestRef.current.promise;
           const nextStoredDetail = {
+            isPreviewOnly: false,
+            previewHeroImage: stored?.previewHeroImage || "",
             request: hotelDetailPayload,
             hotel: {},
             details,
