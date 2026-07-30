@@ -149,37 +149,38 @@ const HotelPassengersPopup = ({
         </div>
 
         <div className={styles.container}>
-          <div className={styles.row}>
-            <div className={styles.leftText}>
-              <div className={styles.title}>ROOMS</div>
-              <div className={styles.sub}>Select the number of rooms</div>
+          <div className={styles.scrollContent}>
+            <div className={styles.row}>
+              <div className={styles.leftText}>
+                <div className={styles.title}>ROOMS</div>
+                <div className={styles.sub}>Select the number of rooms</div>
+              </div>
+              <div className={styles.counter}>
+                <button
+                  type="button"
+                  disabled={totalRooms <= 1}
+                  className={styles.counterBtn}
+                  onClick={() => updateRoomCount(-1)}
+                >
+                  <Minus size={14} />
+                </button>
+                <span className={styles.counterText}>{totalRooms}</span>
+                <button
+                  type="button"
+                  className={styles.counterBtn}
+                  onClick={() => updateRoomCount(1)}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
             </div>
-            <div className={styles.counter}>
-              <button
-                type="button"
-                disabled={totalRooms <= 1}
-                className={styles.counterBtn}
-                onClick={() => updateRoomCount(-1)}
-              >
-                <Minus size={14} />
-              </button>
-              <span className={styles.counterText}>{totalRooms}</span>
-              <button
-                type="button"
-                className={styles.counterBtn}
-                onClick={() => updateRoomCount(1)}
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
 
-          <div className={styles.roomsList}>
-            {rooms.map((room, roomIndex) => {
-              const childAges = normalizeChildAges(room.childAges, room.children);
+            <div className={styles.roomsList}>
+              {rooms.map((room, roomIndex) => {
+                const childAges = normalizeChildAges(room.childAges, room.children);
 
-              return (
-                <section className={styles.roomCard} key={`hotel-room-${roomIndex}`}>
+                return (
+                  <section className={styles.roomCard} key={`hotel-room-${roomIndex}`}>
                   <div className={styles.roomHeader}>
                     <strong className={styles.roomTitle}>Room {roomIndex + 1}</strong>
                     <span className={styles.roomSummary}>
@@ -274,9 +275,10 @@ const HotelPassengersPopup = ({
                       </div>
                     </div>
                   )}
-                </section>
-              );
-            })}
+                  </section>
+                );
+              })}
+            </div>
           </div>
 
           <button type="button" className={styles.doneBtn} onClick={onClose}>

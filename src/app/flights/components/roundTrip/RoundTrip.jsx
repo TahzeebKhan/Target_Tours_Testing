@@ -3,7 +3,6 @@ import React, {
   useCallback,
   useContext,
   useDeferredValue,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -747,7 +746,7 @@ const RoundTrip = ({
   const [selectedMobileDepartId, setSelectedMobileDepartId] = useState(null);
   const [selectedMobileReturnId, setSelectedMobileReturnId] = useState(null);
   const [mobileFareModalFlight, setMobileFareModalFlight] = useState(null);
-  const [combinedFlights, setCombinedFlights] = useState(true);
+  const [combinedFlights] = useState(false);
   const deferredCombinedFlights = useDeferredValue(combinedFlights);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
@@ -837,7 +836,7 @@ const RoundTrip = ({
   const fastestFlight = fastestHighlightedFlight || fastestFallback;
   const visibleFlights = resolvedFlightResults;
   const visibleTripCards = resolvedTripCards;
-  const { allTripCards, pairBookingTripCards, independentTripCards } = useMemo(
+  const { allTripCards, independentTripCards } = useMemo(
     () => {
       const isPairBookingOnly = (flight) =>
         flight?.canBookIndependently === false &&
@@ -846,9 +845,6 @@ const RoundTrip = ({
 
       return {
         allTripCards: deduplicatedCards,
-        pairBookingTripCards: deduplicateTripCards(
-          deduplicatedCards.filter(isPairBookingOnly),
-        ),
         independentTripCards: deduplicateTripCards(
           deduplicatedCards.filter((flight) => !isPairBookingOnly(flight)),
         ),
@@ -856,11 +852,6 @@ const RoundTrip = ({
     },
     [visibleTripCards],
   );
-  const apiAllowsIndependentBooking =
-    independentTripCards.length > 0 && pairBookingTripCards.length === 0;
-  useEffect(() => {
-    setCombinedFlights(apiAllowsIndependentBooking);
-  }, [apiAllowsIndependentBooking]);
   const getTripCardDurationMinutes = (card) => {
     const getLegMinutes = (leg) =>
       Number(leg?.flight?.duration?.hours || 0) * 60 +

@@ -49,26 +49,98 @@ const getLegIdentity = (leg = {}) => {
     .join("|");
 };
 
-const groupByOnwardFlight = (items = []) => {
-  const groups = new Map();
+const parseAmount = (value) => {
+  const normalized = String(value ?? "").replace(/[^\d.]/g, "");
+  if (!normalized) return null;
 
-  items.forEach((item) => {
-    const onwardId = getLegIdentity(item?.depart);
-    const returnId = getLegIdentity(item?.return);
-    const group = groups.get(onwardId) || {
-      depart: item?.depart,
-      returns: [],
-      seenReturns: new Set(),
-    };
+  const amount = Number(normalized);
+  return Number.isFinite(amount) ? amount : null;
+};
 
-    if (!group.seenReturns.has(returnId)) {
-      group.seenReturns.add(returnId);
-      group.returns.push(item);
-    }
-    groups.set(onwardId, group);
+const getLegAmount = (item, type) => {
+  const isDepart = type === "depart";
+  const tripIndex = isDepart ? 0 : 1;
+  const leg = isDepart ? item?.depart : item?.return;
+
+  return (
+    parseAmount(leg?.flight?.fare?.displayAmount) ??
+    parseAmount(item?.booking?.priceRequest?.Trips?.[tripIndex]?.Amount) ??
+    (!isDepart
+      ? parseAmount(item?.booking?.priceRequest?.Trips?.[0]?.Amount)
+      : null) ??
+    parseAmount(leg?.flight?.fare?.totalFare) ??
+    parseAmount(item?.fare?.pricePerAdult) ??
+    Number.MAX_SAFE_INTEGER
+  );
+};
+
+const formatCurrency = (amount) =>
+  `₹ ${new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 0,
+  }).format(amount)}`;
+
+const getUniqueLegItems = (items, type) => {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const identity = getLegIdentity(
+      type === "depart" ? item?.depart : item?.return,
+    );
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
   });
+};
 
-  return [...groups.values()];
+const buildRankedPairs = (items = []) => {
+  const departItems = getUniqueLegItems(items, "depart").sort(
+    (left, right) =>
+      getLegAmount(left, "depart") - getLegAmount(right, "depart"),
+  );
+  const returnItems = getUniqueLegItems(items, "return").sort(
+    (left, right) =>
+      getLegAmount(left, "return") - getLegAmount(right, "return"),
+  );
+  const pairCount = Math.min(departItems.length, returnItems.length);
+
+  return Array.from({ length: pairCount }, (_, index) => {
+    const departItem = departItems[index];
+    const returnItem = returnItems[index];
+    const departAmount = getLegAmount(departItem, "depart");
+    const returnAmount = getLegAmount(returnItem, "return");
+    const hasSegmentAmounts =
+      departAmount !== Number.MAX_SAFE_INTEGER &&
+      returnAmount !== Number.MAX_SAFE_INTEGER;
+    const totalAmount = hasSegmentAmounts
+      ? departAmount + returnAmount
+      : parseAmount(departItem?.fare?.totalFare);
+    const departTrip = departItem?.booking?.priceRequest?.Trips?.[0];
+    const returnTrip =
+      returnItem?.booking?.priceRequest?.Trips?.[1] ||
+      returnItem?.booking?.priceRequest?.Trips?.[0];
+
+    return {
+      ...departItem,
+      id: `ranked-${departItem?.id || index}-${returnItem?.id || index}`,
+      return: returnItem?.return,
+      fare: {
+        ...(departItem?.fare || {}),
+        ...(Number.isFinite(totalAmount)
+          ? {
+              totalFare: formatCurrency(totalAmount),
+              pricePerAdult: formatCurrency(totalAmount),
+            }
+          : {}),
+      },
+      booking: {
+        ...(departItem?.booking || {}),
+        priceRequest: {
+          ...(departItem?.booking?.priceRequest || {}),
+          Trips: [departTrip, returnTrip].filter(Boolean),
+        },
+      },
+    };
+  });
 };
 
 const FareAction = ({ item, onViewFares }) => (
@@ -101,23 +173,18 @@ const FareAction = ({ item, onViewFares }) => (
 );
 
 const CombinedRoundTripCards = ({ tripCardsData = [], onViewFares }) => {
-  const groupedFlights = groupByOnwardFlight(tripCardsData);
-  const [selectedReturns, setSelectedReturns] = React.useState({});
+  const rankedPairs = React.useMemo(
+    () => buildRankedPairs(tripCardsData),
+    [tripCardsData],
+  );
 
   return (
     <div className={styles.cardPairent}>
-      {groupedFlights.map((group, groupIndex) => {
-        const onwardId =
-          getLegIdentity(group.depart) || `onward-${groupIndex}`;
-        const firstReturnId = getLegIdentity(group.returns[0]?.return);
-        const selectedReturnId =
-          selectedReturns[onwardId] || firstReturnId;
-
-        return (
-          <React.Fragment key={onwardId}>
+      {rankedPairs.map((item, pairIndex) => (
+        <React.Fragment key={item.id}>
           <article className={`${styles.card} ${styles.groupedFlightCard}`}>
             <div className={styles.groupedOnward}>
-              <FlightLeg label="Depart" leg={group.depart} />
+              <FlightLeg label="Depart" leg={item.depart} />
               <button type="button" className={styles.seeDetailsBtn}>
                 See Details
                 <svg width="8" height="5" viewBox="0 0 8 5" aria-hidden="true">
@@ -131,42 +198,26 @@ const CombinedRoundTripCards = ({ tripCardsData = [], onViewFares }) => {
             </div>
 
             <div className={styles.groupedReturnList}>
-              {group.returns.map((item, returnIndex) => (
-                <div
-                  className={styles.groupedReturnRow}
-                  key={item?.id || `${groupIndex}-${returnIndex}`}
-                >
-                  <label className={styles.groupedReturnChoice}>
-                    <FlightLeg label="Return" leg={item.return} />
-                    <input
-                      type="radio"
-                      className={styles.groupedReturnRadio}
-                      name={`return-${onwardId}`}
-                      value={getLegIdentity(item.return)}
-                      checked={
-                        selectedReturnId === getLegIdentity(item.return)
-                      }
-                      onChange={() =>
-                        setSelectedReturns((current) => ({
-                          ...current,
-                          [onwardId]: getLegIdentity(item.return),
-                        }))
-                      }
-                      aria-label={`Select return flight ${
-                        item?.return?.airline?.code || returnIndex + 1
-                      }`}
-                    />
-                  </label>
-                  <FareAction item={item} onViewFares={onViewFares} />
+              <div className={styles.groupedReturnRow}>
+                <div className={styles.groupedReturnChoice}>
+                  <FlightLeg label="Return" leg={item.return} />
+                  <input
+                    type="radio"
+                    className={styles.groupedReturnRadio}
+                    checked
+                    readOnly
+                    tabIndex={-1}
+                    aria-label="Return flight paired by price"
+                  />
                 </div>
-              ))}
+                <FareAction item={item} onViewFares={onViewFares} />
+              </div>
             </div>
           </article>
 
-          {groupIndex === 2 && groupedFlights.length > 3 && <OfferBanner />}
+          {pairIndex === 2 && rankedPairs.length > 3 && <OfferBanner />}
         </React.Fragment>
-        );
-      })}
+      ))}
     </div>
   );
 };
