@@ -389,8 +389,6 @@
   position: relative;
   display: block;
   min-width: 0;
-  padding-right: 28px;
-  cursor: pointer;
 }
 
 .groupedReturnRadio {

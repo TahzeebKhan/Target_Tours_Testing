@@ -29,6 +29,17 @@ const truncate = (str) => {
 const passengerTypes = ["REGULAR", "SENIOR CITIZEN", "STUDENT"];
 const MAX_MULTI_CITY_ROUTES = 4;
 
+const getNextDateValue = (value) => {
+  const date = value ? new Date(value) : new Date();
+  const validDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  validDate.setDate(validDate.getDate() + 1);
+
+  const year = validDate.getFullYear();
+  const month = String(validDate.getMonth() + 1).padStart(2, "0");
+  const day = String(validDate.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const PencilIcon = () => {
   return (
     <svg
@@ -312,6 +323,9 @@ const TopFilterSection = ({
 
   const handleCalendarModeChange = (mode) => {
     const nextTripType = mode === "roundtrip" ? "round" : "oneway";
+    if (nextTripType === "round" && !endDate) {
+      setEndDate(getNextDateValue(startDate));
+    }
     setCalendarTripType(nextTripType);
     setTripType(nextTripType);
   };
@@ -415,6 +429,10 @@ const TopFilterSection = ({
       setFlightDirection("right");
     } else if (prevIndex > nextIndex) {
       setFlightDirection("left");
+    }
+
+    if (nextType === "round" && !endDate) {
+      setEndDate(getNextDateValue(startDate));
     }
 
     setTripType(nextType);
@@ -630,7 +648,7 @@ const TopFilterSection = ({
                     <span className={styles.labelText}>ROUND TRIP</span>
                   </label>
 
-                  <label
+                  {/* <label
                     className={`${styles.tripOption} ${
                       tripType === "multi" ? styles.active : ""
                     }`}
@@ -644,7 +662,7 @@ const TopFilterSection = ({
                     />
                     <span className={styles.customRadio}></span>
                     <span className={styles.labelText}>MULTI CITY</span>
-                  </label>
+                  </label> */}
                 </div>
 
                 {/* <div className={styles.serarchingContTop_right}>
@@ -1273,7 +1291,5 @@ const TopFilterSection = ({
 };
 
 export default TopFilterSection;
-
-
 
 
