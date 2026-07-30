@@ -602,26 +602,56 @@ const searchFlightsViaHttp = async (params = {}) => {
   return searchResponse.data;
 };
 
-export const searchFlights = async (params = {}) => {
-  try {
-    if (typeof window !== "undefined" && window.EventSource) {
-      return await searchFlightsViaSocket(params);
-    }
+const inFlightSearchRequests = new Map();
 
-    return await searchFlightsViaHttp(params);
-  } catch (error) {
-    const backendMessage =
-      error?.response?.data?.error?.message ||
-      error?.response?.data?.message ||
-      error?.message ||
-      "";
-    const status = error?.response?.status || error?.status;
-    const fallbackMessage =
-      status === 500
-        ? "Internal server error"
-        : `Flight search failed: ${status || "unknown"}`;
-    const nextError = new Error(backendMessage || fallbackMessage);
-    nextError.status = status;
-    throw nextError;
+const getFlightSearchRequestKey = (params = {}) => {
+  try {
+    return JSON.stringify(params);
+  } catch {
+    return "";
   }
+};
+
+export const searchFlights = (params = {}) => {
+  const requestKey = getFlightSearchRequestKey(params);
+  const existingRequest = requestKey
+    ? inFlightSearchRequests.get(requestKey)
+    : null;
+  if (existingRequest) return existingRequest;
+
+  const request = (async () => {
+    try {
+      if (typeof window !== "undefined" && window.EventSource) {
+        return await searchFlightsViaSocket(params);
+      }
+
+      return await searchFlightsViaHttp(params);
+    } catch (error) {
+      const backendMessage =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "";
+      const status = error?.response?.status || error?.status;
+      const fallbackMessage =
+        status === 500
+          ? "Internal server error"
+          : `Flight search failed: ${status || "unknown"}`;
+      const nextError = new Error(backendMessage || fallbackMessage);
+      nextError.status = status;
+      throw nextError;
+    }
+  })();
+
+  if (!requestKey) return request;
+
+  inFlightSearchRequests.set(requestKey, request);
+  const clearRequest = () => {
+    if (inFlightSearchRequests.get(requestKey) === request) {
+      inFlightSearchRequests.delete(requestKey);
+    }
+  };
+  request.then(clearRequest, clearRequest);
+
+  return request;
 };

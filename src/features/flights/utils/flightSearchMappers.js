@@ -1340,6 +1340,14 @@ const buildRoundCard = (flight, index, options = {}) => {
     flight?.TUI,
     flight?.tui
   );
+  const outboundFlightNumber = buildAirlineDisplayCode(
+    outbound.airlines[0]?.carrierCode || outbound.airlines[0]?.code,
+    outbound?.details?.flightNo || outbound.airlines[0]?.flightNo,
+  );
+  const inboundFlightNumber = buildAirlineDisplayCode(
+    inbound.airlines[0]?.carrierCode || inbound.airlines[0]?.code,
+    inbound?.details?.flightNo || inbound.airlines[0]?.flightNo,
+  );
   const roundTripsPayload = [
     {
       Amount:
@@ -1367,12 +1375,12 @@ const buildRoundCard = (flight, index, options = {}) => {
         flight?.flight_id,
         flight?.flightId
       ),
-      FlightNumber: outbound?.details?.flightNo || "",
+      FlightNumber: outboundFlightNumber,
       Origin: outbound?.departure?.airportCode || "",
       Destination: outbound?.arrival?.airportCode || "",
       DepartureDateTime: outbound?.departure?.date || "",
       ArrivalDateTime: outbound?.arrival?.date || "",
-      flight_no: outbound?.details?.flightNo || "",
+      flight_no: outboundFlightNumber,
     },
     {
       Amount:
@@ -1408,12 +1416,12 @@ const buildRoundCard = (flight, index, options = {}) => {
         flight?.inbound?.flight_id,
         flight?.inbound?.flightId
       ),
-      FlightNumber: inbound?.details?.flightNo || "",
+      FlightNumber: inboundFlightNumber,
       Origin: inbound?.departure?.airportCode || "",
       Destination: inbound?.arrival?.airportCode || "",
       DepartureDateTime: inbound?.departure?.date || "",
       ArrivalDateTime: inbound?.arrival?.date || "",
-      flight_no: inbound?.details?.flightNo || "",
+      flight_no: inboundFlightNumber,
     },
   ];
 
@@ -1449,9 +1457,9 @@ const buildRoundCard = (flight, index, options = {}) => {
         ),
         airline: {
           name: outbound.airlines[0]?.name || "IndiGo",
-          code: outbound.details?.flightNo || outbound.airlines[0]?.code || "N/A",
+          code: outboundFlightNumber || "N/A",
           carrierCode: outbound.airlines[0]?.carrierCode || "",
-          flightNo: outbound.details?.flightNo || outbound.airlines[0]?.flightNo || "",
+          flightNo: outboundFlightNumber,
           logo: outbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: outbound.dateLabel,
@@ -1472,9 +1480,9 @@ const buildRoundCard = (flight, index, options = {}) => {
         ),
         airline: {
           name: inbound.airlines[0]?.name || "IndiGo",
-          code: inbound.details?.flightNo || inbound.airlines[0]?.code || "N/A",
+          code: inboundFlightNumber || "N/A",
           carrierCode: inbound.airlines[0]?.carrierCode || "",
-          flightNo: inbound.details?.flightNo || inbound.airlines[0]?.flightNo || "",
+          flightNo: inboundFlightNumber,
           logo: inbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: inbound.dateLabel,
