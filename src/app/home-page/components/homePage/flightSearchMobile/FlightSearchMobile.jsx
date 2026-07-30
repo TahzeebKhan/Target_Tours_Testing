@@ -107,14 +107,14 @@ const FlightSearchMobile = ({
             One-way
           </button>
 
-          <button
+          {/* <button
             className={`${styles.round_tripBtnMbl} ${
               tripType === "multi" ? styles.activeTrip : ""
             }`}
             onClick={() => handleTripTypeChange("multi")}
           >
             Multi-City
-          </button>
+          </button> */}
         </div>
         {tripType === "round" && (
           <>

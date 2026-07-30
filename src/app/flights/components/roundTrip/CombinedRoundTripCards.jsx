@@ -236,14 +236,6 @@ const CombinedRoundTripCards = ({ tripCardsData = [], onViewFares }) => {
               <div className={styles.groupedReturnRow}>
                 <div className={styles.groupedReturnChoice}>
                   <FlightLeg label="Return" leg={item.return} />
-                  <input
-                    type="radio"
-                    className={styles.groupedReturnRadio}
-                    checked
-                    readOnly
-                    tabIndex={-1}
-                    aria-label="Return flight paired by price"
-                  />
                 </div>
                 <FareAction item={item} onViewFares={onViewFares} />
               </div>

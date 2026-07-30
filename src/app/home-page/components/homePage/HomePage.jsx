@@ -2014,14 +2014,14 @@ const HomePage = ({
                         One-way
                       </button>
 
-                      <button
+                      {/* <button
                         className={`${styles.round_tripBtn} ${
                           tripType === "multi" ? styles.activeTrip : ""
                         }`}
                         onClick={() => handleTripTypeChange("multi")}
                       >
                         Multi-City
-                      </button>
+                      </button> */}
                     </div>
                     <div className={styles.serarchingContTop_right}>
                       <Switch
