@@ -120,6 +120,58 @@ const normalizeHotelRoomPayloads = (guestState = {}) => {
   });
 };
 
+const getDefaultFlightDateRange = () => {
+  const departure = new Date();
+  departure.setHours(0, 0, 0, 0);
+
+  const returnDate = new Date(departure);
+  returnDate.setDate(returnDate.getDate() + 1);
+
+  return { departure, returnDate };
+};
+
+const formatLocalDateValue = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const DEFAULT_HOTEL_LOCATION = {
+  id: "227760",
+  locationId: "227760",
+  label: "New Delhi",
+  value: "New Delhi",
+  detail: "New Delhi, National Capital Territory of Delhi, India",
+  fullName: "New Delhi, National Capital Territory of Delhi, India",
+  type: "city",
+  country: "IN",
+  countryCode: "IN",
+  provider: "akbar",
+  geoCode: {
+    lat: 28.613939,
+    long: 77.209023,
+  },
+  raw: {
+    id: "227760",
+    name: "New Delhi",
+    fullName: "New Delhi, National Capital Territory of Delhi, India",
+    code: null,
+    type: "city",
+    city: null,
+    state: null,
+    country: "IN",
+    score: 0,
+    referenceId: null,
+    provider: "akbar",
+    coordinates: {
+      lat: 28.613939,
+      long: 77.209023,
+    },
+  },
+};
+
 const getHotelRoomTotals = (rooms = []) => ({
   adults: rooms.reduce((sum, room) => sum + Number(room.adults || 0), 0),
   children: rooms.reduce((sum, room) => sum + Number(room.children || 0), 0),
@@ -189,8 +241,12 @@ const HomePage = ({
   const [tripType, setTripType] = useState("round");
   const [bookingType, setBookingType] = useState("flight");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturenDate] = useState("");
+  const [departureDate, setDepartureDate] = useState(
+    () => getDefaultFlightDateRange().departure,
+  );
+  const [returnDate, setReturenDate] = useState(
+    () => getDefaultFlightDateRange().returnDate,
+  );
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [showLogin, setShowLogin] = useState(false);
@@ -219,8 +275,12 @@ const HomePage = ({
   // Hotel calendar states
   const hotelCalendarRef = useRef(null);
   const [showHotelCalendar, setShowHotelCalendar] = useState(false);
-  const [hotelStartDate, setHotelStartDate] = useState("");
-  const [hotelEndDate, setHotelEndDate] = useState("");
+  const [hotelStartDate, setHotelStartDate] = useState(() =>
+    formatLocalDateValue(getDefaultFlightDateRange().departure),
+  );
+  const [hotelEndDate, setHotelEndDate] = useState(() =>
+    formatLocalDateValue(getDefaultFlightDateRange().returnDate),
+  );
 
   // Holiday calendar states
   const holidayCalendarRef = useRef(null);
@@ -273,15 +333,20 @@ const HomePage = ({
         : "/videos/hero.mp4",
     });
   }, [heroResponse]);
-  const [flightDates, setFlightDates] = useState({
-    round: {
-      start: "",
-      end: "",
-    },
-    oneway: {
-      start: "",
-    },
-    multi: [{ date: "" }, { date: "" }],
+  const [flightDates, setFlightDates] = useState(() => {
+    const { departure, returnDate: defaultReturnDate } =
+      getDefaultFlightDateRange();
+
+    return {
+      round: {
+        start: formatLocalDateValue(departure),
+        end: formatLocalDateValue(defaultReturnDate),
+      },
+      oneway: {
+        start: formatLocalDateValue(departure),
+      },
+      multi: [{ date: "" }, { date: "" }],
+    };
   });
   const {
     isLoggedIn,
@@ -464,7 +529,14 @@ const HomePage = ({
   const [to, setTo] = useState("");
   const [fromCode, setFromCode] = useState("");
   const [toCode, setToCode] = useState("");
-  const [selectedHotelLocation, setSelectedHotelLocation] = useState(null);
+  const [selectedHotelLocation, setSelectedHotelLocation] = useState(
+    DEFAULT_HOTEL_LOCATION,
+  );
+  const nonHotelDestinationRef = useRef({ value: "", code: "" });
+  const hotelDestinationRef = useRef({
+    value: DEFAULT_HOTEL_LOCATION.value,
+    code: DEFAULT_HOTEL_LOCATION.locationId,
+  });
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -482,8 +554,11 @@ const HomePage = ({
 
   const selectHotelSuggestion = (suggestion) => {
     setSelectedHotelLocation(suggestion || null);
-    setTo(suggestion?.value || suggestion?.label || "");
-    setToCode(suggestion?.locationId || suggestion?.id || "");
+    const value = suggestion?.value || suggestion?.label || "";
+    const code = suggestion?.locationId || suggestion?.id || "";
+    hotelDestinationRef.current = { value, code };
+    setTo(value);
+    setToCode(code);
     setToSuggestionsOpen(false);
     if (toInputRef.current) toInputRef.current.focus();
   };
@@ -776,6 +851,16 @@ const HomePage = ({
       setDirection("right");
     } else if (prevIndex > nextIndex) {
       setDirection("left");
+    }
+
+    if (feature.type === "hotel" && bookingType !== "hotel") {
+      nonHotelDestinationRef.current = { value: to, code: toCode };
+      setTo(hotelDestinationRef.current.value);
+      setToCode(hotelDestinationRef.current.code);
+    } else if (bookingType === "hotel" && feature.type !== "hotel") {
+      hotelDestinationRef.current = { value: to, code: toCode };
+      setTo(nonHotelDestinationRef.current.value);
+      setToCode(nonHotelDestinationRef.current.code);
     }
 
     setBookingType(feature.type);
@@ -2652,7 +2737,12 @@ const HomePage = ({
                           value={bookingType === "hotel" ? to : from}
                           onChange={(e) => {
                             if (bookingType === "hotel") {
-                              setTo(e.target.value);
+                              const value = e.target.value;
+                              hotelDestinationRef.current = {
+                                value,
+                                code: "",
+                              };
+                              setTo(value);
                               setToCode("");
                               setSelectedHotelLocation(null);
                               setToSuggestionsOpen(true);
@@ -3078,11 +3168,22 @@ const HomePage = ({
             styles={styles}
             to={to}
             setTo={(value) => {
+              hotelDestinationRef.current = { value, code: "" };
               setTo(value);
               setToCode("");
               setSelectedHotelLocation(null);
             }}
             onHotelSelect={(location) => {
+              hotelDestinationRef.current = {
+                value:
+                  location?.value ||
+                  location?.label ||
+                  DEFAULT_HOTEL_LOCATION.value,
+                code:
+                  location?.locationId ||
+                  location?.id ||
+                  DEFAULT_HOTEL_LOCATION.locationId,
+              };
               setSelectedHotelLocation(location || null);
               setToCode(location?.locationId || location?.id || "");
             }}

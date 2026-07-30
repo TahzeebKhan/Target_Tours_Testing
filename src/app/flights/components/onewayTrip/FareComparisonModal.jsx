@@ -1011,7 +1011,7 @@ const FareComparisonModal = ({
                         </div>
                         {/* Action Buttons */}
                         <div className={styles.fareActions}>
-                            {inline && <button className={styles.lockPriceBtn}>LOCK PRICE</button>}
+                            {/* {inline && <button className={styles.lockPriceBtn}>LOCK PRICE</button>} */}
                             <button className={styles.bookNowBtn} disabled={isSubmitting} onClick={() => handleBookNow(fare)}>{isCurrentFareSubmitting ? "LOADING..." : "BOOK NOW"}</button>
                         </div>
                     </div>

@@ -476,9 +476,12 @@
 }
 
 .inlineFareCards .fareActions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inlineFareCards .bookNowBtn {
+  width: calc((100% - 12px) / 2);
 }
 
 .inlineFareCards .price {
