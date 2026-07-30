@@ -1010,7 +1010,7 @@ const RoundTrip = ({
               </span>
             </div>
           </div>
-          <label className={styles.combinedFlightsToggle}>
+          {/* <label className={styles.combinedFlightsToggle}>
             <input
               type="checkbox"
               checked={combinedFlights}
@@ -1021,7 +1021,7 @@ const RoundTrip = ({
               <span className={styles.toggleThumb} />
             </span>
             <span>COMBINED FLIGHTS</span>
-          </label>
+          </label> */}
         </div>
         {/* <DatePriceSlider
           tiles={datewiseFareTiles}
