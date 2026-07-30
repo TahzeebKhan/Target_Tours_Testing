@@ -63,9 +63,22 @@ const Trip = () => {
 
     const bookingId = searchParams.get("bookingId");
     const bookingType = searchParams.get("bookingType");
-    const tabFromType = DETAIL_TYPE_TO_TAB[bookingType];
+    const tabFromType =
+      DETAIL_TYPE_TO_TAB[bookingType] ||
+      (bookingId && RESERVATION_TABS.has(activeTab) && activeTab !== "ALL"
+        ? activeTab
+        : null);
 
     if (!bookingId || !tabFromType) return;
+
+    if (!bookingType) {
+      const inferredBookingType = TAB_TO_DETAIL_TYPE[tabFromType];
+      if (inferredBookingType) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("bookingType", inferredBookingType);
+        router.replace(`/profile?${params.toString()}`, { scroll: false });
+      }
+    }
 
     setSelectedBooking((current) => {
       if (current?.detailId === bookingId) return current;
@@ -79,7 +92,7 @@ const Trip = () => {
     });
     setActiveTab(tabFromType);
     setStep("DETAILS");
-  }, [hasRestoredActiveTab, searchParams]);
+  }, [activeTab, hasRestoredActiveTab, router, searchParams]);
 
   const openDetails = (booking) => {
     setSelectedBooking(booking || null);

@@ -1005,12 +1005,9 @@ const HomePage = ({
     if (!hotelStartDate || hotelEndDate) {
       setHotelStartDate(date);
       setHotelEndDate("");
-    } else if (new Date(date) >= new Date(hotelStartDate)) {
+    } else if (new Date(date) > new Date(hotelStartDate)) {
       setHotelEndDate(date);
       setShowHotelCalendar(false);
-    } else {
-      setHotelStartDate(date);
-      setHotelEndDate("");
     }
   };
 
@@ -1709,6 +1706,20 @@ const HomePage = ({
                 <li>
                   <Link href="#">Home</Link>
                 </li>
+                {isLoggedIn && (
+                  <li>
+                    <Link
+                      href="/profile"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        router.push("/profile");
+                        window.setTimeout(() => setMenuOpen(false), 0);
+                      }}
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link href="#">Destinations</Link>
                 </li>
