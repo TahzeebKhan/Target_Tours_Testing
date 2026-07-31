@@ -55,6 +55,11 @@ const getAmenityLabel = (amenity) => {
     );
 };
 
+const isAssetPath = (label = "") =>
+    /(?:^|[/\\])[^/\\]+\.(?:svg|png|jpe?g|gif|webp|ico)(?:[?#].*)?$/i.test(
+        String(label).trim(),
+    );
+
 const Amenities = ({ amenities = [] }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     useBodyScrollLock(isModalOpen);
@@ -62,7 +67,7 @@ const Amenities = ({ amenities = [] }) => {
     const amenityItems = (Array.isArray(amenities) ? amenities : [])
         .map(getAmenityLabel)
         .map((label) => String(label || "").trim())
-        .filter(Boolean)
+        .filter((label) => label && !isAssetPath(label))
         .filter((label) => {
             const key = label.toLowerCase().replace(/[^a-z0-9]/g, "");
             if (!key || seenAmenities.has(key)) return false;

@@ -1,6 +1,6 @@
 .tabsWrap {
     position: sticky;
-    top: 0;
+    top: 72px;
     z-index: 9999;
     max-width: 1520px;
     width: 100%;

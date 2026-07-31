@@ -143,7 +143,12 @@ const normalizeFlightNo = (value) => {
   if (exact) return exact[0];
 
   const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
-  if (trailing) return trailing[1];
+  if (trailing) {
+    const carrier = text.match(/^([A-Za-z0-9]{1,3})/)?.[1] || "";
+    return carrier
+      ? `${carrier.toUpperCase()} ${trailing[1]}`
+      : trailing[1];
+  }
 
   return text;
 };

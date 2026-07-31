@@ -111,21 +111,33 @@ const filterReducer = (state, action) => {
       };
     }
     case FILTER_ACTIONS.SET_POPULAR_FILTER: {
+      const nextPopular = {
+        ...state.popular,
+        ...action.payload,
+      };
+      const hasChanged = Object.keys(nextPopular).some(
+        (key) => nextPopular[key] !== state.popular[key],
+      );
+      if (!hasChanged) return state;
+
       return {
         ...state,
-        popular: {
-          ...state.popular,
-          ...action.payload,
-        },
+        popular: nextPopular,
       };
     }
     case FILTER_ACTIONS.SET_STOPS_FILTER: {
+      const nextStops = {
+        ...createDefaultFilters().stops,
+        ...action.payload,
+      };
+      const hasChanged = Object.keys(nextStops).some(
+        (key) => nextStops[key] !== state.stops[key],
+      );
+      if (!hasChanged) return state;
+
       return {
         ...state,
-        stops: {
-          ...createDefaultFilters().stops,
-          ...action.payload,
-        },
+        stops: nextStops,
       };
     }
     case FILTER_ACTIONS.SET_SORT_BY: {

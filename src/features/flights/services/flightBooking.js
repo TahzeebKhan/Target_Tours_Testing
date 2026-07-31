@@ -454,7 +454,12 @@ const normalizePricingFlightNo = (...values) => {
 
     if (/^\d+$/.test(text)) return text;
     const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
-    if (trailing) return trailing[1];
+    if (trailing) {
+      const carrier = text.match(/^([A-Za-z0-9]{1,3})/)?.[1] || "";
+      return carrier
+        ? `${carrier.toUpperCase()} ${trailing[1]}`
+        : trailing[1];
+    }
     if (text.includes("|")) return text.split("|").pop()?.trim() || text;
 
     return text;
@@ -1502,6 +1507,33 @@ const ensureV2SsrPayload = (payload) => {
       },
     ],
   };
+};
+
+export const getFlightBaggageInfo = async (payload = {}) => {
+  const trip = Array.isArray(payload?.Trips) ? payload.Trips[0] || {} : payload;
+  const response = await fetch("/api/flights/v2/baggage-info", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify({
+      domain: payload?.domain || process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+      search_key: payload?.search_key || payload?.SearchKey || "",
+      TUI: trip?.TUI || trip?.tui || "",
+      Index: String(trip?.Index ?? trip?.index ?? ""),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(getApiMessage(data));
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
 };
 
 export const getFlightSsr = async (payload) => {

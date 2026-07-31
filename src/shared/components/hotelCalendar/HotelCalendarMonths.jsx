@@ -34,6 +34,7 @@ export default function HotelCalendarMonths({
         year={baseYear}
         startDate={startDate}
         endDate={endDate}
+        minimumCheckoutDate={startDate && !endDate ? startDate : ""}
         onDateClick={onDateClick}
         onPrev={goPrev}
         isRightSide={false}
@@ -45,6 +46,7 @@ export default function HotelCalendarMonths({
         year={baseMonth === 11 ? baseYear + 1 : baseYear}
         startDate={startDate}
         endDate={endDate}
+        minimumCheckoutDate={startDate && !endDate ? startDate : ""}
         onDateClick={onDateClick}
         onNext={goNext}
         isRightSide={true}

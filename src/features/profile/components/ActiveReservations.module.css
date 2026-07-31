@@ -57,6 +57,31 @@
   padding-top: 84px;
 }
 
+.emptyState {
+  min-height: 360px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.emptyState h2 {
+  font-family: "Antic Didone", serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #000033;
+}
+
+.emptyState p {
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #52525b;
+}
+
 .cardList {
   display: flex;
   flex-direction: column;

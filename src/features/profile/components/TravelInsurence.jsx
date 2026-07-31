@@ -1,34 +1,15 @@
 import Image from "next/image";
 import styles from "./TravelInsurence.module.css";
 
-const RESERVATIONS = [
-  {
-    id: "173826",
-    flightName: "Worldwide Health Cover",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    fromTo: "DEL - BLR",
-    image: "/images/travelInsurenceThumbnail.png",
-  },
-  {
-    id: "173826",
-    fromTo: "DEL - BLR",
-    flightName: "Worldwide Health Cover",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    image: "/images/travelInsurenceThumbnail.png",
-  },
-];
-
-const TravelInsurence = ({ setMobileTitle, onCheckDetails }) => {
+const TravelInsurence = ({
+  setMobileTitle,
+  onCheckDetails,
+  reservations = [],
+}) => {
   return (
     <div>
       <div className={styles.cardList}>
-        {RESERVATIONS.map((res, index) => (
+        {reservations.map((res, index) => (
           <section key={index} className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.imageWrapper}>
@@ -78,7 +59,7 @@ const TravelInsurence = ({ setMobileTitle, onCheckDetails }) => {
               <button
                 onClick={() => {
                   setMobileTitle?.("Booking Details");
-                  onCheckDetails();
+                  onCheckDetails(res);
                 }}
                 className={styles.detailsButton}
               >

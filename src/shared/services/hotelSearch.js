@@ -474,7 +474,9 @@ export const fetchHotelSearchSuggestions = async (query) => {
 
   const response = await fetch(url.toString(), {
     method: "GET",
-    headers: getHotelSearchHeaders(),
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "include",
     cache: "no-store",
   });

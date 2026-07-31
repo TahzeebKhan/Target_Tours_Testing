@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MobileHotelDetails.module.css";
 import { Pencil } from "lucide-react";
-import { toast } from "react-toastify";
 import ResultsBottomSheet from "./ResultsBottomSheet";
 import HotelFilterSheet from "./HotelFilterSheet";
 import MobileHotelEditSheet from "./MobileHotelEditSheet";
@@ -15,8 +14,6 @@ import {
   HOTEL_SEARCH_SESSION_KEY,
   HOTEL_LAST_SEARCH_URL_KEY,
   createHotelSearchChannel,
-  fetchHotelDetails,
-  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import {
   clearHotelBookingSession,
@@ -34,7 +31,6 @@ import {
   matchesHotelFilters,
   normalizeHotelCard,
   shouldApplyHotelResults,
-  isHotelUnavailableResponse,
 } from "../TourListing";
 import LoginPopup from '@/app/account/loginPopUp/LoginPopup'
 import SignupPopup from '@/app/account/signUpPopUp/SignupPopup'
@@ -190,6 +186,10 @@ const MobileHotelDetails = () => {
   const normalizeRunRef = useRef(0);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    router.prefetch("/hotel-detail");
+  }, [router]);
+
   const { data: wishlistData } = useQuery({
     queryKey: ["user-wishlists", "hotel"],
     queryFn: () => fetchUserWishlists("hotel"),
@@ -243,7 +243,7 @@ const MobileHotelDetails = () => {
     addHotelToWishlist(hotelId);
   };
 
-  const handleBookNow = async (hotel) => {
+  const handleBookNow = (hotel) => {
     if (!hotel || loadingHotelDetailsId) return;
 
     let fallbackSearchId = "";
@@ -283,45 +283,8 @@ const MobileHotelDetails = () => {
     if (!payload.hotelId) payload.hotelId = String(hotel.id || hotel.hotelId || hotel.code || "").trim();
 
     setLoadingHotelDetailsId(hotel.id || payload.hotelId);
-
-    try {
-      const details = await fetchHotelDetails(payload);
-
-      if (isHotelUnavailableResponse(details)) {
-        toast.error("This hotel is not available to book now", {
-          toastId: "mobile-hotel-not-available",
-        });
-        return;
-      }
-
-      setSessionItem(
-        HOTEL_DETAILS_KEY,
-        {
-          request: payload,
-          hotel,
-          details,
-        },
-        30,
-      );
-      router.push(getHotelDetailUrl(payload), { scroll: true });
-    } catch (error) {
-      console.error("Hotel details request failed:", error);
-      if (isHotelUnavailableResponse(error?.data || error)) {
-        toast.error("This hotel is not available to book now", {
-          toastId: "mobile-hotel-not-available",
-        });
-      } else if (isMissingHotelAuthTokenError(error)) {
-        setAuthView("login");
-        setShowAuthModal(true);
-      } else {
-        toast.error(
-          error?.message || error?.title || "Unable to fetch hotel details. Please try again.",
-          { toastId: "mobile-hotel-details-error" }
-        );
-      }
-    } finally {
-      setLoadingHotelDetailsId("");
-    }
+    setSessionItem(HOTEL_DETAILS_KEY, { request: payload }, 30);
+    router.push(getHotelDetailUrl(payload), { scroll: true });
   };
 
   const handleEditSearch = (form) => {
@@ -773,21 +736,33 @@ const MobileHotelDetails = () => {
     <div className={styles.hotelDetailsMobileContainer}>
       <div className={`${styles.tripDetailsHeader}`}>
         <div className={styles.mainCotainer}>
-          {/* <img src="/icons/leftArrowTrip.svg" alt="" /> */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="1.25"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            class="lucide lucide-chevron-left-icon lucide-chevron-left"
+          <button
+            type="button"
+            className={styles.backButton}
+            aria-label="Go back"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
           <div
             className={`${styles.TripCardHeader} ${styles.TripCardHeaderNav}`}
           >

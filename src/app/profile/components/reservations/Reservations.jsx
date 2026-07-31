@@ -945,6 +945,23 @@ export default function Reservations({
         )}
         {activeTab === "HOTEL BOOKING" && (
           <div className={styles.list}>
+            {!hotelReservationData.length && (
+              <div className={styles.emptyBookingState}>
+                <div className={styles.emptyBookingIllustration}>
+                  <Image
+                    src="/images/empty_trip.png"
+                    alt=""
+                    width={150}
+                    height={150}
+                  />
+                </div>
+                <h2>No hotel bookings found</h2>
+                <p>
+                  You don&apos;t have any hotel reservations yet. A comfortable
+                  stay is waiting whenever you&apos;re ready to travel.
+                </p>
+              </div>
+            )}
             {hotelReservationData.map((item, index) => (
               <article key={`hotel-${item.id}-${index}`} className={styles.card}>
                 <div className={styles.cardMain}>
@@ -1003,6 +1020,23 @@ export default function Reservations({
         )}
         {activeTab === "FLIGHT BOOKING" && (
           <div className={styles.list}>
+            {!flightReservationData.length && (
+              <div className={styles.emptyBookingState}>
+                <div className={styles.emptyBookingIllustration}>
+                  <Image
+                    src="/images/empty_trip.png"
+                    alt=""
+                    width={150}
+                    height={150}
+                  />
+                </div>
+                <h2>No flight bookings found</h2>
+                <p>
+                  You don&apos;t have any flight reservations yet. Your next
+                  journey can start whenever you&apos;re ready.
+                </p>
+              </div>
+            )}
             {flightReservationData.map((item, index) => (
               <article key={index} className={styles.card}>
                 <div className={styles.cardMain}>
@@ -1063,6 +1097,23 @@ export default function Reservations({
         )}
         {activeTab === "PACKAGES" && (
           <div className={styles.list}>
+            {!packageReservationData.length && (
+              <div className={styles.emptyBookingState}>
+                <div className={styles.emptyBookingIllustration}>
+                  <Image
+                    src="/images/empty_trip.png"
+                    alt=""
+                    width={150}
+                    height={150}
+                  />
+                </div>
+                <h2>No package bookings found</h2>
+                <p>
+                  You haven&apos;t booked a holiday package yet. Explore a new
+                  destination and make your next trip unforgettable.
+                </p>
+              </div>
+            )}
             {packageReservationData.map((item, index) => (
               <article key={index} className={styles.card}>
                 <div className={styles.cardMain}>

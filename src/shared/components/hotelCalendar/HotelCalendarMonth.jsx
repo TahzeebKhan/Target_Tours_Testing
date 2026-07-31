@@ -9,6 +9,7 @@ export default function HotelCalendarMonth({
   year,
   startDate,
   endDate,
+  minimumCheckoutDate,
   onDateClick,
   isRightSide,
   onPrev,
@@ -127,29 +128,36 @@ export default function HotelCalendarMonth({
               "0"
             )}-${String(day).padStart(2, "0")}`;
             const isPast = isPastDate(year, month, day);
+            const isInvalidCheckoutDate =
+              minimumCheckoutDate &&
+              new Date(`${dateStr}T00:00:00`) <=
+                new Date(`${minimumCheckoutDate}T00:00:00`);
+            const isDisabled = isPast || isInvalidCheckoutDate;
             const isSaturday = (y, m, d) => new Date(y, m, d).getDay() === 6;
 
             return (
               <div
                 key={dateStr}
                 className={`
-    ${!isPast && isInRange(dateStr) ? styles.range : ""}`}
+    ${!isDisabled && isInRange(dateStr) ? styles.range : ""}`}
               >
                 {" "}
                 <div
                   className={`${styles.cell}
-        ${isPast ? styles.muted : ""}
+        ${isDisabled ? styles.muted : ""}
         ${isSunday(year, month, day) ? styles.sundayDate : ""}
         ${isSunday(year, month, day) ? styles.sunday : ""}
         ${isSaturday(year, month, day) ? styles.satuday : ""}
-        ${!isPast && dateStr === startDate ? styles.selected : ""}
-        ${!isPast && isRangeStart(dateStr) ? styles.RangeStartCell : ""}
-        ${!isPast && isRangeEnd(dateStr) ? styles.RangeEndCell : ""}
+        ${dateStr === startDate ? styles.selected : ""}
+        ${!isDisabled && isRangeStart(dateStr) ? styles.RangeStartCell : ""}
+        ${!isDisabled && isRangeEnd(dateStr) ? styles.RangeEndCell : ""}
       `}
-                  onClick={!isPast ? () => onDateClick(dateStr) : undefined}
+                  onClick={
+                    !isDisabled ? () => onDateClick(dateStr) : undefined
+                  }
                 >
                   <span className={styles.day}>{day}</span>
-                  {!isPast && (
+                  {!isDisabled && (
                     <span className={`${styles.price} ${getPriceClass(PRICE)}`}>
                       ₹ {PRICE}
                     </span>

@@ -72,6 +72,34 @@ const sortTripCardsByLeg = (items = [], legType, sortConfig) => {
   });
 };
 
+const getPairIds = (leg) =>
+  [
+    leg?.pairedIds,
+    leg?.pairedId,
+    ...(Array.isArray(leg?.provider_options) ? leg.provider_options : []).map(
+      (option) => option?.pairedId ?? option?.pairedIds,
+    ),
+  ]
+    .flat(Infinity)
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+
+const getReturnIdentity = (item) =>
+  String(
+    item?.booking?.priceRequest?.Trips?.[1]?.Index ||
+      item?.return?.airline?.flightNo ||
+      item?.return?.airline?.code ||
+      item?.id,
+  );
+
+const getDepartIdentity = (item) =>
+  String(
+    item?.booking?.priceRequest?.Trips?.[0]?.Index ||
+      item?.depart?.airline?.flightNo ||
+      item?.depart?.airline?.code ||
+      item?.id,
+  );
+
 const TripCard = ({
   tripCardsData,
   fareModalOpen,
@@ -202,9 +230,7 @@ const TripCard = ({
     tripCardsData[0] ||
     null;
   const selectedReturn =
-    tripCardsData.find((item) => item.id === selectedReturnId) ||
-    selectedDepart ||
-    null;
+    tripCardsData.find((item) => item.id === selectedReturnId) || null;
 
   const parseSelectedAmount = (value) => {
     const amount = Number(String(value ?? "").replace(/[^\d.]/g, ""));
@@ -266,15 +292,62 @@ const TripCard = ({
         }
       : null;
 
+  const uniqueDepartCards = useMemo(() => {
+    const seenDeparts = new Set();
+
+    return tripCardsData.filter((item) => {
+      const identity = getDepartIdentity(item);
+      if (seenDeparts.has(identity)) return false;
+      seenDeparts.add(identity);
+      return true;
+    });
+  }, [tripCardsData]);
+
   const sortedDepartCards = useMemo(
-    () => sortTripCardsByLeg(tripCardsData, "depart", columnSort.depart),
-    [columnSort.depart, tripCardsData]
+    () => sortTripCardsByLeg(uniqueDepartCards, "depart", columnSort.depart),
+    [columnSort.depart, uniqueDepartCards]
   );
 
+  const eligibleReturnCards = useMemo(() => {
+    const selectedPairIds = new Set(getPairIds(selectedDepart?.depart));
+    const seenReturns = new Set();
+
+    return tripCardsData.filter((item) => {
+      const returnPairIds = getPairIds(item?.return);
+      const matchesSelectedOnward =
+        selectedPairIds.size === 0 ||
+        returnPairIds.some((pairId) => selectedPairIds.has(pairId));
+      const identity = getReturnIdentity(item);
+
+      if (!matchesSelectedOnward || seenReturns.has(identity)) return false;
+      seenReturns.add(identity);
+      return true;
+    });
+  }, [selectedDepart, tripCardsData]);
+
   const sortedReturnCards = useMemo(
-    () => sortTripCardsByLeg(tripCardsData, "return", columnSort.return),
-    [columnSort.return, tripCardsData]
+    () =>
+      sortTripCardsByLeg(
+        eligibleReturnCards,
+        "return",
+        columnSort.return,
+      ),
+    [columnSort.return, eligibleReturnCards],
   );
+
+  useEffect(() => {
+    if (!eligibleReturnCards.length) {
+      setSelectedReturnId(null);
+      return;
+    }
+
+    const currentIsEligible = eligibleReturnCards.some(
+      (item) => item.id === selectedReturnId,
+    );
+    if (!currentIsEligible) {
+      setSelectedReturnId(eligibleReturnCards[0].id);
+    }
+  }, [eligibleReturnCards, selectedReturnId]);
 
   const maxVisibleRows = Math.max(sortedDepartCards.length, sortedReturnCards.length);
 

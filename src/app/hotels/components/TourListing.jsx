@@ -19,13 +19,15 @@ import {
   HOTEL_SEARCH_SESSION_KEY,
   HOTEL_SEARCH_RESULTS_EVENT,
   HOTEL_SEARCH_RESULTS_KEY,
-  fetchHotelDetails,
-  isMissingHotelAuthTokenError,
 } from "@/shared/services/hotelSearch";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
 import { useHotelsContext } from "../context/HotelsContext";
 import { useBodyScrollLock } from "@/shared/hooks/useBodyScrollLock";
+import {
+  removeSessionItem,
+  setSessionItem,
+} from "@/shared/utils/sessionStorage";
 
 const parseSocketValue = (value) => {
   if (typeof value !== "string") return value;
@@ -71,54 +73,53 @@ const getHotelArraySource = (key = "") => {
 const getHotelDisplayName = (hotel = {}) =>
   String(hotel.name || hotel.hotelName || hotel.title || "").trim();
 
-const stripRawFields = (value, depth = 0) => {
-  if (!value || typeof value !== "object" || depth > 10) return value;
-
-  if (Array.isArray(value)) {
-    return value.map((item) => stripRawFields(item, depth + 1));
-  }
-
-  return Object.fromEntries(
-    Object.entries(value)
-      .filter(([key]) => key !== "raw")
-      .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
-  );
-};
-
-const writeHotelDetailsForNavigation = ({ payload, hotel, details }) => {
+const writeHotelRequestForNavigation = ({ payload, hotel }) => {
   if (typeof window === "undefined" || !hotel) return;
 
-  const fullDetail = {
+  const heroImage =
+    hotel.image ||
+    hotel.imageUrl ||
+    hotel.thumbnail ||
+    hotel.images?.[0] ||
+    hotel.galleryImages?.[0] ||
+    "";
+  const listingImages = [
+    heroImage,
+    ...(Array.isArray(hotel.images) ? hotel.images : []),
+    ...(Array.isArray(hotel.galleryImages) ? hotel.galleryImages : []),
+  ].filter((image, index, images) => image && images.indexOf(image) === index);
+
+  const navigationRequest = {
+    isPreviewOnly: true,
+    previewHeroImage: heroImage,
     request: payload,
-    hotel: stripRawFields(hotel),
-    details: stripRawFields(details),
+    hotel: {
+      id: hotel.id || hotel.hotelId || payload.hotelId,
+      hotelId: hotel.hotelId || hotel.id || payload.hotelId,
+      name: hotel.name || hotel.hotelName || hotel.title || "",
+      title: hotel.title || hotel.name || hotel.hotelName || "",
+      addressLine1: hotel.addressLine1 || hotel.address || hotel.route || "",
+      image: heroImage,
+      images: listingImages,
+      galleryImages: listingImages,
+      facilities: hotel.facilities || hotel.amenities || [],
+      amenities: hotel.amenities || hotel.facilities || [],
+      rating: hotel.rating || hotel.starRating || "",
+      starRating: hotel.starRating || hotel.rating || "",
+      reviewScore: hotel.reviewScore || "",
+      reviewText: hotel.reviewText || "",
+      description: hotel.description || hotel.overview || "",
+      price: hotel.price || "",
+      latitude: hotel.latitude,
+      longitude: hotel.longitude,
+    },
+    details: null,
   };
 
   try {
-    setSessionItem(HOTEL_DETAILS_KEY, fullDetail, 30);
-    return;
-  } catch (error) {
-    console.warn(
-      "Hotel details payload exceeded session storage; storing slim payload.",
-      error,
-    );
-  }
-
-  try {
-    setSessionItem(
-      HOTEL_DETAILS_KEY,
-      {
-        request: payload,
-        hotel: stripRawFields(hotel),
-      },
-      30,
-    );
+    setSessionItem(HOTEL_DETAILS_KEY, navigationRequest, 30);
   } catch {
-    try {
-      removeSessionItem(HOTEL_DETAILS_KEY);
-    } catch {
-      // Ignore storage cleanup failures.
-    }
+    removeSessionItem(HOTEL_DETAILS_KEY);
   }
 };
 
@@ -1766,9 +1767,8 @@ export const HotelFacilities = ({ facilities = [], onShowMore }) => {
     <div className={styles.featuresCont}>
       {visibleFacilities.map((facility, index) => (
         <div className={styles.featureItem} key={`${facility.name}-${index}`}>
-          <img src={facility.icon} alt="" />
+          <span aria-hidden="true">•</span>
           <p>{facility.name}</p>
-          {index < visibleFacilities.length - 1 && <span>•</span>}
         </div>
       ))}
       {hasMoreFacilities && (
@@ -1814,9 +1814,6 @@ const HotelFacilitiesModal = ({ facilities = [], onClose }) =>
               className={styles.facilitiesModalItem}
               key={`${facility.name}-${index}`}
             >
-              <span className={styles.facilitiesModalIcon}>
-                <img src={facility.icon} alt="" />
-              </span>
               <span>{facility.name}</span>
             </div>
           ))}
@@ -2377,8 +2374,6 @@ const TourListing = () => {
   const hotelResultSourceRef = useRef("");
   const normalizeRunRef = useRef(0);
   const listSectionRef = useRef(null);
-  const hotelDetailsAbortRef = useRef(null);
-  const hotelDetailsRequestRef = useRef(0);
   const lastFilterRequestKeyRef = useRef("");
   const latestFilterSearchMetaRef = useRef({ searchId: "", hotelSearchId: "" });
   const initCompleteFilterSearchIdRef = useRef("");
@@ -2513,15 +2508,8 @@ const TourListing = () => {
     }
   };
 
-  const handleBookNow = async (hotel) => {
+  const handleBookNow = (hotel) => {
     if (!hotel) return;
-
-    hotelDetailsAbortRef.current?.abort();
-
-    const controller = new AbortController();
-    const requestId = hotelDetailsRequestRef.current + 1;
-    hotelDetailsRequestRef.current = requestId;
-    hotelDetailsAbortRef.current = controller;
 
     const channelSearchId = extractSearchIdFromChannel(
       hotelSearchChannel || searchParams.get("channel") || "",
@@ -2582,52 +2570,10 @@ const TourListing = () => {
       payload.hotelId = String(hotel.id || hotel.hotelId || hotel.code || "").trim();
     }
 
-    console.log("[SEE AVAILABILITY CLICKED] Hitting hotel details API immediately with payload:", payload);
-
     const loadingKey = getHotelLoadingKey(hotel) || payload.hotelId;
     setLoadingHotelDetailsId(loadingKey);
-
-    try {
-      const details = await fetchHotelDetails({
-        ...payload,
-        signal: controller.signal,
-      });
-
-      if (hotelDetailsRequestRef.current !== requestId) return;
-
-      if (isHotelUnavailableResponse(details)) {
-        toast.error("This hotel is not available to book now", {
-          toastId: "hotel-not-available",
-        });
-        return;
-      }
-
-      writeHotelDetailsForNavigation({ payload, hotel, details });
-      router.push(getHotelDetailUrl(payload), { scroll: true });
-    } catch (error) {
-      if (error?.name === "AbortError") return;
-
-      if (hotelDetailsRequestRef.current !== requestId) return;
-
-      console.error("Hotel details request failed:", error);
-      if (isHotelUnavailableResponse(error?.data || error)) {
-        toast.error("This hotel is not available to book now", {
-          toastId: "hotel-not-available",
-        });
-      } else if (isMissingHotelAuthTokenError(error)) {
-        openLoginModal();
-      } else {
-        toast.error(
-          error?.message || error?.title || "Unable to fetch hotel details. Please try again.",
-          { toastId: "hotel-details-error" }
-        );
-      }
-    } finally {
-      if (hotelDetailsRequestRef.current === requestId) {
-        setLoadingHotelDetailsId("");
-        hotelDetailsAbortRef.current = null;
-      }
-    }
+    writeHotelRequestForNavigation({ payload, hotel });
+    router.push(getHotelDetailUrl(payload), { scroll: true });
   };
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -3079,47 +3025,30 @@ const TourListing = () => {
     setIsLoading(isHotelLoading);
   }, [isHotelLoading, setIsLoading]);
 
-  useEffect(
-    () => () => {
-      hotelDetailsAbortRef.current?.abort();
-    },
-    [],
-  );
-
   useEffect(() => {
     const updateScrollState = () => {
       const scrollContainer = listSectionRef.current;
+      const windowScrollY = window.scrollY || window.pageYOffset || 0;
+      const listTop = scrollContainer
+        ? scrollContainer.getBoundingClientRect().top + windowScrollY
+        : 0;
 
       setScrollState({
-        scrollY:
-          scrollContainer?.scrollTop ||
-          window.scrollY ||
-          window.pageYOffset ||
-          0,
-        viewportHeight:
-          scrollContainer?.clientHeight || window.innerHeight || 0,
+        scrollY: Math.max(0, windowScrollY - listTop),
+        viewportHeight: window.innerHeight || 0,
         viewportWidth: window.innerWidth || 0,
       });
     };
 
-    const scrollContainer = listSectionRef.current;
-
     updateScrollState();
-    scrollContainer?.addEventListener("scroll", updateScrollState, {
-      passive: true,
-    });
+    window.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("resize", updateScrollState);
 
     return () => {
-      scrollContainer?.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    listSectionRef.current?.scrollTo({ top: 0, behavior: "auto" });
-  }, [sortType, viewType, hotelSearchChannel]);
 
   const virtualWindow = useMemo(() => {
     const itemCount = displayHotels.length;

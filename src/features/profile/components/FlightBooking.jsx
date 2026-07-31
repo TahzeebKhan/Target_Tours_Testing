@@ -1,36 +1,11 @@
 import Image from "next/image";
 import styles from "./FlightBooking.module.css";
 
-const RESERVATIONS = [
-  {
-    id: "173826",
-    flightName: "IndiGo 6E- 541",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    fromTo: "DEL - BLR",
-    image: "/images/flightsReservations.png",
-  },
-  {
-    id: "173826",
-    fromTo: "DEL - BLR",
-    flightName: "IndiGo 6E- 541",
-    status: "Confirmed",
-    checkIn: "12 Mar 2021",
-    checkOut: "24 Mar 2025",
-    guests: "4 Adults",
-    image: "/images/flightsReservations.png",
-  },
-];
-
 const FlightBooking = ({ setMobileTitle, onCheckDetails, reservations = [] }) => {
-  const rows = reservations.length
-    ? reservations.map((reservation) => ({
-        ...reservation,
-        flightName: reservation.hotel,
-      }))
-    : RESERVATIONS;
+  const rows = reservations.map((reservation) => ({
+    ...reservation,
+    flightName: reservation.hotel,
+  }));
 
   return (
     <div>
@@ -91,7 +66,7 @@ const FlightBooking = ({ setMobileTitle, onCheckDetails, reservations = [] }) =>
               <button
                 onClick={() => {
                   setMobileTitle?.("Booking Details");
-                  onCheckDetails();
+                  onCheckDetails(res);
                 }}
                 className={styles.detailsButton}
               >

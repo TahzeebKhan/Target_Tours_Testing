@@ -5,7 +5,7 @@ import MobileTab from './mobileTab/MobileTab'
 import DescriptionComponent from '../descriptionComponent/DescriptionComponent'
 import Amenities from '../amenities/Amenities'
 import HotelPolicies from '../hotelPolicies/HotelPolicies'
-import Testimonial from '../testimonialSection/Testimonial'
+import CustomerReviews from '../customerReviews/CustomerReviews'
 import BarcelonaSection from '../BarcelonaSection/BarcelonaSection'
 import Footer from '@/app/home-page/components/footer/Footer'
 import FeatureSection from '@/app/home-page/components/featureSection/FeatureSection'
@@ -648,16 +648,16 @@ const HotelDetaislMobileView = () => {
                         activeTab={activeTab}
                         onChange={handleTabChange}
                     />
-                    <div ref={sectionRefs.Description}>
+                    <div ref={sectionRefs.Description} className={styles.scrollSection}>
                         <DescriptionComponent
                             description={hotelDetail?.description}
                             descriptions={hotelDetail?.descriptions}
                         />
                     </div>
-                    <div ref={sectionRefs.Amenities}>
+                    <div ref={sectionRefs.Amenities} className={styles.scrollSection}>
                         <Amenities amenities={hotelDetail?.amenities || []} />
                     </div>
-                    <div ref={sectionRefs.Rooms}>
+                    <div ref={sectionRefs.Rooms} className={styles.scrollSection}>
                         <Availabilitymobile
                             maxRooms={searchSummary.rooms}
                             requiredGuests={searchSummary.adults + searchSummary.children}
@@ -669,7 +669,7 @@ const HotelDetaislMobileView = () => {
                             onRoomQtyChange={setSelectedRoomQty}
                         />
                     </div>
-                    <div ref={sectionRefs["HOTEL POLICY"]}>
+                    <div ref={sectionRefs["HOTEL POLICY"]} className={styles.scrollSection}>
                         <HotelPolicies
                             hotelName={hotelDetail?.name || "This hotel"}
                             policies={
@@ -679,8 +679,8 @@ const HotelDetaislMobileView = () => {
                             }
                         />
                     </div>
-                    <div ref={sectionRefs.Reviews}>
-                        <Testimonial />
+                    <div ref={sectionRefs.Reviews} className={styles.scrollSection}>
+                        <CustomerReviews />
                     </div>
                     <BarcelonaSection
                         city={searchCity}
