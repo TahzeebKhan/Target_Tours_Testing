@@ -1233,9 +1233,11 @@ const IndividualProperty = ({
 
       {activeTab === "TRAVEL INSURANCE" && <InsurenceDetails />}
 
-      <div className={styles.mobileView}>
-        <BookingDetails activeTab={activeTab} setActiveTab={setActiveTab} />
-      </div>
+      {activeTab !== "HOTEL BOOKING" && (
+        <div className={styles.mobileView}>
+          <BookingDetails activeTab={activeTab} setActiveTab={setActiveTab} />
+        </div>
+      )}
 
       {showModifyModal && (
         <ModifyBookingModal

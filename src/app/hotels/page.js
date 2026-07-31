@@ -1,6 +1,6 @@
 
 "use client"
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./layout.module.css";
 import TourHeroSection from "./components/tourHeroSection.js/TourHeroSection";
@@ -32,6 +32,31 @@ const RestoreHotelSearchUrl = () => {
 };
 
 const HotelListContent = () => {
+  const filtersRef = useRef(null);
+
+  useEffect(() => {
+    const filters = filtersRef.current;
+    if (!filters) return;
+
+    const updateStickyOffset = () => {
+      const stickyTop = Math.min(
+        0,
+        window.innerHeight - filters.offsetHeight,
+      );
+      filters.style.setProperty("--filters-sticky-top", `${stickyTop}px`);
+    };
+
+    const resizeObserver = new ResizeObserver(updateStickyOffset);
+    resizeObserver.observe(filters);
+    window.addEventListener("resize", updateStickyOffset);
+    updateStickyOffset();
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateStickyOffset);
+    };
+  }, []);
+
   return (
     <>
       <Suspense fallback={null}>
@@ -47,7 +72,7 @@ const HotelListContent = () => {
         <section className={styles.tourContent}>
           <div className={styles.tourLayout}>
             {/* LEFT: FILTERS */}
-            <aside className={styles.tourFilters}>
+            <aside className={styles.tourFilters} ref={filtersRef}>
               <Suspense fallback={null}>
                 <HotelsFilters />
               </Suspense>

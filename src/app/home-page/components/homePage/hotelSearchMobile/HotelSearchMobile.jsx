@@ -1,9 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import DateField from "../DateField";
 import HotelLocationSheet from "@/shared/components/hotelLocationSheet/HotelLocationSheet";
-import MobileViewCalender from "@/shared/components/mobileViewCalendar/MobileViewCalender";
 import HotelPassengersPopup from "@/shared/components/hotelPassengersPopup/HotelPassengersPopup";
 
 const HotelSearchMobile = ({
@@ -21,8 +20,9 @@ const HotelSearchMobile = ({
   truncate,
 }) => {
   const [openTo, setOpenTo] = useState(false);
-  const [openCalendar, setOpenCalendar] = useState(false);
   const [openPassengers, setOpenPassengers] = useState(false);
+  const checkInInputRef = useRef(null);
+  const checkOutInputRef = useRef(null);
 
   const adultCount = Number(passengers?.adult ?? passengers?.adults) || 1;
   const childCount = Number(passengers?.child ?? passengers?.children) || 0;
@@ -47,11 +47,31 @@ const HotelSearchMobile = ({
   };
 
   const getNextDate = (date) => {
-    const nextDate = ensureDate(date);
-    if (!nextDate) return null;
+    const sourceDate = ensureDate(date);
+    if (!sourceDate) return null;
 
+    const nextDate = new Date(sourceDate.getTime());
     nextDate.setDate(nextDate.getDate() + 1);
     return nextDate;
+  };
+
+  const toDateInputValue = (date) => {
+    const value = ensureDate(date);
+    if (!value || Number.isNaN(value.getTime())) return "";
+
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayInputValue = toDateInputValue(new Date());
+
+  const openNativeDatePicker = (event) => {
+    if (typeof event.currentTarget.showPicker !== "function") return;
+
+    event.preventDefault();
+    event.currentTarget.showPicker();
   };
 
   return (
@@ -81,26 +101,75 @@ const HotelSearchMobile = ({
           />
         )}
 
-        <div
-          className={styles.fromToCont}
-          onClick={() => setOpenCalendar(true)}
-        >
-          <DateField
-            label="Check in"
-            placeholder="ADD DATES"
-            value={formatDate(checkIn)}
-            name="departureDate"
-            // min={new Date().toISOString().split("T")[0]}
-            // onChange={(e) => setCheckIn(e.target.value)}
-          />
-          <DateField
-            label="Check out"
-            placeholder="ADD DATES"
-            value={formatDate(checkOut)}
-            name="returnDate"
-            // min={new Date().toISOString().split("T")[0]}
-            // onChange={(e) => setCheckOut(e.target.value)}
-          />
+        <div className={styles.fromToCont}>
+          <div style={{ position: "relative" }}>
+            <DateField
+              label="Check in"
+              placeholder="ADD DATES"
+              value={formatDate(checkIn)}
+              name="departureDate"
+            />
+            <input
+              ref={checkInInputRef}
+              type="date"
+              aria-label="Check in"
+              value={toDateInputValue(checkIn)}
+              min={todayInputValue}
+              onPointerDown={openNativeDatePicker}
+              onChange={(event) => {
+                const nextCheckIn = ensureDate(event.target.value);
+                if (!nextCheckIn) return;
+
+                setCheckIn(nextCheckIn);
+                const currentCheckOut = ensureDate(checkOut);
+                if (currentCheckOut && currentCheckOut <= nextCheckIn) {
+                  setCheckOut(getNextDate(nextCheckIn));
+                }
+              }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                opacity: 0,
+                cursor: "pointer",
+                zIndex: 2,
+              }}
+            />
+          </div>
+          <div style={{ position: "relative" }}>
+            <DateField
+              label="Check out"
+              placeholder="ADD DATES"
+              value={formatDate(checkOut)}
+              name="returnDate"
+            />
+            <input
+              ref={checkOutInputRef}
+              type="date"
+              aria-label="Check out"
+              value={toDateInputValue(checkOut)}
+              min={
+                toDateInputValue(
+                  getNextDate(checkIn) || ensureDate(todayInputValue),
+                )
+              }
+              onPointerDown={openNativeDatePicker}
+              onChange={(event) => {
+                const nextCheckOut = ensureDate(event.target.value);
+                if (nextCheckOut) setCheckOut(nextCheckOut);
+              }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                opacity: 0,
+                cursor: "pointer",
+                zIndex: 2,
+              }}
+            />
+          </div>
         </div>
 
         <div
@@ -142,30 +211,6 @@ const HotelSearchMobile = ({
 
         <button onClick={handleSearch} className={styles.searchBtna}>SEARCH</button>
       </div>
-      {openCalendar && (
-        <MobileViewCalender
-          onClose={() => setOpenCalendar(false)}
-          inputType="roundtrip"
-          selectedDeparture={ensureDate(checkIn)}
-          selectedReturn={ensureDate(checkOut)}
-          onSelectDate={({ departure, returnDate }) => {
-            if (departure) setCheckIn(departure);
-            if (returnDate) {
-              const departureDate = ensureDate(departure || checkIn);
-              const selectedReturnDate = ensureDate(returnDate);
-
-              setCheckOut(
-                departureDate &&
-                  selectedReturnDate &&
-                  selectedReturnDate <= departureDate
-                  ? getNextDate(departureDate)
-                  : returnDate
-              );
-            }
-            setOpenCalendar(false);
-          }}
-        />
-      )}
     </div>
   );
 };

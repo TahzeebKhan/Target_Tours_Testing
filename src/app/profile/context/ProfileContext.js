@@ -19,10 +19,6 @@ const PROFILE_MENUS = new Set([
 ]);
 
 const getDefaultActiveMenu = () => {
-  if (typeof window !== "undefined" && window.innerWidth < 895) {
-    return "";
-  }
-
   return DEFAULT_ACTIVE_MENU;
 };
 
@@ -30,6 +26,7 @@ const getStoredActiveMenu = () => {
   if (typeof window === "undefined") return DEFAULT_ACTIVE_MENU;
 
   const storedMenu = window.localStorage.getItem(ACTIVE_MENU_STORAGE_KEY);
+  if (storedMenu === "") return DEFAULT_ACTIVE_MENU;
   return PROFILE_MENUS.has(storedMenu) ? storedMenu : getDefaultActiveMenu();
 };
 

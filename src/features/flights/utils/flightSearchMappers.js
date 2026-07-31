@@ -1340,6 +1340,14 @@ const buildRoundCard = (flight, index, options = {}) => {
     flight?.TUI,
     flight?.tui
   );
+  const outboundFlightNumber = buildAirlineDisplayCode(
+    outbound.airlines[0]?.carrierCode || outbound.airlines[0]?.code,
+    outbound?.details?.flightNo || outbound.airlines[0]?.flightNo,
+  );
+  const inboundFlightNumber = buildAirlineDisplayCode(
+    inbound.airlines[0]?.carrierCode || inbound.airlines[0]?.code,
+    inbound?.details?.flightNo || inbound.airlines[0]?.flightNo,
+  );
   const roundTripsPayload = [
     {
       Amount:
@@ -1367,12 +1375,12 @@ const buildRoundCard = (flight, index, options = {}) => {
         flight?.flight_id,
         flight?.flightId
       ),
-      FlightNumber: outbound?.details?.flightNo || "",
+      FlightNumber: outboundFlightNumber,
       Origin: outbound?.departure?.airportCode || "",
       Destination: outbound?.arrival?.airportCode || "",
       DepartureDateTime: outbound?.departure?.date || "",
       ArrivalDateTime: outbound?.arrival?.date || "",
-      flight_no: outbound?.details?.flightNo || "",
+      flight_no: outboundFlightNumber,
     },
     {
       Amount:
@@ -1408,12 +1416,12 @@ const buildRoundCard = (flight, index, options = {}) => {
         flight?.inbound?.flight_id,
         flight?.inbound?.flightId
       ),
-      FlightNumber: inbound?.details?.flightNo || "",
+      FlightNumber: inboundFlightNumber,
       Origin: inbound?.departure?.airportCode || "",
       Destination: inbound?.arrival?.airportCode || "",
       DepartureDateTime: inbound?.departure?.date || "",
       ArrivalDateTime: inbound?.arrival?.date || "",
-      flight_no: inbound?.details?.flightNo || "",
+      flight_no: inboundFlightNumber,
     },
   ];
 
@@ -1429,6 +1437,8 @@ const buildRoundCard = (flight, index, options = {}) => {
 
   return {
     id: flight?.id || flight?.index || `round-${index + 1}`,
+    canBookIndependently: Boolean(flight?.canBookIndependently ?? true),
+    requiresPairBooking: Boolean(flight?.requiresPairBooking),
     fare: {
       totalFare: fare.totalFare,
       cabinClass: fare.cabinClass,
@@ -1437,12 +1447,19 @@ const buildRoundCard = (flight, index, options = {}) => {
     inbound,
     tripCard: {
       id: flight?.id || flight?.index || `round-${index + 1}`,
+      canBookIndependently: Boolean(flight?.canBookIndependently ?? true),
+      requiresPairBooking: Boolean(flight?.requiresPairBooking),
       depart: {
+        pairedIds: toArray(
+          outboundLeg?.pairedId ??
+            outboundLeg?.pairedIds ??
+            outboundLeg?.provider_options?.[0]?.pairedId,
+        ),
         airline: {
           name: outbound.airlines[0]?.name || "IndiGo",
-          code: outbound.details?.flightNo || outbound.airlines[0]?.code || "N/A",
+          code: outboundFlightNumber || "N/A",
           carrierCode: outbound.airlines[0]?.carrierCode || "",
-          flightNo: outbound.details?.flightNo || outbound.airlines[0]?.flightNo || "",
+          flightNo: outboundFlightNumber,
           logo: outbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: outbound.dateLabel,
@@ -1456,11 +1473,16 @@ const buildRoundCard = (flight, index, options = {}) => {
         },
       },
       return: {
+        pairedIds: toArray(
+          inboundLeg?.pairedId ??
+            inboundLeg?.pairedIds ??
+            inboundLeg?.provider_options?.[0]?.pairedId,
+        ),
         airline: {
           name: inbound.airlines[0]?.name || "IndiGo",
-          code: inbound.details?.flightNo || inbound.airlines[0]?.code || "N/A",
+          code: inboundFlightNumber || "N/A",
           carrierCode: inbound.airlines[0]?.carrierCode || "",
-          flightNo: inbound.details?.flightNo || inbound.airlines[0]?.flightNo || "",
+          flightNo: inboundFlightNumber,
           logo: inbound.airlines[0]?.logo || DEFAULT_LOGO,
         },
         date: inbound.dateLabel,
@@ -1539,6 +1561,8 @@ const toRoundOrMultiItem = (item) => ({
   fare: item.fare,
   outbound: item.outbound,
   inbound: item.inbound,
+  canBookIndependently: item.canBookIndependently,
+  requiresPairBooking: item.requiresPairBooking,
 });
 
 const hasGroupedRoundTripLegs = (flight) =>
@@ -1546,6 +1570,83 @@ const hasGroupedRoundTripLegs = (flight) =>
   Array.isArray(flight?.return) ||
   Array.isArray(flight?.outbound) ||
   Array.isArray(flight?.inbound);
+
+const collectRoundLegValues = (value, values = new Set()) => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectRoundLegValues(item, values));
+  } else if (value && typeof value === "object") {
+    Object.values(value).forEach((item) => collectRoundLegValues(item, values));
+  } else if (value !== undefined && value !== null) {
+    const normalizedValue = String(value).trim();
+    if (normalizedValue) values.add(normalizedValue);
+  }
+
+  return values;
+};
+
+const getRoundLegPairIds = (leg) => {
+  const pairIds = [
+    leg?.pairedId,
+    leg?.pairedIds,
+    ...toArray(leg?.provider_options).map(
+      (option) => option?.pairedId ?? option?.pairedIds,
+    ),
+    ...toArray(leg?.providerOptions).map(
+      (option) => option?.pairedId ?? option?.pairedIds,
+    ),
+  ];
+
+  return [...collectRoundLegValues(pairIds)];
+};
+
+const getRoundLegIds = (leg) => {
+  const directIds = [
+    leg?.id,
+    leg?.ID,
+    leg?._id,
+    leg?.key,
+    leg?.pairId,
+    leg?.index,
+    leg?.flight_id,
+    leg?.flightId,
+    leg?.FlightID,
+    leg?.recommendationId,
+    ...toArray(leg?.provider_options).flatMap((option) => [
+      option?.id,
+      option?.ID,
+      option?.pairId,
+      option?.index,
+    ]),
+    ...toArray(leg?.providerOptions).flatMap((option) => [
+      option?.id,
+      option?.ID,
+      option?.pairId,
+      option?.index,
+    ]),
+  ];
+
+  return directIds
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+};
+
+const roundLegsArePaired = (onwardLeg, returnLeg) => {
+  const onwardPairIds = new Set(getRoundLegPairIds(onwardLeg));
+  const returnIds = getRoundLegIds(returnLeg);
+  if (returnIds.some((id) => onwardPairIds.has(id))) return true;
+
+  // Some providers put the shared pair token on both legs instead of using it
+  // as the return leg's primary id.
+  if (getRoundLegPairIds(returnLeg).some((id) => onwardPairIds.has(id))) {
+    return true;
+  }
+
+  // Provider payloads are not consistent about the field containing the
+  // return-box id, so check all primitive values without relying on a key name.
+  return [...collectRoundLegValues(returnLeg)].some((id) =>
+    onwardPairIds.has(id),
+  );
+};
 
 const normalizeGroupedRoundTripFlights = (flights = []) =>
   flights.flatMap((flight, groupIndex) => {
@@ -1559,16 +1660,51 @@ const normalizeGroupedRoundTripFlights = (flights = []) =>
       ...toArray(flight?.return),
       ...toArray(flight?.inbound),
     ];
-    const maxLength = Math.max(onwardLegs.length, returnLegs.length);
+    if (!onwardLegs.length && !returnLegs.length) return [flight];
 
-    if (!maxLength) return [flight];
+    const legPairs = onwardLegs.flatMap((onwardLeg, onwardIndex) => {
+      const requiresPairBooking = Boolean(
+        onwardLeg?.requiresPairBooking ?? flight?.requiresPairBooking,
+      );
+      const canBookIndependently = Boolean(
+        onwardLeg?.canBookIndependently ??
+          flight?.canBookIndependently ??
+          true,
+      );
 
-    return Array.from({ length: maxLength }, (_, legIndex) => {
-      const onwardLeg = onwardLegs[legIndex] || onwardLegs[0] || {};
-      const returnLeg = returnLegs[legIndex] || returnLegs[0] || {};
+      if (requiresPairBooking && !canBookIndependently) {
+        return returnLegs
+          .filter((returnLeg) => roundLegsArePaired(onwardLeg, returnLeg))
+          .map((returnLeg) => ({ onwardLeg, returnLeg }));
+      }
+
+      return [{
+        onwardLeg,
+        returnLeg: returnLegs[onwardIndex] || returnLegs[0] || {},
+      }];
+    });
+
+    const resolvedLegPairs = onwardLegs.length
+      ? legPairs
+      : returnLegs.map((returnLeg) => ({ onwardLeg: {}, returnLeg }));
+
+    return resolvedLegPairs.map(({ onwardLeg, returnLeg }, legIndex) => {
+      const canBookIndependently = Boolean(
+        onwardLeg?.canBookIndependently ??
+          returnLeg?.canBookIndependently ??
+          flight?.canBookIndependently ??
+          true,
+      );
+      const requiresPairBooking = Boolean(
+        onwardLeg?.requiresPairBooking ??
+          returnLeg?.requiresPairBooking ??
+          flight?.requiresPairBooking,
+      );
 
       return {
         ...flight,
+        canBookIndependently,
+        requiresPairBooking,
         id: pickFirst(
           flight?.id,
           flight?.recommendationId,

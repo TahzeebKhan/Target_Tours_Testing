@@ -464,6 +464,7 @@ const searchFlightsViaSocket = async (params = {}) => {
     let events = null;
     let completionReceived = false;
     const isMultiCitySearch = searchPayload.fareType === "DM";
+    const isRoundTripSearch = searchPayload.fareType === "RT";
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
@@ -481,10 +482,12 @@ const searchFlightsViaSocket = async (params = {}) => {
     const scheduleIdleResolve = () => {
       if (!chunks.length && !completionReceived) return;
 
-      // Domestic multi-city results arrive one trip at a time. An idle gap
-      // between providers must not finalize the search before every trip has
-      // had a chance to emit its result.
-      if (isMultiCitySearch && !completionReceived) return;
+      // Round-trip and domestic multi-city providers can emit results many
+      // seconds apart. Do not treat that gap as the end of the search; keep
+      // listening until the backend explicitly completes the whole search.
+      if ((isRoundTripSearch || isMultiCitySearch) && !completionReceived) {
+        return;
+      }
 
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
@@ -599,26 +602,56 @@ const searchFlightsViaHttp = async (params = {}) => {
   return searchResponse.data;
 };
 
-export const searchFlights = async (params = {}) => {
-  try {
-    if (typeof window !== "undefined" && window.EventSource) {
-      return await searchFlightsViaSocket(params);
-    }
+const inFlightSearchRequests = new Map();
 
-    return await searchFlightsViaHttp(params);
-  } catch (error) {
-    const backendMessage =
-      error?.response?.data?.error?.message ||
-      error?.response?.data?.message ||
-      error?.message ||
-      "";
-    const status = error?.response?.status || error?.status;
-    const fallbackMessage =
-      status === 500
-        ? "Internal server error"
-        : `Flight search failed: ${status || "unknown"}`;
-    const nextError = new Error(backendMessage || fallbackMessage);
-    nextError.status = status;
-    throw nextError;
+const getFlightSearchRequestKey = (params = {}) => {
+  try {
+    return JSON.stringify(params);
+  } catch {
+    return "";
   }
+};
+
+export const searchFlights = (params = {}) => {
+  const requestKey = getFlightSearchRequestKey(params);
+  const existingRequest = requestKey
+    ? inFlightSearchRequests.get(requestKey)
+    : null;
+  if (existingRequest) return existingRequest;
+
+  const request = (async () => {
+    try {
+      if (typeof window !== "undefined" && window.EventSource) {
+        return await searchFlightsViaSocket(params);
+      }
+
+      return await searchFlightsViaHttp(params);
+    } catch (error) {
+      const backendMessage =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "";
+      const status = error?.response?.status || error?.status;
+      const fallbackMessage =
+        status === 500
+          ? "Internal server error"
+          : `Flight search failed: ${status || "unknown"}`;
+      const nextError = new Error(backendMessage || fallbackMessage);
+      nextError.status = status;
+      throw nextError;
+    }
+  })();
+
+  if (!requestKey) return request;
+
+  inFlightSearchRequests.set(requestKey, request);
+  const clearRequest = () => {
+    if (inFlightSearchRequests.get(requestKey) === request) {
+      inFlightSearchRequests.delete(requestKey);
+    }
+  };
+  request.then(clearRequest, clearRequest);
+
+  return request;
 };

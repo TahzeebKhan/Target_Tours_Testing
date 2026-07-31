@@ -23,8 +23,24 @@ export default function ActiveReservations({
   hotelReservations = [],
   flightReservations = [],
   packageReservations = [],
+  travelInsuranceReservations = [],
 }) {
   const { setMobileTitle } = useProfile();
+  const allReservationCount =
+    hotelReservations.length +
+    flightReservations.length +
+    packageReservations.length +
+    travelInsuranceReservations.length;
+  const selectedReservationCount =
+    activeTab === "ALL"
+      ? allReservationCount
+      : activeTab === "HOTEL BOOKING"
+        ? hotelReservations.length
+        : activeTab === "FLIGHT BOOKING"
+          ? flightReservations.length
+          : activeTab === "PACKAGES"
+            ? packageReservations.length
+            : travelInsuranceReservations.length;
   useEffect(() => {
     setMobileTitle?.("Active Reservations");
     return () => setMobileTitle?.("");
@@ -46,8 +62,21 @@ export default function ActiveReservations({
 
       {/* Content Area */}
       <main className={styles.mainContent}>
-        {activeTab === "HOTEL BOOKING" ? (
-          <>
+        {selectedReservationCount === 0 && (
+          <div className={styles.emptyState}>
+            <Image
+              src="/images/empty_trip.png"
+              alt=""
+              width={150}
+              height={150}
+            />
+            <h2>No bookings found</h2>
+            <p>You don&apos;t have any reservations in this section yet.</p>
+          </div>
+        )}
+
+        {selectedReservationCount > 0 &&
+          (activeTab === "ALL" || activeTab === "HOTEL BOOKING") && (
             <div className={styles.cardList}>
               {hotelReservations.map((res, index) => (
                 <section key={index} className={styles.card}>
@@ -104,31 +133,34 @@ export default function ActiveReservations({
                 </section>
               ))}
             </div>
-          </>
-        ) : activeTab === "FLIGHT BOOKING" ? (
-          <>
+          )}
+
+        {selectedReservationCount > 0 &&
+          (activeTab === "ALL" || activeTab === "FLIGHT BOOKING") && (
             <FlightBooking
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
               reservations={flightReservations}
-            />{" "}
-          </>
-        ) : activeTab === "PACKAGES" ? (
-          <>
+            />
+          )}
+
+        {selectedReservationCount > 0 &&
+          (activeTab === "ALL" || activeTab === "PACKAGES") && (
             <Packages
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
               reservations={packageReservations}
             />
-          </>
-        ) : activeTab === "TRAVEL INSURANCE" ? (
-          <>
+          )}
+
+        {selectedReservationCount > 0 &&
+          (activeTab === "ALL" || activeTab === "TRAVEL INSURANCE") && (
             <TravelInsurence
               setMobileTitle={setMobileTitle}
               onCheckDetails={onCheckDetails}
+              reservations={travelInsuranceReservations}
             />
-          </>
-        ) : null}
+          )}
       </main>
     </div>
   );

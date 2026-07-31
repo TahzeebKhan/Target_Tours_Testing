@@ -370,3 +370,19 @@
     align-items: start;
   }
 }
+
+
+@media (max-width: 500px) {
+  .heading{
+    padding: 0px 16px;
+  }
+  .reviewContainer {
+    flex-direction: column;
+    align-items: start;
+    padding: 0px 16px;
+  }
+  .rightSection{
+    display: flex;
+    flex-wrap: wrap;
+  }
+}

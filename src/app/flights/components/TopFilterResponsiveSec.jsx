@@ -30,6 +30,17 @@ const passengerTypes = [
 
 ];
 
+const getNextDateValue = (value) => {
+    const date = value ? new Date(value) : new Date();
+    const validDate = Number.isNaN(date.getTime()) ? new Date() : date;
+    validDate.setDate(validDate.getDate() + 1);
+
+    const year = validDate.getFullYear();
+    const month = String(validDate.getMonth() + 1).padStart(2, "0");
+    const day = String(validDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
 const TopFilterResponsiveSec = () => {
     const calendarRef = useRef(null);
     const [isMobileCalendarView, setIsMobileCalendarView] = useState(false);
@@ -191,6 +202,9 @@ const TopFilterResponsiveSec = () => {
 
     const handleCalendarModeChange = (mode) => {
         const nextTripType = mode === "roundtrip" ? "round" : "oneway";
+        if (nextTripType === "round" && !endDate) {
+            setEndDate(getNextDateValue(startDate));
+        }
         setCalendarTripType(nextTripType);
         setTripType(nextTripType);
     };
@@ -272,6 +286,10 @@ const TopFilterResponsiveSec = () => {
             setFlightDirection("right");
         } else if (prevIndex > nextIndex) {
             setFlightDirection("left");
+        }
+
+        if (nextType === "round" && !endDate) {
+            setEndDate(getNextDateValue(startDate));
         }
 
         setTripType(nextType);
@@ -367,7 +385,7 @@ const TopFilterResponsiveSec = () => {
                                         <span className={styles.labelText}>ROUND TRIP</span>
                                     </label>
 
-                                    <label
+                                    {/* <label
                                         className={`${styles.tripOption} ${tripType === "multi" ? styles.active : ""
                                             }`}
                                     >
@@ -380,7 +398,7 @@ const TopFilterResponsiveSec = () => {
                                         />
                                         <span className={styles.customRadio}></span>
                                         <span className={styles.labelText}>MULTI CITY</span>
-                                    </label>
+                                    </label> */}
                                 </div>
 
                                 {/* <div className={styles.serarchingContTop_right}>

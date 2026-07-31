@@ -11,12 +11,14 @@
 .sheet {
   background: #fff;
   width: 100%;
+  max-height: min(90dvh, 760px);
   border-radius: 16px 16px 0px 0px;
   padding-top: 24px;
   padding-bottom: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: hidden;
   animation: slideUp 0.3s ease-out;
 }
 
@@ -33,6 +35,7 @@
 }
 
 .header {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -68,10 +71,23 @@
 }
 
 .container {
+  min-height: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
+}
+
+.scrollContent {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 16px;
   gap: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .row {
@@ -226,6 +242,7 @@
 }
 
 .doneBtn {
+  flex-shrink: 0;
   height: 48px;
   padding: 10px 16px;
   background: #000033;
@@ -235,12 +252,16 @@
   letter-spacing: 0%;
   text-transform: uppercase;
   color: #ffffff;
-  margin-top: 8px;
+  margin: 8px 16px 0;
   cursor: pointer;
   transition: all 0.45s ease;
 }
 
 @media (max-width: 440px) {
+  .sheet {
+    max-height: calc(100dvh - 24px);
+  }
+
   .childAgeGrid {
     grid-template-columns: 1fr;
   }

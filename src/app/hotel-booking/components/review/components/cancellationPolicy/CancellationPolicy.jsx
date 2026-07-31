@@ -184,17 +184,19 @@ export default function CancellationPolicy({ selectedRooms }) {
                   </div>
                 </div>
 
-                {/* Dynamic Progress Bar */}
-                <div className={styles.progressBarContainer}>
-                  <div
-                    className={styles.leftProgress}
-                    style={{ width: room.isRefundable ? "50%" : "0%" }}
-                  />
-                  <div
-                    className={styles.progressBar}
-                    style={{ width: room.isRefundable ? "50%" : "100%" }}
-                  />
-                </div>
+                {/* The timeline only represents a cancellable/refundable window. */}
+                {room.isRefundable && (
+                  <div className={styles.progressBarContainer}>
+                    <div
+                      className={styles.leftProgress}
+                      style={{ width: "50%" }}
+                    />
+                    <div
+                      className={styles.progressBar}
+                      style={{ width: "50%" }}
+                    />
+                  </div>
+                )}
 
                 {/* Dynamic Date Row */}
                 {cutoffDate && (
