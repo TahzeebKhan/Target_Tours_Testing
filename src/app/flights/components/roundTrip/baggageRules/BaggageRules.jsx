@@ -116,8 +116,6 @@ const buildFallbackRows = (flightData, activeLeg = "both") =>
 
 const extractBaggageRows = (ssrData, fallbackRows) => {
     const payload = unwrapSsrPayload(ssrData);
-<<<<<<< HEAD
-=======
     const baggageInfoRoutes = Array.isArray(payload?.routes) ? payload.routes : [];
     const baggageInfoRows = baggageInfoRoutes.map((routeItem, index) => {
         const fallback = fallbackRows[index] || fallbackRows[0] || {};
@@ -136,7 +134,6 @@ const extractBaggageRows = (ssrData, fallbackRows) => {
 
     if (baggageInfoRows.length) return baggageInfoRows;
 
->>>>>>> live/main
     const formatted =
         ssrData?.data?.formatted ||
         ssrData?.formatted ||

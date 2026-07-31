@@ -32,18 +32,11 @@
   font-family: Antic Didone;
   font-weight: 400;
   font-size: 24px;
-<<<<<<< HEAD
   line-height: 100%;
   letter-spacing: 0%;
   text-transform: uppercase;
   color: #000033;
   padding-top: 48px;
-=======
-  line-height: 1.19;
-  letter-spacing: 0%;
-  text-transform: uppercase;
-  color: #000033;
->>>>>>> live/main
 }
 
 .statusText {
