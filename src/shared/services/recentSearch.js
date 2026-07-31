@@ -15,13 +15,7 @@ const getAuthToken = () => {
 };
 
 const normalizeBaseUrl = () => {
-<<<<<<< HEAD
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
-  if (base) return base;
-  return `http://${process.env.NEXT_PUBLIC_DOMAIN}`;
-=======
   return String(process.env.NEXT_PUBLIC_BACKEND_URL || "").trim().replace(/\/$/, "");
->>>>>>> live/main
 };
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
@@ -81,17 +75,6 @@ const pickFirst = (...values) => {
 
 const toRecord = (item = {}) => item?.attributes || item;
 
-<<<<<<< HEAD
-const toAirportPayload = (airport = {}, fallbackCode = "") => ({
-  name: String(airport?.name || "").trim(),
-  city: String(airport?.city || "").trim(),
-  country: String(airport?.country || "").trim(),
-  iata_code: String(airport?.iata_code || fallbackCode || "").trim().toUpperCase(),
-});
-
-const getAirportCode = (airport = {}, fallbackCode = "") =>
-  String(airport?.iata_code || fallbackCode || "").trim().toUpperCase();
-=======
 const toAirportPayload = (airport = {}, fallbackCode = "") => {
   const record = airport?.attributes || airport;
 
@@ -120,7 +103,6 @@ const getAirportCode = (airport = {}, fallbackCode = "") => {
       "",
   ).trim().toUpperCase();
 };
->>>>>>> live/main
 
 const getAirportDisplayValue = (airport = {}, fallbackCode = "") => {
   const code = getAirportCode(airport, fallbackCode);
@@ -133,14 +115,6 @@ const getAirportDisplayValue = (airport = {}, fallbackCode = "") => {
   return name || code;
 };
 
-<<<<<<< HEAD
-const fetchAirportByCode = async (code = "") => {
-  const normalizedCode = String(code || "").trim().toLowerCase();
-  if (!normalizedCode) return null;
-
-  const url = new URL("/api/airports/search", normalizeBaseUrl());
-  url.searchParams.set("q", normalizedCode);
-=======
 const fetchAirportByCode = async (code = "", searchLabel = "") => {
   const normalizedCode = String(code || "").trim().toLowerCase();
   if (!normalizedCode) return null;
@@ -150,7 +124,6 @@ const fetchAirportByCode = async (code = "", searchLabel = "") => {
 
   const url = new URL("/api/airports/search", normalizeBaseUrl());
   url.searchParams.set("q", normalizedSearchLabel || normalizedCode);
->>>>>>> live/main
 
   const response = await fetch(url.toString(), {
     method: "GET",
@@ -167,18 +140,6 @@ const fetchAirportByCode = async (code = "", searchLabel = "") => {
     ? payload
     : Array.isArray(payload?.data)
       ? payload.data
-<<<<<<< HEAD
-      : [];
-
-  const match = list.find(
-    (airport) =>
-      String(airport?.iata_code || "")
-        .trim()
-        .toUpperCase() === normalizedCode.toUpperCase(),
-  );
-
-  return match || list[0] || null;
-=======
       : Array.isArray(payload?.data?.results)
         ? payload.data.results
         : Array.isArray(payload?.results)
@@ -191,7 +152,6 @@ const fetchAirportByCode = async (code = "", searchLabel = "") => {
   );
 
   return match || null;
->>>>>>> live/main
 };
 
 const normalizeLabel = (city, country, fallback) => {
@@ -419,13 +379,6 @@ export const saveRecentFlightSearch = async ({
     return null;
   }
 
-<<<<<<< HEAD
-  const url = new URL("/api/recent-search", normalizeBaseUrl());
-  const [originAirport, destinationAirport] = await Promise.all([
-    fetchAirportByCode(normalizedOrigin),
-    fetchAirportByCode(normalizedDestination),
-  ]);
-=======
   const liveBaseUrl = normalizeBaseUrl();
   if (!liveBaseUrl) {
     throw new Error("NEXT_PUBLIC_BACKEND_URL is required to save recent searches.");
@@ -442,7 +395,6 @@ export const saveRecentFlightSearch = async ({
     getAirportCode(destinationAirport) === normalizedDestination
       ? destinationAirport
       : null;
->>>>>>> live/main
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -460,16 +412,11 @@ export const saveRecentFlightSearch = async ({
         departure_date: departureDate,
         return_date: returnDate || null,
       },
-<<<<<<< HEAD
-      origin: toAirportPayload(originAirport, normalizedOrigin),
-      destination: toAirportPayload(destinationAirport, normalizedDestination),
-=======
       origin: toAirportPayload(matchedOriginAirport, normalizedOrigin),
       destination: toAirportPayload(
         matchedDestinationAirport,
         normalizedDestination,
       ),
->>>>>>> live/main
     }),
   });
 
