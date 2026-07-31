@@ -1509,8 +1509,6 @@ const ensureV2SsrPayload = (payload) => {
   };
 };
 
-<<<<<<< HEAD
-=======
 export const getFlightBaggageInfo = async (payload = {}) => {
   const trip = Array.isArray(payload?.Trips) ? payload.Trips[0] || {} : payload;
   const response = await fetch("/api/flights/v2/baggage-info", {
@@ -1538,7 +1536,6 @@ export const getFlightBaggageInfo = async (payload = {}) => {
   return data;
 };
 
->>>>>>> live/main
 export const getFlightSsr = async (payload) => {
   return getFlightV2Ssr(payload);
 };
