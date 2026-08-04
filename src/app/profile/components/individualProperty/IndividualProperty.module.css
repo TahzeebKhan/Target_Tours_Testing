@@ -267,9 +267,7 @@
 }
 
 .aboutSection {
-  display: grid;
-  grid-template-columns: 1fr 312px;
-  gap: 40px;
+  display: block;
   background-color: rgba(255, 255, 255, 1);
   border-bottom: 1px solid rgba(228, 230, 232, 1);
   padding-bottom: 16px;

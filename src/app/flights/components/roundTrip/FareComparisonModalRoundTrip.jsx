@@ -142,12 +142,11 @@ const normalizeFlightNo = (value) => {
   const exact = text.match(/^\d+$/);
   if (exact) return exact[0];
 
-  const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
-  if (trailing) {
-    const carrier = text.match(/^([A-Za-z0-9]{1,3})/)?.[1] || "";
-    return carrier
-      ? `${carrier.toUpperCase()} ${trailing[1]}`
-      : trailing[1];
+  const carrierFlight = text.match(
+    /^([A-Za-z0-9]{2,3})[-\s]+(\d{1,4})(?:\s+\2)?$/,
+  );
+  if (carrierFlight) {
+    return `${carrierFlight[1].toUpperCase()} ${carrierFlight[2]}`;
   }
 
   return text;
@@ -164,26 +163,26 @@ const pickFlightNo = (...values) => {
 
 const extractRoundTripFlightNos = (flightData) => {
   const onwardFlightNo = pickFlightNo(
-    flightData?.booking?.priceRequest?.Trips?.[0]?.flightNo,
-    flightData?.booking?.priceRequest?.Trips?.[0]?.flight_no,
+    flightData?.depart?.airline?.flightNo,
+    flightData?.outbound?.airlines?.[0]?.flightNo,
     flightData?.depart?.flight?.details?.flightNo,
     flightData?.tripCard?.depart?.flight?.details?.flightNo,
     flightData?.outbound?.details?.flightNo,
     flightData?.outbound?.flightNo,
-    flightData?.depart?.airline?.flightNo,
-    flightData?.outbound?.airlines?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flight_no,
     flightData?.outbound?.airlines?.[0]?.code,
     flightData?.booking?.flightNo
   );
   const returnFlightNo = pickFlightNo(
-    flightData?.booking?.priceRequest?.Trips?.[1]?.flightNo,
-    flightData?.booking?.priceRequest?.Trips?.[1]?.flight_no,
+    flightData?.return?.airline?.flightNo,
+    flightData?.inbound?.airlines?.[0]?.flightNo,
     flightData?.return?.flight?.details?.flightNo,
     flightData?.tripCard?.return?.flight?.details?.flightNo,
     flightData?.inbound?.details?.flightNo,
     flightData?.inbound?.flightNo,
-    flightData?.return?.airline?.flightNo,
-    flightData?.inbound?.airlines?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flight_no,
     flightData?.inbound?.airlines?.[0]?.code
   );
   const fareOptionsFlightNoParam = [onwardFlightNo, returnFlightNo]
@@ -501,6 +500,8 @@ const FareComparisonModalRoundTrip = ({
     () => extractRoundTripFlightNos(flightData),
     [flightData]
   );
+  const isInternationalRoundTrip =
+    String(flightData?.journey || "").toLowerCase() === "international";
 
   useEffect(() => {
     if (!isOpen) return;
@@ -525,12 +526,17 @@ const FareComparisonModalRoundTrip = ({
 
     let cancelled = false;
 
-    const loadFareOptions = async (leg) => {
+    const loadFareOptions = async (leg, combined = false) => {
       try {
         setFareOptionsLoading((prev) => ({ ...prev, [leg]: true }));
-        const legRequest = buildLegFareOptionsRequest(priceRequest, leg, flightNos);
-        const legFlight = buildLegFareOptionsFlightData(flightData, leg, flightNos);
+        const legRequest = combined
+          ? priceRequest
+          : buildLegFareOptionsRequest(priceRequest, leg, flightNos);
+        const legFlight = combined
+          ? flightData
+          : buildLegFareOptionsFlightData(flightData, leg, flightNos);
         const legFlightNo =
+          (combined ? flightNos.onwardFlightNo : "") ||
           legFlight?.booking?.flightNo ||
           legFlight?.details?.flightNo ||
           legFlight?.airlines?.[0]?.flightNo ||
@@ -569,12 +575,16 @@ const FareComparisonModalRoundTrip = ({
       }
     };
 
-    ["onward", "return"].forEach((leg) => loadFareOptions(leg));
+    if (isInternationalRoundTrip) {
+      loadFareOptions("onward", true);
+    } else {
+      ["onward", "return"].forEach((leg) => loadFareOptions(leg));
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [flightData, flightNos, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
+  }, [flightData, flightNos, isInternationalRoundTrip, isOpen, prefetchedData?.fareOptionsResponse, searchParams]);
 
   const performBookNow = useCallback(async (selectedFare, fareKey = "pending") => {
     const selectedPriceRequest = buildSelectedFarePriceRequest(
@@ -629,6 +639,7 @@ const FareComparisonModalRoundTrip = ({
         formattedOnlyPriceResponse
       );
       const nextSession = {
+        journey: flightData?.journey,
         selectedFlight: flightData,
         selectedFare: selectedFareFromFormattedPrice,
         routeContext,
@@ -673,6 +684,18 @@ const FareComparisonModalRoundTrip = ({
   }, [isLoggedIn, pendingFare, performBookNow]);
 
   const handleBookNow = async (selectedFare) => {
+    if (isInternationalRoundTrip) {
+      if (loading) return;
+      if (!isLoggedIn) {
+        setPendingFare(selectedFare);
+        setAuthView("login");
+        setShowLogin(true);
+        return;
+      }
+      performBookNow(selectedFare, `combined:${selectedFare?.id || "fare"}`);
+      return;
+    }
+
     const nextSelectedFares = {
       ...selectedFares,
       [selected]: selectedFare,
@@ -727,10 +750,12 @@ const FareComparisonModalRoundTrip = ({
   const activeSegment = flightSegments[selected];
   const { flight } = activeSegment;
   const fareSourcePayload =
-    fareOptionsPayloads[selected] || null;
+    fareOptionsPayloads[isInternationalRoundTrip ? "onward" : selected] || null;
   const fareOptionsFlightData = React.useMemo(() => {
-    return buildLegFareOptionsFlightData(flightData, selected, flightNos);
-  }, [flightData, flightNos, selected]);
+    return isInternationalRoundTrip
+      ? flightData
+      : buildLegFareOptionsFlightData(flightData, selected, flightNos);
+  }, [flightData, flightNos, isInternationalRoundTrip, selected]);
   const fareOptionsFlightNo =
     fareOptionsFlightData?.booking?.flightNo ||
     fareOptionsFlightData?.details?.flightNo ||
@@ -748,8 +773,9 @@ const FareComparisonModalRoundTrip = ({
       adults: searchParams?.get("adults") || 1,
     })
     : [];
-  const isFareOptionsLoading = Boolean(fareOptionsLoading[selected]);
-  const hasResolvedFareOptions = Boolean(fareOptionsResolved[selected]);
+  const activeFareKey = isInternationalRoundTrip ? "onward" : selected;
+  const isFareOptionsLoading = Boolean(fareOptionsLoading[activeFareKey]);
+  const hasResolvedFareOptions = Boolean(fareOptionsResolved[activeFareKey]);
   const showEmptyFareOptions =
     hasResolvedFareOptions && !isFareOptionsLoading && fares.length === 0;
   useLockBodyScroll(isOpen);
@@ -770,7 +796,7 @@ const FareComparisonModalRoundTrip = ({
 
         {/* Flight Info */}
         <div className={styles.flightInfo}>
-          <div className={styles.toggleBtnsContainer}>
+          {!isInternationalRoundTrip && <div className={styles.toggleBtnsContainer}>
             {Object.entries(flightSegments).map(([key, seg]) => (
               <div
                 key={key}
@@ -781,9 +807,29 @@ const FareComparisonModalRoundTrip = ({
                 {seg.label}
               </div>
             ))}
-          </div>
+          </div>}
 
-          <div className={styles.flightDuration}>
+          {isInternationalRoundTrip && (
+            <div className={styles.internationalRouteSummary}>
+              {Object.entries(flightSegments).map(([key, segment]) => (
+                <div className={styles.internationalRouteLeg} key={key}>
+                  <strong>{segment.label}</strong>
+                  <span>
+                    {segment.flight.departure.airport} {segment.flight.departure.time}
+                    {" → "}
+                    {segment.flight.arrival.airport} {segment.flight.arrival.time}
+                  </span>
+                  <small>
+                    {key === "onward"
+                      ? flightData?.depart?.airline?.name
+                      : flightData?.return?.airline?.name}
+                  </small>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!isInternationalRoundTrip && <div className={styles.flightDuration}>
             <div className={styles.flightInfoStatus}>
               <img
                 className={styles.flightIconStatus}
@@ -862,7 +908,7 @@ const FareComparisonModalRoundTrip = ({
                 <div className={styles.city}>{flight.arrival.city}</div>
               </div>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Fare Cards */}

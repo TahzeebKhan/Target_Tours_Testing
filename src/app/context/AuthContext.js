@@ -31,6 +31,12 @@ const getValidName = (...values) =>
     );
   })?.trim() || "";
 
+const mergeProfileContactIntoUser = (userData, profileData) => ({
+  ...userData,
+  phone_no: profileData?.phone_no ?? userData?.phone_no ?? null,
+  dail_code: profileData?.dail_code ?? userData?.dail_code ?? null,
+});
+
 export const getAuthDisplayName = (profileData, userData) =>
   getValidName(
     profileData?.display_name,
@@ -87,7 +93,11 @@ export const AuthProvider = ({ children }) => {
 
         const parsedUser = JSON.parse(userCookie);
         const cachedProfile = profileCookie ? JSON.parse(profileCookie) : null;
-        setUser(parsedUser);
+        const cachedUser = mergeProfileContactIntoUser(parsedUser, cachedProfile);
+        setUser(cachedUser);
+        Cookies.set("user", JSON.stringify(cachedUser), {
+          expires: new Date(expiresAt),
+        });
         setIsLoggedIn(true);
         if (cachedProfile) {
           setProfile(getProfileFallback(parsedUser, cachedProfile));
@@ -107,8 +117,13 @@ export const AuthProvider = ({ children }) => {
 
         if (res.ok) {
           const profileData = await res.json();
-          const nextProfile = getProfileFallback(parsedUser, profileData);
+          const nextProfile = getProfileFallback(cachedUser, profileData);
+          const nextUser = mergeProfileContactIntoUser(cachedUser, profileData);
+          setUser(nextUser);
           setProfile(nextProfile);
+          Cookies.set("user", JSON.stringify(nextUser), {
+            expires: new Date(expiresAt),
+          });
           Cookies.set("user_profile", JSON.stringify(nextProfile), {
             expires: new Date(expiresAt),
           });
@@ -178,9 +193,12 @@ export const AuthProvider = ({ children }) => {
       if (res.ok) {
         const profileData = await res.json();
         const nextProfile = getProfileFallback(user, profileData);
+        const nextUser = mergeProfileContactIntoUser(user, profileData);
 
+        setUser(nextUser);
         setProfile(nextProfile); // 🔥 re-renders → "Hi, Full Name"
 
+        Cookies.set("user", JSON.stringify(nextUser), { expires });
         Cookies.set("user_profile", JSON.stringify(nextProfile), {
           expires,
         });

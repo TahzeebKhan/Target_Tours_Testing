@@ -959,23 +959,6 @@ const IndividualProperty = ({
                   {hotelDetail.description}
                 </p>
               </div>
-              <div className={styles.mapWrapper}>
-                <Image
-                  src="/images/map-view.png"
-                  alt="Map Location"
-                  fill
-                  className={styles.objectFit}
-                />
-
-                {/* Map Pin Icon */}
-                <Image
-                  src="/icons/map-pin.svg"
-                  alt="Location Pin"
-                  width={24}
-                  height={28}
-                  className={styles.mapPin}
-                />
-              </div>
             </section>
 
             {/* Booking Summary */}
@@ -1225,7 +1208,9 @@ const IndividualProperty = ({
         </div>
       )}
 
-      {activeTab === "FLIGHT BOOKING" && <FlightBookingDetails onBack={onBack} />}
+      {activeTab === "FLIGHT BOOKING" && (
+        <FlightBookingDetails onBack={onBack} booking={selectedBooking} />
+      )}
 
       {activeTab === "PACKAGES" && (
         <PackageDetails booking={selectedBooking} onBack={onBack} />

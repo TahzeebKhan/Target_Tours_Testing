@@ -2,46 +2,10 @@ import React from "react";
 import styles from "./FlightSection.module.css";
 import FlightFacilities from "../flightFacilities/FlightFacilities";
 
-const defaultFlight = {
-  type: "DEPARTURE",
-  airline: {
-    name: "Garuda Indonesia",
-    code: "6E-541",
-    logo: "/images/GarudaIndonesia.png",
-  },
-  aircraft: "Boeing 737",
-  cabinClass: "Economy",
-  fareType: "Flexi Plus Fare",
-  date: "Thu, 06 Jul 2025",
-
-  departure: {
-    time: "06:00",
-    city: "Jakarta (JKTC)",
-  },
-
-  arrival: {
-    time: "07:40",
-    city: "Surabaya (SUB)",
-  },
-
-  duration: {
-    hours: "01",
-    minutes: "50",
-  },
-
-  stops: "Direct",
-
-  facilities: [
-    "Baggage 20 kg, Cabin Baggage 7kg",
-    "In-flight entertainment",
-    "In-flight meal",
-    "Power & USB Port",
-  ],
-};
-
 const FlightSection = ({ flight }) => {
-  // 👉 props aaye to use karo, warna default
-  const flightData = flight ?? defaultFlight;
+  if (!flight) return null;
+
+  const flightData = flight;
 
   return (
     <div className={styles.FlightSection}>

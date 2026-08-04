@@ -229,6 +229,7 @@ const MobileFareComparisonModal = ({ isOpen, onClose, flightData, prefetchedData
         prefetchedData?.priceResponse || (await getFlightPrice(priceRequest));
       const formattedOnlyPriceResponse = buildFormattedOnlyPriceResponse(priceResponse);
       const nextSession = {
+        journey: flightData?.journey,
         selectedFlight: flightData,
         selectedFare,
         routeContext,

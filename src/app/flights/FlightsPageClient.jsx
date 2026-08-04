@@ -136,24 +136,118 @@ const sortFlightsByOption = (items = [], sortBy) => {
 };
 
 const sortCardsByFlightOrder = (cards = [], sortedFlights = []) => {
-  if (!Array.isArray(cards) || !Array.isArray(sortedFlights) || !sortedFlights.length) {
+  if (!Array.isArray(cards) || !Array.isArray(sortedFlights)) {
     return cards;
   }
+  if (!sortedFlights.length) return [];
 
   const order = new Map(
     sortedFlights.map((flight, index) => [String(flight?.id || ""), index]),
   );
 
-  return [...cards].sort((left, right) => {
+  return cards.filter((card) => order.has(String(card?.id || ""))).sort((left, right) => {
     const leftOrder = order.get(String(left?.id || "")) ?? Number.MAX_SAFE_INTEGER;
     const rightOrder = order.get(String(right?.id || "")) ?? Number.MAX_SAFE_INTEGER;
     return leftOrder - rightOrder;
   });
 };
 
+const getFlightLegs = (flight = {}) =>
+  [flight?.outbound, flight?.depart?.flight, flight?.inbound, flight?.return?.flight]
+    .filter(Boolean)
+    .concat(flight?.outbound || flight?.depart?.flight ? [] : [flight]);
+
+const getStopCount = (leg = {}) => {
+  const directValue = Number(leg?.stops?.count ?? leg?.stopCount ?? leg?.stops_count);
+  if (Number.isFinite(directValue)) return directValue;
+  const label = String(leg?.stops?.type || leg?.stops || "").toLowerCase();
+  if (label.includes("non") || label.includes("direct")) return 0;
+  const match = label.match(/\d+/);
+  return match ? Number(match[0]) : 0;
+};
+
+const isTimeInSlot = (time, slot) => {
+  if (!slot) return true;
+  const minutes = parseTimeValue(time);
+  if (minutes === Number.MAX_SAFE_INTEGER) return false;
+  if (slot === "before6") return minutes < 360;
+  if (slot === "6to12") return minutes >= 360 && minutes < 720;
+  if (slot === "12to6") return minutes >= 720 && minutes < 1080;
+  return minutes >= 1080;
+};
+
+const getSelectedKeys = (values = {}) =>
+  Object.entries(values)
+    .filter(([, selected]) => selected)
+    .map(([key]) => String(key).toLowerCase());
+
+const isTruthyValue = (value) =>
+  value === true || value === 1 || ["true", "yes", "refundable"].includes(String(value || "").toLowerCase());
+
+const matchesFlightFilters = (flight = {}, filters = {}) => {
+  const legs = getFlightLegs(flight);
+  const primaryLeg = legs[0] || flight;
+  const fare = parseCurrencyValue(
+    flight?.fare?.totalFare || flight?.fare?.displayAmount || primaryLeg?.fare?.totalFare,
+  );
+
+  if (filters.priceTouched && Number.isFinite(fare)) {
+    const [minimum, maximum] = filters.price || [];
+    if (fare < Number(minimum) || fare > Number(maximum)) return false;
+  }
+
+  if (
+    filters.popular?.refundable &&
+    !legs.some((leg) => isTruthyValue(leg?.details?.refundable ?? leg?.refundable))
+  ) return false;
+
+  const selectedStops = new Set();
+  if (filters.popular?.nonStop || filters.stops?.nonStop) selectedStops.add(0);
+  if (filters.popular?.oneStop || filters.stops?.oneStop) selectedStops.add(1);
+  if (filters.stops?.twoPlus) selectedStops.add(2);
+  if (selectedStops.size) {
+    const stopCount = getStopCount(primaryLeg);
+    const normalizedStops = stopCount >= 2 ? 2 : stopCount;
+    if (!selectedStops.has(normalizedStops)) return false;
+  }
+
+  if (filters.popular?.lateDeparture) {
+    const departureTime = parseTimeValue(primaryLeg?.departure?.time);
+    if (departureTime === Number.MAX_SAFE_INTEGER || departureTime < 1080) return false;
+  }
+  if (!isTimeInSlot(primaryLeg?.departure?.time, filters.departureJakarta)) return false;
+  if (!isTimeInSlot(primaryLeg?.arrival?.time, filters.departureSingapore)) return false;
+
+  const selectedAircraft = getSelectedKeys(filters.aircraft);
+  if (
+    selectedAircraft.length &&
+    !legs.some((leg) => {
+      const aircraft = String(leg?.details?.aircraft || leg?.aircraft || "").toLowerCase();
+      return selectedAircraft.some((key) => aircraft.includes(key));
+    })
+  ) return false;
+
+  const selectedAirlines = getSelectedKeys(filters.airlines);
+  if (
+    selectedAirlines.length &&
+    !legs.some((leg) => {
+      const airlines = Array.isArray(leg?.airlines) ? leg.airlines : [leg?.airline];
+      return airlines.some((airline) => {
+        const value = String(airline?.name || airline?.code || airline || "").toLowerCase();
+        return selectedAirlines.some((key) => value.includes(key) || key.includes(value));
+      });
+    })
+  ) return false;
+
+  return true;
+};
+
+const filterFlights = (items = [], filters = {}) =>
+  Array.isArray(items) ? items.filter((flight) => matchesFlightFilters(flight, filters)) : [];
+
 const FlightsPageClient = () => {
   const { tripType, committedRequest, searchRefreshToken: contextSearchRefreshToken } = useTripType();
-  const { filters, setApiFilterData } = useFlightFilters();
+  const { filters, setApiFilterData, resetFilters } = useFlightFilters();
   const urlSearchParams = useFlightSearchParams();
 
   const request = committedRequest || {};
@@ -174,10 +268,21 @@ const FlightsPageClient = () => {
     [urlSearchParams]
   );
 
-  const apiFilters = useMemo(() => {
-    const { sortBy, ...apiRelevantFilters } = filters;
-    return apiRelevantFilters;
-  }, [filters]);
+  const searchOnlyQueryParams = useMemo(() => {
+    const searchValues = { ...rawQueryParams };
+    [
+      "stops",
+      "airlines",
+      "aircrafts",
+      "min_price",
+      "max_price",
+      "refundable",
+      "departure_slots",
+      "arrival_slots",
+      "late_departure",
+    ].forEach((key) => delete searchValues[key]);
+    return searchValues;
+  }, [rawQueryParams]);
 
   const baseSearchParams = useMemo(
     () =>
@@ -192,8 +297,7 @@ const FlightsPageClient = () => {
         passengers: request.passengers,
         travelClass: request.travelClass,
         fareTypes: request.fareTypes,
-        searchParams: rawQueryParams,
-        filters: apiFilters,
+        searchParams: searchOnlyQueryParams,
       }),
     [
       requestTripType,
@@ -206,8 +310,7 @@ const FlightsPageClient = () => {
       request.passengers,
       request.travelClass,
       request.fareTypes,
-      rawQueryParams,
-      apiFilters,
+      searchOnlyQueryParams,
     ]
   );
 
@@ -232,8 +335,9 @@ const FlightsPageClient = () => {
     setCurrentPage(1);
     setAggregatedMappedData(null);
     setApiFilterData(null);
+    resetFilters();
     isLoadingMoreRef.current = false;
-  }, [baseSearchKey, combinedRefreshToken, setApiFilterData]);
+  }, [baseSearchKey, combinedRefreshToken, resetFilters, setApiFilterData]);
 
   const {
     data,
@@ -245,7 +349,7 @@ const FlightsPageClient = () => {
   } = useSearchFlights({
     params: searchParams,
     enabled: Boolean(tripType && hasCommittedSearch),
-    filterTrigger: apiFilters,
+    filterTrigger: null,
     refreshTrigger: combinedRefreshToken,
   });
 
@@ -395,14 +499,12 @@ const FlightsPageClient = () => {
 
   const sortedMappedData = useMemo(() => {
     const sortBy = filters.sortBy;
-    if (!sortBy) return mappedData;
-
-    const oneway = sortFlightsByOption(mappedData.oneway, sortBy);
-    const round = sortFlightsByOption(mappedData.round, sortBy);
-    const multi = sortFlightsByOption(mappedData.multi, sortBy);
+    const oneway = sortFlightsByOption(filterFlights(mappedData.oneway, filters), sortBy);
+    const round = sortFlightsByOption(filterFlights(mappedData.round, filters), sortBy);
+    const multi = sortFlightsByOption(filterFlights(mappedData.multi, filters), sortBy);
     const multiRouteResults = Object.fromEntries(
       Object.entries(mappedData.multiRouteResults || {}).map(([routeKey, routeData]) => {
-        const routeMulti = sortFlightsByOption(routeData?.multi, sortBy);
+        const routeMulti = sortFlightsByOption(filterFlights(routeData?.multi, filters), sortBy);
         return [
           routeKey,
           {
@@ -422,8 +524,14 @@ const FlightsPageClient = () => {
       multi,
       multiTripCards: sortCardsByFlightOrder(mappedData.multiTripCards, multi),
       multiRouteResults,
+      pagination: {
+        ...(mappedData.pagination || {}),
+        from: Math.max(oneway.length, round.length, multi.length) ? 1 : 0,
+        to: Math.max(oneway.length, round.length, multi.length),
+        total: Math.max(oneway.length, round.length, multi.length),
+      },
     };
-  }, [filters.sortBy, mappedData]);
+  }, [filters, mappedData]);
 
   const selectedDateTilePrice = useMemo(() => {
     if (requestTripType !== "oneway" || !request.startDate) return null;

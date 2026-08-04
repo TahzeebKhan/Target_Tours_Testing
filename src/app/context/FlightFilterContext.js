@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 const FlightFilterContext = createContext(null);
@@ -221,9 +221,9 @@ export function FlightFilterProvider({ children }) {
     });
   };
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     dispatch({ type: FILTER_ACTIONS.RESET_FILTERS });
-  };
+  }, []);
 
   const setSortBy = (value) => {
     dispatch({ type: FILTER_ACTIONS.SET_SORT_BY, payload: value });

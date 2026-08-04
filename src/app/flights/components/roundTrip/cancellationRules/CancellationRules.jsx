@@ -277,13 +277,29 @@ const getActiveLegKeys = (activeLeg = "both") =>
         ? [activeLeg]
         : ["depart", "return"];
 
+const getCanonicalAirlineCode = (leg = {}) => {
+    const airline = leg?.airline || {};
+    const rawCode = String(airline?.code || "").trim();
+    const carrier =
+        String(airline?.carrierCode || "").trim() ||
+        rawCode.match(/^([A-Za-z0-9]{2,3})\s+/)?.[1] ||
+        (/spicejet/i.test(airline?.name || "") ? "SG" : "") ||
+        (/indigo/i.test(airline?.name || "") ? "6E" : "");
+    const flightNumberSource =
+        leg?.flight?.details?.flightNo || airline?.flightNo || rawCode;
+    const flightNumber =
+        String(flightNumberSource).trim().match(/(\d{1,4})(?:\s+\1)?$/)?.[1] || "";
+
+    return [carrier, flightNumber].filter(Boolean).join(" ") || rawCode || "N/A";
+};
+
 const buildFallbackCards = (flightData, activeLeg = "both") =>
     getActiveLegKeys(activeLeg).map((key) => {
         const leg = flightData?.[key] || {};
         return {
             airline: {
                 name: leg?.airline?.name || "N/A",
-                code: leg?.airline?.code || "N/A",
+                code: getCanonicalAirlineCode(leg),
                 logo: resolveAirlineLogo(leg?.airline || {}),
             },
             rules: [],

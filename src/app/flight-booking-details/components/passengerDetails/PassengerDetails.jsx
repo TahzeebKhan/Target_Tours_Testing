@@ -8,7 +8,7 @@ import TravelerDetails from "./fareDetailsExpandable/component/travelerDetails/T
 import { useFlightBooking } from "../../FlightBookingContext";
 import PassengerDetailsMobile from "../../mobileViewComponents/passengerDetailsMobileView/PassengerDetailsMobile";
 import { getBookingDetailsView } from "@/features/flights/utils/flightBookingSession";
-import { validateTravelerForm } from "@/app/flight-booking-details/utils/travelerValidation";
+import { getBookingJourney, validateTravelerForm } from "@/app/flight-booking-details/utils/travelerValidation";
 import { toast } from "react-toastify";
 
 const PassengerDetails = () => {
@@ -35,6 +35,7 @@ const PassengerDetails = () => {
       travelerDetails,
       bookingContactDetails,
       checklistResponse: bookingSession?.checklistResponse,
+      journey: getBookingJourney(bookingSession),
     });
 
     setTravelerFormErrors(validation.errors);
@@ -48,7 +49,7 @@ const PassengerDetails = () => {
       travelerDetailsOverride: travelerDetails,
     });
     if (loaded) {
-      setCurrentStep(3);
+      setCurrentStep(6);
     }
   };
 
@@ -108,7 +109,7 @@ const PassengerDetails = () => {
         </div>
 
         {/* INSURANCE */}
-        <div
+        {/* <div
           className={`${styles.flightExpandableContainer} ${
             openTab === "insurance" ? styles.flightActiveBorder : ""
           }`}
@@ -136,7 +137,7 @@ const PassengerDetails = () => {
           >
             <TravelInsuranceOption />
           </div>
-        </div>
+        </div> */}
 
         <div
           className={`${styles.flightExpandableContainer} ${

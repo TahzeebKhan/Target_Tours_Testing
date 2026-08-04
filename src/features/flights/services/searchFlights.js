@@ -276,6 +276,10 @@ const isUsableFlight = (flight) => {
   if (flight.index || flight.flightNo) return true;
   if (Array.isArray(flight.onward) && flight.onward.length) return true;
   if (Array.isArray(flight.return) && flight.return.length) return true;
+  if (flight.onward && typeof flight.onward === "object") return true;
+  if (flight.return && typeof flight.return === "object") return true;
+  if (flight.outbound && typeof flight.outbound === "object") return true;
+  if (flight.inbound && typeof flight.inbound === "object") return true;
   return false;
 };
 
@@ -334,7 +338,13 @@ const getApiMessage = (payload) =>
   payload?.data?.message ||
   "Flight search failed. Please try again.";
 
-const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
+const mergeSocketPayloads = ({
+  chunks,
+  initResponse,
+  completionPayload,
+  params,
+  channel,
+}) => {
   const flights = [];
   const tripResults = {};
   const seen = new Set();
@@ -394,6 +404,23 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
   });
 
   const payloadData = latestPayload?.data || latestPayload || {};
+  const journey =
+    completionPayload?.data?.journey ||
+    completionPayload?.journey ||
+    payloadData?.journey ||
+    latestPayload?.journey ||
+    "";
+  const flightsWithJourney = journey
+    ? flights.map((flight) => ({ ...flight, journey }))
+    : flights;
+  if (journey) {
+    Object.values(tripResults).forEach((tripResult) => {
+      tripResult.flights = tripResult.flights.map((flight) => ({
+        ...flight,
+        journey,
+      }));
+    });
+  }
   const resultData = getPayloadResultData(latestPayload);
   const pagination = {
     page: Number(params.page || 1),
@@ -410,8 +437,9 @@ const mergeSocketPayloads = ({ chunks, initResponse, params, channel }) => {
     streaming: true,
     data: {
       ...payloadData,
-      flights,
-      results: flights,
+      journey,
+      flights: flightsWithJourney,
+      results: flightsWithJourney,
       tripResults,
       pagination,
       filters: resultData?.filters,
@@ -463,8 +491,8 @@ const searchFlightsViaSocket = async (params = {}) => {
     let idleTimer = null;
     let events = null;
     let completionReceived = false;
+    let completionPayload = null;
     const isMultiCitySearch = searchPayload.fareType === "DM";
-    const isRoundTripSearch = searchPayload.fareType === "RT";
 
     const cleanup = () => {
       window.clearTimeout(idleTimer);
@@ -482,12 +510,9 @@ const searchFlightsViaSocket = async (params = {}) => {
     const scheduleIdleResolve = () => {
       if (!chunks.length && !completionReceived) return;
 
-      // Round-trip and domestic multi-city providers can emit results many
-      // seconds apart. Do not treat that gap as the end of the search; keep
-      // listening until the backend explicitly completes the whole search.
-      if ((isRoundTripSearch || isMultiCitySearch) && !completionReceived) {
-        return;
-      }
+      // The completion event carries journey classification (domestic or
+      // international), so keep listening until that metadata is available.
+      if (!completionReceived) return;
 
       window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
@@ -496,6 +521,7 @@ const searchFlightsViaSocket = async (params = {}) => {
           mergeSocketPayloads({
             chunks,
             initResponse,
+            completionPayload,
             params,
             channel,
           }),
@@ -510,6 +536,7 @@ const searchFlightsViaSocket = async (params = {}) => {
           ? mergeSocketPayloads({
               chunks,
               initResponse,
+              completionPayload,
               params,
               channel,
             })
@@ -539,12 +566,14 @@ const searchFlightsViaSocket = async (params = {}) => {
 
       if (isFlightSearchComplete(payload)) {
         completionReceived = true;
+        completionPayload = payload;
         if (isMultiCitySearch) {
           settle(
             resolve,
             mergeSocketPayloads({
               chunks,
               initResponse,
+              completionPayload,
               params,
               channel,
             }),

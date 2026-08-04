@@ -7,12 +7,9 @@ import { useRouter } from "next/navigation";
 // import { useSearchParams } from "next/navigation";
 
 const steps = [
-  { id: 1, label: "Search" },
-  { id: 2, label: "Passenger Details" },
-  { id: 3, label: "Baggage" },
-  { id: 4, label: "Meal" },
-  { id: 5, label: "Seating" },
-  { id: 6, label: "Overview & Payment" },
+  { id: 1, number: 1, label: "Search" },
+  { id: 2, number: 2, label: "Passenger Details" },
+  { id: 6, number: 3, label: "Overview & Payment" },
 ];
 
 export default function BookingStepper() {
@@ -76,7 +73,7 @@ export default function BookingStepper() {
                       <Check size={16} color="white" />{" "}
                     </span>
                   ) : (
-                    <span>{step.id}</span>
+                    <span>{step.number}</span>
                   )}
                 </div>
               </div>

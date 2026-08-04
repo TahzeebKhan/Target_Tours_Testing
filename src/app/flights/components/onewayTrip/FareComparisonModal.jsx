@@ -815,6 +815,7 @@ const FareComparisonModal = ({
             );
           
             const nextSession = {
+                journey: flightData?.journey,
                 selectedFlight: flightData,
                 selectedFare: selectedFareFromFormattedPrice,
                 routeContext,

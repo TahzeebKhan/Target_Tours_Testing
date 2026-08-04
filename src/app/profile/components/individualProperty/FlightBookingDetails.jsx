@@ -1,252 +1,248 @@
-import { useState } from "react";
-import styles from "./FlightBookingDetails.module.css";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import styles from "./FlightBookingDetails.module.css";
 import CancelBookingModal from "./CancelBookingModal";
-const FlightBookingDetails = ({ onBack }) => {
-  const [isActive, setIsActive] = useState(true);
+
+const first = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const asArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+
+const unwrap = (response) => {
+  let value = response;
+  for (let index = 0; index < 4; index += 1) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) break;
+    if (value.booking_id || value.journeys || value.passengers || value.pricing) break;
+    value = value.data || value.result || value.booking || value;
+  }
+  return value && typeof value === "object" ? value : {};
+};
+
+const money = (value) => {
+  const amount = Number(value);
+  return Number.isFinite(amount)
+    ? `₹ ${amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
+    : "—";
+};
+
+const parseDate = (value) => {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+};
+
+const dateLabel = (value) =>
+  parseDate(value)?.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }) || "—";
+
+const datePart = (value, part) => {
+  const date = parseDate(value);
+  if (!date) return "—";
+  return part === "day"
+    ? String(date.getDate()).padStart(2, "0")
+    : date.toLocaleDateString("en-IN", { month: "long" });
+};
+
+const timeLabel = (value) => {
+  const date = parseDate(value);
+  return date
+    ? date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false })
+    : "—";
+};
+
+const airportParts = (name, code) => {
+  const parts = String(name || "").split("|").map((part) => part.trim()).filter(Boolean);
+  return {
+    city: first(parts.at(-1), code, "Airport"),
+    airport: first(parts[0], code, "Airport"),
+  };
+};
+
+const segmentFromJourney = (journey) =>
+  asArray(first(journey?.segments, journey?.Segments, journey?.flights, journey?.Flights))[0] || journey || {};
+
+const normalizeBooking = (response, fallbackId) => {
+  const root = response && typeof response === "object" ? response : {};
+  const data = unwrap(root);
+  const booking = data.booking && typeof data.booking === "object" ? data.booking : {};
+  const raw = first(data.raw, root.raw, {});
+  const journeys = asArray(first(data.journeys, booking.journeys, root.journeys, raw?.journeys));
+  const segments = journeys.map(segmentFromJourney).filter(Boolean);
+  if (!segments.length) {
+    segments.push(...asArray(first(data.segments, booking.segments, raw?.segments)));
+  }
+  const firstSegment = segments[0] || {};
+  const lastSegment = segments.at(-1) || firstSegment;
+  const pricing = first(data.pricing, booking.pricing, root.pricing, firstSegment.pricing, {});
+  const statusObject = data.status && typeof data.status === "object" ? data.status : {};
+  const passengers = asArray(first(data.passengers, booking.passengers, root.passengers, raw?.passengers));
+
+  return {
+    bookingId: first(data.booking_id, booking.booking_id, root.booking_id, fallbackId, "N/A"),
+    pnr: first(data.pnr, booking.pnr, root.pnr, firstSegment.pnr, "N/A"),
+    status: String(first(statusObject.booking_status, data.booking_status, booking.booking_status, data.status, "CONFIRMED")).toUpperCase(),
+    providerStatus: first(statusObject.provider_status_label, data.provider_status_label, ""),
+    airline: first(firstSegment.airline, firstSegment.airline_name, firstSegment.AirlineName, "Airline"),
+    flightNo: first(firstSegment.flightNo, firstSegment.flight_no, firstSegment.flight_number, firstSegment.FlightNumber, ""),
+    origin: first(firstSegment.origin, firstSegment.from, data.route?.from, "—"),
+    destination: first(lastSegment.destination, lastSegment.to, data.route?.to, "—"),
+    departure: first(firstSegment.departure, firstSegment.departure_time, firstSegment.DepartureTime),
+    arrival: first(lastSegment.arrival, lastSegment.arrival_time, lastSegment.ArrivalTime),
+    duration: first(data.duration, journeys[0]?.duration, firstSegment.duration, "—"),
+    fromName: first(firstSegment.FromName, firstSegment.from_name, firstSegment.origin_name),
+    toName: first(lastSegment.ToName, lastSegment.to_name, lastSegment.destination_name),
+    departureTerminal: first(firstSegment.departureTerminal, firstSegment.departure_terminal, ""),
+    arrivalTerminal: first(lastSegment.arrivalTerminal, lastSegment.arrival_terminal, ""),
+    passengers,
+    pricing: {
+      base: first(pricing.base, pricing.base_fare, pricing.net, raw?.BaseFare),
+      discount: first(pricing.discount, pricing.discount_amount),
+      coupon: first(pricing.coupon_discount, pricing.couponDiscount),
+      tax: first(pricing.tax, pricing.taxes, pricing.taxes_and_fees, raw?.TotalTax),
+      total: first(pricing.customer_fare, pricing.gross, pricing.total, pricing.net, data.total_amount, raw?.CustomerFare),
+    },
+  };
+};
+
+const passengerName = (passenger) =>
+  [
+    first(passenger.title, passenger.salutation),
+    first(passenger.first_name, passenger.firstName, passenger.given_name),
+    first(passenger.last_name, passenger.lastName, passenger.surname),
+  ].filter(Boolean).join(" ") || first(passenger.name, passenger.full_name, "Passenger");
+
+const FlightBookingDetails = ({ onBack, booking }) => {
+  const bookingId = first(booking?.detailId, booking?.id);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const openCancelModal = () => setShowCancelModal(true);
-  const closeCancelModal = () => setShowCancelModal(false);
+  useEffect(() => {
+    if (!bookingId) {
+      setError("Flight booking id is missing.");
+      setLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+    const backendUrl = String(process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    const token = Cookies.get("auth_token");
 
-  const isCorporate = false;
+    if (!backendUrl) {
+      setError("Flight booking service is not configured.");
+      setLoading(false);
+      return undefined;
+    }
+
+    fetch(`${backendUrl}/api/flights/v2/retrieve-booking`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+        booking_id: bookingId,
+      }),
+      signal: controller.signal,
+    })
+      .then(async (result) => {
+        const payload = await result.json().catch(() => ({}));
+        if (!result.ok || payload?.success === false) {
+          throw new Error(
+            first(
+              payload?.error?.message,
+              payload?.error?.details?.message,
+              payload?.message,
+              payload?.data?.message,
+              "Unable to retrieve flight booking.",
+            ),
+          );
+        }
+        setResponse(payload);
+      })
+      .catch((requestError) => {
+        if (requestError.name !== "AbortError") setError(requestError.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [bookingId]);
+
+  const details = useMemo(() => normalizeBooking(response, bookingId), [response, bookingId]);
+  const from = airportParts(details.fromName, details.origin);
+  const to = airportParts(details.toName, details.destination);
+  const failed = details.status.includes("FAIL") || details.status.includes("CANCEL");
+  const passengerStatus = failed ? "FAILED" : "CONFIRMED";
+  const priceRows = [
+    ["Base Price", details.pricing.base],
+    ["Discount", details.pricing.discount],
+    ["Coupon Discount", details.pricing.coupon],
+    ["Taxes & Fees", details.pricing.tax],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+
   return (
-    <>
-      {" "}
-      <div className={styles.container}>
-        <div className={styles.innerContainer}>
-          {onBack && (
-            <button
-              type="button"
-              className={styles.backButton}
-              onClick={onBack}
-            >
-              <span aria-hidden="true">←</span>
-              Back
-            </button>
-          )}
-
-          {/* Header Section */}
-          <header className={styles.header}>
-            <div className={styles.hotelInfo}>
-              <div className={styles.imageWrapper}>
-                <Image
-                  src="/images/flightsReservations.png"
-                  alt="Hotel Arts Barcelona"
-                  fill
-                  className={styles.objectFit}
-                />
-              </div>
-              <div className={styles.details}>
-                <h1 className={styles.hotelName}>
-                  IndiGo 6E- 541 <span>DEL - BLR</span>
-                </h1>
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>Address:</span>
-                  <span className={styles.infoValue}>
-                    Marina, 19-21, Ciutat Vella, 08005 Barcelona, Spain
-                  </span>
-                </p>
-
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>Phone:</span>
-                  <span className={styles.infoValue}>+38 540 979 5428</span>
-                </p>
-
-                <p className={styles.textSecondary}>
-                  <span className={styles.infoLabel}>GPS coordinates:</span>
-                  <span className={styles.infoValue}>
-                    N 040* 50.963, E 14* 15.348
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.bookingMeta}>
-              <div className={styles.metaBox}>
-                <span className={styles.label}>Departure</span>
-                <span className={styles.dateNumber}>14</span>
-                <span className={styles.month}>August</span>
-                <div className={styles.timeWrapper}>
-                  <Image
-                    src="/icons/alarm-clock.svg"
-                    alt="Time"
-                    width={18}
-                    height={18}
-                    className={styles.timeIcon}
-                  />
-                  <span className={styles.time}>14:00 </span>
-                </div>
-              </div>
-              <div className={styles.divider} />
-              <div className={styles.metaBox}>
-                <span className={styles.label}>Arrival</span>
-                <span className={styles.dateNumber}>19</span>
-                <span className={styles.month}>August</span>
-                <div className={styles.timeWrapper}>
-                  <Image
-                    src="/icons/alarm-clock.svg"
-                    alt="Time"
-                    width={18}
-                    height={18}
-                    className={styles.timeIcon}
-                  />
-                  <span className={styles.time}>08:00 </span>
-                </div>
-              </div>
-              <div className={styles.divider} />
-              <div className={styles.statusSection}>
-                <button
-                  onClick={() => setIsActive(!isActive)}
-                  className={`${styles.statusBadge} ${
-                    isActive ? styles.active : ""
-                  }`}
-                >
-                  CONFIRMED
-                </button>
-                <div className={styles.roomCount}>
-                  <div className={styles.countGroup}>
-                    <span className={styles.label}>PNR</span>
-                    <span className={styles.value}>E0267</span>
-                  </div>
-                  {/* <span className={styles.slash}>/</span>
-                <div className={styles.countGroup}>
-                  <span className={styles.label}>Nights</span>
-                  <span className={styles.value}>5</span>
-                </div> */}
-                </div>
-              </div>
-            </div>
-          </header>
-
-          <div className={styles.detailsWrapper}>
-            {/* About Section */}
-            {/* Flight Summary */}
-            <section className={styles.flightSummarySection}>
-              <h2 className={styles.flightSummaryTitle}>FLIGHT SUMMARY</h2>
-
-              <div className={styles.flightSummaryCard}>
-                {/* Departure */}
-                <div className={styles.flightPoint}>
-                  <span className={styles.flightLabel}>Departure</span>
-                  <h3 className={styles.flightCity}>New Delhi (DEL)</h3>
-                  <p className={styles.flightDate}>Thu, 18 Dec 2025</p>
-                  <p className={styles.flightTerminal}>
-                    Terminal 3 Indira Gandhi Airport, Delhi
-                  </p>
-                </div>
-
-                {/* Timeline */}
-                <div className={styles.flightTimeline}>
-                  <div className={styles.flightPath}>
-                    <span className={styles.pathDot} />
-                    <span className={styles.pathLine} />
-                    <span className={styles.flightIcon}>
-                      <img src={"/icons/flightIcon.svg"} alt="flight" />
-                    </span>
-                    <span className={styles.pathLine} />
-                    <span className={styles.pathDot} />
-                  </div>
-                  <span className={styles.flightDuration}>01 h 30 m</span>
-                </div>
-
-                {/* Arrival */}
-                <div
-                  className={`${styles.flightPoint} ${styles.flightPointRight}`}
-                >
-                  <span className={styles.flightLabel}>Arrival</span>
-                  <h3 className={styles.flightCity}>Bengaluru (BLR)</h3>
-                  <p className={styles.flightDate}>Thu, 18 Dec 2025</p>
-                  <p className={styles.flightTerminal}>
-                    Terminal 2 Kempegowda Airport, Bengaluru
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Booking Summary */}
-            <section className={styles.summarySection}>
-              <h2 className={styles.sectionTitle}>BOOKING SUMMARY</h2>
-              <div className={styles.priceTable}>
-                {[
-                  // { label: "₹2245.5 x 1 Room x 8 Nights", value: "₹ 64,126" },
-                  { label: "Base Price", value: "₹ 64,126" },
-                  { label: "Discount", value: "₹ 64,126" },
-                  { label: "Coupon Discount", value: "₹ 64,126" },
-                  { label: "Taxes & Fees", value: "₹ 64,126" },
-                ].map((item, idx) => (
-                  <div key={idx} className={styles.priceRow}>
-                    <span className={styles.priceLabel}>{item.label}</span>
-                    <span className={styles.textPrimary}>{item.value}</span>
-                  </div>
-                ))}
-                <div className={styles.totalRow}>
-                  <span className={styles.totalLabel}>Total Amount</span>
-                  <span className={styles.totalValue}>₹ 66,945</span>
-                </div>
-              </div>
-            </section>
-
-            {/* Passenger Details */}
-            <section className={styles.passengerDetailsSection}>
-              <div className={styles.passengerHeader}>
-                <h2 className={styles.passengerTitle}>
-                  PASSENGER DETAILS{" "}
-                  <span className={styles.passengerCount}>4 Adults</span>
-                </h2>
-              </div>
-
-              <div className={styles.passengerList}>
-                {[
-                  { name: "Mr Ayush Kumar", status: "CONFIRMED" },
-                  { name: "Mr Ayush Kumar", status: "CONFIRMED" },
-                ].map((passenger, index) => (
-                  <div key={index} className={styles.passengerRow}>
-                    <div className={styles.passengerInfo}>
-                      <div className={styles.passengerAvatar}>
-                        <span className={styles.avatarIcon}>
-                          <img src={"/images/passenger-avatar.png"} />
-                        </span>
-                      </div>
-                      <span className={styles.passengerName}>
-                        {passenger.name}
-                      </span>
-                    </div>
-
-                    <span className={styles.passengerStatus}>
-                      {passenger.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className={styles.mealPlanInfo}>
-                <span className={styles.mealLabel}>Meal Plan</span>
-                <span className={styles.mealText}>
-                  There is no meal included in the rate for this flight.
-                </span>
-              </div>
-            </section>
-
-            {/* Footer Actions */}
-            <footer className={styles.footerActions}>
-              <button onClick={openCancelModal} className={styles.btnSecondary}>
-                CANCEL BOOKING
-              </button>
-              <button className={styles.btnPrimary}>DOWNLOAD INVOICE</button>
-            </footer>
+    <div className={styles.container}>
+      <div className={styles.innerContainer}>
+        {onBack && <button type="button" className={styles.backButton} onClick={onBack}>← Back</button>}
+        {loading && (
+          <div className={styles.loadingCard} role="status" aria-live="polite">
+            <span className={styles.loadingSpinner} aria-hidden="true" />
+            <h2>Retrieving your booking</h2>
+            <p>Please wait while we load the latest flight details.</p>
+            <div className={styles.loadingProgress}><span /></div>
           </div>
-        </div>
+        )}
+        {!loading && error && <div className={`${styles.apiState} ${styles.apiError}`}>{error}</div>}
+        {!loading && !error && response && (
+          <>
+            <header className={styles.header}>
+              <div className={styles.hotelInfo}>
+                <div className={styles.imageWrapper}><Image src="/images/flightsReservations.png" alt="Flight" fill className={styles.objectFit} /></div>
+                <div className={styles.details}>
+                  <h1 className={styles.hotelName}>{details.airline} {details.flightNo}<span>{details.origin} - {details.destination}</span></h1>
+                  <p className={styles.textSecondary}><span className={styles.infoLabel}>Booking ID:</span><span className={styles.infoValue}>{details.bookingId}</span></p>
+                  {!!details.providerStatus && <p className={styles.textSecondary}><span className={styles.infoLabel}>Status:</span><span className={styles.infoValue}>{details.providerStatus}</span></p>}
+                </div>
+              </div>
+              <div className={styles.bookingMeta}>
+                {[{ label: "Departure", value: details.departure }, { label: "Arrival", value: details.arrival }].map((item) => (
+                  <div className={styles.metaBox} key={item.label}>
+                    <span className={styles.label}>{item.label}</span><span className={styles.dateNumber}>{datePart(item.value, "day")}</span><span className={styles.month}>{datePart(item.value, "month")}</span>
+                    <div className={styles.timeWrapper}><Image src="/icons/alarm-clock.svg" alt="Time" width={18} height={18} /><span className={styles.time}>{timeLabel(item.value)}</span></div>
+                  </div>
+                ))}
+                <div className={styles.divider} />
+                <div className={styles.statusSection}><span className={`${styles.statusBadge} ${!failed ? styles.active : ""}`}>{details.status}</span><div className={styles.roomCount}><div className={styles.countGroup}><span className={styles.label}>PNR</span><span className={styles.value}>{details.pnr}</span></div></div></div>
+              </div>
+            </header>
+            <div className={styles.detailsWrapper}>
+              <section className={styles.flightSummarySection}>
+                <h2 className={styles.flightSummaryTitle}>FLIGHT SUMMARY</h2>
+                <div className={styles.flightSummaryCard}>
+                  <div className={styles.flightPoint}><span className={styles.flightLabel}>Departure</span><h3 className={styles.flightCity}>{from.city} ({details.origin})</h3><p className={styles.flightDate}>{dateLabel(details.departure)}</p><p className={styles.flightTerminal}>{details.departureTerminal && `Terminal ${details.departureTerminal} · `}{from.airport}</p></div>
+                  <div className={styles.flightTimeline}><div className={styles.flightPath}><span className={styles.pathDot} /><span className={styles.pathLine} /><span className={styles.flightIcon}><img src="/icons/flightIcon.svg" alt="flight" /></span><span className={styles.pathLine} /><span className={styles.pathDot} /></div><span className={styles.flightDuration}>{details.duration}</span></div>
+                  <div className={`${styles.flightPoint} ${styles.flightPointRight}`}><span className={styles.flightLabel}>Arrival</span><h3 className={styles.flightCity}>{to.city} ({details.destination})</h3><p className={styles.flightDate}>{dateLabel(details.arrival)}</p><p className={styles.flightTerminal}>{details.arrivalTerminal && `Terminal ${details.arrivalTerminal} · `}{to.airport}</p></div>
+                </div>
+              </section>
+              {!!priceRows.length && <section className={styles.summarySection}><h2 className={styles.sectionTitle}>BOOKING SUMMARY</h2><div className={styles.priceTable}>{priceRows.map(([label, value]) => <div key={label} className={styles.priceRow}><span className={styles.priceLabel}>{label}</span><span className={styles.textPrimary}>{money(value)}</span></div>)}<div className={styles.totalRow}><span className={styles.totalLabel}>Total Amount</span><span className={styles.totalValue}>{money(details.pricing.total)}</span></div></div></section>}
+              <section className={styles.passengerDetailsSection}><div className={styles.passengerHeader}><h2 className={styles.passengerTitle}>PASSENGER DETAILS <span className={styles.passengerCount}>{details.passengers.length} Traveller{details.passengers.length === 1 ? "" : "s"}</span></h2></div><div className={styles.passengerList}>{details.passengers.map((passenger, index) => <div key={first(passenger.id, passenger.passenger_id, index)} className={styles.passengerRow}><div className={styles.passengerInfo}><div className={styles.passengerAvatar}><span className={styles.avatarIcon}><img src="/images/passenger-avatar.png" alt="" /></span></div><span className={styles.passengerName}>{passengerName(passenger)}</span></div><span className={styles.passengerStatus}>{first(passenger.status, passenger.booking_status, passengerStatus)}</span></div>)}</div></section>
+              <footer className={styles.footerActions}>{!failed && <button onClick={() => setShowCancelModal(true)} className={styles.btnSecondary}>CANCEL BOOKING</button>}</footer>
+            </div>
+          </>
+        )}
       </div>
-      {showCancelModal && (
-        <CancelBookingModal
-          airline="Air India"
-          route="DEL to BOM"
-          bookingId="BK001234"
-          onClose={closeCancelModal}
-        />
-      )}
-    </>
+      {showCancelModal && <CancelBookingModal airline={details.airline} route={`${details.origin} to ${details.destination}`} bookingId={details.bookingId} onClose={() => setShowCancelModal(false)} />}
+    </div>
   );
 };
 

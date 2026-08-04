@@ -31,12 +31,14 @@ const removeBookingFallbackFromUrl = () => {
 };
 
 const Navbar = ({
+  transparent = false,
   sessionExpiresAt: sessionExpiresAtOverride = null,
   onSessionExpired,
   sessionExpiredMessage = "Your flight booking session has expired. Please search again to continue.",
   sessionExpiredSubText = "Search again to refresh fares and availability.",
   sessionExpiredActionLabel = "SEARCH FLIGHTS",
   sessionExpiredRedirectPath = "/flights",
+  onLogoClick,
 }) => {
   const { isLoggedIn, profile: userProfile, user } = useAuth();
   const flightBooking = useOptionalFlightBooking();
@@ -110,12 +112,19 @@ const Navbar = ({
         onClose={handleSessionExpiredClose}
       />
       {" "}
-      <div className={`${styles.navContainer} fixed top-0 z-50`}>
+      <div
+        className={`${styles.navContainer} ${transparent ? styles.transparentNav : ""} fixed top-0 z-50`}
+      >
         <div
           className={`${styles.navbar}  w-full flex  justify-between items-center`}
         >
           <BrandLogo
             onClick={() => {
+              if (onLogoClick) {
+                onLogoClick();
+                return;
+              }
+              clearFlightBookingSession();
               clearBookingSession();
               router.push("/");
             }}

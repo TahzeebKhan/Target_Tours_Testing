@@ -12,8 +12,28 @@
 }
 .fromToContainer {
   display: flex;
+  justify-content: space-between;
   gap: 6px;
   align-items: center;
+}
+
+.fromToContainer button{
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  height: 41px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  width: 100%;
+  transition: all 0.5s ease;
+max-width: max-content;
+cursor: pointer;
 }
 .from,
 .to {

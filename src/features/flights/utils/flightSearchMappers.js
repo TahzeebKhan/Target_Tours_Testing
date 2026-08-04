@@ -51,8 +51,10 @@ const normalizeCarrierCode = (value) => {
   const text = String(value || "").trim();
   if (!text) return "";
 
-  const pipeCode = text.split("|")[0]?.trim();
-  if (pipeCode) return pipeCode;
+  if (text.includes("|")) {
+    const pipeCode = text.split("|")[0]?.trim();
+    if (pipeCode) return pipeCode;
+  }
 
   const codeMatch = text.match(/^[A-Za-z0-9]{2,3}/);
   return codeMatch?.[0] || text;
@@ -69,7 +71,9 @@ const normalizeFlightNo = (value) => {
   const exact = text.match(/^\d+$/);
   if (exact) return exact[0];
 
-  const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
+  const trailing = text.match(
+    /^[A-Za-z0-9]{2,3}[-\s]?(\d{1,4})(?:\s+\1)?$/,
+  );
   if (trailing) return trailing[1];
 
   return text;
@@ -427,14 +431,18 @@ const pickAirlinesFromSegments = (segments = []) => {
         segment?.carrier?.name ||
         segment?.marketing_airline?.name ||
         "N/A";
-      const flightNo = normalizeFlightNo(
-        pickFirst(segment?.flight_number, segment?.flightNo, segment?.flight_no)
+      const rawFlightNo = pickFirst(
+        segment?.flight_number,
+        segment?.flightNo,
+        segment?.flight_no,
       );
+      const flightNo = normalizeFlightNo(rawFlightNo);
       const carrierCode = normalizeCarrierCode(
         pickFirst(
           segment?.airline?.code,
           segment?.carrier?.code,
-          segment?.marketing_airline?.code
+          segment?.marketing_airline?.code,
+          rawFlightNo,
         )
       );
       const code = buildAirlineDisplayCode(carrierCode, flightNo) || "N/A";
@@ -510,40 +518,59 @@ const getDefaultOrderId = (tripType) => {
   return "1";
 };
 
-const extractResponseBookingMeta = (payload, tripType) => ({
-  provider: pickFirst(
-    getPrimaryV2Result(payload)?.meta?.provider,
-    payload?.data?.provider,
-    payload?.provider
-  ),
-  searchKey: pickFirst(
-    getPrimaryV2Result(payload)?.search_key,
-    getPrimaryV2Result(payload)?.meta?.search_key,
-    getPrimaryV2Result(payload)?.meta?.provider_search_key,
-    payload?.data?.search_key,
-    payload?.data?.provider_search_key,
-    payload?.search_key,
-    payload?.provider_search_key
-  ),
-  tui: pickFirst(
-    getPrimaryV2Result(payload)?.tui,
-    getPrimaryV2Result(payload)?.TUI,
-    getPrimaryV2Result(payload)?.meta?.tui,
-    getPrimaryV2Result(payload)?.meta?.TUI,
-    payload?.data?.result?.meta?.tui,
-    payload?.data?.result?.meta?.TUI,
-    payload?.data?.tui,
-    payload?.data?.TUI,
-    payload?.tui,
-    payload?.TUI
-  ),
-  clientId: DEFAULT_BOOKING_CLIENT_ID,
-  mode: DEFAULT_BOOKING_MODE,
-  options: DEFAULT_BOOKING_OPTIONS,
-  source: DEFAULT_PRICE_SOURCE,
-  ssrSource: undefined,
-  tripType: normalizeBookingTripType(tripType),
-});
+const extractResponseBookingMeta = (payload, tripType) => {
+  const data = getV2PayloadData(payload);
+  const primaryResult = getPrimaryV2Result(payload);
+
+  return {
+    journey: pickFirst(
+      payload?.journey,
+      payload?.journy,
+      payload?.data?.journey,
+      payload?.data?.journy,
+      data?.journey,
+      data?.journy,
+      data?.mergedProviders?.journey,
+      data?.mergedProviders?.journy,
+      primaryResult?.journey,
+      primaryResult?.journy,
+      primaryResult?.meta?.journey,
+      primaryResult?.meta?.journy,
+    ),
+    provider: pickFirst(
+      primaryResult?.meta?.provider,
+      payload?.data?.provider,
+      payload?.provider
+    ),
+    searchKey: pickFirst(
+      primaryResult?.search_key,
+      primaryResult?.meta?.search_key,
+      primaryResult?.meta?.provider_search_key,
+      payload?.data?.search_key,
+      payload?.data?.provider_search_key,
+      payload?.search_key,
+      payload?.provider_search_key
+    ),
+    tui: pickFirst(
+      primaryResult?.tui,
+      primaryResult?.TUI,
+      primaryResult?.meta?.tui,
+      primaryResult?.meta?.TUI,
+      payload?.data?.result?.meta?.tui,
+      payload?.data?.result?.meta?.TUI,
+      payload?.data?.tui,
+      payload?.data?.TUI,
+      payload?.tui,
+      payload?.TUI
+    ),
+    clientId: DEFAULT_BOOKING_CLIENT_ID,
+    mode: DEFAULT_BOOKING_MODE,
+    options: DEFAULT_BOOKING_OPTIONS,
+    source: DEFAULT_PRICE_SOURCE,
+    ssrSource: undefined,
+    tripType: normalizeBookingTripType(tripType),
+  };
+};
 
 const buildOneWayCard = (flight, index, options = {}) => {
   const {
@@ -730,6 +757,7 @@ const buildOneWayCard = (flight, index, options = {}) => {
 
   return {
     id: flight?.id || flight?.index || `flight-${index + 1}`,
+    journey: pickFirst(flight?.journey, responseBookingMeta.journey),
     airlines,
     departure: {
       time: formatTime(departureValue),
@@ -937,7 +965,7 @@ const buildRoundLeg = (leg, fallbackLabel, fallbackCode) => {
           pickFirst(
             leg?.airline_code,
             leg?.carrier_code,
-            "6E"
+            rawFlightNo,
           )
         );
         const flightNo = normalizeFlightNo(rawFlightNo);
@@ -1437,6 +1465,7 @@ const buildRoundCard = (flight, index, options = {}) => {
 
   return {
     id: flight?.id || flight?.index || `round-${index + 1}`,
+    journey: pickFirst(flight?.journey, responseBookingMeta.journey),
     canBookIndependently: Boolean(flight?.canBookIndependently ?? true),
     requiresPairBooking: Boolean(flight?.requiresPairBooking),
     fare: {
@@ -1447,6 +1476,7 @@ const buildRoundCard = (flight, index, options = {}) => {
     inbound,
     tripCard: {
       id: flight?.id || flight?.index || `round-${index + 1}`,
+      journey: pickFirst(flight?.journey, responseBookingMeta.journey),
       canBookIndependently: Boolean(flight?.canBookIndependently ?? true),
       requiresPairBooking: Boolean(flight?.requiresPairBooking),
       depart: {
@@ -1558,6 +1588,7 @@ const extractSortHighlight = (payload, key) => {
 
 const toRoundOrMultiItem = (item) => ({
   id: item.id,
+  journey: item.journey,
   fare: item.fare,
   outbound: item.outbound,
   inbound: item.inbound,

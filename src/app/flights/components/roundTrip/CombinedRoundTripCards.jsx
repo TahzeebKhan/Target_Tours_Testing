@@ -92,7 +92,42 @@ const getUniqueLegItems = (items, type) => {
   });
 };
 
+const getPairIds = (leg = {}) =>
+  [
+    leg?.pairedIds,
+    leg?.pairedId,
+    ...(Array.isArray(leg?.provider_options) ? leg.provider_options : []).map(
+      (option) => option?.pairedIds ?? option?.pairedId,
+    ),
+  ]
+    .flat(Infinity)
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+
+const getLegPairKey = (departLeg, returnLeg) =>
+  `${getLegIdentity(departLeg)}::${getLegIdentity(returnLeg)}`;
+
+const legsSharePairId = (departItem, returnItem, validPairKeys) => {
+  const departPairIds = new Set(getPairIds(departItem?.depart));
+  const hasSharedPairId =
+    departPairIds.size > 0 &&
+    getPairIds(returnItem?.return).some((pairId) =>
+      departPairIds.has(pairId),
+    );
+  if (hasSharedPairId) return true;
+
+  // The mapper has already validated provider pair IDs when expanding grouped
+  // results. Preserve those valid relationships when one side points to the
+  // other leg's primary ID instead of repeating the same pairedId token.
+  return validPairKeys.has(
+    getLegPairKey(departItem?.depart, returnItem?.return),
+  );
+};
+
 const buildRankedPairs = (items = []) => {
+  const validPairKeys = new Set(
+    items.map((item) => getLegPairKey(item?.depart, item?.return)),
+  );
   const departItems = getUniqueLegItems(items, "depart").sort(
     (left, right) =>
       getLegAmount(left, "depart") - getLegAmount(right, "depart"),
@@ -101,11 +136,25 @@ const buildRankedPairs = (items = []) => {
     (left, right) =>
       getLegAmount(left, "return") - getLegAmount(right, "return"),
   );
-  const pairCount = Math.min(departItems.length, returnItems.length);
+  const usedReturnIds = new Set();
+  const matchedPairs = [];
 
-  return Array.from({ length: pairCount }, (_, index) => {
-    const departItem = departItems[index];
-    const returnItem = returnItems[index];
+  departItems.forEach((departItem) => {
+    const returnItem = returnItems.find((candidate) => {
+      const returnIdentity = getLegIdentity(candidate?.return);
+      return (
+        !usedReturnIds.has(returnIdentity) &&
+        legsSharePairId(departItem, candidate, validPairKeys)
+      );
+    });
+
+    if (!returnItem) return;
+
+    usedReturnIds.add(getLegIdentity(returnItem.return));
+    matchedPairs.push({ departItem, returnItem });
+  });
+
+  return matchedPairs.map(({ departItem, returnItem }, index) => {
     const departAmount = getLegAmount(departItem, "depart");
     const returnAmount = getLegAmount(returnItem, "return");
     const hasSegmentAmounts =

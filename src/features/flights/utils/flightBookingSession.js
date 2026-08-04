@@ -1,6 +1,7 @@
 "use client";
 
 import { resolveAirlineLogo } from "./airlineLogos";
+import { Nationality as NATIONALITY_OPTIONS } from "@/app/flight-booking-details/utils/Nationality";
 
 let inMemoryFlightBookingSession = null;
 let flightBookingSessionExpiryTimer = null;
@@ -100,6 +101,50 @@ const normalizeGenderCode = (value) => {
   if (text === "MALE" || text === "M") return "M";
   if (text === "FEMALE" || text === "F") return "F";
   return text;
+};
+
+const getGenderCodeFromTitle = (title, fallbackGender) => {
+  const normalizedTitle = String(title || "").trim().toUpperCase();
+  if (normalizedTitle === "MR") return "M";
+  if (normalizedTitle === "MS" || normalizedTitle === "MRS") return "F";
+  return normalizeGenderCode(fallbackGender);
+};
+
+const calculateAgeFromDob = (value, referenceDate = new Date()) => {
+  if (!value) return null;
+
+  const text = String(value).trim();
+  const slashMatch = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  const dob = slashMatch
+    ? new Date(
+        Number(slashMatch[3]),
+        Number(slashMatch[2]) - 1,
+        Number(slashMatch[1]),
+      )
+    : new Date(text);
+
+  if (Number.isNaN(dob.getTime())) return null;
+
+  let age = referenceDate.getFullYear() - dob.getFullYear();
+  const birthdayHasPassed =
+    referenceDate.getMonth() > dob.getMonth() ||
+    (referenceDate.getMonth() === dob.getMonth() &&
+      referenceDate.getDate() >= dob.getDate());
+
+  if (!birthdayHasPassed) age -= 1;
+  return Math.max(age, 0);
+};
+
+const normalizeNationalityIsoCode = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "";
+  const match = NATIONALITY_OPTIONS.find(
+    (option) =>
+      String(option.Isocode || "").toLowerCase() === normalized ||
+      String(option.nationality || "").toLowerCase() === normalized ||
+      String(option.country || "").toLowerCase() === normalized,
+  );
+  return String(match?.Isocode || "").toUpperCase();
 };
 
 const normalizeProviderCode = (provider) =>
@@ -2389,7 +2434,9 @@ const buildRiyaCreateItineraryPayload = (session, prices) => {
       FirstName: String(traveler?.FName || "").trim(),
       LastName: String(traveler?.LName || "").trim(),
       DOB: formatRiyaDateSlash(traveler?.DOB),
-      Gender: normalizeRiyaGender(traveler?.Gender),
+      Gender: normalizeRiyaGender(
+        getGenderCodeFromTitle(traveler?.Title, traveler?.Gender)
+      ),
       PaxType: normalizeRiyaPaxType(traveler?.PTC || traveler?.type),
       PassportNo: traveler?.PassportNo || "",
       PassportExpiry: formatRiyaDateSlash(
@@ -2413,11 +2460,11 @@ const buildRiyaCreateItineraryPayload = (session, prices) => {
       EmailID: String(pickFirst(contact.Email, travelers[0]?.Email, "")),
     },
     GSTInfo: {
-      GSTNumber: "",
-      GSTCompanyName: "",
+      GSTNumber: contact.HasGST ? contact.GSTRegistrationNo || "" : "",
+      GSTCompanyName: contact.HasGST ? contact.GSTHolderName || "" : "",
       GSTAddress: "",
-      GSTEmailID: "",
-      GSTMobileNumber: "",
+      GSTEmailID: contact.HasGST ? contact.GSTEmail || "" : "",
+      GSTMobileNumber: contact.HasGST ? contact.GSTPhone || "" : "",
     },
     TripType: seatPayload?.SegmentInfo?.TripType || "O",
     BlockPNR: false,
@@ -2545,22 +2592,23 @@ export const buildCreateItineraryPayload = (session, prices) => {
       State: contact.State || "",
       City: contact.City || "",
       PIN: contact.PIN || "",
-      GSTCompanyName: "",
-      GSTTIN: "",
-      GSTMobile: "",
-      GSTEmail: "",
+      GSTCompanyName: contact.HasGST ? contact.GSTHolderName || "" : "",
+      GSTTIN: contact.HasGST ? contact.GSTRegistrationNo || "" : "",
+      GSTMobile: contact.HasGST ? contact.GSTPhone || "" : "",
+      GSTEmail: contact.HasGST ? contact.GSTEmail || "" : "",
       UpdateProfile: false,
       IsGuest: false,
-      SaveGST: false,
+      SaveGST: Boolean(contact.HasGST && contact.SaveGST),
     },
     Travellers: travelers.map((traveler, index) => ({
       ID: index + 1,
       Title: traveler.Title || "",
       FName: traveler.FName || "",
       LName: traveler.LName || "",
-      Age: traveler.Age ? Number(traveler.Age) : "",
+      Age: calculateAgeFromDob(traveler.DOB) ??
+        (traveler.Age ? Number(traveler.Age) : ""),
       DOB: traveler.DOB || "",
-      Gender: normalizeGenderCode(traveler.Gender),
+      Gender: getGenderCodeFromTitle(traveler.Title, traveler.Gender),
       PTC: traveler.PTC || "",
       Nationality: traveler.Nationality || "",
       PassportNo: traveler.PassportNo || "",
@@ -2763,14 +2811,36 @@ export const buildCreateBookingPayload = (session = {}, prices = {}) => {
       })
     : [];
 
-  const passengers = travelers.map((traveler, index) => ({
-    id: index + 1,
-    title: traveler?.Title || "",
-    firstName: traveler?.FName || "",
-    lastName: traveler?.LName || "",
-    type: traveler?.PTC || traveler?.type || "",
-    gender: normalizeGenderCode(traveler?.Gender),
-    dob: traveler?.DOB || "",
+  const journey = String(
+    pickFirst(
+      session?.journey,
+      session?.selectedFlight?.journey,
+      session?.selectedFlight?.data?.journey,
+      priceResponse?.journey,
+      priceResponse?.data?.journey,
+      "",
+    ),
+  ).trim().toLowerCase();
+  const includeInternationalDetails = journey !== "domestic";
+
+  const passengers = travelers.map((traveler) => ({
+    Title: traveler?.Title || "",
+    FName: traveler?.FName || "",
+    LName: traveler?.LName || "",
+    Age: calculateAgeFromDob(traveler?.DOB) ??
+      (traveler?.Age ? Number(traveler.Age) : ""),
+    DOB: traveler?.DOB || "",
+    Gender: getGenderCodeFromTitle(traveler?.Title, traveler?.Gender),
+    PTC: normalizeRiyaPaxType(traveler?.PTC || traveler?.type),
+    ...(includeInternationalDetails
+      ? {
+          Nationality: normalizeNationalityIsoCode(traveler?.Nationality),
+          PassportNo: traveler?.PassportNo || "",
+          PLI: traveler?.PLI || "",
+          PDOE: traveler?.PDOE || "",
+          VisaType: traveler?.VisaType || "",
+        }
+      : {}),
   }));
   const contactPayload = {
     phone: contactPhone,

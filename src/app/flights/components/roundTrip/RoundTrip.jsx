@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useDeferredValue,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -747,7 +748,7 @@ const RoundTrip = ({
   const [selectedMobileDepartId, setSelectedMobileDepartId] = useState(null);
   const [selectedMobileReturnId, setSelectedMobileReturnId] = useState(null);
   const [mobileFareModalFlight, setMobileFareModalFlight] = useState(null);
-  const [combinedFlights] = useState(false);
+  const [combinedFlights, setCombinedFlights] = useState(false);
   const deferredCombinedFlights = useDeferredValue(combinedFlights);
   const { setIsSidebarOpen } = useContext(SidebarContext);
   const sortTriggerRef = useRef(null);
@@ -769,6 +770,16 @@ const RoundTrip = ({
       : "";
   const resolvedFlightResults = Array.isArray(flightData) ? flightData : [];
   const resolvedTripCards = Array.isArray(tripCards) ? tripCards : [];
+  const journeyType = String(
+    resolvedFlightResults.find((flight) => flight?.journey)?.journey ||
+      resolvedTripCards.find((card) => card?.journey)?.journey ||
+      "",
+  ).toLowerCase();
+
+  useEffect(() => {
+    if (!journeyType) return;
+    setCombinedFlights(journeyType === "international");
+  }, [journeyType]);
   const parseFareValue = (fare) => {
     const raw = String(fare?.totalFare || "").replace(/[^\d]/g, "");
     const amount = Number(raw);
@@ -1010,18 +1021,17 @@ const RoundTrip = ({
               </span>
             </div>
           </div>
-          {/* <label className={styles.combinedFlightsToggle}>
+          <label className={styles.combinedFlightsToggle}>
             <input
               type="checkbox"
               checked={combinedFlights}
-              disabled
-              aria-disabled="true"
+              onChange={(event) => setCombinedFlights(event.target.checked)}
             />
             <span className={styles.toggleTrack} aria-hidden="true">
               <span className={styles.toggleThumb} />
             </span>
             <span>COMBINED FLIGHTS</span>
-          </label> */}
+          </label>
         </div>
         {/* <DatePriceSlider
           tiles={datewiseFareTiles}
@@ -1081,7 +1091,7 @@ const RoundTrip = ({
             <FlightSearchLoader />
           ) : hasNoData ? (
             <FlightNoResults />
-          ) : !deferredCombinedFlights ? (
+          ) : deferredCombinedFlights ? (
             <MemoizedCombinedRoundTripCards
               tripCardsData={allTripCards}
               onViewFares={openCombinedFareDetails}

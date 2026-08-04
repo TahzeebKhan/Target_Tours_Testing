@@ -1,7 +1,6 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DIGITS_PATTERN = /\d/g;
 const PASSPORT_PATTERN = /^[A-Za-z0-9]{6,20}$/;
-const PIN_PATTERN = /^[A-Za-z0-9-]{4,10}$/;
 
 export const EMPTY_TRAVELER_FORM_ERRORS = {
   travelers: {},
@@ -11,6 +10,61 @@ export const EMPTY_TRAVELER_FORM_ERRORS = {
 const getDigitCount = (value = "") => String(value).match(DIGITS_PATTERN)?.length || 0;
 
 const isBlank = (value) => String(value ?? "").trim() === "";
+
+const getAgeFromDob = (value, referenceDate = new Date()) => {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  const slashMatch = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  const dob = slashMatch
+    ? new Date(Number(slashMatch[3]), Number(slashMatch[2]) - 1, Number(slashMatch[1]))
+    : new Date(text);
+  if (Number.isNaN(dob.getTime()) || dob > referenceDate) return null;
+
+  let age = referenceDate.getFullYear() - dob.getFullYear();
+  if (
+    referenceDate.getMonth() < dob.getMonth() ||
+    (referenceDate.getMonth() === dob.getMonth() && referenceDate.getDate() < dob.getDate())
+  ) {
+    age -= 1;
+  }
+  return age;
+};
+
+export const getTravelerDobError = (traveler = {}) => {
+  const type = String(traveler?.type || traveler?.PTC || "").trim().toUpperCase();
+  const isAdult = type === "ADULT" || type === "ADT";
+  const isChild = type === "CHILD" || type === "CHD";
+  const isInfant = type === "INFANT" || type === "INF";
+
+  if (isBlank(traveler.DOB)) {
+    if (isChild) return "DOB is required for children.";
+    if (isInfant) return "DOB is required for infants.";
+    return "";
+  }
+
+  const age = getAgeFromDob(traveler.DOB);
+  if (age === null) return "Enter a valid DOB.";
+  if (isAdult && age <= 12) return "Adult age must be more than 12 years.";
+  if (isChild && (age < 2 || age > 12)) {
+    return "Child age must be between 2 and 12 years.";
+  }
+  if (isInfant && (age < 0 || age >= 2)) {
+    return "Infant age must be less than 2 years.";
+  }
+  return "";
+};
+
+export const getBookingJourney = (bookingSession = {}) =>
+  String(
+    bookingSession?.journey ||
+      bookingSession?.selectedFlight?.journey ||
+      bookingSession?.selectedFlight?.data?.journey ||
+      bookingSession?.priceResponse?.journey ||
+      bookingSession?.priceResponse?.data?.journey ||
+      "",
+  )
+    .trim()
+    .toLowerCase();
 
 const getTravelerChecklistRules = (checklistResponse = {}) => {
   const rawChecklist =
@@ -27,50 +81,32 @@ const getTravelerChecklistRules = (checklistResponse = {}) => {
 
 const isChecklistFieldRequired = (rules, field) => Number(rules?.[field]) === 1;
 
-const getTravelerAgeError = (traveler) => {
-  const ageValue = Number(traveler?.Age);
-  if (!Number.isFinite(ageValue)) {
-    return "Age is required.";
-  }
-
-  if (ageValue > 150) {
-    return "Age cannot be greater than 150.";
-  }
-
-  const type = traveler?.type || traveler?.PTC || "ADULT";
-  if ((type === "ADULT" || type === "ADT") && ageValue < 12) {
-    return "Adult age must be 12 or above.";
-  }
-  if ((type === "CHILD" || type === "CHD") && (ageValue < 2 || ageValue > 11)) {
-    return "Child age must be between 2 and 11.";
-  }
-  if ((type === "INFANT" || type === "INF") && (ageValue < 0 || ageValue > 1)) {
-    return "Infant age must be below 2.";
-  }
-
-  return "";
-};
-
-const validateTraveler = (traveler = {}, index = 0, checklistRules = {}) => {
+const validateTraveler = (
+  traveler = {},
+  index = 0,
+  checklistRules = {},
+  isDomestic = false,
+) => {
   const errors = {};
 
   if (isBlank(traveler.Title)) errors.Title = "Title is required.";
   if (isBlank(traveler.FName)) errors.FName = "First Name is required.";
   if (isBlank(traveler.LName)) errors.LName = "Last Name is required.";
-  if (isBlank(traveler.Gender)) errors.Gender = "Gender is required.";
-  if (isBlank(traveler.CountryCode)) errors.CountryCode = "Country Code is required.";
+  const travelerType = String(traveler?.type || traveler?.PTC || "").toUpperCase();
+  const isChild = travelerType === "CHILD" || travelerType === "CHD";
+  const dobError = getTravelerDobError(traveler);
+  if (dobError) errors.DOB = dobError;
 
-  const ageError = getTravelerAgeError(traveler);
-  if (ageError) errors.Age = ageError;
-
-  if (isChecklistFieldRequired(checklistRules, "DOB") && isBlank(traveler.DOB)) {
-    errors.DOB = "DOB is required.";
+  if (isDomestic) {
+    const entries = Object.values(errors);
+    return {
+      errors,
+      message: entries[0] ? `Traveler ${index + 1}: ${entries[0]}` : "",
+    };
   }
 
-  if (isBlank(traveler.MobileNumber)) {
-    errors.MobileNumber = "Mobile Number is required.";
-  } else if (getDigitCount(traveler.MobileNumber) < 10) {
-    errors.MobileNumber = "Enter a valid Mobile Number.";
+  if (!isChild && isChecklistFieldRequired(checklistRules, "DOB") && isBlank(traveler.DOB)) {
+    errors.DOB = "DOB is required.";
   }
 
   if (isBlank(traveler.Email)) {
@@ -103,10 +139,6 @@ const validateTraveler = (traveler = {}, index = 0, checklistRules = {}) => {
     errors.PDOE = "Passport Expiry is required.";
   }
 
-  if (isChecklistFieldRequired(checklistRules, "VisaType") && isBlank(traveler.VisaType)) {
-    errors.VisaType = "Visa Type is required.";
-  }
-
   const entries = Object.values(errors);
   return {
     errors,
@@ -134,16 +166,6 @@ const validateBookingContact = (bookingContact = {}) => {
     errors.Email = "Enter a valid Email.";
   }
 
-  if (isBlank(bookingContact.Address)) errors.Address = "Address is required.";
-  if (isBlank(bookingContact.State)) errors.State = "State is required.";
-  if (isBlank(bookingContact.City)) errors.City = "City is required.";
-
-  if (isBlank(bookingContact.PIN)) {
-    errors.PIN = "PIN is required.";
-  } else if (!PIN_PATTERN.test(String(bookingContact.PIN).trim())) {
-    errors.PIN = "Enter a valid PIN.";
-  }
-
   return errors;
 };
 
@@ -151,12 +173,14 @@ export const validateTravelerForm = ({
   travelerDetails = [],
   bookingContactDetails = {},
   checklistResponse = null,
+  journey = "",
 }) => {
   const nextErrors = {
     travelers: {},
     bookingContact: {},
   };
   const checklistRules = getTravelerChecklistRules(checklistResponse);
+  const isDomestic = String(journey).trim().toLowerCase() === "domestic";
 
   if (!Array.isArray(travelerDetails) || travelerDetails.length === 0) {
     return {
@@ -168,7 +192,12 @@ export const validateTravelerForm = ({
 
   let firstMessage = "";
   travelerDetails.forEach((traveler, index) => {
-    const travelerValidation = validateTraveler(traveler, index, checklistRules);
+    const travelerValidation = validateTraveler(
+      traveler,
+      index,
+      checklistRules,
+      isDomestic,
+    );
     if (Object.keys(travelerValidation.errors).length > 0) {
       nextErrors.travelers[traveler.id || `traveler-${index + 1}`] = travelerValidation.errors;
       if (!firstMessage) firstMessage = travelerValidation.message;

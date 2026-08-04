@@ -466,6 +466,7 @@ const FareComparisonModalMulticity = ({
         },
       };
       const nextSession = {
+        journey: selectedFlight?.journey,
         selectedFlight,
         selectedFare: {
           ...selectedFareList[0],

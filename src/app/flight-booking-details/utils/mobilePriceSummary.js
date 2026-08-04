@@ -41,6 +41,9 @@ export const buildMobilePriceSummary = ({
   prices = {},
   bookingSession = null,
   travelerDetails = [],
+  baggageSelections = [],
+  mealSelections = [],
+  seatSelections = [],
 }) => {
   const passengerCounts = getPassengerCounts(travelerDetails, bookingSession);
   const totalPassengers =
@@ -63,22 +66,28 @@ export const buildMobilePriceSummary = ({
       value: "Included",
       isGreen: true,
     },
-    {
-      label: "Seat Selection",
-      value: seats > 0 ? formatCurrency(seats) : "Free",
-      isGreen: seats <= 0,
-    },
-    {
-      label: "Meals",
-      value: meals > 0 ? formatCurrency(meals) : "Included",
-      isGreen: meals <= 0,
-    },
   ];
 
-  if (baggage > 0) {
+  if (baggageSelections.length > 0 || baggage > 0) {
     lineItems.splice(3, 0, {
       label: "Extra Baggage",
       value: formatCurrency(baggage),
+    });
+  }
+
+  if (seatSelections.length > 0 || seats > 0) {
+    lineItems.push({
+      label: "Seat Selection",
+      value: seats > 0 ? formatCurrency(seats) : "Free",
+      isGreen: seats <= 0,
+    });
+  }
+
+  if (mealSelections.length > 0 || meals > 0) {
+    lineItems.push({
+      label: "Meals",
+      value: meals > 0 ? formatCurrency(meals) : "Included",
+      isGreen: meals <= 0,
     });
   }
 

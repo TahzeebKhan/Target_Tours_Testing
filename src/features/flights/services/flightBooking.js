@@ -453,12 +453,11 @@ const normalizePricingFlightNo = (...values) => {
     if (!text) continue;
 
     if (/^\d+$/.test(text)) return text;
-    const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
-    if (trailing) {
-      const carrier = text.match(/^([A-Za-z0-9]{1,3})/)?.[1] || "";
-      return carrier
-        ? `${carrier.toUpperCase()} ${trailing[1]}`
-        : trailing[1];
+    const carrierFlight = text.match(
+      /^([A-Za-z0-9]{2,3})[-\s]+(\d{1,4})(?:\s+\2)?$/,
+    );
+    if (carrierFlight) {
+      return `${carrierFlight[1].toUpperCase()} ${carrierFlight[2]}`;
     }
     if (text.includes("|")) return text.split("|").pop()?.trim() || text;
 
@@ -700,6 +699,12 @@ const PRICING_SSE_EVENT_NAMES = [
   "FLIGHT_V2_PRICING_ACCEPTED",
   "FLIGHT_V2_PRICING_STARTED",
   "FLIGHT_V2_PRICING_RESULT",
+  "FLIGHT_V2_PRICING_TRAVEL_CHECK_LIST_RESULT",
+  "FLIGHT_V2_PRICING_TRAVEL_CHECK_LIST_COMPLETE",
+  "FLIGHT_V2_PRICING_TRAVEL_CHECK_LIST_COMPLETED",
+  "FLIGHT_V2_PRICING_CHECK_LIST_RESULT",
+  "FLIGHT_V2_PRICING_CHECK_LIST_COMPLETE",
+  "FLIGHT_V2_PRICING_CHECK_LIST_COMPLETED",
   "FLIGHT_V2_PRICING_COMPLETE",
   "FLIGHT_V2_PRICING_COMPLETED",
   "FLIGHT_V2_PRICING_ERROR",
@@ -873,9 +878,11 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
     let initResponse = null;
     let events = null;
     let abortHandler = null;
+    let completionTimer = null;
 
     const cleanup = () => {
       window.clearTimeout(hardTimer);
+      window.clearTimeout(completionTimer);
       events?.close();
       if (abortHandler) signal?.removeEventListener("abort", abortHandler);
     };
@@ -1041,15 +1048,21 @@ export const getFlightPrice = async (payload, { signal } = {}) => {
         (type.includes("COMPLETE") || type.includes("COMPLETED"));
 
       if (isPricingCompleteEvent) {
-        const result = buildResult();
-        if (extractFlightPricingPayload(result) || multiCityPricingResults.size > 0) {
-          settle(resolve, result);
-        } else {
-          settle(
-            reject,
-            new Error("Flight pricing completed without pricing details.")
-          );
-        }
+        // The backend can emit travel-checklist events shortly after the
+        // pricing-complete event. Keep the SSE connection alive briefly so
+        // those named events are included in pricingChunks.
+        window.clearTimeout(completionTimer);
+        completionTimer = window.setTimeout(() => {
+          const result = buildResult();
+          if (extractFlightPricingPayload(result) || multiCityPricingResults.size > 0) {
+            settle(resolve, result);
+          } else {
+            settle(
+              reject,
+              new Error("Flight pricing completed without pricing details.")
+            );
+          }
+        }, 1200);
       }
     };
 

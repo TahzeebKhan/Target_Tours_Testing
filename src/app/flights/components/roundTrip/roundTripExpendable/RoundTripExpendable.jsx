@@ -214,6 +214,13 @@ const toApiTimelineFlight = (flight = {}) => {
     flight?.airline || flight?.airlineName || flight?.MAC || flight?.VAC || "N/A";
   const airlineCode = flight?.MAC || flight?.VAC || flight?.airlineCode || "";
   const flightNo = flight?.flightNo || flight?.FlightNo || "";
+  const normalizedAirlineCode =
+    String(airlineCode).trim().split(/\s+/)[0] ||
+    String(flightNo).trim().match(/^([A-Za-z0-9]{2,3})[-\s]+/)?.[1] ||
+    "";
+  const normalizedFlightNo =
+    String(flightNo).trim().match(/(\d{1,4})(?:\s+\1)?$/)?.[1] ||
+    String(flightNo).trim();
   const departureCode = getInfoOriginCode(flight);
   const arrivalCode = getInfoDestinationCode(flight);
   const duration = parseDurationParts(
@@ -233,10 +240,10 @@ const toApiTimelineFlight = (flight = {}) => {
   return {
     airline: {
       name: airlineName,
-      code: `${airlineCode}${flightNo ? ` ${flightNo}` : ""}`.trim(),
+      code: `${normalizedAirlineCode}${normalizedFlightNo ? ` ${normalizedFlightNo}` : ""}`.trim(),
       logo: resolveAirlineLogo({
         name: airlineName,
-        code: airlineCode || flightNo,
+        code: normalizedAirlineCode || normalizedFlightNo,
       }),
     },
     aircraft: flight?.AirCraft || flight?.aircraft || "",

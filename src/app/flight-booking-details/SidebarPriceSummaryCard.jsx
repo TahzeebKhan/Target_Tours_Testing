@@ -44,6 +44,9 @@ export default function SidebarPriceSummaryCard() {
     travelerDetails,
     bookingSession,
     paymentMethod,
+    baggage,
+    meals,
+    seats,
   } = useFlightBooking();
   const passengerCounts = getPassengerCounts(travelerDetails, bookingSession);
   const totalPassengers =
@@ -83,30 +86,34 @@ export default function SidebarPriceSummaryCard() {
           <span className={styles.success}>Included</span>
         </div>
 
-        {prices.baggage > 0 && (
+        {(baggage?.length > 0 || prices.baggage > 0) && (
           <div className={styles.row}>
             <span>Extra Baggage</span>
             <span className={styles.price}>₹ {prices.baggage.toLocaleString()}</span>
           </div>
         )}
 
-        <div className={styles.row}>
-          <span>Seat Selection</span>
-          {prices.seats > 0 ? (
-            <span className={styles.price}>₹ {prices.seats.toLocaleString()}</span>
-          ) : (
-            <span className={styles.success}>Free</span>
-          )}
-        </div>
+        {(seats?.length > 0 || prices.seats > 0) && (
+          <div className={styles.row}>
+            <span>Seat Selection</span>
+            {prices.seats > 0 ? (
+              <span className={styles.price}>₹ {prices.seats.toLocaleString()}</span>
+            ) : (
+              <span className={styles.success}>Free</span>
+            )}
+          </div>
+        )}
 
-        <div className={styles.row}>
-          <span>Meals</span>
-          {prices.meals > 0 ? (
-            <span className={styles.price}>₹ {prices.meals.toLocaleString()}</span>
-          ) : (
-            <span className={styles.success}>Included</span>
-          )}
-        </div>
+        {(meals?.length > 0 || prices.meals > 0) && (
+          <div className={styles.row}>
+            <span>Meals</span>
+            {prices.meals > 0 ? (
+              <span className={styles.price}>₹ {prices.meals.toLocaleString()}</span>
+            ) : (
+              <span className={styles.success}>Included</span>
+            )}
+          </div>
+        )}
 
         <div className={styles.row}>
           <span>Taxes & Fees</span>

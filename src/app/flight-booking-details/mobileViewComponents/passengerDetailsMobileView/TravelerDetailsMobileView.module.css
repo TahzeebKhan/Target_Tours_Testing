@@ -37,10 +37,19 @@
 
 /* Card */
 .card {
+    position: relative;
     border: 1px solid #E4E6E8;
     padding: 16px;
     background: #FFFFFF;
 
+}
+
+.travelerCard {
+    z-index: auto;
+}
+
+.card:has(button[aria-expanded="true"]) {
+    z-index: 1000;
 }
 
 /* Header */
@@ -100,6 +109,58 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.internationalFields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.internationalFields > .grid {
+    display: contents;
+}
+
+.childDobGrid > .field {
+    width: 100%;
+}
+
+.gstSection {
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #E4E6E8;
+}
+
+.gstCheckboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-inter);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gstCheckboxLabel input {
+    width: 18px;
+    height: 18px;
+    accent-color: #078CF5;
+}
+
+.gstCheckboxLabel em {
+    color: #999;
+    font-style: normal;
+    font-weight: 400;
+}
+
+.gstFields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.saveGstCheckbox {
+    margin-top: 4px;
 }
 
 /* Field */

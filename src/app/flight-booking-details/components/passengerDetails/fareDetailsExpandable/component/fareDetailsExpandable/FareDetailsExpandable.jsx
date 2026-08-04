@@ -47,7 +47,7 @@ const FareDetailsExpandable = () => {
                         <div className={styles.flightDepartureDetails}>
                             <FlightTimeline flight={routeFlight} />
                         </div>
-                        <FlightFacilities />
+                        {/* <FlightFacilities /> */}
                     </div>
                 </div>
             ))}
@@ -58,7 +58,7 @@ const FareDetailsExpandable = () => {
                         <div className={styles.flightDepartureDetails}>
                             <FlightTimeline flight={flight} />
                         </div>
-                        <FlightFacilities />
+                        {/* <FlightFacilities /> */}
                     </div>
                 </div>
             )}
@@ -69,7 +69,7 @@ const FareDetailsExpandable = () => {
                         <div className={styles.flightDepartureDetails}>
                             <FlightTimeline flight={returnFlight} />
                         </div>
-                        <FlightFacilities facilities={facilitiesData} className={styles.facilities} />
+                        {/* <FlightFacilities facilities={facilitiesData} className={styles.facilities} /> */}
                     </div>
                 </div>
             )}

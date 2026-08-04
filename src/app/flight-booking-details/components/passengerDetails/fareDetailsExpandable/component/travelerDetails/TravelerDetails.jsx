@@ -4,8 +4,16 @@ import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingCont
 import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import {
     EMPTY_TRAVELER_FORM_ERRORS,
+    getBookingJourney,
+    getTravelerDobError,
     validateTravelerForm,
 } from "@/app/flight-booking-details/utils/travelerValidation";
+import Cookies from "js-cookie";
+import { useAuth } from "@/app/context/AuthContext";
+import CountryCodeSelect from "@/app/flight-booking-details/components/CountryCodeSelect/CountryCodeSelect";
+import NationalitySelect from "@/app/flight-booking-details/components/NationalitySelect/NationalitySelect";
+import { createPassenger, getPassengers } from "@/shared/services/passenger";
+import { toast } from "react-toastify";
 
 const buildPassengerSlots = (bookingSession) => {
     const { adult: adults, child: children, infant: infants } =
@@ -35,18 +43,18 @@ const buildTravelerPayload = (slot, isOpen = true) => ({
     Title: "Mr",
     FName: "",
     LName: "",
-    Age: "26",
-    DOB: "2000-01-01",
-    Gender: "Male",
+    Age: "",
+    DOB: "",
+    Gender: "",
     PTC: getPtcForTravelerType(slot?.type),
-    Nationality: "IN",
-    PassportNo: "1234567",
-    PLI: "NOIDA",
-    PDOE: "2026-09-28",
-    VisaType: "Business",
-    CountryCode: "IN",
-    MobileNumber: "8532907106",
-    Email: "MUKUL.MISHRA@WEBNINJAZ.COM",
+    Nationality: "",
+    PassportNo: "",
+    PLI: "",
+    PDOE: "",
+    VisaType: "",
+    CountryCode: "",
+    MobileNumber: "",
+    Email: "",
 });
 
 const hydrateTravelers = (savedTravelers = [], passengerSlots = []) => {
@@ -78,18 +86,21 @@ const serializeTravelers = (travelers = []) =>
         ...payload,
     }));
 
-const DEFAULT_BOOKING_CONTACT = {
-    Address: "ETAH",
-    CountryCode: "IN",
-    State: "UP",
-    City: "NOIDA",
-    PIN: "207001",
-    MobileNumber: "8532907106",
-    Email: "MUKUL.MISHRA@WEBNINJAZ.COM",
+const getUserBookingContact = () => {
+    try {
+        const user = JSON.parse(Cookies.get("user") || "{}");
+        return {
+            CountryCode: user.dail_code || "",
+            MobileNumber: user.phone_no || "",
+            Email: user.email || "",
+        };
+    } catch {
+        return { CountryCode: "", MobileNumber: "", Email: "" };
+    }
 };
 
 const getBookingContactState = (value) =>
-    value && Object.keys(value).length > 0 ? value : DEFAULT_BOOKING_CONTACT;
+    value && Object.keys(value).length > 0 ? value : getUserBookingContact();
 
 const openNativeDatePicker = (event) => {
     try {
@@ -100,6 +111,7 @@ const openNativeDatePicker = (event) => {
 };
 
 const TravelerDetails = () => {
+    const { user } = useAuth();
     const {
         bookingSession,
         travelerDetails,
@@ -110,14 +122,66 @@ const TravelerDetails = () => {
         setTravelerFormErrors,
     } = useFlightBooking();
     const passengerSlots = useMemo(() => buildPassengerSlots(bookingSession), [bookingSession]);
+    const journey = getBookingJourney(bookingSession);
+    const isDomestic = journey === "domestic";
     const [bookingContact, setBookingContact] = useState(
         getBookingContactState(bookingContactDetails)
     );
     const [travelers, setTravelers] = useState(() =>
         hydrateTravelers(travelerDetails, passengerSlots)
     );
+    const [savedTravelers, setSavedTravelers] = useState([]);
+    const [savedTravelerSearch, setSavedTravelerSearch] = useState("");
+    const [savedTravelersLoading, setSavedTravelersLoading] = useState(true);
+    const [savingTravelerId, setSavingTravelerId] = useState("");
     const lastSyncedTravelersRef = useRef(JSON.stringify(serializeTravelers(hydrateTravelers(travelerDetails, passengerSlots))));
     const lastSyncedBookingContactRef = useRef(JSON.stringify(getBookingContactState(bookingContactDetails)));
+
+    const loadSavedTravelers = async () => {
+        setSavedTravelersLoading(true);
+        try {
+            const response = await getPassengers();
+            const rows =
+                (Array.isArray(response) && response) ||
+                (Array.isArray(response?.data) && response.data) ||
+                response?.data?.passengers ||
+                response?.passengers ||
+                response?.results ||
+                [];
+            setSavedTravelers(Array.isArray(rows) ? rows : []);
+        } catch (error) {
+            toast.error(error?.response?.data?.error?.message || error?.response?.data?.message || "Unable to load saved travelers.");
+        } finally {
+            setSavedTravelersLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadSavedTravelers();
+    }, []);
+
+    const filteredSavedTravelers = useMemo(() => {
+        const query = savedTravelerSearch.trim().toLowerCase();
+        if (!query) return savedTravelers;
+        return savedTravelers.filter((passenger) =>
+            [passenger?.title, passenger?.first_name, passenger?.last_name, passenger?.email]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase()
+                .includes(query)
+        );
+    }, [savedTravelerSearch, savedTravelers]);
+
+    useEffect(() => {
+        if (!user) return;
+
+        setBookingContact((current) => ({
+            ...current,
+            CountryCode: current.CountryCode || user.dail_code || "",
+            MobileNumber: current.MobileNumber || user.phone_no || "",
+            Email: current.Email || user.email || "",
+        }));
+    }, [user]);
 
     useEffect(() => {
         const nextTravelers = hydrateTravelers(travelerDetails, passengerSlots);
@@ -168,12 +232,13 @@ const TravelerDetails = () => {
             travelerDetails: serializeTravelers(travelers),
             bookingContactDetails: bookingContact,
             checklistResponse: bookingSession?.checklistResponse,
+            journey,
         });
         const nextErrors = JSON.stringify(validation.errors || EMPTY_TRAVELER_FORM_ERRORS);
         if (currentErrors !== nextErrors) {
             setTravelerFormErrors(validation.errors);
         }
-    }, [bookingContact, setTravelerFormErrors, travelerFormErrors, travelers]);
+    }, [bookingContact, journey, setTravelerFormErrors, travelerFormErrors, travelers]);
 
     const clearTravelerFieldError = (travelerId, field) => {
         setTravelerFormErrors((prev) => {
@@ -194,6 +259,18 @@ const TravelerDetails = () => {
                 ...(prev || EMPTY_TRAVELER_FORM_ERRORS),
                 travelers: nextTravelerErrors,
             };
+        });
+    };
+
+    const setTravelerFieldError = (travelerId, field, message) => {
+        setTravelerFormErrors((prev) => {
+            const nextTravelers = { ...(prev?.travelers || {}) };
+            const nextFields = { ...(nextTravelers[travelerId] || {}) };
+            if (message) nextFields[field] = message;
+            else delete nextFields[field];
+            if (Object.keys(nextFields).length) nextTravelers[travelerId] = nextFields;
+            else delete nextTravelers[travelerId];
+            return { ...(prev || EMPTY_TRAVELER_FORM_ERRORS), travelers: nextTravelers };
         });
     };
 
@@ -222,7 +299,77 @@ const TravelerDetails = () => {
         lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
         setTravelers(nextTravelers);
         setTravelerDetails(serializedNext);
-        clearTravelerFieldError(nextTravelers[index]?.id, field);
+        if (field === "DOB") {
+            setTravelerFieldError(
+                nextTravelers[index]?.id,
+                field,
+                getTravelerDobError(nextTravelers[index]),
+            );
+        } else {
+            clearTravelerFieldError(nextTravelers[index]?.id, field);
+        }
+    };
+
+    const selectSavedTraveler = (passenger) => {
+        const targetIndex = travelers.findIndex((traveler) => !traveler.FName && !traveler.LName);
+        const index = targetIndex >= 0 ? targetIndex : 0;
+        const current = travelers[index];
+        if (!current) return;
+        const nextTravelers = travelers.map((traveler, travelerIndex) =>
+            travelerIndex === index
+                ? {
+                    ...traveler,
+                    Title: passenger?.title || "Mr",
+                    FName: passenger?.first_name || "",
+                    LName: passenger?.last_name || "",
+                    Gender: passenger?.gender || "",
+                    DOB: passenger?.dob || "",
+                    Nationality: passenger?.nationality || "",
+                    PassportNo: passenger?.passport_no || "",
+                    PDOE: passenger?.passport_expiry || "",
+                    Email: passenger?.email || traveler.Email || "",
+                    isOpen: true,
+                }
+                : traveler
+        );
+        const serializedNext = serializeTravelers(nextTravelers);
+        lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
+        setTravelers(nextTravelers);
+        setTravelerDetails(serializedNext);
+        setTravelerFormErrors(EMPTY_TRAVELER_FORM_ERRORS);
+    };
+
+    const saveSpecificTraveler = async (traveler) => {
+        const nullable = (value) => {
+            if (value === undefined || value === null) return null;
+            const normalized = String(value).trim();
+            return normalized || null;
+        };
+
+        setSavingTravelerId(traveler.id);
+        try {
+            await createPassenger({
+                type: "flight",
+                title: nullable(traveler.Title),
+                first_name: nullable(traveler.FName),
+                last_name: nullable(traveler.LName),
+                gender: nullable(traveler.Gender)?.toLowerCase() || null,
+                dob: nullable(traveler.DOB),
+                nationality: nullable(traveler.Nationality),
+                passport_no: nullable(traveler.PassportNo),
+                passport_expiry: nullable(traveler.PDOE),
+            });
+            toast.success("Traveler saved successfully.");
+            await loadSavedTravelers();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.error?.message ||
+                error?.response?.data?.message ||
+                "Unable to save traveler."
+            );
+        } finally {
+            setSavingTravelerId("");
+        }
     };
 
     const addTraveler = () => {
@@ -271,6 +418,41 @@ const TravelerDetails = () => {
         travelerFormErrors?.bookingContact?.[field] || "";
     return (
         <div className={styles.wrapper}>
+            <section className={styles.savedTravelersSection}>
+                <div className={styles.savedTravelersHeader}>
+                    <div>
+                        <h3>Saved Travelers</h3>
+
+                    </div>
+                    <input
+                        type="search"
+                        value={savedTravelerSearch}
+                        onChange={(event) => setSavedTravelerSearch(event.target.value)}
+                        placeholder="Search saved travelers"
+                        aria-label="Search saved travelers"
+                    />
+                </div>
+                {savedTravelersLoading ? (
+                    <p className={styles.savedTravelerState}>Loading saved travelers…</p>
+                ) : filteredSavedTravelers.length ? (
+                    <div className={styles.savedTravelerGrid}>
+                        {filteredSavedTravelers.map((passenger, index) => (
+                            <button
+                                type="button"
+                                className={styles.savedTravelerCard}
+                                key={passenger?.id || `${passenger?.first_name}-${index}`}
+                                onClick={() => selectSavedTraveler(passenger)}
+                            >
+                                <strong>{[passenger?.title, passenger?.first_name, passenger?.last_name].filter(Boolean).join(" ") || "Traveler"}</strong>
+                                <span>{passenger?.email || passenger?.phone || passenger?.mobile || "Saved flight traveler"}</span>
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <p className={styles.savedTravelerState}>No saved travelers found.</p>
+                )}
+            </section>
+
             {/* Add Traveler */}
             {travelers.length < passengerSlots.length && (
                 <div className={styles.addTraveler} onClick={addTraveler}>
@@ -281,9 +463,20 @@ const TravelerDetails = () => {
             {/* Traveler Cards */}
             <div className={styles.travelerCards}>
                 {travelers.map((traveler, index) => (
-                <div key={traveler.id} className={styles.card}>
+                <div key={traveler.id} className={`${styles.card} ${styles.travelerCard}`}>
                     <div className={styles.cardHeader}>
+
                         <h3>TRAVELER {index + 1} - {traveler.type}</h3>
+
+                     <div className={styles.saveButtonParent}>
+                     <button
+                            type="button"
+                            className={styles.savedTravellerButton}
+                            disabled={savingTravelerId === traveler.id}
+                            onClick={() => saveSpecificTraveler(traveler)}
+                        >
+                            {savingTravelerId === traveler.id ? "Saving…" : "Save traveller"}
+                        </button>
 
                         <span className={styles.iconWrapper} onClick={() => toggleTraveler(index)}>
                             <span className={`${styles.icon} ${traveler.isOpen ? styles.hide : styles.show}`}>
@@ -293,6 +486,8 @@ const TravelerDetails = () => {
                                 —
                             </span>
                         </span>
+                        </div>
+
                     </div>
 
                     <div
@@ -346,53 +541,8 @@ const TravelerDetails = () => {
 
                         </div>
 
-                        <div className={styles.grid}>
-                            <div className={`${styles.field} ${styles.selectField}`}>
-                                <label className={styles.label}>Gender</label>
-                                <select
-                                    className={`${styles.select} ${getTravelerFieldError(traveler.id, "Gender") ? styles.fieldError : ""}`}
-                                    value={traveler.Gender}
-                                    onChange={(event) => updateTravelerField(index, "Gender", event.target.value)}
-                                >
-                                    <option value="" disabled hidden>Select</option>
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
-                                </select>
-                                {getTravelerFieldError(traveler.id, "Gender") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "Gender")}</span>
-                                )}
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={styles.label}>Country Code</label>
-                                <input
-                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "CountryCode") ? styles.fieldError : ""}`}
-                                    type="text"
-                                    placeholder="Country Code (optional)"
-                                    value={traveler.CountryCode}
-                                    onChange={(event) => updateTravelerField(index, "CountryCode", event.target.value)}
-                                />
-                                {getTravelerFieldError(traveler.id, "CountryCode") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "CountryCode")}</span>
-                                )}
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={styles.label}>Mobile Number</label>
-                                <input
-                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "MobileNumber") ? styles.fieldError : ""}`}
-                                    type="text"
-                                    placeholder="Mobile number (optional)"
-                                    value={traveler.MobileNumber}
-                                    onChange={(event) => updateTravelerField(index, "MobileNumber", event.target.value)}
-                                />
-                                {getTravelerFieldError(traveler.id, "MobileNumber") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "MobileNumber")}</span>
-                                )}
-                            </div>
-
-                        </div>
-
+                        {!isDomestic && (
+                        <div className={styles.internationalFields}>
                         <div className={styles.grid}>
                             <div className={styles.field}>
                                 <label className={styles.label}>Email</label>
@@ -408,46 +558,15 @@ const TravelerDetails = () => {
                                 )}
                             </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Age</label>
-                                <input
-                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "Age") ? styles.fieldError : ""}`}
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    placeholder="Enter Age"
-                                    value={traveler.Age}
-                                    onChange={(event) => updateTravelerField(index, "Age", event.target.value)}
-                                />
-                                {getTravelerFieldError(traveler.id, "Age") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "Age")}</span>
-                                )}
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={styles.label}>DOB</label>
-                                <input
-                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "DOB") ? styles.fieldError : ""}`}
-                                    type="date"
-                                    value={traveler.DOB}
-                                    onChange={(event) => updateTravelerField(index, "DOB", event.target.value)}
-                                    onClick={openNativeDatePicker}
-                                />
-                                {getTravelerFieldError(traveler.id, "DOB") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "DOB")}</span>
-                                )}
-                            </div>
                         </div>
 
                         <div className={styles.grid}>
                             <div className={styles.field}>
                                 <label className={styles.label}>Nationality</label>
-                                <input
-                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "Nationality") ? styles.fieldError : ""}`}
-                                    type="text"
-                                    placeholder="Nationality"
+                                <NationalitySelect
                                     value={traveler.Nationality}
-                                    onChange={(event) => updateTravelerField(index, "Nationality", event.target.value)}
+                                    onChange={(value) => updateTravelerField(index, "Nationality", value)}
+                                    hasError={Boolean(getTravelerFieldError(traveler.id, "Nationality"))}
                                 />
                                 {getTravelerFieldError(traveler.id, "Nationality") && (
                                     <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "Nationality")}</span>
@@ -501,33 +620,22 @@ const TravelerDetails = () => {
                             <div className={`${styles.field} ${styles.selectField}`}>
                                 <label className={styles.label}>Visa Type</label>
                                 <select
-                                    className={`${styles.select} ${getTravelerFieldError(traveler.id, "VisaType") ? styles.fieldError : ""}`}
+                                    className={styles.select}
                                     value={traveler.VisaType}
                                     onChange={(event) => updateTravelerField(index, "VisaType", event.target.value)}
                                 >
-                                    <option value="" disabled hidden>Select</option>
-                                    <option value="Visiting">Visiting</option>
-                                    <option value="Tourist">Tourist</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Student">Student</option>
-                                    <option value="Work">Work</option>
-                                    <option value="Transit">Transit</option>
+                                    <option value="">Select Visa Type</option>
+                                    <option value="Tourist Visa">Tourist Visa</option>
+                                    <option value="Visiting Visa">Visiting Visa</option>
+                                    <option value="Business Visa">Business Visa</option>
+                                    <option value="Transit Visa">Transit Visa</option>
+                                    <option value="Student Visa">Student Visa</option>
                                 </select>
-                                {getTravelerFieldError(traveler.id, "VisaType") && (
-                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "VisaType")}</span>
-                                )}
                             </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>PTC</label>
-                                <input
-                                    className={styles.input}
-                                    type="text"
-                                    value={traveler.PTC}
-                                    readOnly
-                                />
-                            </div>
                         </div>
+                        </div>
+                        )}
                     </div>
 
                 </div>
@@ -539,15 +647,14 @@ const TravelerDetails = () => {
                     BOOKING DETAILS WILL BE SENT TO
                 </h3>
 
-                <div className={styles.cardBody}>
+                <div className={`${styles.cardBody} ${styles.bookingCardBody}`}>
                     <div className={styles.grid}>
                         <div className={styles.field}>
                             <label className={styles.label}>Country Code</label>
-                            <input
-                                className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("CountryCode") ? styles.fieldError : ""}`}
-                                placeholder="Country Code (optional)"
+                            <CountryCodeSelect
                                 value={bookingContact.CountryCode}
-                                onChange={(event) => updateBookingContactField("CountryCode", event.target.value)}
+                                hasError={Boolean(getBookingFieldError("CountryCode"))}
+                                onChange={(value) => updateBookingContactField("CountryCode", value)}
                             />
                             {getBookingFieldError("CountryCode") && (
                                 <span className={styles.errorText}>{getBookingFieldError("CountryCode")}</span>
@@ -558,7 +665,7 @@ const TravelerDetails = () => {
                             <label className={styles.label}>Mobile Number</label>
                             <input
                                 className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("MobileNumber") ? styles.fieldError : ""}`}
-                                placeholder="Mobile number (optional)"
+                                placeholder="Mobile number "
                                 value={bookingContact.MobileNumber}
                                 onChange={(event) => updateBookingContactField("MobileNumber", event.target.value)}
                             />
@@ -571,7 +678,7 @@ const TravelerDetails = () => {
                             <label className={styles.label}>Email</label>
                             <input
                                 className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("Email") ? styles.fieldError : ""}`}
-                                placeholder="Email (Optional)"
+                                placeholder="Email "
                                 value={bookingContact.Email}
                                 onChange={(event) => updateBookingContactField("Email", event.target.value)}
                             />
@@ -581,64 +688,72 @@ const TravelerDetails = () => {
                         </div>
                     </div>
 
-                    <div className={styles.grid}>
-                        <div className={styles.field}>
-                            <label className={styles.label}>Address</label>
+                    <div className={styles.gstSection}>
+                        <label className={styles.gstCheckboxLabel}>
                             <input
-                                className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("Address") ? styles.fieldError : ""}`}
-                                placeholder="Address"
-                                value={bookingContact.Address}
-                                onChange={(event) => updateBookingContactField("Address", event.target.value)}
+                                type="checkbox"
+                                checked={Boolean(bookingContact.HasGST)}
+                                onChange={(event) => updateBookingContactField("HasGST", event.target.checked)}
                             />
-                            {getBookingFieldError("Address") && (
-                                <span className={styles.errorText}>{getBookingFieldError("Address")}</span>
-                            )}
-                        </div>
+                            <span>I have a GST number <em>(Optional)</em></span>
+                        </label>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>State</label>
-                            <input
-                                className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("State") ? styles.fieldError : ""}`}
-                                placeholder="State"
-                                value={bookingContact.State}
-                                onChange={(event) => updateBookingContactField("State", event.target.value)}
-                            />
-                            {getBookingFieldError("State") && (
-                                <span className={styles.errorText}>{getBookingFieldError("State")}</span>
-                            )}
-                        </div>
+                        {bookingContact.HasGST && (
+                            <div className={styles.gstFields}>
+                                <div className={styles.field}>
+                                    <label className={styles.label}>GSTIN</label>
+                                    <input
+                                        className={`${styles.input} ${styles.bookingInput}`}
+                                        placeholder="GSTIN"
+                                        value={bookingContact.GSTRegistrationNo || ""}
+                                        onChange={(event) => updateBookingContactField("GSTRegistrationNo", event.target.value)}
+                                    />
+                                </div>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>City</label>
-                            <input
-                                className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("City") ? styles.fieldError : ""}`}
-                                placeholder="City"
-                                value={bookingContact.City}
-                                onChange={(event) => updateBookingContactField("City", event.target.value)}
-                            />
-                            {getBookingFieldError("City") && (
-                                <span className={styles.errorText}>{getBookingFieldError("City")}</span>
-                            )}
-                        </div>
+                                <div className={styles.field}>
+                                    <label className={styles.label}>GST Holder Name</label>
+                                    <input
+                                        className={`${styles.input} ${styles.bookingInput}`}
+                                        placeholder="GST Holder Name"
+                                        value={bookingContact.GSTHolderName || ""}
+                                        onChange={(event) => updateBookingContactField("GSTHolderName", event.target.value)}
+                                    />
+                                </div>
+
+                                <div className={styles.field}>
+                                    <label className={styles.label}>GST Email Address</label>
+                                    <input
+                                        className={`${styles.input} ${styles.bookingInput}`}
+                                        type="email"
+                                        placeholder="GST Email Address"
+                                        value={bookingContact.GSTEmail || ""}
+                                        onChange={(event) => updateBookingContactField("GSTEmail", event.target.value)}
+                                    />
+                                </div>
+
+                                <div className={styles.field}>
+                                    <label className={styles.label}>GST Phone Number</label>
+                                    <input
+                                        className={`${styles.input} ${styles.bookingInput}`}
+                                        type="tel"
+                                        placeholder="GST Phone Number"
+                                        value={bookingContact.GSTPhone || ""}
+                                        onChange={(event) => updateBookingContactField("GSTPhone", event.target.value)}
+                                    />
+                                </div>
+
+                                <label className={`${styles.gstCheckboxLabel} ${styles.saveGstCheckbox}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(bookingContact.SaveGST)}
+                                        onChange={(event) => updateBookingContactField("SaveGST", event.target.checked)}
+                                    />
+                                    <span>Save GST Details</span>
+                                </label>
+                            </div>
+                        )}
                     </div>
 
-                    <div className={styles.grid}>
-                        <div className={styles.field}>
-                            <label className={styles.label}>PIN</label>
-                            <input
-                                className={`${styles.input} ${styles.bookingInput} ${getBookingFieldError("PIN") ? styles.fieldError : ""}`}
-                                placeholder="PIN"
-                                value={bookingContact.PIN}
-                                onChange={(event) => updateBookingContactField("PIN", event.target.value)}
-                            />
-                            {getBookingFieldError("PIN") && (
-                                <span className={styles.errorText}>{getBookingFieldError("PIN")}</span>
-                            )}
-                        </div>
-
-                        <div className={styles.field}></div>
-                        <div className={styles.field}></div>
-                    </div>
                 </div>
             </div>
             </div>

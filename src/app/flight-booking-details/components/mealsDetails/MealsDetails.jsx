@@ -5,7 +5,6 @@ import Expandable from "./Components/Expandable";
 import MealGuidelineExpandable from "./Components/mealGuidelineExpandable/MealGuidelineExpandable";
 import MobileFlightMeals from "./Components/MobileFlightMeals";
 import { useFlightBooking } from "../../FlightBookingContext";
-import { meals, beverages } from "./mealsData";
 import TripDetailsHeader from "@/shared/components/tripDetailsHeader/TripDetailsHeader";
 import PriceSummary from "@/features/profile/components/PriceSummary";
 import { getBookingDetailsView, getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
@@ -29,8 +28,7 @@ const buildQuantitiesFromSelections = (items = []) =>
     return acc;
   }, {});
 
-const MAIN_MEAL_IMAGES = meals.map((item) => item.image);
-const BEVERAGE_IMAGES = beverages.map((item) => item.image);
+const MEAL_IMAGE = "/images/common.png";
 
 const buildMealRouteCards = (bookingSession, bookingView) => {
   const formatted = bookingSession?.ssrResponse?.data?.formatted || {};
@@ -39,8 +37,7 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
   const normalizeMealItem = (item, index) => {
     const title = String(item?.name || "").trim() || "Meal";
     const mealType = String(item?.type || "").trim().toLowerCase();
-    const isBeverage = /beverage|tea|coffee|drink|juice/i.test(title);
-    const imagePool = isBeverage ? BEVERAGE_IMAGES : MAIN_MEAL_IMAGES;
+    const isBeverage = /beverage|baverage|tea|coffee|drink|juice/i.test(title);
     const mealId = pickFirst(
       item?.MealID,
       item?.mealID,
@@ -73,7 +70,7 @@ const buildMealRouteCards = (bookingSession, bookingView) => {
         mealId ?? index + 1,
         fuid,
       ].join("::"),
-      image: imagePool[index % imagePool.length] || MAIN_MEAL_IMAGES[0],
+      image: MEAL_IMAGE,
       title,
       price: Number(item?.price || 0),
       mealType,

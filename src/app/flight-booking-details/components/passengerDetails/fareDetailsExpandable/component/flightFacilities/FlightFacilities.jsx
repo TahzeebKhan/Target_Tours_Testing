@@ -30,12 +30,12 @@ const FlightFacilities = ({ title = "Facilities", facilities = facilitiesData, c
       <h3 className={styles.flightDepartureFacilitiesHeader}>{title}</h3>
 
       <div className={`${styles.flightDepartureFacilitiesList} ${className}`}>
-        {facilities.map((item) => (
+        {/* {facilities.map((item) => (
           <div key={item.id} className={styles.flightDepartureFacilitiesItem}>
             <img src={item.icon} alt={item.text} />
             <p className={styles.facilitiesText}>{item.text}</p>
           </div>
-        ))}
+        ))} */}
       </div>
     </div>
   );

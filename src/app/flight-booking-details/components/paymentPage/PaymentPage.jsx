@@ -18,6 +18,7 @@ import { buildMobilePriceSummary } from "../../utils/mobilePriceSummary";
 import { useAuth } from "@/app/context/AuthContext";
 import LoginPopup from "@/app/account/loginPopUp/LoginPopup";
 import SignupPopup from "@/app/account/signUpPopUp/SignupPopup";
+import AddOnsModal from "./components/AddOnsModal";
 
 const formatSummaryDuration = (duration = {}) =>
   `${duration.hours || "00"}h ${duration.minutes || "00"}m`;
@@ -120,6 +121,7 @@ const PaymentPage = () => {
     setBaggage,
     meals,
     setMeals,
+    seats,
     setSeats,
     paymentMethod,
     setPaymentMethod,
@@ -128,6 +130,7 @@ const PaymentPage = () => {
   const [openTab, setOpenTab] = useState("passengerInfo");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const [showAddOnsModal, setShowAddOnsModal] = useState(false);
   const bookingView = useMemo(() => getBookingDetailsView(bookingSession), [bookingSession]);
   const selectedFare = bookingSession?.selectedFare || {};
   const header = bookingView?.header || {};
@@ -162,8 +165,15 @@ const PaymentPage = () => {
     };
   }, [bookingView, isMultiCity, multiCityFares, multiCityFlights, selectedFare]);
   const priceSummary = useMemo(
-    () => buildMobilePriceSummary({ prices, bookingSession, travelerDetails }),
-    [bookingSession, prices, travelerDetails]
+    () => buildMobilePriceSummary({
+      prices,
+      bookingSession,
+      travelerDetails,
+      baggageSelections: baggage,
+      mealSelections: meals,
+      seatSelections: seats,
+    }),
+    [baggage, bookingSession, meals, prices, seats, travelerDetails]
   );
   const summaryFlight = bookingView?.departureFlight;
 
@@ -215,10 +225,14 @@ const PaymentPage = () => {
       {showAuthModal && authView === "signup" && (
         <SignupPopup onClose={closeAuthModal} onNavigate={setAuthView} />
       )}
+      <AddOnsModal
+        isOpen={showAddOnsModal}
+        onClose={() => setShowAddOnsModal(false)}
+      />
       <div className={styles.tripDetailsContainer}>
         <div className={styles.tripDetailsHeader}>
           <img
-            onClick={() => setCurrentStep(5)}
+            onClick={() => setCurrentStep(2)}
             className={styles.backArrow}
             src="/icons/leftArrowTrip.svg"
             alt=""
@@ -236,6 +250,9 @@ const PaymentPage = () => {
             <h2 className={styles.to}>
               Singapore <span className={styles.cityCode}>(SIN)</span>
             </h2> */}
+            <button type="button" onClick={() => setShowAddOnsModal(true)}>
+            Add ons
+          </button>
           </div>
 
           <div className={styles.aboutFlightContainerRight}>
@@ -243,6 +260,7 @@ const PaymentPage = () => {
               Confirm and complete booking.
             </span>
           </div>
+
         </div>
 
         {/* Trip Summary */}

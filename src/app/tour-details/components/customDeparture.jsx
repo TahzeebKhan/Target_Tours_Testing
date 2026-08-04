@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import styles from "./customDeparture.module.css";
+import CustomItinerary from "./priceBar/CustomItinerary";
 
 const MONTHS = [
   { name: "February", month: 1, price: 43500 },
@@ -70,6 +71,7 @@ const CustomDeparture = ({ data, onBook }) => {
   const packagePrice = Number(data?.started_price || data?.base_price || 0);
   const [openMonth, setOpenMonth] = useState("September");
   const [selectedDate, setSelectedDate] = useState(new Date(year, 8, 13)); // Default to Sept 13
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
 
   const activeMonth = MONTHS.find((month) => month.name === openMonth) || MONTHS[7];
   
@@ -207,11 +209,22 @@ const CustomDeparture = ({ data, onBook }) => {
               >
                 SPEAK TO AN AGENT
               </button>
-              <button type="button" className={styles.detailsButton}>Submit Inquiry</button>
+              <button
+                type="button"
+                className={styles.detailsButton}
+                onClick={() => setIsInquiryOpen(true)}
+              >
+                Submit Inquiry
+              </button>
             </div>
           </aside>
         </div>
       </div>
+      <CustomItinerary
+        isOpen={isInquiryOpen}
+        hotel={data || { title: "Custom Tour", images: ["/fallback.png"] }}
+        onClose={() => setIsInquiryOpen(false)}
+      />
     </section>
   );
 };

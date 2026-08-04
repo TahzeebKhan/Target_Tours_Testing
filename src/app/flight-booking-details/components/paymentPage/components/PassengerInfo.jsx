@@ -12,6 +12,15 @@ const TYPE_MAP = {
   INF: "Infant",
 };
 
+const getGenderFromTitle = (traveler) => {
+  const title = String(traveler?.Title || "").trim().toUpperCase();
+  if (title === "MR") return "MALE";
+  if (title === "MS" || title === "MRS") return "FEMALE";
+
+  const gender = String(traveler?.Gender || "").trim().toUpperCase();
+  return GENDER_MAP[gender] || (gender === "MALE" || gender === "FEMALE" ? gender : "N/A");
+};
+
 const formatPassengerName = (traveler) => {
   const typeLabel = TYPE_MAP[traveler?.PTC] || traveler?.PTC || "Passenger";
   return `${traveler?.Title || ""} ${traveler?.FName || ""} ${traveler?.LName || ""} (${typeLabel})`
@@ -29,7 +38,7 @@ const PassengerInfo = () => {
 
   const passengers = travelers.map((traveler) => ({
     name: formatPassengerName(traveler),
-    gender: GENDER_MAP[traveler?.Gender] || traveler?.Gender || "N/A",
+    gender: getGenderFromTitle(traveler),
     email: traveler?.Email || contact?.Email || "N/A",
     contact: traveler?.MobileNumber || contact?.MobileNumber || "N/A",
     type: TYPE_MAP[traveler?.PTC] || traveler?.PTC || "Passenger",

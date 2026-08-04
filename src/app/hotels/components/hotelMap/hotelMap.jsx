@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Search, RotateCcw } from "lucide-react";
 import { GoogleMap, LoadScriptNext, OverlayView } from "@react-google-maps/api";
 import { useSearchParams } from "next/navigation";
@@ -329,7 +330,7 @@ export default function HotelMap({ isOpen, onClose }) {
       section.key !== "refundable",
   );
 
-  return (
+  return createPortal(
     <div
       className={styles.backdrop}
       role="dialog"
@@ -525,7 +526,8 @@ export default function HotelMap({ isOpen, onClose }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

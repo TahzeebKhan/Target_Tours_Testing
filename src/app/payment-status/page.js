@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../flight-booking-details/Navbar";
+import { resolveAirlineLogo } from "@/features/flights/utils/airlineLogos";
 import styles from "./page.module.css";
 import { clearFlightBookingSession } from "@/features/flights/utils/flightBookingSession";
 import { clearBookingSession } from "@/shared/utils/sessionStorage";
@@ -18,6 +19,18 @@ const readFlightPaymentSnapshot = () => {
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
+  }
+};
+
+const FLIGHT_RETRIEVE_SNAPSHOT_KEY = "flightRetrieveResponse";
+
+const readFlightRetrieveSnapshot = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(FLIGHT_RETRIEVE_SNAPSHOT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
   }
 };
 
@@ -123,6 +136,8 @@ const getApiMessage = (payload = {}, fallbackMessage) =>
   );
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
+const toBaggageItems = (value) =>
+  Array.isArray(value) ? value : value !== undefined && value !== null ? [value] : [];
 
 const postFlightJson = async (url, payload, fallbackMessage) => {
   const response = await fetch(url, {
@@ -142,6 +157,327 @@ const postFlightJson = async (url, payload, fallbackMessage) => {
   return data;
 };
 
+const formatTicketDate = (value) => {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatTicketTime = (value) => {
+  if (!value) return "--:--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+};
+
+const getPassengerName = (passenger = {}) =>
+  pickFirst(
+    passenger.name,
+    [passenger.Title || passenger.title, passenger.FName || passenger.firstName, passenger.LName || passenger.lastName]
+      .filter(Boolean)
+      .join(" "),
+    "Passenger",
+  );
+
+const formatBaggageAllowance = (value) => {
+  const entries = [];
+  const collectEntries = (item, key = "") => {
+    if (item === null || item === undefined || item === "") return;
+    if (Array.isArray(item)) {
+      item.forEach((child) => collectEntries(child, key));
+      return;
+    }
+    if (typeof item === "object") {
+      const type = pickFirst(
+        item.type,
+        item.baggage_type,
+        item.baggageType,
+        item.category,
+        item.kind,
+        key,
+      );
+      const allowance = pickFirst(
+        item.allowance,
+        item.weight,
+        item.value,
+        item.description,
+        item.name,
+        item.code,
+      );
+      if (allowance) {
+        entries.push({ type: String(type || ""), allowance: String(allowance) });
+        return;
+      }
+      Object.entries(item).forEach(([childKey, child]) =>
+        collectEntries(child, childKey),
+      );
+      return;
+    }
+    entries.push({ type: String(key || ""), allowance: String(item) });
+  };
+
+  collectEntries(value);
+  const cabin = [];
+  const checkIn = [];
+  const other = [];
+
+  entries.forEach(({ type, allowance }) => {
+    const classification = `${type} ${allowance}`.toLowerCase();
+    const normalizedAllowance = allowance.replace(/\s*kgs?\b/gi, " kg").trim();
+    if (/cabin|hand|carry[ -]?on/.test(classification)) {
+      cabin.push(normalizedAllowance.replace(/\b(cabin|hand|carry[ -]?on).*$/i, "").trim());
+    } else if (/check[ -]?in|checked|registered/.test(classification)) {
+      checkIn.push(normalizedAllowance.replace(/\b(check[ -]?in|checked|registered).*$/i, "").trim());
+    } else {
+      other.push(normalizedAllowance);
+    }
+  });
+
+  const unique = (items) => [...new Set(items.filter(Boolean))];
+  const parts = [];
+  const cabinValues = unique(cabin);
+  const checkInValues = unique(checkIn);
+  if (cabinValues.length) parts.push(`${cabinValues.join(" / ")} Cabin`);
+  if (checkInValues.length) parts.push(`${checkInValues.join(" / ")} Check-in`);
+  if (!parts.length) parts.push(...unique(other));
+
+  return parts.join(" + ") || "As per airline policy";
+};
+
+const getCityLabel = (name, code, fallback) => {
+  const parts = String(name || "").split("|").map((part) => part.trim()).filter(Boolean);
+  const city = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  return city || code || fallback;
+};
+
+const getAirportLabel = (name, code, fallback) => {
+  const city = getCityLabel(name, code, fallback);
+  return code && !city.toUpperCase().includes(String(code).toUpperCase())
+    ? `${code} - ${city}`
+    : city;
+};
+
+const getSegmentAirport = (segment = {}, side, route = {}) => {
+  const isDeparture = side === "departure";
+  const location = isDeparture
+    ? segment.origin || segment.departure_airport || segment.departureAirport
+    : segment.destination || segment.arrival_airport || segment.arrivalAirport;
+  const code = pickFirst(
+    isDeparture ? segment.from : segment.to,
+    location?.code,
+    location?.airport_code,
+    location?.iata_code,
+  );
+  const name = pickFirst(
+    isDeparture ? segment.dep_airport_name : segment.arr_airport_name,
+    isDeparture ? segment.departure_airport_name : segment.arrival_airport_name,
+    isDeparture ? route.from_name : route.to_name,
+    location?.airport_name,
+    location?.AirportName,
+    location?.name,
+    typeof location === "string" ? location : "",
+    isDeparture ? segment.from_name : segment.to_name,
+  );
+  const airportName = String(name || "")
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean)[0];
+  const fallback = isDeparture ? "Origin airport" : "Destination airport";
+
+  if (!airportName) return code || fallback;
+  return code && !airportName.toUpperCase().includes(String(code).toUpperCase())
+    ? `${code} - ${airportName}`
+    : airportName;
+};
+
+const getSegmentTerminal = (segment = {}, side) => {
+  const isDeparture = side === "departure";
+  const location = isDeparture
+    ? segment.origin || segment.departure_airport || segment.departureAirport
+    : segment.destination || segment.arrival_airport || segment.arrivalAirport;
+  const terminal = pickFirst(
+    isDeparture ? segment.departure_terminal : segment.arrival_terminal,
+    isDeparture ? segment.from_terminal : segment.to_terminal,
+    isDeparture ? segment.departureTerminal : segment.arrivalTerminal,
+    isDeparture ? segment.terminal?.departure : segment.terminal?.arrival,
+    location?.terminal,
+    location?.Terminal,
+  );
+
+  if (!terminal) return "Terminal information unavailable";
+  return String(terminal).toLowerCase().startsWith("terminal")
+    ? String(terminal)
+    : `Terminal ${terminal}`;
+};
+
+function SuccessfulFlightBooking({ details, isFailed = false, isPending = false }) {
+  const journeys = details.journeys.length ? details.journeys : [{ segments: [] }];
+  const passengers = details.passengers.length ? details.passengers : [{ name: "Passenger" }];
+  const includedBaggage = formatBaggageAllowance(details.baggage);
+  const bookedCabinClass = pickFirst(
+    journeys?.[0]?.segments?.[0]?.cabin_class,
+    journeys?.[0]?.segments?.[0]?.cabinClass,
+    journeys?.[0]?.cabin_class,
+    journeys?.[0]?.cabinClass,
+    "N/A",
+  );
+
+  return (
+    <div className={styles.successShell}>
+      <section className={styles.successHero}>
+        <div
+          className={`${styles.successCheck} ${
+            isFailed ? styles.failedCheck : isPending ? styles.pendingCheck : ""
+          }`}
+        >
+          {isFailed || isPending ? (isFailed ? "!" : "…") : <img src="/images/successCircle.png" alt="" />}
+        </div>
+        <h1>{isFailed ? "Booking Failed!" : isPending ? "Booking Pending" : "Booking Confirmed!"}</h1>
+        <p>
+          {isFailed
+            ? details.providerStatus || details.message || "Your flight booking could not be completed."
+            : isPending
+              ? details.message || "Your flight booking is being processed."
+              : "Your flight has been booked successfully. A confirmation has been sent to your email."}
+        </p>
+        <div className={styles.pnrBox}>
+          <span>BOOKING PNR</span>
+          <strong>{details.pnr}</strong>
+        </div>
+      </section>
+
+      <section className={styles.ticketCard}>
+        {journeys.map((journey, journeyIndex) => {
+          const segments = toArray(journey.segments);
+          const firstSegment = segments[0] || {};
+          const lastSegment = segments[segments.length - 1] || firstSegment;
+          return (
+            <div className={styles.ticketJourney} key={`ticket-journey-${journeyIndex}`}>
+              <div className={styles.ticketJourneyHeader}>
+                <strong>{journeyIndex === 0 ? "Departing Flight" : "Return Flight"}</strong>
+                <span>{getCityLabel(firstSegment.from_name, firstSegment.from, "Origin")}</span>
+                <b><img src='/icons/flightIcon.svg'/></b>
+                <span>{getCityLabel(lastSegment.to_name, lastSegment.to, "Destination")}</span>
+                <time>{formatTicketDate(firstSegment.departure)}</time>
+              </div>
+
+              {segments.length ? segments.map((segment, segmentIndex) => (
+                <div className={styles.ticketSegment} key={`${segment.flight_no || "flight"}-${segmentIndex}`}>
+                  <div className={styles.airlineBlock}>
+                    <span className={styles.airlineLogo}>
+                      <img
+                        src={resolveAirlineLogo({
+                          name: segment.airline || segment.provider || journey.provider,
+                          code: segment.airline_code || segment.provider,
+                          logo: segment.airline_logo || segment.logo,
+                        })}
+                        alt=""
+                      />
+                    </span>
+                    <div>
+                      <strong>{segment.airline || segment.provider || journey.provider || "Airline"}</strong>
+                      <small>{segment.aircraft || segment.aircraft_name || segment.flight_no || ""}</small>
+                    </div>
+                  </div>
+                  {(segment.fare_type || journey.fare_type) && (
+                    <strong className={styles.fareType}>{segment.fare_type || journey.fare_type}</strong>
+                  )}
+                  <span className={styles.cabinBadge}>{segment.cabin_class || segment.cabinClass || "Economy"}</span>
+                  <div className={styles.flightTimeline}>
+                    <div className={styles.departureAirport}>
+                      <small>{formatTicketDate(segment.departure)}</small>
+                      <strong>{formatTicketTime(segment.departure)}</strong>
+                      <em>{getSegmentTerminal(segment, "departure")}</em>
+                        <span className={styles.airportName}>{getSegmentAirport(segment, "departure", details.routeData)}</span>
+
+                    </div>
+                    <div className={styles.flightPath}>
+                      <span>●---------------- <img src='/icons/flightIcon.svg'/> ----------------●</span>
+                      <small>{segment.duration || journey.duration || ""}</small>
+                    </div>
+                    <div className={styles.arrivalPoint}>
+                      <small>{formatTicketDate(segment.arrival)}</small>
+                      <strong>{formatTicketTime(segment.arrival)}</strong>
+                      <em>{getSegmentTerminal(segment, "arrival")}</em>
+                      <span className={styles.airportName}>{getSegmentAirport(segment, "arrival", details.routeData)}</span>
+
+                    </div>
+                  </div>
+                  {segmentIndex < segments.length - 1 && (
+                    <div className={styles.layover}>Change of aircraft / layover</div>
+                  )}
+                </div>
+              )) : (
+                <div className={styles.ticketFallbackRoute}>{details.route}</div>
+              )}
+            </div>
+          );
+        })}
+
+        <div className={styles.ticketSection}>
+          <h2>Passenger Information</h2>
+          {passengers.map((passenger, index) => (
+            <div className={styles.ticketPassenger} key={`${getPassengerName(passenger)}-${index}`}>
+              <strong><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B8799" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> {getPassengerName(passenger)}</strong>
+              <span className={styles.passengerType}>
+                {String(
+                  pickFirst(
+                    passenger.cabin_class,
+                    passenger.cabinClass,
+                    bookedCabinClass,
+                  ),
+                ).toUpperCase()}
+              </span>
+              <div>
+                <span>SEAT ALLOCATED<strong>{passenger.seat || passenger.seat_no || "Not selected"}</strong></span>
+                <span>
+                  BAGGAGE ALLOWANCE
+                  <strong>
+                    {passenger.baggage
+                      ? formatBaggageAllowance(passenger.baggage)
+                      : includedBaggage}
+                  </strong>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {!isFailed && (
+          <div className={styles.ticketSection}>
+            <h2>Payment Summary</h2>
+            <div className={styles.paymentRow}><span>BASE FARE</span><strong>{details.pricing.base}</strong></div>
+            <div className={styles.paymentRow}><span>TAXES &amp; FEES</span><strong>{details.pricing.tax}</strong></div>
+            <div className={`${styles.paymentRow} ${styles.totalPaid}`}><span>TOTAL PAID</span><strong>{details.amount}</strong></div>
+          </div>
+        )}
+
+        {isFailed ? (
+          <div className={styles.refundNotice} role="status">
+            <strong>Payment deducted?</strong>
+            <span>
+              Don&apos;t worry. If your account was charged, the amount will be
+              refunded automatically to your original payment method within
+              24–72 hours.
+            </span>
+          </div>
+        ) : (
+          <button type="button" className={styles.downloadTicket} onClick={() => window.print()}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg> Download Ticket
+          </button>
+        )}
+      </section>
+
+    </div>
+  );
+}
+
 function PaymentStatusContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -150,12 +486,32 @@ function PaymentStatusContent() {
   const [retrieveResponse, setRetrieveResponse] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
   const finishBookingFlow = () => {
     clearFlightBookingSession();
     clearBookingSession();
     window.localStorage.removeItem("flightPaymentSnapshot");
+    window.localStorage.removeItem(FLIGHT_RETRIEVE_SNAPSHOT_KEY);
     router.push("/");
   };
+
+  useEffect(() => {
+    const navigationEntry = window.performance
+      .getEntriesByType("navigation")
+      .at(0);
+
+    if (navigationEntry?.type === "reload") {
+      clearFlightBookingSession();
+      clearBookingSession();
+      window.localStorage.removeItem("flightPaymentSnapshot");
+      window.localStorage.removeItem(FLIGHT_RETRIEVE_SNAPSHOT_KEY);
+      router.replace("/");
+    }
+  }, [router]);
 
   useEffect(() => {
     setSnapshot(readFlightPaymentSnapshot());
@@ -214,21 +570,33 @@ function PaymentStatusContent() {
       setErrorMessage("");
 
       try {
-        const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
-
-        if (!confirmBookingId || !searchKey) {
-          throw new Error("Flight booking confirmation details are missing.");
+        const cachedRetrieve = readFlightRetrieveSnapshot();
+        if (
+          cachedRetrieve?.response &&
+          String(cachedRetrieve.bookingId || "") === String(bookingId || "")
+        ) {
+          if (!isActive) return;
+          setRetrieveResponse(cachedRetrieve.response);
+          setIsLoading(false);
+          return;
         }
 
-        await postFlightJson(
-          "/api/flights/v2/confirm-booking",
-          {
-            booking_id: confirmBookingId,
-            domain,
-            search_key: searchKey,
-          },
-          "Unable to confirm flight booking."
-        );
+        const domain = process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337";
+
+        // On the initial payment return we have the confirmation snapshot and
+        // confirm first. On refresh, order_id is sufficient to retrieve the
+        // already-confirmed booking, so missing temporary tokens must not block UI.
+        if (confirmBookingId && searchKey) {
+          await postFlightJson(
+            "/api/flights/v2/confirm-booking",
+            {
+              booking_id: confirmBookingId,
+              domain,
+              search_key: searchKey,
+            },
+            "Unable to confirm flight booking."
+          );
+        }
 
         const data = await postFlightJson(
           "/api/flights/v2/retrieve-booking",
@@ -242,7 +610,12 @@ function PaymentStatusContent() {
         if (!isActive) return;
 
         setRetrieveResponse(data);
-        window.localStorage.removeItem("flightPaymentSnapshot");
+        window.localStorage.setItem(
+          FLIGHT_RETRIEVE_SNAPSHOT_KEY,
+          JSON.stringify({ bookingId, response: data }),
+        );
+        // Temporarily keep flightPaymentSnapshot for refresh/UI testing.
+        // window.localStorage.removeItem("flightPaymentSnapshot");
       } catch (error) {
         if (!isActive) return;
         setErrorMessage(error?.message || "Unable to retrieve flight booking.");
@@ -297,6 +670,13 @@ function PaymentStatusContent() {
       raw.PGDescription,
       "Flight booking failed."
     );
+    const routeData = pickFirst(
+      data.route,
+      data.sector,
+      data.trip,
+      snapshot.searchKey,
+      {},
+    );
 
     return {
       status,
@@ -345,17 +725,18 @@ function PaymentStatusContent() {
           paymentData.amount
         )
       ),
-      route: formatRoute(
-        pickFirst(
-          data.route,
-          data.sector,
-          data.trip,
-          snapshot.searchKey,
-          "Flight booking"
-        )
-      ),
+      route: formatRoute(routeData),
+      routeData: routeData && typeof routeData === "object" ? routeData : {},
       provider: pickFirst(data.provider, root.provider, "N/A"),
-      pnr: pickFirst(data.pnr, raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Flight?.APNR, "N/A"),
+      pnr: pickFirst(
+        root.pnr,
+        data.pnr,
+        data.booking?.pnr,
+        data.booking_details?.pnr,
+        data.journeys?.[0]?.segments?.[0]?.pnr,
+        raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Flight?.APNR,
+        "N/A"
+      ),
       bookingDate: formatDateTime(pickFirst(data.booking_date, raw.BookingDate)),
       paymentStatus: formatStatus(
         pickFirst(statusData.payment_status, statusMeta.payment_status, raw.PaymentStatus, "N/A")
@@ -370,16 +751,34 @@ function PaymentStatusContent() {
         "N/A"
       ),
       pricing: {
-        base: formatAmount(raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalBaseFare),
-        tax: formatAmount(raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalTax),
+        base: formatAmount(
+          pickFirst(
+            pricing.base,
+            pricing.base_fare,
+            data.journeys?.[0]?.pricing?.base,
+            data.journeys?.[0]?.segments?.[0]?.pricing?.base,
+            raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalBaseFare
+          )
+        ),
+        tax: formatAmount(
+          pickFirst(
+            pricing.tax,
+            pricing.taxes,
+            data.journeys?.[0]?.pricing?.tax,
+            data.journeys?.[0]?.segments?.[0]?.pricing?.tax,
+            raw?.Trips?.[0]?.Journey?.[0]?.Segments?.[0]?.Fares?.TotalTax
+          )
+        ),
         net: formatAmount(pickFirst(pricing.net, raw.NetAmount)),
         gross: formatAmount(pickFirst(pricing.gross, raw.GrossAmount)),
         customerFare: formatAmount(pickFirst(pricing.customer_fare, raw.CustomerFare)),
         ssr: formatAmount(pickFirst(pricing.ssr_amount, raw.SSRAmount)),
       },
-      journeys: toArray(data.journeys),
-      passengers: toArray(data.passengers),
-      baggage: toArray(data.baggage),
+      journeys: toArray(pickFirst(data.journeys, root.journeys, data.booking?.journeys, [])),
+      passengers: toArray(pickFirst(data.passengers, root.passengers, data.booking?.passengers, [])),
+      baggage: toBaggageItems(
+        pickFirst(data.baggage, root.baggage, data.booking?.baggage, []),
+      ),
       message: pickFirst(
         isResponseFailed ? providerFailureMessage : "",
         isSuccessFalse(retrieveResponse) ? "" : retrieveResponse?.message,
@@ -394,6 +793,7 @@ function PaymentStatusContent() {
   const normalizedStatus = formatStatus(details.status);
   const isFailed = normalizedStatus.includes("FAIL") || normalizedStatus.includes("CANCEL");
   const isPending = normalizedStatus.includes("PENDING");
+  const showConfirmationUi = Boolean(retrieveResponse);
   const heading = isFailed
     ? "Flight Booking Failed"
     : isPending
@@ -402,8 +802,8 @@ function PaymentStatusContent() {
 
   return (
     <>
-      <Navbar />
-      <main className={styles.page}>
+      <Navbar transparent onLogoClick={finishBookingFlow} />
+      <main className={`${styles.page} ${!isLoading && !errorMessage && showConfirmationUi ? styles.successPage : ""}`}>
         <section className={styles.card}>
           {isLoading ? (
             <div className={styles.centerState}>
@@ -426,6 +826,8 @@ function PaymentStatusContent() {
                 </button>
               </div>
             </div>
+          ) : showConfirmationUi ? (
+            <SuccessfulFlightBooking details={details} isFailed={isFailed} isPending={isPending} />
           ) : (
             <>
               <div className={styles.header}>

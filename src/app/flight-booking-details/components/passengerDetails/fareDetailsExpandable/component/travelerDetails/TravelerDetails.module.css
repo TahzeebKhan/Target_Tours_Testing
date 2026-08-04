@@ -8,6 +8,118 @@
 
 }
 
+.savedTravelersSection {
+    border: 1px solid #E4E6E8;
+    padding: 16px;
+}
+
+.savedTravelersHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 14px;
+}
+
+.savedTravelersHeader > div {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+}
+.savedTravellerButton{
+    padding: 4px 12px;
+    border: .5px solid rgba(0, 0, 51, 1);
+    color: rgba(0, 0, 51, 1);
+
+    font-weight: 300;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color .3s ease-out, color .3s ease-out, border-color .3s ease-out;
+}
+.saveButtonParent{
+    display: flex;
+    gap: 20px;
+}
+.savedTravellerButton:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.savedTravelersHeader h3 {
+    color: #070773;
+    font-family: Antic Didone, serif;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.savedTravelersHeader p,
+.savedTravelerState {
+    color: #777;
+    font-size: 13px;
+}
+
+.savedTravelersHeader input {
+    width: 280px;
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #DBE2EB;
+    outline: none;
+}
+
+.savedTravelerGrid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #9aa3b4 #eef0f4;
+}
+
+.savedTravelerGrid::-webkit-scrollbar {
+    height: 6px;
+}
+
+.savedTravelerGrid::-webkit-scrollbar-track {
+    background: #eef0f4;
+}
+
+.savedTravelerGrid::-webkit-scrollbar-thumb {
+    background: #9aa3b4;
+    border-radius: 10px;
+}
+
+.savedTravelerCard {
+    flex: 0 0 300px;
+    min-width: 300px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border: 1px solid #DBE2EB;
+    background: #fff;
+    color: #111;
+    text-align: left;
+    cursor: pointer;
+}
+
+.savedTravelerCard:hover {
+    border-color: #070773;
+    background: #f7f8ff;
+}
+
+.savedTravelerCard strong,
+.savedTravelerCard span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.savedTravelerCard strong { font-size: 14px; text-transform: uppercase; }
+.savedTravelerCard span { color: #777; font-size: 12px; }
+
+
 /* Add traveler */
 .addTraveler {
     font-family: Antic Didone;
@@ -24,11 +136,20 @@
 
 /* Card */
 .card {
+    position: relative;
     border: 1px solid #E4E6E8;
     padding: 16px;
     display: flex;
     flex-direction: column;
     /* gap: 14px; */
+}
+
+.travelerCard {
+    z-index: auto;
+}
+
+.card:has(button[aria-expanded="true"]) {
+    z-index: 1000;
 }
 
 /* Header */
@@ -79,8 +200,8 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    height: 400px;
-    overflow: scroll;
+    height: auto;
+    overflow: visible;
 }
 
 .cardBody {
@@ -92,6 +213,10 @@
     overflow: hidden;
     transition: max-height 0.5s ease, opacity 0.45s ease, padding-top 0.45s ease;
     animation: slideFade 0.65s ease-in-out;
+}
+
+.bookingCardBody {
+    overflow: visible;
 }
 
 .iconWrapper {
@@ -138,6 +263,7 @@
     max-height: 600px;
     opacity: 1;
     padding-top: 14px;
+    overflow: visible;
 }
 
 .closed {
@@ -152,6 +278,61 @@
     display: flex;
     align-items: flex-start;
     gap: 16px;
+}
+
+.internationalFields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.internationalFields > .grid {
+    display: contents;
+}
+
+.childDobGrid > .field {
+    width: calc((100% - 32px) / 3);
+    flex: 0 0 calc((100% - 32px) / 3);
+}
+
+.gstSection {
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #E4E6E8;
+}
+
+.gstCheckboxLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-inter);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gstCheckboxLabel input {
+    width: 18px;
+    height: 18px;
+    accent-color: #078CF5;
+    cursor: pointer;
+}
+
+.gstCheckboxLabel em {
+    color: #999;
+    font-style: normal;
+    font-weight: 400;
+}
+
+.gstFields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.saveGstCheckbox {
+    grid-column: 1 / -1;
 }
 
 /* Field */
@@ -243,4 +424,11 @@
     .field select {
         padding: 8px 7px;
     }
+}
+
+@media(max-width: 760px) {
+    .savedTravelersHeader,
+    .savedTravelersHeader > div { align-items: stretch; flex-direction: column; gap: 8px; }
+    .savedTravelersHeader input { width: 100%; }
+    .savedTravelerCard { flex-basis: 260px; min-width: 260px; }
 }

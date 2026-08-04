@@ -118,8 +118,12 @@ const normalizeFlightNo = (value) => {
   const exact = text.match(/^\d+$/);
   if (exact) return exact[0];
 
-  const trailing = text.match(/[A-Za-z]{1,3}[-\s]?(\d{1,4})$/);
-  if (trailing) return trailing[1];
+  const carrierFlight = text.match(
+    /^([A-Za-z0-9]{2,3})[-\s]+(\d{1,4})(?:\s+\2)?$/,
+  );
+  if (carrierFlight) {
+    return `${carrierFlight[1].toUpperCase()} ${carrierFlight[2]}`;
+  }
 
   return text;
 };
@@ -135,26 +139,26 @@ const pickFlightNo = (...values) => {
 
 const extractRoundTripFlightNos = (flightData) => {
   const onwardFlightNo = pickFlightNo(
-    flightData?.booking?.priceRequest?.Trips?.[0]?.flightNo,
-    flightData?.booking?.priceRequest?.Trips?.[0]?.flight_no,
+    flightData?.depart?.airline?.flightNo,
+    flightData?.outbound?.airlines?.[0]?.flightNo,
     flightData?.depart?.flight?.details?.flightNo,
     flightData?.tripCard?.depart?.flight?.details?.flightNo,
     flightData?.outbound?.details?.flightNo,
     flightData?.outbound?.flightNo,
-    flightData?.depart?.airline?.flightNo,
-    flightData?.outbound?.airlines?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[0]?.flight_no,
     flightData?.outbound?.airlines?.[0]?.code,
     flightData?.booking?.flightNo
   );
   const returnFlightNo = pickFlightNo(
-    flightData?.booking?.priceRequest?.Trips?.[1]?.flightNo,
-    flightData?.booking?.priceRequest?.Trips?.[1]?.flight_no,
+    flightData?.return?.airline?.flightNo,
+    flightData?.inbound?.airlines?.[0]?.flightNo,
     flightData?.return?.flight?.details?.flightNo,
     flightData?.tripCard?.return?.flight?.details?.flightNo,
     flightData?.inbound?.details?.flightNo,
     flightData?.inbound?.flightNo,
-    flightData?.return?.airline?.flightNo,
-    flightData?.inbound?.airlines?.[0]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flightNo,
+    flightData?.booking?.priceRequest?.Trips?.[1]?.flight_no,
     flightData?.inbound?.airlines?.[0]?.code
   );
   const fareOptionsFlightNoParam = [onwardFlightNo, returnFlightNo]
@@ -591,6 +595,7 @@ const MobileFareComparisonModalRoundTrip = ({
         formattedOnlyPriceResponse
       );
       const nextSession = {
+        journey: flightData?.journey,
         selectedFlight: flightData,
         selectedFare: selectedFareFromFormattedPrice,
         routeContext,
