@@ -49,7 +49,7 @@ const PassengerDetails = () => {
       travelerDetailsOverride: travelerDetails,
     });
     if (loaded) {
-      setCurrentStep(6);
+      setCurrentStep(3);
     }
   };
 

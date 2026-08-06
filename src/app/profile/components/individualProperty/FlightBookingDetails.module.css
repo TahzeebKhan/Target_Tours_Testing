@@ -259,15 +259,30 @@
 }
 
 .statusBadge {
-  background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
-  border: 1px solid rgba(4, 145, 83, 1);
-  color: rgba(4, 145, 83, 1);
   padding: 0px 8px;
   height: 24px;
   font-size: 14px;
   font-weight: 300;
   cursor: pointer;
   width: 100%;
+}
+
+.statusSuccess {
+  color: #049153;
+  border-color: #049153;
+  background: #f2faeb;
+}
+
+.statusPending {
+  color: #b54708;
+  border-color: #f79009;
+  background: #fffaeb;
+}
+
+.statusFailed {
+  color: #d92d20;
+  border-color: #f04438;
+  background: #fff4f2;
 }
 
 .roomCount {
@@ -700,6 +715,29 @@
 .passengerDetailsSection {
 }
 
+.extrasSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e6e8;
+}
+
+.extraRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  color: #4a5565;
+  font-size: 14px;
+}
+
+.extraRow strong {
+  color: #0a0a0a;
+  font-weight: 500;
+  text-align: right;
+}
+
 .passengerHeader {
   margin-bottom: 12px;
 }
@@ -785,7 +823,8 @@
   letter-spacing: 0%;
   text-transform: uppercase;
 
-  color: #049153;
+  border: 0;
+  background: transparent;
 }
 
 .mealPlanInfo {

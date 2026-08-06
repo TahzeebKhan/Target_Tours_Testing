@@ -8,6 +8,10 @@
   background: #f9f9f9;
 }
 
+.desktopChrome {
+  display: contents;
+}
+
 .mainContent {
   display: grid;
   grid-template-columns: 1fr 356px;
@@ -46,6 +50,47 @@
   display: none;
 }
 
+.loadingState {
+  width: min(720px, calc(100% - 32px));
+  min-height: 420px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #05053f;
+}
+
+.loadingState h2 {
+  margin: 20px 0 8px;
+  font-family: var(--font-antic-didone), serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.loadingState p {
+  max-width: 520px;
+  margin: 0;
+  color: #667085;
+  line-height: 1.5;
+}
+
+.loadingSpinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e4e6e8;
+  border-top-color: #05053f;
+  border-radius: 50%;
+  animation: bookingSpin 0.8s linear infinite;
+}
+
+@keyframes bookingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 1280px) {
   .mainContent {
     padding-left: 20px;
@@ -77,11 +122,18 @@
   }
 }
 @media (max-width: 640px) {
-  .mobileView {
-    display: flex;
-  }
   .layoutWrapper {
+    display: flex;
+    padding-top: 0;
+    gap: 0;
+  }
+  .desktopChrome,
+  .sidebar {
     display: none;
   }
- 
+  .mainContent {
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
 }

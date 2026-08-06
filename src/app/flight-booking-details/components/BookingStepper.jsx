@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 const steps = [
   { id: 1, number: 1, label: "Search" },
   { id: 2, number: 2, label: "Passenger Details" },
-  { id: 6, number: 3, label: "Overview & Payment" },
+  { id: 3, number: 3, label: "Extra" },
+  { id: 6, number: 4, label: "Overview & Payment" },
 ];
 
 export default function BookingStepper() {

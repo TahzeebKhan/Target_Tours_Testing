@@ -44,11 +44,8 @@ const hasCompleteSeatLayoutIndexes = (request) => {
 };
 const getRestoredBookingStep = (session) => {
   const savedStep = Number(session?.currentStep);
-  if (Number.isInteger(savedStep) && savedStep >= 2 && savedStep <= 6) {
-    return savedStep;
-  }
+  if ([2, 3, 6].includes(savedStep)) return savedStep;
   if (session?.gatewayPaymentRequest || session?.createBookingRequest) return 6;
-  if (session?.seatLayoutResponse || session?.seatLayoutRequest) return 5;
   if (session?.ssrResponse || session?.ssrRequest) return 3;
   return 2;
 };
@@ -546,7 +543,7 @@ export function FlightBookingProvider({ children }) {
 
     const handlePopState = (event) => {
       const nextStep = Number(event.state?.flightBookingStep);
-      if (!Number.isFinite(nextStep) || nextStep < 2 || nextStep > 6) {
+      if (![2, 3, 6].includes(nextStep)) {
         return;
       }
 
@@ -1195,6 +1192,7 @@ export function FlightBookingProvider({ children }) {
         setSeats,
         bookingSession,
         setBookingSession,
+        bookingSessionReady,
         travelerDetails,
         setTravelerDetails,
         bookingContactDetails,

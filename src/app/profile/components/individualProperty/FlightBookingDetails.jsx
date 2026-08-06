@@ -12,6 +12,14 @@ const first = (...values) =>
 const asArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 
 const unwrap = (response) => {
+  if (
+    response?.data &&
+    typeof response.data === "object" &&
+    !Array.isArray(response.data) &&
+    (response.data.booking_id || response.data.journeys || response.data.route)
+  ) {
+    return response.data;
+  }
   let value = response;
   for (let index = 0; index < 4; index += 1) {
     if (!value || typeof value !== "object" || Array.isArray(value)) break;
@@ -81,13 +89,17 @@ const normalizeBooking = (response, fallbackId) => {
   const lastSegment = segments.at(-1) || firstSegment;
   const pricing = first(data.pricing, booking.pricing, root.pricing, firstSegment.pricing, {});
   const statusObject = data.status && typeof data.status === "object" ? data.status : {};
+  const statusMeta = root.status_meta && typeof root.status_meta === "object" ? root.status_meta : {};
   const passengers = asArray(first(data.passengers, booking.passengers, root.passengers, raw?.passengers));
+  const baggage = asArray(first(data.baggage, booking.baggage, root.baggage));
+  const meals = asArray(first(data.meals, data.meal, booking.meals, root.meals));
+  const seats = asArray(first(data.seats, data.seat, booking.seats, root.seats));
 
   return {
     bookingId: first(data.booking_id, booking.booking_id, root.booking_id, fallbackId, "N/A"),
     pnr: first(data.pnr, booking.pnr, root.pnr, firstSegment.pnr, "N/A"),
-    status: String(first(statusObject.booking_status, data.booking_status, booking.booking_status, data.status, "CONFIRMED")).toUpperCase(),
-    providerStatus: first(statusObject.provider_status_label, data.provider_status_label, ""),
+    status: String(first(statusObject.booking_status, statusMeta.booking_status, data.booking_status, booking.booking_status, typeof data.status === "string" ? data.status : "", "CONFIRMED")).toUpperCase(),
+    providerStatus: first(statusObject.provider_status_label, statusMeta.akbar_status_label, data.provider_status_label, ""),
     airline: first(firstSegment.airline, firstSegment.airline_name, firstSegment.AirlineName, "Airline"),
     flightNo: first(firstSegment.flightNo, firstSegment.flight_no, firstSegment.flight_number, firstSegment.FlightNumber, ""),
     origin: first(firstSegment.origin, firstSegment.from, data.route?.from, "—"),
@@ -97,14 +109,17 @@ const normalizeBooking = (response, fallbackId) => {
     duration: first(data.duration, journeys[0]?.duration, firstSegment.duration, "—"),
     fromName: first(firstSegment.FromName, firstSegment.from_name, firstSegment.origin_name),
     toName: first(lastSegment.ToName, lastSegment.to_name, lastSegment.destination_name),
-    departureTerminal: first(firstSegment.departureTerminal, firstSegment.departure_terminal, ""),
-    arrivalTerminal: first(lastSegment.arrivalTerminal, lastSegment.arrival_terminal, ""),
+    departureTerminal: first(firstSegment.terminal?.departure, firstSegment.departureTerminal, firstSegment.departure_terminal, ""),
+    arrivalTerminal: first(lastSegment.terminal?.arrival, lastSegment.arrivalTerminal, lastSegment.arrival_terminal, ""),
     passengers,
+    baggage,
+    meals,
+    seats,
     pricing: {
-      base: first(pricing.base, pricing.base_fare, pricing.net, raw?.BaseFare),
+      base: first(pricing.base, pricing.base_fare, journeys[0]?.pricing?.base, pricing.net, raw?.BaseFare),
       discount: first(pricing.discount, pricing.discount_amount),
       coupon: first(pricing.coupon_discount, pricing.couponDiscount),
-      tax: first(pricing.tax, pricing.taxes, pricing.taxes_and_fees, raw?.TotalTax),
+      tax: first(pricing.tax, pricing.taxes, pricing.taxes_and_fees, journeys[0]?.pricing?.tax, raw?.TotalTax),
       total: first(pricing.customer_fare, pricing.gross, pricing.total, pricing.net, data.total_amount, raw?.CustomerFare),
     },
   };
@@ -116,6 +131,18 @@ const passengerName = (passenger) =>
     first(passenger.first_name, passenger.firstName, passenger.given_name),
     first(passenger.last_name, passenger.lastName, passenger.surname),
   ].filter(Boolean).join(" ") || first(passenger.name, passenger.full_name, "Passenger");
+
+const getExtraLabel = (item, type) => {
+  if (item === undefined || item === null || item === "") return "";
+  if (typeof item !== "object") return String(item);
+  if (type === "baggage") {
+    return first(item.description, item.name, item.label, item.weight, item.code, "");
+  }
+  if (type === "meal") {
+    return first(item.description, item.meal_name, item.mealName, item.name, item.label, item.code, "");
+  }
+  return first(item.seat_no, item.seatNo, item.seat_number, item.seatNumber, item.number, item.name, item.label, "");
+};
 
 const FlightBookingDetails = ({ onBack, booking }) => {
   const bookingId = first(booking?.detailId, booking?.id);
@@ -182,13 +209,29 @@ const FlightBookingDetails = ({ onBack, booking }) => {
   const from = airportParts(details.fromName, details.origin);
   const to = airportParts(details.toName, details.destination);
   const failed = details.status.includes("FAIL") || details.status.includes("CANCEL");
-  const passengerStatus = failed ? "FAILED" : "CONFIRMED";
+  const pending = details.status.includes("PENDING") || details.status.includes("PROCESS");
+  const passengerStatus = failed ? "FAILED" : pending ? "PENDING" : "CONFIRMED";
+  const getStatusClass = (status) => {
+    const normalized = String(status || "").toUpperCase();
+    if (normalized.includes("FAIL") || normalized.includes("CANCEL")) return styles.statusFailed;
+    if (normalized.includes("PENDING") || normalized.includes("PROCESS")) return styles.statusPending;
+    return styles.statusSuccess;
+  };
   const priceRows = [
     ["Base Price", details.pricing.base],
     ["Discount", details.pricing.discount],
     ["Coupon Discount", details.pricing.coupon],
     ["Taxes & Fees", details.pricing.tax],
   ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+  const baggageLabels = details.baggage.map((item) => getExtraLabel(item, "baggage")).filter(Boolean);
+  const mealLabels = [
+    ...details.meals.map((item) => getExtraLabel(item, "meal")),
+    ...details.passengers.map((passenger) => getExtraLabel(first(passenger.meal, passenger.meal_name, passenger.mealName), "meal")),
+  ].filter(Boolean);
+  const seatLabels = [
+    ...details.seats.map((item) => getExtraLabel(item, "seat")),
+    ...details.passengers.map((passenger) => getExtraLabel(first(passenger.seat_no, passenger.seatNo, passenger.seat_number, passenger.seatNumber, passenger.seat), "seat")),
+  ].filter(Boolean);
 
   return (
     <div className={styles.container}>
@@ -222,7 +265,7 @@ const FlightBookingDetails = ({ onBack, booking }) => {
                   </div>
                 ))}
                 <div className={styles.divider} />
-                <div className={styles.statusSection}><span className={`${styles.statusBadge} ${!failed ? styles.active : ""}`}>{details.status}</span><div className={styles.roomCount}><div className={styles.countGroup}><span className={styles.label}>PNR</span><span className={styles.value}>{details.pnr}</span></div></div></div>
+                <div className={styles.statusSection}><span className={`${styles.statusBadge} ${getStatusClass(details.status)}`}>{details.status}</span><div className={styles.roomCount}><div className={styles.countGroup}><span className={styles.label}>PNR</span><span className={styles.value}>{details.pnr}</span></div></div></div>
               </div>
             </header>
             <div className={styles.detailsWrapper}>
@@ -235,7 +278,15 @@ const FlightBookingDetails = ({ onBack, booking }) => {
                 </div>
               </section>
               {!!priceRows.length && <section className={styles.summarySection}><h2 className={styles.sectionTitle}>BOOKING SUMMARY</h2><div className={styles.priceTable}>{priceRows.map(([label, value]) => <div key={label} className={styles.priceRow}><span className={styles.priceLabel}>{label}</span><span className={styles.textPrimary}>{money(value)}</span></div>)}<div className={styles.totalRow}><span className={styles.totalLabel}>Total Amount</span><span className={styles.totalValue}>{money(details.pricing.total)}</span></div></div></section>}
-              <section className={styles.passengerDetailsSection}><div className={styles.passengerHeader}><h2 className={styles.passengerTitle}>PASSENGER DETAILS <span className={styles.passengerCount}>{details.passengers.length} Traveller{details.passengers.length === 1 ? "" : "s"}</span></h2></div><div className={styles.passengerList}>{details.passengers.map((passenger, index) => <div key={first(passenger.id, passenger.passenger_id, index)} className={styles.passengerRow}><div className={styles.passengerInfo}><div className={styles.passengerAvatar}><span className={styles.avatarIcon}><img src="/images/passenger-avatar.png" alt="" /></span></div><span className={styles.passengerName}>{passengerName(passenger)}</span></div><span className={styles.passengerStatus}>{first(passenger.status, passenger.booking_status, passengerStatus)}</span></div>)}</div></section>
+              <section className={styles.passengerDetailsSection}><div className={styles.passengerHeader}><h2 className={styles.passengerTitle}>PASSENGER DETAILS <span className={styles.passengerCount}>{details.passengers.length} Traveller{details.passengers.length === 1 ? "" : "s"}</span></h2></div><div className={styles.passengerList}>{details.passengers.map((passenger, index) => { const status = first(passenger.status, passenger.booking_status, passengerStatus); return <div key={first(passenger.id, passenger.passenger_id, index)} className={styles.passengerRow}><div className={styles.passengerInfo}><div className={styles.passengerAvatar}><span className={styles.avatarIcon}><img src="/images/passenger-avatar.png" alt="" /></span></div><span className={styles.passengerName}>{passengerName(passenger)}</span></div><span className={`${styles.passengerStatus} ${getStatusClass(status)}`}>{status}</span></div>; })}</div></section>
+              {(baggageLabels.length > 0 || mealLabels.length > 0 || seatLabels.length > 0) && (
+                <section className={styles.extrasSection}>
+                  <h2 className={styles.sectionTitle}>TRAVEL DETAILS</h2>
+                  {baggageLabels.length > 0 && <div className={styles.extraRow}><span>Baggage</span><strong>{[...new Set(baggageLabels)].join(", ")}</strong></div>}
+                  {mealLabels.length > 0 && <div className={styles.extraRow}><span>Meal</span><strong>{[...new Set(mealLabels)].join(", ")}</strong></div>}
+                  {seatLabels.length > 0 && <div className={styles.extraRow}><span>Seat No.</span><strong>{[...new Set(seatLabels)].join(", ")}</strong></div>}
+                </section>
+              )}
               <footer className={styles.footerActions}>{!failed && <button onClick={() => setShowCancelModal(true)} className={styles.btnSecondary}>CANCEL BOOKING</button>}</footer>
             </div>
           </>

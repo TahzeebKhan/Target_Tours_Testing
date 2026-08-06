@@ -26,6 +26,11 @@
     align-items: baseline;
     gap: 24px;
 }
+.travellerParent{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
 .savedTravellerButton{
     padding: 4px 12px;
     border: .5px solid rgba(0, 0, 51, 1);
@@ -102,11 +107,52 @@
     color: #111;
     text-align: left;
     cursor: pointer;
+    position: relative;
 }
 
 .savedTravelerCard:hover {
     border-color: #070773;
     background: #f7f8ff;
+}
+
+.savedTravelerCardSelected {
+    border: 2px solid #070773;
+    background: #f4f5ff;
+}
+
+.savedTravelerCard small {
+    color: #070773;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.removeSavedTraveler {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #b42318;
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, background-color .2s ease;
+}
+
+.savedTravelerCard:hover .removeSavedTraveler,
+.removeSavedTraveler:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.removeSavedTraveler:hover {
+    background: #fff0ee;
 }
 
 .savedTravelerCard strong,
@@ -118,6 +164,33 @@
 
 .savedTravelerCard strong { font-size: 14px; text-transform: uppercase; }
 .savedTravelerCard span { color: #777; font-size: 12px; }
+
+.savedTravelerNameRow {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 24px;
+}
+
+.savedTravelerNameRow strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.savedTravelerNameRow em {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #edf0ff;
+    color: #070773;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 
 
 /* Add traveler */

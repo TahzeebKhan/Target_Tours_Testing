@@ -1,0 +1,146 @@
+.page {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 38px 0 64px;
+  color: #05053f;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin: 0 0 6px;
+  font-family: var(--font-antic-didone), serif;
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.header p {
+  margin: 0;
+  color: #4a5565;
+}
+
+.extrasCard {
+  border: 1px solid #d9dee8;
+  background: #fff;
+}
+
+.extra + .extra {
+  border-top: 1px solid #d9dee8;
+}
+
+.extraHeader {
+  display: flex;
+  width: 100%;
+  min-height: 88px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 30px;
+  border: 0;
+  background: #fff;
+  color: #0a1467;
+  cursor: pointer;
+  font-family: var(--font-antic-didone), serif;
+  font-size: 28px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  transition: transform 180ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.extraContent {
+  overflow: hidden;
+  border-top: 1px solid #d9dee8;
+  background: #f8f9fc;
+}
+
+/* Navigation is owned by this combined Extras step. */
+.extraContent :global([class*="continueButtonContainer"]),
+.extraContent :global([class*="tripDetailsHeader"]) {
+  display: none !important;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.forwardActions {
+  display: flex;
+  gap: 12px;
+}
+
+.backButton,
+.skipButton,
+.skipTop,
+.continueButton {
+  min-width: 150px;
+  padding: 14px 24px;
+  border: 1px solid #05053f;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.backButton,
+.skipButton,
+.skipTop {
+  background: #fff;
+  color: #05053f;
+}
+
+.continueButton {
+  background: #05053f;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .page {
+    width: calc(100% - 24px);
+    padding-top: 24px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+  }
+
+  .skipTop {
+    display: none;
+  }
+
+  .extraHeader {
+    min-height: 70px;
+    padding: 18px;
+    font-size: 22px;
+  }
+
+  .actions,
+  .forwardActions {
+    width: 100%;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .forwardActions > button,
+  .backButton {
+    min-width: 0;
+    flex: 1;
+  }
+}

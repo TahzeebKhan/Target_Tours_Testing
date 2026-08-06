@@ -185,6 +185,26 @@ const getPassengerName = (passenger = {}) =>
     "Passenger",
   );
 
+const formatPassengerType = (passenger = {}) => {
+  const type = String(
+    pickFirst(
+      passenger.passenger_type,
+      passenger.passengerType,
+      passenger.type,
+      passenger.PTC,
+      passenger.ptc,
+      "",
+    ),
+  )
+    .trim()
+    .toUpperCase();
+
+  if (["ADT", "ADULT"].includes(type)) return "Adult";
+  if (["CHD", "CHILD"].includes(type)) return "Child";
+  if (["INF", "INFANT"].includes(type)) return "Infant";
+  return "N/A";
+};
+
 const formatBaggageAllowance = (value) => {
   const entries = [];
   const collectEntries = (item, key = "") => {
@@ -320,14 +340,6 @@ function SuccessfulFlightBooking({ details, isFailed = false, isPending = false 
   const journeys = details.journeys.length ? details.journeys : [{ segments: [] }];
   const passengers = details.passengers.length ? details.passengers : [{ name: "Passenger" }];
   const includedBaggage = formatBaggageAllowance(details.baggage);
-  const bookedCabinClass = pickFirst(
-    journeys?.[0]?.segments?.[0]?.cabin_class,
-    journeys?.[0]?.segments?.[0]?.cabinClass,
-    journeys?.[0]?.cabin_class,
-    journeys?.[0]?.cabinClass,
-    "N/A",
-  );
-
   return (
     <div className={styles.successShell}>
       <section className={styles.successHero}>
@@ -426,13 +438,7 @@ function SuccessfulFlightBooking({ details, isFailed = false, isPending = false 
             <div className={styles.ticketPassenger} key={`${getPassengerName(passenger)}-${index}`}>
               <strong><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B8799" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> {getPassengerName(passenger)}</strong>
               <span className={styles.passengerType}>
-                {String(
-                  pickFirst(
-                    passenger.cabin_class,
-                    passenger.cabinClass,
-                    bookedCabinClass,
-                  ),
-                ).toUpperCase()}
+                {formatPassengerType(passenger)}
               </span>
               <div>
                 <span>SEAT ALLOCATED<strong>{passenger.seat || passenger.seat_no || "Not selected"}</strong></span>
@@ -802,7 +808,7 @@ function PaymentStatusContent() {
 
   return (
     <>
-      <Navbar transparent onLogoClick={finishBookingFlow} />
+      <Navbar transparent={!isLoading} onLogoClick={finishBookingFlow} />
       <main className={`${styles.page} ${!isLoading && !errorMessage && showConfirmationUi ? styles.successPage : ""}`}>
         <section className={styles.card}>
           {isLoading ? (

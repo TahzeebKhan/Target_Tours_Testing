@@ -569,11 +569,19 @@ export default function Reservations({
   const [hotelReservationData, setHotelReservationData] = useState([]);
   const [flightReservationData, setFlightReservationData] = useState([]);
   const [packageReservationData, setPackageReservationData] = useState([]);
+  const [hotelBookingsLoading, setHotelBookingsLoading] = useState(true);
+  const [flightBookingsLoading, setFlightBookingsLoading] = useState(true);
+  const [packageBookingsLoading, setPackageBookingsLoading] = useState(true);
+  const [hotelBookingsError, setHotelBookingsError] = useState("");
+  const [flightBookingsError, setFlightBookingsError] = useState("");
+  const [packageBookingsError, setPackageBookingsError] = useState("");
   const { tripFilter } = useProfile();
   const bookingStatus = getBookingStatusParam(tripFilter);
 
   useEffect(() => {
     let ignore = false;
+    setHotelBookingsLoading(true);
+    setHotelBookingsError("");
 
     const loadHotelBookings = async () => {
       try {
@@ -595,7 +603,10 @@ export default function Reservations({
       } catch (error) {
         if (!ignore) {
           setHotelReservationData([]);
+          setHotelBookingsError("Unable to load hotel bookings.");
         }
+      } finally {
+        if (!ignore) setHotelBookingsLoading(false);
       }
     };
 
@@ -608,6 +619,8 @@ export default function Reservations({
 
   useEffect(() => {
     let ignore = false;
+    setFlightBookingsLoading(true);
+    setFlightBookingsError("");
 
     const loadFlightBookings = async () => {
       try {
@@ -636,7 +649,10 @@ export default function Reservations({
       } catch (error) {
         if (!ignore) {
           setFlightReservationData([]);
+          setFlightBookingsError("Unable to load flight bookings.");
         }
+      } finally {
+        if (!ignore) setFlightBookingsLoading(false);
       }
     };
 
@@ -649,6 +665,8 @@ export default function Reservations({
 
   useEffect(() => {
     let ignore = false;
+    setPackageBookingsLoading(true);
+    setPackageBookingsError("");
 
     const loadPackageBookings = async () => {
       try {
@@ -669,7 +687,10 @@ export default function Reservations({
       } catch (error) {
         if (!ignore) {
           setPackageReservationData([]);
+          setPackageBookingsError("Unable to load package bookings.");
         }
+      } finally {
+        if (!ignore) setPackageBookingsLoading(false);
       }
     };
 
@@ -686,6 +707,26 @@ export default function Reservations({
     () => packageReservationData,
     [packageReservationData]
   );
+  const activeTabLoading =
+    activeTab === "ALL"
+      ? hotelBookingsLoading || flightBookingsLoading || packageBookingsLoading
+      : activeTab === "HOTEL BOOKING"
+        ? hotelBookingsLoading
+        : activeTab === "FLIGHT BOOKING"
+          ? flightBookingsLoading
+          : activeTab === "PACKAGES"
+            ? packageBookingsLoading
+            : false;
+  const activeTabError =
+    activeTab === "ALL"
+      ? hotelBookingsError || flightBookingsError || packageBookingsError
+      : activeTab === "HOTEL BOOKING"
+        ? hotelBookingsError
+        : activeTab === "FLIGHT BOOKING"
+          ? flightBookingsError
+          : activeTab === "PACKAGES"
+            ? packageBookingsError
+            : "";
 
   return (
     <>
@@ -715,7 +756,21 @@ export default function Reservations({
           <CorporateReservationCard data={corporateReservationData} />
         )}
 
-        {activeTab === "ALL" && (
+        {activeTabLoading && (
+          <div className={styles.bookingsLoadingState} role="status" aria-live="polite">
+            <span className={styles.bookingsSpinner} aria-hidden="true" />
+            <h2>Loading your bookings</h2>
+            <p>Please wait while we retrieve your latest reservations.</p>
+          </div>
+        )}
+
+        {!activeTabLoading && activeTabError && (
+          <div className={styles.bookingsErrorState} role="alert">
+            {activeTabError}
+          </div>
+        )}
+
+        {activeTab === "ALL" && !activeTabLoading && !activeTabError && (
           <>
             {" "}
             <div className={styles.list}>
@@ -943,7 +998,7 @@ export default function Reservations({
             </div>{" "}
           </>
         )}
-        {activeTab === "HOTEL BOOKING" && (
+        {activeTab === "HOTEL BOOKING" && !activeTabLoading && !activeTabError && (
           <div className={styles.list}>
             {!hotelReservationData.length && (
               <div className={styles.emptyBookingState}>
@@ -1018,7 +1073,7 @@ export default function Reservations({
             ))}
           </div>
         )}
-        {activeTab === "FLIGHT BOOKING" && (
+        {activeTab === "FLIGHT BOOKING" && !activeTabLoading && !activeTabError && (
           <div className={styles.list}>
             {!flightReservationData.length && (
               <div className={styles.emptyBookingState}>
@@ -1095,7 +1150,7 @@ export default function Reservations({
             ))}
           </div>
         )}
-        {activeTab === "PACKAGES" && (
+        {activeTab === "PACKAGES" && !activeTabLoading && !activeTabError && (
           <div className={styles.list}>
             {!packageReservationData.length && (
               <div className={styles.emptyBookingState}>

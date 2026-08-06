@@ -125,11 +125,36 @@ const getPayloadChannel = (payload) =>
 const getPayloadType = (payload) =>
   String(payload?.type || payload?.data?.type || "").toUpperCase();
 
+const getFailedPricingResultMessage = (payload) => {
+  const resultGroups = [
+    payload?.results,
+    payload?.data?.results,
+    payload?.result?.results,
+    payload?.data?.result?.results,
+  ];
+
+  for (const results of resultGroups) {
+    if (!Array.isArray(results)) continue;
+
+    const failedResult = results.find((result) =>
+      ["failed", "rejected", "error"].includes(
+        String(result?.status || "").trim().toLowerCase()
+      )
+    );
+
+    if (failedResult?.message) return failedResult.message;
+    if (failedResult?.error?.message) return failedResult.error.message;
+  }
+
+  return "";
+};
+
 const getApiMessage = (payload) =>
   payload?.error?.message ||
   payload?.data?.error?.message ||
   payload?.data?.result?.message ||
   payload?.result?.message ||
+  getFailedPricingResultMessage(payload) ||
   payload?.message ||
   payload?.data?.message ||
   "Flight request failed. Please try again.";
@@ -158,7 +183,12 @@ const isFareOptionsComplete = (payload) => {
 
 const isPricingError = (payload) => {
   const type = getPayloadType(payload);
+  const status = String(payload?.status || payload?.data?.status || "")
+    .trim()
+    .toLowerCase();
+
   return Boolean(payload?.error || payload?.data?.error) ||
+    ["failed", "rejected", "error"].includes(status) ||
     (type.includes("FARE_OPTIONS") && type.includes("ERROR")) ||
     (type.includes("PRICING") && type.includes("ERROR")) ||
     (type.includes("SSR") && type.includes("ERROR")) ||
@@ -654,6 +684,10 @@ const postV2Price = async (payload, signal) => {
     const error = new Error(getApiMessage(data));
     error.status = response.status;
     throw error;
+  }
+
+  if (isPricingError(data)) {
+    throw new Error(getApiMessage(data));
   }
 
   return data;

@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./TravelerDetails.module.css";
 import { useFlightBooking } from "@/app/flight-booking-details/FlightBookingContext";
 import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookingSession";
 import {
     EMPTY_TRAVELER_FORM_ERRORS,
     getBookingJourney,
+    getPassportNoError,
     getTravelerDobError,
-    validateTravelerForm,
 } from "@/app/flight-booking-details/utils/travelerValidation";
 import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import CountryCodeSelect from "@/app/flight-booking-details/components/CountryCodeSelect/CountryCodeSelect";
 import NationalitySelect from "@/app/flight-booking-details/components/NationalitySelect/NationalitySelect";
-import { createPassenger, getPassengers } from "@/shared/services/passenger";
+import VisaTypeSelect from "@/app/flight-booking-details/components/VisaTypeSelect/VisaTypeSelect";
+import { createPassenger, deletePassenger, getPassengers } from "@/shared/services/passenger";
 import { toast } from "react-toastify";
 
 const buildPassengerSlots = (bookingSession) => {
@@ -35,6 +36,16 @@ const buildPassengerSlots = (bookingSession) => {
 
 const getPtcForTravelerType = (type) =>
     type === "CHILD" ? "CHD" : type === "INFANT" ? "INF" : "ADT";
+
+const getPassengerTypeLabel = (traveler = {}) => {
+    const type = String(traveler?.type || traveler?.PTC || "")
+        .trim()
+        .toUpperCase();
+
+    if (["CHILD", "CHD"].includes(type)) return "Child";
+    if (["INFANT", "INF"].includes(type)) return "Infant";
+    return "Adult";
+};
 
 const buildTravelerPayload = (slot, isOpen = true) => ({
     id: slot?.id || "adult-1",
@@ -110,8 +121,29 @@ const openNativeDatePicker = (event) => {
     }
 };
 
+const getSavedTravelerId = (passenger) =>
+    passenger?.id || passenger?._id || passenger?.passenger_id || passenger?.uuid || "";
+
+const getSavedTravelerCategory = (passenger) => {
+    const value = String(
+        passenger?.passenger_type ||
+        passenger?.traveler_type ||
+        passenger?.traveller_type ||
+        passenger?.pax_type ||
+        passenger?.PTC ||
+        passenger?.ptc ||
+        ""
+    ).trim().toUpperCase();
+
+    if (["ADT", "ADULT"].includes(value)) return "Adult";
+    if (["CHD", "CHILD"].includes(value)) return "Child";
+    if (["INF", "INFANT"].includes(value)) return "Infant";
+    // Older saved flight travelers may not have passenger_type yet.
+    return "Adult";
+};
+
 const TravelerDetails = () => {
-    const { user } = useAuth();
+    const { isLoggedIn, loading: authLoading, user } = useAuth();
     const {
         bookingSession,
         travelerDetails,
@@ -132,15 +164,17 @@ const TravelerDetails = () => {
     );
     const [savedTravelers, setSavedTravelers] = useState([]);
     const [savedTravelerSearch, setSavedTravelerSearch] = useState("");
-    const [savedTravelersLoading, setSavedTravelersLoading] = useState(true);
+    const [savedTravelersLoading, setSavedTravelersLoading] = useState(false);
     const [savingTravelerId, setSavingTravelerId] = useState("");
+    const [deletingSavedTravelerId, setDeletingSavedTravelerId] = useState("");
+    const [savedTravelerAssignments, setSavedTravelerAssignments] = useState({});
     const lastSyncedTravelersRef = useRef(JSON.stringify(serializeTravelers(hydrateTravelers(travelerDetails, passengerSlots))));
     const lastSyncedBookingContactRef = useRef(JSON.stringify(getBookingContactState(bookingContactDetails)));
 
-    const loadSavedTravelers = async () => {
+    const loadSavedTravelers = useCallback(async (force = false) => {
         setSavedTravelersLoading(true);
         try {
-            const response = await getPassengers();
+            const response = await getPassengers({ force });
             const rows =
                 (Array.isArray(response) && response) ||
                 (Array.isArray(response?.data) && response.data) ||
@@ -154,11 +188,21 @@ const TravelerDetails = () => {
         } finally {
             setSavedTravelersLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
+        if (authLoading) return;
+
+        if (!isLoggedIn) {
+            setSavedTravelers([]);
+            setSavedTravelerSearch("");
+            setSavedTravelerAssignments({});
+            setSavedTravelersLoading(false);
+            return;
+        }
+
         loadSavedTravelers();
-    }, []);
+    }, [authLoading, isLoggedIn, loadSavedTravelers]);
 
     const filteredSavedTravelers = useMemo(() => {
         const query = savedTravelerSearch.trim().toLowerCase();
@@ -222,24 +266,6 @@ const TravelerDetails = () => {
         setBookingContactDetails(bookingContact);
     }, [bookingContact, bookingContactDetails, setBookingContactDetails]);
 
-    useEffect(() => {
-        const currentErrors = JSON.stringify(travelerFormErrors || EMPTY_TRAVELER_FORM_ERRORS);
-        if (currentErrors === JSON.stringify(EMPTY_TRAVELER_FORM_ERRORS)) {
-            return;
-        }
-
-        const validation = validateTravelerForm({
-            travelerDetails: serializeTravelers(travelers),
-            bookingContactDetails: bookingContact,
-            checklistResponse: bookingSession?.checklistResponse,
-            journey,
-        });
-        const nextErrors = JSON.stringify(validation.errors || EMPTY_TRAVELER_FORM_ERRORS);
-        if (currentErrors !== nextErrors) {
-            setTravelerFormErrors(validation.errors);
-        }
-    }, [bookingContact, journey, setTravelerFormErrors, travelerFormErrors, travelers]);
-
     const clearTravelerFieldError = (travelerId, field) => {
         setTravelerFormErrors((prev) => {
             const travelerErrorFields = prev?.travelers?.[travelerId];
@@ -299,22 +325,74 @@ const TravelerDetails = () => {
         lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
         setTravelers(nextTravelers);
         setTravelerDetails(serializedNext);
-        if (field === "DOB") {
+        const travelerId = nextTravelers[index]?.id;
+        const fieldAlreadyHasError = Boolean(
+            travelerFormErrors?.travelers?.[travelerId]?.[field]
+        );
+        if (field === "DOB" && fieldAlreadyHasError) {
             setTravelerFieldError(
-                nextTravelers[index]?.id,
+                travelerId,
                 field,
                 getTravelerDobError(nextTravelers[index]),
             );
+        } else if (field === "PassportNo" && fieldAlreadyHasError) {
+            setTravelerFieldError(
+                travelerId,
+                field,
+                getPassportNoError(normalizedValue),
+            );
         } else {
-            clearTravelerFieldError(nextTravelers[index]?.id, field);
+            clearTravelerFieldError(travelerId, field);
         }
     };
 
     const selectSavedTraveler = (passenger) => {
-        const targetIndex = travelers.findIndex((traveler) => !traveler.FName && !traveler.LName);
-        const index = targetIndex >= 0 ? targetIndex : 0;
+        const savedTravelerId = String(getSavedTravelerId(passenger));
+        if (!savedTravelerId) return;
+
+        const selectedSlotId = savedTravelerAssignments[savedTravelerId];
+        if (selectedSlotId) {
+            const nextTravelers = travelers.map((traveler) =>
+                traveler.id === selectedSlotId
+                    ? buildTravelerPayload(
+                        { id: traveler.id, type: traveler.type },
+                        traveler.isOpen,
+                    )
+                    : traveler
+            );
+            const serializedNext = serializeTravelers(nextTravelers);
+            lastSyncedTravelersRef.current = JSON.stringify(serializedNext);
+            setTravelers(nextTravelers);
+            setTravelerDetails(serializedNext);
+            setSavedTravelerAssignments((currentAssignments) => {
+                const nextAssignments = { ...currentAssignments };
+                delete nextAssignments[savedTravelerId];
+                return nextAssignments;
+            });
+            setTravelerFormErrors(EMPTY_TRAVELER_FORM_ERRORS);
+            return;
+        }
+
+        const passengerCategory = getSavedTravelerCategory(passenger);
+        const assignedSlotIds = new Set(Object.values(savedTravelerAssignments));
+        const targetIndex = travelers.findIndex(
+            (traveler) =>
+                !assignedSlotIds.has(traveler.id) &&
+                getPassengerTypeLabel(traveler) === passengerCategory
+        );
+        const index = targetIndex >= 0 ? targetIndex : -1;
         const current = travelers[index];
-        if (!current) return;
+        if (!current) {
+            const hasMatchingSlot = travelers.some(
+                (traveler) => getPassengerTypeLabel(traveler) === passengerCategory
+            );
+            toast.info(
+                hasMatchingSlot
+                    ? `All ${passengerCategory.toLowerCase()} traveler slots are already selected.`
+                    : `This booking does not have a ${passengerCategory.toLowerCase()} traveler slot.`
+            );
+            return;
+        }
         const nextTravelers = travelers.map((traveler, travelerIndex) =>
             travelerIndex === index
                 ? {
@@ -337,6 +415,37 @@ const TravelerDetails = () => {
         setTravelers(nextTravelers);
         setTravelerDetails(serializedNext);
         setTravelerFormErrors(EMPTY_TRAVELER_FORM_ERRORS);
+        setSavedTravelerAssignments((currentAssignments) => ({
+            ...currentAssignments,
+            [savedTravelerId]: current.id,
+        }));
+    };
+
+    const removeSavedTraveler = async (passenger) => {
+        const passengerId = String(getSavedTravelerId(passenger));
+        if (!passengerId || deletingSavedTravelerId) return;
+
+        setDeletingSavedTravelerId(passengerId);
+        try {
+            await deletePassenger(passengerId);
+            setSavedTravelers((current) =>
+                current.filter((item) => String(getSavedTravelerId(item)) !== passengerId)
+            );
+            setSavedTravelerAssignments((current) => {
+                const next = { ...current };
+                delete next[passengerId];
+                return next;
+            });
+            toast.success("Saved traveler removed.");
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.error?.message ||
+                error?.response?.data?.message ||
+                "Unable to remove saved traveler."
+            );
+        } finally {
+            setDeletingSavedTravelerId("");
+        }
     };
 
     const saveSpecificTraveler = async (traveler) => {
@@ -350,6 +459,7 @@ const TravelerDetails = () => {
         try {
             await createPassenger({
                 type: "flight",
+                passenger_type: getPassengerTypeLabel(traveler),
                 title: nullable(traveler.Title),
                 first_name: nullable(traveler.FName),
                 last_name: nullable(traveler.LName),
@@ -360,7 +470,7 @@ const TravelerDetails = () => {
                 passport_expiry: nullable(traveler.PDOE),
             });
             toast.success("Traveler saved successfully.");
-            await loadSavedTravelers();
+            await loadSavedTravelers(true);
         } catch (error) {
             toast.error(
                 error?.response?.data?.error?.message ||
@@ -418,7 +528,7 @@ const TravelerDetails = () => {
         travelerFormErrors?.bookingContact?.[field] || "";
     return (
         <div className={styles.wrapper}>
-            <section className={styles.savedTravelersSection}>
+            {isLoggedIn && <section className={styles.savedTravelersSection}>
                 <div className={styles.savedTravelersHeader}>
                     <div>
                         <h3>Saved Travelers</h3>
@@ -439,19 +549,56 @@ const TravelerDetails = () => {
                         {filteredSavedTravelers.map((passenger, index) => (
                             <button
                                 type="button"
-                                className={styles.savedTravelerCard}
-                                key={passenger?.id || `${passenger?.first_name}-${index}`}
+                                className={`${styles.savedTravelerCard} ${
+                                    savedTravelerAssignments[String(getSavedTravelerId(passenger))]
+                                        ? styles.savedTravelerCardSelected
+                                        : ""
+                                }`}
+                                key={getSavedTravelerId(passenger) || `${passenger?.first_name}-${index}`}
                                 onClick={() => selectSavedTraveler(passenger)}
                             >
-                                <strong>{[passenger?.title, passenger?.first_name, passenger?.last_name].filter(Boolean).join(" ") || "Traveler"}</strong>
+                                <span
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label="Remove saved traveler"
+                                    className={styles.removeSavedTraveler}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        removeSavedTraveler(passenger);
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            removeSavedTraveler(passenger);
+                                        }
+                                    }}
+                                >
+                                    {deletingSavedTravelerId === String(getSavedTravelerId(passenger)) ? "…" : "×"}
+                                </span>
+                                <div className={styles.savedTravelerNameRow}>
+                                    <div className={styles.travellerParent}>
+                                    <strong>{[passenger?.title, passenger?.first_name, passenger?.last_name].filter(Boolean).join(" ") || "Traveler"}</strong>
+                                    {savedTravelerAssignments[String(getSavedTravelerId(passenger))] && (
+                                    <small>
+                                        Traveler {travelers.findIndex((traveler) => traveler.id === savedTravelerAssignments[String(getSavedTravelerId(passenger))]) + 1}
+                                    </small>
+                                )}
+                                    </div>
+
+                                    {getSavedTravelerCategory(passenger) && (
+                                        <em>{getSavedTravelerCategory(passenger)}</em>
+                                    )}
+                                </div>
                                 <span>{passenger?.email || passenger?.phone || passenger?.mobile || "Saved flight traveler"}</span>
+
                             </button>
                         ))}
                     </div>
                 ) : (
                     <p className={styles.savedTravelerState}>No saved travelers found.</p>
                 )}
-            </section>
+            </section>}
 
             {/* Add Traveler */}
             {travelers.length < passengerSlots.length && (
@@ -469,14 +616,14 @@ const TravelerDetails = () => {
                         <h3>TRAVELER {index + 1} - {traveler.type}</h3>
 
                      <div className={styles.saveButtonParent}>
-                     <button
+                     {isLoggedIn && <button
                             type="button"
                             className={styles.savedTravellerButton}
                             disabled={savingTravelerId === traveler.id}
                             onClick={() => saveSpecificTraveler(traveler)}
                         >
                             {savingTravelerId === traveler.id ? "Saving…" : "Save traveller"}
-                        </button>
+                        </button>}
 
                         <span className={styles.iconWrapper} onClick={() => toggleTraveler(index)}>
                             <span className={`${styles.icon} ${traveler.isOpen ? styles.hide : styles.show}`}>
@@ -541,9 +688,41 @@ const TravelerDetails = () => {
 
                         </div>
 
+                        {isDomestic && (traveler.type === "CHILD" || traveler.PTC === "CHD") && (
+                            <div className={`${styles.grid} ${styles.childDobGrid}`}>
+                                <div className={styles.field}>
+                                    <label className={styles.label}>DOB</label>
+                                    <input
+                                        className={`${styles.input} ${getTravelerFieldError(traveler.id, "DOB") ? styles.fieldError : ""}`}
+                                        type="date"
+                                        value={traveler.DOB}
+                                        onChange={(event) => updateTravelerField(index, "DOB", event.target.value)}
+                                        onClick={openNativeDatePicker}
+                                    />
+                                    {getTravelerFieldError(traveler.id, "DOB") && (
+                                        <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "DOB")}</span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {!isDomestic && (
                         <div className={styles.internationalFields}>
                         <div className={styles.grid}>
+                            <div className={styles.field}>
+                                <label className={styles.label}>DOB</label>
+                                <input
+                                    className={`${styles.input} ${getTravelerFieldError(traveler.id, "DOB") ? styles.fieldError : ""}`}
+                                    type="date"
+                                    value={traveler.DOB}
+                                    onChange={(event) => updateTravelerField(index, "DOB", event.target.value)}
+                                    onClick={openNativeDatePicker}
+                                />
+                                {getTravelerFieldError(traveler.id, "DOB") && (
+                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "DOB")}</span>
+                                )}
+                            </div>
+
                             <div className={styles.field}>
                                 <label className={styles.label}>Email</label>
                                 <input
@@ -579,8 +758,16 @@ const TravelerDetails = () => {
                                     className={`${styles.input} ${getTravelerFieldError(traveler.id, "PassportNo") ? styles.fieldError : ""}`}
                                     type="text"
                                     placeholder="Passport Number"
+                                    minLength={6}
+                                    maxLength={20}
+                                    pattern="[A-Za-z0-9]{6,20}"
+                                    autoCapitalize="characters"
                                     value={traveler.PassportNo}
-                                    onChange={(event) => updateTravelerField(index, "PassportNo", event.target.value)}
+                                    onChange={(event) => updateTravelerField(
+                                        index,
+                                        "PassportNo",
+                                        event.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 20)
+                                    )}
                                 />
                                 {getTravelerFieldError(traveler.id, "PassportNo") && (
                                     <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "PassportNo")}</span>
@@ -593,8 +780,13 @@ const TravelerDetails = () => {
                                     className={`${styles.input} ${getTravelerFieldError(traveler.id, "PLI") ? styles.fieldError : ""}`}
                                     type="text"
                                     placeholder="Passport Issue Place"
+                                    maxLength={50}
                                     value={traveler.PLI}
-                                    onChange={(event) => updateTravelerField(index, "PLI", event.target.value)}
+                                    onChange={(event) => updateTravelerField(
+                                        index,
+                                        "PLI",
+                                        event.target.value.replace(/[^A-Za-z .'-]/g, "").slice(0, 50)
+                                    )}
                                 />
                                 {getTravelerFieldError(traveler.id, "PLI") && (
                                     <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "PLI")}</span>
@@ -617,20 +809,16 @@ const TravelerDetails = () => {
                                 )}
                             </div>
 
-                            <div className={`${styles.field} ${styles.selectField}`}>
+                            <div className={styles.field}>
                                 <label className={styles.label}>Visa Type</label>
-                                <select
-                                    className={styles.select}
+                                <VisaTypeSelect
                                     value={traveler.VisaType}
-                                    onChange={(event) => updateTravelerField(index, "VisaType", event.target.value)}
-                                >
-                                    <option value="">Select Visa Type</option>
-                                    <option value="Tourist Visa">Tourist Visa</option>
-                                    <option value="Visiting Visa">Visiting Visa</option>
-                                    <option value="Business Visa">Business Visa</option>
-                                    <option value="Transit Visa">Transit Visa</option>
-                                    <option value="Student Visa">Student Visa</option>
-                                </select>
+                                    onChange={(value) => updateTravelerField(index, "VisaType", value)}
+                                    hasError={Boolean(getTravelerFieldError(traveler.id, "VisaType"))}
+                                />
+                                {getTravelerFieldError(traveler.id, "VisaType") && (
+                                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "VisaType")}</span>
+                                )}
                             </div>
 
                         </div>

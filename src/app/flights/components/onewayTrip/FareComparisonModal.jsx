@@ -109,6 +109,7 @@ const getFormattedJourney = (priceResponse) => {
 const buildFormattedOnlyPriceResponse = (priceResponse) => {
     const payload = getPricePayload(priceResponse);
     const formatted = getFormattedPricePayload(priceResponse);
+    const journey = payload?.journey || priceResponse?.journey || priceResponse?.data?.journey;
     const fareBreakdown = Array.isArray(payload?.fare_breakdown) ? payload.fare_breakdown : [];
     const tui =
         payload?.tui ||
@@ -134,12 +135,14 @@ const buildFormattedOnlyPriceResponse = (priceResponse) => {
         success: priceResponse?.success ?? payload?.success,
         message: priceResponse?.message ?? payload?.message,
         provider,
+        journey,
         tui,
         trackid,
         data: {
             success: payload?.success,
             cached: payload?.cached,
             provider,
+            journey,
             tui,
             trackid,
             search_key: payload?.search_key || payload?.SearchKey,
@@ -815,7 +818,7 @@ const FareComparisonModal = ({
             );
           
             const nextSession = {
-                journey: flightData?.journey,
+                journey: flightData?.journey || formattedOnlyPriceResponse?.journey,
                 selectedFlight: flightData,
                 selectedFare: selectedFareFromFormattedPrice,
                 routeContext,

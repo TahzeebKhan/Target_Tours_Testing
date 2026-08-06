@@ -1,6 +1,7 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DIGITS_PATTERN = /\d/g;
 const PASSPORT_PATTERN = /^[A-Za-z0-9]{6,20}$/;
+const PASSPORT_ISSUE_PLACE_PATTERN = /^[A-Za-z][A-Za-z .'-]{0,49}$/;
 
 export const EMPTY_TRAVELER_FORM_ERRORS = {
   travelers: {},
@@ -10,6 +11,14 @@ export const EMPTY_TRAVELER_FORM_ERRORS = {
 const getDigitCount = (value = "") => String(value).match(DIGITS_PATTERN)?.length || 0;
 
 const isBlank = (value) => String(value ?? "").trim() === "";
+
+export const getPassportNoError = (value) => {
+  if (isBlank(value)) return "Passport No is required.";
+  if (!PASSPORT_PATTERN.test(String(value).trim())) {
+    return "Passport No must be 6–20 letters and numbers only.";
+  }
+  return "";
+};
 
 const getAgeFromDob = (value, referenceDate = new Date()) => {
   const text = String(value || "").trim();
@@ -61,30 +70,16 @@ export const getBookingJourney = (bookingSession = {}) =>
       bookingSession?.selectedFlight?.data?.journey ||
       bookingSession?.priceResponse?.journey ||
       bookingSession?.priceResponse?.data?.journey ||
+      bookingSession?.priceResponse?.data?.data?.journey ||
+      bookingSession?.urlFallback?.journey ||
       "",
   )
     .trim()
     .toLowerCase();
 
-const getTravelerChecklistRules = (checklistResponse = {}) => {
-  const rawChecklist =
-    checklistResponse?.data?.raw?.TravellerCheckList ||
-    checklistResponse?.raw?.TravellerCheckList ||
-    [];
-
-  if (!Array.isArray(rawChecklist) || rawChecklist.length === 0) {
-    return {};
-  }
-
-  return rawChecklist[0] || {};
-};
-
-const isChecklistFieldRequired = (rules, field) => Number(rules?.[field]) === 1;
-
 const validateTraveler = (
   traveler = {},
   index = 0,
-  checklistRules = {},
   isDomestic = false,
 ) => {
   const errors = {};
@@ -105,7 +100,7 @@ const validateTraveler = (
     };
   }
 
-  if (!isChild && isChecklistFieldRequired(checklistRules, "DOB") && isBlank(traveler.DOB)) {
+  if (!isChild && isBlank(traveler.DOB)) {
     errors.DOB = "DOB is required.";
   }
 
@@ -115,28 +110,25 @@ const validateTraveler = (
     errors.Email = "Enter a valid Email.";
   }
 
-  if (
-    isChecklistFieldRequired(checklistRules, "Nationality") &&
-    isBlank(traveler.Nationality)
-  ) {
+  if (isBlank(traveler.Nationality)) {
     errors.Nationality = "Nationality is required.";
   }
 
-  if (isChecklistFieldRequired(checklistRules, "PassportNo") && isBlank(traveler.PassportNo)) {
-    errors.PassportNo = "Passport No is required.";
-  } else if (
-    !isBlank(traveler.PassportNo) &&
-    !PASSPORT_PATTERN.test(String(traveler.PassportNo).trim())
-  ) {
-    errors.PassportNo = "Enter a valid Passport No.";
-  }
+  const passportNoError = getPassportNoError(traveler.PassportNo);
+  if (passportNoError) errors.PassportNo = passportNoError;
 
-  if (isChecklistFieldRequired(checklistRules, "PLI") && isBlank(traveler.PLI)) {
+  if (isBlank(traveler.PLI)) {
     errors.PLI = "Passport Issue Place is required.";
+  } else if (!PASSPORT_ISSUE_PLACE_PATTERN.test(String(traveler.PLI).trim())) {
+    errors.PLI = "Passport Issue Place must contain letters only.";
   }
 
-  if (isChecklistFieldRequired(checklistRules, "PDOE") && isBlank(traveler.PDOE)) {
+  if (isBlank(traveler.PDOE)) {
     errors.PDOE = "Passport Expiry is required.";
+  }
+
+  if (isBlank(traveler.VisaType)) {
+    errors.VisaType = "Visa Type is required.";
   }
 
   const entries = Object.values(errors);
@@ -172,14 +164,12 @@ const validateBookingContact = (bookingContact = {}) => {
 export const validateTravelerForm = ({
   travelerDetails = [],
   bookingContactDetails = {},
-  checklistResponse = null,
   journey = "",
 }) => {
   const nextErrors = {
     travelers: {},
     bookingContact: {},
   };
-  const checklistRules = getTravelerChecklistRules(checklistResponse);
   const isDomestic = String(journey).trim().toLowerCase() === "domestic";
 
   if (!Array.isArray(travelerDetails) || travelerDetails.length === 0) {
@@ -195,7 +185,6 @@ export const validateTravelerForm = ({
     const travelerValidation = validateTraveler(
       traveler,
       index,
-      checklistRules,
       isDomestic,
     );
     if (Object.keys(travelerValidation.errors).length > 0) {

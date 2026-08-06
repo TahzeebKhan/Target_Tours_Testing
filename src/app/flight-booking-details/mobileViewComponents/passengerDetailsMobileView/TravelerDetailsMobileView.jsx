@@ -8,6 +8,7 @@ import { getBookingPassengerCounts } from "@/features/flights/utils/flightBookin
 import {
   EMPTY_TRAVELER_FORM_ERRORS,
   getBookingJourney,
+  getPassportNoError,
   getTravelerDobError,
   validateTravelerForm,
 } from "@/app/flight-booking-details/utils/travelerValidation";
@@ -17,6 +18,7 @@ import Cookies from "js-cookie";
 import { useAuth } from "@/app/context/AuthContext";
 import CountryCodeSelect from "@/app/flight-booking-details/components/CountryCodeSelect/CountryCodeSelect";
 import NationalitySelect from "@/app/flight-booking-details/components/NationalitySelect/NationalitySelect";
+import VisaTypeSelect from "@/app/flight-booking-details/components/VisaTypeSelect/VisaTypeSelect";
 
 const buildPassengerSlots = (bookingSession) => {
   const { adult: adults, child: children, infant: infants } =
@@ -274,15 +276,25 @@ const TravelerDetailsMobileView = ({ onClose }) => {
       setTravelerDetails(serializedNext);
       return next;
     });
-    if (field === "DOB") {
+    const travelerId = travelers[index]?.id;
+    const fieldAlreadyHasError = Boolean(
+      travelerFormErrors?.travelers?.[travelerId]?.[field]
+    );
+    if (field === "DOB" && fieldAlreadyHasError) {
       const nextTraveler = { ...travelers[index], DOB: normalizedValue };
       setTravelerFieldError(
         nextTraveler.id,
         field,
         getTravelerDobError(nextTraveler),
       );
+    } else if (field === "PassportNo" && fieldAlreadyHasError) {
+      setTravelerFieldError(
+        travelerId,
+        field,
+        getPassportNoError(normalizedValue),
+      );
     } else {
-      clearTravelerFieldError(travelers[index]?.id, field);
+      clearTravelerFieldError(travelerId, field);
     }
   };
 
@@ -496,9 +508,17 @@ const TravelerDetailsMobileView = ({ onClose }) => {
                     className={`${styles.input} ${getTravelerFieldError(traveler.id, "PassportNo") ? styles.fieldError : ""}`}
                     type="text"
                     placeholder="Passport Number"
+                    minLength={6}
+                    maxLength={20}
+                    pattern="[A-Za-z0-9]{6,20}"
+                    autoCapitalize="characters"
                     value={traveler.PassportNo}
                     onChange={(event) =>
-                      updateTravelerField(index, "PassportNo", event.target.value)
+                      updateTravelerField(
+                        index,
+                        "PassportNo",
+                        event.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 20)
+                      )
                     }
                   />
                   {getTravelerFieldError(traveler.id, "PassportNo") && (
@@ -512,9 +532,14 @@ const TravelerDetailsMobileView = ({ onClose }) => {
                     className={`${styles.input} ${getTravelerFieldError(traveler.id, "PLI") ? styles.fieldError : ""}`}
                     type="text"
                     placeholder="Passport Issue Place"
+                    maxLength={50}
                     value={traveler.PLI}
                     onChange={(event) =>
-                      updateTravelerField(index, "PLI", event.target.value)
+                      updateTravelerField(
+                        index,
+                        "PLI",
+                        event.target.value.replace(/[^A-Za-z .'-]/g, "").slice(0, 50)
+                      )
                     }
                   />
                   {getTravelerFieldError(traveler.id, "PLI") && (
@@ -541,22 +566,18 @@ const TravelerDetailsMobileView = ({ onClose }) => {
                   )}
                 </div>
 
-                <div className={`${styles.field} ${styles.selectField}`}>
+                <div className={styles.field}>
                   <label className={styles.label}>Visa Type</label>
-                  <select
-                    className={styles.select}
+                  <VisaTypeSelect
                     value={traveler.VisaType}
-                    onChange={(event) =>
-                      updateTravelerField(index, "VisaType", event.target.value)
+                    onChange={(value) =>
+                      updateTravelerField(index, "VisaType", value)
                     }
-                  >
-                    <option value="">Select Visa Type</option>
-                    <option value="Tourist Visa">Tourist Visa</option>
-                    <option value="Visiting Visa">Visiting Visa</option>
-                    <option value="Business Visa">Business Visa</option>
-                    <option value="Transit Visa">Transit Visa</option>
-                    <option value="Student Visa">Student Visa</option>
-                  </select>
+                    hasError={Boolean(getTravelerFieldError(traveler.id, "VisaType"))}
+                  />
+                  {getTravelerFieldError(traveler.id, "VisaType") && (
+                    <span className={styles.errorText}>{getTravelerFieldError(traveler.id, "VisaType")}</span>
+                  )}
                 </div>
 
               </div>

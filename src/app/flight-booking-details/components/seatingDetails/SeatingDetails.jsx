@@ -887,7 +887,7 @@ const SeatingDetails = () => {
                   Select Seat On Map
                   {seatLayoutLoading ? "..." : ""}
                 </div>
-                {seatNavState.canScrollPrevious && (
+                {seatLayoutGroups.length > 1 && seatNavState.canScrollPrevious && (
                   <button
                     type="button"
                     className={`${styles.seatNavButton} ${styles.seatNavPrevious}`}
@@ -929,7 +929,7 @@ const SeatingDetails = () => {
                     ))
                   )}
                 </div>
-                {seatNavState.canScrollNext && (
+                {seatLayoutGroups.length > 1 && seatNavState.canScrollNext && (
                   <button
                     type="button"
                     className={`${styles.seatNavButton} ${styles.seatNavNext}`}
