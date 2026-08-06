@@ -1,0 +1,282 @@
+.wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: white;
+  box-shadow: 0px 4px 9.3px 0px #0000001a;
+  border: 1px solid #e4e6e8;
+}
+
+.container {
+  max-width: 1177px;
+  width: 100%;
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 37px;
+}
+
+/* Headings */
+.heading {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: #000000;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 26px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+}
+
+/* Regions */
+.regionGrid {
+  display: grid;
+  max-width: 452px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.regionCard {
+  text-align: start;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+.checkboxContainer {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+}
+.checkboxContainer label {
+  gap: 0;
+}
+.checkboxContainer span {
+  margin: 0 !important;
+}
+.regionCard span {
+  display: block;
+  color: black;
+
+  margin-top: 6px;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 18px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.imagePlaceholder {
+  width: 140px;
+  height: auto;
+  border: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.imagePlaceholder img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Countries */
+.countryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.countryBtn {
+  padding: 8px 24px;
+  border: 0.5px solid #000033;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  
+  line-height: 100%;
+  transition: all 0.5s ease;
+  letter-spacing: -2%;
+}
+
+.activeCountry {
+  background: #0b0f2f;
+  color: #fff;
+  border-color: #0b0f2f;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 30px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.resetBtn {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  height: 24px;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  
+  line-height: 0%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000033;
+  border-bottom: 1px solid #000033;
+  padding: 5px 0px;
+}
+
+.applyBtn {
+  width: 210px;
+  /* height: 41px; */
+  background: #000033;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+.applyBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+/* Active region */
+
+.regionCard {
+  position: relative;
+  background: #fff;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.active {
+  border: 1px solid #d0d4e4;
+}
+
+/* .regionCard:hover {
+  border-color: #0b0f2f;
+} */
+
+.active {
+  border-color: #0b0f2f;
+}
+
+/* Checkbox top-right */
+
+.checkboxContainer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+.active .checkboxContainer {
+  opacity: 1;
+}
+
+.regionCard {
+  position: relative;
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  border: 1px solid transparent;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Hover */
+.imagePlaceholder:hover {
+  border-color: #0b0f2f;
+}
+
+/* Active */
+.activeImage {
+  border: 2px solid #0b0f2f;
+}
+
+/* Checkbox fade in */
+.checkboxContainer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.active .checkboxContainer {
+  opacity: 1;
+}
+.rightPart {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e4e6e8;
+  padding-left: 37px;
+}
+/* Responsive */
+
+
+@media (max-width: 1200px){
+  .container{
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+@media (max-width: 991px){
+  .container{
+    gap: 16px;
+  }
+  .rightPart{
+    padding-left: 16px;
+  }
+  .imagePlaceholder{
+    width: 100%;
+  }
+   .heading{
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  .regionCard span{
+    font-size: 16px;
+  }
+}
+@media (max-width: 900px) {
+
+ 
+  .container {
+    /* grid-template-columns: 1fr; */
+  }
+
+  .regionGrid {
+    /* grid-template-columns: repeat(2, 1fr); */
+  }
+}

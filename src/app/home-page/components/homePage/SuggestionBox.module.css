@@ -1,0 +1,120 @@
+.suggestionBox{
+  position: absolute;
+  left: 0;
+  right: 0;
+  background-color: #171717;
+  border: .5px solid #E6E8EC;
+ backdrop-filter: blur(39.29999923706055px);
+  width: 324px;
+  overflow-y: auto;
+  z-index: 50;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.light {
+  background-color: #ffffff;
+  border: 1px solid #dfe3ea;
+  backdrop-filter: none;
+  box-shadow: 0 14px 32px rgba(12, 18, 28, 0.12);
+  z-index: 60;
+}
+
+.below {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.above {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+
+.recentSearchHeading{
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #C4C4C4;
+
+}
+.suggestionItem{
+  display: flex;
+  /* align-items: center; */
+  gap: 5px;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.suggestionItemActive,
+.suggestionItem:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.suggestionText{
+  display: flex;
+  flex-direction: column;
+  
+  gap: 2px;
+}
+.suggestionLabel{
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 1.19;
+  text-align: start;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+.suggestionDetail{
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-align: start;
+  text-transform: capitalize;
+  color: rgba(255, 255, 255, 0.82);
+
+
+}
+.suggestionCode{
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  color: #FFFFFF;
+
+}
+
+.light .recentSearchHeading {
+  color: #7b8799;
+}
+
+.light .suggestionItem:hover,
+.light .suggestionItemActive {
+  background: #f4f6f8;
+}
+
+.light .suggestionLabel {
+  color: #1a2029;
+}
+
+.light .suggestionDetail {
+  color: #5c6470;
+}
+
+.light .suggestionCode {
+  color: #1a2029;
+}

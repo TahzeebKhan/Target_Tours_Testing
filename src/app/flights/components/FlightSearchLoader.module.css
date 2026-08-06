@@ -1,0 +1,42 @@
+.loader {
+  width: 100%;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.animationWrap {
+  width: min(220px, 60vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.animation {
+  width: 100%;
+  height: 100%;
+}
+
+.loader p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #4a5565;
+}
+
+@media (max-width: 629px) {
+  .loader {
+    min-height: 280px;
+    padding: 32px 12px;
+  }
+
+  .animationWrap {
+    width: min(180px, 68vw);
+  }
+}

@@ -1,0 +1,312 @@
+.tripDetailsContainer {
+    background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+    padding: 76px 16px 148px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tripDetailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.heading {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000033;
+}
+
+/* Add traveler */
+.addTraveler {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    text-align: right;
+    color: #070773;
+    cursor: pointer;
+}
+
+/* Card */
+.card {
+    position: relative;
+    border: 1px solid #E4E6E8;
+    padding: 16px;
+    background: #FFFFFF;
+
+}
+
+.travelerCard {
+    z-index: auto;
+}
+
+.card:has(button[aria-expanded="true"]) {
+    z-index: 1000;
+}
+
+/* Header */
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.cardHeader h3 {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.19;
+    letter-spacing: 0%;
+    color: #000000;
+    text-transform: uppercase;
+
+}
+
+.label {
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: -3%;
+    vertical-align: middle;
+    color: #1A2029;
+
+}
+
+.collapse {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Section title */
+.sectionTitle {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Grid */
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.internationalFields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.internationalFields > .grid {
+    display: contents;
+}
+
+.childDobGrid > .field {
+    width: 100%;
+}
+
+.gstSection {
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #E4E6E8;
+}
+
+.gstCheckboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-inter);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gstCheckboxLabel input {
+    width: 18px;
+    height: 18px;
+    accent-color: #078CF5;
+}
+
+.gstCheckboxLabel em {
+    color: #999;
+    font-style: normal;
+    font-weight: 400;
+}
+
+.gstFields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.saveGstCheckbox {
+    margin-top: 4px;
+}
+
+/* Field */
+.field {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+.field input,
+.field select {
+    height: 33px;
+    padding: 8px 12px;
+    border: 1px solid #DBE2EB;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 1.18;
+    letter-spacing: 0%;
+    outline: none;
+}
+
+.fieldError {
+    border-color: #E24C4B !important;
+}
+
+.errorText {
+    font-family: var(--font-inter);
+    font-size: 12px;
+    line-height: 1.2;
+    color: #E24C4B;
+}
+
+.input::placeholder {
+    color: #8b93a7;
+}
+
+.bookingInput::placeholder {
+    color: #C4C4C4;
+
+}
+
+.select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 100%;
+    padding-right: 44px;
+    /* arrow ke liye space */
+    cursor: pointer;
+}
+
+.selectField {
+    position: relative;
+}
+
+.selectField::after {
+    width: 14px;
+    height: 14px;
+    content: "";
+    position: absolute;
+    right: 12px;
+    top: 73%;
+    transform: translateY(-50%);
+
+    background-image: url("/icons/DownArrows.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    /* important */
+}
+
+.footer {
+    padding: 24px 16px 55px;
+    background: #000033;
+    box-shadow: 0px -6px 10.2px 0px #0000001A;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9;
+}
+
+.footerContainer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.amountSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.Btnlabel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    color: #FFFFFF;
+
+}
+
+.infoIcon {
+    border: 1.5px solid #7B8799;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #7B8799;
+}
+
+.amount {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 1.19;
+    color: #FFFFFF;
+}
+
+.continueBtn {
+    max-width: 240px;
+    width: 100%;
+    height: 48px;
+    padding: 10px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+    background-color: #FFFFFF;
+    cursor: pointer;
+}

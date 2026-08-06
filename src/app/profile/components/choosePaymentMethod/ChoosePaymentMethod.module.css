@@ -1,0 +1,139 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 956px;
+  background-color: #ffffff;
+  margin: 0 auto;
+  color: rgba(0, 0, 0, 1);
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  padding-bottom: 16px;
+  padding-left: 10px;
+  border-bottom: 1px solid rgba(228, 230, 232, 1);
+  gap: 18px;
+}
+
+.cardBrand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  min-width: 60px;
+  height: 41px;
+}
+
+.logoWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cardDetails {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cardTextWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.defaultBadge {
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  background: rgba(241, 242, 243, 1);
+  border: 1px solid rgba(221, 223, 227, 1);
+  color: #a0a0a0;
+  padding: 2px 8px;
+}
+
+.expiryText {
+  font-size: 12px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  gap: 3px;
+}
+
+.dots,
+.dots::before,
+.dots::after {
+  width: 3px;
+  height: 3px;
+  background-color: rgba(43, 48, 55, 1);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dots {
+  position: relative;
+}
+
+.dots::before,
+.dots::after {
+  content: "";
+  position: absolute;
+}
+
+.dots::before {
+  left: -6px;
+}
+
+.dots::after {
+  left: 6px;
+}
+
+@media (max-width: 480px) {
+  .cardRow {
+    padding: 10px 0px;
+    padding-bottom: 26px;
+    gap: 12px;
+    border-bottom: 1px dashed #e4e6e8;
+  }
+
+  .cardTitle {
+    font-size: 15px;
+  }
+  .defaultBadge {
+    background-color: #fcc800;
+    border-radius: 2px;
+    text-transform: capitalize;
+    border: none;
+    color: #1f2226;
+  }
+
+  .cardBrand {
+    min-width: 56px;
+  }
+  .cardRowLast {
+    border-bottom: 0px;
+    padding-bottom: 10px;
+  }
+}

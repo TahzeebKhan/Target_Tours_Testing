@@ -1,0 +1,20 @@
+.wrapper {
+    padding: 16px 24px 24px 24px;
+    background-color: #FFFFFF;
+}
+
+.mealNotes {
+    list-style-type: decimal;
+    padding-left: 20px;
+}
+.mealNotes li{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 12px;
+    line-height: 1.67;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}

@@ -1,0 +1,162 @@
+.container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 1);
+  border: 1px solid rgba(228, 230, 232, 1);
+  width: 100%;
+  max-width: 768px;
+  padding-bottom: 146px;
+  margin: 0 auto;
+}
+
+.gridWrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Styling for the Extra Legroom (XL) box */
+.legendItem:last-child .swatch {
+  border: 1px solid rgba(74, 85, 101, 1);
+}
+
+.xlText {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(10, 10, 10, 1);
+  line-height: 16px;
+  letter-spacing: 0px;
+}
+
+.label {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(10, 10, 10, 1);
+  line-height: 20px;
+  letter-spacing: 0px;
+}
+
+/* Responsiveness */
+
+/* Tablet */
+@media (max-width: 400px) {
+  .gridWrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* ================= PASSENGER SECTION ================= */
+
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 16px;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(228, 230, 232, 1);
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 6px;
+}
+
+.title {
+  font-family: "Antic Didone", serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(7, 7, 115, 1);
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.selectionStatus {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: rgba(0, 0, 0, 1);
+}
+
+/* Passenger Cards */
+.passengerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.passengerCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  border: 1px solid rgba(228, 230, 232, 1);
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+.activeCard {
+  border-color: rgba(0, 0, 51, 1);
+}
+
+.avatarBox {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 1);
+  border: 0.83px solid rgba(219, 226, 235, 1);
+}
+
+.passengerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passengerLabel {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(26, 32, 41, 1);
+  line-height: 100%;
+  letter-spacing: -3%;
+}
+
+.passengerSub {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: rgba(91, 101, 116, 1);
+  line-height: 150%;
+  letter-spacing: -3%;
+}
+
+.separator {
+  padding: 0 4px;
+}

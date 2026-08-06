@@ -1,0 +1,122 @@
+.container {
+  /* max-width: 956px; */
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 24px;
+}
+.contentWrapper {
+  max-width: 600px;
+  width: 100%;
+  padding: 0 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  align-items: center;
+}
+.containerMobile {
+  display: none;
+}
+.heartIcon {
+  width: 200px;
+  height: 200px;
+}
+.startBtn {
+  max-width: 268px;
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #000033;
+  color: #ffffff;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  transition: all 0.45s ease;
+  cursor: pointer;
+}
+.startBtn:hover {
+  background-color: rgb(252, 200, 0);
+  color: #000033;
+}
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.textWrapper h2 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 32px;
+  line-height: 32px;
+  letter-spacing: 0%;
+  text-align: center;
+  color: #000033;
+}
+
+.textWrapper p {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  color: #000000;
+}
+
+@media (max-width: 895px) {
+  .container {
+    display: none;
+  }
+  .containerMobile {
+    display: flex;
+    padding: 0;
+  }
+  .startBtn {
+    max-width: 350px;
+    /* text-transform: capitalize; */
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    height: 48px;
+    font-size: 14px;
+    
+    line-height: 20px;
+    letter-spacing: 0%;
+  }
+  .contentWrapper {
+    gap: 12px;
+  }
+  .textWrapper h2 {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    
+    line-height: 28px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: #27272a;
+  }
+  .textWrapper p {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    
+    line-height: 160%;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: #434343;
+    max-width: 350px;
+  }
+}

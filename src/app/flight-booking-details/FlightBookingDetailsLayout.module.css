@@ -1,0 +1,139 @@
+.layoutWrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+  padding-top: 73px;
+  background-color: #f9f9f9;
+  background: #f9f9f9;
+}
+
+.desktopChrome {
+  display: contents;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 356px;
+  column-gap: 24px;
+  max-width: 1280px;
+  margin: 0px auto;
+  width: 100%;
+  padding-bottom: 40px;
+  /* Offset for fixed navbar */
+}
+
+.container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sidebar {
+  width: 100%;
+  min-height: 551px;
+  padding-top: 74px;
+}
+
+.sidebarSticky {
+  position: sticky;
+  max-height: 690px;
+  top: 202px; /* navbar (96px) + stepper (~90px) */
+  overflow-y: auto;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobileView {
+  display: none;
+}
+
+.loadingState {
+  width: min(720px, calc(100% - 32px));
+  min-height: 420px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #05053f;
+}
+
+.loadingState h2 {
+  margin: 20px 0 8px;
+  font-family: var(--font-antic-didone), serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.loadingState p {
+  max-width: 520px;
+  margin: 0;
+  color: #667085;
+  line-height: 1.5;
+}
+
+.loadingSpinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e4e6e8;
+  border-top-color: #05053f;
+  border-radius: 50%;
+  animation: bookingSpin 0.8s linear infinite;
+}
+
+@keyframes bookingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1280px) {
+  .mainContent {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 1025px) {
+  .mainContent {
+    column-gap: 12px;
+    grid-template-columns: 1fr 330px;
+  }
+}
+
+@media (max-width: 991px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 24px;
+  }
+  .sidebar {
+    order: -1;
+    padding-top: 0;
+    min-height: unset;
+  }
+   .sidebarSticky{
+    max-height: unset;
+  }
+}
+@media (max-width: 640px) {
+  .layoutWrapper {
+    display: flex;
+    padding-top: 0;
+    gap: 0;
+  }
+  .desktopChrome,
+  .sidebar {
+    display: none;
+  }
+  .mainContent {
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+}

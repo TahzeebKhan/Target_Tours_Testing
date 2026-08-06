@@ -1,0 +1,24 @@
+.tripDetailsContainer {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #000033;
+  position: fixed;
+  top: 0;
+  z-index: 9;
+}
+
+.tripDetailsHeader {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tripDetails {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 100%;
+  text-transform: capitalize;
+  color: #ffffff;
+}

@@ -1,0 +1,781 @@
+.container {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bookingLoadingCard {
+  min-height: 236px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 32px;
+  background: #ffffff;
+}
+
+.bookingLoadingCard h3 {
+  margin: 0 0 8px;
+  color: #000033;
+  font-family: Antic Didone;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bookingLoadingCard p {
+  margin: 0;
+  color: #4b5563;
+  font-family: var(--font-inter);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.bookingLoadingSpinner {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 3px solid #e6e8ef;
+  border-top-color: #000033;
+  border-radius: 999px;
+  animation: bookingLoadingSpin 0.8s linear infinite;
+}
+
+@keyframes bookingLoadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.headerText {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 32px;
+  line-height: 1.19;
+  letter-spacing: 0px;
+  color: #1e2939;
+}
+.headerText span {
+  color: #fcc800 !important;
+}
+
+.locationAndRating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hotelAddress {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  color: #000000;
+}
+.ratingSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 150px;
+  width: 100%;
+}
+.stars {
+  display: flex;
+  align-items: center;
+}
+
+.reviewCount {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.headerBannerContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background-color: #ffffff;
+  padding-bottom: 24px;
+}
+
+.BannerContainer {
+  height: 245px;
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
+}
+
+.priceContainer {
+  position: absolute;
+  bottom: 15px;
+  right: 26px;
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+.price {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -2%;
+  color: #ffffff;
+}
+.price strong {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -2%;
+}
+.person {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #e5e5e5;
+}
+.bannerTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 24px;
+}
+
+.bannerHeading {
+  font-family: var(--font-antic-didone);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+
+  color: #070773;
+}
+.subTextContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dateLocationContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dateLocation {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+  color: #000000;
+}
+.dayNightContainer {
+  display: flex;
+  align-items: center;
+}
+.dayNightChip {
+  padding: 2px 6px;
+  border: 0.5px solid #000033;
+  background-color: #dff9ff;
+
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.dash {
+  width: 19px;
+  height: 1px;
+  background-color: #000033;
+}
+.itineraryContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.boldSpan {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000033;
+}
+.ubudText {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  /* align-items: start; */
+  height: fit-content;
+}
+
+.subInfoText {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.flightExpandableCard {
+  padding: 16px 24px;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.flightExpandableHeader {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.expandWrap {
+  max-height: 0; /* start closed */
+  overflow: hidden; /* hide content */
+  transition: max-height 0.6s ease-in-out;
+}
+
+.guestDetailsWrap {
+  position: relative;
+}
+
+.guestDetailsWrap.expandOpen {
+  max-height: min(760px, calc(100vh - 220px));
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.guestDetailsWrap.expandOpen::-webkit-scrollbar {
+  width: 6px;
+}
+
+.guestDetailsWrap.expandOpen::-webkit-scrollbar-thumb {
+  background: #c8ced8;
+}
+.flightExpandableContainer {
+  border: 1px solid transparent;
+}
+.flightActiveBorder {
+  border: 1px solid #e4e6e8;
+  transition: border 0.6s ease-in-out;
+}
+.expandOpen {
+  max-height: 1000px; /* enough to hold content */
+}
+.arrow {
+  transition: transform 0.6s ease;
+}
+
+.arrowRotate {
+  transform: rotate(180deg);
+}
+
+.paymentBox {
+  width: 100%;
+  background: #ffffff;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.paymentTitle {
+  font-family: var(--font-antic-didone);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.18;
+  letter-spacing: 0px;
+  color: #070773;
+}
+
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.paymentMessage,
+.paymentError {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 0px;
+}
+
+.paymentMessage {
+  color: #4b5563;
+}
+
+.paymentError {
+  color: #b42318;
+}
+
+.paymentOption {
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid #cfd6df;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 24px 66px 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.paymentOption:hover,
+.paymentOptionActive {
+  border-color: #000033;
+  box-shadow: 0 0 0 1px #000033;
+}
+
+.paymentRadio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #c3c8cf;
+  border-radius: 50%;
+  position: relative;
+}
+
+.paymentOptionActive .paymentRadio {
+  border-color: #070773;
+}
+
+.paymentOptionActive .paymentRadio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #070773;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+.paymentImageWrap {
+  width: 66px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paymentImageWrap img {
+  max-width: 66px;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.paymentGatewayBadge {
+  width: 46px;
+  height: 30px;
+  border: 1px solid #d1d5dc;
+  background: #f8fafc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0px;
+  color: #070773;
+  text-transform: uppercase;
+}
+
+.paymentLabel {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0px;
+  color: #111827;
+}
+
+.continueButtonContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+.continueButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+.continueButton:hover {
+  background-color: #fcc800;
+}
+
+.hotelTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.hotelImageContainer {
+  max-width: 183px;
+  width: 100%;
+  height: 137px;
+}
+.hotelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background-color: #ffffff;
+  padding: 24px;
+}
+
+.hotelTopContainer {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.hotelImageContainer img {
+  width: 100%;
+  height: 100%;
+}
+.hotelNameAndLocation {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hotelTextContainer h3 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 28px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  color: #070773;
+}
+
+.checkinOutContainer {
+  display: flex;
+  gap: 31px;
+  align-items: center;
+}
+
+.checkinContainer {
+  display: flex;
+  flex-direction: column;
+}
+.checkinText {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.19;
+  text-transform: capitalize;
+  letter-spacing: 0px;
+  color: #000000;
+}
+.dateAndTime {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.15px;
+}
+
+.time {
+  font-family: var(--font-inter);
+  font-weight: 300 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  letter-spacing: -0.15px !important;
+
+  color: #000000;
+}
+
+.perNight {
+  padding: 4px 12px;
+  background-color: #f2f3f7;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.19;
+  letter-spacing: 0px;
+}
+
+@media (max-width: 1246px) {
+  .container {
+    width: 100%;
+    max-width: unset;
+  }
+}
+@media (max-width: 704px) {
+  .hotelTextContainer {
+    width: 100%;
+  }
+  .checkinOutContainer {
+    gap: unset;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 656px) {
+  .hotelAddress {
+    font-size: 14px;
+  }
+  .dateAndTime {
+    font-size: 12px;
+  }
+  .checkinOutContainer {
+    gap: unset;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 640px) {
+  .continueButton {
+    display: none;
+  }
+  .headerText {
+    font-size: 20px;
+  }
+  .container {
+    gap: 12px;
+  }
+  .hotelContainer {
+    padding: 16px;
+  }
+  .flightExpandableCard {
+    padding: 16px;
+  }
+  .hotelTextContainer h3 {
+    font-size: 20px;
+  }
+  .hotelAddress,
+  .reviewCount {
+    font-size: 12px;
+  }
+  .perNight {
+    display: none;
+  }
+}
+
+@media (max-width: 582px) {
+  .locationAndRating {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+}
+@media (max-width: 532px) {
+  .checkinOutContainer {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hotelTextContainer {
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .dateAndTime,
+  .time {
+    font-size: 11px !important;
+  }
+  .flightExpandableHeader{
+    font-size: 16px;
+  }
+  .paymentBox {
+    padding: 18px 16px;
+  }
+  .paymentOption {
+    grid-template-columns: 22px 56px 1fr;
+    min-height: 64px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .paymentTitle {
+    font-size: 20px;
+  }
+  .paymentLabel {
+    font-size: 13px;
+  }
+  .paymentImageWrap {
+    width: 56px;
+  }
+  .paymentImageWrap img {
+    max-width: 56px;
+  }
+}
+@media (max-width: 455px) {
+  .hotelTopContainer {
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .hotelImageContainer {
+    max-width: unset;
+    width: 100%;
+    height: 100%;
+  }
+  .checkinOutContainer {
+    flex-direction: row;
+    max-width: 300px;
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+  }
+}
+
+.pricingErrorOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pricingErrorBox {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pricingErrorIcon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  object-fit: contain;
+}
+
+.pricingErrorTitle {
+  font-family: var(--font-antic-didone, serif);
+  font-size: 26px;
+  font-weight: 600;
+  color: #101828;
+  margin: 0 0 10px 0;
+}
+
+.pricingErrorSubtitle {
+  font-family: var(--font-inter, sans-serif);
+  font-size: 15px;
+  line-height: 1.5;
+  color: #475467;
+  margin: 0 0 28px 0;
+}
+
+.pricingErrorActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.pricingErrorPrimaryBtn {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #000033;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pricingErrorPrimaryBtn:hover {
+  background-color: #1a1a52;
+}
+
+.pricingErrorSecondaryBtn {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #f2f4f7;
+  color: #344054;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pricingErrorSecondaryBtn:hover {
+  background-color: #e4e7ec;
+}

@@ -1,0 +1,398 @@
+.expandWrap {
+  padding: 16px 24px 24px 24px;
+  background-color: #ffffff;
+}
+
+.mealGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 40px;
+}
+.expandHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.expandHeader h2 {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vegToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  color: #000000;
+  font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 13px;
+
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: middle;
+
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggleTrack {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #E5E5E5;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  transition: background-color 0.25s ease;
+}
+
+.toggleThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #000033;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+.vegToggleActive .toggleTrack {
+  background-color: #dff5e7;
+}
+
+.vegToggleActive .toggleThumb {
+  transform: translateX(23px);
+}
+
+.emptyState {
+  width: 100%;
+  min-height: 132px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: left;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.emptyIcon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.emptyTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-inter);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #111827;
+}
+
+.emptyText {
+  margin: 0;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.Itemwrapper {
+  max-width: 388px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.itemInfo {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.imageBox {
+  width: 75px;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.title {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: 0px;
+}
+
+.tag {
+  padding: 1px 8px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0px;
+}
+
+.tagVeg {
+  background-color: #e8f7ee;
+  color: #1f7a3f;
+}
+
+.tagNonVeg {
+  background-color: #fdecec;
+  color: #b42318;
+}
+
+.tagOther {
+  background-color: #fff4cc;
+  color: #8a5a00;
+}
+
+.counter {
+  max-width: 86px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn {
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  border: 0.75px solid #000033;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.count {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+}
+
+.aboutFlightContainerRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.aboutFlightContainerRight span {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.mobileFlightDestinationName {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.baggageMobileCard {
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobileViewContainer {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(180deg, #eef5ff 0%, #ffffff 100%);
+  padding-top: 76px;
+}
+.baggageMobileCard {
+  border: 1px solid #e4e6e8;
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.br {
+  width: 100%;
+  height: 1px;
+  /* border: .5px dashed #94A3B8; */
+  background-image: repeating-linear-gradient(
+    to right,
+    #94a3b8 0,
+    #94a3b8 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.74;
+  margin: 0 auto;
+}
+.btn,
+.btn svg path {
+  transition: all 0.5s ease;
+}
+
+.btn svg {
+  flex: 0 0 auto;
+}
+
+.btn:hover svg path {
+  fill: white;
+}
+
+.btn:hover {
+  background-color: #000033;
+}
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+@media (max-width: 1200px) {
+  .mealGrid {
+    gap: 12px 12px;
+  }
+  .imageBox {
+    width: 56px;
+    height: 56px;
+  }
+  .Itemwrapper {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 1156px) {
+  .tag {
+    font-size: 10px;
+    height: auto;
+  }
+  .price {
+    font-size: 16px;
+  }
+  .itemInfo {
+    gap: 10px;
+  }
+  .counter {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .mealGrid {
+    /* grid-template-columns: 1fr; */
+  }
+  .priceRow {
+    gap: 2px;
+  }
+  .info {
+    gap: 2px;
+  }
+  .price {
+    font-size: 14px;
+  }
+  .expandWrap {
+    padding: 16px;
+  }
+}
+@media (max-width: 1024px) {
+  .title {
+    font-size: 11px;
+  }
+}
+@media (max-width: 640px) {
+  .mealGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .Itemwrapper {
+    max-width: unset;
+  }
+  .emptyState {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,0 +1,74 @@
+.tabsWrap {
+    position: sticky;
+    top: 72px;
+    z-index: 9999;
+    max-width: 1520px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #E4E6E8;
+    border-bottom: 1px solid #DDDFE3;
+    overflow: scroll;
+    background-color: #F9F9F9;
+    padding-top: 15px;
+    padding-left: 16px;
+    padding-right: 16px;
+    
+}
+
+.tabs {
+    display: flex;
+    position: relative;
+    gap: 24px;
+    font-size: 14px;
+    text-transform: uppercase;
+
+    /* indicator vars */
+    --indicator-width: 0px;
+    --indicator-left: 0px;
+}
+
+.tab {
+    padding-bottom: 16px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 26px;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #8B94A4;
+
+}
+
+.tabBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    text-transform: inherit;
+    font-size: inherit;
+    white-space: nowrap;
+}
+
+.active {
+    color: #000033;
+}
+
+/* Sliding underline */
+.tabs::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 3px;
+    width: var(--indicator-width);
+    transform: translateX(var(--indicator-left));
+    background-color: #000033;
+    transition: transform 0.25s ease, width 0.25s ease;
+}
+@media (max-width: 1520px){
+   
+    
+}

@@ -1,0 +1,368 @@
+.container {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+}
+
+
+
+.passengerDetailsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fromToContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.from,
+.to {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  color: #070773;
+}
+
+.flightExpandableContainer {
+  border: 1px solid transparent;
+}
+
+
+
+
+.aboutFlightContainerRight {
+  display: flex;
+  gap: 8px;
+  /* align-items: start; */
+  height: fit-content;
+}
+
+.subInfoText {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #000000;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.flightExpandableHeaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.aboutFlightContainerRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.aboutFlightContainerRight span {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.flightExpandableCard {
+  padding: 16px 24px;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.flightExpandableHeader {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  line-height: 1.18;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
+}
+
+.expandWrap {
+  max-height: 0;
+  /* start closed */
+  overflow: hidden;
+  /* hide content */
+  transition: max-height 0.35s ease-in-out;
+}
+
+.scrollArea {
+  max-height: min(58vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.flightActiveBorder {
+  border: 1px solid #E4E6E8;
+  transition: border 0.35s ease;
+}
+
+.expandOpen {
+  max-height: 1000px;
+  /* border-top: 1px solid #E4E6E8; */
+  /* enough to hold content */
+}
+
+.arrow {
+  transition: transform 0.35s ease;
+}
+
+.arrowRotate {
+  transform: rotate(180deg);
+}
+
+.continueButtonContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 24px;
+}
+
+.continueButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  height: 40px;
+  width: 236px;
+  background-color: #000033;
+  color: #FFFFFF;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+
+.continueButton:hover {
+  background-color: #FCC800;
+}
+
+.skipButton {
+  height: 41px;
+  padding: 12px 16px;
+  border: 0.5px solid #000033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000033;
+}
+
+
+.mobileView {
+  display: none;
+}
+
+
+
+.mobileViewContainer {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(180deg, #EEF5FF 0%, #FFFFFF 100%);
+  padding-top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 143px;
+}
+
+.baggageMobileCard {
+  border: 1px solid #E4E6E8;
+  background: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+}
+
+.br {
+  width: 100%;
+  height: 1px;
+  /* border: .5px dashed #94A3B8; */
+  background-image: repeating-linear-gradient(to right,
+      #94A3B8 0,
+      #94A3B8 6px,
+      transparent 6px,
+      transparent 12px);
+  opacity: 0.74;
+  margin: 0 auto;
+}
+
+.mealNotes {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+.mealNotes li {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.67;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+
+}
+
+.mealGuideLineMobileView {
+  padding: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E4E6E8;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mealHeading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #070773;
+
+}
+
+.footer {
+    padding: 24px 16px 55px;
+    background: #000033;
+    box-shadow: 0px -6px 10.2px 0px #0000001A;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 9;
+}
+
+.footerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.amountSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 1.20;
+    letter-spacing: -3%;
+    color: #FFFFFF;
+
+}
+
+.infoIcon {
+    border: 1.5px solid #7B8799;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 13px;
+    color: #7B8799;
+}
+
+.amount {
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 20px;
+    line-height: 1.19;
+    color: #FFFFFF;
+}
+
+.continueBtn {
+    max-width: 240px;
+    width: 100%;
+    height: 48px;
+    padding: 10px 16px;
+    font-family: var(--font-inter);
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #000033;
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+@media (max-width: 991px){
+    .container{
+      max-width: unset;
+    }
+}
+
+@media (max-width: 640px) {
+  .container {
+    display: none;
+  }
+
+  .mobileView {
+    display: flex;
+  }
+
+  .scrollArea {
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
+}
+@media (max-width: 400px) {
+  .amountSection{
+    min-width: 148px;
+  }
+}

@@ -1,0 +1,226 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 1);
+  /* min-height: 100vh; */
+  font-family: "Inter", sans-serif;
+  color: rgba(0, 0, 0, 1);
+}
+
+/* Tabs */
+.tabNav {
+  display: flex;
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(228, 228, 231, 1);
+  overflow-x: auto;
+  padding: 0 16px;
+  padding-top: 24px;
+  gap: 24px;
+  justify-content: space-between;
+
+  width: 100vw;
+  position: fixed;
+  top: 58px;
+  padding-top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  z-index: 9999;
+}
+
+.tabItem {
+  background: none;
+  border: none;
+  width: 100%;
+
+  /* padding: 4px 0; */
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(161, 161, 170, 1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  line-height: 20px;
+  letter-spacing: 0%;
+  padding: 10px 6px;
+}
+
+.tabActive {
+  color: rgba(0, 0, 51, 1);
+  border-bottom-color: rgba(0, 0, 51, 1);
+}
+
+/* Main Content */
+.mainContent {
+  /* padding: 32px 16px; */
+  padding-top: 84px;
+}
+
+.emptyState {
+  min-height: 360px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.emptyState h2 {
+  font-family: "Antic Didone", serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #000033;
+}
+
+.emptyState p {
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #52525b;
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  /* max-width: 600px; */
+  width: 100%;
+  align-self: center;
+}
+
+.card {
+  background-color: #ffffff;
+  padding: 16px;
+  gap: 16px;
+  box-shadow: 0px 1px 18.6px 0px rgba(0, 0, 0, 0.09);
+}
+
+.cardHeader {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+}
+
+.hotelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.hotelName {
+  font-family: "Antic Didone", serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: rgba(0, 0, 51, 1);
+}
+
+.statusBadge {
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--Color-Soft-Green-50, rgba(242, 250, 235, 1));
+  border: 1px solid rgba(4, 145, 83, 1);
+  color: rgba(4, 145, 83, 1);
+  padding: 4px 8px;
+  width: fit-content;
+  line-height: 20px;
+}
+
+/* Details */
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.dash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(228, 228, 231, 1);
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 4px;
+  white-space: nowrap;
+}
+
+/* Ensure labels stay on the left */
+.label {
+  font-size: 14px;
+  color: rgba(82, 82, 91, 1);
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+/* Ensure values stay on the right */
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(39, 39, 42, 1);
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+/* Optional: Add vertical spacing between rows using padding on the container */
+.detailsGrid {
+  border: 1px solid rgba(228, 230, 232, 1);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Space between the dashed rows */
+}
+
+.detailsButton {
+  border: 1px solid rgba(0, 0, 51, 1);
+  background-color: transparent;
+  color: rgba(0, 0, 51, 1);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  line-height: 20px;
+  letter-spacing: 0%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.detailsButton:hover {
+  background-color: rgba(243, 244, 246, 1);
+}
+
+/* Tablet / Desktop */
+@media (min-width: 768px) {
+  .cardList {
+    max-width: 800px;
+  }
+}
+@media (max-width: 480px) {
+  .detailsGrid {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .tabNav {
+    gap: 0px;
+    justify-content: space-between;
+  }
+  .tabItem {
+    padding: 8px 16px;
+    padding-bottom: 12px;
+  }
+}

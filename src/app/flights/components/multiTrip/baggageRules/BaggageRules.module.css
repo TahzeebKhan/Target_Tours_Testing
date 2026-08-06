@@ -1,0 +1,150 @@
+/* Main container */
+.tabContentBaggageRules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Left table card */
+.tableCard {
+  max-width: 534px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Table element */
+.baggageTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table header */
+.baggageTable thead tr {
+  background-color: #000033;
+}
+
+.baggageTable thead th {
+  padding: 11px 13px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: left;
+}
+
+/* Table body row */
+.baggageTable tbody tr {
+  border: 1px solid #e4e6e8;
+}
+
+.baggageTable tbody td {
+  padding: 9px 13px;
+}
+
+/* Airline cell */
+.airlineCell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Airline icon */
+.airlineIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Airline text */
+.airlineText {
+  display: flex;
+  flex-direction: column;
+}
+
+.airlineName {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.flightNo {
+  font-family: var(--font-inter);
+  font-weight: 400;
+
+  white-space: nowrap;
+  font-size: 14px;
+  color: #737373;
+}
+
+/* Baggage values */
+.baggage {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #000000;
+}
+
+/* Right info box */
+.infoBox {
+  flex: 1;
+  padding: 11px 12px 12px 7px;
+  background-color: #fff7e8;
+}
+
+/* Bullet list */
+.infoBox ul {
+  list-style-type: disc;
+  padding-left: 18px;
+}
+
+.infoBox ul li {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9a3412;
+}
+
+/* Fade animation (reuse) */
+.fadeIn {
+  animation: fadeIn 420ms cubic-bezier(0.16, 0.84, 0.24, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 990px) {
+  .airlineName,
+  .flightNo,
+  .baggageTable thead th,
+  .baggageTable tbody td {
+    font-size: 12px;
+  }
+}
+@media (max-width:717px) {
+    .airlineIcon{
+        width: 22px;
+        height: 22px;
+    }
+    .airlineCell{
+        gap: 8px;
+    }
+}

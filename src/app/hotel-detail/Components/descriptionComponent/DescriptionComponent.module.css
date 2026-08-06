@@ -1,0 +1,218 @@
+.DescriptionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.heading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 24px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000033;
+}
+.paraCont p {
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0%;
+  color: #1f2226;
+}
+.seeMoreBtn {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-decoration: underline;
+  color: #000033;
+  text-align: start;
+  cursor: pointer;
+  width: fit-content;
+  text-underline-offset: 4px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+  width: min(720px, 100%);
+  max-height: min(78vh, 760px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e4e6e8;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #000033;
+}
+
+.closeBtn {
+  border: 0;
+  background: transparent;
+  color: #000033;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modalBody {
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modalDescriptionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalDescriptionItem h4 {
+  margin: 0;
+  font-family: var(--font-inter);
+  color: #000033;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 30px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+}
+
+.modalDescriptionItem p,
+.htmlDescription p,
+.htmlDescription {
+  margin: 0;
+  font-family: var(--font-inter);
+  color: #1f2226;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.modalDescriptionItem p {
+  font-weight: 300;
+  line-height: 20px;
+  letter-spacing: 0%;
+  color: #4a5565;
+}
+
+.htmlDescription p {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.htmlDescription p + p {
+  margin-top: 10px;
+}
+
+.htmlDescription br {
+  content: "";
+  display: block;
+  margin-top: 4px;
+}
+
+.attractionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.attractionCard {
+  min-height: 58px;
+  padding: 12px;
+  border: 1px solid #e4e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #ffffff;
+}
+
+.attractionCard div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attractionCard span {
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #4a5565;
+  text-transform: uppercase;
+}
+
+.attractionCard strong {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #1f2226;
+}
+
+.attractionCard b {
+  flex: 0 0 auto;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+
+  color: #000033;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .DescriptionSection {
+    padding: 24px 16px;
+  }
+
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .attractionsGrid {
+    grid-template-columns: 1fr;
+  }
+}

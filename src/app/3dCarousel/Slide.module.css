@@ -1,0 +1,94 @@
+.card {
+  width: 100%;
+}
+
+.cardButton {
+  position: absolute;
+  top: 43%;
+  box-shadow: none;
+  width: 36px;
+  height: 36px;
+  background-color: transparent;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
+.react-stacked-center-carousel {
+  padding: 20px 0;
+}
+
+/* CARD */
+.cardCard {
+  transition: all 300ms ease;
+  cursor: pointer;
+  width: 100%;
+  height: 576px;
+  /* border-radius: 15px; */
+  position: relative;
+  /* background-color: #ffffff; */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2),
+    0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.cardCard:hover {
+  transform: scale(1.05);
+}
+
+.text{
+    color: black;
+}
+.fill {
+  width: 100%;
+  height: 100%;
+}
+
+/* .cardOverlay {
+  position: absolute;
+  height: 100%;
+  background-color: #00000099;
+  transition: all 300ms ease;
+} */
+
+/* .cardCard:hover .cardOverlay {
+  background-color: #0000002d;
+} */
+
+.cover {
+  position: absolute;
+  transition: opacity 300ms ease;
+}
+
+.card :global(.react-stacked-center-carousel-slide-0) {
+    width: 966px !important;
+  background: #ffffff;
+  border: 1px solid #E4E6E8;
+  overflow: hidden;
+}
+.on {
+  opacity: 1;
+  z-index: 1;
+}
+
+.off {
+  opacity: 0;
+  z-index: -1;
+}
+
+.detail {
+  display: flex;
+}
+
+.discription {
+  display: flex;
+  flex-direction: column;
+}
+
+.coverImage {
+  object-fit: cover;
+}

@@ -1,0 +1,205 @@
+.section {
+    padding: 0 200px 80px;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+}
+.heading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 42px;
+    line-height: 1.19;
+    text-transform: capitalize;
+    color: #000033;
+}
+.cardContainer{
+    display: flex;
+    gap: 24px;
+}
+.slide{
+    width: 482px;
+}
+.card{
+    max-width: 482px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.cardImgContainer{
+    width: 100%;
+    height: 290px;
+    overflow: hidden;
+}
+.cardImg{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+ .cardImg:hover {
+    transform: scale(1.08);
+}
+.cardTextConatiner{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+}
+.travleTrip{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.travelText{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: -2%;
+    text-transform: uppercase;
+    color: #000000;
+
+}
+.travelTime{
+    font-family: var(--font-inter);
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: -2%;
+    color: rgba(0, 0, 0, 0.4);
+
+}
+
+.bottomTextCont{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+}
+.cardHeading{
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 18px;
+    line-height: 25px;
+    letter-spacing: 0px;
+    color: #000000;
+}
+.cardSubHeading{
+    font-family: var(--font-inter);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0px;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.btnContainer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #212121;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #000000;
+    color: white;
+}
+
+.btn img {
+    filter: invert(0);
+    transition: filter 0.2s ease;
+}
+
+.btn:hover img {
+    filter: invert(1);
+}
+.slide{
+    width: 482px !important;
+}
+
+@media (max-width: 1440px) {
+    .section {
+        padding: 0 80px 80px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .section {
+        padding: 0 40px 80px;
+    }
+    .heading {
+        font-size: 40px;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .heading {
+        font-size: 36px;
+    }
+    .card{
+        max-width: 400px;
+        width: 100%;
+    }
+    .slide{
+        width: 400px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .heading {
+        font-size: 32px;
+    }
+    .container{
+        gap: 24px;
+    }
+    .section{
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 529px) {
+    .section {
+        padding: 0px 16px 40px 16px;
+    }
+    .card{
+        max-width: 310px;
+        width: 100%;
+    }
+    .slide{
+        width: min(310px, calc(100vw - 64px)) !important;
+    }
+    .cardSubHeading{
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .heading {
+        font-size: 28px;
+    }
+
+}

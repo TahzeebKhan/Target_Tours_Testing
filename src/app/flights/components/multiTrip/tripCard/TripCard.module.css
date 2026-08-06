@@ -1,0 +1,314 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 16px;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.4s ease;
+
+  border: 1px solid transparent;
+}
+.card:hover {
+  box-shadow: 0px 1px 18.6px 0px #00000017;
+}
+.cardOpen {
+  box-shadow: none !important;
+  border: 1px solid #e5e7f0;
+  border-bottom: transparent;
+}
+.cardLeft {
+  max-width: 835px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cardLeftMainCont {
+  max-width: 783px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.departContainer,
+.returnContainer {
+  /* max-width: 409px; */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.HeadingCont {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  min-width: 150px;
+}
+.HeadingCont img {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+}
+
+.ariLineName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: start;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  max-width: 92px;
+  white-space: wrap;
+  text-overflow: ellipsis;
+  text-align: start;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+.airlineLogoContainer {
+  width: 42px;
+  height: 42px;
+}
+.airlineLogoContainer > .flightLogo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: unset;
+}
+.ariLineNumber {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 15.71px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #737373;
+}
+.departureDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.departTextHeading {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.departTextHeading h3 {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-style: Bold;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000000;
+}
+.departTextHeading span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000000;
+}
+.departTimeContainer {
+  display: flex;
+  width: 100%;
+  gap: 38px;
+  justify-content: space-between;
+  /* max-width: 409px; */
+  width: 100%;
+  padding: 14px;
+  border: 0.5px solid #e4e6e8;
+}
+
+.cardRight {
+  display: flex;
+}
+
+/* FARE DETAILS CONTAINER */
+.fareDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* TOTAL FARE (TOP) */
+.totalFare {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.fareText {
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  color: #000000;
+}
+
+/* VIEW FARES BUTTON */
+.viewBtn {
+  padding: 12px 24px;
+  background-color: #000033;
+  height: 40px;
+  color: #ffffff;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.45s ease;
+}
+.viewBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+/* PRICE PER ADULT ROW */
+.fareAmount {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 8px;
+}
+
+/* PRICE TEXT */
+.fare {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1;
+  color: #000000;
+}
+
+.adult {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1;
+  color: #000000;
+}
+
+/* CABIN CLASS */
+.economy {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 1%;
+  text-transform: uppercase;
+  color: #208ef5;
+}
+
+/* DOT (REUSED) */
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #737373;
+}
+
+/* SEE DETAILS BUTTON */
+.seeDetailsBtn {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ARROW ICON */
+.downArrow {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ROTATE WHEN OPEN */
+.rotate {
+  transform: rotate(180deg);
+}
+
+.expandWrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s ease;
+  border: 1px solid transparent;
+
+  border: 1px solid transparent;
+  border-top: transparent;
+  /* border-top: 1px solid #e5e7f0; */
+}
+
+.expandWrap.open {
+  max-height: 800px;
+  /* enough for content */
+  border: 1px solid #e5e7f0 !important;
+}
+
+.open {
+  max-height: 800px;
+  /* enough for content */
+}
+
+.downArrow {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+.cardRight .seeDetailsBtn {
+  display: none;
+}
+@media (max-width: 1200px) {
+  .top {
+    justify-content: space-between;
+  }
+  .cardLeftMainCont {
+    max-width: 835px;
+  }
+}
+@media (max-width: 751px) {
+  .top {
+    flex-direction: column;
+  }
+  .seeDetailsBtn {
+    display: none;
+  }
+  .cardRight .seeDetailsBtn {
+    display: flex;
+  }
+  .cardRight {
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}

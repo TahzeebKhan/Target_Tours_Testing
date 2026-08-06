@@ -1,0 +1,1201 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 40px;
+  width: 900px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #ffffff;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* ============= HEADER ============= */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 10px;
+  width: 100%;
+}
+
+.countryBadge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  gap: 6px;
+  width: 100%;
+  height: 26px;
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.countryIcon {
+  width: 26px;
+  height: 26px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="%23E8D5B7"/></svg>');
+  border-radius: 80px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.countryText {
+  width: auto;
+  height: 19px;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  color: #59707e;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.mainTitle {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  font-family: "Antic Didone", serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 100%;
+  color: #000033;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.subtitle {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 140%;
+  letter-spacing: -2%;
+  text-transform: capitalize;
+  color: #59707e;
+  flex: none;
+  order: 2;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* ============= CONTENT ============= */
+
+.content {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 24px;
+  gap: 24px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  border-radius: 4px;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* ============= CITY SECTION ============= */
+
+.citySection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.sectionLabel {
+  width: auto;
+  height: 19px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000000;
+  display: block;
+  margin: 0;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.cityTabs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.cityTab {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 0;
+  height: 37px;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  border-radius: 20px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: none;
+  flex-grow: 0;
+  white-space: nowrap;
+}
+
+.cityTab:hover {
+  border-color: #000033;
+  background: #f5f5f5;
+}
+
+.cityTabActive {
+  background: #000033;
+  border-color: #000033;
+  color: #ffffff;
+}
+
+/* ============= SLOTS SECTION ============= */
+
+.slotsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 0 16px 0;
+  gap: 12px;
+  width: 100%;
+  border-bottom: 1px solid #e4e6e8;
+  box-sizing: border-box;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.dateGroups {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.dateGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  flex-grow: 0;
+}
+
+.dateLabel {
+  display: block;
+  width: auto;
+  height: 17px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #59707e;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.timeSlots {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 0;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.timeSlot {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 0;
+  height: 35px;
+  min-width: 63px;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: none;
+  flex-grow: 0;
+}
+
+.timeSlot:hover {
+  border-color: #ca8a04;
+  background: #fffbeb;
+}
+
+.timeSlotSelected {
+  background: #fefce8;
+  border-color: #ca8a04;
+  color: #000000;
+  font-weight: 500;
+}
+
+/* ============= NOTICE CARD ============= */
+
+.noticeCard {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 20px;
+  gap: 16px;
+  width: 100%;
+  background: #f7f9fb;
+  border: 1px solid #1E293B0D;
+  border-radius: 12px;
+  flex: none;
+  order: 2;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.noticeIconWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  gap: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #000033;
+  border-radius: 20px;
+  position: relative;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.noticeIcon {
+  width: 20px;
+  height: 20px;
+  color: #fcc800;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.noticeContent {
+  display: flex;
+  max-width: 620px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 4px;
+  flex: none;
+  order: 1;
+  flex-grow: 1;
+}
+
+.noticeTitle {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 100%;
+  color: #000000;
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.noticeText {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  color: #59707e;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.policyLink {
+  width: auto;
+  height: auto;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-decoration: underline;
+  color: #000033;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration-line: underline;
+  flex: none;
+  order: 2;
+  flex-grow: 0;
+}
+
+.policyLink:hover {
+  color: #000000;
+}
+
+/* ============= FOOTER ============= */
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+  flex: none;
+  order: 3;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.backButton {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  gap: 8px;
+  height: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #59707e;
+  transition: color 0.2s ease;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.backButton:hover {
+  color: #000000;
+}
+
+.backButton svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.confirmButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 42px;
+  gap: 0;
+  height: 41px;
+  min-width: 186px;
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #000033;
+  border: none;
+  border-radius: 0;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), #000033;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 51, 0.25);
+}
+
+.confirmButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 51, 0.15);
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmButtonActive {
+  animation: confirmPulse 0.6s ease;
+}
+
+@keyframes confirmPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(0, 200, 83, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0);
+  }
+}
+
+/* ============= RESPONSIVE DESIGN ============= */
+
+/* Desktop - 1920px and above */
+@media (max-width: 1920px) {
+  .container {
+    width: 900px;
+    padding: 40px 20px;
+  }
+}
+
+/* Desktop - 1600px */
+@media (max-width: 1600px) {
+  .container {
+    width: 900px;
+    padding: 40px 20px;
+  }
+}
+
+/* Desktop - 1440px */
+@media (max-width: 1440px) {
+  .container {
+    width: 900px;
+    padding: 40px 20px;
+  }
+}
+
+/* Desktop - 1366px */
+@media (max-width: 1366px) {
+  .container {
+    width: 100%;
+    max-width: 900px;
+    padding: 32px 20px;
+  }
+}
+
+/* Desktop - 1280px */
+@media (max-width: 1280px) {
+  .container {
+    width: 100%;
+    max-width: 900px;
+    padding: 32px 16px;
+  }
+
+  .mainTitle {
+    font-size: 28px;
+    line-height: 34px;
+  }
+}
+
+/* Laptop - 1200px */
+@media (max-width: 1200px) {
+  .container {
+    width: 100%;
+    max-width: 900px;
+    padding: 32px 16px;
+  }
+
+  .mainTitle {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+}
+
+/* Laptop - 1024px */
+@media (max-width: 1024px) {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 16px;
+  }
+
+  .content {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .mainTitle {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .countryText {
+    font-size: 14px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .confirmButton {
+    width: 100%;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Tablet - 992px */
+@media (max-width: 992px) {
+  .container {
+    width: 100%;
+    padding: 20px 16px;
+    gap: 24px;
+  }
+
+  .header {
+    gap: 16px;
+  }
+
+  .content {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .mainTitle {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .countryText {
+    font-size: 13px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .cityTabs {
+    gap: 8px;
+  }
+
+  .cityTab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .timeSlot {
+    padding: 8px 12px;
+    font-size: 11px;
+    min-width: 55px;
+  }
+
+  .timeSlots {
+    gap: 8px;
+  }
+
+  .dateLabel {
+    font-size: 13px;
+  }
+
+  .noticeCard {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .noticeTitle {
+    font-size: 13px;
+  }
+
+  .noticeText {
+    font-size: 12px;
+    line-height: 15px;
+  }
+
+  .policyLink {
+    font-size: 12px;
+  }
+
+  .confirmButton,
+  .backButton {
+    font-size: 12px;
+  }
+}
+
+/* Tablet - 768px */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 16px 12px;
+    gap: 20px;
+  }
+
+  .header {
+    gap: 12px;
+  }
+
+  .content {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .mainTitle {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .countryText {
+    font-size: 12px;
+  }
+
+  .countryIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .sectionLabel {
+    font-size: 14px;
+  }
+
+  .cityTabs {
+    gap: 6px;
+  }
+
+  .cityTab {
+    padding: 6px 12px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .timeSlot {
+    padding: 6px 10px;
+    height: 32px;
+    font-size: 10px;
+    min-width: 50px;
+  }
+
+  .timeSlots {
+    gap: 6px;
+  }
+
+  .noticeCard {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .noticeIconWrapper {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .noticeIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .noticeTitle {
+    font-size: 12px;
+  }
+
+  .noticeText {
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  .policyLink {
+    font-size: 11px;
+  }
+
+  .footer {
+    gap: 10px;
+  }
+
+  .confirmButton {
+    padding: 10px 32px;
+    height: 36px;
+    font-size: 11px;
+    min-width: 140px;
+  }
+
+  .backButton {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .backButton svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Mobile - 575px */
+@media (max-width: 575px) {
+  .container {
+    width: 100%;
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .header {
+    gap: 10px;
+  }
+
+  .countryBadge {
+    gap: 4px;
+  }
+
+  .countryIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .countryText {
+    font-size: 11px;
+  }
+
+  .mainTitle {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    line-height: 130%;
+  }
+
+  .content {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .sectionLabel {
+    font-size: 13px;
+  }
+
+  .cityTabs {
+    gap: 6px;
+    row-gap: 8px;
+  }
+
+  .cityTab {
+    padding: 6px 12px;
+    height: 30px;
+    font-size: 11px;
+  }
+
+  .timeSlot {
+    padding: 5px 10px;
+    height: 30px;
+    font-size: 10px;
+    min-width: 48px;
+  }
+
+  .timeSlots {
+    gap: 6px;
+    row-gap: 8px;
+  }
+
+  .dateLabel {
+    font-size: 12px;
+  }
+
+  .noticeCard {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .noticeIconWrapper {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .noticeIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .noticeTitle {
+    font-size: 11px;
+  }
+
+  .noticeText {
+    font-size: 10px;
+    line-height: 13px;
+  }
+
+  .policyLink {
+    font-size: 10px;
+  }
+
+  .footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .confirmButton {
+    width: 100%;
+    padding: 10px 24px;
+    height: 36px;
+    font-size: 11px;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+    font-size: 11px;
+  }
+}
+
+/* Mobile - 480px */
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+    padding: 10px;
+    gap: 14px;
+  }
+
+  .header {
+    gap: 8px;
+  }
+
+  .mainTitle {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .countryText {
+    font-size: 10px;
+  }
+
+  .subtitle {
+    font-size: 10px;
+  }
+
+  .content {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .cityTab {
+    padding: 5px 10px;
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .timeSlot {
+    padding: 4px 8px;
+    height: 28px;
+    font-size: 9px;
+    min-width: 45px;
+  }
+
+  .confirmButton {
+    padding: 8px 20px;
+    height: 32px;
+    font-size: 10px;
+  }
+
+  .backButton {
+    font-size: 10px;
+  }
+}
+
+/* Mobile - 375px */
+@media (max-width: 375px) {
+  .container {
+    width: 100%;
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .header {
+    gap: 6px;
+  }
+
+  .mainTitle {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .countryIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .countryText {
+    font-size: 9px;
+  }
+
+  .subtitle {
+    font-size: 9px;
+  }
+
+  .content {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .sectionLabel {
+    font-size: 12px;
+  }
+
+  .cityTab {
+    padding: 4px 8px;
+    height: 26px;
+    font-size: 9px;
+  }
+
+  .timeSlot {
+    padding: 4px 8px;
+    height: 26px;
+    font-size: 8px;
+    min-width: 42px;
+  }
+
+  .timeSlots {
+    gap: 4px;
+  }
+
+  .noticeCard {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .noticeTitle {
+    font-size: 10px;
+  }
+
+  .noticeText {
+    font-size: 9px;
+  }
+
+  .confirmButton {
+    padding: 8px 16px;
+    height: 30px;
+    font-size: 9px;
+    min-width: auto;
+  }
+
+  .backButton {
+    font-size: 9px;
+  }
+
+  .backButton svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Mobile - 320px */
+@media (max-width: 320px) {
+  .container {
+    width: 100%;
+    padding: 6px;
+    gap: 10px;
+  }
+
+  .header {
+    gap: 4px;
+  }
+
+  .mainTitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .countryIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .countryText {
+    font-size: 8px;
+  }
+
+  .subtitle {
+    font-size: 8px;
+    line-height: 120%;
+  }
+
+  .content {
+    padding: 6px;
+    gap: 8px;
+  }
+
+  .sectionLabel {
+    font-size: 11px;
+  }
+
+  .cityTab {
+    padding: 4px 6px;
+    height: 24px;
+    font-size: 8px;
+  }
+
+  .timeSlot {
+    padding: 3px 6px;
+    height: 24px;
+    font-size: 7px;
+    min-width: 40px;
+  }
+
+  .timeSlots {
+    gap: 3px;
+  }
+
+  .dateLabel {
+    font-size: 10px;
+  }
+
+  .noticeCard {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .noticeIconWrapper {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+
+  .noticeIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .noticeTitle {
+    font-size: 9px;
+  }
+
+  .noticeText {
+    font-size: 8px;
+    line-height: 12px;
+  }
+
+  .policyLink {
+    font-size: 8px;
+  }
+
+  .confirmButton {
+    padding: 6px 12px;
+    height: 28px;
+    font-size: 8px;
+    min-width: auto;
+  }
+
+  .backButton {
+    font-size: 8px;
+    gap: 4px;
+  }
+
+  .backButton svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .footer {
+    gap: 6px;
+  }
+}

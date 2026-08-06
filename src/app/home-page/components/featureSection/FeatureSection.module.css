@@ -1,0 +1,292 @@
+.featureSection {
+    background-image: url('/images/whyChhose.jpg');
+    background-size: cover;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    padding-top: 94px;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+    padding: 0 200px;
+    box-sizing: border-box;
+}
+
+.containerTop p {
+    font-weight: 300;
+    font-style: Light;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.containerTop h2 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 54px;
+    line-height: 1.9;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+}
+
+.linearContainer {
+    margin-top: 256px;
+    padding-bottom: 70px;
+    background: linear-gradient(0deg,
+            #000033 0%,
+            rgba(0, 0, 51, 0) 100%);
+}
+
+.containerBottom {
+    width: 100%;
+    display: flex;
+    gap: 84px;
+    padding: 0 200px;
+    box-sizing: border-box;
+}
+
+.textContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.headText {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 36px;
+    line-height: 44px;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+}
+
+.subHeadText {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+    color: #FFFFFF;
+
+}
+
+@media (max-width: 1520px) {
+
+    .container,
+    .containerBottom {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+@media (max-width: 1440px) {
+    .containerTop h2 {
+        font-size: 48px;
+    }
+
+    .headText {
+        font-size: 32px;
+    }
+
+    .subHeadText {
+        font-size: 14px;
+    }
+
+    .linearContainer {
+        margin-top: 184px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .containerTop h2 {
+        font-size: 44px;
+    }
+
+    .containerTop p {
+        font-size: 18px
+    }
+
+    .headText {
+        font-size: 30px;
+    }
+
+    .containerBottom {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .headText {
+        font-size: 28px
+    }
+
+    .containerTop h2 {
+        font-size: 40px;
+    }
+
+    .container,
+    .containerBottom {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+@media (max-width: 1056px) {
+    .containerBottom {
+        gap: 17px;
+    }
+}
+
+@media (max-width: 991px) {
+    .subHeadText {
+        font-size: 12px;
+        line-height: 20px;
+    }
+
+    .headText {
+        font-size: 28px;
+    }
+
+    .linearContainer {
+        margin-top: 133px;
+    }
+}
+
+@media(max-width: 885px) {
+
+    .container,
+    .containerBottom {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+
+    .headText {
+        font-size: 28px;
+    }
+
+    .subHeadText {
+        font-size: 14px;
+    }
+
+    .containerTop h2 {
+        font-size: 32px;
+    }
+
+    .containerTop p {
+        font-size: 14px;
+        line-height: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .featureSection {
+        padding-top: 24px;
+    }
+
+    .container,
+    .containerBottom {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+
+    .containerBottom {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .linearContainer {
+        margin-top: 50px;
+    }
+
+    .headText {
+        font-size: 24px;
+    }
+
+    .subHeadText {
+        font-size: 14px;
+    }
+
+    .containerTop h2 {
+        font-size: 32px;
+    }
+
+    .containerTop p {
+        font-size: 14px;
+        line-height: 24px;
+    }
+}
+
+@media (max-width: 529px) {
+
+    .container,
+    .containerBottom {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .container {
+        justify-content: center !important;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+    }
+
+    .containerTop {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: start !important;
+        text-align: start !important;
+        gap: 8px !important;
+        margin-top: 22px;
+    }
+
+    .containerTop p {
+        font-size: 12px !important;
+        letter-spacing: 2px !important;
+        font-weight: 500 !important;
+        text-align: center !important;
+    }
+
+    .containerTop h2 {
+        font-size: 54px !important;
+        line-height: 55px !important;
+        text-align: start !important;
+    }
+
+    .containerBottom {
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        gap: 46px !important;
+        flex-direction: column !important;
+    }
+
+    .textContainer {
+        /* align-items: center !important; */
+        text-align: start !important;
+        gap: 16px !important;
+    }
+
+    .headText {
+        font-size: 36px !important;
+        line-height: 44px !important;
+        text-align: start !important;
+    }
+
+    .subHeadText {
+        font-size: 16px !important;
+        line-height: 24px !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-align: start !important;
+    }
+}

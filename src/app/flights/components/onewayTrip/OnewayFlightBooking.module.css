@@ -1,0 +1,980 @@
+.container {
+  max-width: 1060px;
+  width: 100%;
+  /* background-color: red; */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.FlightBookingTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heading {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.heading span {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #070773;
+  text-transform: capitalize;
+}
+
+.subTextContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priceInfo {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1.25;
+  letter-spacing: -2%;
+}
+
+.itemsResult {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  color: #000000;
+}
+
+.sortContainer {
+  padding: 8px;
+  background-color: #ffffff;
+  /* border: 1px solid rgba(0, 0, 0, 0.1); */
+}
+
+.desktopLoaderWrap {
+  min-height: calc(100vh - 360px);
+  display: flex;
+  background: #ffffff;
+}
+
+.desktopLoaderWrap>div {
+  flex: 1;
+}
+
+.sortedItemContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sortSubContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+
+.sortedItemMainContainer {
+  display: flex;
+  gap: 12px;
+}
+
+.sortedItem {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  padding: 7px 8px;
+  cursor: pointer;
+  border: 1px solid #0000001a;
+}
+
+.sortedItem>img {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: block;
+  object-fit: contain;
+}
+
+.sortedItem.activeSortedItem {
+  border: 1px solid #000033;
+  background-color: #f0f3ff;
+}
+
+.sortedTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000033;
+}
+
+.priceContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.price {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 100%;
+  background-color: #737373;
+}
+
+.duration {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: -2%;
+}
+
+.hours {
+  color: #a3a3a3;
+}
+
+.sortByContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sortByText {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.flightFareDetailsContainer {
+  justify-content: space-between;
+  padding-bottom: 16px;
+  padding-right: 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background-color: #ffffff;
+  display: flex;
+  gap: 32px;
+
+  transition: border-bottom 0.45s ease;
+}
+
+.expendableContainer {
+  transition: all 0.4s ease;
+}
+
+.expendableContainer:hover {
+  box-shadow: 0px 1px 18.6px 0px #00000017;
+}
+
+.flightOpenHoverNone {
+  box-shadow: none !important;
+}
+
+.airlineRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.separator {
+  margin: 0 6px;
+  color: #9ca3af;
+}
+
+.flightFareDetailsContainerOpen {
+  border: 1px solid #e5e7f0;
+  border-bottom: none;
+}
+
+.flightFareDetails {
+  max-width: 754px;
+  width: 100%;
+  padding: 16px 6px 0px 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flightDetail {
+  max-width: 754px;
+  width: 100%;
+  gap: 32px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flightNameContainer {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  align-items: center;
+}
+
+.flightNameContainer img {
+  width: 42px;
+  height: 42px;
+}
+
+.flightName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.multiImageCont {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+}
+
+.multiImageCont img {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.multiImageCont img:first-child {
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.multiImageCont img:last-child {
+  left: 18px;
+  top: 18px;
+  z-index: 2;
+}
+
+.seeDetailsBtn {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  color: #000033;
+  cursor: pointer;
+}
+
+/* .downArrow{
+    width: 16px;
+    height: 16px;
+} */
+
+.airlineName {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 16px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.flightNumber {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 15.71px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #737373;
+}
+
+.departureDetail {
+  max-width: 531px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  justify-content: center;
+}
+
+.goingVia {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -20px;
+
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: 0%;
+  color: #208ef5;
+}
+
+.nextDay {
+  font-size: 11px;
+  font-weight: 400;
+  color: #dc2626;
+  font-family: var(--font-inter);
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.arrivalTime {
+  position: relative;
+}
+
+.departureTimeContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.departureName {
+  display: flex;
+}
+
+.departureTime {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 34px;
+  line-height: 1.25;
+  letter-spacing: 0%;
+  color: #000033;
+}
+
+.flightAnimation {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.flightDotedcontainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dashBorder {
+  width: 115px;
+  border-top: 1px dashed #94a3b8;
+}
+
+.bigDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 100%;
+  background-color: #94a3b8;
+}
+
+.departureName {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fromName {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #a3a3a3;
+}
+
+.nonStop {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.fareDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: end;
+  justify-content: end;
+}
+
+.totalFare {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  align-items: end;
+}
+
+.fareText {
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.viewBtn {
+  padding: 12px 24px;
+  background-color: #000033;
+  height: 40px;
+  color: #ffffff;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.45s ease;
+}
+
+.viewBtn:hover {
+  background-color: #fcc800;
+  color: #000033;
+}
+
+.fareAmount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flightFareDetailsResponsive {
+  display: none;
+}
+
+.fare {
+  display: flex;
+  gap: 2px;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.adult {
+  display: flex;
+  align-items: end;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.economy {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 1%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #208ef5;
+}
+
+.fareDetailsResponsive {
+  display: none;
+}
+
+/* EXPAND CONTAINER */
+.expandWrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s ease;
+  border: 1px solid transparent;
+  /* border-top: 1px solid #e5e7f0; */
+}
+
+.expandWrap.open {
+  max-height: 600px;
+  /* enough for content */
+  border: 1px solid #e5e7f0;
+}
+
+.inlineFarePanel {
+  border: 1px solid #e5e7f0;
+  border-top: none;
+  background: #ffffff;
+}
+
+.open {
+  max-height: 600px;
+  /* enough for content */
+}
+
+.downArrow {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.fare {
+  white-space: nowrap;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+.isMobileView {
+  display: none;
+  padding: 12px 16px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileFlightContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobileSubTextContainer {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 1.18;
+  letter-spacing: -2%;
+  color: #000000;
+}
+
+.filterBtn {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: -3%;
+  text-transform: uppercase;
+  color: #0604b2;
+}
+
+.flightChipContainer {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chips {
+  padding: 4px;
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e4e6e8;
+  background-color: #ffffff;
+  border-radius: 16px;
+}
+
+.mobileCloseBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  background-color: #f2f3f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileCloseBtn img {
+  width: 16px;
+  height: 16px;
+}
+
+.chevronSort {
+  transition: all 0.5s ease;
+}
+
+.chevronSort.open {
+  transform: rotate(-180deg);
+}
+
+.filterChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  width: 100%;
+  align-items: flex-start;
+
+  white-space: nowrap;
+
+  /* smooth scroll */
+  scroll-behavior: smooth;
+
+  /* hide scrollbar (optional) */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.filterChips .name {
+  padding: 3px 8px;
+}
+
+.filterChips::-webkit-scrollbar {
+  display: none;
+  /* Chrome / Safari */
+}
+
+.chip {
+  flex-shrink: 0;
+  /* IMPORTANT */
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid #e4e6e8;
+  background: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+  
+  line-height: 150%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+
+  cursor: pointer;
+}
+
+.chip>span {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: #f2f3f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1418px) {
+  .flightFareDetailsContainer {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 1333px) {
+  .flightFareDetailsContainer {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1326px) {
+  .dashBorder {
+    width: 95px;
+  }
+}
+
+@media (max-width: 1264px) {
+  .flightFareDetailsContainer {
+    gap: 4px;
+  }
+
+  .flightFareDetails {
+    padding-right: 0;
+  }
+
+  .dashBorder {
+    width: 65px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .flightDetail {
+    gap: 15px;
+    max-width: unset;
+  }
+
+  .container {
+    max-width: unset;
+  }
+
+  .FlightBookingTextContainer {
+    gap: 20px;
+  }
+
+  .dashBorder {
+    width: 100%;
+  }
+
+  .flightAnimation {
+    width: 100%;
+  }
+
+  .flightDotedcontainer {
+    width: 95%;
+  }
+
+  .flightFareDetails {
+    max-width: 841px;
+  }
+}
+
+@media (max-width: 1131px) {
+  .flightDetail {
+    max-width: 71vw;
+  }
+}
+
+@media (max-width: 1022px) {
+  .flightNameContainer {
+    min-width: 179px;
+  }
+}
+
+@media (max-width: 914px) {
+  .flightNameContainer {
+    min-width: 152px;
+    /* max-width: 102px; */
+  }
+}
+
+@media (max-width: 830px) {
+  .departureTime {
+    font-size: 26px;
+  }
+
+  .dashBorder {
+    width: 77px;
+  }
+
+  .bigDot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .flightFareDetails {
+    padding-left: 16px;
+  }
+
+  .airlineName {
+    font-size: 13px;
+  }
+
+  .flightNumber {
+    font-size: 12px;
+  }
+
+  .flightNameContainer {
+    gap: 5px;
+    min-width: 119px;
+  }
+
+  .flightFareDetailsContainer {
+    gap: 10px;
+  }
+
+  .flightNameContainer img {
+    width: 27px;
+    height: 27px;
+  }
+
+  .sortedItem img {
+    height: 27px;
+    width: 27px;
+  }
+
+  .fareDetails {
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 780px) {
+  .departureDetail {
+    margin-left: 15px;
+  }
+
+  .viewBtn {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .flightAnimation {
+    width: 100%;
+  }
+
+  .flightDotedcontainer {
+    width: 100%;
+  }
+
+  .dashBorder {
+    width: 100%;
+    /* max-width: 77px; */
+  }
+}
+
+@media (max-width: 730px) {
+  .flightFareDetailsContainer {
+    flex-direction: column;
+  }
+
+  .fareDetailsResponsive {
+    display: flex;
+    padding-left: 16px;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .fareDetails {
+    display: none;
+  }
+
+  .seeDetailsBtn {
+    display: none;
+  }
+
+  .fareDetailsResponsive>.fareDetails {
+    display: flex;
+    padding-top: 0;
+  }
+
+  .fareDetailsResponsive>.seeDetailsBtn {
+    display: flex;
+  }
+
+  .fareDetailsResponsive .totalFare {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 630px) {
+  .container {
+    display: none;
+  }
+
+  .isMobileView {
+    display: flex;
+  }
+
+  .sortSubContainer {
+    align-items: center;
+  }
+
+  .sortContainer {
+    background-color: transparent;
+    padding: 0;
+  }
+
+  .sortedItem {
+    padding: 6px 4px;
+    gap: 4px;
+    height: 40px;
+    border: 0.69px solid transparent;
+    transition: all 0.5s ease;
+  }
+
+  .sortedItem.activeSortedItem {
+    background-color: #ffffff;
+    border: 0.69px solid #0000001a;
+  }
+
+  .sortedItem img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .budget {
+    font-size: 10px;
+  }
+
+  .priceContainer {
+    gap: 4px;
+  }
+
+  .price {
+    font-size: 10px;
+  }
+
+  .duration {
+    font-size: 10px;
+  }
+
+  .sortByText {
+    font-size: 12px;
+    font-weight: 300;
+  }
+}
+
+@media (max-width: 380px) {
+  .sortedItemContainer {
+    gap: unset;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sortedItemMainContainer {
+    width: 100%;
+    max-width: 264px;
+  }
+
+  .sortByContainer {
+    gap: 4px;
+  }
+
+  .chevronSort {
+    display: none;
+  }
+}

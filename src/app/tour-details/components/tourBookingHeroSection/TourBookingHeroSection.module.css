@@ -1,0 +1,379 @@
+.tourBookingSection {
+  position: relative;
+  min-height: 820px;
+  height: 88vh;
+  overflow: hidden;
+  background-image: url("/tourList/cardItem1.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fff;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.2) 52%, rgba(0, 0, 0, 0.42) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.04) 38%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.topBar {
+  position: relative;
+  z-index: 2;
+  min-height: 76px;
+  padding: 0 24px;
+  margin: 0 auto;
+   /* width: min(1520px, 100%); */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.logo {
+  width: 72px;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.downloadButton,
+.signInButton {
+  min-height: 36px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font: 400 14px/1 var(--font-inter);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.downloadButton {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.signInButton {
+  border-color: #000033;
+  background: #000033;
+}
+
+.heroContainer {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  left: 0;
+  z-index: 1;
+  padding: 0 24px;
+}
+
+.container {
+  width: min(1520px, 100%);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  /* grid-template-columns: minmax(0, 760px) minmax(420px, 520px); */
+  /* align-items: end; */
+  /* gap: clamp(48px, 7vw, 130px); */
+}
+
+.copyBlock {
+  min-width: 0;
+}
+
+.tagsCont {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tags {
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.24);
+  color: #fff;
+  font: 300 13px/1 var(--font-inter);
+  text-transform: uppercase;
+}
+
+.fromToCont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+  color: #fff;
+ font-family: Inter;
+font-weight: 200;
+font-style: Extra Light;
+font-size: 24px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.header {
+  max-width: 760px;
+  margin: 0;
+  color: #fff;
+font-family: Antic Didone;
+font-size: 48px;
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+margin-bottom: 12px;
+  letter-spacing: 0;
+  text-transform: capitalize;
+}
+
+.routeLabel {
+  /* margin: 22px 0 0; */
+  color: #fff;
+font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 16px;
+
+line-height: 160%;
+letter-spacing: -2%;
+vertical-align: middle;
+
+}
+
+.customizeBar {
+  width: min(790px, 100%);
+  min-height: 44px;
+  margin-top: 24px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1A214399;
+  backdrop-filter: blur(12px);
+}
+
+.customizeBar p {
+  margin: 0;
+  color: #fff;
+  font-family: Inter;
+font-weight: 300;
+font-style: Light;
+font-size: 14px;
+
+line-height: 16px;
+letter-spacing: 0%;
+vertical-align: middle;
+color:#E7E5E4;
+}
+
+.customizeBar button {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font: 400 13px/1 var(--font-inter);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.statsContParent{
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
+.statsPanel {
+  display: flex;
+  width: min(500px, 100%);
+ max-height: 92px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #FFFFFF1A;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.statsPanel div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 158px;
+  gap: 10px;
+  padding: 14px 20px;
+  text-align: center;
+}
+
+.statsPanel div + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.statsPanel strong {
+  color: #fff;
+  font: 400 34px/1 "Antic Didone", serif;
+}
+
+.statsPanel span {
+  color: #fff;
+  font: 300 10px/1 var(--font-inter);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.labelDesktop {
+  display: inline;
+}
+
+.labelMobile {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  .tourBookingSection {
+    min-height: 760px;
+  }
+
+  .topBar {
+    padding-inline: 36px;
+  }
+
+  .container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .statsPanel {
+    width: min(520px, 100%);
+  }
+}
+
+@media (max-width: 760px) {
+  .tourBookingSection {
+    min-height: 720px;
+    height: 86vh;
+  }
+
+  .topBar {
+    min-height: 64px;
+    padding-inline: 18px;
+  }
+
+  .logo {
+    width: 58px;
+  }
+
+  .downloadButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding-inline: 14px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .signInButton {
+    min-height: 34px;
+    padding-inline: 18px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .heroContainer {
+    bottom: 26px;
+    padding-inline: 18px;
+  }
+
+  .fromToCont {
+    font-size: 18px;
+  }
+
+  .routeLabel {
+    font-size: 13px;
+  }
+
+  .customizeBar {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px 14px;
+  }
+
+  .customizeBar button {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .statsPanel {
+    min-height: 82px;
+    width: 100%;
+  }
+
+  .statsPanel div {
+    padding: 12px 6px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .statsPanel strong {
+    font-size: 24px;
+  }
+
+  .statsPanel span {
+    letter-spacing: 1.2px;
+  }
+}
+
+@media (max-width: 450px) {
+  .labelDesktop {
+    display: none !important;
+  }
+  .labelMobile {
+    display: inline !important;
+  }
+  
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .statsContParent {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  .header {
+    font-size: clamp(26px, 8vw, 36px);
+  }
+
+  .tags {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .statsPanel div {
+    padding: 10px 4px;
+  }
+
+  .statsPanel strong {
+    font-size: 20px;
+  }
+
+  .statsPanel span {
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+}

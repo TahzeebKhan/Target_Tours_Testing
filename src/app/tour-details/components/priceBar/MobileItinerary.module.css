@@ -1,0 +1,330 @@
+.popupOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    /* Mobile drawer style */
+}
+
+.popupCard {
+    background: #ffffff;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.popupHeader {
+    padding: 24px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(228, 230, 232, 1);
+}
+
+.stepHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stepLabel {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: rgba(123, 135, 153, 1);
+    line-height: 150%;
+    letter-spacing: -3%;
+}
+
+.stepNumber {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1);
+    line-height: 120%;
+    letter-spacing: -3%;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #000;
+    cursor: pointer;
+}
+
+.scrollableContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.headingDiv {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mainHeading {
+    font-family: 'Antic Didone', serif;
+    font-size: 24px;
+    color: rgba(0, 0, 51, 1);
+    line-height: 32px;
+    letter-spacing: 0%;
+}
+
+.subText {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+
+.formSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fieldLabel {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 1);
+    line-height: 20px;
+    letter-spacing: 0%;
+}
+
+.tabGrid,
+.buttonGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.tabGrid {
+    grid-template-columns: 1fr 1fr;
+}
+
+.tabItem,
+.gridBtn {
+    padding: 13px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 1);
+}
+
+/* .activeTab,
+.activeGridBtn {
+    border-color: rgba(0, 0, 51, 1);
+} */
+
+.textInput,
+.textArea {
+    padding: 12px 16px;
+    border: 1px solid rgba(228, 230, 232, 1);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.textArea {
+    min-height: 42px;
+    resize: none;
+    color: rgba(123, 135, 153, 1);
+}
+
+.textArea2 {
+    padding: 12px 16px;
+    border: 1px solid rgba(228, 230, 232, 1);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.textArea2 {
+    min-height: 119px;
+    resize: none;
+    color: rgba(123, 135, 153, 1);
+}
+
+.textArea2::placeholder,
+.textArea::placeholder,
+.textInput::placeholder {
+    color: rgba(123, 135, 153, 1);
+}
+
+
+.rangeWrapper {
+    padding-top: 12px;
+    width: 100%;
+}
+
+.rangeContainer {
+    position: relative;
+    width: 100%;
+    height: 24px;
+}
+
+.sliderTrack {
+    position: absolute;
+    height: 4px;
+    width: 100%;
+    background: rgba(228, 230, 232, 1);
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.sliderRange {
+    position: absolute;
+    height: 4px;
+    background: rgba(0, 0, 51, 1);
+    /* Exact Color from Palette */
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+/* Update these specific classes in your CSS file */
+
+.rangeInput {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    /* This allows clicks to pass through the 'invisible' parts of the input */
+    pointer-events: none;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    z-index: 3;
+}
+
+/* Chrome/Safari Thumb */
+.rangeInput::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+
+    background: rgba(0, 0, 51, 1);
+    border: 6px solid #ffffff;
+    /* white ring */
+
+    outline: 1px solid rgba(123, 135, 153, 0.6);
+    /* dull outer border */
+    outline-offset: 0;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+
+/* Firefox Thumb */
+.rangeInput::-moz-range-thumb {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: rgba(0, 0, 51, 1);
+    border: 4px solid #ffffff;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.rangeLabels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+    color: #000;
+}
+
+.activeTab,
+.activeGridBtn {
+    border: 1.5px solid rgba(0, 0, 51, 1) !important;
+    background-color: rgba(240, 243, 255, 1) !important;
+}
+
+.pillContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pill {
+    padding: 8px 12px;
+    border-radius: 33554400px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    font-family: 'Arial';
+    font-size: 12px;
+}
+
+
+.activePill {
+    background: rgba(0, 0, 51, 1) !important;
+    color: #fff !important;
+}
+
+
+.footer {
+    display: flex;
+    padding: 16px;
+    padding-top: 24px;
+    gap: 12px;
+}
+
+.backButton,
+.continueButton {
+    flex: 1;
+    padding: 13px 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.backButton {
+    color: rgba(26, 32, 41, 1);
+    background: #fff;
+    border: 1px solid rgba(228, 230, 232, 1);
+    box-shadow: 0px 1.5px 0.5px 0px rgba(255, 255, 255, 0.3) inset;
+}
+
+.continueButton {
+    background: rgba(0, 0, 51, 1);
+    color: #fff;
+    border: none;
+}

@@ -1,0 +1,341 @@
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import style from "./TopToFlights.module.css";
+
+// JSON DATA
+const flightData = {
+  "Popular routes": [
+    { from: "Nagpur", to: "Bangkok", price: "₹20,000", image: "/images/item1.png" },
+    { from: "Indore", to: "Cairo", price: "₹15,500", image: "/images/indore.png" },
+    { from: "Jaipur", to: "Moscow", price: "₹18,200", image: "/images/jaipur.png" },
+    { from: "Bengaluru", to: "Tokyo", price: "₹12,900", image: "/images/bengaluru.png" },
+    { from: "Lucknow", to: "London", price: "₹46,000", image: "/images/lucknow.png" },
+    { from: "Surat", to: "Doha", price: "₹22,300", image: "/images/surat.png" },
+    { from: "Kolkata", to: "Abu Dhabi", price: "₹17,800", image: "/images/kolkata.png" },
+    { from: "Hyderabad", to: "Hong Kong", price: "₹29,500", image: "/images/hyderabad1.png" },
+  ],
+  "Cities Countries": [
+    { from: "Mumbai", to: "New York", price: "₹65,000", image: "/images/item1.png" },
+    { from: "Delhi", to: "Paris", price: "₹52,000", image: "/images/item1.png" },
+    { from: "Bangalore", to: "Toronto", price: "₹58,000", image: "/images/item1.png" },
+    { from: "Chennai", to: "Sydney", price: "₹48,000", image: "/images/item1.png" },
+    { from: "Hyderabad", to: "Tokyo", price: "₹35,000", image: "/images/item1.png" },
+    { from: "Kolkata", to: "Bangkok", price: "₹18,500", image: "/images/item1.png" },
+    { from: "Pune", to: "Dubai", price: "₹16,800", image: "/images/item1.png" },
+    { from: "Ahmedabad", to: "Singapore", price: "₹19,200", image: "/images/item1.png" },
+  ],
+  Region: [
+    { from: "India", to: "Middle East", price: "₹14,500", image: "/images/item1.png" },
+    { from: "India", to: "Southeast Asia", price: "₹16,000", image: "/images/item1.png" },
+    { from: "India", to: "Europe", price: "₹45,000", image: "/images/item1.png" },
+    { from: "India", to: "North America", price: "₹60,000", image: "/images/item1.png" },
+    { from: "India", to: "Australia", price: "₹50,000", image: "/images/item1.png" },
+    { from: "India", to: "East Asia", price: "₹32,000", image: "/images/item1.png" },
+    { from: "India", to: "Africa", price: "₹38,000", image: "/images/item1.png" },
+    { from: "India", to: "South America", price: "₹85,000", image: "/images/item1.png" },
+  ],
+  Airports: [
+    { from: "DEL", to: "DXB", price: "₹15,200", image: "/images/item1.png" },
+    { from: "BOM", to: "LHR", price: "₹48,000", image: "/images/item1.png" },
+    { from: "BLR", to: "SIN", price: "₹17,500", image: "/images/item1.png" },
+    { from: "MAA", to: "KUL", price: "₹12,800", image: "/images/item1.png" },
+    { from: "HYD", to: "DOH", price: "₹21,500", image: "/images/item1.png" },
+    { from: "CCU", to: "BKK", price: "₹18,200", image: "/images/item1.png" },
+    { from: "AMD", to: "AUH", price: "₹14,900", image: "/images/item1.png" },
+    { from: "PNQ", to: "FRA", price: "₹52,000", image: "/images/item1.png" },
+  ],
+};
+
+const TAB_API_TYPE_MAP = {
+  "Popular routes": "popular_routes",
+  "Cities Countries": "cities_countries",
+  Region: "region",
+  Airports: "airports",
+};
+
+const FALLBACK_IMAGES = [
+  "/images/item1.png",
+  "/images/indore.png",
+  "/images/jaipur.png",
+  "/images/bengaluru.png",
+  "/images/lucknow.png",
+  "/images/surat.png",
+  "/images/kolkata.png",
+  "/images/hyderabad1.png",
+];
+
+const formatPrice = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "N/A";
+  return `₹${amount.toLocaleString("en-IN")}`;
+};
+
+const pickValue = (...values) =>
+  values.find((value) => value !== undefined && value !== null && value !== "");
+
+const toAbsoluteImageUrl = (value) => {
+  const url = String(value || "").trim();
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`;
+};
+
+const getTodayDateParam = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getCodeFromValue = (value = "") => {
+  const trimmed = String(value || "").trim();
+  if (/^[A-Za-z]{3}$/.test(trimmed)) return trimmed.toUpperCase();
+  return "";
+};
+
+const getTopFlightIataCode = (item, key) =>
+  getCodeFromValue(
+    pickValue(
+      item?.[key],
+      item?.raw?.[key],
+      item?.attributes?.[key],
+      item?.raw?.attributes?.[key]
+    )
+  );
+
+const getRouteLabel = (value = "") => {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  return trimmed;
+};
+
+const TopToFlights = () => {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("Popular routes");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
+  const [apiFlightsByTab, setApiFlightsByTab] = useState({});
+
+  const navItems = ["Popular routes", "Cities Countries", "Region", "Airports"];
+  const tabsRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(0);
+    setAnimationKey((prev) => prev + 1);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!tabsRef.current) return;
+
+    const tabs = tabsRef.current;
+    const activeTabEl = tabs.querySelector(`.${style.active}`);
+
+    if (!activeTabEl) return;
+
+    tabs.style.setProperty("--indicator-width", `${activeTabEl.offsetWidth}px`);
+    tabs.style.setProperty("--indicator-left", `${activeTabEl.offsetLeft}px`);
+  }, [activeTab]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTopFlights = async () => {
+      const apiType = TAB_API_TYPE_MAP[activeTab];
+      if (!apiType) return;
+
+      try {
+        const params = new URLSearchParams({
+          domain: process.env.NEXT_PUBLIC_DOMAIN || "localhost:1337",
+          type: apiType,
+          from_iata_code: "DEL",
+        });
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/top-flights/public?${params.toString()}`
+        );
+        const json = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json?.error?.message || json?.message || "Failed to fetch top flights");
+        }
+
+        const rawItems = Array.isArray(json?.top_flights) ? json.top_flights : [];
+        const normalizedItems = rawItems.map((item, index) => ({
+          id: pickValue(item?.id, item?.route_id, `${apiType}-${index}`),
+          from: pickValue(item?.from, item?.from_iata_code, "N/A"),
+          to: pickValue(item?.to, item?.to_iata_code, "N/A"),
+          fromCode: getTopFlightIataCode(item, "from_iata_code"),
+          toCode: getTopFlightIataCode(item, "to_iata_code"),
+          price: formatPrice(pickValue(item?.economy_start_from, "N/A")),
+          image: toAbsoluteImageUrl(
+            pickValue(
+              item?.thumbnail?.url
+            )
+          ) || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+          raw: item,
+        }));
+
+        if (!isMounted) return;
+
+        setApiFlightsByTab((prev) => ({
+          ...prev,
+          [activeTab]: normalizedItems,
+        }));
+      } catch (error) {
+        if (!isMounted) return;
+
+        setApiFlightsByTab((prev) => ({
+          ...prev,
+          [activeTab]: [],
+        }));
+      }
+    };
+
+    fetchTopFlights();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab]);
+
+  const itemsPerPage = 4;
+  const currentFlights =
+    apiFlightsByTab[activeTab]?.length > 0 ? apiFlightsByTab[activeTab] : flightData[activeTab];
+
+  const getDisplayedItems = () => {
+    if (isMobile && currentFlights.length > itemsPerPage) {
+      const startIndex = currentPage * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      return currentFlights.slice(startIndex, endIndex);
+    }
+
+    return currentFlights;
+  };
+
+  const displayedFlights = getDisplayedItems();
+  const totalPages = isMobile ? Math.ceil(currentFlights.length / itemsPerPage) : 1;
+  const showPagination = isMobile && currentFlights.length > itemsPerPage;
+
+  const handlePrevious = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
+  };
+
+  const handleFlightCardClick = (item) => {
+    const from = getRouteLabel(item?.from);
+    const to = getRouteLabel(item?.to);
+    const origin = getCodeFromValue(item?.fromCode) || getTopFlightIataCode(item, "from_iata_code");
+    const destination = getCodeFromValue(item?.toCode) || getTopFlightIataCode(item, "to_iata_code");
+    const params = new URLSearchParams({
+      from,
+      to,
+      tripType: "oneway",
+      start: getTodayDateParam(),
+      adults: "1",
+      children: "0",
+      infants: "0",
+      travelClass: "ECONOMY",
+    });
+
+    if (origin) params.set("origin", origin);
+    if (destination) params.set("destination", destination);
+
+    router.push(`/flights?${params.toString()}`);
+  };
+
+  return (
+    <section className={style.topToFlightsSection}>
+      <h2 className={style.heading}>Top Flights From India</h2>
+
+      <nav className={style.tabsWrap}>
+        <ul className={style.tabs} ref={tabsRef}>
+          {navItems.map((t) => (
+            <li
+              key={t}
+              className={`${style.tab} ${activeTab === t ? style.active : ""}`}
+              onClick={() => setActiveTab(t)}
+            >
+              <button className={style.tabBtn}>{t}</button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div className={style.container}>
+        <div
+          className={`${style.flight_items_cont} ${style.flight_items_animated}`}
+          key={animationKey}
+        >
+          <div className={style.flight_items_row}>
+            {displayedFlights.map((item, i) => (
+              <div
+                className={style.flight_items}
+                key={item.id || `${animationKey}-${i}`}
+                onClick={() => handleFlightCardClick(item)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleFlightCardClick(item);
+                  }
+                }}
+              >
+                <img className={style.flight_items_img} src={item.image} alt="" />
+
+                <div className={style.flight_items_bottom}>
+                  <div className={style.fromTo}>
+                    <span>{item.from}</span>
+                    <img src="/icons/rightIcon.svg" alt="" />
+                    <span>{item.to}</span>
+                  </div>
+
+                  <div className={style.price}>
+                    Economy From <span>{item.price}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {showPagination && (
+        <div className={style.btnContainer}>
+          <div
+            className={`${style.btn} ${currentPage === 0 ? style.disabled : ""}`}
+            onClick={handlePrevious}
+          >
+            <img src="/icons/left.svg" alt="" />
+          </div>
+
+          <div
+            className={`${style.btn} ${currentPage === totalPages - 1 ? style.disabled : ""}`}
+            onClick={handleNext}
+          >
+            <img src="/icons/right.svg" alt="" />
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+export default TopToFlights;

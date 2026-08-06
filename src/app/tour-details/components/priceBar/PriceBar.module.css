@@ -1,0 +1,331 @@
+.priceBar {
+    padding: 20px 30px;
+    background-color: #fff;
+    background-color: #000033;
+    box-shadow: 0px 25px 50px -12px #00000040;
+
+}
+
+.container{
+    max-width: 1520px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+
+}
+.containerMobile{
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+.priceLeft{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.tripInfo, .priceText{
+    font-weight: 300;
+    font-style: Light;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -2%;
+
+}
+.priceText strong{
+    font-family: var(--font-inter);
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 24px;
+    line-height: 28px;
+    letter-spacing: -2%;
+    color: #fff;
+
+}
+.perPerson{
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 14px;
+    letter-spacing: 0px;
+    text-transform: uppercase;
+    color: #E5E5E5;
+
+}
+
+.priceRight{
+    max-width: 500px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+}
+.iconBtn{
+    width: 48px;
+    height: 48px;
+    border: 1px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.iconBtn img{
+    width: 20px;
+    height: 20px;
+}
+.personalizeBtn{
+    max-width: 210px;
+    width: 100%;
+    padding: 13.5px 24px;
+    border: 1px solid #FFFFFF;
+
+    color: #FFFFFF;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    cursor: pointer;
+
+}
+
+.bookNowBtn{
+    max-width: 210px;
+    width: 100%;
+    padding: 14.5px 24px;
+    background-color: #FFFFFF;
+    color: #000033;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.19;
+    letter-spacing: -2%;
+    vertical-align: middle;
+    text-transform: uppercase;
+    cursor: pointer;
+
+}
+
+
+
+
+
+
+
+
+
+
+.section {
+  display: flex;
+  gap: 24px;
+  border: 1px solid #E4E6E8;
+}
+
+.leftSection {
+  max-width: 244px;
+  width: 100%;
+}
+
+.leftSection img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rating {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.rightSection {
+  padding: 16px 24px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightTop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heading {
+  font-family: "Antic Didone";
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.19;
+  text-transform: capitalize;
+  color: #000000;
+}
+
+.downtown {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  color: #808080;
+}
+
+.schaduleTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.schaduleTime span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #000000;
+}
+
+.rightMiddle p {
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #000000;
+}
+
+.viewHotel {
+  width: 100%;
+  padding: 10px 24px;
+  border: 0.5px solid #000033;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.19;
+  text-transform: uppercase;
+  color: #000033;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewHotel:hover {
+  background-color: #000033;
+  color: #ffffff;
+}
+
+
+@media (max-width: 991px) {
+   .priceBar{
+    padding: 20px 16px;
+   }
+   .tripInfo, .priceText{
+    font-size: 16px;
+   }
+   .priceText strong{
+    font-size: 22px;
+   }
+   .iconBtn{
+    width: 40px;
+    height: 40px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    padding: 10.5px 20px;
+   }
+}
+
+@media (max-width: 910px) {
+  .priceLeft{
+    max-width: 333px;
+    width: 100%;
+  }
+  .priceRight{
+    max-width: 453px;
+    justify-content: flex-end;
+  }
+  .tripInfo, .priceText{
+    font-size: 14px;
+   }
+   .priceText strong{
+    font-size: 20px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    max-width: 170px;
+    font-size: 14px;
+   }
+}
+
+
+@media (max-width: 800px) {
+  .priceRight{
+    max-width: 408px;
+  }
+  .personalizeBtn, .bookNowBtn{
+    max-width: 140px;
+    font-size: 14px;
+   }
+}
+
+@media (max-width: 768px){
+  .tripInfo, .priceText{
+    font-size: 12px;
+   }
+   .personalizeBtn, .bookNowBtn{
+    max-width: 116px;
+    padding: 10.5px 6px;
+   }
+   .priceRight{
+    max-width: 306px;
+    width: 100%;
+   }
+
+}
+
+@media (max-width: 653px){
+  .priceLeft{
+    width: fit-content;
+  }
+  .container{
+    display: none;
+  }
+  .containerMobile{
+    display: flex;
+  }
+}
+
+@media (max-width: 554px){
+  .priceLeft{
+    flex-direction: column;
+    gap: 0;
+    align-items: end;
+  }
+  .separator{
+    display: none;
+  }
+  .priceText strong{
+    font-size: 18px;
+    text-align: end;
+  }
+  .priceRight{
+    max-width: 258px;
+    gap: 8px;
+  }
+  .personalizeBtn{
+    max-width: 107px;
+    padding: 10.5px 6px;
+   }
+    .bookNowBtn{
+      max-width: 94px;
+    }
+    .priceBar{
+    padding: 9.5px 16px;
+  }
+}
+@media (max-width: 392px){
+  .priceBar{
+    padding: 9.5px 10px;
+  }
+  .priceText, .tripInfo{
+    font-size: 10px;
+  }
+  .priceText strong{
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,61 @@
+.mobileFlightContainer {
+  display: flex;
+  background-color: #ffffff;
+  padding: 12px;
+  flex-direction: column;
+  gap: 14px;
+  border: 1px solid #f0f0f0;
+}
+
+.flightDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flightDetailsLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.flightLogo {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+}
+
+.flightDetailsLeftText {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.flightName,
+.flightCode {
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 18.57px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+.flightCode {
+  color: #737373 !important;
+}
+.bookingPrice {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #000033;
+}
+
+@media (max-width: 356px) {
+  .flightDetailsLeftText {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

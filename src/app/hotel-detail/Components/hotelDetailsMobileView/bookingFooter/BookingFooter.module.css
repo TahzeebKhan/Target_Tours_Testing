@@ -1,0 +1,74 @@
+.footer {
+  padding: 24px 16px 24px;
+  background: #000033;
+  box-shadow: 0px -6px 10.2px 0px #0000001A;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 9;
+}
+
+.footerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.amountSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #FFFFFF;
+}
+
+.infoIcon {
+  border: 1.5px solid #7B8799;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  color: #7B8799;
+}
+
+.amount {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.19;
+  color: #FFFFFF;
+}
+
+.continueBtn {
+  max-width: 240px;
+  width: 100%;
+  height: 48px;
+  padding: 10px 16px;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  text-transform: uppercase;
+  color: #000033;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  border: none;
+}
+
+@media (max-width: 400px) {
+  .amountSection {
+    min-width: 148px;
+  }
+}

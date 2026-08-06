@@ -1,0 +1,46 @@
+.toastContent {
+  position: relative;
+  display: flex! important;
+  gap: 22px! important;
+  align-items: center;
+
+  /* min-height: 72px; */
+  width: 100%;
+  overflow: hidden;
+  color: #ffffff;
+  padding:5px 10px 5px 25px !important;
+}
+
+.toastIcon {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+}
+
+.toastMessage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  color: #ffffff;
+  font-family: Inter;
+font-weight: 500;
+font-style: Medium;
+font-size: 14px;
+
+line-height: 22px;
+letter-spacing: 0%;
+
+}
+
+.toastWatermark {
+  position: absolute;
+  right: 38px;
+  top: 50%;
+  width: 132px;
+  height: auto;
+  opacity: 0.18;
+  pointer-events: none;
+  transform: translateY(-50%);
+}

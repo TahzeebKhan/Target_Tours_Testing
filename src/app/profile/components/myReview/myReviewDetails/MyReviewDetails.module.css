@@ -1,0 +1,273 @@
+.container {
+  padding: 24px;
+  background-color: #ffffff;
+  height: 100%;
+}
+.containerBox {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 800px;
+  height: 100%;
+  overflow: auto;
+}
+.posted {
+  border-color: #049153 !important;
+  color: #049153 !important;
+  background-color: #f2faeb !important;
+}
+
+.rejected {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #ef4444 !important;
+}
+
+.pending {
+  border-color: #ea580c !important;
+  color: #f97316 !important;
+  background: #fff7ed !important;
+}
+.br {
+  width: 100%;
+  border: 0.5px solid #e4e6e8;
+}
+.reviewCard {
+  display: flex;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #dddfe3;
+}
+.reviewCardWrapper:last-child .reviewCard {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.left {
+  max-width: 124px;
+  width: 100%;
+  height: 124px;
+}
+
+.left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status {
+  padding: 4px 8px;
+  background: var(--Color-Soft-Green-50, #f2faeb);
+  border: 1px solid #049153;
+
+  font-family: var(--font-inter);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0%;
+  text-transform: uppercase;
+  color: #049153;
+}
+
+.date {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #656f81;
+}
+
+.ratingBox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating {
+  padding: 2px 4px;
+  background: #f1f2f3;
+  border: 0.5px solid #003499;
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: #003499;
+}
+
+.ratingText {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.reviewText {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+
+.reviewText p {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.responseBox {
+  padding-top: 24px;
+  border-top: 1px solid #dddfe3;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.helpful {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.helpful span {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  line-height: 1.19;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.responseText {
+  padding: 16px;
+  background: #f2f3f77d;
+  border: 1px solid #e4e6e8;
+}
+
+.responseText h4 {
+  font-family: var(--font-inter);
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  
+  line-height: 1.19;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #000000;
+}
+.responseText p {
+  font-family: var(--font-inter);
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  line-height: 22px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+.containerMobile {
+  display: none;
+}
+@media (max-width: 788px) {
+  .container {
+    display: none;
+  }
+  .containerMobile {
+    display: block;
+    padding: 0;
+  }
+  .reviewCard {
+    flex-direction: column;
+  }
+  .imgAndReviewContainer {
+    display: flex;
+    gap: 16px;
+  }
+  .topRow,
+  .statusRow {
+    display: flex;
+    flex-direction: column;
+  }
+  .topRow {
+    gap: 12px;
+    align-items: flex-start;
+    /* justify-content: center; */
+  }
+  .right {
+    justify-content: center;
+  }
+  .statusRow {
+    flex-direction: column-reverse;
+  }
+  .date {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 18px;
+    
+    line-height: 28px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #27272a;
+  }
+  .status {
+    font-family: Inter;
+    font-weight: 600;
+    font-style: Semi Bold;
+    font-size: 14px;
+    
+    line-height: 20px;
+    letter-spacing: 0%;
+  }
+  .reviewText p {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 13px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+  }
+  .responseBox {
+    padding-top: 16px;
+    margin-top: -8px;
+    gap: 16px;
+  }
+  .responseText h4 {
+    margin-bottom: 12px;
+  }
+  .reviewText p {
+    line-height: 1.2;
+  }
+}

@@ -1,0 +1,148 @@
+.profileLayout {
+  background-color: #f9f9f9;
+  margin-top: 73px;
+  display: flex;
+}
+.profileContainer {
+  max-width: 1520px;
+  width: 100%;
+  min-height: calc(100vh - 73px);
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  margin: 0 auto;
+  padding: 60px 20px 24px 20px;
+  gap: 24px;
+}
+.profileContent {
+  /* max-height: calc(100vh - 171px); */
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+@media (max-width: 895px) {
+  .mobileFooter {
+    position: relative;
+    padding: 24px;
+    /* padding-top: 84px; */
+    background-size: cover;
+    background-position: center;
+    /* padding-bottom: calc(96px + env(safe-area-inset-bottom)); */
+    background-image: url("/images/whyChhose.jpg");
+    background-repeat: no-repeat;
+
+    color: #ffffff;
+  }
+  .mobileView {
+    overflow-x: hidden;
+  }
+  /* Dark overlay for readability */
+  /* .mobileFooter::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.65),
+      rgba(0, 0, 0, 0.85)
+    );
+    z-index: 0;
+  } */
+
+  .footerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 97px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footerTagline {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    opacity: 0.9;
+    margin-bottom: 16px;
+
+    font-family: Poppins;
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+  }
+  .footerTitleDiv {
+    display: flex;
+    flex-direction: column;
+  }
+  .footerTitle {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 32px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+
+  .footerList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 31px;
+  }
+
+  .footerList h6 {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 24px;
+    
+    line-height: 44px;
+    letter-spacing: 0%;
+    margin-bottom: 6px;
+  }
+
+  .footerList p {
+    font-family: Poppins;
+    font-weight: 300;
+    font-style: Light;
+    font-size: 14px;
+    
+    line-height: 24px;
+    letter-spacing: 0%;
+  }
+  .navDetailsMobile {
+    height: 60px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 2000;
+  }
+  .navDetailsMobile span {
+    font-family: Antic Didone;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 24px;
+    
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #1f2226;
+  }
+  .backArrow {
+    cursor: pointer;
+    padding: 8px;
+  }
+  .mobileContainer {
+    padding: 32px 16px;
+    padding-top: 92px;
+  }
+}

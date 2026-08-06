@@ -1,0 +1,557 @@
+.carouselWrapper {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  position: relative;
+  top: -95px;
+  overflow-x: visible;
+  overflow-y: visible;
+  margin: 0 auto;
+}
+.imageContainer > .bottomText {
+  position: absolute; /* override previous relative */
+  bottom: -20px; /* distance from bottom of the image */
+  z-index: 199;
+  max-width: 320px; /* control width of the white info card on side slides */
+  width: auto;
+  background: white;
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  opacity: 1;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+/* Left side: card sits at left edge inside the slide */
+.imageContainer > .bottomText.leftAlign {
+  left: 20px; /* distance from left edge */
+  right: auto;
+  text-align: left;
+  transform: translateX(0);
+  align-items: flex-start;
+}
+
+/* Right side: card sits at right edge inside the slide */
+.imageContainer > .bottomText.rightAlign {
+  right: 20px; /* distance from right edge */
+  left: auto;
+  /* text-align: right; */
+  transform: translateX(0);
+  align-items: flex-end;
+}
+
+/* For middle / active slide the bottomText is not rendered (JSX),
+   but if it ever appears ensure it stays centered under the image */
+.imageContainer > .bottomText.centerAlign,
+.slide.activeSlide .imageContainer > .bottomText {
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
+  text-align: center;
+}
+
+/* Slightly smaller card for far slides (optional) */
+.imageContainer > .bottomText.far {
+  max-width: 240px;
+  opacity: 1;
+}
+
+.slider {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 650px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+  overflow: visible;
+}
+
+.slide {
+  position: absolute;
+  max-width: 966px;
+  width: 100%;
+  height: 550px;
+  cursor: pointer;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.slideContent {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  position: relative;
+  top: 95px;
+  border-radius: 12px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 576px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.slideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.activeSlide .slideImage {
+  filter: brightness(0.85);
+}
+
+.slide:hover .slideImage {
+  transform: scale(1.05);
+}
+
+/* Overlay content for active slide */
+.overlayContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  color: white;
+  z-index: 2;
+}
+
+.overlayContent {
+  background: #00000066; /* SAME COLOR */
+  opacity: 0;
+  transition: opacity 0.6s ease, background-color 0.6s ease;
+  pointer-events: none;
+}
+.overlayContent .newTag,
+.overlayContent .price,
+.overlayContent .textContent {
+  opacity: 0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.overlayActive .newTag {
+  transition-delay: 0.1s;
+}
+
+.overlayActive .price {
+  transition-delay: 0.2s;
+}
+
+.overlayActive .textContent {
+  transition-delay: 0.3s;
+}
+
+.overlayActive .newTag,
+.overlayActive .price,
+.overlayActive .textContent {
+  opacity: 1;
+}
+.overlayActive {
+  opacity: 1;
+}
+
+.newTag {
+  align-self: flex-end;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 8px 14px;
+  font-size: 11px;
+  text-transform: capitalize;
+  /* letter-spacing: 0.5px; */
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.inactiveNewTag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  align-self: flex-end;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 8px 14px;
+  font-size: 11px;
+  text-transform: capitalize;
+  /* letter-spacing: 0.5px; */
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  z-index: 3;
+}
+
+.textContent {
+  max-width: 634px;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-weight: 300;
+  font-style: Light;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: capitalize;
+  color: #ffffff;
+}
+
+.description {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.price {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translate(-50%);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.price > span {
+  font-weight: 300 !important;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+/* Bottom text for all slides */
+.bottomText {
+  max-width: 210px;
+  width: 100%;
+  position: relative;
+  padding: 11px 0;
+  background: white;
+  border-radius: 8px;
+  color: #333;
+  z-index: 15;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.bottomTitle {
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.bottomDescription {
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 20px;
+  
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000000;
+}
+.leftAlign {
+  text-align: left;
+  align-items: flex-start;
+  left: 10px;
+}
+
+.rightAlign {
+  position: absolute;
+  right: 0;
+  bottom: -109px;
+  z-index: 999;
+  /* text-align: right; */
+  /* align-items: flex-end; */
+  /* width: 100% !important; */
+  /* max-width: 100% !important; */
+}
+
+.bottomPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 8px;
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  z-index: 20;
+  position: relative;
+  bottom: -95px;
+}
+
+.navButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #212121;
+  padding: 12px;
+  background: white;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  background: #000000;
+  color: white;
+}
+
+.navButton:hover svg path {
+  fill: #ffffff;
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
+.radioContainer {
+  display: none !important;
+}
+
+.navButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Radio buttons */
+.radioContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  z-index: 20;
+  position: relative;
+}
+
+.radioInput {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background: #ccc;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.radioInput:checked {
+  background: #333;
+  border-color: #333;
+}
+
+.radioInput:hover {
+  border-color: #333;
+}
+/* Responsive tweaks */
+/* @media (max-width: 1200px){
+
+} */
+@media (max-width: 1100px) {
+  .imageContainer > .bottomText {
+    max-width: 260px;
+    bottom: 14px;
+    padding: 12px;
+  }
+  .imageContainer > .bottomText.leftAlign {
+    left: 12px;
+  }
+  .imageContainer > .bottomText.rightAlign {
+    right: 12px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .slide {
+    max-width: 654px;
+    height: 564px;
+  }
+  .tabsWrap {
+    margin-bottom: 34px;
+  }
+  .imageContainer {
+    height: 435px;
+  }
+  .slideContent {
+    min-height: unset;
+  }
+  .rightAlign {
+    background-color: transparent;
+    bottom: -21%;
+    right: -16px;
+
+    max-width: 170px;
+  }
+  .navigation {
+    margin-top: -134px;
+  }
+  .bottomDescription {
+    font-size: 14px;
+  }
+  .description {
+    font-size: 30px;
+    max-width: 560px;
+    margin: 0px auto;
+  }
+}
+
+@media (max-width: 889px) {
+  .slide {
+    max-width: 572px;
+    height: 661px;
+  }
+  .slider {
+    height: 626px;
+  }
+  .navigation {
+    margin-top: -183px;
+  }
+}
+
+@media (max-width: 700px) {
+  .imageContainer > .bottomText {
+    position: relative; /* stack under image on small screens */
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: none;
+    margin-top: 12px;
+    background: white;
+  }
+  .imageContainer > .bottomText.leftAlign,
+  .imageContainer > .bottomText.rightAlign {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .slide {
+    max-width: 506px;
+    height: 750px;
+  }
+  .slider {
+    height: 626px;
+  }
+  .navigation {
+    margin-top: -207px;
+  }
+  .overlayContent {
+    padding-top: 75px;
+    padding-right: 21px;
+  }
+}
+
+@media (max-width: 430px) {
+  .navButton {
+    background-color: transparent;
+  }
+  .title {
+    font-size: 14px;
+  }
+  .textContent {
+    gap: 8px;
+  }
+  .description {
+    max-width: 316px;
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .newTag {
+    padding: 6px;
+    text-transform: capitalize;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .price {
+    font-size: 14px;
+    /* font-weight: 400; */
+  }
+  .slide {
+    max-width: 364px;
+
+    /* height: ; */
+  }
+  .imageContainer {
+    height: 315px;
+  }
+  .navigation {
+    margin-top: -338px;
+  }
+  .overlayContent {
+    background: #00000066;
+    transition: all 0.9s ease;
+  }
+  .leftAlign {
+    background-color: transparent;
+    display: none !important;
+  }
+  .rightAlign {
+    display: none !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .slide {
+    padding: 5px;
+  }
+  .price {
+    width: 100%;
+    margin: 0px auto;
+    text-align: center;
+  }
+}

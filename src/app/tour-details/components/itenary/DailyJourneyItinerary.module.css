@@ -1,0 +1,1582 @@
+.section {
+  --navy: #08083d;
+  padding: 0px 200px 100px;
+  background: #f9f9f9;
+  color: #202020;
+  scroll-margin-top: 118px;
+}
+
+.headingSticky {
+  position: sticky;
+  top: 55px;
+  z-index: 20;
+  margin: 0 0 40px;
+  border-bottom: 1px solid #e7e7ec;
+  background: #f9f9f9;
+}
+
+.itineraryHeading {
+  width: 100%;
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 20px 0 28px;
+}
+
+.headingEyebrow {
+  margin: 0 0 8px;
+  color: #000033;
+  font-family: Poppins;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  
+  line-height: 125%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.itineraryHeading h2 {
+  margin: 0;
+  color: var(--navy);
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 32px;
+  
+  line-height: 40px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+
+}
+
+.headingDescription {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 14px;
+  
+  line-height: 16px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.itineraryHeading>p:last-child {
+  margin: 8px 0 0;
+  color: #333;
+  font: 300 14px/1.5 var(--font-inter);
+}
+
+.layout {
+  width: min(1520px, 100%);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 42px;
+}
+
+.swapButton {
+  width: fit-content;
+  min-height: 30px;
+  margin-left: 8px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  
+  line-height: 16px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+
+  letter-spacing: 0;
+  text-transform: capitalize;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.swapButton span {
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 12px;
+  line-height: 1;
+}
+
+.swapButton img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.flightRouteRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #1a1a1a;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 140%;
+  letter-spacing: -2%;
+}
+
+.flightCard {
+  display: grid;
+  grid-template-columns: minmax(100px, 130px) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid #e7e7ec;
+  background: #fafafb;
+}
+
+.flightAirline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.flightAirline img {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  object-fit: contain;
+}
+
+.flightAirline span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.flightAirline strong {
+  color: #000033;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  text-transform: uppercase;
+}
+
+.flightAirline small {
+  color: #71717b;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 100%;
+}
+
+.flightTimeline {
+  display: grid;
+  grid-template-columns: minmax(50px, 1fr) minmax(80px, 150px) minmax(50px, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  text-align: center;
+}
+
+.flightEndpoint {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.flightEndpoint strong {
+  color: #000033;
+  font-family: "Antic Didone", serif;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 100%;
+}
+
+.flightEndpoint small {
+  overflow: hidden;
+  color: #9c9ca6;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 100%;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flightPath {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+  color: #9aa3b2;
+}
+
+.flightPath>span {
+  height: 1px;
+  border-top: 1px dashed #9aa3b2;
+}
+
+.flightPath small {
+  grid-column: 1 / -1;
+  color: #1a1a1a;
+  font-family: Inter;
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 100%;
+}
+
+.flightPath b {
+  margin: 0 6px;
+  color: #9aa3b2;
+}
+
+.stickyColumn {
+  position: sticky;
+  top: 245px;
+  width: 100%;
+  max-width: 638px;
+  flex: 0 0 638px;
+}
+
+.mapCard,
+.dayCard {
+  border: 1px solid #dcdde5;
+  background: #fff;
+}
+
+.mapCard {
+  position: relative;
+  height: 599px;
+  min-height: 599px;
+  display: flex;
+  flex-direction: column;
+  max-width: 638px;
+  width: 100%;
+}
+
+.mapHeader {
+  min-height: 98px;
+  padding: 25px 22px 18px;
+  text-align: center;
+  border-bottom: 1px solid #e9e9ed;
+}
+
+.mapHeader p {
+  margin: 0 0 6px;
+  color: var(--navy);
+  font: 600 13px/1.2 var(--font-inter);
+  text-transform: uppercase;
+}
+
+.mapHeader span {
+  color: #6d6d73;
+  font: 400 11px/1.4 var(--font-inter);
+}
+
+.mapHeader strong {
+  color: var(--navy);
+  text-transform: uppercase;
+}
+
+.mapCanvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: #eef3f1;
+}
+
+.mapCanvas>div {
+  width: 100%;
+  height: 100%;
+}
+
+.mapFrame {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  display: block;
+  border: 0;
+}
+
+.mapMarker {
+  position: relative;
+  min-width: 84px;
+  padding: 7px 10px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(8, 8, 61, 0.18);
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(8, 8, 61, 0.18);
+  color: var(--navy);
+  font-family: var(--font-inter);
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.mapMarker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border-right: 1px solid rgba(8, 8, 61, 0.18);
+  border-bottom: 1px solid rgba(8, 8, 61, 0.18);
+  background: #fff;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.mapMarker span {
+  width: fit-content;
+  min-width: 36px;
+  margin: 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mapMarker strong {
+  overflow: hidden;
+  max-width: 112px;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.mapMarker:hover,
+.mapMarker:focus-visible {
+  border-color: var(--navy);
+  box-shadow: 0 12px 24px rgba(8, 8, 61, 0.24);
+  outline: 0;
+}
+
+.mapHint {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #111;
+  font: 400 11px/1.4 var(--font-inter);
+  pointer-events: none;
+}
+
+.cards {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dayCard {
+  border-color: #1A1A1A1A;
+  max-width: 835px;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e7e7ec;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  padding-right: 32px;
+  gap: 4px;
+}
+
+.cardHeaderCollapsed {
+  border-bottom: 0;
+}
+
+.dayMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.dayMetaLeft,
+.dayMetaRight {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.metaInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 9px;
+  color: #71717b;
+  line-height: 14.63px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.metaSeparator {
+  color: #71717b;
+  font-size: 9px;
+  line-height: 14.63px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dayBadge {
+  padding: 4px 10px;
+  border-radius: 32px;
+  background: var(--navy);
+  color: #fff;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 14.63px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 9px;
+  color: #000033;
+  line-height: 14.63px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.location svg {
+  color: #000033;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 18px;
+  
+  line-height: 26px;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: capitalize;
+  color: #000033;
+}
+
+.cardHeader p {
+  margin: 4px 0 0;
+  color: #8c8c93;
+  font-family: Inter;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 12px;
+  
+  line-height: 16px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #71717B;
+}
+
+.cardChevron {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e2e2e7;
+  border-radius: 50%;
+  background: #fff;
+  color: #777780;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.cardChevron:hover,
+.cardChevron:focus-visible {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.cardChevron:focus-visible {
+  outline: 2px solid rgba(8, 8, 61, 0.18);
+  outline-offset: 2px;
+}
+
+.cardChevronOpen {
+  transform: rotate(180deg);
+}
+
+.cardBody {
+  max-height: 1200px;
+  overflow: hidden;
+  opacity: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 242px;
+  gap: 20px;
+  padding: 18px 20px 20px;
+  transition:
+    max-height 280ms ease,
+    opacity 200ms ease,
+    padding-top 280ms ease,
+    padding-bottom 280ms ease;
+}
+
+.cardBodyCollapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.description {
+  margin: 0 0 10px;
+  color: #44444c;
+  font-family: Inter;
+  font-weight: 300;
+  color: #1A1A1A;
+  font-size: 14px;
+  line-height: 140%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  max-width: 523px;
+}
+
+.detailRow {
+  border-bottom: 1px solid #e7e7eb;
+}
+
+.detailButton {
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  /* font: 500 11px/1.3 var(--font-inter); */
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.detailbutton span {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #000033;
+
+}
+
+.chevron {
+  transition: transform 180ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  transition: transform 180ms ease;
+}
+
+.detailContent {
+  max-height: 360px;
+  overflow: hidden;
+  opacity: 1;
+  padding: 0 0 12px;
+  color: #55555d;
+  font: 300 11px/1.5 var(--font-inter);
+  transition:
+    max-height 260ms ease,
+    opacity 180ms ease,
+    padding-bottom 260ms ease;
+}
+
+.detailContentCollapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
+}
+
+.detailContent p {
+  margin: 0;
+}
+
+
+.inclusionList {
+  margin: 0;
+  padding: 0;
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 13px;
+  
+  line-height: 20px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #212121;
+  display: grid;
+  gap: 7px;
+  list-style: none;
+}
+
+.inclusionList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.inclusionList li span {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 2px;
+  background: #edf2f8;
+  color: var(--navy);
+  font-size: 11px;
+}
+
+.leisureBox {
+  margin-top: 14px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px dashed #9da0ae;
+}
+
+.leisureBox div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.leisureBox strong {
+  color: #000033;
+  font-family: Antic Didone;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.leisureBox span {
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 10px;
+  
+  line-height: 16.5px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.leisureBox button {
+  margin-top: 10px;
+  min-height: 32px;
+  padding: 0 18px;
+  border: 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 12px;
+
+  letter-spacing: -2%;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+
+.hotelCard {
+  position: relative;
+  margin-top: 14px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 11px;
+  border: 1px solid #e1e1e6;
+}
+
+.hotelCard>img {
+  width: 116px;
+  height: 116px;
+  object-fit: cover;
+}
+
+.hotelCard>div:nth-child(2) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hotelCard span {
+  padding-right: 75px;
+  overflow: hidden;
+  color: #808080;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 10px;
+  
+  line-height: 14px;
+  letter-spacing: 0px;
+  vertical-align: middle;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hotelCard strong {
+  margin-top: 6px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  color: #000033;
+}
+
+.hotelCard p {
+  margin: 5px 0 0;
+  color: #434343;
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 10px;
+  
+  line-height: 160%;
+  letter-spacing: 0px;
+
+}
+
+.hotelCard button {
+  width: fit-content;
+  margin-top: auto;
+  padding: 5px 0 2px;
+  border: 0;
+  border-bottom: 1px solid var(--navy);
+  background: transparent;
+  color: var(--navy);
+  font-family: Inter;
+  font-weight: 300;
+  font-style: Light;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  text-decoration-style: solid;
+  text-decoration-offset: 0%;
+  text-decoration-thickness: 0%;
+
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.hotelCard .swapButton {
+  margin-top: 8px;
+  margin-left: 0;
+  min-height: 30px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-bottom: 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0%;
+  text-transform: capitalize;
+}
+
+.dayCopy {
+  max-width: 523px;
+}
+
+.hotelCard .swapButton span {
+  width: 12px;
+  height: 12px;
+  padding-right: 0;
+  overflow: visible;
+  display: inline-flex;
+  flex: 0 0 12px;
+}
+
+.hotelCard .swapButton img {
+  width: 100%;
+  height: 100%;
+}
+
+.hotelCard button:not(.swapButton):hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  color: #000033;
+}
+
+.rating {
+  position: absolute;
+  gap: 3.5px;
+  top: 30px;
+  right: 10px;
+  display: flex;
+  color: #f2b300;
+}
+
+.dayAside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 242px;
+}
+
+.dayImage {
+  width: 100%;
+  height: 142px;
+  padding: 5px;
+  border: 1px solid #dedee4;
+  object-fit: cover;
+}
+
+.mealBox {
+  padding: 12px;
+  border: 1px solid #dedee4;
+  background: #fcfcfd;
+}
+
+.mealTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--navy);
+  font: 500 10px/1.2 var(--font-inter);
+  text-transform: uppercase;
+}
+
+.mealTitle strong {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  
+  line-height: 100%;
+  letter-spacing: -2%;
+  vertical-align: middle;
+
+
+
+
+}
+
+.mealTags {
+  margin: 10px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.mealTags span {
+  padding: 4px 6px;
+  border: 1px solid #1A1A1A1A;
+  background: #fff;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 9px;
+  color: #1A1A1A;
+  line-height: 14.63px;
+  letter-spacing: 0.45px;
+  vertical-align: middle;
+  text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.mealBox small {
+  display: block;
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Italic;
+  font-size: 9px;
+  
+  line-height: 13.5px;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.flightNote {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f3f5f8;
+  color: #5d5d66;
+  font: 400 9px/1.4 var(--font-inter);
+}
+
+@media (max-width: 1399px) {
+  .stickyColumn {
+    max-width: 500px;
+    flex: 0 0 500px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .stickyColumn {
+    max-width: none;
+    flex: none;
+  }
+
+  .mapCard {
+    height: 480px;
+    min-height: 480px;
+    max-width: none;
+  }
+
+  .cardBody {
+    grid-template-columns: 1fr;
+  }
+
+  .dayAside {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .flightNote {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1440px) {
+  .section {
+    padding: 60px 40px 100px;
+  }
+
+  .headingSticky {
+    margin: 0 0 60px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .section {
+    padding: 0px 40px 100px;
+  }
+
+  .headingSticky {
+    margin: 0 0 40px;
+  }
+}
+
+@media (max-width: 850px) {
+  .section {
+    /* padding: 60px 60px 64px; */
+    padding: 0px 60px 40px 60px;
+    scroll-margin-top: 110px;
+  }
+
+  .headingSticky {
+    top: 54px;
+    margin: 0 0 28px;
+  }
+
+  .itineraryHeading {
+    width: calc(100% - 36px);
+    padding: 18px 0 24px;
+  }
+
+  .layout {
+    display: block;
+  }
+
+  .stickyColumn {
+    position: static;
+    margin-bottom: 24px;
+    max-width: none;
+  }
+
+  .mapCard {
+    height: 520px;
+    min-height: 520px;
+    max-width: none;
+  }
+
+  .mapCanvas {
+    min-height: 0;
+  }
+
+  .cardHeader,
+  .cardBody {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cardHeader h3 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 0px 32px 40px 32px;
+  }
+}
+
+@media (max-width: 529px) {
+  .section {
+    padding: 0px 16px 40px 16px;
+  }
+}
+
+/* @media (max-width: 850px) {
+  .section {
+    padding: 60px 60px 64px;
+    scroll-margin-top: 110px;
+  }
+
+  .headingSticky {
+    top: 54px;
+    margin: 0 0 28px;
+  }
+
+  .itineraryHeading {
+    width: calc(100% - 36px);
+    padding: 18px 0 24px;
+  }
+
+  .layout {
+    display: block;
+  }
+
+  .stickyColumn {
+    position: static;
+    margin-bottom: 24px;
+    max-width: none;
+  }
+
+  .mapCard {
+    height: 520px;
+    min-height: 520px;
+    max-width: none;
+  }
+
+  .mapCanvas {
+    min-height: 0;
+  }
+
+  .cardHeader,
+  .cardBody {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cardHeader h3 {
+    font-size: 18px;
+  }
+} */
+
+@media (max-width: 576px) {
+  .flightCard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .flightAirline {
+    justify-content: center;
+  }
+
+  .dayMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .dayMetaRight {
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .itineraryHeading h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .flightTimeline {
+    gap: 6px;
+    grid-template-columns: minmax(45px, 1fr) minmax(70px, 150px) minmax(45px, 1fr);
+  }
+
+  .dayAside {
+    display: flex;
+  }
+
+  .leisureBox {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hotelCard {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .hotelCard>img {
+    width: 76px;
+    height: 82px;
+  }
+
+  .rating {
+    display: none;
+  }
+
+  .hotelCard span {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .section {
+    padding: 0px 16px 24px 16px !important;
+  }
+
+  .headingSticky {
+    margin: 0 0 28px;
+  }
+
+  .itineraryHeading {
+    width: calc(100% - 32px);
+  }
+
+  .cardHeader {
+    padding: 24px;
+  }
+
+  .headerContent {
+    padding-right: 0;
+    gap: 4px;
+  }
+
+  .dayMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .dayMetaLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .dayMetaRight {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 10px;
+    color: #71717a;
+    text-transform: uppercase;
+  }
+
+  .cardHeader h3 {
+    font-family: "Antic Didone", serif;
+    font-size: 18px;
+    line-height: 1.25;
+    color: #000033;
+    /* margin-top: 6px;
+    margin-bottom: 2px; */
+  }
+
+  .cardHeader p {
+    font-style: italic;
+    font-size: 12px;
+    line-height: 140%;
+    margin-top: -2px;
+    color: #666;
+  }
+
+  .cardChevron {
+    border: 1px solid #e2e2e7;
+    background: #fff;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #777780;
+    cursor: pointer;
+  }
+
+  .cardBody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 16px !important;
+    border-top: 1px solid #e7e7ec;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .cardBodyCollapsed {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+    border-top: none !important;
+  }
+
+  .dayAside {
+    order: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .dayCopy {
+    order: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .dayImage {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1.62 !important;
+    object-fit: cover !important;
+    border: 1px solid #dedee4 !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+  }
+
+  .mealBox {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    row-gap: 8px !important;
+    column-gap: 12px !important;
+    padding: 16px !important;
+    border: 1px solid #dedee4 !important;
+    background: #fcfcfd !important;
+    border-radius: 6px !important;
+  }
+
+  .mealTitle {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+  }
+
+  .mealTitle strong {
+    font-family: Inter !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #1a1a1a !important;
+  }
+
+  .mealTags {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .mealTags span {
+    padding: 4px 8px !important;
+    border: 1px solid #dedee4 !important;
+    background: #fff !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    color: #1a1a1a !important;
+    text-transform: uppercase !important;
+  }
+
+  .mealBox small {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    font-family: Inter !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    color: #666 !important;
+  }
+
+  .description {
+    font-family: Inter !important;
+    font-weight: 300 !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    color: #333 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .detailRow {
+    border-bottom: 1px solid #e7e7eb !important;
+  }
+
+  .detailButton {
+    min-height: 44px !important;
+    padding: 12px 0 !important;
+  }
+
+  .detailButton span {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #000033 !important;
+  }
+
+  .detailContent {
+    max-height: none !important;
+    padding: 0 0 16px !important;
+  }
+
+  .detailContentCollapsed {
+    max-height: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .flightCard {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    border: 1px solid #e7e7ec !important;
+    background: #ffffff !important;
+    border-radius: 6px !important;
+    margin-top: 8px !important;
+  }
+
+  .flightAirline {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .flightAirline img {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+  }
+
+  .flightAirline span {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .flightAirline strong {
+    font-family: Inter !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    color: #1a1a1a !important;
+  }
+
+  .flightAirline small {
+    font-family: Inter !important;
+    font-weight: 400 !important;
+    font-size: 11px !important;
+    color: #666 !important;
+  }
+
+  .flightTimeline {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  .flightEndpoint strong {
+    font-family: "Antic Didone", serif !important;
+    font-size: 20px !important;
+    font-weight: 400 !important;
+    color: #000033 !important;
+  }
+
+  .flightEndpoint small {
+    font-family: Inter !important;
+    font-weight: 300 !important;
+    font-size: 10px !important;
+    color: #888 !important;
+    text-transform: uppercase !important;
+  }
+
+  .flightPath {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #9aa3b2 !important;
+  }
+
+  .flightPath>span {
+    height: 1px !important;
+    border-top: 1px dashed #9aa3b2 !important;
+  }
+
+  .flightPath small {
+    grid-column: 1 / -1 !important;
+    color: #1a1a1a !important;
+    font-size: 10px !important;
+    margin-top: 4px !important;
+  }
+
+  .hotelCard {
+    display: grid !important;
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    border: 1px solid #e7e7ec !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    position: relative !important;
+    margin-top: 8px !important;
+  }
+
+  .hotelCard>img {
+    width: 76px !important;
+    height: 82px !important;
+    object-fit: cover !important;
+    border-radius: 4px !important;
+  }
+
+  .hotelCard span {
+    font-family: Inter !important;
+    font-weight: 400 !important;
+    font-size: 10px !important;
+    color: #888 !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    margin-bottom: 2px !important;
+  }
+
+  .hotelCard strong {
+    font-family: Inter !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #000033 !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+  }
+
+  .hotelCard p {
+    font-family: Inter !important;
+    font-weight: 300 !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    color: #555 !important;
+  }
+
+  .rating {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    display: flex !important;
+    gap: 2px !important;
+  }
+
+  .swapButton {
+    margin-top: 8px !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+}

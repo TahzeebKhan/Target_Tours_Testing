@@ -1,0 +1,360 @@
+.section {
+  width: 100%;
+  background: #ffffff;
+  padding: 0 24px 84px;
+}
+
+.container {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.heading {
+font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 36px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+  color: #000033;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  /* min-height: 36px; */
+  padding: 10px 16px;
+  border: 1px solid #E4E6E8;
+  background: #ffffff;
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+
+line-height: 100%;
+letter-spacing: 0%;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.filterButton:hover,
+.filterButtonActive {
+  background: #121433;
+  border-color: #121433;
+  color: #ffffff;
+}
+
+.swiper {
+  width: 100%;
+}
+
+.card {
+  position: relative;
+  height: 465px;
+  overflow: hidden;
+  background: #e8ebef;
+  cursor: pointer;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 0.45s ease;
+}
+
+.gradient {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.72) 62%,
+    #000000 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gradient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.82) 42%,
+    #000000 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.hoverZone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  z-index: 3;
+}
+
+.card:has(.hoverZone:hover) .image,
+.card:focus-within .image {
+  transform: scale(1.04);
+}
+
+.card:has(.hoverZone:hover) .gradient::after,
+.card:focus-within .gradient::after {
+  opacity: 1;
+}
+
+.cardContent {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 31px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #ffffff;
+  transform: translateY(90px);
+  transition: transform 0.3s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.card:has(.hoverZone:hover) .cardContent,
+.card:focus-within .cardContent {
+  transform: translateY(0);
+}
+
+.primaryRow {
+  display: flex;
+  /* align-items: flex-; */
+  justify-content: space-between;
+  gap: 16px;
+ border-bottom: 1.37px solid #FFFFFF4F;
+ padding-bottom: 10px;
+}
+
+.cardTitle {
+font-family: Antic Didone;
+font-weight: 400;
+font-style: Regular;
+font-size: 26px;
+
+line-height: 100%;
+letter-spacing: -2%;
+vertical-align: middle;
+color:#FFFFFF;
+}
+
+.priceBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.priceLabel {
+  color: #ffffff;
+font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 14px;
+
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: uppercase;
+
+  text-transform: uppercase;
+}
+
+.price {
+  color: #ffffff;
+ font-family: Inter;
+font-weight: 600;
+font-style: Semi Bold;
+font-size: 21.95px;
+
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: bottom;
+
+}
+
+.hoverDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s ease;
+}
+
+
+.card:has(.hoverZone:hover) .hoverDetails,
+.card:focus-within .hoverDetails {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.visaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailLabel {
+  color: #ffffff;
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 100%;
+}
+.visaType {
+  font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 12px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+text-transform: capitalize;
+
+
+}
+
+.detailValue{
+ font-family: Inter;
+font-weight: 400;
+font-style: Regular;
+font-size: 19.21px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+vertical-align: bottom;
+color: #FFFFFF;
+
+}
+
+.visaType {
+  text-align: right;
+}
+
+.navButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.navButton {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #11131c;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navButton:hover {
+  background: #f5f6f8;
+  transform: translateY(-1px);
+}
+
+.navButton img {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 900px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .heading {
+    font-size: 32px;
+  }
+
+  .card {
+    height: 380px;
+  }
+}
+
+@media (max-width: 560px) {
+  .section {
+    padding: 0 18px 64px;
+  }
+
+  .cardContent {
+    align-items: flex-start;
+    flex-direction: column;
+    transform: translateY(0);
+  }
+
+  .hoverZone {
+    display: none;
+  }
+
+  .priceBlock {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .primaryRow,
+  .hoverDetails {
+    width: 100%;
+  }
+
+  .hoverDetails {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

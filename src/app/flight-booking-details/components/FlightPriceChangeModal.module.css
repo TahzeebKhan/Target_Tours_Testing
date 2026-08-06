@@ -1,0 +1,90 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.modal {
+  width: min(430px, 100%);
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e4e6e8;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.modal h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-antic-didone);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.19;
+  color: #070773;
+}
+
+.modal p {
+  margin: 10px 0 0;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  line-height: 22px;
+  color: #1e2939;
+}
+
+.priceIncrease {
+  color: #d92d20 !important;
+}
+
+.priceDecrease {
+  color: #067647 !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelBtn,
+.confirmBtn {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 18px;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  border: 1px solid #000033;
+  color: #000033;
+  background: #ffffff;
+}
+
+.confirmBtn {
+  min-width: 210px;
+  border: 1px solid #000033;
+  color: #ffffff;
+  background: #000033;
+}
+
+.cancelBtn:disabled,
+.confirmBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .confirmBtn {
+    width: 100%;
+  }
+}

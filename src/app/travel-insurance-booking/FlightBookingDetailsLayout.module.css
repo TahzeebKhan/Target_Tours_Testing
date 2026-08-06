@@ -1,0 +1,80 @@
+.layoutWrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* gap: 42px; */
+  padding-top: 73px;
+  background-color: #f9f9f9;
+
+  background: #f9f9f9;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 356px;
+  column-gap: 24px;
+  max-width: 1280px;
+  margin: 0px auto;
+  width: 100%;
+  padding-bottom: 40px;
+  /* Offset for fixed navbar */
+}
+
+.container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sidebar {
+  width: 100%;
+  min-height: 551px;
+}
+
+.sidebarSticky {
+  position: sticky;
+  top: 224px; /* navbar (96px) + stepper (~90px) */
+  align-self: flex-start;
+}
+
+
+.mobileView{
+  display: none;
+  flex-direction: column;
+  /* gap: 32px; */
+  height: 100vh;
+  background: rgba(249, 249, 249, 1);
+}
+
+
+@media (max-width: 1290px){
+  .mainContent{
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 1156px){
+  .mainContent{
+    grid-template-columns: 1fr 340px;
+  }
+}
+@media (max-width: 991px){
+  .mainContent{
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .sidebar{
+    order: -1;
+    min-height: unset;
+  }
+}
+
+@media(max-width: 650px){
+  .layoutWrapper{
+    display: none;
+  }
+  .mobileView{
+    display: flex;
+  }
+}

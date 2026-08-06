@@ -1,0 +1,201 @@
+import React, { useEffect, useMemo, useState } from 'react'
+import styles from './HotelGallery.module.css'
+import { useRouter } from 'next/navigation';
+import { HOTEL_DETAILS_KEY } from '@/shared/services/hotelSearch';
+
+const FALLBACK_IMAGE = "/images/hotelFallback.png";
+const GALLERY_SLOT_COUNT = 5;
+
+const stripRawFields = (value, depth = 0) => {
+    if (!value || typeof value !== "object" || depth > 10) return value;
+
+    if (Array.isArray(value)) {
+        return value.map((item) => stripRawFields(item, depth + 1));
+    }
+
+    return Object.fromEntries(
+        Object.entries(value)
+            .filter(([key]) => key !== "raw")
+            .map(([key, item]) => [key, stripRawFields(item, depth + 1)]),
+    );
+};
+
+const isRemoteImage = (image = "") => /^https?:\/\//.test(String(image || ""));
+
+const normalizeImageUrl = (value = "") => {
+    let rawUrl = String(value || "").trim();
+    if (!rawUrl) return "";
+
+    if (rawUrl.startsWith("//")) {
+        rawUrl = `https:${rawUrl}`;
+    }
+
+    let url = rawUrl.replace(/\\\//g, "/").replace(/\s/g, "%20");
+
+    try {
+        url = encodeURI(decodeURI(url));
+    } catch {
+        // Keep the original URL if it is not safely decodable.
+    }
+
+    return url;
+};
+
+const isGeneratedPhotoTitle = (value = "") =>
+    /^photo\s+\d+$/i.test(String(value || "").trim());
+
+const getGalleryTitle = (item = {}, index = 0) => {
+    const title = String(item?.title || "").trim();
+    const caption = String(item?.caption || "").trim();
+
+    if (caption && (!title || isGeneratedPhotoTitle(title))) return caption;
+
+    return (
+        title ||
+        caption ||
+        item?.name ||
+        item?.label ||
+        item?.category ||
+        item?.roomType ||
+        `Photo ${index + 1}`
+    );
+};
+
+const GalleryImage = ({ image, title = "" }) => {
+    const resolvedImage = image || FALLBACK_IMAGE;
+    const [src, setSrc] = useState(resolvedImage);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setSrc(resolvedImage);
+        setIsLoading(true);
+    }, [resolvedImage]);
+
+    return (
+        <>
+            {isLoading && <span className={styles.imageLoader} aria-hidden="true" />}
+            <img
+                className={`${styles.galleryImage} ${isLoading ? styles.imageLoading : ""}`}
+                src={src}
+                alt={title}
+                onLoad={() => setIsLoading(false)}
+                onError={() => {
+                    setIsLoading(false);
+                    if (src !== FALLBACK_IMAGE) {
+                        setSrc(FALLBACK_IMAGE);
+                    }
+                }}
+            />
+        </>
+    );
+};
+
+const GallerySlot = ({ item }) =>
+    item?.isPlaceholder ? (
+        <span className={styles.imageLoader} aria-hidden="true" />
+    ) : (
+        <GalleryImage image={item?.image} title={item?.title} />
+    );
+
+const HotelGallery = ({ images = [], loading = false }) => {
+
+     const router = useRouter();
+     const normalizedImages = useMemo(() => (Array.isArray(images) ? images : []).map(
+        (item, index) =>
+          typeof item === "string"
+            ? { image: normalizeImageUrl(item), title: `Photo ${index + 1}` }
+            : {
+                image: normalizeImageUrl(
+                    item?.image ||
+                    item?.url ||
+                    item?.src ||
+                    item?.imageUrl ||
+                    item?.thumbnail ||
+                    item?.coverImage ||
+                    item?.heroImage,
+                ),
+                title: getGalleryTitle(item, index),
+              },
+      ).filter((item) => item.image), [images]);
+     const remoteImages = normalizedImages.filter((item) => isRemoteImage(item.image));
+     const localImages = normalizedImages.filter((item) => !isRemoteImage(item.image));
+     const galleryImages = remoteImages.length ? [...remoteImages, ...localImages] : normalizedImages;
+     const visibleImages = Array.from({ length: GALLERY_SLOT_COUNT }, (_, index) => (
+        galleryImages[index] ||
+        (loading
+            ? { image: "", title: `Photo ${index + 1}`, isPlaceholder: true }
+            : { image: FALLBACK_IMAGE, title: `Photo ${index + 1}` })
+     ));
+
+        if (loading && galleryImages.length === 0) {
+            return (
+                <div className={styles.bottomContainerRef} aria-busy="true" aria-label="Loading hotel images">
+                    <div className={styles.rightImage}>
+                        <span className={styles.imageLoader} aria-hidden="true" />
+                    </div>
+                    <div className={styles.rightGrid}>
+                        {Array.from({ length: GALLERY_SLOT_COUNT - 1 }).map((_, index) => (
+                            <div className={styles.imageBox} key={`gallery-skeleton-${index}`}>
+                                <span className={styles.imageLoader} aria-hidden="true" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        const goToGallery = () => {
+            if (typeof window !== "undefined") {
+                try {
+                    const raw = window.sessionStorage.getItem(HOTEL_DETAILS_KEY);
+                    const stored = raw ? JSON.parse(raw) : {};
+                    window.sessionStorage.setItem(
+                        HOTEL_DETAILS_KEY,
+                        JSON.stringify(stripRawFields({
+                            ...stored,
+                            galleryImages: (galleryImages.length
+                                ? galleryImages
+                                : [{ image: FALLBACK_IMAGE, title: "Photo 1" }]
+                            ).map((item, index) =>
+                              typeof item === "string"
+                                ? { image: item, title: `Photo ${index + 1}` }
+                                : item,
+                            ),
+                        })),
+                    );
+                } catch {
+                    // Ignore storage failures and still navigate.
+                }
+            }
+            router.push('/hotel-gallery');
+        }
+    return (
+        <div className={styles.bottomContainerRef}>
+            <div className={styles.rightImage}>
+                <GallerySlot item={visibleImages[0]} />
+            </div>
+            <div className={styles.rightGrid}>
+                <div className={styles.imageBox}>
+                    <GallerySlot item={visibleImages[1]} />
+                </div>
+
+                <div className={styles.imageBox}>
+                    <GallerySlot item={visibleImages[2]} />
+                </div>
+
+                <div className={styles.imageBox}>
+                    <GallerySlot item={visibleImages[3]} />
+                </div>
+
+                <div className={styles.imageBox}>
+                    <GallerySlot item={visibleImages[4]} />
+                    <button className={styles.viewGalleryBtn} onClick={goToGallery} >
+                        <img className={styles.viewGalleryBtnIcon} src="/icons/dotBtn.svg" alt="" /> VIEW GALLERY
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default HotelGallery
